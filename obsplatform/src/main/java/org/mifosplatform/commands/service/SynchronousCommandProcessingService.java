@@ -29,20 +29,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class SynchronousCommandProcessingService implements CommandProcessingService {
 
-	private PlatformSecurityContext context;
+	private final PlatformSecurityContext context;
 	private final ApplicationContext applicationContext;
 	private final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer;
 	private CommandSourceRepository commandSourceRepository;
 	private final ConfigurationDomainService configurationDomainService;
 
 	@Autowired
-	public SynchronousCommandProcessingService(
-			final PlatformSecurityContext context,
-			final ApplicationContext applicationContext,
-			final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
-			final CommandSourceRepository commandSourceRepository,
-			final ConfigurationDomainService configurationDomainService) {
-		this.context = context;
+	public SynchronousCommandProcessingService(final PlatformSecurityContext context,
+			final ApplicationContext applicationContext,final ToApiJsonSerializer<Map<String, Object>> toApiJsonSerializer,
+			final CommandSourceRepository commandSourceRepository,final ConfigurationDomainService configurationDomainService) {
+		
 		this.context = context;
 		this.applicationContext = applicationContext;
 		this.toApiJsonSerializer = toApiJsonSerializer;
