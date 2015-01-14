@@ -666,7 +666,7 @@ public void processNotify() {
 						ClientEntitlementData clientdata = this.entitlementReadPlatformService.getClientData(clientId);
 						
 						if(clientdata == null || clientdata.getSelfcareUsername() == null || 
-								!clientdata.getSelfcareUsername().equalsIgnoreCase("")){
+								clientdata.getSelfcareUsername().isEmpty()){
 							
 							String output = "Selfcare Not Created with this ClientId: " + clientId + " Properly.";
 							fw.append(output + " \r\n");
@@ -705,7 +705,8 @@ public void processNotify() {
 							}
 							
 						} else if (entitlementsData.getRequestType().equalsIgnoreCase(RadiusJobConstants.Activation) || 
-								entitlementsData.getRequestType().equalsIgnoreCase(RadiusJobConstants.ReConnection)) {
+								entitlementsData.getRequestType().equalsIgnoreCase(RadiusJobConstants.ReConnection) ||
+								entitlementsData.getRequestType().equalsIgnoreCase(RadiusJobConstants.RENEWAL_AE)) {
 
 							try {
 								JSONObject jsonObject = new JSONObject(entitlementsData.getProduct());
@@ -796,10 +797,10 @@ public void processNotify() {
 								
 								System.out.println(output1);
 								
-								if (output1.equalsIgnoreCase(RadiusJobConstants.RADUSER_DELETE_OUTPUT)) {
+								if (output1.trim().equalsIgnoreCase(RadiusJobConstants.RADUSER_DELETE_OUTPUT.trim())) {
 									ReceiveMessage = "Success";
 								} else {
-									ReceiveMessage = RadiusJobConstants.FAILURE + output;
+									ReceiveMessage = RadiusJobConstants.FAILURE + output1;
 								}
 
 								fw.append("Output from Server: " + output + " \r\n");
@@ -1038,19 +1039,16 @@ public void reportStatmentPdf() {
 				fileHandler.createNewFile();
 				FileWriter fw = new FileWriter(fileHandler);
 				FileUtils.BILLING_JOB_PATH = fileHandler.getAbsolutePath();
-				/*DriverManagerDataSource ds=new DriverManagerDataSource();
-			    ds.setUrl(tenant.databaseURL());
-			    ds.setUsername(tenant.getSchemaUsername());
-			    ds.setPassword(tenant.getSchemaPassword());*/
 				fw.append("Processing export data....\r\n");
-			
+			    
+				//procedure calling
 				 SimpleJdbcCall simpleJdbcCall=new SimpleJdbcCall(this.jdbcTemplate);
+				 MapSqlParameterSource parameterSource = new MapSqlParameterSource();
 					simpleJdbcCall.setProcedureName("p_int_fa");//p --> procedure int --> integration fa --> financial account s/w
-					MapSqlParameterSource parameterSource = new MapSqlParameterSource();
 					if (data.isDynamic().equalsIgnoreCase("Y")) {
-					     parameterSource.addValue("p_todt", new LocalDate().toDate(), Types.DATE);
+					     parameterSource.addValue("p_todt", new LocalDate().toString(), Types.DATE);
 					   } else {
-						   parameterSource.addValue("p_todt", data.getProcessDate().toDate(), Types.DATE);		
+						   parameterSource.addValue("p_todt", data.getProcessDate().toString(), Types.DATE);		
 					 }
 					Map<String, Object> output = simpleJdbcCall.execute(parameterSource);
 					if(output.isEmpty()){
