@@ -7,6 +7,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.planprice.domain.Price;
 import org.mifosplatform.billing.planprice.domain.PriceRepository;
 import org.mifosplatform.cms.journalvoucher.domain.JournalVoucher;
@@ -56,6 +58,7 @@ public class RedemptionWritePlatformServiceImpl implements
 	private final RedemptionCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
 	private final OrderRepository orderRepository;
+	private final ChargeCodeRepository chargeCodeRepository;
 	private final JournalvoucherRepository journalvoucherRepository;
 	private final static String VALUE_PINTYPE = "VALUE";
 	private final static String PRODUCE_PINTYPE = "PRODUCT";
@@ -71,7 +74,7 @@ public class RedemptionWritePlatformServiceImpl implements
 		final OrderWritePlatformService orderWritePlatformService,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,
 		final RedemptionReadPlatformService redemptionReadPlatformService,final OrderRepository orderRepository,
 		final RedemptionCommandFromApiJsonDeserializer apiJsonDeserializer,final JournalvoucherRepository journalvoucherRepository,
-		final PriceRepository priceRepository,final ContractRepository contractRepository) {
+		final PriceRepository priceRepository,final ContractRepository contractRepository,final ChargeCodeRepository chargeCodeRepository) {
 		
 		this.context = context;
 		this.fromJsonHelper = fromJsonHelper;
@@ -79,6 +82,7 @@ public class RedemptionWritePlatformServiceImpl implements
 		this.clientRepository = clientRepository;
 		this.fromApiJsonDeserializer= apiJsonDeserializer;
 		this.orderWritePlatformService = orderWritePlatformService;
+		this.chargeCodeRepository=chargeCodeRepository;
 		this.redemptionReadPlatformService=redemptionReadPlatformService;
 		this.adjustmentWritePlatformService = adjustmentWritePlatformService;
 		this.voucherDetailsRepository = voucherDetailsRepository;
@@ -145,11 +149,11 @@ public class RedemptionWritePlatformServiceImpl implements
 				final JsonObject json = new JsonObject();
 				
 				if(orderIds.isEmpty() && (price != null)){
-					 
+					ChargeCodeMaster  chargeCode = this.chargeCodeRepository.findOneByChargeCode(price.getChargeCode());
 					json.addProperty("billAlign", false);json.addProperty("planCode", planId);
 					json.addProperty("contractPeriod", contractId);
 					json.addProperty("isNewplan", true);
-					json.addProperty("paytermCode", price.getChargeCode());
+					json.addProperty("paytermCode",chargeCode.getBillFrequencyCode());
 					json.addProperty("locale", "en");
 					json.addProperty("dateFormat","dd MMMM yyyy"); 
 					json.addProperty("start_date", simpleDateFormat);
