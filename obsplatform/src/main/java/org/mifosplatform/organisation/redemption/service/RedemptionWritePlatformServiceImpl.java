@@ -56,7 +56,6 @@ public class RedemptionWritePlatformServiceImpl implements
 	private final OrderWritePlatformService orderWritePlatformService;
 	private final RedemptionReadPlatformService redemptionReadPlatformService;
 	private final RedemptionCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-	private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
 	private final OrderRepository orderRepository;
 	private final ChargeCodeRepository chargeCodeRepository;
 	private final JournalvoucherRepository journalvoucherRepository;
@@ -71,8 +70,7 @@ public class RedemptionWritePlatformServiceImpl implements
 	@Autowired
 	public RedemptionWritePlatformServiceImpl(final PlatformSecurityContext context,final VoucherDetailsRepository voucherDetailsRepository,
 		final ClientRepository clientRepository,final AdjustmentWritePlatformService adjustmentWritePlatformService,final FromJsonHelper fromJsonHelper,
-		final OrderWritePlatformService orderWritePlatformService,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,
-		final RedemptionReadPlatformService redemptionReadPlatformService,final OrderRepository orderRepository,
+		final OrderWritePlatformService orderWritePlatformService,final RedemptionReadPlatformService redemptionReadPlatformService,final OrderRepository orderRepository,
 		final RedemptionCommandFromApiJsonDeserializer apiJsonDeserializer,final JournalvoucherRepository journalvoucherRepository,
 		final PriceRepository priceRepository,final ContractRepository contractRepository,final ChargeCodeRepository chargeCodeRepository) {
 		
@@ -87,7 +85,6 @@ public class RedemptionWritePlatformServiceImpl implements
 		this.adjustmentWritePlatformService = adjustmentWritePlatformService;
 		this.voucherDetailsRepository = voucherDetailsRepository;
 		this.journalvoucherRepository=journalvoucherRepository;
-		this.contractPeriodReadPlatformService = contractPeriodReadPlatformService;
 		this.priceRepository = priceRepository;
 		this.contractRepository = contractRepository;
 		
@@ -180,10 +177,11 @@ public class RedemptionWritePlatformServiceImpl implements
 			  
 			voucherDetails.setClientId(clientId);
 			voucherDetails.setStatus(USED);
+			voucherDetails.setSaleDate(new Date());
 			
 			this.voucherDetailsRepository.save(voucherDetails);
 			 
-			return new CommandProcessingResult(clientId);
+			return new CommandProcessingResult(voucherDetails.getId(), clientId);
 		}catch(DataIntegrityViolationException dve){
 			handleCodeDataIntegrityIssues(dve);
 	    	return new CommandProcessingResult(Long.valueOf(-1));
