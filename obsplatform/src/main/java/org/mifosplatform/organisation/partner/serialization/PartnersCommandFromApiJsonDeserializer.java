@@ -1,6 +1,7 @@
 package org.mifosplatform.organisation.partner.serialization;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -28,7 +29,7 @@ public class PartnersCommandFromApiJsonDeserializer {
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("partnerType", "partnerName","loginName","password","phone","email",
 			                            "city","state","country","currency","organization","roleName","companyLogo","parentId","officeType","repeatPassword",
-			                            "isCollective"));
+			                            "isCollective","creditLimit","locale"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
@@ -66,8 +67,11 @@ public class PartnersCommandFromApiJsonDeserializer {
         final String repeatPassword = fromApiJsonHelper.extractStringNamed("repeatPassword", element);
         baseDataValidator.reset().parameter("repeatPassword").value(repeatPassword).notBlank().notExceedingLengthOf(60);
         
-        final Long partnerType = fromApiJsonHelper.extractLongNamed("partnerType", element);
-        baseDataValidator.reset().parameter("partnerType").value(partnerType).notNull().integerGreaterThanZero();
+        final BigDecimal creditLimit = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("creditLimit", element);
+        
+        if(creditLimit != null){
+        baseDataValidator.reset().parameter("creditLimit").value(creditLimit).integerGreaterThanZero();
+        }
         
         final Long parentId = fromApiJsonHelper.extractLongNamed("parentId", element);
         baseDataValidator.reset().parameter("parentId").value(parentId).notBlank();

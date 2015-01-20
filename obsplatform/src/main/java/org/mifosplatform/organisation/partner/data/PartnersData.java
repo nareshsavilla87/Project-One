@@ -17,7 +17,7 @@ public class PartnersData {
 	private Long officeId;
 	private Long additionalinfoId;
 	private String partnerName; 
-	private String partnerType;
+	private BigDecimal creditLimit;
 	private String currency;
 	private Long parentId;
 	private String parentName;
@@ -31,7 +31,6 @@ public class PartnersData {
 	private String phoneNumber;
 	private boolean isCollective;
 	private BigDecimal balanceAmount;
-	private Collection<MCodeData> partnerTypes;
 	private List<String> countryData;
 	private List<String> statesData;
 	private List<String> citiesData;
@@ -41,7 +40,7 @@ public class PartnersData {
 	private List<AgreementData> agreementData;
 	
 	
-	public PartnersData(Collection<MCodeData> partnerTypes, List<String> countryData, List<String> statesData,
+	public PartnersData(List<String> countryData, List<String> statesData,
 			List<String> citiesData, Collection<CodeValueData> officeTypes,
 			ApplicationCurrencyConfigurationData currencyData, Collection<OfficeData> allowedParents) {
         
@@ -49,14 +48,13 @@ public class PartnersData {
 		this.currencyData = currencyData;
 		this.countryData = countryData;
 		this.officeTypes = officeTypes;
-		this.partnerTypes = partnerTypes;
 		this.allowedParents = allowedParents;
 		this.statesData = statesData;
 		
 		
 	}
 
-	public PartnersData(final Long officeId, final Long additionalinfoId,final String partnerName, final String partnerType, 
+	public PartnersData(final Long officeId, final Long additionalinfoId,final String partnerName, final BigDecimal creditLimit, 
 			final String currency,final Long parentId, final String parentName, final String officeType,final LocalDate openingDate, 
 			final String loginName,final String city, final String state,final String country, final String email, final String phoneNumber,
 			final String isCollective,final BigDecimal balanceAmount) {
@@ -64,7 +62,7 @@ public class PartnersData {
 	this.officeId = officeId;
 	this.id = additionalinfoId;
 	this.partnerName = partnerName;
-	this.partnerType = partnerType;
+	this.creditLimit = creditLimit;
 	this.currency = currency;
 	this.parentId = parentId;
 	this.parentName =parentName;
@@ -97,8 +95,8 @@ public class PartnersData {
 		return partnerName;
 	}
 
-	public String getPartnerType() {
-		return partnerType;
+	public BigDecimal getPartnerType() {
+		return creditLimit;
 	}
 
 	public String getCurrency() {
@@ -152,10 +150,6 @@ public class PartnersData {
 	
 	public BigDecimal getBalanceAmount() {
 		return balanceAmount;
-	}
-
-	public Collection<MCodeData> getPartnerTypes() {
-		return partnerTypes;
 	}
 
 	public List<String> getCountryData() {
