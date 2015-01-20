@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.organisation.office.data;
 
+import java.math.BigDecimal;
 import java.util.Collection;
 
 import org.joda.time.LocalDate;
@@ -24,29 +25,30 @@ public class OfficeData {
     private final Long parentId;
     private final String parentName;
     private final String officeType;
+    private final BigDecimal balance;
     
     private final Collection<OfficeData> allowedParents;
     private final Collection<CodeValueData> officeTypes;
 
     public static OfficeData dropdown(final Long id, final String name, final String nameDecorated) {
     	
-        return new OfficeData(id, name, nameDecorated, null, null, null, null, null, null,null,null);
+        return new OfficeData(id, name, nameDecorated, null, null, null, null, null, null,null,null,null);
     }
 
     public static OfficeData template(final Collection<OfficeData> parentLookups, final LocalDate defaultOpeningDate, final Collection<CodeValueData> officeTypes) {
     	
-        return new OfficeData(null, null, null, null, defaultOpeningDate, null, null, null, parentLookups,officeTypes,null);
+        return new OfficeData(null, null, null, null, defaultOpeningDate, null, null, null, parentLookups,officeTypes,null,null);
     }
 
     public static OfficeData appendedTemplate(final OfficeData office, final Collection<OfficeData> allowedParents, final Collection<CodeValueData> codeValueDatas) {
     	
         return new OfficeData(office.id, office.name, office.nameDecorated, office.externalId, office.openingDate, office.hierarchy,
-                office.parentId, office.parentName, allowedParents,codeValueDatas,office.officeType);
+                office.parentId, office.parentName, allowedParents,codeValueDatas,office.officeType,office.balance);
     }
 
     public OfficeData(final Long id, final String name, final String nameDecorated, final String externalId, final LocalDate openingDate,
             final String hierarchy, final Long parentId, final String parentName, final Collection<OfficeData> allowedParents, 
-            final Collection<CodeValueData> codeValueDatas, final String officeType) {
+            final Collection<CodeValueData> codeValueDatas, final String officeType, BigDecimal balance) {
     	
         this.id = id;
         this.name = name;
@@ -59,6 +61,7 @@ public class OfficeData {
         this.allowedParents = allowedParents;
         this.officeTypes = codeValueDatas;
         this.officeType = officeType;
+        this.balance=balance;
         
     }
 

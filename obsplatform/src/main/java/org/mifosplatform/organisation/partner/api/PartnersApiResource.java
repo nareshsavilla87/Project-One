@@ -115,14 +115,14 @@ public class PartnersApiResource {
 
 	private PartnersData handlePartnersTemplateData() {
 		
-		final Collection<MCodeData> partnerTypes = mCodeReadPlatformService.getCodeValue(PARTNER_TYPE);
+		
 		final List<String> countryData = this.addressReadPlatformService.retrieveCountryDetails();
 		final List<String> statesData = this.addressReadPlatformService.retrieveStateDetails();
 		final List<String> citiesData = this.addressReadPlatformService.retrieveCityDetails();
 	    final Collection<CodeValueData> officeTypes=this.codeValueReadPlatformService.retrieveCodeValuesByCode(OFFICE_TYPE);
 		final ApplicationCurrencyConfigurationData currencyData = this.currencyReadPlatformService.retrieveCurrencyConfiguration();
 		final Collection<OfficeData> allowedParents = this.officereadPlatformService.retrieveAllOfficesForDropdown();
-		return new PartnersData(partnerTypes,countryData,statesData,citiesData,officeTypes,currencyData,allowedParents);
+		return new PartnersData(countryData,statesData,citiesData,officeTypes,currencyData,allowedParents);
 	}
 	
 	

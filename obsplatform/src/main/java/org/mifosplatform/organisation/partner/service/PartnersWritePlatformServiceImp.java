@@ -3,6 +3,7 @@ package org.mifosplatform.organisation.partner.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
@@ -80,7 +81,7 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			}
 			final Office parentOffice = this.validateUserPriviledgeOnOfficeAndRetrieve(currentUser,parentId);
 			Office office = Office.fromPartner(parentOffice, command);
-			final String partnerType = command.stringValueOfParameterNamed("partnerType");
+			final BigDecimal creditlimit = command.bigDecimalValueOfParameterNamed("creditlimit");
 			final String loginName = command.stringValueOfParameterNamed("loginName");
 			final String password = command.stringValueOfParameterNamed("password");
 			final String repeatPassword = command.stringValueOfParameterNamed("repeatPassword");
@@ -88,7 +89,7 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			final String email = command.stringValueOfParameterNamed("email");
 			final boolean isCollective= command.booleanPrimitiveValueOfParameterNamed("isCollective");
 			OfficeAddress address =OfficeAddress.fromJson(command,office);
-			OfficeAdditionalInfo additionalInfo = new OfficeAdditionalInfo(office, partnerType,currency,isCollective);
+			OfficeAdditionalInfo additionalInfo = new OfficeAdditionalInfo(office,creditlimit,currency,isCollective);
 			office.setOfficeAddress(address);
 			office.setOfficeAdditionalInfo(additionalInfo);
 			this.officeRepository.save(office);
