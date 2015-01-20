@@ -12,7 +12,7 @@ import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "m_controlaccount_balance")
-public class PartnerBalance extends AbstractAuditableCustom<AppUser,Long> {
+public class PartnerControlBalance extends AbstractAuditableCustom<AppUser,Long> {
 
 	/**
       */
@@ -27,11 +27,11 @@ public class PartnerBalance extends AbstractAuditableCustom<AppUser,Long> {
 	@Column(name = "office_id", insertable = true, updatable = true, nullable = true)
 	private Long officeId;
 
-	public PartnerBalance() {
+	public PartnerControlBalance() {
 
 	}
 
-	public PartnerBalance(final BigDecimal amount, final String accountType,
+	public PartnerControlBalance(final BigDecimal amount, final String accountType,
 			final Long officeId) {
 
 		this.accountType = accountType;
@@ -39,10 +39,10 @@ public class PartnerBalance extends AbstractAuditableCustom<AppUser,Long> {
 		this.officeId = officeId;
 	}
 
-	public static PartnerBalance create(final BigDecimal amount,
+	public static PartnerControlBalance create(final BigDecimal amount,
 			final String accountType, final Long officeId) {
 
-		return new PartnerBalance(amount, accountType, officeId);
+		return new PartnerControlBalance(amount, accountType, officeId);
 
 	}
 

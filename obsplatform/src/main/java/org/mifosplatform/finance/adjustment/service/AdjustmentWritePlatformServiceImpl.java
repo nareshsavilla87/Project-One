@@ -17,8 +17,8 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfoRepository;
-import org.mifosplatform.organisation.partner.domain.PartnerBalance;
 import org.mifosplatform.organisation.partner.domain.PartnerBalanceRepository;
+import org.mifosplatform.organisation.partner.domain.PartnerControlBalance;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,21 +133,21 @@ public class AdjustmentWritePlatformServiceImpl implements
 	private void updatePartnerBalance(final Office office,final Adjustment adjustment) {
 
 		final String accountType = "ADJUSTMENTS";
-		PartnerBalance partnerBalance = this.partnerBalanceRepository.findOneWithPartnerAccount(office.getId(), accountType);
-		if (partnerBalance != null) {
+		PartnerControlBalance partnerControlBalance = this.partnerBalanceRepository.findOneWithPartnerAccount(office.getId(), accountType);
+		if (partnerControlBalance != null) {
 			if(adjustment.getAdjustmentType().equalsIgnoreCase("CREDIT")){
-			partnerBalance.update(adjustment.getAmountPaid().negate(), office.getId());
+				partnerControlBalance.update(adjustment.getAmountPaid().negate(), office.getId());
 			}else{
-				partnerBalance.update(adjustment.getAmountPaid(), office.getId());
+				partnerControlBalance.update(adjustment.getAmountPaid(), office.getId());
 			}
 
 		} else {
 		  if(adjustment.getAdjustmentType().equalsIgnoreCase("CREDIT")){
-			partnerBalance = PartnerBalance.create(adjustment.getAmountPaid().negate(), accountType,office.getId());
+			  partnerControlBalance = PartnerControlBalance.create(adjustment.getAmountPaid().negate(), accountType,office.getId());
 		  }else{
-			  partnerBalance = PartnerBalance.create(adjustment.getAmountPaid(), accountType,office.getId());
+			  partnerControlBalance = PartnerControlBalance.create(adjustment.getAmountPaid(), accountType,office.getId());
 		}
 	}
-		this.partnerBalanceRepository.save(partnerBalance);
+		this.partnerBalanceRepository.save(partnerControlBalance);
 	}
 }

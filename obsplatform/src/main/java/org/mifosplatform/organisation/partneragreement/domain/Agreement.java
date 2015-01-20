@@ -3,6 +3,8 @@ package org.mifosplatform.organisation.partneragreement.domain;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -12,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
@@ -134,6 +137,36 @@ public class Agreement extends AbstractAuditableCustom<AppUser, Long> {
 		detail.update(this);
 		this.details.add(detail);
 		
+	}
+
+	public Map<String, Object> update(JsonCommand command) {
+		
+		final Map<String, Object> actualChanges = new ConcurrentHashMap<String, Object>(1);
+		
+		final String agreementStatus = "agreementStatus";
+		if (command.isChangeInStringParameterNamed(agreementStatus,this.agreementStatus)) {
+			final String newValue=command.stringValueOfParameterNamed(agreementStatus);
+			actualChanges.put(agreementStatus, newValue);
+			this.agreementStatus = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String startDateParamName = "startDate";
+		if (command.isChangeInLocalDateParameterNamed(startDateParamName,new LocalDate(this.startDate))) {
+			final LocalDate newValue = command.localDateValueOfParameterNamed(startDateParamName);
+			actualChanges.put(startDateParamName, newValue);
+			this.startDate = newValue.toDate();
+		}
+		
+		final String endDateParamName = "endDate";
+		if (command.isChangeInLocalDateParameterNamed(endDateParamName,new LocalDate(this.endDate))) {
+			final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
+			actualChanges.put(endDateParamName, newValue);
+			if(newValue !=null){
+			this.endDate = newValue.toDate();
+			}
+		}
+		
+		return actualChanges;
 	}
 
 
