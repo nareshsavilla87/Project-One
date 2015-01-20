@@ -1202,8 +1202,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
            }else if(wrapper.isPartnerAgreement()){
            	if(wrapper.isCreate()){
           		 handler = applicationContext.getBean("createPartnerAgreementCommandHandler",NewCommandSourceHandler.class);
-          	}else if(wrapper.isDelete()){
-          		 handler = applicationContext.getBean("deletePartnerAgreementDetailCommandHandler",NewCommandSourceHandler.class);
+          	}else if(wrapper.isUpdate()){
+          		 handler = applicationContext.getBean("updatePartnerAgreementCommandHandler",NewCommandSourceHandler.class);
           	}else {
            	throw new UnsupportedCommandException(wrapper.commandName());
 		     }

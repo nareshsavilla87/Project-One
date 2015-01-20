@@ -19,6 +19,7 @@ public class AgreementData {
 	private BigDecimal shareAmount;
 	private String source;
 	private Long detailId;
+	private Long partnerId;
 	private Collection<MCodeData> shareTypes;
 	private Collection<MCodeData> sourceData;
 	private List<EnumOptionData> statusData;
@@ -51,13 +52,14 @@ public class AgreementData {
 	}
 
 	public AgreementData(Long id, String agreementStatus, Long officeId,
-			LocalDate startDate, LocalDate endDate) {
+			LocalDate startDate, LocalDate endDate,Long partnerId) {
 		
 		this.id=id;
 		this.agreementStatus = agreementStatus;
 		this.officeId = officeId;
 		this.startDate = startDate;
 		this.endDate = endDate;
+		this.partnerId =  partnerId;
 		
 	}
 
@@ -96,6 +98,10 @@ public class AgreementData {
 
 	public  Long getDetailId() {
 		return detailId;
+	}
+	
+	public Long getPartnerId() {
+		return partnerId;
 	}
 
 	public Collection<MCodeData> getShareTypes() {
