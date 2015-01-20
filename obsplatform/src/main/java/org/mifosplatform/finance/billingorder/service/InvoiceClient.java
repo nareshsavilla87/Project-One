@@ -80,7 +80,7 @@ public class InvoiceClient {
 			Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
 			
 			//Update Client Balance
-			this.billingOrderWritePlatformService.updateClientBalance(invoice,clientId,false);
+			this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId,false);
 
 			// Update order-price
 			 billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);

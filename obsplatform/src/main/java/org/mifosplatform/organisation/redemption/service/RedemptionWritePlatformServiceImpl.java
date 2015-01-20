@@ -14,6 +14,7 @@ import org.mifosplatform.billing.planprice.domain.PriceRepository;
 import org.mifosplatform.cms.journalvoucher.domain.JournalVoucher;
 import org.mifosplatform.cms.journalvoucher.domain.JournalvoucherRepository;
 import org.mifosplatform.finance.adjustment.service.AdjustmentWritePlatformService;
+import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -30,7 +31,6 @@ import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
-import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
@@ -59,6 +59,7 @@ public class RedemptionWritePlatformServiceImpl implements
 	private final OrderRepository orderRepository;
 	private final ChargeCodeRepository chargeCodeRepository;
 	private final JournalvoucherRepository journalvoucherRepository;
+	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
 	private final static String VALUE_PINTYPE = "VALUE";
 	private final static String PRODUCE_PINTYPE = "PRODUCT";
 	private final static int RECONNECT_ORDER_STATUS = 3;
@@ -72,12 +73,14 @@ public class RedemptionWritePlatformServiceImpl implements
 		final ClientRepository clientRepository,final AdjustmentWritePlatformService adjustmentWritePlatformService,final FromJsonHelper fromJsonHelper,
 		final OrderWritePlatformService orderWritePlatformService,final RedemptionReadPlatformService redemptionReadPlatformService,final OrderRepository orderRepository,
 		final RedemptionCommandFromApiJsonDeserializer apiJsonDeserializer,final JournalvoucherRepository journalvoucherRepository,
-		final PriceRepository priceRepository,final ContractRepository contractRepository,final ChargeCodeRepository chargeCodeRepository) {
+		final PriceRepository priceRepository,final ContractRepository contractRepository,final ChargeCodeRepository chargeCodeRepository,
+		final BillingOrderWritePlatformService billingOrderWritePlatformService) {
 		
 		this.context = context;
 		this.fromJsonHelper = fromJsonHelper;
 		this.orderRepository=orderRepository;
 		this.clientRepository = clientRepository;
+		this.billingOrderWritePlatformService=billingOrderWritePlatformService;
 		this.fromApiJsonDeserializer= apiJsonDeserializer;
 		this.orderWritePlatformService = orderWritePlatformService;
 		this.chargeCodeRepository=chargeCodeRepository;
@@ -98,22 +101,25 @@ public class RedemptionWritePlatformServiceImpl implements
 	public CommandProcessingResult createRedemption(final JsonCommand command) {
 	
 		try {
+			
 			 final String simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy").format(new Date());
 			context.authenticatedUser();
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
 			final Long clientId = command.longValueOfParameterNamed("clientId");
 			final String pinNum = command.stringValueOfParameterNamed("pinNumber");
 			this.clientObjectRetrieveById(clientId);
-
+            Long resourceId=Long.valueOf(0);
+            CommandProcessingResult result =null;
 			final VoucherDetails voucherDetails = retrieveRandomDetailsByPinNo(pinNum);
 			final Voucher voucher = voucherDetails.getVoucher();
 			final String pinType = voucher.getPinType();
 			final String pinTypeValue =  voucher.getPinValue();
 			final Long priceId  =  voucher.getPriceId();
-			 
+			BigDecimal pinValue = BigDecimal.ZERO;
+			
 			if(pinType.equalsIgnoreCase(VALUE_PINTYPE) && pinTypeValue != null){
 				
-				final BigDecimal pinValue = new BigDecimal(pinTypeValue);
+				pinValue = new BigDecimal(pinTypeValue);
 				final JsonObject json = new JsonObject();
 				json.addProperty("adjustment_type", "CREDIT");json.addProperty("adjustment_code", 123);
 				json.addProperty("amount_paid",pinValue);json.addProperty("Remarks", "Adjustment Post By Redemption");
@@ -122,14 +128,10 @@ public class RedemptionWritePlatformServiceImpl implements
 				json.addProperty("adjustment_date", simpleDateFormat);
 				final JsonCommand commd = new JsonCommand(null, json.toString(), json, fromJsonHelper, null, clientId, null, null, clientId, null, null, null, null, null, null,null);
 				
-				CommandProcessingResult commandProcessingResult=this.adjustmentWritePlatformService.createAdjustments(commd);
+				 result=this.adjustmentWritePlatformService.createAdjustments(commd);
+				resourceId=result.resourceId();
 				
-				  JournalVoucher journalVoucher=new JournalVoucher(voucher.getOfficeId(),new Date(),"Redemption",null,
-						  pinValue.doubleValue(),Long.valueOf(0));
-					this.journalvoucherRepository.save(journalVoucher);
-					
-					journalVoucher=new JournalVoucher(commandProcessingResult.resourceId(),new Date(),"Redemption",pinValue.doubleValue(),null,clientId);
-						this.journalvoucherRepository.save(journalVoucher);
+				
 			}
 			 
 			if(pinType.equalsIgnoreCase(PRODUCE_PINTYPE) && pinTypeValue != null){
@@ -142,10 +144,12 @@ public class RedemptionWritePlatformServiceImpl implements
 					final String contractPeriod = price.getContractPeriod();
 					Contract contract = this.contractRepository.findOneByContractId(contractPeriod);
 					contractId = contract.getId();
+					pinValue = price.getPrice();
 				}
 				final JsonObject json = new JsonObject();
 				
 				if(orderIds.isEmpty() && (price != null)){
+					
 					ChargeCodeMaster  chargeCode = this.chargeCodeRepository.findOneByChargeCode(price.getChargeCode());
 					json.addProperty("billAlign", false);json.addProperty("planCode", planId);
 					json.addProperty("contractPeriod", contractId);
@@ -155,7 +159,8 @@ public class RedemptionWritePlatformServiceImpl implements
 					json.addProperty("dateFormat","dd MMMM yyyy"); 
 					json.addProperty("start_date", simpleDateFormat);
 					final JsonCommand commd = new JsonCommand(null, json.toString(), json, fromJsonHelper, null,clientId, null, null, null, null, null, null, null, null, null,null);
-					this.orderWritePlatformService.createOrder(clientId, commd);
+					 result=this.orderWritePlatformService.createOrder(clientId, commd);
+					resourceId=result.resourceId();
 				 
 				}else {
 					 
@@ -170,10 +175,20 @@ public class RedemptionWritePlatformServiceImpl implements
 							json.addProperty("renewalPeriod", contractId);
 							json.addProperty("description", "Order Renewal By Redemption");
 							final JsonCommand commd = new JsonCommand(null, json.toString(), json, fromJsonHelper, null, clientId, null, null, clientId, null, null, null, null, null, null,null);
-							this.orderWritePlatformService.renewalClientOrder(commd, orderId);				
+							result=this.orderWritePlatformService.renewalClientOrder(commd, orderId);
+							resourceId=result.resourceId();
 						}
 				}
+				
+				this.billingOrderWritePlatformService.updateClientBalance(pinValue, clientId, false);
 			}
+			
+			  JournalVoucher journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",null,
+					  pinValue.doubleValue(),Long.valueOf(0));
+				this.journalvoucherRepository.save(journalVoucher);
+				
+				journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",pinValue.doubleValue(),null,clientId);
+					this.journalvoucherRepository.save(journalVoucher);
 			  
 			voucherDetails.setClientId(clientId);
 			voucherDetails.setStatus(USED);
