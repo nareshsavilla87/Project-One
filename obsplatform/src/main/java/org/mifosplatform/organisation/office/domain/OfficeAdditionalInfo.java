@@ -1,5 +1,7 @@
 package org.mifosplatform.organisation.office.domain;
 
+import java.math.BigDecimal;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
@@ -17,8 +19,8 @@ public class OfficeAdditionalInfo extends AbstractPersistable<Long> {
 		 */
 	private static final long serialVersionUID = 1L;
 
-	@Column(name = "partner_type")
-	private String partnerType;
+	@Column(name = "credit_limit")
+	private BigDecimal creditLimit;
 	
 	@Column(name = "partner_currency")
 	private String partnerCurrency;
@@ -34,17 +36,17 @@ public class OfficeAdditionalInfo extends AbstractPersistable<Long> {
 		
 	}
 	
-	public OfficeAdditionalInfo(final Office office, final String partnerType,final String currency,
+	public OfficeAdditionalInfo(final Office office, final BigDecimal creditLimit,final String currency,
 			   final boolean isCollective) {
 		
 		this.office = office;
-		this.partnerType = partnerType;
+		this.creditLimit = creditLimit;
 		this.partnerCurrency = currency;
 		this.isCollective = isCollective?'Y':'N';
 	}
 
-	public String getPartnerType() {
-		return partnerType;
+	public BigDecimal getCreditLimit() {
+		return creditLimit;
 	}
 
 	public String getPartnerCurrency() {

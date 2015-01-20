@@ -51,8 +51,9 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             return "o.id AS id,o.name AS name,"
             	       +NAMEDECORATEDBASEON_HIERARCHY+
             	       "AS nameDecorated,o.external_id AS externalId,o.opening_date AS openingDate,o.hierarchy AS hierarchy," +
-            	       "parent.id AS parentId,parent.name AS parentName,c.code_value as officeType" +
-            	       " FROM m_office o LEFT JOIN m_office AS parent ON parent.id = o.parent_id left join m_code_value c on c.id=o.office_type ";
+            	       "parent.id AS parentId,parent.name AS parentName,c.code_value as officeType, ifnull(b.balance_amount,0 )as balance" +
+            	       " FROM m_office o LEFT JOIN m_office AS parent ON parent.id = o.parent_id left join m_code_value c on c.id=o.office_type " +
+            	       " Left join m_office_balance b on o.id = b.office_id ";
         }
 
         @Override
@@ -67,8 +68,9 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             final Long parentId = JdbcSupport.getLong(resultSet, "parentId");
             final String parentName = resultSet.getString("parentName");
             final String officeType = resultSet.getString("officeType");
+            final BigDecimal balance =resultSet.getBigDecimal("balance");
 
-            return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, null, null, officeType);
+            return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, null, null, officeType,balance);
         }
     }
 
@@ -135,7 +137,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         String hierarchySearchString = hierarchy + "%";
 
         final OfficeMapper officeMapper = new OfficeMapper();
-        final String sql = "select " + officeMapper.officeSchema() + "where o.hierarchy like ? order by o.hierarchy";
+        final String sql = "select " + officeMapper.officeSchema() + " where o.hierarchy like ? order by o.hierarchy";
 
         return this.jdbcTemplate.query(sql, officeMapper , new Object[] { hierarchySearchString });
     }

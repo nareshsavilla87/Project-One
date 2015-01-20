@@ -10,7 +10,7 @@ INSERT IGNORE INTO m_role VALUES(null, 'Partner', 'partners only');
 CREATE TABLE IF NOT EXISTS `m_office_additional_info` (
   `id` bigint(11) NOT NULL AUTO_INCREMENT,
   `office_id` bigint(20) NOT NULL,
-  `partner_type` int(10) NOT NULL,
+  `credit_limit` decimal(6,2) NOT NULL,
   `partner_currency` varchar(50) NOT NULL,
   `is_collective` char(2) DEFAULT 'N',
    PRIMARY KEY (`id`),

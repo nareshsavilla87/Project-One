@@ -48,14 +48,14 @@ public class PartnersReadPlatformServiceImp implements PartnersReadPlatformServi
 private static final class PartnerMapper implements RowMapper<PartnersData> {
 
 		public String schema() {
-			return " a.id as infoId,a.partner_currency as currency,mc.code_value as partnerType,a.is_collective as isCollective,o.name as partnerName,"
+			return " a.id as infoId,a.partner_currency as currency,a.credit_limit as creditLimit,a.is_collective as isCollective,o.name as partnerName,"
 					+ "o.id as officeId,o.parent_id as parentId,o.external_id AS externalId,o.opening_date AS openingDate,parent.id AS parentId,"
 					+ "parent.name AS parentName,c.code_value as officeType,  ad.address_name as addressName, ad.city as city, ad.state as state,"
 					+ "ad.country as country,ad.email_id as email,ad.phone_number as phoneNumber,au.username as loginName,"
 					+ "IFNULL(ob.balance_amount,0) as balanceAmount from m_office o left join m_office AS parent on parent.id = o.parent_id " 
 					+ "inner join m_office_additional_info a ON o.id=a.office_id  inner join b_office_address ad on o.id = ad.office_id "
 					+ "inner join m_appuser au on o.id=au.office_id left join m_office_balance ob ON ob.office_id=o.id "
-					+ "left join m_code_value c on c.id = o.office_type left join m_code_value mc on mc.id = a.partner_type";
+					+ "left join m_code_value c on c.id = o.office_type ";
 		}
 
 	@Override
@@ -65,10 +65,10 @@ private static final class PartnerMapper implements RowMapper<PartnersData> {
 	final Long id = rs.getLong("infoId");
 	final Long officeId = rs.getLong("officeId");
 	final String partnerName = rs.getString("partnerName");
-	final String partnerType = rs.getString("partnerType");
+	final BigDecimal creditLimit = rs.getBigDecimal("creditLimit");
 	final String currency = rs.getString("currency");
 	final Long parentId = rs.getLong("parentId");
-	//final Long externalId = rs.getLong("externalId");
+	//final Long creditLimit = rs.getLong("creditLimit");
 	final String parentName = rs.getString("parentName");
 	final String officeType = rs.getString("officeType");
 	final LocalDate openingDate = JdbcSupport.getLocalDate(rs, "openingDate");
@@ -81,7 +81,7 @@ private static final class PartnerMapper implements RowMapper<PartnersData> {
 	final String isCollective = rs.getString("isCollective");
 	final BigDecimal balanceAmount =rs.getBigDecimal("balanceAmount");
 	
-	return new PartnersData(officeId,id,partnerName,partnerType,currency,parentId,parentName,officeType,
+	return new PartnersData(officeId,id,partnerName,creditLimit,currency,parentId,parentName,officeType,
 			     openingDate,loginName,city,state,country,email,phoneNumber,isCollective,balanceAmount);
 	
 
