@@ -1,5 +1,6 @@
 package org.mifosplatform.finance.billingorder.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
@@ -13,6 +14,6 @@ public interface BillingOrderWritePlatformService {
 	
 	//CommandProcessingResult updateOrderPrice(List<BillingOrderCommand> billingOrderCommands);
 	
-	void updateClientBalance(Invoice invoice,Long clientId, boolean isWalletEnable);
+	void updateClientBalance(BigDecimal amount,Long clientId, boolean isWalletEnable);
 
 }
