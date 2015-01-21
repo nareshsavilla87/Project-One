@@ -118,7 +118,7 @@ public class PartnersAgreementWritePlatformServiceImp implements PartnersAgreeme
 					final JsonElement element = fromApiJsonHelper.parse(removeAgreementDetails.get(i).toString());
 					final Long detailId = fromApiJsonHelper.extractLongNamed("detailId", element);
 					AgreementDetails detail = this.agreementDetailsRepository.findOne(detailId);
-					detail.setSourceType(Long.valueOf(detail.getSourceType()+"_"+detail.getId()));
+					detail.setSourceType(detail.getSourceType()+detail.getId());
 					detail.setEndDate(new Date());
 					detail.setIsDeleted('Y');
 					this.agreementDetailsRepository.saveAndFlush(detail);
