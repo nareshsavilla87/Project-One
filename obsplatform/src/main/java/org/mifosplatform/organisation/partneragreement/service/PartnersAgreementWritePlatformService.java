@@ -7,5 +7,7 @@ public interface PartnersAgreementWritePlatformService {
 
 	CommandProcessingResult createNewPartnerAgreement(JsonCommand command);
 
+	CommandProcessingResult UpdatePartnerAgreement(JsonCommand command);
+
 	
 }

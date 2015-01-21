@@ -30,7 +30,7 @@ public class PartnersAgreementCommandFromApiJsonDeserializer {
 	 * The parameters supported for this command.
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("agreementStatus", "shareType", "shareAmount","sourceType","startDate",
-			                                               "endDate","sourceData","status","locale","dateFormat"));
+			                                               "endDate","sourceData","locale","dateFormat","newSourceData","removeSourceData"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
@@ -62,8 +62,6 @@ public class PartnersAgreementCommandFromApiJsonDeserializer {
 		final LocalDate startDate = fromApiJsonHelper.extractLocalDateNamed("startDate", element);
 		baseDataValidator.reset().parameter("startDate").value(startDate).notBlank();
 
-		final LocalDate endDate = fromApiJsonHelper.extractLocalDateNamed("endDate", element);
-		baseDataValidator.reset().parameter("endDate").value(endDate).notBlank();
 
 		final JsonArray partnerAgreementDataArray = fromApiJsonHelper.extractJsonArrayNamed("sourceData", element);
 		int DataSize = partnerAgreementDataArray.size();
@@ -90,8 +88,85 @@ public class PartnersAgreementCommandFromApiJsonDeserializer {
 				final BigDecimal shareAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shareAmount",jsonElement);
 				baseDataValidator.reset().parameter("shareAmount").value(shareAmount).notBlank();
 
-				final Long status = fromApiJsonHelper.extractLongNamed("status", jsonElement);
-				baseDataValidator.reset().parameter("status").value(status).notBlank();
+				throwExceptionIfValidationWarningsExist(dataValidationErrors);
+			}
+		}
+
+		throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+	}
+	
+	public void validateForUpdate(final String json) {
+		
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+
+		final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+		fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,supportedParameters);
+
+		final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("agreement");
+
+		final JsonElement element = fromApiJsonHelper.parse(json);
+
+		final String agreementStatus = fromApiJsonHelper.extractStringNamed("agreementStatus", element);
+		baseDataValidator.reset().parameter("agreementStatus").value(agreementStatus).notBlank().notExceedingLengthOf(50);
+
+		final LocalDate startDate = fromApiJsonHelper.extractLocalDateNamed("startDate", element);
+		baseDataValidator.reset().parameter("startDate").value(startDate).notBlank();
+
+		final LocalDate endDate = fromApiJsonHelper.extractLocalDateNamed("endDate", element);
+		baseDataValidator.reset().parameter("endDate").value(endDate).notBlank();
+
+		final JsonArray partnerAgreementDataArray = fromApiJsonHelper.extractJsonArrayNamed("newSourceData", element);
+
+		if (partnerAgreementDataArray != null && partnerAgreementDataArray.size() > 0) {
+			String[] paramsDataArrayAttributes = null;
+			paramsDataArrayAttributes = new String[partnerAgreementDataArray.size()];
+
+			for (int i = 0; i < partnerAgreementDataArray.size(); i++) {
+
+				paramsDataArrayAttributes[i] = partnerAgreementDataArray.get(i).toString();
+			}
+
+			for (JsonElement jsonElement : partnerAgreementDataArray) {
+
+				final Long source = fromApiJsonHelper.extractLongNamed("source", jsonElement);
+				baseDataValidator.reset().parameter("source").value(source).notBlank();
+
+				final String shareType = fromApiJsonHelper.extractStringNamed("shareType", jsonElement);
+				baseDataValidator.reset().parameter("shareType").value(shareType).notBlank().notExceedingLengthOf(20);
+
+				final BigDecimal shareAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shareAmount",jsonElement);
+				baseDataValidator.reset().parameter("shareAmount").value(shareAmount).notBlank();
+
+				throwExceptionIfValidationWarningsExist(dataValidationErrors);
+			}
+		}
+		
+		final JsonArray existAgreementDetails = fromApiJsonHelper.extractJsonArrayNamed("sourceData", element);
+		
+
+		if (existAgreementDetails != null && existAgreementDetails.size() > 0) {
+			String[] paramsDataArrayAttributes = null;
+			paramsDataArrayAttributes = new String[existAgreementDetails.size()];
+
+			for (int i = 0; i < existAgreementDetails.size(); i++) {
+
+				paramsDataArrayAttributes[i] = existAgreementDetails.get(i).toString();
+			}
+
+			for (JsonElement jsonElement : existAgreementDetails) {
+
+				final Long source = fromApiJsonHelper.extractLongNamed("source", jsonElement);
+				baseDataValidator.reset().parameter("source").value(source).notBlank();
+
+				final String shareType = fromApiJsonHelper.extractStringNamed("shareType", jsonElement);
+				baseDataValidator.reset().parameter("shareType").value(shareType).notBlank().notExceedingLengthOf(20);
+
+				final BigDecimal shareAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shareAmount",jsonElement);
+				baseDataValidator.reset().parameter("shareAmount").value(shareAmount).notBlank();
 
 				throwExceptionIfValidationWarningsExist(dataValidationErrors);
 			}
@@ -109,4 +184,6 @@ public class PartnersAgreementCommandFromApiJsonDeserializer {
 					"Validation errors exist.", dataValidationErrors);
 		}
 	}
+
+	
 }

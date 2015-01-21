@@ -11,8 +11,8 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfoRepository;
-import org.mifosplatform.organisation.partner.domain.PartnerBalance;
 import org.mifosplatform.organisation.partner.domain.PartnerBalanceRepository;
+import org.mifosplatform.organisation.partner.domain.OfficeControlBalance;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
@@ -110,6 +110,7 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 			if (officeAdditionalInfo.getIsCollective()) {
 				System.out.println(officeAdditionalInfo.getIsCollective());
 				this.updatePartnerBalance(client.getOffice(), amount);
+
 			}
 		}
 
@@ -118,15 +119,16 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 	private void updatePartnerBalance(final Office office,final BigDecimal amount) {
 
 		final String accountType = "INVOICE";
-		PartnerBalance partnerBalance = this.partnerBalanceRepository.findOneWithPartnerAccount(office.getId(), accountType);
-		if (partnerBalance != null) {
-			partnerBalance.update(amount, office.getId());
+		OfficeControlBalance partnerControlBalance = this.partnerBalanceRepository.findOneWithPartnerAccount(office.getId(), accountType);
+		if (partnerControlBalance != null) {
+			partnerControlBalance.update(amount, office.getId());
 
 		} else {
-			partnerBalance = PartnerBalance.create(amount, accountType,office.getId());
+			partnerControlBalance = OfficeControlBalance.create(amount, accountType,office.getId());
+
 		}
 
-		this.partnerBalanceRepository.save(partnerBalance);
+		this.partnerBalanceRepository.save(partnerControlBalance);
 	}
 
 }

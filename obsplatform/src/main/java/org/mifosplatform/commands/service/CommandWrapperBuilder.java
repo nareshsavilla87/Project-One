@@ -2633,6 +2633,15 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+	public CommandWrapperBuilder updateAgreement(final Long agreementId) {
+		
+		this.actionName = "UPDATE";
+		this.entityName = "PARTNERAGREEMENT";
+		this.entityId = agreementId;
+		this.href = "";
+		return this;
+	}
+
 }
 
 
