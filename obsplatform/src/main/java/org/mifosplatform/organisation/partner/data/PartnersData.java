@@ -6,7 +6,6 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
-import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.monetary.data.ApplicationCurrencyConfigurationData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.partneragreement.data.AgreementData;

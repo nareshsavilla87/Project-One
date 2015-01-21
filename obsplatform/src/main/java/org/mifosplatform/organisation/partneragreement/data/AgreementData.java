@@ -24,6 +24,10 @@ public class AgreementData {
 	private Collection<MCodeData> sourceData;
 	private List<EnumOptionData> statusData;
 	private Collection<MCodeData> agreementTypes;
+	private String officeType;
+	private Long sourceId;
+	private Long chargeId;
+	private BigDecimal commisionAmount;
 
 
 	public AgreementData(Collection<MCodeData> shareTypes,Collection<MCodeData> sourceData, 
@@ -63,10 +67,32 @@ public class AgreementData {
 	}
 
 
+	public AgreementData(Long officeId, String officeType, Long agreementId) {
+		this.officeId = officeId;
+		this.officeType = officeType;
+		this.id = agreementId;
+	}
+
+
+	public AgreementData(Long chargeId, Long officeId, LocalDate invoiceDate,
+			Long source, BigDecimal shareAmount, String shareType,
+			String commisionSource, BigDecimal commisionAmount) {
+		
+		this.chargeId=chargeId;
+		this.officeId=officeId;
+		this.startDate = invoiceDate;
+		this.sourceId = source ;
+		this.shareAmount=shareAmount;
+		this.shareType = shareType;
+		this.source= commisionSource;
+		this.commisionAmount=commisionAmount;
+	}
+
+
 	public Long getId() {
 		return id;
 	}
-	
+
 	public Long getOfficeId() {
 		return officeId;
 	}
@@ -95,12 +121,16 @@ public class AgreementData {
 		return source;
 	}
 
-	public  Long getDetailId() {
+	public Long getDetailId() {
 		return detailId;
 	}
-	
+
 	public Long getPartnerId() {
 		return partnerId;
+	}
+
+	public String getOfficeType() {
+		return officeType;
 	}
 
 	public Collection<MCodeData> getShareTypes() {
@@ -118,5 +148,18 @@ public class AgreementData {
 	public Collection<MCodeData> getAgreementTypes() {
 		return agreementTypes;
 	}
+
+	public Long getSourceId() {
+		return sourceId;
+	}
+
+	public Long getChargeId() {
+		return chargeId;
+	}
+
+	public BigDecimal getCommisionAmount() {
+		return commisionAmount;
+	}
+
 	
 }

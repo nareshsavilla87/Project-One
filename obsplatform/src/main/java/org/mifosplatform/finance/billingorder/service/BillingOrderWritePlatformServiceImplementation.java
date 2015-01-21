@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
+import org.mifosplatform.finance.billingorder.domain.BillingOrder;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
@@ -11,8 +12,11 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfoRepository;
+import org.mifosplatform.organisation.office.domain.OfficeCommision;
+import org.mifosplatform.organisation.office.domain.OfficeCommisionRepository;
 import org.mifosplatform.organisation.partner.domain.PartnerBalanceRepository;
 import org.mifosplatform.organisation.partner.domain.PartnerControlBalance;
+import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
@@ -30,19 +34,25 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 	private final ClientRepository clientRepository;
 	private final PartnerBalanceRepository partnerBalanceRepository;
 	private final OfficeAdditionalInfoRepository infoRepository;
+	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
+	private final OfficeCommisionRepository officeCommisionRepository;
 	
 	@Autowired
 	public BillingOrderWritePlatformServiceImplementation(final OrderRepository orderRepository,
 			final ClientBalanceRepository clientBalanceRepository,
 			final ClientRepository clientRepository,
 			final PartnerBalanceRepository partnerBalanceRepository,
-			final OfficeAdditionalInfoRepository infoRepository){
+			final OfficeAdditionalInfoRepository infoRepository,
+			final BillingOrderReadPlatformService billingOrderReadPlatformService,
+			final OfficeCommisionRepository officeCommisionRepository){
 
 		this.orderRepository = orderRepository;
 		this.clientBalanceRepository = clientBalanceRepository;
 		this.clientRepository = clientRepository;
 		this.partnerBalanceRepository = partnerBalanceRepository;
 		this.infoRepository = infoRepository;
+		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
+		this.officeCommisionRepository = officeCommisionRepository;
 	}
 
 
@@ -127,6 +137,21 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		}
 
 		this.partnerBalanceRepository.save(partnerControlBalance);
+	}
+
+	@Override
+	public void UpdateOfficeCommision(Invoice invoice, Long agreementId) {
+
+		List<BillingOrder> charges = invoice.getCharges();
+
+		for (BillingOrder charge : charges) {
+
+			AgreementData data = this.billingOrderReadPlatformService.retrieveOfficeChargesCommission(charge.getId());
+			if (data != null) {
+				OfficeCommision commisionData = OfficeCommision.fromJson(data);
+				this.officeCommisionRepository.save(commisionData);
+			}else{}
+		}
 	}
 
 }
