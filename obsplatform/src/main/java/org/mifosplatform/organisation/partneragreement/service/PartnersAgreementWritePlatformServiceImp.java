@@ -113,6 +113,17 @@ public class PartnersAgreementWritePlatformServiceImp implements PartnersAgreeme
 			final JsonArray removeAgreementDetails = command.arrayOfParameterNamed("removeSourceData").getAsJsonArray();
 			final JsonArray newAgreementDetails = command.arrayOfParameterNamed("newSourceData").getAsJsonArray();
 			
+			if (removeAgreementDetails.size() != 0) {
+				for (int i = 0; i < removeAgreementDetails.size(); i++) {
+					final JsonElement element = fromApiJsonHelper.parse(removeAgreementDetails.get(i).toString());
+					final Long detailId = fromApiJsonHelper.extractLongNamed("detailId", element);
+					AgreementDetails detail = this.agreementDetailsRepository.findOne(detailId);
+					detail.setSourceType(Long.valueOf(detail.getSourceType()+"_"+detail.getId()));
+					detail.setEndDate(new Date());
+					detail.setIsDeleted('Y');
+					this.agreementDetailsRepository.saveAndFlush(detail);
+				}
+			}
 		    if(newAgreementDetails.size() !=0){
 				for(int i=0; i<newAgreementDetails.size();i++){ 
 					final JsonElement element = fromApiJsonHelper.parse(newAgreementDetails.get(i).toString());
@@ -145,17 +156,7 @@ public class PartnersAgreementWritePlatformServiceImp implements PartnersAgreeme
 						this.agreementDetailsRepository.saveAndFlush(detail);
 				}
 			}
-			
-		    if(removeAgreementDetails.size() !=0){
-			for(int i=0; i<removeAgreementDetails.size(); i++){
-				final JsonElement element = fromApiJsonHelper.parse(removeAgreementDetails.get(i).toString());
-				final Long detailId = fromApiJsonHelper.extractLongNamed("detailId", element);
-				AgreementDetails detail=this.agreementDetailsRepository.findOne(detailId);
-				detail.setEndDate(new Date());
-				detail.setIsDeleted('Y');
-				this.agreementDetailsRepository.saveAndFlush(detail);
-			}
-		  }
+		  
 			this.agreementRepository.save(agreement);
 			
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(agreement.getId())

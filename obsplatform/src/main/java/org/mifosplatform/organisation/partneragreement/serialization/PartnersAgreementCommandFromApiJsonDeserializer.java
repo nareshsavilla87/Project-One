@@ -88,9 +88,6 @@ public class PartnersAgreementCommandFromApiJsonDeserializer {
 				final BigDecimal shareAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shareAmount",jsonElement);
 				baseDataValidator.reset().parameter("shareAmount").value(shareAmount).notBlank();
 
-				final Long status = fromApiJsonHelper.extractLongNamed("status", jsonElement);
-				baseDataValidator.reset().parameter("status").value(status).notBlank();
-
 				throwExceptionIfValidationWarningsExist(dataValidationErrors);
 			}
 		}
