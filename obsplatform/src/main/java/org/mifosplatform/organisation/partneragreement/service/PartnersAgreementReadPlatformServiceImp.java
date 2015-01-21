@@ -99,8 +99,8 @@ public class PartnersAgreementReadPlatformServiceImp<AgreementDataMapper> implem
 	private static final class DataMapper implements RowMapper<AgreementData> {
 
 		public String schema() {
-			return " a.id as Id,a.agreement_status as agreementStatus,a.office_id as officeId,a.partner_id as partnerId, a.start_date as startDate,a.end_date as endDate "
-					+" from m_office_agreement a where a.is_deleted='N' and a.partner_id= ?";
+			return " a.id as Id,a.agreement_status as agreementStatus,a.office_id as officeId, a.start_date as startDate,a.end_date as endDate "
+					+" from m_office_agreement a where a.is_deleted='N' and a.office_id= ?";
 		}
 
 		@Override
@@ -111,10 +111,9 @@ public class PartnersAgreementReadPlatformServiceImp<AgreementDataMapper> implem
 			final Long officeId = rs.getLong("officeId");
 			final LocalDate startDate = JdbcSupport.getLocalDate(rs,"startDate");
 			final LocalDate endDate = JdbcSupport.getLocalDate(rs,"endDate");
-			final Long partnerId = rs.getLong("partnerId");
 			//final EnumOptionData enumstatus=OrderStatusEnumaration.OrderStatusType(status.intValue());
 			
-			return new AgreementData(id,agreementStatus,officeId,startDate,endDate,partnerId);
+			return new AgreementData(id,agreementStatus,officeId,startDate,endDate);
 
 		}
 

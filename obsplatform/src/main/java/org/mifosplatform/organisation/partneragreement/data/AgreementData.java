@@ -52,14 +52,13 @@ public class AgreementData {
 	}
 
 	public AgreementData(Long id, String agreementStatus, Long officeId,
-			LocalDate startDate, LocalDate endDate,Long partnerId) {
+			LocalDate startDate, LocalDate endDate) {
 		
 		this.id=id;
 		this.agreementStatus = agreementStatus;
 		this.officeId = officeId;
 		this.startDate = startDate;
 		this.endDate = endDate;
-		this.partnerId =  partnerId;
 		
 	}
 
