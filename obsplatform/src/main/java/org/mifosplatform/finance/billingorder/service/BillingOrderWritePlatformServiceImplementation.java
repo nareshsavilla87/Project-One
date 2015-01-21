@@ -75,9 +75,8 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 
 	@Override
 	public void updateClientBalance(final BigDecimal amount,final Long clientId,boolean isWalletEnable) {
-		
+
 		BigDecimal balance=null;
-		
 		ClientBalance clientBalance = this.clientBalanceRepository.findByClientId(clientId);
 		
 		if(clientBalance == null){

@@ -80,11 +80,11 @@ public class RedemptionWritePlatformServiceImpl implements
 		this.fromJsonHelper = fromJsonHelper;
 		this.orderRepository=orderRepository;
 		this.clientRepository = clientRepository;
-		this.billingOrderWritePlatformService=billingOrderWritePlatformService;
 		this.fromApiJsonDeserializer= apiJsonDeserializer;
 		this.orderWritePlatformService = orderWritePlatformService;
 		this.chargeCodeRepository=chargeCodeRepository;
 		this.redemptionReadPlatformService=redemptionReadPlatformService;
+		this.billingOrderWritePlatformService=billingOrderWritePlatformService;
 		this.adjustmentWritePlatformService = adjustmentWritePlatformService;
 		this.voucherDetailsRepository = voucherDetailsRepository;
 		this.journalvoucherRepository=journalvoucherRepository;
@@ -110,6 +110,7 @@ public class RedemptionWritePlatformServiceImpl implements
 			this.clientObjectRetrieveById(clientId);
             Long resourceId=Long.valueOf(0);
             CommandProcessingResult result =null;
+
 			final VoucherDetails voucherDetails = retrieveRandomDetailsByPinNo(pinNum);
 			final Voucher voucher = voucherDetails.getVoucher();
 			final String pinType = voucher.getPinType();
@@ -118,17 +119,18 @@ public class RedemptionWritePlatformServiceImpl implements
 			BigDecimal pinValue = BigDecimal.ZERO;
 			
 			if(pinType.equalsIgnoreCase(VALUE_PINTYPE) && pinTypeValue != null){
-				
-				pinValue = new BigDecimal(pinTypeValue);
+				  pinValue = new BigDecimal(pinTypeValue);
 				final JsonObject json = new JsonObject();
 				json.addProperty("adjustment_type", "CREDIT");json.addProperty("adjustment_code", 123);
-				json.addProperty("amount_paid",pinValue);json.addProperty("Remarks", "Adjustment Post By Redemption");
+				json.addProperty("amount_paid",pinValue);
+				json.addProperty("Remarks", "Adjustment Post By Redemption");
 				json.addProperty("locale", "en");
 				json.addProperty("dateFormat","dd MMMM yyyy");
 				json.addProperty("adjustment_date", simpleDateFormat);
 				final JsonCommand commd = new JsonCommand(null, json.toString(), json, fromJsonHelper, null, clientId, null, null, clientId, null, null, null, null, null, null,null);
 				
 				 result=this.adjustmentWritePlatformService.createAdjustments(commd);
+
 				resourceId=result.resourceId();
 				
 				
@@ -140,11 +142,12 @@ public class RedemptionWritePlatformServiceImpl implements
 				final List<Long> orderIds=this.redemptionReadPlatformService.retrieveOrdersData(clientId,planId);
 				final Price price  =  this.priceRepository.findOne(priceId);
 				Long contractId = (long) 0;
+				
 				if(price != null){
 					final String contractPeriod = price.getContractPeriod();
 					Contract contract = this.contractRepository.findOneByContractId(contractPeriod);
 					contractId = contract.getId();
-					pinValue = price.getPrice();
+					pinValue =price.getPrice();
 				}
 				final JsonObject json = new JsonObject();
 				
@@ -159,9 +162,8 @@ public class RedemptionWritePlatformServiceImpl implements
 					json.addProperty("dateFormat","dd MMMM yyyy"); 
 					json.addProperty("start_date", simpleDateFormat);
 					final JsonCommand commd = new JsonCommand(null, json.toString(), json, fromJsonHelper, null,clientId, null, null, null, null, null, null, null, null, null,null);
-					 result=this.orderWritePlatformService.createOrder(clientId, commd);
-					resourceId=result.resourceId();
-				 
+					result=this.orderWritePlatformService.createOrder(clientId, commd);
+				    resourceId=result.resourceId();
 				}else {
 					 
 					final Long orderId = orderIds.get(0);
@@ -183,8 +185,7 @@ public class RedemptionWritePlatformServiceImpl implements
 				this.billingOrderWritePlatformService.updateClientBalance(pinValue, clientId, false);
 			}
 			
-			  JournalVoucher journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",null,
-					  pinValue.doubleValue(),Long.valueOf(0));
+			  JournalVoucher journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",null,pinValue.doubleValue(),Long.valueOf(0));
 				this.journalvoucherRepository.save(journalVoucher);
 				
 				journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",pinValue.doubleValue(),null,clientId);
