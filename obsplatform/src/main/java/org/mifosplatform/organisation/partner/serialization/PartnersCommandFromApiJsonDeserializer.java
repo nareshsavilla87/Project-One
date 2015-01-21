@@ -69,9 +69,9 @@ public class PartnersCommandFromApiJsonDeserializer {
         
         final BigDecimal creditLimit = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("creditLimit", element);
         
-        if(creditLimit != null){
-        baseDataValidator.reset().parameter("creditLimit").value(creditLimit).integerGreaterThanZero();
-        }
+     /*   if(creditLimit != null){
+        baseDataValidator.reset().parameter("creditLimit").value(creditLimit).
+        }*/
         
         final Long parentId = fromApiJsonHelper.extractLongNamed("parentId", element);
         baseDataValidator.reset().parameter("parentId").value(parentId).notBlank();
