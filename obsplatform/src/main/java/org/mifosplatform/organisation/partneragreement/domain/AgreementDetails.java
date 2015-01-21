@@ -1,6 +1,7 @@
 package org.mifosplatform.organisation.partneragreement.domain;
 
 import java.math.BigDecimal;
+import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -9,8 +10,11 @@ import javax.persistence.FetchType;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.useradministration.domain.AppUser;
 
@@ -39,17 +43,31 @@ public class AgreementDetails extends AbstractAuditableCustom<AppUser, Long> {
 
 	@Column(name = "status")
 	private Integer status;
+	
+	@Column(name = "start_date")
+	private Date startDate;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "end_date")
+	private Date endDate;
+
+	@Column(name = "is_deleted")
+	private char isDeleted;
 
 	public AgreementDetails() {
 
 	}
 
-	public AgreementDetails(final Long source, final String shareType, final BigDecimal shareAmount, final Long status) {
+	public AgreementDetails(final Long source, final String shareType, final BigDecimal shareAmount,  final LocalDate startDate,final LocalDate endDate) {
 		
 		this.sourceType = source;
 		this.shareType = shareType;
 		this.shareAmount =shareAmount;
-		this.status = Integer.valueOf(status.toString());
+		this.status = Integer.valueOf(1);
+		this.startDate = startDate.toDate();
+		this.isDeleted = 'N';
+		if(endDate !=null)
+		this.endDate = endDate.toDate();
 		
 	}
 
@@ -73,6 +91,18 @@ public class AgreementDetails extends AbstractAuditableCustom<AppUser, Long> {
 		return status;
 	}
 
+	public Date getStartDate() {
+		return startDate;
+	}
+
+	public Date getEndDate() {
+		return endDate;
+	}
+
+	public char getIsDeleted() {
+		return isDeleted;
+	}
+	
 
 	public void setSourceType(Long sourceType) {
 		this.sourceType = sourceType;
@@ -90,8 +120,22 @@ public class AgreementDetails extends AbstractAuditableCustom<AppUser, Long> {
 		this.status = status;
 	}
 	
+	public void setStartDate(Date startDate) {
+		this.startDate = startDate;
+	}
+
+	public void setEndDate(Date endDate) {
+		this.endDate = endDate;
+	}
+
+	public void setIsDeleted(char isDeleted) {
+		this.isDeleted = isDeleted;
+	}
+	
 	public void update (final Agreement agreement){
 		this.agreements = agreement;
 	}
+
+
 
 }

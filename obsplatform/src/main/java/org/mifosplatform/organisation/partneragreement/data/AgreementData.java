@@ -18,7 +18,8 @@ public class AgreementData {
 	private String shareType;
 	private BigDecimal shareAmount;
 	private String source;
-	private EnumOptionData status;
+	private Long detailId;
+	private Long partnerId;
 	private Collection<MCodeData> shareTypes;
 	private Collection<MCodeData> sourceData;
 	private List<EnumOptionData> statusData;
@@ -26,10 +27,9 @@ public class AgreementData {
 
 
 	public AgreementData(Collection<MCodeData> shareTypes,Collection<MCodeData> sourceData, 
-			List<EnumOptionData> statusData, Collection<MCodeData> agreementTypes) {
+			 Collection<MCodeData> agreementTypes) {
 
 		this.shareTypes = shareTypes;
-		this.statusData = statusData;
 		this.sourceData = sourceData;
 		this.agreementTypes = agreementTypes;
 
@@ -37,7 +37,7 @@ public class AgreementData {
 
 
 	public AgreementData(Long id,String agreementStatus, Long officeId, LocalDate startDate,LocalDate endDate,  
-			   String shareType, BigDecimal shareAmount,String source, EnumOptionData status) {
+			   String shareType, BigDecimal shareAmount,String source, Long detailId) {
 		
 		this.id=id;
 		this.agreementStatus = agreementStatus;
@@ -47,9 +47,21 @@ public class AgreementData {
 		this.shareType = shareType;
 		this.shareAmount = shareAmount;
 		this.source = source;
-		this.status = status;
+		this.detailId = detailId;
 		
 	}
+
+	public AgreementData(Long id, String agreementStatus, Long officeId,
+			LocalDate startDate, LocalDate endDate) {
+		
+		this.id=id;
+		this.agreementStatus = agreementStatus;
+		this.officeId = officeId;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		
+	}
+
 
 	public Long getId() {
 		return id;
@@ -83,8 +95,12 @@ public class AgreementData {
 		return source;
 	}
 
-	public EnumOptionData getStatus() {
-		return status;
+	public  Long getDetailId() {
+		return detailId;
+	}
+	
+	public Long getPartnerId() {
+		return partnerId;
 	}
 
 	public Collection<MCodeData> getShareTypes() {

@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -21,7 +22,6 @@ import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -96,8 +96,8 @@ public class PartnersAgreementApiResource {
 		final Collection<MCodeData> shareTypes = this.mCodeReadPlatformService.getCodeValue("type");
 		final Collection<MCodeData> sourceData = this.mCodeReadPlatformService.getCodeValue(SOURCE_TYPE);
 		final Collection<MCodeData> agreementTypes = this.mCodeReadPlatformService.getCodeValue(AGREEMENT_TYPE);
-		final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
-		return new AgreementData(shareTypes, sourceData, statusData,agreementTypes);
+		//final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
+		return new AgreementData(shareTypes, sourceData,agreementTypes);
 	}
 
 	/**
@@ -115,17 +115,46 @@ public class PartnersAgreementApiResource {
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}
-	
-	  @GET
-	    @Path("{partnerId}")
-	    @Consumes({ MediaType.APPLICATION_JSON })
-	    @Produces({ MediaType.APPLICATION_JSON })
-	    public String retrievePartnerAgreementData(@PathParam("partnerId") final Long partnerId,@Context final UriInfo uriInfo) {
 
-	        context.authenticatedUser().validateHasReadPermission(resorceNameForPermission);
-	        final List<AgreementData> agreementData = this.agreementReadPlatformService.retrieveAgreementData(partnerId);
-	        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-	        return this.toApiJsonSerializer.serialize(settings, agreementData, RESPONSE_DATA_PARAMETERS);
-	    }
+	@GET
+	@Path("{partnerId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrievePartnerAgreementData(	@PathParam("partnerId") final Long partnerId,@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission(resorceNameForPermission);
+	    AgreementData agreementData = this.agreementReadPlatformService.retrieveAgreementData(partnerId);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializer.serialize(settings, agreementData,RESPONSE_DATA_PARAMETERS);
+	}
+
+	@GET
+	@Path("/{agreementId}/details")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrievePartnerAgreementDetails(@PathParam("agreementId") final Long agreementId,@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission(resorceNameForPermission);
+		final List<AgreementData> agreementData = this.agreementReadPlatformService.retrieveAgreementDetails(agreementId);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		if (settings.isTemplate()) {
+            AgreementData templateData = handleAgreementTemplateData();
+			agreementData.add(templateData);
+		}
+		return this.toApiJsonSerializer.serialize(settings, agreementData,RESPONSE_DATA_PARAMETERS);
+	}
+
+	@PUT
+	@Path("{agreementId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String updateAgreement(@PathParam("agreementId") final Long agreementId,final String apiRequestBodyAsJson) {
+
+		context.authenticatedUser().validateHasReadPermission(resorceNameForPermission);
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateAgreement(agreementId).withJson(apiRequestBodyAsJson).build();
+		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+	}
+	  
 
 }

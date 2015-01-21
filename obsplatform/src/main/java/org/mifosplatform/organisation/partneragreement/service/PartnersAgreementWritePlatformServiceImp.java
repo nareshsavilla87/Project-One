@@ -1,7 +1,10 @@
 package org.mifosplatform.organisation.partneragreement.service;
 
 import java.math.BigDecimal;
+import java.util.Date;
+import java.util.Map;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -13,6 +16,7 @@ import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfoReposito
 import org.mifosplatform.organisation.partner.service.PartnersWritePlatformServiceImp;
 import org.mifosplatform.organisation.partneragreement.domain.Agreement;
 import org.mifosplatform.organisation.partneragreement.domain.AgreementDetails;
+import org.mifosplatform.organisation.partneragreement.domain.AgreementDetailsRepository;
 import org.mifosplatform.organisation.partneragreement.domain.AgreementRepository;
 import org.mifosplatform.organisation.partneragreement.serialization.PartnersAgreementCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
@@ -32,20 +36,20 @@ public class PartnersAgreementWritePlatformServiceImp implements PartnersAgreeme
 	private final FromJsonHelper fromApiJsonHelper;
 	private final PartnersAgreementCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final AgreementRepository agreementRepository;
-	private final PartnersAgreementReadPlatformService agreementReadPlatformService;
 	private final OfficeAdditionalInfoRepository officeAdditionalInfoRepository;
+	private final AgreementDetailsRepository agreementDetailsRepository;
 	
 	
 	@Autowired
 	public PartnersAgreementWritePlatformServiceImp(final PlatformSecurityContext context,final FromJsonHelper fromApiJsonHelper,
 			final PartnersAgreementCommandFromApiJsonDeserializer apiJsonDeserializer,final AgreementRepository agreementRepository,
-			final PartnersAgreementReadPlatformService agreementReadPlatformService,final OfficeAdditionalInfoRepository officeAdditionalInfoRepository) {
+		    final OfficeAdditionalInfoRepository officeAdditionalInfoRepository,final AgreementDetailsRepository agreementDetailsRepository) {
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.fromApiJsonHelper = fromApiJsonHelper;
 		this.agreementRepository = agreementRepository;
-		this.agreementReadPlatformService = agreementReadPlatformService;
 		this.officeAdditionalInfoRepository = officeAdditionalInfoRepository;
+		this.agreementDetailsRepository = agreementDetailsRepository;
 
 	}
 
@@ -58,79 +62,26 @@ public class PartnersAgreementWritePlatformServiceImp implements PartnersAgreeme
 			this.apiJsonDeserializer.validateForCreate(command.json());
 			final OfficeAdditionalInfo additionalInfo=this.officeAdditionalInfoRepository.findOne(command.entityId());
 			Agreement agreement=Agreement.fromJosn(command,additionalInfo.getOffice().getId());
-			final Long agreementId=this.agreementReadPlatformService.checkPartnerAgreementId(agreement.getPartnerId());
 			final JsonArray partnerAgreementArray = command.arrayOfParameterNamed("sourceData").getAsJsonArray();
-				
-			if(agreementId !=null){
-				
-				Agreement existsAgreement=this.agreementRepository.findOne(agreementId);
-				
-				//agreement status
-				if(existsAgreement.getAgreementStatus() == null && agreement.getAgreementStatus() == null){
-	      			 
-	        	}else if(existsAgreement.getAgreementStatus() == null && agreement.getAgreementStatus() != null){
-	        		existsAgreement.setAgreementStatus(agreement.getAgreementStatus());
-	   		 	}else if(!existsAgreement.getAgreementStatus().equals(agreement.getAgreementStatus()) ){
-	   		 	     existsAgreement.setAgreementStatus(agreement.getAgreementStatus());		    		
-	   		 	}
-				
-				//startDate
-				if(existsAgreement.getStartDate() == null && existsAgreement.getStartDate() == null){
-	    			 
-	        	}else if(existsAgreement.getStartDate() == null && existsAgreement.getStartDate() != null){
-	        		  existsAgreement.setStartDate(agreement.getStartDate());
-	   		 	}else if(!existsAgreement.getStartDate().equals(agreement.getStartDate()) ){
-	   		 	      existsAgreement.setStartDate(agreement.getStartDate());		    		
-	   		 	}
-	        	//endDate
-	        	if(existsAgreement.getEndDate() == null && agreement.getEndDate() == null){
-	   			 
-	        	}else if(existsAgreement.getEndDate() == null && agreement.getEndDate() != null){
-	        		  existsAgreement.setEndDate(agreement.getEndDate());
-	   		 	}else if(!existsAgreement.getEndDate().equals(agreement.getEndDate()) ){
-	   		 	     existsAgreement.setEndDate(agreement.getEndDate());		    		
-	   		 	}
-				
-				if(existsAgreement.getIsDeleted()=='N'&& agreement.getIsDeleted()=='N'){
-	        		
-	        	}else if((existsAgreement.getIsDeleted()=='Y')&&(agreement.getIsDeleted()=='N')){
-	        		
-	        		existsAgreement.setIsDeleted(agreement.getIsDeleted());
-	        	}
-				
-				for(int i=0; i<partnerAgreementArray.size();i++){ 
-					
-					final JsonElement element = fromApiJsonHelper.parse(partnerAgreementArray.get(i).toString());
-					final Long source = fromApiJsonHelper.extractLongNamed("source", element);
-					final String shareType = fromApiJsonHelper.extractStringNamed("shareType", element);
-					final BigDecimal shareAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shareAmount",element);
-					final Long status = fromApiJsonHelper.extractLongNamed("status", element);
-					AgreementDetails details=new AgreementDetails(source,shareType,shareAmount,status);
-					existsAgreement.addAgreementDetails(details);
-				}
-				this.agreementRepository.save(existsAgreement);
-				
-				return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-                        .withEntityId(existsAgreement.getId()).withOfficeId(agreement.getOfficeId()).build();
-				
-			}else{
 			
+			if(partnerAgreementArray.size() !=0){
 			for(int i=0; i<partnerAgreementArray.size();i++){ 
 				
 				final JsonElement element = fromApiJsonHelper.parse(partnerAgreementArray.get(i).toString());
 				final Long source = fromApiJsonHelper.extractLongNamed("source", element);
 				final String shareType = fromApiJsonHelper.extractStringNamed("shareType", element);
 				final BigDecimal shareAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shareAmount",element);
-				final Long status = fromApiJsonHelper.extractLongNamed("status", element);
-				AgreementDetails details=new AgreementDetails(source,shareType,shareAmount,status);
+				final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
+				final LocalDate endDate = command.localDateValueOfParameterNamed("endDate");
+				AgreementDetails details=new AgreementDetails(source,shareType,shareAmount,startDate,endDate);
 				agreement.addAgreementDetails(details);
 			}
+		 }
 			this.agreementRepository.save(agreement);
 		
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 			                          .withEntityId(agreement.getId()).withOfficeId(agreement.getOfficeId()).build();
-		  }
-		}catch (DataIntegrityViolationException dve) {
+		  }catch (DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
@@ -149,4 +100,73 @@ public class PartnersAgreementWritePlatformServiceImp implements PartnersAgreeme
 				"Unknown data integrity issue with resource: "+ realCause.getMessage());
 
 	}
+
+	@Override
+	public CommandProcessingResult UpdatePartnerAgreement(final JsonCommand command) {
+		
+		try{
+			this.context.authenticatedUser();
+			this.apiJsonDeserializer.validateForUpdate(command.json());
+			Agreement agreement=this.agreementRepository.findOne(command.entityId());
+			final Map<String, Object> changes = agreement.update(command);
+			final JsonArray partnerAgreementArray = command.arrayOfParameterNamed("sourceData").getAsJsonArray();
+			final JsonArray removeAgreementDetails = command.arrayOfParameterNamed("removeSourceData").getAsJsonArray();
+			final JsonArray newAgreementDetails = command.arrayOfParameterNamed("newSourceData").getAsJsonArray();
+			
+			if (removeAgreementDetails.size() != 0) {
+				for (int i = 0; i < removeAgreementDetails.size(); i++) {
+					final JsonElement element = fromApiJsonHelper.parse(removeAgreementDetails.get(i).toString());
+					final Long detailId = fromApiJsonHelper.extractLongNamed("detailId", element);
+					AgreementDetails detail = this.agreementDetailsRepository.findOne(detailId);
+					detail.setSourceType(detail.getSourceType()+detail.getId());
+					detail.setEndDate(new Date());
+					detail.setIsDeleted('Y');
+					this.agreementDetailsRepository.saveAndFlush(detail);
+				}
+			}
+		    if(newAgreementDetails.size() !=0){
+				for(int i=0; i<newAgreementDetails.size();i++){ 
+					final JsonElement element = fromApiJsonHelper.parse(newAgreementDetails.get(i).toString());
+					final Long source = fromApiJsonHelper.extractLongNamed("source", element);
+					final String shareType = fromApiJsonHelper.extractStringNamed("shareType", element);
+					final BigDecimal shareAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shareAmount",element);
+					final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
+					final LocalDate endDate = command.localDateValueOfParameterNamed("endDate");
+					AgreementDetails details=new AgreementDetails(source,shareType,shareAmount,startDate,endDate);
+					agreement.addAgreementDetails(details);
+				}
+	         }
+			this.agreementRepository.saveAndFlush(agreement);
+			
+			  if(partnerAgreementArray.size() !=0){
+				 for(int i=0; i<partnerAgreementArray.size(); i++){
+						final JsonElement element = fromApiJsonHelper.parse(partnerAgreementArray.get(i).toString());
+						final Long source = fromApiJsonHelper.extractLongNamed("source", element);
+						final String shareType = fromApiJsonHelper.extractStringNamed("shareType", element);
+						final BigDecimal shareAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shareAmount",element);
+						final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
+						final LocalDate endDate = command.localDateValueOfParameterNamed("endDate");
+						final Long detailId = fromApiJsonHelper.extractLongNamed("detailId", element);
+						AgreementDetails detail=this.agreementDetailsRepository.findOne(detailId);
+						detail.setSourceType(source);
+						detail.setShareType(shareType);
+						detail.setShareAmount(shareAmount);
+						detail.setStartDate(startDate.toDate());
+						if(endDate!=null){detail.setEndDate(endDate.toDate());}
+						this.agreementDetailsRepository.saveAndFlush(detail);
+				}
+			}
+		  
+			this.agreementRepository.save(agreement);
+			
+			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(agreement.getId())
+					 .withOfficeId(agreement.getOfficeId()).with(changes).build();
+		  
+		}catch (DataIntegrityViolationException dve) {
+			handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}	   
+        
+   }
+	
 }

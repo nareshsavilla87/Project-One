@@ -4,11 +4,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 
-public interface PartnerBalanceRepository extends JpaRepository<PartnerBalance, Long>,
-JpaSpecificationExecutor<PartnerBalance> {
+public interface PartnerBalanceRepository extends JpaRepository<PartnerControlBalance, Long>,
+JpaSpecificationExecutor<PartnerControlBalance> {
 
 	
-@Query("from PartnerBalance balance where balance.officeId = ?1 and balance.accountType= ?2")
-PartnerBalance findOneWithPartnerAccount(Long officeId,String accountType);
+@Query("from PartnerControlBalance balance where balance.officeId = ?1 and balance.accountType= ?2")
+PartnerControlBalance findOneWithPartnerAccount(Long officeId,String accountType);
 
 }

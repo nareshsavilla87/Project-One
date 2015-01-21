@@ -6,8 +6,10 @@ import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 
 public interface PartnersAgreementReadPlatformService {
 
-	List<AgreementData> retrieveAgreementData(Long partnerId);
+	AgreementData retrieveAgreementData(Long partnerId);
 
 	Long checkPartnerAgreementId(Long partnerAccountId);
+
+	List<AgreementData> retrieveAgreementDetails(Long agreementId);
 
 }
