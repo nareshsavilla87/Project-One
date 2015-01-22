@@ -13,11 +13,13 @@ import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
+import org.mifosplatform.finance.billingorder.service.BillingOrderReadPlatformService;
 import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
 import org.mifosplatform.finance.billingorder.service.GenerateBill;
 import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderService;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
+import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,13 +35,16 @@ public class InvoiceOneTimeSale {
 	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
 	private final GenerateBillingOrderService generateBillingOrderService;
 	private final DiscountMasterRepository discountMasterRepository;
+	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	@Autowired
 	public InvoiceOneTimeSale(final GenerateBill generateBill,final BillingOrderWritePlatformService billingOrderWritePlatformService,
-			final GenerateBillingOrderService generateBillingOrderService,final DiscountMasterRepository discountMasterRepository) {
+			final GenerateBillingOrderService generateBillingOrderService,final DiscountMasterRepository discountMasterRepository,
+			final BillingOrderReadPlatformService billingOrderReadPlatformService) {
 		this.generateBill = generateBill;
 		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
 		this.generateBillingOrderService = generateBillingOrderService;
 		this.discountMasterRepository=discountMasterRepository;
+		this.billingOrderReadPlatformService=billingOrderReadPlatformService; 
 	}
 
 /**
@@ -74,9 +79,14 @@ public CommandProcessingResult invoiceOneTimeSale(final Long clientId, final One
 				// To fetch record from client_balance table
 				this.billingOrderWritePlatformService.updateClientBalance(invoice,clientId,isWalletEnable);
 				
+				 //office commision
+				 AgreementData clientAgreement=this.billingOrderReadPlatformService.retriveClientOfficeDetails(clientId);
+			     if(clientAgreement.getOfficeType().equalsIgnoreCase("Agent")&&clientAgreement.getId()!=null) {
+				     this.billingOrderWritePlatformService.UpdateOfficeCommision(invoice,clientAgreement.getId());
+		          }
+				
 				return new CommandProcessingResult(invoice.getId());
 
-		
 
 			}
 

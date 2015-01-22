@@ -2,14 +2,9 @@ package org.mifosplatform.organisation.office.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -27,9 +22,6 @@ public class OfficeCommision extends AbstractPersistable<Long> {
 	 */
 	private static final long serialVersionUID = 1L;
 
-	@OneToMany(fetch = FetchType.EAGER)
-	@JoinColumn(name = "charge_id")
-	private final List<Office> children = new LinkedList<Office>();
 
 	@Column(name = "charge_id", nullable = false)
 	private Long chargeId;
@@ -58,6 +50,11 @@ public class OfficeCommision extends AbstractPersistable<Long> {
 	@Column(name = "created_dt", nullable = false)
 	@Temporal(TemporalType.DATE)
 	private Date createdDate;
+	
+	
+	public OfficeCommision(){
+		
+	}
 
 	public OfficeCommision(final AgreementData data) {
 		
@@ -77,4 +74,79 @@ public class OfficeCommision extends AbstractPersistable<Long> {
 		
 		return new OfficeCommision(data);
 	}
+
+
+	public Long getChargeId() {
+		return chargeId;
+	}
+
+	public Long getOfficeId() {
+		return officeId;
+	}
+
+	public Date getInvoiceDate() {
+		return invoiceDate;
+	}
+
+	public Long getSource() {
+		return source;
+	}
+
+	public BigDecimal getShareAmount() {
+		return shareAmount;
+	}
+
+	public String getShareType() {
+		return shareType;
+	}
+
+	public String getCommisionSource() {
+		return commisionSource;
+	}
+
+	public BigDecimal getCommisionAmount() {
+		return commisionAmount;
+	}
+
+	public Date getCreatedDate() {
+		return createdDate;
+	}
+
+	public void setChargeId(Long chargeId) {
+		this.chargeId = chargeId;
+	}
+
+	public void setOfficeId(Long officeId) {
+		this.officeId = officeId;
+	}
+
+	public void setInvoiceDate(Date invoiceDate) {
+		this.invoiceDate = invoiceDate;
+	}
+
+	public void setSource(Long source) {
+		this.source = source;
+	}
+
+	public void setShareAmount(BigDecimal shareAmount) {
+		this.shareAmount = shareAmount;
+	}
+
+	public void setShareType(String shareType) {
+		this.shareType = shareType;
+	}
+
+	public void setCommisionSource(String commisionSource) {
+		this.commisionSource = commisionSource;
+	}
+
+	public void setCommisionAmount(BigDecimal commisionAmount) {
+		this.commisionAmount = commisionAmount;
+	}
+
+	public void setCreatedDate(Date createdDate) {
+		this.createdDate = createdDate;
+	}
+	
+
 }

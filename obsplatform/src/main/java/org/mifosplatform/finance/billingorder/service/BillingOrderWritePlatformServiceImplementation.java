@@ -145,12 +145,13 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		List<BillingOrder> charges = invoice.getCharges();
 
 		for (BillingOrder charge : charges) {
-
+      
 			AgreementData data = this.billingOrderReadPlatformService.retrieveOfficeChargesCommission(charge.getId());
 			if (data != null) {
 				OfficeCommision commisionData = OfficeCommision.fromJson(data);
 				this.officeCommisionRepository.save(commisionData);
 			}else{}
+           
 		}
 	}
 

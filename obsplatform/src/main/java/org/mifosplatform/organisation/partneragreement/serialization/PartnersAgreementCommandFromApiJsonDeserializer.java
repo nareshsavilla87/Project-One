@@ -115,39 +115,11 @@ public class PartnersAgreementCommandFromApiJsonDeserializer {
 
 		final LocalDate startDate = fromApiJsonHelper.extractLocalDateNamed("startDate", element);
 		baseDataValidator.reset().parameter("startDate").value(startDate).notBlank();
-
-		final LocalDate endDate = fromApiJsonHelper.extractLocalDateNamed("endDate", element);
-		baseDataValidator.reset().parameter("endDate").value(endDate).notBlank();
-
-		final JsonArray partnerAgreementDataArray = fromApiJsonHelper.extractJsonArrayNamed("newSourceData", element);
-
-		if (partnerAgreementDataArray != null && partnerAgreementDataArray.size() > 0) {
-			String[] paramsDataArrayAttributes = null;
-			paramsDataArrayAttributes = new String[partnerAgreementDataArray.size()];
-
-			for (int i = 0; i < partnerAgreementDataArray.size(); i++) {
-
-				paramsDataArrayAttributes[i] = partnerAgreementDataArray.get(i).toString();
-			}
-
-			for (JsonElement jsonElement : partnerAgreementDataArray) {
-
-				final Long source = fromApiJsonHelper.extractLongNamed("source", jsonElement);
-				baseDataValidator.reset().parameter("source").value(source).notBlank();
-
-				final String shareType = fromApiJsonHelper.extractStringNamed("shareType", jsonElement);
-				baseDataValidator.reset().parameter("shareType").value(shareType).notBlank().notExceedingLengthOf(20);
-
-				final BigDecimal shareAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shareAmount",jsonElement);
-				baseDataValidator.reset().parameter("shareAmount").value(shareAmount).notBlank();
-
-				throwExceptionIfValidationWarningsExist(dataValidationErrors);
-			}
-		}
 		
 		final JsonArray existAgreementDetails = fromApiJsonHelper.extractJsonArrayNamed("sourceData", element);
+		 int DataSize = existAgreementDetails.size();
+		 baseDataValidator.reset().parameter("sourceData").value(DataSize).integerGreaterThanZero(); 
 		
-
 		if (existAgreementDetails != null && existAgreementDetails.size() > 0) {
 			String[] paramsDataArrayAttributes = null;
 			paramsDataArrayAttributes = new String[existAgreementDetails.size()];
@@ -171,6 +143,7 @@ public class PartnersAgreementCommandFromApiJsonDeserializer {
 				throwExceptionIfValidationWarningsExist(dataValidationErrors);
 			}
 		}
+		
 
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
