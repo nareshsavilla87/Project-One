@@ -15,6 +15,7 @@ import org.mifosplatform.finance.billingorder.serialization.BillingOrderCommandF
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -30,14 +31,15 @@ public class InvoiceClient {
 	
 	
 	
+	
 	@Autowired
 	InvoiceClient(final BillingOrderReadPlatformService billingOrderReadPlatformService,final GenerateBillingOrderService generateBillingOrderService,
 			final BillingOrderWritePlatformService billingOrderWritePlatformService,final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer) {
-
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.generateBillingOrderService = generateBillingOrderService;
 		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
 		this.apiJsonDeserializer=apiJsonDeserializer;
+		
 	}
 	
 	
@@ -86,6 +88,11 @@ public class InvoiceClient {
 			 billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
 			 System.out.println("---------------------"+billingOrderCommands.get(0).getNextBillableDate());
 			 
+			 //office commision
+			 AgreementData clientAgreement=this.billingOrderReadPlatformService.retriveClientOfficeDetails(clientId);
+		     if(clientAgreement.getOfficeType().equalsIgnoreCase("Agent")&&clientAgreement.getId()!=null) {
+			     this.billingOrderWritePlatformService.UpdateOfficeCommision(invoice,clientAgreement.getId());
+	           }
                if(invoice.getInvoiceAmount() == null){
             	   return null;
                }

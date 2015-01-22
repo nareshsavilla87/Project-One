@@ -6,6 +6,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
+import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 
 public interface BillingOrderReadPlatformService {
 
@@ -26,5 +27,9 @@ public interface BillingOrderReadPlatformService {
 	List<BillingOrderData> getReverseBillingOrderData(Long clientId,LocalDate disconnectionDate, Long orderId);
 
 	TaxMappingRateData retriveExemptionTaxDetails(Long clientId);
+
+	AgreementData retriveClientOfficeDetails(Long clientId);
+
+	AgreementData retrieveOfficeChargesCommission(Long id);
 
 }
