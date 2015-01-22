@@ -8,8 +8,10 @@ public interface PartnersAgreementReadPlatformService {
 
 	AgreementData retrieveAgreementData(Long partnerId);
 
-	Long checkPartnerAgreementId(Long partnerAccountId);
+	Long checkAgreement(Long officeId);
 
 	List<AgreementData> retrieveAgreementDetails(Long agreementId);
+
+
 
 }

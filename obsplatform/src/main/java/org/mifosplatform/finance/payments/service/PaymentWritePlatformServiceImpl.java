@@ -162,7 +162,6 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 				if(officeAdditionalInfo !=null){
 					if(officeAdditionalInfo.getIsCollective())
 					{
-					System.out.println(officeAdditionalInfo.getIsCollective());
 					this.updatePartnerBalance(client.getOffice(),payment);
 				   }
 				}

@@ -41,8 +41,6 @@ public class AgreementDetails extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "share_type")
 	private String shareType;
 
-	@Column(name = "status")
-	private Integer status;
 	
 	@Column(name = "start_date")
 	private Date startDate;
@@ -63,7 +61,6 @@ public class AgreementDetails extends AbstractAuditableCustom<AppUser, Long> {
 		this.sourceType = source;
 		this.shareType = shareType;
 		this.shareAmount =shareAmount;
-		this.status = Integer.valueOf(1);
 		this.startDate = startDate.toDate();
 		this.isDeleted = 'N';
 		if(endDate !=null)
@@ -87,9 +84,6 @@ public class AgreementDetails extends AbstractAuditableCustom<AppUser, Long> {
 		return shareType;
 	}
 
-	public Integer getStatus() {
-		return status;
-	}
 
 	public Date getStartDate() {
 		return startDate;
@@ -116,10 +110,6 @@ public class AgreementDetails extends AbstractAuditableCustom<AppUser, Long> {
 		this.shareType = shareType;
 	}
 
-	public void setStatus(Integer status) {
-		this.status = status;
-	}
-	
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
 	}

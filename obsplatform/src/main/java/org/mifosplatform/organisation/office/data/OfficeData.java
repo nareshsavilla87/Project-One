@@ -30,6 +30,7 @@ public class OfficeData {
     private final Collection<OfficeData> allowedParents;
     private final Collection<CodeValueData> officeTypes;
 
+
     public static OfficeData dropdown(final Long id, final String name, final String nameDecorated) {
     	
         return new OfficeData(id, name, nameDecorated, null, null, null, null, null, null,null,null,null);
@@ -65,7 +66,8 @@ public class OfficeData {
         
     }
 
-    public boolean hasIdentifyOf(final Long officeId) {
+
+	public boolean hasIdentifyOf(final Long officeId) {
     	
         return this.id.equals(officeId);
     }

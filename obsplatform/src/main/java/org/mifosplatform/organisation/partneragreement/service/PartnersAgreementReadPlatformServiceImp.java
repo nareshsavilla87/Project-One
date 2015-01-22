@@ -31,12 +31,12 @@ public class PartnersAgreementReadPlatformServiceImp<AgreementDataMapper> implem
 	
 	
 	@Override
-	public Long checkPartnerAgreementId(Long partnerAccountId) {
+	public Long checkAgreement(Long officeId) {
 		
 		try {
 			context.authenticatedUser();
-			final String sql = "select id from m_office_agreement where partner_id=? ";
-			return jdbcTemplate.queryForLong(sql, new Object[] { partnerAccountId});
+			final String sql = "select id from m_office_agreement where office_id=? ";
+			return jdbcTemplate.queryForLong(sql, new Object[] { officeId});
 		} catch (final EmptyResultDataAccessException e) {
 			return null;
 		}

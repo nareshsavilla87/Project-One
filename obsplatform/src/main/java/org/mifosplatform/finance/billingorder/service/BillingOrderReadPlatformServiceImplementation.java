@@ -12,6 +12,7 @@ import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -309,7 +310,70 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 			}
 		}
 		
-}	/*@Override
+	@Override
+	public AgreementData retriveClientOfficeDetails(final Long clientId) {
+
+		try {
+
+			final OfficeMapper mapper = new OfficeMapper();
+			final String sql = "select " + mapper.schema() + " where c.id = ?";
+			return this.jdbcTemplate.queryForObject(sql, mapper,new Object[] { clientId });
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	private final static class OfficeMapper implements RowMapper<AgreementData> {
+
+		public String schema() {
+
+			return " o.id as officeId, co.code_value as officeType,a.id as agreementId from m_office o inner join m_client c ON o.id = c.office_id "
+					+ " left join m_office_agreement a ON o.id = a.office_id and a.agreement_status='signed' left join m_code_value co ON co.id = o.office_type ";
+		}
+
+		@Override
+		public AgreementData mapRow(ResultSet rs, int rowNum) throws SQLException {
+			final Long officeId = rs.getLong("officeId");
+			final Long agreementId = rs.getLong("agreementId");
+			final String officeType = rs.getString("officeType");
+			return new AgreementData(officeId, officeType, agreementId);
+		}
+	}
+
+	@Override
+	public AgreementData retrieveOfficeChargesCommission(Long chareId) {
+
+		try {
+			final CommisionMapper mapper = new CommisionMapper();
+			final String sql = "Select * from  v_office_commission  v where v.charge_id=? and v.amt <> 0";
+			return this.jdbcTemplate.queryForObject(sql, mapper,new Object[] {chareId});
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	private final static class CommisionMapper implements RowMapper<AgreementData> {
+
+		@Override
+		public AgreementData mapRow(ResultSet rs, int rowNum)throws SQLException {
+			final Long chargeId = rs.getLong("charge_id");
+			final Long officeId = rs.getLong("office_id");
+			final LocalDate invoiceDate = JdbcSupport.getLocalDate(rs,"invoice_date");
+			final Long source = rs.getLong("source");
+			final BigDecimal shareAmount = rs.getBigDecimal("share_amount");
+			final String shareType = rs.getString("share_type");
+			final String commisionSource = rs.getString("comm_source");
+			final BigDecimal commisionAmount = rs.getBigDecimal("amt");
+			return new AgreementData(chargeId, officeId, invoiceDate, source,
+					shareAmount, shareType, commisionSource, commisionAmount);
+		}
+	}
+
+}
+
+
+
+/*@Override
 		public List<OrderPriceData> retrieveInvoiceTillDate(final Long orderId) {
 
 			final OrderPriceMapper orderPriceMapper = new OrderPriceMapper();
