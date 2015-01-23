@@ -67,7 +67,7 @@ public class PartnersCommandFromApiJsonDeserializer {
         final String repeatPassword = fromApiJsonHelper.extractStringNamed("repeatPassword", element);
         baseDataValidator.reset().parameter("repeatPassword").value(repeatPassword).notBlank().notExceedingLengthOf(60);
         
-        final BigDecimal creditLimit = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("creditLimit", element);
+       // final BigDecimal creditLimit = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("creditLimit", element);
         
      /*   if(creditLimit != null){
         baseDataValidator.reset().parameter("creditLimit").value(creditLimit).
