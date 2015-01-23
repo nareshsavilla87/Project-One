@@ -52,7 +52,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             	       +NAMEDECORATEDBASEON_HIERARCHY+
             	       "AS nameDecorated,o.external_id AS externalId,o.opening_date AS openingDate,o.hierarchy AS hierarchy," +
             	       "parent.id AS parentId,parent.name AS parentName,c.code_value as officeType, ifnull(b.balance_amount,0 )as balance" +
-            	       " FROM m_office o LEFT JOIN m_office AS parent ON parent.id = o.parent_id left join m_code_value c on c.id=o.office_type " +
+            	       " FROM m_office o LEFT JOIN m_office AS parent ON parent.id = o.parent_id  join m_code_value c on c.id=o.office_type and c.code_value='Office' " +
             	       " Left join m_office_balance b on o.id = b.office_id ";
         }
 

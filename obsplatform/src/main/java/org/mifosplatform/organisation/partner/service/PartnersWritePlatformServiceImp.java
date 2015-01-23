@@ -88,8 +88,9 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			final String currency = command.stringValueOfParameterNamed("currency");
 			final String email = command.stringValueOfParameterNamed("email");
 			final boolean isCollective= command.booleanPrimitiveValueOfParameterNamed("isCollective");
+			final String contactName = command.stringValueOfParameterNamed("contactName");
 			OfficeAddress address =OfficeAddress.fromJson(command,office);
-			OfficeAdditionalInfo additionalInfo = new OfficeAdditionalInfo(office,creditlimit,currency,isCollective);
+			OfficeAdditionalInfo additionalInfo = new OfficeAdditionalInfo(office,creditlimit,currency,isCollective,contactName);
 			office.setOfficeAddress(address);
 			office.setOfficeAdditionalInfo(additionalInfo);
 			this.officeRepository.save(office);
@@ -114,7 +115,7 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 	        JSONObject resultJson = new JSONObject(result);
 	        final String userId=resultJson.getString("resourceId");
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-					       .withEntityId(office.getId()).withResourceIdAsString(userId).build();
+					       .withEntityId(additionalInfo.getId()).withResourceIdAsString(userId).build();
 		} catch (final DataIntegrityViolationException e) {
 			handleDataIntegrityIssues(command, e);
 			return new CommandProcessingResult(Long.valueOf(-1l));
@@ -172,19 +173,19 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 	
 	@Transactional
 	@Override
-	public CommandProcessingResult saveOrUpdatePartnerImage(final Long partnerId, final String imageName,final InputStream inputStream) {
+	public CommandProcessingResult saveOrUpdatePartnerImage(final Long officeId, final String imageName,final InputStream inputStream) {
 		try {
 
-			final Office office =this.officeRepository.findOne(partnerId);
+			final Office office =this.officeRepository.findOne(officeId);
 			final OfficeAddress officeAddress = this.addressRepository.findOneWithPartnerId(office);
 			if (officeAddress == null) {
-				throw new OfficeNotFoundException(partnerId);
+				throw new OfficeNotFoundException(officeId);
 			}
-			final String imageUploadLocation = setupForPartnerImageUpdate(partnerId, officeAddress);
+			final String imageUploadLocation = setupForPartnerImageUpdate(officeId, officeAddress);
 			final String imageLocation = FileUtils.saveToFileSystem(inputStream, imageUploadLocation, imageName);
 			officeAddress.setCompanyLogo(imageLocation);
 			this.addressRepository.save(officeAddress);
-			return new CommandProcessingResult(partnerId);
+			return new CommandProcessingResult(officeId);
 
 		} catch (IOException ioe) {
 			LOGGER.error(ioe.getMessage(), ioe);
@@ -194,19 +195,19 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 
 	@Transactional
 	@Override
-	public CommandProcessingResult saveOrUpdatePartnerImage(final Long partnerId, final Base64EncodedImage encodedImage) {
+	public CommandProcessingResult saveOrUpdatePartnerImage(final Long officeId, final Base64EncodedImage encodedImage) {
 
 		try {
-			final Office office =this.officeRepository.findOne(partnerId);
+			final Office office =this.officeRepository.findOne(officeId);
 			final OfficeAddress officeAddress = this.addressRepository.findOneWithPartnerId(office);
 			if (officeAddress == null) {
-				throw new OfficeNotFoundException(partnerId);
+				throw new OfficeNotFoundException(officeId);
 			}
-			final String imageUploadLocation = setupForPartnerImageUpdate(partnerId, officeAddress);
+			final String imageUploadLocation = setupForPartnerImageUpdate(officeId, officeAddress);
 			final String imageLocation = FileUtils.saveToFileSystem(encodedImage, imageUploadLocation, "image");
 			officeAddress.setCompanyLogo(imageLocation);
 			this.addressRepository.save(officeAddress);
-			return new CommandProcessingResult(partnerId);
+			return new CommandProcessingResult(officeId);
 			// return updatePartnerImage(partnerId, officeAddress, imageLocation);
 		} catch (IOException ioe) {
 			LOGGER.error(ioe.getMessage(), ioe);
