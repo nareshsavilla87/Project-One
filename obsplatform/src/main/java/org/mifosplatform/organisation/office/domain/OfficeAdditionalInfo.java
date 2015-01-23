@@ -29,6 +29,9 @@ public class OfficeAdditionalInfo extends AbstractPersistable<Long> {
 	@Column(name = "partner_currency")
 	private String partnerCurrency;
 	
+	@Column(name = "contact_name")
+	private String contactName;
+	
 	@Column(name = "is_collective", nullable = false, length = 100)
 	private char isCollective;
 
@@ -41,12 +44,13 @@ public class OfficeAdditionalInfo extends AbstractPersistable<Long> {
 	}
 	
 	public OfficeAdditionalInfo(final Office office, final BigDecimal creditLimit,final String currency,
-			   final boolean isCollective) {
+			   final boolean isCollective,final String contactName) {
 		
 		this.office = office;
 		this.creditLimit = creditLimit;
 		this.partnerCurrency = currency;
 		this.isCollective = isCollective?'Y':'N';
+		this.contactName = contactName;
 	}
 
 	public BigDecimal getCreditLimit() {
@@ -59,6 +63,11 @@ public class OfficeAdditionalInfo extends AbstractPersistable<Long> {
 
 	public Office getOffice() {
 		return office;
+	}
+	
+
+	public String getContactName() {
+		return contactName;
 	}
 
 	public void setOffice(Office office) {

@@ -45,7 +45,7 @@ public class Agreement extends AbstractAuditableCustom<AppUser, Long> {
 	private Date endDate;
 
 	@Column(name = "is_deleted")
-	private char isDeleted;
+	private char isDeleted = 'N';
 
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "agreements", orphanRemoval = true)
@@ -70,7 +70,7 @@ public class Agreement extends AbstractAuditableCustom<AppUser, Long> {
 		this.agreementStatus =agreementStatus;
 		this.startDate = startDate.toDate();
 		this.endDate = endDate!=null? endDate.toDate() : null ;
-		this.isDeleted = 'N';
+	
 	}
 	
 	public Long getOfficeId() {
@@ -148,8 +148,8 @@ public class Agreement extends AbstractAuditableCustom<AppUser, Long> {
 		final String endDateParamName = "endDate";
 		if (command.isChangeInLocalDateParameterNamed(endDateParamName,new LocalDate(this.endDate))) {
 			final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
-			actualChanges.put(endDateParamName, newValue);
 			if(newValue !=null){
+			actualChanges.put(endDateParamName, newValue);
 			this.endDate = newValue.toDate();
 			}
 		}

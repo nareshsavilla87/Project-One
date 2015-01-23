@@ -37,6 +37,9 @@ public class PartnersData {
 	private ApplicationCurrencyConfigurationData currencyData;
 	private Collection<OfficeData> allowedParents;
 	private List<AgreementData> agreementData;
+	private String officeNumber;
+	private String contactName;
+	private Long userId;
 	
 	
 	public PartnersData(List<String> countryData, List<String> statesData,
@@ -56,7 +59,7 @@ public class PartnersData {
 	public PartnersData(final Long officeId, final Long additionalinfoId,final String partnerName, final BigDecimal creditLimit, 
 			final String currency,final Long parentId, final String parentName, final String officeType,final LocalDate openingDate, 
 			final String loginName,final String city, final String state,final String country, final String email, final String phoneNumber,
-			final String isCollective,final BigDecimal balanceAmount) {
+			final String isCollective,final BigDecimal balanceAmount,final String officeNumber,final String contactName,final Long userId) {
 		
 	this.officeId = officeId;
 	this.id = additionalinfoId;
@@ -75,6 +78,9 @@ public class PartnersData {
 	this.phoneNumber =phoneNumber; 
 	this.isCollective = isCollective.contains("Y");
 	this.balanceAmount = balanceAmount;
+	this.officeNumber = officeNumber;
+	this.contactName = contactName;
+	this.userId = userId;
 	
 	}
 	
@@ -149,6 +155,19 @@ public class PartnersData {
 	
 	public BigDecimal getBalanceAmount() {
 		return balanceAmount;
+	}
+
+	
+	public String getOfficeNumber() {
+		return officeNumber;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public Long getUserId() {
+		return userId;
 	}
 
 	public List<String> getCountryData() {

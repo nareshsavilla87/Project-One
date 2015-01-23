@@ -29,7 +29,6 @@ import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 import org.mifosplatform.organisation.partneragreement.service.PartnersAgreementReadPlatformService;
-import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -53,7 +52,6 @@ public class PartnersAgreementApiResource {
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService;
 	private final MCodeReadPlatformService mCodeReadPlatformService;
-	private final PlanReadPlatformService planReadPlatformService;
 	private final PartnersAgreementReadPlatformService agreementReadPlatformService;
 
 	@Autowired
@@ -62,7 +60,6 @@ public class PartnersAgreementApiResource {
 			final ApiRequestParameterHelper apiRequestParameterHelper,
 			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
 			final MCodeReadPlatformService mCodeReadPlatformService,
-			final PlanReadPlatformService planReadPlatformService,
 			final PartnersAgreementReadPlatformService agreementReadPlatformService) {
 
 		this.context = context;
@@ -70,7 +67,6 @@ public class PartnersAgreementApiResource {
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.commandSourceWritePlatformService = commandSourceWritePlatformService;
 		this.mCodeReadPlatformService = mCodeReadPlatformService;
-		this.planReadPlatformService = planReadPlatformService;
 		this.agreementReadPlatformService = agreementReadPlatformService;
 
 	}
@@ -96,7 +92,6 @@ public class PartnersAgreementApiResource {
 		final Collection<MCodeData> shareTypes = this.mCodeReadPlatformService.getCodeValue("type");
 		final Collection<MCodeData> sourceData = this.mCodeReadPlatformService.getCodeValue(SOURCE_TYPE);
 		final Collection<MCodeData> agreementTypes = this.mCodeReadPlatformService.getCodeValue(AGREEMENT_TYPE);
-		//final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
 		return new AgreementData(shareTypes, sourceData,agreementTypes);
 	}
 
@@ -110,7 +105,7 @@ public class PartnersAgreementApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String createNewPartnerAgreement(@PathParam("partnerId") final Long partnerId,final String apiRequestBodyAsJson) {
 
-		context.authenticatedUser().validateHasReadPermission(resorceNameForPermission);
+		context.authenticatedUser();
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().createPartnerAgreement(partnerId).withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
@@ -150,7 +145,6 @@ public class PartnersAgreementApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String updateAgreement(@PathParam("agreementId") final Long agreementId,final String apiRequestBodyAsJson) {
 
-		context.authenticatedUser().validateHasReadPermission(resorceNameForPermission);
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateAgreement(agreementId).withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
