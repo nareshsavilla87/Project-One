@@ -28,8 +28,8 @@ public class PartnersCommandFromApiJsonDeserializer {
 	 * The parameters supported for this command.
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("partnerType", "partnerName","loginName","password","phone","email",
-			                            "city","state","country","currency","organization","roleName","companyLogo","parentId","officeType","repeatPassword",
-			                            "isCollective","creditLimit","locale"));
+			                            "city","state","country","currency","contactName","roleName","companyLogo","parentId","officeType","repeatPassword",
+			                            "isCollective","creditLimit","locale","officeNumber"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
@@ -76,8 +76,8 @@ public class PartnersCommandFromApiJsonDeserializer {
         final Long parentId = fromApiJsonHelper.extractLongNamed("parentId", element);
         baseDataValidator.reset().parameter("parentId").value(parentId).notBlank();
         
-        final String organization = fromApiJsonHelper.extractStringNamed("organization", element);
-        baseDataValidator.reset().parameter("organization").value(organization).notBlank().notExceedingLengthOf(100);
+       /* final String contactName = fromApiJsonHelper.extractStringNamed("contactName", element);
+        baseDataValidator.reset().parameter("contactName").value(contactName).notBlank().notExceedingLengthOf(100);*/
         
         final String phone = fromApiJsonHelper.extractStringNamed("phone", element);
         baseDataValidator.reset().parameter("phone").value(phone).notBlank().notExceedingLengthOf(30);
@@ -96,13 +96,6 @@ public class PartnersCommandFromApiJsonDeserializer {
 		
 		final String currency = fromApiJsonHelper.extractStringNamed("currency", element);
         baseDataValidator.reset().parameter("currency").value(currency).notBlank();
-		
-		/*final String role = fromApiJsonHelper.extractStringNamed("roleName", element);
-		baseDataValidator.reset().parameter("role").value(role).notBlank().notExceedingLengthOf(20);
-		
-		final Long officeType = fromApiJsonHelper.extractLongNamed("officeType", element);
-		baseDataValidator.reset().parameter("officeType").value(officeType).notBlank().notExceedingLengthOf(20);
-		*/
 	
         
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

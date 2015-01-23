@@ -38,6 +38,9 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 
 	@Column(name = "phone_number")
 	private String phone;
+	
+	@Column(name = "office_number")
+	private String officeNumber;
 
 	@Column(name = "email_id")
 	private String email;
@@ -65,7 +68,7 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 	
 	public static OfficeAddress fromJson(final JsonCommand command, Office office) {
 		
-		final String organization = command.stringValueOfParameterNamed("organization");
+		final String officeNumber = command.stringValueOfParameterNamed("officeNumber");
 		final String phone = command.stringValueOfParameterNamed("phone");
 		final String email = command.stringValueOfParameterNamed("email");
 		final String city = command.stringValueOfParameterNamed("city");
@@ -76,12 +79,13 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 			companyLogo  = command.stringValueOfParameterNamed("companyLogo");
 		}
 		
-		return new OfficeAddress(organization,phone,email,city,state,country,companyLogo,office);
+		return new OfficeAddress(officeNumber,phone,email,city,state,country,companyLogo,office);
 	}
 
-	public OfficeAddress(final String organization, final String phone, final String email,final String city, 
+	public OfficeAddress(final String officeNumber,final String phone, final String email,final String city, 
 			final String state, final String country, final String companyLogo,final Office office) {
-		this.addressName = organization;
+
+		this.officeNumber = officeNumber;
 		this.phone = phone;
 		this.email = email;
 		this.city = city;
@@ -91,7 +95,6 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 		this.office = office;
 		
 	}
-	
 	
 
 	public String getAddressName() {
@@ -114,16 +117,18 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 	public String getPhone() {
 		return phone;
 	}
+	
+	public String getOfficeNumber() {
+		return officeNumber;
+	}
 
 	public String getEmail() {
 		return email;
 	}
 
-
 	public String getCompanyLogo() {
 		return companyLogo;
 	}
-
 
 	public Office getOffice() {
 		return office;
@@ -132,7 +137,6 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 	public void setOffice(Office office) {
 		this.office = office;
 	}
-
 
 	public void setCompanyLogo(final String imageLocation) {
 		
