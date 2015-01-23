@@ -1,11 +1,18 @@
 package org.mifosplatform.organisation.office.domain;
 
+import java.math.BigDecimal;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
+import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -78,6 +85,64 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 		
 		return new OfficeAddress(organization,phone,email,city,state,country,companyLogo,office);
 	}
+	
+	
+	public Map<String, Object> update(final JsonCommand command) {
+		final Map<String, Object> actualChanges = new ConcurrentHashMap<String, Object>(1);
+		final String organizationParamName = "organization";
+		if (command.isChangeInStringParameterNamed(organizationParamName,this.addressName)) {
+			final String newValue = command.stringValueOfParameterNamed(organizationParamName);
+			actualChanges.put(organizationParamName, newValue);
+			this.addressName = StringUtils.defaultIfEmpty(newValue, null);
+		}
+
+		final String phoneParamName = "phone";
+		if (command.isChangeInStringParameterNamed(phoneParamName,this.phone)) {
+			final String newValue = command.stringValueOfParameterNamed(phoneParamName);
+			actualChanges.put(phoneParamName, newValue);
+			this.phone = StringUtils.defaultIfEmpty(newValue,null);
+		}
+
+		final String emailParamName = "email";
+		if (command.isChangeInStringParameterNamed(emailParamName,this.email)) {
+			final String newValue = command.stringValueOfParameterNamed(emailParamName);
+			actualChanges.put(emailParamName, newValue);
+			this.email = StringUtils.defaultIfEmpty(newValue, null);
+		}
+
+		final String cityParamName = "city";
+		if (command.isChangeInStringParameterNamed(cityParamName,this.city)) {
+			final String newValue = command.stringValueOfParameterNamed(cityParamName);
+			actualChanges.put(cityParamName, newValue);
+			this.city = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String stateParamName = "state";
+		if (command.isChangeInStringParameterNamed(stateParamName,this.state)) {
+			final String newValue = command.stringValueOfParameterNamed(stateParamName);
+			actualChanges.put(stateParamName, newValue);
+			this.state = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String countryParamName = "country";
+		if (command.isChangeInStringParameterNamed(countryParamName,this.country)) {
+			final String newValue = command.stringValueOfParameterNamed(countryParamName);
+			actualChanges.put(countryParamName, newValue);
+			this.country = StringUtils.defaultIfEmpty(newValue, null);
+		}
+
+		if(command.parameterExists("companyLogo")){
+			final String companyLogoParamName = "companyLogo";
+			if (command.isChangeInStringParameterNamed(companyLogoParamName,this.companyLogo)) {
+				final String newValue = command.stringValueOfParameterNamed(companyLogoParamName);
+				actualChanges.put(companyLogoParamName, newValue);
+				this.companyLogo = StringUtils.defaultIfEmpty(newValue, null);
+			}
+		}
+
+		return actualChanges;
+
+	}
 
 	public OfficeAddress(final String organization, final String phone, final String email,final String city, 
 			final String state, final String country, final String companyLogo,final Office office) {
@@ -139,7 +204,6 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 		this.companyLogo = imageLocation;
 	}
 
-		
 }
 	
 

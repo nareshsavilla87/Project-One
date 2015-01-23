@@ -1,6 +1,8 @@
 package org.mifosplatform.organisation.office.domain;
 
 import java.math.BigDecimal;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -8,6 +10,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
+import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -73,6 +77,34 @@ public class OfficeAdditionalInfo extends AbstractPersistable<Long> {
 			return collective;
 		}
 		
+	}
+
+	public Map<String, Object> update(final JsonCommand command) {
+		final Map<String, Object> actualChanges = new ConcurrentHashMap<String, Object>(1);
+		final String creditlimitParamName = "creditlimit";
+		if (command.isChangeInBigDecimalParameterNamed(creditlimitParamName,this.creditLimit)) {
+			final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(creditlimitParamName);
+			actualChanges.put(creditlimitParamName, newValue);
+			this.creditLimit = newValue;
+		}
+
+		final String currencyParamName = "currency";
+		if (command.isChangeInStringParameterNamed(currencyParamName,this.partnerCurrency)) {
+			final String newValue = command.stringValueOfParameterNamed(currencyParamName);
+			actualChanges.put(currencyParamName, newValue);
+			this.partnerCurrency = StringUtils.defaultIfEmpty(newValue,null);
+		}
+
+		final char isCollectiveParamName = command.booleanPrimitiveValueOfParameterNamed("isCollective")?'Y':'N';
+		
+		if(this.isCollective != isCollectiveParamName){
+			//actualChanges.put(isCollectiveParamName, isCollectiveParamName);
+			this.isCollective = isCollectiveParamName;
+		}
+		
+
+		return actualChanges;
+
 	}
 
 		
