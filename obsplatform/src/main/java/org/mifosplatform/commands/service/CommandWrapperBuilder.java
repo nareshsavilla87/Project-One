@@ -2624,6 +2624,14 @@ public class CommandWrapperBuilder {
 		this.href = "";
 		return this;
 	}
+	
+	public CommandWrapperBuilder updatePartner(final Long partnerId) {
+		this.actionName = "UPDATE";
+		this.entityName = "PARTNER";
+		this.entityId 	= partnerId;
+		this.href = "/partner/" +partnerId;
+		return this;
+	}
 
 	public CommandWrapperBuilder createPartnerAgreement(final Long partnerId) {
 		this.actionName = "CREATE";

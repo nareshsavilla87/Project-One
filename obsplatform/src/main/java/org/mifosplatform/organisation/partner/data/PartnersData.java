@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.billing.currency.data.CountryCurrencyData;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.organisation.monetary.data.ApplicationCurrencyConfigurationData;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -36,6 +37,7 @@ public class PartnersData {
 	private Collection<CodeValueData> officeTypes;
 	private ApplicationCurrencyConfigurationData currencyData;
 	private Collection<OfficeData> allowedParents;
+	private Collection<CountryCurrencyData> configCurrency;
 	private List<AgreementData> agreementData;
 	private String officeNumber;
 	private String contactName;
@@ -44,7 +46,8 @@ public class PartnersData {
 	
 	public PartnersData(List<String> countryData, List<String> statesData,
 			List<String> citiesData, Collection<CodeValueData> officeTypes,
-			ApplicationCurrencyConfigurationData currencyData, Collection<OfficeData> allowedParents) {
+			ApplicationCurrencyConfigurationData currencyData, Collection<OfficeData> allowedParents,
+			Collection<CountryCurrencyData> configCurrency) {
         
 		this.citiesData = citiesData;
 		this.currencyData = currencyData;
@@ -52,6 +55,7 @@ public class PartnersData {
 		this.officeTypes = officeTypes;
 		this.allowedParents = allowedParents;
 		this.statesData = statesData;
+		this.configCurrency = configCurrency;
 		
 		
 	}
@@ -199,10 +203,42 @@ public class PartnersData {
 		return agreementData;
 	}
 
+	public Collection<CountryCurrencyData> getConfigCurrency() {
+		return configCurrency;
+	}
+	
 	public void setAgreementData(List<AgreementData> agreementData) {
 		this.agreementData = agreementData;
 	}
 
+
+	public void setConfigCurrency(Collection<CountryCurrencyData> configCurrency) {
+		this.configCurrency = configCurrency;
+	}
+
+	public void setCountryData(List<String> countryData) {
+		this.countryData = countryData;
+	}
+
+	public void setStatesData(List<String> statesData) {
+		this.statesData = statesData;
+	}
+
+	public void setCitiesData(List<String> citiesData) {
+		this.citiesData = citiesData;
+	}
+
+	public void setOfficeTypes(Collection<CodeValueData> officeTypes) {
+		this.officeTypes = officeTypes;
+	}
+
+	public void setCurrencyData(ApplicationCurrencyConfigurationData currencyData) {
+		this.currencyData = currencyData;
+	}
+
+	public void setAllowedParents(Collection<OfficeData> allowedParents) {
+		this.allowedParents = allowedParents;
+	}
 	
 
 }
