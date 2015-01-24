@@ -1,6 +1,5 @@
 package org.mifosplatform.organisation.office.domain;
 
-import java.math.BigDecimal;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -11,8 +10,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
-import org.joda.time.LocalDate;
-import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -92,11 +89,11 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 	
 	public Map<String, Object> update(final JsonCommand command) {
 		final Map<String, Object> actualChanges = new ConcurrentHashMap<String, Object>(1);
-		final String organizationParamName = "organization";
-		if (command.isChangeInStringParameterNamed(organizationParamName,this.addressName)) {
+		final String organizationParamName = "officeNumber";
+		if (command.isChangeInStringParameterNamed(organizationParamName,this.officeNumber)) {
 			final String newValue = command.stringValueOfParameterNamed(organizationParamName);
 			actualChanges.put(organizationParamName, newValue);
-			this.addressName = StringUtils.defaultIfEmpty(newValue, null);
+			this.officeNumber = StringUtils.defaultIfEmpty(newValue, null);
 		}
 
 		final String phoneParamName = "phone";

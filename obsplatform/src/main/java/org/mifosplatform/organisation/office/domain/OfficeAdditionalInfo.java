@@ -103,6 +103,13 @@ public class OfficeAdditionalInfo extends AbstractPersistable<Long> {
 			actualChanges.put(currencyParamName, newValue);
 			this.partnerCurrency = StringUtils.defaultIfEmpty(newValue,null);
 		}
+		
+		final String contactNameParamName = "contactName";
+		if (command.isChangeInStringParameterNamed(contactNameParamName,this.contactName)) {
+			final String newValue = command.stringValueOfParameterNamed(contactNameParamName);
+			actualChanges.put(contactNameParamName, newValue);
+			this.contactName = StringUtils.defaultIfEmpty(newValue,null);
+		}
 
 		final char isCollectiveParamName = command.booleanPrimitiveValueOfParameterNamed("isCollective")?'Y':'N';
 		

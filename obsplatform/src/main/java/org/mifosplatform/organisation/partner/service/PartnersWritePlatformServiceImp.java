@@ -241,42 +241,46 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 		
 		try {
 			final AppUser currentUser = context.authenticatedUser();
-			this.apiJsonDeserializer.validateForCreate(command.json());
+			this.apiJsonDeserializer.validateForUpdate(command.json());
 			
 			 Long parentId = null;
             if (command.parameterExists("parentId")) {
                 parentId = command.longValueOfParameterNamed("parentId");
             }
 
-            final Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, partnerId);
+            
+            final OfficeAdditionalInfo officeAdditionalInfo=this.officeAdditionalInfoRepository.findOne(partnerId);
+            final Office office=this.officeRepository.findOne(officeAdditionalInfo.getOffice().getId());
+           // final Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, partnerId);
 
             final Map<String, Object> officeChanges = office.update(command);
 
-            if (officeChanges.containsKey("parentId")) {
+           /* if (officeChanges.containsKey("parentId")) {
                 final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, parentId);
                 office.update(parent);
-            }
+            }*/
             
            OfficeAddress officeAddress  = this.addressRepository.findOneWithPartnerId(office);
            OfficeAddress officeAddressChanges = (OfficeAddress) officeAddress.update(command);
            office.setOfficeAddress(officeAddressChanges);
            
-           OfficeAdditionalInfo officeAdditionalInfo = this.officeAdditionalInfoRepository.findoneByoffice(office);
+         //  OfficeAdditionalInfo officeAdditionalInfo = this.officeAdditionalInfoRepository.findoneByoffice(office);
            OfficeAdditionalInfo officeAdditionalInfoChanges = (OfficeAdditionalInfo) officeAdditionalInfo.update(command);
            office.setOfficeAdditionalInfo(officeAdditionalInfoChanges);
            
-           this.userApiResource.updateUser(partnerId, command.json());
+           Long  userId = command.longValueOfParameterNamed("userId");
+           this.userApiResource.updateUser(userId, command.json());
             
             if (!officeChanges.isEmpty()) {
                 this.officeRepository.saveAndFlush(office);
             }
-            
+	        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
+				       .withEntityId(officeAdditionalInfo.getId()).with(officeChanges).build();
 			
 		}  catch (final DataIntegrityViolationException e) {
 			handleDataIntegrityIssues(command, e);
 			return new CommandProcessingResult(Long.valueOf(-1l));
 		}
-		return null;
 	}
 
 }
