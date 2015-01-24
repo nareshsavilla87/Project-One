@@ -86,7 +86,6 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			final String password = command.stringValueOfParameterNamed("password");
 			final String repeatPassword = command.stringValueOfParameterNamed("repeatPassword");
 			final String currency = command.stringValueOfParameterNamed("currency");
-			final String email = command.stringValueOfParameterNamed("email");
 			final boolean isCollective= command.booleanPrimitiveValueOfParameterNamed("isCollective");
 			final String contactName = command.stringValueOfParameterNamed("contactName");
 			OfficeAddress address =OfficeAddress.fromJson(command,office);
@@ -99,16 +98,16 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			
 			//create user
 		    final String roleName = command.stringValueOfParameterNamed("roleName");
-			final String partnerName = command.stringValueOfParameterNamed("partnerName");
+			//final String email = command.stringValueOfParameterNamed("email");
 		    final String[]  roles= arrayOfRole(roleName);
 		    JSONObject json = new JSONObject();
 		    json.put("username", loginName);
 		    json.put("password", password);
 		    json.put("repeatPassword", repeatPassword);
-		    json.put("firstname",partnerName);
-		    json.put("lastname", partnerName);
+		    json.put("firstname",office.getName());
+		    json.put("lastname", office.getName());
 		    json.put("sendPasswordToEmail",Boolean.FALSE);
-		    json.put("email",email);
+		    json.put("email",address.getEmail());
 		    json.put("officeId", office.getId());
 		    json.put("roles", new JSONArray(roles));
 	        final String result=this.userApiResource.createUser(json.toString());
@@ -128,15 +127,15 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 
 	 private Office validateUserPriviledgeOnOfficeAndRetrieve(final AppUser currentUser, final Long officeId) {
 
-	        final Long userOfficeId = currentUser.getOffice().getId();
-	        final Office userOffice = this.officeRepository.findOne(userOfficeId);
-	        if (userOffice == null) { throw new OfficeNotFoundException(userOfficeId); }
+	        final Long currentUserOfficeId = currentUser.getOffice().getId();
+	        final Office currentUserOffice = this.officeRepository.findOne(currentUserOfficeId);
+	        if (currentUserOffice == null) { throw new OfficeNotFoundException(currentUserOfficeId); }
 
-	        if (userOffice.doesNotHaveAnOfficeInHierarchyWithId(officeId)) { throw new NoAuthorizationException(
+	        if (currentUserOffice.doesNotHaveAnOfficeInHierarchyWithId(officeId)) { throw new NoAuthorizationException(
 	                "User does not have sufficient priviledges to act on the provided office."); }
 
-	        Office officeToReturn = userOffice;
-	        if (!userOffice.identifiedBy(officeId)) {
+	        Office officeToReturn = currentUserOffice;
+	        if (!currentUserOffice.identifiedBy(officeId)) {
 	            officeToReturn = this.officeRepository.findOne(officeId);
 	            if (officeToReturn == null) { throw new OfficeNotFoundException(officeId); }
 	        }

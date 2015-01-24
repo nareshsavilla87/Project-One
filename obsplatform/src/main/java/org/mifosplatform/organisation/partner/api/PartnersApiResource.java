@@ -134,7 +134,7 @@ public class PartnersApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String createNewPartner(final String apiRequestBodyAsJson) {
 
-		context.authenticatedUser().validateHasReadPermission(resorceNameForPermission);
+		context.authenticatedUser();
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().createPartner().withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);

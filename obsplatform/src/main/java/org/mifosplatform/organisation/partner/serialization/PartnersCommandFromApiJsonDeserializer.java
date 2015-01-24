@@ -29,7 +29,7 @@ public class PartnersCommandFromApiJsonDeserializer {
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("partnerType", "partnerName","loginName","password","phone","email",
 			                            "city","state","country","currency","contactName","roleName","companyLogo","parentId","officeType","repeatPassword",
-			                            "isCollective","creditLimit","locale","officeNumber"));
+			                            "isCollective","creditLimit","locale","officeNumber","userId"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
