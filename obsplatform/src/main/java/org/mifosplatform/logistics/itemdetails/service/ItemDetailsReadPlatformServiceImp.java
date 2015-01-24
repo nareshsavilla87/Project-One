@@ -17,6 +17,7 @@ import org.mifosplatform.logistics.itemdetails.data.ItemDetailsData;
 import org.mifosplatform.logistics.itemdetails.data.ItemMasterIdData;
 import org.mifosplatform.logistics.itemdetails.data.ItemSerialNumberData;
 import org.mifosplatform.logistics.itemdetails.data.QuantityData;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -76,13 +77,17 @@ public class ItemDetailsReadPlatformServiceImp implements ItemDetailsReadPlatfor
 
 	public Page<ItemDetailsData> retriveAllItemDetails(SearchSqlQuery searchItemDetails) {	
 		// TODO Auto-generated method stub
-		context.authenticatedUser();
+		final AppUser user = this.context.authenticatedUser();
+		
+		final String hierarchy = user.getOffice().getHierarchy();
+        final String hierarchySearchString = hierarchy + "%";
+        
 		ItemDetailsMapper itemDetails = new ItemDetailsMapper();
 		
 		StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select ");
         sqlBuilder.append(itemDetails.schema());
-        sqlBuilder.append(" where item.office_id = office.id and item.is_deleted='N' ");
+        sqlBuilder.append(" where item.office_id = office.id and office.hierarchy like ? and item.is_deleted='N' ");
         
         String sqlSearch = searchItemDetails.getSqlSearch();
         String extraCriteria = "";
@@ -107,7 +112,7 @@ public class ItemDetailsReadPlatformServiceImp implements ItemDetailsReadPlatfor
         }
 
 		return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(),
-                new Object[] {}, itemDetails);
+                new Object[] {hierarchySearchString}, itemDetails);
 	}
 
 	/*

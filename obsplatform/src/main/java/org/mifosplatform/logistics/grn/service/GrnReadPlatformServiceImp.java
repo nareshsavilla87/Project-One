@@ -10,8 +10,10 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.itemdetails.data.InventoryGrnData;
 import org.mifosplatform.logistics.itemdetails.domain.InventoryGrnRepository;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -24,11 +26,14 @@ public class GrnReadPlatformServiceImp implements GrnReadPlatformService{
 	
 	private final JdbcTemplate jdbcTemplate;
 	private final InventoryGrnRepository inventoryGrnRepository;
+	private final PlatformSecurityContext context;
 	private final PaginationHelper<InventoryGrnData> paginationHelper = new PaginationHelper<InventoryGrnData>();
 	@Autowired
-	public GrnReadPlatformServiceImp(final TenantAwareRoutingDataSource dataSource,InventoryGrnRepository inventoryGrnRepository){
+	public GrnReadPlatformServiceImp(final TenantAwareRoutingDataSource dataSource,InventoryGrnRepository inventoryGrnRepository,
+			final PlatformSecurityContext context){
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.inventoryGrnRepository = inventoryGrnRepository;
+		this.context = context;
 		
 	}
 	
@@ -67,6 +72,10 @@ public class GrnReadPlatformServiceImp implements GrnReadPlatformService{
 	
 public Page<InventoryGrnData> retriveGrnDetails(SearchSqlQuery searchGrn) {
 		
+		final AppUser user = this.context.authenticatedUser();
+		final String hierarchy = user.getOffice().getHierarchy();
+	    final String hierarchySearchString = hierarchy + "%";
+	    
 		GrnMapperForDetails grn = new GrnMapperForDetails();
 		
 		String sql = "SQL_CALC_FOUND_ROWS g.id as id, f.name as officeName, g.purchase_date as purchaseDate, "
@@ -74,13 +83,14 @@ public Page<InventoryGrnData> retriveGrnDetails(SearchSqlQuery searchGrn) {
 				+ "g.received_quantity as receivedQuantity, g.po_no as purchaseNo, im.item_description as itemDescription, "
 				+ "s.supplier_description as supplierDescription "
 				+ "from b_grn g left outer join m_office f on g.office_id=f.id "
-				+ "left outer join b_item_master im on g.item_master_id = im.id left outer join b_supplier s on g.supplier_id=s.id ";
+				+ "left outer join b_item_master im on g.item_master_id = im.id "
+				+ "left outer join b_supplier s on g.supplier_id=s.id ";
 		
 		
 		StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select ");
         sqlBuilder.append(sql);
-        sqlBuilder.append(" where g.id IS NOT NULL ");
+        sqlBuilder.append(" where g.id IS NOT NULL and f.hierarchy like ? ");
         
         String sqlSearch = searchGrn.getSqlSearch();
         String extraCriteria = "";
@@ -109,7 +119,7 @@ public Page<InventoryGrnData> retriveGrnDetails(SearchSqlQuery searchGrn) {
         }
 	
 		return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(),
-	            new Object[] {}, grn);
+	            new Object[] {hierarchySearchString}, grn);
 }
 	
 	@Override
