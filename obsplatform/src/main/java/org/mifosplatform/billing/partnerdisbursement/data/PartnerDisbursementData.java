@@ -15,6 +15,7 @@ public class PartnerDisbursementData {
 	private Double chargeAmount;
 	private Double commissionAmount;
 	private Double netAmount;
+	private Double shareAmount;
 	private String percentage;
 	private Collection<MCodeData> sourceData;
 	private List<PartnerDisbursementData> patnerData;
@@ -26,22 +27,23 @@ public class PartnerDisbursementData {
 
 	public PartnerDisbursementData(Long id, String partnerName,
 			Date transDate, String source, String percentage,
-			Double chargeAmount, Double commissionAmount, Double netAmount) {
+			 Double commissionAmount, Double chargeAmount,Double netAmount,Double shareAmount) {
 		
-		this.id = id;
+		this.id=id;
 		this.partnerName = partnerName;
 		this.transDate = transDate;
 		this.source = source;
 		this.percentage = percentage;
-		this.chargeAmount = chargeAmount;
 		this.commissionAmount = commissionAmount;
+		this.chargeAmount = chargeAmount;
 		this.netAmount = netAmount;
+		this.shareAmount = shareAmount;
 		
 	}
 
 	public PartnerDisbursementData(Long id, String partnerName) {
 		
-		this.id = id;
+		this.setId(id);
 		this.partnerName = partnerName;
 	}
 
@@ -50,6 +52,8 @@ public class PartnerDisbursementData {
 		this.sourceData = sourceData;
 		this.patnerData = patnerData;
 	}
+	
+	
 
 	public String getSource() {
 		return source;
@@ -69,6 +73,14 @@ public class PartnerDisbursementData {
 
 	public String getPartnerName() {
 		return partnerName;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	public void setPartnerName(String partnerName) {
@@ -121,6 +133,14 @@ public class PartnerDisbursementData {
 
 	public List<PartnerDisbursementData> getPatnerData() {
 		return patnerData;
+	}
+
+	public Double getShareAmount() {
+		return shareAmount;
+	}
+
+	public void setShareAmount(Double shareAmount) {
+		this.shareAmount = shareAmount;
 	}
 	
 	

@@ -41,7 +41,7 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 	private String country;
 
 	@Column(name = "phone_number")
-	private String phone;
+	private String phoneNumber;
 	
 	@Column(name = "office_number")
 	private String officeNumber;
@@ -73,7 +73,7 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 	public static OfficeAddress fromJson(final JsonCommand command, Office office) {
 		
 		final String officeNumber = command.stringValueOfParameterNamed("officeNumber");
-		final String phone = command.stringValueOfParameterNamed("phone");
+		final String phoneNumber = command.stringValueOfParameterNamed("phoneNumber");
 		final String email = command.stringValueOfParameterNamed("email");
 		final String city = command.stringValueOfParameterNamed("city");
 		final String state = command.stringValueOfParameterNamed("state");
@@ -83,7 +83,7 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 			companyLogo  = command.stringValueOfParameterNamed("companyLogo");
 		}
 		
-		return new OfficeAddress(officeNumber,phone,email,city,state,country,companyLogo,office);
+		return new OfficeAddress(officeNumber,phoneNumber,email,city,state,country,companyLogo,office);
 	}
 	
 	
@@ -96,11 +96,11 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 			this.officeNumber = StringUtils.defaultIfEmpty(newValue, null);
 		}
 
-		final String phoneParamName = "phone";
-		if (command.isChangeInStringParameterNamed(phoneParamName,this.phone)) {
+		final String phoneParamName = "phoneNumber";
+		if (command.isChangeInStringParameterNamed(phoneParamName,this.phoneNumber)) {
 			final String newValue = command.stringValueOfParameterNamed(phoneParamName);
 			actualChanges.put(phoneParamName, newValue);
-			this.phone = StringUtils.defaultIfEmpty(newValue,null);
+			this.phoneNumber = StringUtils.defaultIfEmpty(newValue,null);
 		}
 
 		final String emailParamName = "email";
@@ -144,11 +144,11 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 
 	}
 
-	public OfficeAddress(final String officeNumber,final String phone, final String email,final String city, 
+	public OfficeAddress(final String officeNumber,final String phoneNumber, final String email,final String city, 
 			final String state, final String country, final String companyLogo,final Office office) {
 
 		this.officeNumber = officeNumber;
-		this.phone = phone;
+		this.phoneNumber = phoneNumber;
 		this.email = email;
 		this.city = city;
 		this.state = state;
@@ -176,8 +176,8 @@ public class OfficeAddress extends AbstractPersistable<Long> {
 	}
 
 	
-	public String getPhone() {
-		return phone;
+	public String getPhoneNumber() {
+		return phoneNumber;
 	}
 	
 	public String getOfficeNumber() {

@@ -20,6 +20,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.billing.currency.data.CountryCurrencyData;
+import org.mifosplatform.billing.currency.service.CountryCurrencyReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -34,7 +36,6 @@ import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
-import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.monetary.data.ApplicationCurrencyConfigurationData;
 import org.mifosplatform.organisation.monetary.service.OrganisationCurrencyReadPlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -72,7 +73,7 @@ public class PartnersApiResource {
    private final PartnersReadPlatformService readPlatformService;
    private final OfficeReadPlatformService officereadPlatformService;
    private final OrganisationCurrencyReadPlatformService currencyReadPlatformService;
-   private final MCodeReadPlatformService mCodeReadPlatformService;
+   private final CountryCurrencyReadPlatformService countryCurrencyReadPlatformService;
    private final CodeValueReadPlatformService codeValueReadPlatformService;
    private final PartnersWritePlatformService partnersWritePlatformService;
 	
@@ -80,10 +81,10 @@ public class PartnersApiResource {
    public PartnersApiResource(final PlatformSecurityContext context,final ToApiJsonSerializer<PartnersData> toApiJsonSerializer,
 			final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
 			final AddressReadPlatformService addressReadPlatformService,final PartnersReadPlatformService readPlatformService,
-			final OrganisationCurrencyReadPlatformService currencyReadPlatformService, final MCodeReadPlatformService mCodeReadPlatformService,
-			final OfficeReadPlatformService officereadPlatformService,final CodeValueReadPlatformService codeValueReadPlatformService,
-			final PartnersWritePlatformService partnersWritePlatformService){
-		
+			final OrganisationCurrencyReadPlatformService currencyReadPlatformService,final OfficeReadPlatformService officereadPlatformService,
+			final CodeValueReadPlatformService codeValueReadPlatformService,final PartnersWritePlatformService partnersWritePlatformService,
+	        final CountryCurrencyReadPlatformService countryCurrencyReadPlatformService){
+	  
             this.context = context;
             this.toApiJsonSerializer = toApiJsonSerializer;
 	        this.apiRequestParameterHelper = apiRequestParameterHelper;
@@ -91,10 +92,10 @@ public class PartnersApiResource {
 	        this.addressReadPlatformService=addressReadPlatformService;
 	        this.readPlatformService = readPlatformService;
 	        this.currencyReadPlatformService = currencyReadPlatformService;
-	        this.mCodeReadPlatformService = mCodeReadPlatformService;
 	        this.officereadPlatformService = officereadPlatformService;
 	        this.codeValueReadPlatformService = codeValueReadPlatformService;
 	        this.partnersWritePlatformService = partnersWritePlatformService;
+	        this.countryCurrencyReadPlatformService = countryCurrencyReadPlatformService;
 
 	}
   
@@ -121,8 +122,9 @@ public class PartnersApiResource {
 		final List<String> citiesData = this.addressReadPlatformService.retrieveCityDetails();
 	    final Collection<CodeValueData> officeTypes=this.codeValueReadPlatformService.retrieveCodeValuesByCode(OFFICE_TYPE);
 		final ApplicationCurrencyConfigurationData currencyData = this.currencyReadPlatformService.retrieveCurrencyConfiguration();
+		final Collection<CountryCurrencyData> configCurrency = this.countryCurrencyReadPlatformService.retrieveAllCurrencyConfigurationDetails();
 		final Collection<OfficeData> allowedParents = this.officereadPlatformService.retrieveAllOfficesForDropdown();
-		return new PartnersData(countryData,statesData,citiesData,officeTypes,currencyData,allowedParents);
+		return new PartnersData(countryData,statesData,citiesData,officeTypes,currencyData,allowedParents,configCurrency);
 	}
 	
 	
@@ -141,23 +143,6 @@ public class PartnersApiResource {
 		return this.toApiJsonSerializer.serialize(result);
 	}
 	
-	/**
-	 * @param apiRequestBodyAsJson
-	 * @return
-	 */
-	@PUT
-	@Path("{partnerId}")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String updateDiscount(
-			@PathParam("partnerId") final Long partnerId,
-			final String apiRequestBodyAsJson) {
-
-		context.authenticatedUser();
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePartner(partnerId).withJson(apiRequestBodyAsJson).build();
-		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
-		return this.toApiJsonSerializer.serialize(result);
-	}
 
     /**
      * @param uriInfo
@@ -187,10 +172,36 @@ public class PartnersApiResource {
 
         context.authenticatedUser().validateHasReadPermission(resorceNameForPermission);
         final PartnersData partner = this.readPlatformService.retrieveSinglePartnerDetails(partnerId);
-        //final List<AgreementData> agreementData = this.readPlatformService.retrieveAgreementData(partnerId);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        if(settings.isTemplate()){
+        	partner.setCountryData(this.addressReadPlatformService.retrieveCountryDetails());
+        	partner.setCitiesData(this.addressReadPlatformService.retrieveCityDetails());
+        	partner.setStatesData(this.addressReadPlatformService.retrieveStateDetails());
+    	    partner.setOfficeTypes(this.codeValueReadPlatformService.retrieveCodeValuesByCode(OFFICE_TYPE));
+    	    partner.setCurrencyData(this.currencyReadPlatformService.retrieveCurrencyConfiguration());
+    	    partner.setAllowedParents(this.officereadPlatformService.retrieveAllOfficesForDropdown());
+        	partner.setConfigCurrency(this.countryCurrencyReadPlatformService.retrieveAllCurrencyConfigurationDetails());
+        }
         return this.toApiJsonSerializer.serialize(settings, partner, RESPONSE_DATA_PARAMETERS);
     }
+    
+    
+    /**
+	 * @param apiRequestBodyAsJson
+	 * @return
+	 */
+	@PUT
+	@Path("{partnerId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String updatePartner(@PathParam("partnerId") final Long partnerId,final String apiRequestBodyAsJson) {
+
+		context.authenticatedUser();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePartner(partnerId).withJson(apiRequestBodyAsJson).build();
+		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+	}
+    
     
     
     /**

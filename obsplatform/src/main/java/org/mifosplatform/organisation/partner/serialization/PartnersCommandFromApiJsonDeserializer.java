@@ -27,9 +27,9 @@ public class PartnersCommandFromApiJsonDeserializer {
 	/*
 	 * The parameters supported for this command.
 	 */
-	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("partnerType", "partnerName","loginName","password","phone","email",
+	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("partnerType", "partnerName","loginName","password","phoneNumber","email",
 			                            "city","state","country","currency","contactName","roleName","companyLogo","parentId","officeType","repeatPassword",
-			                            "isCollective","creditLimit","locale","officeNumber","userId"));
+			                            "isCollective","creditLimit","locale","officeNumber","userId","roles"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
@@ -79,8 +79,8 @@ public class PartnersCommandFromApiJsonDeserializer {
        /* final String contactName = fromApiJsonHelper.extractStringNamed("contactName", element);
         baseDataValidator.reset().parameter("contactName").value(contactName).notBlank().notExceedingLengthOf(100);*/
         
-        final String phone = fromApiJsonHelper.extractStringNamed("phone", element);
-        baseDataValidator.reset().parameter("phone").value(phone).notBlank().notExceedingLengthOf(30);
+        final String phone = fromApiJsonHelper.extractStringNamed("phoneNumber", element);
+        baseDataValidator.reset().parameter("phoneNumber").value(phone).notBlank().notExceedingLengthOf(30);
         
         final String email = fromApiJsonHelper.extractStringNamed("email", element);
         baseDataValidator.reset().parameter("email").value(email).notBlank();
@@ -139,8 +139,8 @@ public class PartnersCommandFromApiJsonDeserializer {
        /* final String contactName = fromApiJsonHelper.extractStringNamed("contactName", element);
         baseDataValidator.reset().parameter("contactName").value(contactName).notBlank().notExceedingLengthOf(100);*/
         
-        final String phone = fromApiJsonHelper.extractStringNamed("phone", element);
-        baseDataValidator.reset().parameter("phone").value(phone).notBlank().notExceedingLengthOf(30);
+        final String phoneNumber = fromApiJsonHelper.extractStringNamed("phoneNumber", element);
+        baseDataValidator.reset().parameter("phone").value(phoneNumber).notBlank().notExceedingLengthOf(30);
         
         final String email = fromApiJsonHelper.extractStringNamed("email", element);
         baseDataValidator.reset().parameter("email").value(email).notBlank();
