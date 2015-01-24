@@ -11,6 +11,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -140,7 +141,23 @@ public class PartnersApiResource {
 		return this.toApiJsonSerializer.serialize(result);
 	}
 	
-	
+	/**
+	 * @param apiRequestBodyAsJson
+	 * @return
+	 */
+	@PUT
+	@Path("{partnerId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String updateDiscount(
+			@PathParam("partnerId") final Long partnerId,
+			final String apiRequestBodyAsJson) {
+
+		context.authenticatedUser();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePartner(partnerId).withJson(apiRequestBodyAsJson).build();
+		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+	}
 
     /**
      * @param uriInfo

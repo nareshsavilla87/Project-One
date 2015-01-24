@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
@@ -20,6 +21,7 @@ import org.mifosplatform.infrastructure.security.exception.NoAuthorizationExcept
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
+import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfoRepository;
 import org.mifosplatform.organisation.office.domain.OfficeAddress;
 import org.mifosplatform.organisation.office.domain.OfficeAddressRepository;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
@@ -51,18 +53,21 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
     private final RoleRepository roleRepository;
     private final UsersApiResource userApiResource;
     private final OfficeAddressRepository addressRepository;
+    private final OfficeAdditionalInfoRepository officeAdditionalInfoRepository;
 
 	@Autowired
 	public PartnersWritePlatformServiceImp(final PlatformSecurityContext context,
 			final PartnersCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final OfficeRepository officeRepository,final RoleRepository roleRepository,
-			final UsersApiResource userApiResource,final OfficeAddressRepository addressRepository) {
+			final UsersApiResource userApiResource,final OfficeAddressRepository addressRepository,
+			final OfficeAdditionalInfoRepository officeAdditionalInfoRepository) {
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.officeRepository = officeRepository;
 		this.roleRepository = roleRepository;
 		this.userApiResource = userApiResource;
 		this.addressRepository = addressRepository;
+		this.officeAdditionalInfoRepository = officeAdditionalInfoRepository;
 
 	}
 
@@ -226,6 +231,55 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			new File(imageUploadLocation).mkdirs();
 		}
 		return imageUploadLocation;
+	}
+
+
+	@Transactional
+	@Override
+	public CommandProcessingResult updatePartner(final JsonCommand command,final Long partnerId) {
+		
+		try {
+			final AppUser currentUser = context.authenticatedUser();
+			this.apiJsonDeserializer.validateForUpdate(command.json());
+			
+			 Long parentId = null;
+            if (command.parameterExists("parentId")) {
+                parentId = command.longValueOfParameterNamed("parentId");
+            }
+
+            
+            final OfficeAdditionalInfo officeAdditionalInfo=this.officeAdditionalInfoRepository.findOne(partnerId);
+            final Office office=this.officeRepository.findOne(officeAdditionalInfo.getOffice().getId());
+           // final Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, partnerId);
+
+            final Map<String, Object> officeChanges = office.update(command);
+
+           /* if (officeChanges.containsKey("parentId")) {
+                final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, parentId);
+                office.update(parent);
+            }*/
+            
+           OfficeAddress officeAddress  = this.addressRepository.findOneWithPartnerId(office);
+           OfficeAddress officeAddressChanges = (OfficeAddress) officeAddress.update(command);
+           office.setOfficeAddress(officeAddressChanges);
+           
+         //  OfficeAdditionalInfo officeAdditionalInfo = this.officeAdditionalInfoRepository.findoneByoffice(office);
+           OfficeAdditionalInfo officeAdditionalInfoChanges = (OfficeAdditionalInfo) officeAdditionalInfo.update(command);
+           office.setOfficeAdditionalInfo(officeAdditionalInfoChanges);
+           
+           Long  userId = command.longValueOfParameterNamed("userId");
+           this.userApiResource.updateUser(userId, command.json());
+            
+            if (!officeChanges.isEmpty()) {
+                this.officeRepository.saveAndFlush(office);
+            }
+	        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
+				       .withEntityId(officeAdditionalInfo.getId()).with(officeChanges).build();
+			
+		}  catch (final DataIntegrityViolationException e) {
+			handleDataIntegrityIssues(command, e);
+			return new CommandProcessingResult(Long.valueOf(-1l));
+		}
 	}
 
 }
