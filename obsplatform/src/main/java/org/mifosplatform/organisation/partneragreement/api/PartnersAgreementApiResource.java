@@ -112,7 +112,7 @@ public class PartnersAgreementApiResource {
 	}
 
 	@GET
-	@Path("{partnerId}")
+	@Path("{partnerId}")//officeId
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrievePartnerAgreementData(	@PathParam("partnerId") final Long partnerId,@Context final UriInfo uriInfo) {

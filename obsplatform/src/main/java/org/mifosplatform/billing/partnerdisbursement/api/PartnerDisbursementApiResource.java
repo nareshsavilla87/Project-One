@@ -38,25 +38,20 @@ public class PartnerDisbursementApiResource {
 	/**
 	 * The set of parameters that are supported in response for {@link CodeData}
 	 */
-	private static final Set<String> RESPONSE_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "source", "partnerName", "transDate",
+	private static final Set<String> RESPONSE_PARAMETERS = new HashSet<String>(Arrays.asList("id", "source", "partnerName", "transDate",
 					"chargeAmount", "commissionAmount", "netAmount", "percentage"));
 
 	private static String resourceNameForPermissions = "PARTNERDISBURSEMENT";
 	public static final String SOURCE_TYPE = "Source Category";
-	
-	/** The Object is used for Authentication Checking. */
-	private PlatformSecurityContext context;
-	
-	/** The Below Objects are used for Program. */
-	private PartnerDisbursementReadPlatformService readPlatformService;
-	private DefaultToApiJsonSerializer<PartnerDisbursementData> toApiJsonSerializer;
-	private ApiRequestParameterHelper apiRequestParameterHelper;
+
+	private final PlatformSecurityContext context;
+	private final PartnerDisbursementReadPlatformService readPlatformService;
+	private final DefaultToApiJsonSerializer<PartnerDisbursementData> toApiJsonSerializer;
+	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final MCodeReadPlatformService mCodeReadPlatformService;
 
 	@Autowired
-	public PartnerDisbursementApiResource(
-			final PlatformSecurityContext context,
+	public PartnerDisbursementApiResource(final PlatformSecurityContext context,
 			final PartnerDisbursementReadPlatformService readPlatformService,
 			final DefaultToApiJsonSerializer<PartnerDisbursementData> toApiJsonSerializer,
 			final ApiRequestParameterHelper apiRequestParameterHelper,
@@ -73,16 +68,14 @@ public class PartnerDisbursementApiResource {
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveVoucherGroups(@Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch,
+	public String retrieveSettlementData(@Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch,
 			@QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset,
 			@QueryParam("sourceType") final String sourceType, @QueryParam("partnerType") final String partnerType) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final SearchSqlQuery search = SearchSqlQuery.forSearch(sqlSearch, offset,limit );
 		final Page<PartnerDisbursementData> patnerDisbursementData = this.readPlatformService.getAllData(search, sourceType, partnerType);
-		
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		
 		return this.toApiJsonSerializer.serialize(patnerDisbursementData);
 	}
 	
@@ -90,7 +83,7 @@ public class PartnerDisbursementApiResource {
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveTicketMasterTemplateData(@Context final UriInfo uriInfo) {
+	public String retrieveSettlemenTemplatetData(@Context final UriInfo uriInfo) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());

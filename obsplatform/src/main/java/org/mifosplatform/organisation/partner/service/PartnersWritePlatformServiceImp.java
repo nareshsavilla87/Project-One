@@ -103,7 +103,6 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			
 			//create user
 		    final String roleName = command.stringValueOfParameterNamed("roleName");
-			//final String email = command.stringValueOfParameterNamed("email");
 		    final String[]  roles= arrayOfRole(roleName);
 		    JSONObject json = new JSONObject();
 		    json.put("username", loginName);
@@ -242,42 +241,61 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			final AppUser currentUser = context.authenticatedUser();
 			this.apiJsonDeserializer.validateForUpdate(command.json());
 			
-			 Long parentId = null;
+		    Long parentId = null;
             if (command.parameterExists("parentId")) {
                 parentId = command.longValueOfParameterNamed("parentId");
             }
 
-            
             final OfficeAdditionalInfo officeAdditionalInfo=this.officeAdditionalInfoRepository.findOne(partnerId);
-            final Office office=this.officeRepository.findOne(officeAdditionalInfo.getOffice().getId());
-           // final Office office = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, partnerId);
-
-            final Map<String, Object> officeChanges = office.update(command);
-
-           /* if (officeChanges.containsKey("parentId")) {
-                final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, parentId);
-                office.update(parent);
-            }*/
-            
-           OfficeAddress officeAddress  = this.addressRepository.findOneWithPartnerId(office);
-           OfficeAddress officeAddressChanges = (OfficeAddress) officeAddress.update(command);
-           office.setOfficeAddress(officeAddressChanges);
-           
-         //  OfficeAdditionalInfo officeAdditionalInfo = this.officeAdditionalInfoRepository.findoneByoffice(office);
-           OfficeAdditionalInfo officeAdditionalInfoChanges = (OfficeAdditionalInfo) officeAdditionalInfo.update(command);
-           office.setOfficeAdditionalInfo(officeAdditionalInfoChanges);
-           
-           Long  userId = command.longValueOfParameterNamed("userId");
-           this.userApiResource.updateUser(userId, command.json());
-            
-            if (!officeChanges.isEmpty()) {
-                this.officeRepository.saveAndFlush(office);
+            final Office office = this.validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeAdditionalInfo.getOffice().getId());
+            if(office==null){
+            	throw new OfficeNotFoundException(partnerId);
             }
+            //update office
+            final Map<String, Object> officeChanges = office.update(command);
+            if (officeChanges.containsKey("parentId")) {
+                final Office parent =this.validateUserPriviledgeOnOfficeAndRetrieve(currentUser, parentId);
+                office.update(parent);
+            }
+            
+            //update officeAddress
+           final  OfficeAddress officeAddress  = this.addressRepository.findOneWithPartnerId(office);
+           final Map<String, Object> addressChanges = officeAddress.update(command);
+           if(!addressChanges.isEmpty()){
+           office.setOfficeAddress(officeAddress);
+		   }
+           
+           //update additonal info
+           final Map<String, Object> infoChanges  = officeAdditionalInfo.update(command);
+           office.setOfficeAdditionalInfo(officeAdditionalInfo);
+           if(!infoChanges.isEmpty()){
+        	   office.setOfficeAdditionalInfo(officeAdditionalInfo);
+           }
+           
+           this.officeRepository.saveAndFlush(office);
+           
+           //update user
+           Long  userId = command.longValueOfParameterNamed("userId");
+           final String loginName = command.stringValueOfParameterNamed("loginName");
+           final String[] roles = command.arrayValueOfParameterNamed("roles");
+            JSONObject json = new JSONObject();
+		    json.put("username", loginName);
+		    json.put("firstname",office.getName());
+		    json.put("lastname", office.getName());
+		    json.put("sendPasswordToEmail",Boolean.FALSE);
+		    json.put("email",officeAddress.getEmail());
+		    json.put("officeId", office.getId());
+		    json.put("roles", roles);
+            this.userApiResource.updateUser(userId, json.toString());
+            
 	        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-				       .withEntityId(officeAdditionalInfo.getId()).with(officeChanges).build();
+				       .withEntityId(officeAdditionalInfo.getId()).withOfficeId(office.getId()).with(officeChanges).build();
 			
 		}  catch (final DataIntegrityViolationException e) {
 			handleDataIntegrityIssues(command, e);
+			return new CommandProcessingResult(Long.valueOf(-1l));
+		} catch( JSONException e){
+			e.printStackTrace();
 			return new CommandProcessingResult(Long.valueOf(-1l));
 		}
 	}
