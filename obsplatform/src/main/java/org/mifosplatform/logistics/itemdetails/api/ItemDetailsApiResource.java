@@ -36,8 +36,11 @@ import org.mifosplatform.logistics.itemdetails.data.ItemDetailsData;
 import org.mifosplatform.logistics.itemdetails.data.ItemSerialNumberData;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetailsAllocation;
 import org.mifosplatform.logistics.itemdetails.service.ItemDetailsReadPlatformService;
+import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleReadPlatformService;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
+import org.mifosplatform.organisation.office.data.OfficeData;
+import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -68,6 +71,8 @@ public class ItemDetailsApiResource {
 	private final DefaultToApiJsonSerializer<ItemDetailsAllocation> toApiJsonSerializerForItemAllocation;
 	private final MCodeReadPlatformService mCodeReadPlatformService;
 	private final DefaultToApiJsonSerializer<ItemData> toApiJsonSerializerForItemData;
+	private final OfficeReadPlatformService officeReadPlatformService;
+	private final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService;
 	
     
 	@Autowired
@@ -77,7 +82,8 @@ public class ItemDetailsApiResource {
 			final DefaultToApiJsonSerializer<ItemDetailsAllocation> toApiJsonSerializerForItemAllocation,
 			final DefaultToApiJsonSerializer<ItemSerialNumberData> toApiJsonSerializerForAllocationHardware,
 			final ItemDetailsReadPlatformService itemDetailsReadPlatformService,
-			final DefaultToApiJsonSerializer<ItemData> toApiJsonSerializerForItemData) {
+			final DefaultToApiJsonSerializer<ItemData> toApiJsonSerializerForItemData,final OfficeReadPlatformService officeReadPlatformService,
+			final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService) {
 		
 		this.context=context;
 		this.mCodeReadPlatformService=mCodeReadPlatformService;
@@ -89,6 +95,8 @@ public class ItemDetailsApiResource {
 	    this.toApiJsonSerializerForItemAllocation = toApiJsonSerializerForItemAllocation;
 	    this.toApiJsonSerializerForAllocationHardware = toApiJsonSerializerForAllocationHardware;
 	    this.toApiJsonSerializerForItemData = toApiJsonSerializerForItemData;
+	    this.officeReadPlatformService = officeReadPlatformService;
+	    this.oneTimeSaleReadPlatformService = oneTimeSaleReadPlatformService;
 	}
 
 	/*
@@ -129,11 +137,12 @@ public class ItemDetailsApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retriveItemDetails(@Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch, 
-			         @QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset) {
+			         @QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset,
+			         @QueryParam("officeName") final String officeName, @QueryParam("itemCode") final String itemCode) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final SearchSqlQuery searchItemDetails =SearchSqlQuery.forSearch(sqlSearch, offset,limit );
-		final Page<ItemDetailsData> clientDatafinal = this.itemDetailsReadPlatformService.retriveAllItemDetails(searchItemDetails);
+		final Page<ItemDetailsData> clientDatafinal = this.itemDetailsReadPlatformService.retriveAllItemDetails(searchItemDetails,officeName,itemCode);
 		return this.toApiJsonSerializerForItem.serialize(clientDatafinal);
 	}
 
@@ -188,7 +197,6 @@ public class ItemDetailsApiResource {
 		return this.toApiJsonSerializerForItem.serialize(settings,itemDetailsData,RESPONSE_DATA_GRN_IDS_PARAMETERS);
 	}
 	
-	
 	@PUT
 	@Path("deallocate/{allocationId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -235,6 +243,20 @@ public class ItemDetailsApiResource {
 			
 		
 		return this.toApiJsonSerializerForItemData.serialize(settings, itemMasterData, RESPONSE_ITEM_MASTER_DETAILS_PARAMETERS);
+	}
+	
+	@GET
+	@Path("template/dropdown")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String retriveDropdownValues(@Context final UriInfo uriInfo){
+		
+		context.authenticatedUser().validateHasReadPermission(resourceNameForGrnPermissions);
+		final Collection<OfficeData> officeData = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+		final Collection<ItemData> itemMasterData = this.oneTimeSaleReadPlatformService.retrieveItemData();
+		ItemDetailsData itemDetailsData=new ItemDetailsData(officeData,itemMasterData);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializerForItem.serialize(settings,itemDetailsData,RESPONSE_DATA_GRN_IDS_PARAMETERS);
 	}
 
 }
