@@ -118,7 +118,7 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 	        JSONObject resultJson = new JSONObject(result);
 	        final String userId=resultJson.getString("resourceId");
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-					       .withEntityId(additionalInfo.getId()).withResourceIdAsString(userId).build();
+					       .withEntityId(additionalInfo.getId()).withOfficeId(office.getId()).withResourceIdAsString(userId).build();
 		} catch (final DataIntegrityViolationException e) {
 			handleDataIntegrityIssues(command, e);
 			return new CommandProcessingResult(Long.valueOf(-1l));

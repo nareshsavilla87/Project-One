@@ -64,7 +64,7 @@ public class RadiusAPiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String createNas(final String apiRequestBodyAsJson) {
 
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		context.authenticatedUser();
 		final String nasData = this.radiusReadPlatformService.createNas(apiRequestBodyAsJson);
 		return nasData;
 	}
@@ -121,7 +121,7 @@ public class RadiusAPiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String createRadService(final String apiRequestBodyAsJson) {
 
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		context.authenticatedUser();
 		final String radServiceData = this.radiusReadPlatformService.createRadService(apiRequestBodyAsJson);
 		return radServiceData;
 	}
