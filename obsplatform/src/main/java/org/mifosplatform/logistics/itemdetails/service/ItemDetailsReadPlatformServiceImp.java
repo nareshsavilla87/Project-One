@@ -62,12 +62,14 @@ public class ItemDetailsReadPlatformServiceImp implements ItemDetailsReadPlatfor
 			
 			String sql = "SQL_CALC_FOUND_ROWS item.id as id, office.name as officeName,item.item_master_id as itemMasterId, "
 					+ "item.serial_no as serialNumber, item.grn_id as grnId, "
-					+ "(select supplier_description from b_supplier where id = (select supplier_id from b_grn where b_grn.id=item.grn_id)) as supplier,"
+					+ " s.supplier_description as supplier, "
 					+ "item.provisioning_serialno as provisioningSerialNumber, item.quality as quality, item.status as status, "
 					+ "item.warranty as warranty, item.remarks as remarks, master.item_description as itemDescription, "
 					+ "item.client_id as clientId, "
 					+ "(select account_no from m_client where id = client_id) as accountNumber "
-					+ "from b_item_detail item left outer join b_item_master master on item.item_master_id = master.id left outer join m_office office on item.office_id=office.id ";
+					+ "from b_item_detail item left outer join b_item_master master on item.item_master_id = master.id "
+					+ "left outer join m_office office on item.office_id=office.id "
+					+ " left join  b_grn g on ( g.id=item.grn_id ) left join b_supplier s on (s.id = g.supplier_id ) ";
 			
 					
 			return sql;
@@ -75,7 +77,7 @@ public class ItemDetailsReadPlatformServiceImp implements ItemDetailsReadPlatfor
 		
 	}
 
-	public Page<ItemDetailsData> retriveAllItemDetails(SearchSqlQuery searchItemDetails) {	
+	public Page<ItemDetailsData> retriveAllItemDetails(SearchSqlQuery searchItemDetails,String officeName,String itemCode) {	
 		// TODO Auto-generated method stub
 		final AppUser user = this.context.authenticatedUser();
 		
@@ -99,8 +101,17 @@ public class ItemDetailsReadPlatformServiceImp implements ItemDetailsReadPlatfor
 	    			+ " item.quality like '%"+sqlSearch+"%' OR"
 	    			+ " item.status like '%"+sqlSearch+"%' )";
 	    }
-	   
-	 
+	    
+	    if(officeName != null){
+	    	officeName = officeName.trim();
+	    	extraCriteria += " and office.name like '%"+officeName+"%' ";
+	    }
+	    
+	    if(itemCode != null){
+	    	itemCode = itemCode.trim();
+	    	extraCriteria += " and master.item_description like '%"+itemCode+"%' ";
+	    }
+	    
             sqlBuilder.append(extraCriteria);
        
         if (searchItemDetails.isLimited()) {

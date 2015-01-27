@@ -20,7 +20,7 @@ public interface ItemDetailsReadPlatformService {
 
 	List<String> retriveSerialNumbers();
 
-	public Page<ItemDetailsData> retriveAllItemDetails(SearchSqlQuery searchItemDetails);
+	public Page<ItemDetailsData> retriveAllItemDetails(SearchSqlQuery searchItemDetails,String officeName,String itemCode);
 
 	public List<String> retriveSerialNumbersOnKeyStroke(Long oneTimeSaleId,String query, Long officeId);
 
