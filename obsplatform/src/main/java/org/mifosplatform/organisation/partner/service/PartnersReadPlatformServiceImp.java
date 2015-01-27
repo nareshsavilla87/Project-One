@@ -103,5 +103,28 @@ public PartnersData retrieveSinglePartnerDetails(final Long partnerId) {
 	}
 }
 
-	
+	@Override
+	public PartnersData retrievePartnerImage(Long userId) {
+
+		try {
+			context.authenticatedUser();
+			final PartnerImage mapper = new PartnerImage();
+			final String sql = "select ad.company_logo as imageKey from b_office_address ad inner join m_appuser au on ad.office_id=au.office_id where au.id= ?";
+			return this.jdbcTemplate.queryForObject(sql, mapper,new Object[] { userId });
+		} catch (final EmptyResultDataAccessException accessException) {
+			return null;
+		}
+	}
+
+	private static class PartnerImage implements RowMapper<PartnersData> {
+
+		@Override
+		public PartnersData mapRow(ResultSet rs, int rowNum) throws SQLException {
+			
+			final String imageKey =rs.getString("imageKey");
+			
+			return new PartnersData(imageKey);		
+			}
+
+	}
 }
