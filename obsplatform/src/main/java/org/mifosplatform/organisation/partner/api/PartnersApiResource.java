@@ -20,6 +20,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.billing.currency.data.CountryCurrencyData;
 import org.mifosplatform.billing.currency.service.CountryCurrencyReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -34,6 +35,8 @@ import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
+import org.mifosplatform.infrastructure.core.service.FileUtils.IMAGE_DATA_URI_SUFFIX;
+import org.mifosplatform.infrastructure.core.service.FileUtils.IMAGE_FILE_EXTENSION;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
 import org.mifosplatform.organisation.monetary.data.ApplicationCurrencyConfigurationData;
@@ -47,6 +50,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.lowagie.text.pdf.codec.Base64;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
@@ -61,7 +65,7 @@ import com.sun.jersey.multipart.FormDataParam;
 public class PartnersApiResource {
 
   private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(""));
-  private final String resorceNameForPermission = "PARTNERS";
+  private final String resorceNameForPermission = "PARTNER";
   public static final String OFFICE_TYPE="Office Type";
   public static final String PARTNER_TYPE="Partner Type";
 	
@@ -76,6 +80,7 @@ public class PartnersApiResource {
    private final CountryCurrencyReadPlatformService countryCurrencyReadPlatformService;
    private final CodeValueReadPlatformService codeValueReadPlatformService;
    private final PartnersWritePlatformService partnersWritePlatformService;
+ 
 	
   @Autowired	
    public PartnersApiResource(final PlatformSecurityContext context,final ToApiJsonSerializer<PartnersData> toApiJsonSerializer,
@@ -96,6 +101,7 @@ public class PartnersApiResource {
 	        this.codeValueReadPlatformService = codeValueReadPlatformService;
 	        this.partnersWritePlatformService = partnersWritePlatformService;
 	        this.countryCurrencyReadPlatformService = countryCurrencyReadPlatformService;
+	      
 
 	}
   
@@ -240,5 +246,34 @@ public class PartnersApiResource {
 
 		return this.toApiJsonSerializer.serialize(result);
 	}
+	
+	   /**
+	 * Returns a base 64 encoded partner image Data URI
+	 */
+	@GET
+	@Path("{userId}/images")
+	@Consumes({ MediaType.TEXT_PLAIN, MediaType.TEXT_HTML,MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.TEXT_PLAIN })
+	public String retrievePartnerImage(@PathParam("userId") final Long userId) {
 
+		context.authenticatedUser().validateHasReadPermission(resorceNameForPermission);
+
+		final PartnersData imageData = this.readPlatformService.retrievePartnerImage(userId);
+
+		if (imageData.imageKeyExists()) {
+		// TODO: Need a better way of determining image type
+		String imageDataURISuffix = IMAGE_DATA_URI_SUFFIX.JPEG.getValue();
+		if (StringUtils.endsWith(imageData.getImageKey(),IMAGE_FILE_EXTENSION.GIF.getValue())) {
+			imageDataURISuffix = IMAGE_DATA_URI_SUFFIX.GIF.getValue();
+		} else if (StringUtils.endsWith(imageData.getImageKey(),IMAGE_FILE_EXTENSION.PNG.getValue())) {
+			imageDataURISuffix = IMAGE_DATA_URI_SUFFIX.PNG.getValue();
+		}
+		String ImageAsBase64Text = imageDataURISuffix + Base64.encodeFromFile(imageData.getImageKey());
+
+		return ImageAsBase64Text;
+		} else {
+			return null;
+		}
+
+	}
 }
