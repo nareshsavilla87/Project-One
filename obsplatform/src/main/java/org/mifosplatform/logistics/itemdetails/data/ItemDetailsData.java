@@ -2,7 +2,9 @@ package org.mifosplatform.logistics.itemdetails.data;
 
 import java.util.Collection;
 
+import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.organisation.office.data.OfficeData;
 
 
 public class ItemDetailsData {
@@ -25,6 +27,8 @@ public class ItemDetailsData {
 	private final String supplier;
 	private final String officeName;
 	private final String accountNumber;
+	private Collection<OfficeData> officeData;
+	private Collection<ItemData> itemMasterData;
 
 	public ItemDetailsData(Collection<InventoryGrnData> inventoryGrnData,Collection<MCodeData> qualityDatas,Collection<MCodeData> statusDatas,
 			String serialNumber, String provisionSerialNumber) {
@@ -73,6 +77,29 @@ public class ItemDetailsData {
 		this.inventoryGrnDatas=null;
 		this.qualityDatas=null;
 		this.statusDatas=null;
+	}
+	
+	public ItemDetailsData(Collection<OfficeData> officeData, Collection<ItemData> itemMasterData) {
+		this.officeData = officeData;
+		this.itemMasterData = itemMasterData;
+		this.inventoryGrnDatas = null;
+		this.qualityDatas = null;
+		this.statusDatas = null;
+		this.id = null;
+		this.itemMasterId = null;
+		this.serialNumber = null;
+		this.grnId = null;
+		this.provisioningSerialNumber = null;
+		this.quality = null;
+		this.status = null;
+		this.officeId = null;
+		this.clientId = null;
+		this.warranty = null;
+		this.remarks = null;
+		this.itemDescription = null;
+		this.supplier = null;
+		this.officeName = null;
+		this.accountNumber = null;
 	}
 
 	public Collection<InventoryGrnData> getInventoryGrnDatas() {
@@ -147,6 +174,22 @@ public class ItemDetailsData {
 		return accountNumber;
 	}
 	
+	public Collection<OfficeData> getOfficeData() {
+		return officeData;
+	}
+
+	public void setOfficeData(Collection<OfficeData> officeData) {
+		this.officeData = officeData;
+	}
+
+	public Collection<ItemData> getItemMasterData() {
+		return itemMasterData;
+	}
+
+	public void setItemMasterData(Collection<ItemData> itemMasterData) {
+		this.itemMasterData = itemMasterData;
+	}
+
 	
 	
 }
