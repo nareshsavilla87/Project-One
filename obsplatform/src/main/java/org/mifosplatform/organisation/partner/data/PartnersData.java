@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.mifosplatform.billing.currency.data.CountryCurrencyData;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
@@ -42,13 +43,14 @@ public class PartnersData {
 	private String officeNumber;
 	private String contactName;
 	private Long userId;
+	private String imageKey;
 	
 	
 	public PartnersData(List<String> countryData, List<String> statesData,
 			List<String> citiesData, Collection<CodeValueData> officeTypes,
 			ApplicationCurrencyConfigurationData currencyData, Collection<OfficeData> allowedParents,
 			Collection<CountryCurrencyData> configCurrency) {
-        
+
 		this.citiesData = citiesData;
 		this.currencyData = currencyData;
 		this.countryData = countryData;
@@ -57,37 +59,41 @@ public class PartnersData {
 		this.statesData = statesData;
 		this.configCurrency = configCurrency;
 		
-		
 	}
 
-	public PartnersData(final Long officeId, final Long additionalinfoId,final String partnerName, final BigDecimal creditLimit, 
+	public PartnersData(final Long additionalinfoId,final Long officeId,final String partnerName, final BigDecimal creditLimit, 
 			final String currency,final Long parentId, final String parentName, final String officeType,final LocalDate openingDate, 
 			final String loginName,final String city, final String state,final String country, final String email, final String phoneNumber,
 			final String isCollective,final BigDecimal balanceAmount,final String officeNumber,final String contactName,final Long userId) {
 		
-	this.officeId = officeId;
-	this.id = additionalinfoId;
-	this.partnerName = partnerName;
-	this.creditLimit = creditLimit;
-	this.currency = currency;
-	this.parentId = parentId;
-	this.parentName =parentName;
-	this.officeType =officeType;
-	this.openingDate = openingDate;
-	this.loginName = loginName;
-	this.city = city;
-	this.state = state;
-	this.country =country;
-	this.email = email;
-	this.phoneNumber =phoneNumber; 
-	this.isCollective = isCollective.contains("Y");
-	this.balanceAmount = balanceAmount;
-	this.officeNumber = officeNumber;
-	this.contactName = contactName;
-	this.userId = userId;
-	
+		this.id = additionalinfoId;
+		this.officeId = officeId;
+		this.partnerName = partnerName;
+		this.creditLimit = creditLimit;
+		this.currency = currency;
+		this.parentId = parentId;
+		this.parentName = parentName;
+		this.officeType = officeType;
+		this.openingDate = openingDate;
+		this.loginName = loginName;
+		this.city = city;
+		this.state = state;
+		this.country = country;
+		this.email = email;
+		this.phoneNumber = phoneNumber;
+		this.isCollective = isCollective.contains("Y");
+		this.balanceAmount = balanceAmount;
+		this.officeNumber = officeNumber;
+		this.contactName = contactName;
+		this.userId = userId;
+
 	}
-	
+
+	public PartnersData(final String imageKey) {
+
+		this.imageKey = imageKey;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -240,5 +246,12 @@ public class PartnersData {
 		this.allowedParents = allowedParents;
 	}
 	
+	public String getImageKey() {
+		return this.imageKey;
+	}
+
+	public boolean imageKeyExists() {
+		return StringUtils.isNotBlank(this.imageKey);
+	}
 
 }
