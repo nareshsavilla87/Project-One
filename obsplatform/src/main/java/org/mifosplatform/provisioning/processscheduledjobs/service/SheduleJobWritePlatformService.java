@@ -27,6 +27,8 @@ public interface SheduleJobWritePlatformService {
     
 	void processExportData();
 
+	void processPartnersCommission();
+
 
 	
 }

@@ -1,20 +1,3 @@
-INSERT IGNORE INTO m_code VALUES(null ,'Agreement Type', '0','Describe the agreement status');
-SET @id=(select id from m_code where code_name='Agreement Type');
-INSERT IGNORE INTO m_code_value VALUES(null, @id, 'Signed', '0');
-INSERT IGNORE INTO m_code_value VALUES(null, @id, 'Pending', '0');
-
-
-INSERT IGNORE INTO m_code VALUES(null ,'Source Category', '0','Describe the different sources');
-SET @id=(select id from m_code where code_name='Source Category');
-INSERT IGNORE INTO m_code_value VALUES(null, @id, 'Subscriptions', '0');
-INSERT IGNORE INTO m_code_value VALUES(null, @id, 'Hardware', '1');
-INSERT IGNORE INTO m_code_value VALUES(null, @id, 'On-demand', '2');
-
-INSERT IGNORE INTO  m_permission VALUES (null,'organization', 'CREATE_PARTNERAGREEMENT', 'PARTNERAGREEMENT', 'CREATE', 0);
-INSERT IGNORE INTO  m_permission VALUES (null,'organization', 'UPDATE_PARTNERAGREEMENT', 'PARTNERAGREEMENT', 'UPDATE', 0);
-INSERT IGNORE INTO  m_permission VALUES (null,'organization', 'CREATE_PARTNER', 'PARTNER', 'CREATE', 0);
-
-
 CREATE TABLE IF NOT EXISTS `m_office_agreement` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `office_id` bigint(20) NOT NULL,
@@ -49,30 +32,6 @@ CREATE TABLE IF NOT EXISTS `m_office_agreement` (
   KEY `fk_agreement` (`agreement_id`),
   CONSTRAINT `fk_agreement_2` FOREIGN KEY (`agreement_id`) REFERENCES `m_office_agreement` (`id`) ON DELETE NO ACTION ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-CREATE TABLE IF NOT EXISTS `m_controlaccount_balance` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `office_id` bigint(20) NOT NULL,
-  `account_type` varchar(50) NOT NULL,
-  `balance_amount`  decimal(6,2) NOT NULL,
-  `createdby_id` int(5) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` int(5) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-  ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
-
-
-CREATE TABLE IF NOT EXISTS `m_office_balance` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `office_id` bigint(20) NOT NULL,
-  `balance_amount`  decimal(6,2) NOT NULL,
-  `createdby_id` int(5) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` int(5) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-  ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 Drop procedure if exists officeInfo;
 DELIMITER //
@@ -115,7 +74,7 @@ insert ignore into stretchy_report_parameter(report_id,parameter_id,report_param
 insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@id,2,'To Date');
 
 CREATE TABLE IF NOT EXISTS `b_office_commission` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` int(20) NOT NULL AUTO_INCREMENT,
   `charge_id` int(20) NOT NULL DEFAULT '0',
   `partner_id` bigint(20) DEFAULT NULL,
   `office_id` bigint(20) NOT NULL,
@@ -128,6 +87,14 @@ CREATE TABLE IF NOT EXISTS `b_office_commission` (
   `created_dt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+INSERT IGNORE INTO job VALUES(null, 'RESELLERCOMMISSION', 'Reseller Commission', '0 0 12 1/1 * ? *', 'Daily once at Midnight', '2015-01-26 15:59:45', '5', NULL, '2015-01-26 15:59:45', NULL, 'RESELLERCOMMISSIONJobDetaildefault _ DEFAULT', NULL, '0', '0', '1', '0', '0', '1');
+
+SET @id=(select id from job where name='RESELLERCOMMISSION');
+
+INSERT IGNORE INTO job_parameters VALUES(null ,@id, 'processDate', 'DATE', 'NOW()', '26 January 2015', 'Y', NULL);
+
+
 
 
 CREATE OR REPLACE VIEW  `v_office_commission`
