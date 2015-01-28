@@ -1143,6 +1143,47 @@ public void reportStatmentPdf() {
 		}
 	}
 	
+	@Override
+	@CronTarget(jobName = JobName.RESELLER_COMMISSION)
+	public void processPartnersCommission() {
+
+		try {
+			System.out.println("Processing reseller commission data....");
+			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RESELLER_COMMISSION.toString());
+			if (data != null) {
+				MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+				LocalTime date = new LocalTime(zone);
+				String dateTime = date.getHourOfDay() + "_"+ date.getMinuteOfHour() + "_"+ date.getSecondOfMinute();
+				String path = FileUtils.generateLogFileDirectory()+ JobName.RESELLER_COMMISSION.toString()+ File.separator + "Commission_"+ new LocalDate().toString().replace("-", "") + "_"+ dateTime + ".log";
+				File fileHandler = new File(path.trim());
+				fileHandler.createNewFile();
+				FileWriter fw = new FileWriter(fileHandler);
+				FileUtils.BILLING_JOB_PATH = fileHandler.getAbsolutePath();
+				fw.append("Processing reseller commission data....\r\n");
+
+				// procedure calling
+				SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(this.jdbcTemplate);
+				simpleJdbcCall.setProcedureName("proc_office_commission");
+				Map<String, Object> output = simpleJdbcCall.execute();
+				if (output.isEmpty()) {
+					fw.append("Reseller commission process failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+				} else {
+					fw.append("Reseller commission process successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+				}
+				fw.flush();
+				fw.close();
+				System.out.println("Reseller commission process successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+			}
+		} catch (DataIntegrityViolationException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		}
+	}
+	
 }
 
 

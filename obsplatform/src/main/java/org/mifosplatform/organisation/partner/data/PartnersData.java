@@ -61,7 +61,7 @@ public class PartnersData {
 		
 	}
 
-	public PartnersData(final Long additionalinfoId,final Long officeId,final String partnerName, final BigDecimal creditLimit, 
+	public PartnersData(final Long officeId,final Long additionalinfoId,final String partnerName, final BigDecimal creditLimit, 
 			final String currency,final Long parentId, final String parentName, final String officeType,final LocalDate openingDate, 
 			final String loginName,final String city, final String state,final String country, final String email, final String phoneNumber,
 			final String isCollective,final BigDecimal balanceAmount,final String officeNumber,final String contactName,final Long userId) {
