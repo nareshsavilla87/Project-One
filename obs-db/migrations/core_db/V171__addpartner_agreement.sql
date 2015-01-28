@@ -1,3 +1,4 @@
+
 CREATE TABLE IF NOT EXISTS `m_office_agreement` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `office_id` bigint(20) NOT NULL,
@@ -93,68 +94,4 @@ INSERT IGNORE INTO job VALUES(null, 'RESELLERCOMMISSION', 'Reseller Commission',
 SET @id=(select id from job where name='RESELLERCOMMISSION');
 
 INSERT IGNORE INTO job_parameters VALUES(null ,@id, 'processDate', 'DATE', 'NOW()', '26 January 2015', 'Y', NULL);
-
-
-
-
-CREATE OR REPLACE VIEW  `v_office_commission`
-AS
-   SELECT `bc`.`id` AS `charge_id`,
-          `mc`.`office_id` AS `office_id`,
-          `bi`.`invoice_date` AS `invoice_date`,
-          `oad`.`source` AS `source`,
-          `oad`.`share_amount` AS `share_amount`,
-          `oad`.`share_type` AS `share_type`,
-          `mcv`.`code_value` AS `comm_source`,
-          (CASE
-              WHEN (    (`oad`.`share_type` = 'Flat')
-                    AND (`bc`.`charge_type` = 'NRC'))
-              THEN
-                 round(`oad`.`share_amount`, 2)
-              WHEN (    (`oad`.`share_type` = 'Percentage')
-                    AND (`bc`.`charge_type` <> 'NRC'))
-              THEN
-                 round(
-                    ((`bc`.`netcharge_amount` * `oad`.`share_amount`) / 100),
-                    2)
-              ELSE
-                 0
-           END)
-             AS `amt`,
-          now() AS `created_dt`
-     FROM (   (   (   (   (    `b_charge` `bc`
-                           JOIN
-                               `b_invoice` `bi`
-                           ON ((`bc`.`invoice_id` = `bi`.`id`)))
-                       JOIN
-                           `m_client` `mc`
-                       ON ((`bc`.`client_id` = `mc`.`id`)))
-                   JOIN
-                       `m_office_agreement` `oa`
-                   ON ((`oa`.`office_id` = `mc`.`office_id`)))
-               LEFT JOIN
-                   `m_office_agreement_detail` `oad`
-               ON ((    (`oad`.`agreement_id` = `oa`.`id`)
-                    AND (`oad`.`is_deleted` = 'N'))))
-           LEFT JOIN
-               `m_code_value` `mcv`
-           ON (((`mcv`.`id` = `oad`.`source`) AND (`mcv`.`code_id` = 75))));
-		   
-
- CREATE OR REPLACE VIEW  `v_agent_commission` 
-  AS 
-  SELECT `boc`.`office_id` AS `reseller_id`,`r`.`name` AS `reseller`,`bc`.`client_id` AS `client_id`,
-  `mc`.`display_name` AS `client_name`,cast(`boc`.`invoice_date` AS date) AS `invoice_date`,
-  date_format(`boc`.`invoice_date`,'%b-%Y') AS `month`,`bca`.`country` AS `country`,
-  coalesce(`bpm`.`plan_description`,`im`.`item_description`) AS `plan_item`,`mcv`.`code_value` AS `source`,
-  cast(round(`bc`.`netcharge_amount`,2) AS char CHARSET utf8) AS `netcharge_amount`,
-  `boc`.`share_amount` AS `share_amount`,`boc`.`share_type` AS `share_type`,
-  cast(round(`boc`.`amt`,2) AS char CHARSET utf8) AS `comm_amount` FROM (((((((((( `b_office_commission` `boc` 
-  LEFT JOIN  `m_code_value` `mcv` ON((`mcv`.`id` = `boc`.`source`))) JOIN  `m_office` `r` ON((`boc`.`office_id` = `r`.`id`))) 
-  JOIN  `m_office` `s` ON((`boc`.`office_id` = `s`.`id`))) JOIN  `b_charge` `bc` ON((`boc`.`charge_id` = `bc`.`id`))) 
-  JOIN  `m_client` `mc` ON((`bc`.`client_id` = `mc`.`id`))) JOIN  `b_client_address` `bca` ON(((`bc`.`client_id` = `bca`.`client_id`) 
-  AND (`bca`.`address_key` = 'PRIMARY')))) LEFT JOIN  `b_onetime_sale` `bos` ON(((`bc`.`order_id` = `bos`.`id`) AND (`bc`.`priceline_id` = 0)))) LEFT JOIN  `b_item_master` `im` ON((`bos`.`item_id` = `im`.`id`))) LEFT JOIN  `b_orders` `bo` ON(((`bc`.`order_id` = `bo`.`id`) AND (`bc`.`priceline_id` <> 0)))) LEFT JOIN  `b_plan_master` `bpm` ON((`bo`.`plan_id` = `bpm`.`id`)));
-		   
-		   
-
 
