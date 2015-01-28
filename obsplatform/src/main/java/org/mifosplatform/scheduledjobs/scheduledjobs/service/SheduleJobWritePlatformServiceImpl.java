@@ -1128,11 +1128,12 @@ public void reportStatmentPdf() {
 					if(output.isEmpty()){
 						fw.append("Exporting data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}else{
+						fw.append("No of records inserted :" +output.values());
 						fw.append("Exporting data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}
 				fw.flush();
 				fw.close();
-				System.out.println("Exporting data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+				System.out.println("Exporting data successfully done....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 			}
 		} catch (DataIntegrityViolationException e) {
 			System.out.println(e.getMessage());
@@ -1164,16 +1165,18 @@ public void reportStatmentPdf() {
 
 				// procedure calling
 				SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(this.jdbcTemplate);
+				//String sql="SHOW PROCEDURE STATUS LIKE 'proc_office_commission'";
 				simpleJdbcCall.setProcedureName("proc_office_commission");
 				Map<String, Object> output = simpleJdbcCall.execute();
 				if (output.isEmpty()) {
 					fw.append("Reseller commission process failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 				} else {
-					fw.append("Reseller commission process successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+					fw.append("No of records inserted :" +output.values());
+					fw.append("Reseller commission processed successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 				}
 				fw.flush();
 				fw.close();
-				System.out.println("Reseller commission process successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+				System.out.println("Reseller commission processed successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 			}
 		} catch (DataIntegrityViolationException e) {
 			System.out.println(e.getMessage());
