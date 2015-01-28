@@ -132,7 +132,7 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 	        if(!allocationDetailsDatas.isEmpty()){
 	    				this.associationWriteplatformService.createNewHardwareAssociation(ownedHardware.getClientId(),allocationDetailsDatas.get(0).getPlanId(),
 	    						ownedHardware.getSerialNumber(),allocationDetailsDatas.get(0).getorderId(),"ALLOT");
-	    		   }
+	        }
 	   }else{
 		
 		//DeAllocate HardWare
