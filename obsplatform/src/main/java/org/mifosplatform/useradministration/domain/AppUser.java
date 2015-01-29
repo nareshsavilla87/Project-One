@@ -314,8 +314,16 @@ public class AppUser extends AbstractPersistable<Long> implements PlatformUser {
     public Office getOffice() {
         return this.office;
     }
+    
+    public void setEmail(String email) {
+		this.email = email;
+	}
 
-    public boolean canNotApproveLoanInPast() {
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
+	public boolean canNotApproveLoanInPast() {
         return hasNotPermissionForAnyOf("ALL_FUNCTIONS", "APPROVEINPAST_LOAN");
     }
 

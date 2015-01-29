@@ -15,7 +15,6 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.mifosplatform.freeradius.radius.exception.RadiusDetailsNotFoundException;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
-import org.mifosplatform.portfolio.order.exceptions.OrderNotFoundException;
 import org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobReadPlatformService;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +35,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 		
 	}
 	
-	@SuppressWarnings("unused")
+
 	@Override
 	public String retrieveAllNasDetails() {
 
@@ -64,7 +63,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	}
 	
 	
-	@SuppressWarnings("unused")
+
 	@Override
 	public String retrieveNasDetail(final Long nasId) {
 

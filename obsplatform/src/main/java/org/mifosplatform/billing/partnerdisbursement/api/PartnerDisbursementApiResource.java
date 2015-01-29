@@ -75,7 +75,6 @@ public class PartnerDisbursementApiResource {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final SearchSqlQuery search = SearchSqlQuery.forSearch(sqlSearch, offset,limit );
 		final Page<PartnerDisbursementData> patnerDisbursementData = this.readPlatformService.getAllData(search, sourceType, partnerType);
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(patnerDisbursementData);
 	}
 	

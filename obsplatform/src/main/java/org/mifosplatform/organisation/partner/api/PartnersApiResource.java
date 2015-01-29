@@ -64,7 +64,7 @@ import com.sun.jersey.multipart.FormDataParam;
 @Scope("singleton")
 public class PartnersApiResource {
 
-  private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(""));
+  private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("partnerName","creditLimit","isCollective"));
   private final String resorceNameForPermission = "PARTNER";
   public static final String OFFICE_TYPE="Office Type";
   public static final String PARTNER_TYPE="Partner Type";
@@ -261,7 +261,7 @@ public class PartnersApiResource {
 		final PartnersData imageData = this.readPlatformService.retrievePartnerImage(userId);
 
 		if (imageData.imageKeyExists()) {
-		// TODO: Need a better way of determining image type
+	
 		String imageDataURISuffix = IMAGE_DATA_URI_SUFFIX.JPEG.getValue();
 		if (StringUtils.endsWith(imageData.getImageKey(),IMAGE_FILE_EXTENSION.GIF.getValue())) {
 			imageDataURISuffix = IMAGE_DATA_URI_SUFFIX.GIF.getValue();
