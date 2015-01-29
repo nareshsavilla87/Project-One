@@ -112,6 +112,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			}
 			/**	Call if Item units is PIECES */
 			if(UnitEnumType.PIECES.toString().equalsIgnoreCase(item.getUnits())){
+				
 				JsonArray serialData = fromJsonHelper.extractJsonArrayNamed("serialNumber", element);
 				for (JsonElement je : serialData) {
 					JsonObject serialNumber = je.getAsJsonObject();
