@@ -189,9 +189,10 @@ public class JobParameterData {
 	public void setUpdateStatus(String updateStatus) {
 		this.updateStatus = updateStatus;
 	}
-
+	
 	public String getMikrotikApi() {
 		return mikrotikApi;
 	}
+
 	
 }
