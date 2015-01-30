@@ -505,7 +505,7 @@ public class PaymentGatewayApiResource {
 		} 
 	   catch(Exception e){
 		   
-		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  "+ e.getCause().getMessage();
+		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  "+ e.getCause();//.getMessage();
 		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus + "</Strong>";
 		   return htmlData;   
 	   }
@@ -535,7 +535,26 @@ public class PaymentGatewayApiResource {
 
 		if (screenName.equalsIgnoreCase("vod")) {
 			
-			return "Payment Done Successfully.";
+			JSONObject object = new JSONObject();
+			object.put("clientId", clientId);
+			object.put("dateFormat", dateFormat);
+			object.put("eventBookedDate", date);
+			object.put("eventId", jsonCustomData.getString("eventId"));
+			if(jsonCustomData.has("deviceId")){
+			object.put("deviceId", jsonCustomData.getString("deviceId"));
+			}
+			object.put("formatType",  jsonCustomData.getString("formatType"));
+			object.put("locale", "en");
+			object.put("optType", jsonCustomData.getString("optType"));
+			
+			final CommandWrapper commandRequest = new CommandWrapperBuilder().createEventOrder(clientId).withJson(object.toString()).build();
+		    final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+			
+		    if (result == null) {
+				return "failure : Payment Done and Event Booking Failed";
+			} else {
+				return "Payment Done and Event Booked Successfully. ";
+			}
 			
 		} else if (screenName.equalsIgnoreCase("additionalOrders")) {
 
