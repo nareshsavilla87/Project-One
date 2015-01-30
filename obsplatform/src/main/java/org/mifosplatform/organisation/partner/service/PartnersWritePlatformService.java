@@ -9,6 +9,8 @@ import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 public interface PartnersWritePlatformService {
 
 	CommandProcessingResult createNewPartner(JsonCommand command);
+	
+	CommandProcessingResult updatePartner(JsonCommand command,Long partnerId);
 
 	CommandProcessingResult saveOrUpdatePartnerImage(Long partnerId,
 			String fileName, InputStream inputStream);

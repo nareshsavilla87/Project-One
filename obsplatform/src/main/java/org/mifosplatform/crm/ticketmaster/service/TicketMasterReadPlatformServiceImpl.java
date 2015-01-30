@@ -79,12 +79,17 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 	public Page<ClientTicketData> retrieveAssignedTicketsForNewClient(SearchSqlQuery searchTicketMaster, String statusType) {
 		final AppUser user = this.context.authenticatedUser();
 		
+		final String hierarchy = user.getOffice().getHierarchy();
+        
+        
+        final String hierarchySearchString = hierarchy + "%";
+		
 		final UserTicketsMapperForNewClient mapper = new UserTicketsMapperForNewClient();
 				
 		StringBuilder sqlBuilder = new StringBuilder(200);
         sqlBuilder.append("select ");
         sqlBuilder.append(mapper.userTicketSchema());
-        sqlBuilder.append(" where tckt.id IS NOT NULL ");
+        sqlBuilder.append(" where tckt.id IS NOT NULL and o.hierarchy like ? ");
         
         String sqlSearch = searchTicketMaster.getSqlSearch();
         String extraCriteria = "";
@@ -109,7 +114,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
         }
 		
 		return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()", sqlBuilder.toString(),
-	            new Object[] {}, mapper);
+	            new Object[] {hierarchySearchString}, mapper);
 		
 	}
 	
@@ -239,7 +244,8 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 							"CONCAT(TIMESTAMPDIFF(day, tckt.ticket_date, Now()), ' d ', MOD(TIMESTAMPDIFF(hour, tckt.ticket_date, Now()), 24), ' hr ',"+
 							"MOD(TIMESTAMPDIFF(minute, tckt.ticket_date, Now()), 60), ' min ') AS timeElapsed,"+
 							"IFNull((SELECT user.username FROM m_appuser user WHERE tckt.lastmodifiedby_id = user.id),'Null') AS closedby_user "+
-							"FROM b_ticket_master tckt left join m_client mct on mct.id = tckt.client_id";
+							"FROM b_ticket_master tckt left join m_client mct on mct.id = tckt.client_id "+
+							"left join m_office o on o.id = mct.office_id ";
       
 		}
 

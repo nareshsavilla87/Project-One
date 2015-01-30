@@ -50,8 +50,8 @@ private static final class PartnerMapper implements RowMapper<PartnersData> {
 		public String schema() {
 			return " a.id as infoId,a.partner_currency as currency,a.credit_limit as creditLimit,a.is_collective as isCollective,o.name as partnerName,"
 					+ "o.id as officeId,o.parent_id as parentId,o.external_id AS externalId,o.opening_date AS openingDate,parent.id AS parentId,"
-					+ "parent.name AS parentName,c.code_value as officeType,  ad.address_name as addressName, ad.city as city, ad.state as state,"
-					+ "ad.country as country,ad.email_id as email,ad.phone_number as phoneNumber,au.username as loginName,"
+					+ "parent.name AS parentName,c.code_value as officeType,  a.contact_name as contactName, ad.city as city, ad.state as state,"
+					+ "ad.country as country,ad.email_id as email,ad.phone_number as phoneNumber,ad.office_number as officeNumber,au.id as userId,au.username as loginName,"
 					+ "IFNULL(ob.balance_amount,0) as balanceAmount from m_office o left join m_office AS parent on parent.id = o.parent_id " 
 					+ "inner join m_office_additional_info a ON o.id=a.office_id  inner join b_office_address ad on o.id = ad.office_id "
 					+ "inner join m_appuser au on o.id=au.office_id left join m_office_balance ob ON ob.office_id=o.id "
@@ -68,7 +68,6 @@ private static final class PartnerMapper implements RowMapper<PartnersData> {
 	final BigDecimal creditLimit = rs.getBigDecimal("creditLimit");
 	final String currency = rs.getString("currency");
 	final Long parentId = rs.getLong("parentId");
-	//final Long creditLimit = rs.getLong("creditLimit");
 	final String parentName = rs.getString("parentName");
 	final String officeType = rs.getString("officeType");
 	final LocalDate openingDate = JdbcSupport.getLocalDate(rs, "openingDate");
@@ -78,11 +77,14 @@ private static final class PartnerMapper implements RowMapper<PartnersData> {
 	final String country =rs.getString("country");
 	final String email =rs.getString("email");
 	final String phoneNumber =rs.getString("phoneNumber");
+	final String officeNumber =rs.getString("officeNumber");
 	final String isCollective = rs.getString("isCollective");
 	final BigDecimal balanceAmount =rs.getBigDecimal("balanceAmount");
+	final Long userId = rs.getLong("userId");
+	final String contactName =rs.getString("contactName");
 	
 	return new PartnersData(officeId,id,partnerName,creditLimit,currency,parentId,parentName,officeType,
-			     openingDate,loginName,city,state,country,email,phoneNumber,isCollective,balanceAmount);
+			     openingDate,loginName,city,state,country,email,phoneNumber,isCollective,balanceAmount,officeNumber,contactName,userId);
 	
 
 	}
@@ -101,5 +103,28 @@ public PartnersData retrieveSinglePartnerDetails(final Long partnerId) {
 	}
 }
 
-	
+	@Override
+	public PartnersData retrievePartnerImage(Long userId) {
+
+		try {
+			context.authenticatedUser();
+			final PartnerImage mapper = new PartnerImage();
+			final String sql = "select ad.company_logo as imageKey from b_office_address ad inner join m_appuser au on ad.office_id=au.office_id where au.id= ?";
+			return this.jdbcTemplate.queryForObject(sql, mapper,new Object[] { userId });
+		} catch (final EmptyResultDataAccessException accessException) {
+			return null;
+		}
+	}
+
+	private static class PartnerImage implements RowMapper<PartnersData> {
+
+		@Override
+		public PartnersData mapRow(ResultSet rs, int rowNum) throws SQLException {
+			
+			final String imageKey =rs.getString("imageKey");
+			
+			return new PartnersData(imageKey);		
+			}
+
+	}
 }

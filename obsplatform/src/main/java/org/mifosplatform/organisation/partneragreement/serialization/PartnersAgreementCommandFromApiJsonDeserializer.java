@@ -30,7 +30,7 @@ public class PartnersAgreementCommandFromApiJsonDeserializer {
 	 * The parameters supported for this command.
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("agreementStatus", "shareType", "shareAmount","sourceType","startDate",
-			                                               "endDate","sourceData","locale","dateFormat","newSourceData","removeSourceData"));
+			                                               "endDate","sourceData","locale","dateFormat","removeSourceData"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
@@ -88,7 +88,7 @@ public class PartnersAgreementCommandFromApiJsonDeserializer {
 				final BigDecimal shareAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shareAmount",jsonElement);
 				baseDataValidator.reset().parameter("shareAmount").value(shareAmount).notBlank();
 
-				throwExceptionIfValidationWarningsExist(dataValidationErrors);
+				
 			}
 		}
 
@@ -140,7 +140,7 @@ public class PartnersAgreementCommandFromApiJsonDeserializer {
 				final BigDecimal shareAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shareAmount",jsonElement);
 				baseDataValidator.reset().parameter("shareAmount").value(shareAmount).notBlank();
 
-				throwExceptionIfValidationWarningsExist(dataValidationErrors);
+				
 			}
 		}
 		

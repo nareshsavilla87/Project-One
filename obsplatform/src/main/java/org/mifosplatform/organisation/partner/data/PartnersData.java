@@ -4,7 +4,9 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
+import org.mifosplatform.billing.currency.data.CountryCurrencyData;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.organisation.monetary.data.ApplicationCurrencyConfigurationData;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -36,48 +38,62 @@ public class PartnersData {
 	private Collection<CodeValueData> officeTypes;
 	private ApplicationCurrencyConfigurationData currencyData;
 	private Collection<OfficeData> allowedParents;
+	private Collection<CountryCurrencyData> configCurrency;
 	private List<AgreementData> agreementData;
+	private String officeNumber;
+	private String contactName;
+	private Long userId;
+	private String imageKey;
 	
 	
 	public PartnersData(List<String> countryData, List<String> statesData,
 			List<String> citiesData, Collection<CodeValueData> officeTypes,
-			ApplicationCurrencyConfigurationData currencyData, Collection<OfficeData> allowedParents) {
-        
+			ApplicationCurrencyConfigurationData currencyData, Collection<OfficeData> allowedParents,
+			Collection<CountryCurrencyData> configCurrency) {
+
 		this.citiesData = citiesData;
 		this.currencyData = currencyData;
 		this.countryData = countryData;
 		this.officeTypes = officeTypes;
 		this.allowedParents = allowedParents;
 		this.statesData = statesData;
-		
+		this.configCurrency = configCurrency;
 		
 	}
 
-	public PartnersData(final Long officeId, final Long additionalinfoId,final String partnerName, final BigDecimal creditLimit, 
+	public PartnersData(final Long officeId,final Long additionalinfoId,final String partnerName, final BigDecimal creditLimit, 
 			final String currency,final Long parentId, final String parentName, final String officeType,final LocalDate openingDate, 
 			final String loginName,final String city, final String state,final String country, final String email, final String phoneNumber,
-			final String isCollective,final BigDecimal balanceAmount) {
+			final String isCollective,final BigDecimal balanceAmount,final String officeNumber,final String contactName,final Long userId) {
 		
-	this.officeId = officeId;
-	this.id = additionalinfoId;
-	this.partnerName = partnerName;
-	this.creditLimit = creditLimit;
-	this.currency = currency;
-	this.parentId = parentId;
-	this.parentName =parentName;
-	this.officeType =officeType;
-	this.openingDate = openingDate;
-	this.loginName = loginName;
-	this.city = city;
-	this.state = state;
-	this.country =country;
-	this.email = email;
-	this.phoneNumber =phoneNumber; 
-	this.isCollective = isCollective.contains("Y");
-	this.balanceAmount = balanceAmount;
-	
+		this.id = additionalinfoId;
+		this.officeId = officeId;
+		this.partnerName = partnerName;
+		this.creditLimit = creditLimit;
+		this.currency = currency;
+		this.parentId = parentId;
+		this.parentName = parentName;
+		this.officeType = officeType;
+		this.openingDate = openingDate;
+		this.loginName = loginName;
+		this.city = city;
+		this.state = state;
+		this.country = country;
+		this.email = email;
+		this.phoneNumber = phoneNumber;
+		this.isCollective = isCollective.contains("Y");
+		this.balanceAmount = balanceAmount;
+		this.officeNumber = officeNumber;
+		this.contactName = contactName;
+		this.userId = userId;
+
 	}
-	
+
+	public PartnersData(final String imageKey) {
+
+		this.imageKey = imageKey;
+	}
+
 	public Long getId() {
 		return id;
 	}
@@ -151,6 +167,19 @@ public class PartnersData {
 		return balanceAmount;
 	}
 
+	
+	public String getOfficeNumber() {
+		return officeNumber;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
 	public List<String> getCountryData() {
 		return countryData;
 	}
@@ -180,10 +209,49 @@ public class PartnersData {
 		return agreementData;
 	}
 
+	public Collection<CountryCurrencyData> getConfigCurrency() {
+		return configCurrency;
+	}
+	
 	public void setAgreementData(List<AgreementData> agreementData) {
 		this.agreementData = agreementData;
 	}
 
+
+	public void setConfigCurrency(Collection<CountryCurrencyData> configCurrency) {
+		this.configCurrency = configCurrency;
+	}
+
+	public void setCountryData(List<String> countryData) {
+		this.countryData = countryData;
+	}
+
+	public void setStatesData(List<String> statesData) {
+		this.statesData = statesData;
+	}
+
+	public void setCitiesData(List<String> citiesData) {
+		this.citiesData = citiesData;
+	}
+
+	public void setOfficeTypes(Collection<CodeValueData> officeTypes) {
+		this.officeTypes = officeTypes;
+	}
+
+	public void setCurrencyData(ApplicationCurrencyConfigurationData currencyData) {
+		this.currencyData = currencyData;
+	}
+
+	public void setAllowedParents(Collection<OfficeData> allowedParents) {
+		this.allowedParents = allowedParents;
+	}
 	
+	public String getImageKey() {
+		return this.imageKey;
+	}
+
+	public boolean imageKeyExists() {
+		return StringUtils.isNotBlank(this.imageKey);
+	}
 
 }

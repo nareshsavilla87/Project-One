@@ -27,9 +27,9 @@ public class PartnersCommandFromApiJsonDeserializer {
 	/*
 	 * The parameters supported for this command.
 	 */
-	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("partnerType", "partnerName","loginName","password","phone","email",
-			                            "city","state","country","currency","organization","roleName","companyLogo","parentId","officeType","repeatPassword",
-			                            "isCollective","creditLimit","locale"));
+	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("partnerType", "partnerName","loginName","password","phoneNumber","email",
+			                            "city","state","country","currency","contactName","roleName","companyLogo","parentId","officeType","repeatPassword",
+			                            "isCollective","creditLimit","locale","officeNumber","userId","roles"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
@@ -76,11 +76,11 @@ public class PartnersCommandFromApiJsonDeserializer {
         final Long parentId = fromApiJsonHelper.extractLongNamed("parentId", element);
         baseDataValidator.reset().parameter("parentId").value(parentId).notBlank();
         
-        final String organization = fromApiJsonHelper.extractStringNamed("organization", element);
-        baseDataValidator.reset().parameter("organization").value(organization).notBlank().notExceedingLengthOf(100);
+       /* final String contactName = fromApiJsonHelper.extractStringNamed("contactName", element);
+        baseDataValidator.reset().parameter("contactName").value(contactName).notBlank().notExceedingLengthOf(100);*/
         
-        final String phone = fromApiJsonHelper.extractStringNamed("phone", element);
-        baseDataValidator.reset().parameter("phone").value(phone).notBlank().notExceedingLengthOf(30);
+        final String phone = fromApiJsonHelper.extractStringNamed("phoneNumber", element);
+        baseDataValidator.reset().parameter("phoneNumber").value(phone).notBlank().notExceedingLengthOf(30);
         
         final String email = fromApiJsonHelper.extractStringNamed("email", element);
         baseDataValidator.reset().parameter("email").value(email).notBlank();
@@ -96,13 +96,66 @@ public class PartnersCommandFromApiJsonDeserializer {
 		
 		final String currency = fromApiJsonHelper.extractStringNamed("currency", element);
         baseDataValidator.reset().parameter("currency").value(currency).notBlank();
+	
+        
+        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+	}
+	
+	/**
+	 * @param json
+	 * check validation for update partner
+	 */
+	public void validateForUpdate(final String json) {
 		
-		/*final String role = fromApiJsonHelper.extractStringNamed("roleName", element);
-		baseDataValidator.reset().parameter("role").value(role).notBlank().notExceedingLengthOf(20);
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+
+		final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+		fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,supportedParameters);
+
+		final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("partner");
+
+		final JsonElement element = fromApiJsonHelper.parse(json);
+
+		final String partnerName = fromApiJsonHelper.extractStringNamed("partnerName", element);
+		baseDataValidator.reset().parameter("partnerName").value(partnerName).notBlank().notExceedingLengthOf(20);
 		
-		final Long officeType = fromApiJsonHelper.extractLongNamed("officeType", element);
-		baseDataValidator.reset().parameter("officeType").value(officeType).notBlank().notExceedingLengthOf(20);
-		*/
+		final String loginName = fromApiJsonHelper.extractStringNamed("loginName", element);
+		baseDataValidator.reset().parameter("loginName").value(loginName).notBlank().notExceedingLengthOf(20);
+		
+        
+        final BigDecimal creditLimit = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("creditLimit", element);
+        
+        if(creditLimit != null){
+        baseDataValidator.reset().parameter("creditLimit").value(creditLimit).integerGreaterThanZero();
+        }
+        
+        final Long parentId = fromApiJsonHelper.extractLongNamed("parentId", element);
+        baseDataValidator.reset().parameter("parentId").value(parentId).notBlank();
+        
+       /* final String contactName = fromApiJsonHelper.extractStringNamed("contactName", element);
+        baseDataValidator.reset().parameter("contactName").value(contactName).notBlank().notExceedingLengthOf(100);*/
+        
+        final String phoneNumber = fromApiJsonHelper.extractStringNamed("phoneNumber", element);
+        baseDataValidator.reset().parameter("phone").value(phoneNumber).notBlank().notExceedingLengthOf(30);
+        
+        final String email = fromApiJsonHelper.extractStringNamed("email", element);
+        baseDataValidator.reset().parameter("email").value(email).notBlank();
+        
+		final String city = fromApiJsonHelper.extractStringNamed("city", element);
+		baseDataValidator.reset().parameter("city").value(city).notBlank().notExceedingLengthOf(100);
+		
+		final String state = fromApiJsonHelper.extractStringNamed("state", element);
+		baseDataValidator.reset().parameter("state").value(state).notBlank().notExceedingLengthOf(100);
+		
+		final String country = fromApiJsonHelper.extractStringNamed("country", element);
+		baseDataValidator.reset().parameter("country").value(country).notBlank().notExceedingLengthOf(100);
+		
+		final String currency = fromApiJsonHelper.extractStringNamed("currency", element);
+        baseDataValidator.reset().parameter("currency").value(currency).notBlank();
 	
         
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

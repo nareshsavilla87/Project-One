@@ -6,8 +6,10 @@
 package org.mifosplatform.infrastructure.security.data;
 
 import java.util.Collection;
+import java.util.Set;
 
 import org.mifosplatform.useradministration.data.RoleData;
+import org.mifosplatform.useradministration.domain.Role;
 
 /**
  * Immutable data object for authentication.
@@ -37,6 +39,8 @@ public class AuthenticatedUserData {
     private final Integer maxTime;
     @SuppressWarnings("unused")
     private final Long loginHistoryId;
+    @SuppressWarnings("unused")
+	private Set<Role> userRole;
 
     public AuthenticatedUserData(final String username, final Collection<String> permissions) {
         this.username = username;
@@ -54,7 +58,7 @@ public class AuthenticatedUserData {
 
     public AuthenticatedUserData(final String username, final Collection<RoleData> roles, final Collection<String> permissions,
             final Long userId, final String base64EncodedAuthenticationKey,final Long unreadMessages,final String remoteHost,
-            final String session, int maxTime,Long loginHistoryId) {
+            final String session, int maxTime,Long loginHistoryId, Set<Role> userRole) {
         this.username = username;
         this.userId = userId;
         this.base64EncodedAuthenticationKey = base64EncodedAuthenticationKey;
@@ -66,5 +70,6 @@ public class AuthenticatedUserData {
         this.session = session;
         this.maxTime = maxTime;
         this.loginHistoryId=loginHistoryId;
+        this.userRole =userRole;
     }
 }

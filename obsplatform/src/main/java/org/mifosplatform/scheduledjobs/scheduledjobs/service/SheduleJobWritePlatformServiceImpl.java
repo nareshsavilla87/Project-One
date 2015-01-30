@@ -1158,11 +1158,12 @@ public void reportStatmentPdf() {
 					if(output.isEmpty()){
 						fw.append("Exporting data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}else{
+						fw.append("No of records inserted :" +output.values());
 						fw.append("Exporting data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}
 				fw.flush();
 				fw.close();
-				System.out.println("Exporting data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+				System.out.println("Exporting data successfully done....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 			}
 		} catch (DataIntegrityViolationException e) {
 			System.out.println(e.getMessage());
@@ -1170,6 +1171,49 @@ public void reportStatmentPdf() {
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 			    e.printStackTrace();
+		}
+	}
+	
+	@Override
+	@CronTarget(jobName = JobName.RESELLER_COMMISSION)
+	public void processPartnersCommission() {
+
+		try {
+			System.out.println("Processing reseller commission data....");
+			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RESELLER_COMMISSION.toString());
+			if (data != null) {
+				MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+				LocalTime date = new LocalTime(zone);
+				String dateTime = date.getHourOfDay() + "_"+ date.getMinuteOfHour() + "_"+ date.getSecondOfMinute();
+				String path = FileUtils.generateLogFileDirectory()+ JobName.RESELLER_COMMISSION.toString()+ File.separator + "Commission_"+ new LocalDate().toString().replace("-", "") + "_"+ dateTime + ".log";
+				File fileHandler = new File(path.trim());
+				fileHandler.createNewFile();
+				FileWriter fw = new FileWriter(fileHandler);
+				FileUtils.BILLING_JOB_PATH = fileHandler.getAbsolutePath();
+				fw.append("Processing reseller commission data....\r\n");
+
+				// procedure calling
+				SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(this.jdbcTemplate);
+				//String sql="SHOW PROCEDURE STATUS LIKE 'proc_office_commission'";
+				simpleJdbcCall.setProcedureName("proc_office_commission");
+				Map<String, Object> output = simpleJdbcCall.execute();
+				if (output.isEmpty()) {
+					fw.append("Reseller commission process failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+				} else {
+					fw.append("No of records inserted :" +output.values());
+					fw.append("Reseller commission processed successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+				}
+				fw.flush();
+				fw.close();
+				System.out.println("Reseller commission processed successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+			}
+		} catch (DataIntegrityViolationException e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
 	

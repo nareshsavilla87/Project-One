@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONArray;
@@ -20,6 +21,7 @@ import org.mifosplatform.infrastructure.security.exception.NoAuthorizationExcept
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
+import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfoRepository;
 import org.mifosplatform.organisation.office.domain.OfficeAddress;
 import org.mifosplatform.organisation.office.domain.OfficeAddressRepository;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
@@ -27,6 +29,7 @@ import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.organisation.partner.serialization.PartnersCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.api.UsersApiResource;
 import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.useradministration.domain.AppUserRepository;
 import org.mifosplatform.useradministration.domain.Role;
 import org.mifosplatform.useradministration.domain.RoleRepository;
 import org.mifosplatform.useradministration.exception.RoleNotFoundException;
@@ -50,19 +53,25 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 	private final OfficeRepository officeRepository;
     private final RoleRepository roleRepository;
     private final UsersApiResource userApiResource;
+    private final AppUserRepository userRepository;
     private final OfficeAddressRepository addressRepository;
+    private final OfficeAdditionalInfoRepository officeAdditionalInfoRepository;
 
 	@Autowired
 	public PartnersWritePlatformServiceImp(final PlatformSecurityContext context,
 			final PartnersCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final OfficeRepository officeRepository,final RoleRepository roleRepository,
-			final UsersApiResource userApiResource,final OfficeAddressRepository addressRepository) {
+			final UsersApiResource userApiResource,final AppUserRepository userRepository,
+			final OfficeAddressRepository addressRepository,
+			final OfficeAdditionalInfoRepository officeAdditionalInfoRepository) {
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.officeRepository = officeRepository;
 		this.roleRepository = roleRepository;
 		this.userApiResource = userApiResource;
+		this.userRepository = userRepository;
 		this.addressRepository = addressRepository;
+		this.officeAdditionalInfoRepository = officeAdditionalInfoRepository;
 
 	}
 
@@ -86,10 +95,10 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			final String password = command.stringValueOfParameterNamed("password");
 			final String repeatPassword = command.stringValueOfParameterNamed("repeatPassword");
 			final String currency = command.stringValueOfParameterNamed("currency");
-			final String email = command.stringValueOfParameterNamed("email");
 			final boolean isCollective= command.booleanPrimitiveValueOfParameterNamed("isCollective");
+			final String contactName = command.stringValueOfParameterNamed("contactName");
 			OfficeAddress address =OfficeAddress.fromJson(command,office);
-			OfficeAdditionalInfo additionalInfo = new OfficeAdditionalInfo(office,creditlimit,currency,isCollective);
+			OfficeAdditionalInfo additionalInfo = new OfficeAdditionalInfo(office,creditlimit,currency,isCollective,contactName);
 			office.setOfficeAddress(address);
 			office.setOfficeAdditionalInfo(additionalInfo);
 			this.officeRepository.save(office);
@@ -98,23 +107,22 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			
 			//create user
 		    final String roleName = command.stringValueOfParameterNamed("roleName");
-			final String partnerName = command.stringValueOfParameterNamed("partnerName");
 		    final String[]  roles= arrayOfRole(roleName);
 		    JSONObject json = new JSONObject();
 		    json.put("username", loginName);
 		    json.put("password", password);
 		    json.put("repeatPassword", repeatPassword);
-		    json.put("firstname",partnerName);
-		    json.put("lastname", partnerName);
+		    json.put("firstname",office.getName());
+		    json.put("lastname", office.getName());
 		    json.put("sendPasswordToEmail",Boolean.FALSE);
-		    json.put("email",email);
+		    json.put("email",address.getEmail());
 		    json.put("officeId", office.getId());
 		    json.put("roles", new JSONArray(roles));
 	        final String result=this.userApiResource.createUser(json.toString());
 	        JSONObject resultJson = new JSONObject(result);
 	        final String userId=resultJson.getString("resourceId");
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-					       .withEntityId(office.getId()).withResourceIdAsString(userId).build();
+					       .withEntityId(additionalInfo.getId()).withOfficeId(office.getId()).withResourceIdAsString(userId).build();
 		} catch (final DataIntegrityViolationException e) {
 			handleDataIntegrityIssues(command, e);
 			return new CommandProcessingResult(Long.valueOf(-1l));
@@ -127,15 +135,15 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 
 	 private Office validateUserPriviledgeOnOfficeAndRetrieve(final AppUser currentUser, final Long officeId) {
 
-	        final Long userOfficeId = currentUser.getOffice().getId();
-	        final Office userOffice = this.officeRepository.findOne(userOfficeId);
-	        if (userOffice == null) { throw new OfficeNotFoundException(userOfficeId); }
+	        final Long currentUserOfficeId = currentUser.getOffice().getId();
+	        final Office currentUserOffice = this.officeRepository.findOne(currentUserOfficeId);
+	        if (currentUserOffice == null) { throw new OfficeNotFoundException(currentUserOfficeId); }
 
-	        if (userOffice.doesNotHaveAnOfficeInHierarchyWithId(officeId)) { throw new NoAuthorizationException(
+	        if (currentUserOffice.doesNotHaveAnOfficeInHierarchyWithId(officeId)) { throw new NoAuthorizationException(
 	                "User does not have sufficient priviledges to act on the provided office."); }
 
-	        Office officeToReturn = userOffice;
-	        if (!userOffice.identifiedBy(officeId)) {
+	        Office officeToReturn = currentUserOffice;
+	        if (!currentUserOffice.identifiedBy(officeId)) {
 	            officeToReturn = this.officeRepository.findOne(officeId);
 	            if (officeToReturn == null) { throw new OfficeNotFoundException(officeId); }
 	        }
@@ -172,19 +180,19 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 	
 	@Transactional
 	@Override
-	public CommandProcessingResult saveOrUpdatePartnerImage(final Long partnerId, final String imageName,final InputStream inputStream) {
+	public CommandProcessingResult saveOrUpdatePartnerImage(final Long officeId, final String imageName,final InputStream inputStream) {
 		try {
 
-			final Office office =this.officeRepository.findOne(partnerId);
+			final Office office =this.officeRepository.findOne(officeId);
 			final OfficeAddress officeAddress = this.addressRepository.findOneWithPartnerId(office);
 			if (officeAddress == null) {
-				throw new OfficeNotFoundException(partnerId);
+				throw new OfficeNotFoundException(officeId);
 			}
-			final String imageUploadLocation = setupForPartnerImageUpdate(partnerId, officeAddress);
+			final String imageUploadLocation = setupForPartnerImageUpdate(officeId, officeAddress);
 			final String imageLocation = FileUtils.saveToFileSystem(inputStream, imageUploadLocation, imageName);
 			officeAddress.setCompanyLogo(imageLocation);
 			this.addressRepository.save(officeAddress);
-			return new CommandProcessingResult(partnerId);
+			return new CommandProcessingResult(officeId);
 
 		} catch (IOException ioe) {
 			LOGGER.error(ioe.getMessage(), ioe);
@@ -194,19 +202,19 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 
 	@Transactional
 	@Override
-	public CommandProcessingResult saveOrUpdatePartnerImage(final Long partnerId, final Base64EncodedImage encodedImage) {
+	public CommandProcessingResult saveOrUpdatePartnerImage(final Long officeId, final Base64EncodedImage encodedImage) {
 
 		try {
-			final Office office =this.officeRepository.findOne(partnerId);
+			final Office office =this.officeRepository.findOne(officeId);
 			final OfficeAddress officeAddress = this.addressRepository.findOneWithPartnerId(office);
 			if (officeAddress == null) {
-				throw new OfficeNotFoundException(partnerId);
+				throw new OfficeNotFoundException(officeId);
 			}
-			final String imageUploadLocation = setupForPartnerImageUpdate(partnerId, officeAddress);
+			final String imageUploadLocation = setupForPartnerImageUpdate(officeId, officeAddress);
 			final String imageLocation = FileUtils.saveToFileSystem(encodedImage, imageUploadLocation, "image");
 			officeAddress.setCompanyLogo(imageLocation);
 			this.addressRepository.save(officeAddress);
-			return new CommandProcessingResult(partnerId);
+			return new CommandProcessingResult(officeId);
 			// return updatePartnerImage(partnerId, officeAddress, imageLocation);
 		} catch (IOException ioe) {
 			LOGGER.error(ioe.getMessage(), ioe);
@@ -226,6 +234,78 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			new File(imageUploadLocation).mkdirs();
 		}
 		return imageUploadLocation;
+	}
+
+
+	@Transactional
+	@Override
+	public CommandProcessingResult updatePartner(final JsonCommand command,final Long partnerId) {
+		
+		try {
+			final AppUser currentUser = context.authenticatedUser();
+			this.apiJsonDeserializer.validateForUpdate(command.json());
+			
+		    Long parentId = null;
+            if (command.parameterExists("parentId")) {
+                parentId = command.longValueOfParameterNamed("parentId");
+            }
+
+            final OfficeAdditionalInfo officeAdditionalInfo=this.officeAdditionalInfoRepository.findOne(partnerId);
+            final Office office = this.validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeAdditionalInfo.getOffice().getId());
+            if(office==null){
+            	throw new OfficeNotFoundException(partnerId);
+            }
+            //update office
+            final Map<String, Object> officeChanges = office.update(command);
+            if (officeChanges.containsKey("parentId")) {
+                final Office parent =this.validateUserPriviledgeOnOfficeAndRetrieve(currentUser, parentId);
+                office.update(parent);
+            }
+            
+            //update officeAddress
+           final  OfficeAddress officeAddress  = this.addressRepository.findOneWithPartnerId(office);
+           final Map<String, Object> addressChanges = officeAddress.update(command);
+           if(!addressChanges.isEmpty()){
+           office.setOfficeAddress(officeAddress);
+		   }
+           
+           //update additonal info
+           final Map<String, Object> infoChanges  = officeAdditionalInfo.update(command);
+           office.setOfficeAdditionalInfo(officeAdditionalInfo);
+           if(!infoChanges.isEmpty()){
+        	   office.setOfficeAdditionalInfo(officeAdditionalInfo);
+           }
+           
+           this.officeRepository.saveAndFlush(office);
+           
+           //update user
+           final Long  userId = command.longValueOfParameterNamed("userId");
+           final String loginName = command.stringValueOfParameterNamed("loginName");
+           final AppUser user=this.userRepository.findOne(userId);
+           if(!user.getUsername().equalsIgnoreCase(loginName)){
+        	   user.setUsername(loginName);
+           }else if(!user.getEmail().equalsIgnoreCase(officeAddress.getEmail())){
+        	   user.setEmail(officeAddress.getEmail());
+           }else{}
+           this.userRepository.saveAndFlush(user);
+           /*final String[] roles = command.arrayValueOfParameterNamed("roles");
+            JSONObject json = new JSONObject();
+		    json.put("username", loginName);
+		    json.put("firstname",office.getName());
+		    json.put("lastname", office.getName());
+		    json.put("sendPasswordToEmail",Boolean.FALSE);
+		    json.put("email",officeAddress.getEmail());
+		    json.put("officeId", office.getId());
+		    json.put("roles", roles);
+            this.userApiResource.updateUser(userId, json.toString());*/
+            
+	        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
+				       .withEntityId(officeAdditionalInfo.getId()).withOfficeId(office.getId()).with(officeChanges).build();
+			
+		}  catch (final DataIntegrityViolationException e) {
+			handleDataIntegrityIssues(command, e);
+			return new CommandProcessingResult(Long.valueOf(-1l));
+		} 
 	}
 
 }

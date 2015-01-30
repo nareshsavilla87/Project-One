@@ -50,10 +50,10 @@ PartnerDisbursementReadPlatformService {
 			sqlBuilder.append(" where st.id IS NOT NULL ");
 			
 	        if(sourceType != null){
-	        	sqlBuilder.append(" and (st.source_type ='"+sourceType+"') ");
+	        	sqlBuilder.append(" and (st.comm_source ='"+sourceType+"') ");
 		    }
 	        if(partnerType != null){
-	        	sqlBuilder.append(" and (o.partner_name ='"+partnerType+"') ");
+	        	sqlBuilder.append(" and (o.name ='"+partnerType+"') ");
 		    }
 			
 			if (search.isLimited()) {
@@ -76,10 +76,10 @@ PartnerDisbursementReadPlatformService {
 
 		public String schema() {
 
-				return " st.id AS id,o.partner_name as partnerName,st.d_date as transDate,st.source_type as source," +
-						"st.charge_amount as chargeAmount,st.commission_percentage as percentage," +
-						"st.commission_amount as commissionAmount,st.net_amount as netAmount FROM b_partner_settlement st " +
-						"LEFT JOIN b_office_additional_info o ON o.office_id = st.partner_id ";
+				return " st.id AS id, o.name as partnerName, st.created_dt as transDate, st.comm_source as source, st.share_amount as shareAmount,"
+                       + " st.share_type as commisionType,st.amt as commissionAmount,c.netcharge_amount as netChargeAmount,c.charge_amount as chargeAmount" 
+                       + " FROM b_office_commission st JOIN b_charge c ON st.charge_id = c.id JOIN m_office o ON  o.id= st.office_id ";
+
 
 		}
 
@@ -87,17 +87,18 @@ PartnerDisbursementReadPlatformService {
 		public PartnerDisbursementData mapRow(final ResultSet rs, final int rowNum)
 				throws SQLException {
 
-			Long id = rs.getLong("id");
-			String partnerName = rs.getString("partnerName");
-			Date transDate = rs.getDate("transDate");
-			String source = rs.getString("source");
-			String percentage = rs.getString("percentage");
-			Double chargeAmount = rs.getDouble("chargeAmount");
-			Double commissionAmount = rs.getDouble("commissionAmount");
-			Double netAmount = rs.getDouble("netAmount");
+			final Long id = rs.getLong("id");
+			final String partnerName = rs.getString("partnerName");
+			final Date transDate = rs.getDate("transDate");
+			final String source = rs.getString("source");
+			final String percentage = rs.getString("commisionType");
+			final Double shareAmount = rs.getDouble("shareAmount");
+			final Double commissionAmount = rs.getDouble("commissionAmount");
+			final Double chargeAmount = rs.getDouble("chargeAmount");
+			final Double netAmount = rs.getDouble("netChargeAmount");
 
 			return new PartnerDisbursementData(id, partnerName, transDate,
-					source, percentage, chargeAmount, commissionAmount, netAmount);
+					source, percentage, commissionAmount,chargeAmount, netAmount,shareAmount);
 
 		}
 	}
@@ -117,7 +118,7 @@ PartnerDisbursementReadPlatformService {
 	private static final class PartnerDataMapper implements RowMapper<PartnerDisbursementData> {
 
 		public String schema() {
-			return " bo.id as id,bo.partner_name as partnerName from b_office_additional_info bo ";
+			return " o.id as id,o.name as partnerName from m_office o inner join m_office_additional_info af where o.id=af.office_id";
 
 		}
 
