@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -150,5 +151,18 @@ public class PartnersAgreementApiResource {
 		return this.toApiJsonSerializer.serialize(result);
 	}
 	  
+	
+	@DELETE
+	@Path("{agreementId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deleteAgreement(@PathParam("agreementId") final Long agreementId) {
+
+		context.authenticatedUser();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteAgreement(agreementId).build();
+		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+
+	}
 
 }
