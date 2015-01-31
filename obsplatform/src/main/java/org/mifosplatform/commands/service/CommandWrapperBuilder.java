@@ -2642,28 +2642,38 @@ public class CommandWrapperBuilder {
 	}
 
 	public CommandWrapperBuilder updateAgreement(final Long agreementId) {
-		
 		this.actionName = "UPDATE";
 		this.entityName = "PARTNERAGREEMENT";
 		this.entityId = agreementId;
 		this.href = "";
 		return this;
 	}
+	
+	
+	public CommandWrapperBuilder deleteAgreement(final Long agreementId) {
+		this.actionName = "DELETE";
+		this.entityName = "PARTNERAGREEMENT";
+		this.entityId = agreementId;
+		this.href = "";
+		return this;
+	}
 
-public CommandWrapperBuilder updateVoucherPin(Long id) {
-	this.actionName = "UPDATE";
-	this.entityName = "VOUCHER";
-	this.entityId = id;
-	this.href = "/vouchers";
-	return this;
-}
-public CommandWrapperBuilder deleteVoucherPin(Long id) {
-	this.actionName = "DELETE";
-	this.entityName = "VOUCHER";
-	this.entityId = id;
-	this.href = "/vouchers";
-	return this;
-}
+	public CommandWrapperBuilder updateVoucherPin(Long id) {
+		this.actionName = "UPDATE";
+		this.entityName = "VOUCHER";
+		this.entityId = id;
+		this.href = "/vouchers";
+		return this;
+	}
+
+	public CommandWrapperBuilder deleteVoucherPin(Long id) {
+		this.actionName = "DELETE";
+		this.entityName = "VOUCHER";
+		this.entityId = id;
+		this.href = "/vouchers";
+		return this;
+	}
+
 
 }
 

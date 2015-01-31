@@ -9,5 +9,7 @@ public interface PartnersAgreementWritePlatformService {
 
 	CommandProcessingResult UpdatePartnerAgreement(JsonCommand command);
 
+	CommandProcessingResult deletePartnerAgreement(Long entityId);
+
 	
 }
