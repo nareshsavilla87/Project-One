@@ -25,6 +25,7 @@ public class JobParameterData {
 	private String emailId;
 	private String createTicket;
 	private String updateStatus;
+	private String mikrotikApi;
 	
 	public JobParameterData(List<JobParameters> jobParameters) {
               
@@ -70,8 +71,10 @@ public class JobParameterData {
             }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_Prov_System)){
                  this.provSystem=parameter.getParamValue();
 	
-
-            }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_IS_RENEWAL)){
+            }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_MIKROTIK_API)){
+			     this.mikrotikApi=parameter.getParamValue();
+					
+		    }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_IS_RENEWAL)){
                 
             	this.isAutoRenewal=parameter.getParamValue();
             	
@@ -187,19 +190,9 @@ public class JobParameterData {
 		this.updateStatus = updateStatus;
 	}
 	
-	
-	
-	
-	
-	
+	public String getMikrotikApi() {
+		return mikrotikApi;
+	}
 
 	
-
-	
-	
-	
-	
-
-	
-
 }
