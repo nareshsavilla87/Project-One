@@ -157,5 +157,11 @@ public class Agreement extends AbstractAuditableCustom<AppUser, Long> {
 		return actualChanges;
 	}
 
+	public void delete() {
 
+		if (this.isDeleted == 'N') {
+			this.isDeleted = 'Y';
+			this.endDate = new Date();
+		}
+	}
 }
