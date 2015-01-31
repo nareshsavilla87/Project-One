@@ -12,6 +12,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import me.legrange.mikrotik.ApiConnection;
+import me.legrange.mikrotik.MikrotikApiException;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -666,241 +669,279 @@ public void processNotify() {
 		return output1;
 	}
 	
+	private void processRadiusSessionDisConnection(String mikrotikData, String userName) {
+		
+		try{
+			
+			if(null != mikrotikData){
+				
+				JSONObject object = new JSONObject(mikrotikData);
+				String hostAddress = object.getString("ip");
+				String hostUName = object.getString("uname");
+				String password = object.getString("pwd");
+				
+				ApiConnection con = ApiConnection.connect(hostAddress);
+				con.login(hostUName,password); 
+				
+				List<Map<String, String>> res = con.execute("/ip/hotspot/active/print where name="+userName);
+		        for (Map<String, String> attr : res) {
+		            String id = attr.get(".id");
+		            con.execute("/ip/hotspot/active/remove .id=" + id);
+		            System.out.println("Session Deleted For "+ userName);   
+		        }
+			}	
+			
+		} catch (JSONException e) {
+			System.out.println("Mikrotik JobParameter is not a JsonObject");
+		} catch (MikrotikApiException e) {
+			System.out.println("Mikrotik Api Exception:" + e.getCause().getMessage());
+		} catch (InterruptedException e) {
+			System.out.println("Interrupted Exception:"+ e.getCause().getMessage());
+		}
+	}
+
 	@Override
 	@CronTarget(jobName = JobName.RADIUS)
 	public void processMiddleware() {
-
 		try {
 			System.out.println("Processing Radius Details.......");
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
-
 			if (data != null) {
 				MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 				LocalTime date = new LocalTime(zone);
 				String dateTime = date.getHourOfDay() + "_" + date.getMinuteOfHour() + "_" + date.getSecondOfMinute();
-				
 				String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
 				byte[] encoded = Base64.encodeBase64(credentials.getBytes());
 				String encodePassword = new String(encoded);
-
 				HttpClient httpClient = new DefaultHttpClient();
+				
 				List<EntitlementsData> entitlementDataForProcessings = this.entitlementReadPlatformService
-						.getProcessingData(new Long(100), data.getProvSystem(), null);
-
+						.getProcessingData(new Long(100), RadiusJobConstants.ProvisioningSystem, null);
+				
 				if (!entitlementDataForProcessings.isEmpty()) {
-
+					
 					String path = FileUtils.generateLogFileDirectory() + JobName.RADIUS.toString() + File.separator
 							+ "radius_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".log";
-
+					
 					File fileHandler = new File(path.trim());
 					fileHandler.createNewFile();
 					FileWriter fw = new FileWriter(fileHandler);
 					FileUtils.BILLING_JOB_PATH = fileHandler.getAbsolutePath();
-
 					fw.append("Processing Radius Details....... \r\n");
 					fw.append("Radius Server Details.....\r\n");
 					fw.append("UserName of Radius:" + data.getUsername() + " \r\n");
 					fw.append("password of Radius: ************** \r\n");
 					fw.append("url of Radius:" + data.getUrl() + " \r\n");
-
+					
 					for (EntitlementsData entitlementsData : entitlementDataForProcessings) {
-
-						fw.append("EntitlementsData id=" + entitlementsData.getId() + " ,clientId="
-								+ entitlementsData.getClientId() + " ,RequestType="
-								+ entitlementsData.getRequestType() + "\r\n");
-
+						fw.append("EntitlementsData id=" + entitlementsData.getId() + " ,clientId=" + entitlementsData.getClientId() 
+								+ " ,RequestType=" + entitlementsData.getRequestType() + "\r\n");
 						Long clientId = entitlementsData.getClientId();
-
 						if (clientId == null || clientId == 0) {
 							throw new ClientNotFoundException(clientId);
 						}
-
 						ReceiveMessage = "";
 						ClientEntitlementData clientdata = this.entitlementReadPlatformService.getClientData(clientId);
-
+						
 						if (clientdata == null || clientdata.getSelfcareUsername() == null) {
-
 							String output = "Selfcare Not Created with this ClientId: " + clientId + " Properly.";
 							fw.append(output + " \r\n");
-							ReceiveMessage = RadiusJobConstants.FAILURE	+ output;
-
+							ReceiveMessage = RadiusJobConstants.FAILURE + output;
+						
 						} else if (entitlementsData.getRequestType().equalsIgnoreCase(RadiusJobConstants.ChangePlan)) {
-
 							try {
-
-								String userName = clientdata.getSelfcareUsername();
-								String deletePlanUrl = data.getUrl() + "raduser/" + userName;
-
-								String deleteOutput = processRadiusDeleteRequests(deletePlanUrl, encodePassword, fw);
-
-								fw.append("Output from Server For Delete Plan: " + deleteOutput + " \r\n");
-
-								if (deleteOutput.equalsIgnoreCase("UnauthorizedException")
-										|| deleteOutput.equalsIgnoreCase("ResourceNotFoundException")) {
-									return;
-
-								} else if (deleteOutput.trim().contains(RadiusJobConstants.RADIUS_DELETE_OUTPUT)) {
-
-									JSONObject jsonObject = new JSONObject(entitlementsData.getProduct());
-									String planIdentification = jsonObject.getString("planIdentification");
-
-									if (planIdentification != null && !planIdentification.equalsIgnoreCase("")) {
-
+								String planIdentification = null;
+								JSONObject jsonObject = new JSONObject(entitlementsData.getProduct());
+								
+								if (jsonObject.has("planIdentification")) {
+									planIdentification = jsonObject.getString("planIdentification");
+								}
+								if (planIdentification == null || planIdentification.isEmpty() || planIdentification.equalsIgnoreCase("")) {
+									fw.append("Plan Identification should Not Mapped Properly, Plan Identification=" + planIdentification + " \r\n");
+									ReceiveMessage = RadiusJobConstants.FAILURE + "Plan Identification "
+											+ " should Not Mapped Properly and Plan Identification=" + planIdentification;
+								}
+								if (data.getProvSystem().equalsIgnoreCase(RadiusJobConstants.RADIUS_VERSION_ONE)) {
+									
+									String userName = clientdata.getSelfcareUsername();
+									String deletePlanUrl = data.getUrl() + "raduser/" + userName;
+									String deleteOutput = processRadiusDeleteRequests(deletePlanUrl, encodePassword, fw);
+									
+									fw.append("Output from Server For Delete Plan: " + deleteOutput + " \r\n");
+									
+									if (deleteOutput.trim().contains(RadiusJobConstants.RADIUS_DELETE_OUTPUT)) {
+										
 										JSONObject object = new JSONObject();
 										object.put("username", clientdata.getSelfcareUsername());
 										object.put("groupname", planIdentification);
 										object.put("priority", Long.valueOf(1));
-
 										String url = data.getUrl() + "raduser";
-
 										String output = processRadiusRequests(url, encodePassword, object.toString(), fw);
-
-										if (output.equalsIgnoreCase("UnauthorizedException")
-												|| output.equalsIgnoreCase("ResourceNotFoundException")) {
+										
+										if (output.trim().equalsIgnoreCase(RadiusJobConstants.RADUSER_CREATE_OUTPUT)) ReceiveMessage = "Success";
+										else if (output.equalsIgnoreCase("UnauthorizedException") || output.equalsIgnoreCase("ResourceNotFoundException"))
 											return;
-										} else if (output.trim().equalsIgnoreCase(RadiusJobConstants.RADUSER_CREATE_OUTPUT)) {
-											ReceiveMessage = "Success";
-										} else {
-											ReceiveMessage = RadiusJobConstants.FAILURE + output;
-										}
-
-										fw.append("Output from Server For Create Plan: " + output + " \r\n");
-
-									} else {
-
-										fw.append("Plan Identification should Not Mapped Properly, Plan Identification=" + planIdentification + " \r\n");
-										ReceiveMessage = RadiusJobConstants.FAILURE + "Plan Identification "
-												+ " should Not Mapped Properly and Plan Identification=" + planIdentification;
-									}
-
+										else ReceiveMessage = RadiusJobConstants.FAILURE + output;
+										
+										fw.append("Output from Server For Create Plan: "+ output + " \r\n");
+								
+									} else if (deleteOutput.equalsIgnoreCase("UnauthorizedException")
+											|| deleteOutput.equalsIgnoreCase("ResourceNotFoundException")) return;
+									else ReceiveMessage = RadiusJobConstants.FAILURE + deleteOutput;
+							
+								} else if (data.getProvSystem().equalsIgnoreCase(RadiusJobConstants.RADIUS_VERSION_TWO)) {
+									
 								} else {
-									ReceiveMessage = RadiusJobConstants.FAILURE + deleteOutput;
+									String output = "UNKNOWN Radius Version, Please check in RadiusJobConstants.java";
+									fw.append(output + " \r\n");
+									ReceiveMessage = RadiusJobConstants.FAILURE + output;
 								}
-
 							} catch (JSONException e) {
-
 								fw.append("JSON Exeception throwing. StockTrace:" + e.getMessage() + " \r\n");
 								ReceiveMessage = RadiusJobConstants.FAILURE + e.getMessage();
 							}
-
 						} else if (entitlementsData.getRequestType().equalsIgnoreCase(RadiusJobConstants.Activation)
 								|| entitlementsData.getRequestType().equalsIgnoreCase(RadiusJobConstants.ReConnection)
 								|| entitlementsData.getRequestType().equalsIgnoreCase(RadiusJobConstants.RENEWAL_AE)) {
-
 							try {
-								JSONObject createUser = new JSONObject();
-								createUser.put("username", clientdata.getSelfcareUsername());
-								createUser.put("attribute", "Cleartext-Password");
-								createUser.put("op", ":=");
-								createUser.put("value", clientdata.getSelfcarePassword());
-
-								String createUrl = data.getUrl() + "radcheck";
-								String createOutput = processRadiusRequests(createUrl, encodePassword, createUser.toString(), fw);
-
-								if (createOutput.equalsIgnoreCase("UnauthorizedException")
-										|| createOutput.equalsIgnoreCase("ResourceNotFoundException")) {
-									return;
-
-								} else if (createOutput.trim().contains(RadiusJobConstants.RADCHECK_OUTPUT)) {
-
-									JSONObject jsonObject = new JSONObject(entitlementsData.getProduct());
-									String planIdentification = jsonObject.getString("planIdentification");
-
-									if (planIdentification != null && !planIdentification.equalsIgnoreCase("")) {
-
+								JSONObject jsonObject = new JSONObject(entitlementsData.getProduct());
+								String planIdentification = jsonObject.getString("planIdentification");
+								if (planIdentification == null || planIdentification.isEmpty() || planIdentification.equalsIgnoreCase("")) {
+									
+									fw.append("Plan Identification should Not Mapped Properly, Plan Identification=" + planIdentification + " \r\n");
+									ReceiveMessage = RadiusJobConstants.FAILURE + "Plan Identification " 
+									+ " should Not Mapped Properly and Plan Identification=" + planIdentification;
+								}
+								
+								if (data.getProvSystem().equalsIgnoreCase(RadiusJobConstants.RADIUS_VERSION_ONE)) {
+									JSONObject createUser = new JSONObject();
+									createUser.put("username", clientdata.getSelfcareUsername());
+									createUser.put("attribute", "Cleartext-Password");
+									createUser.put("op", ":=");
+									createUser.put("value", clientdata.getSelfcarePassword());
+									String createUrl = data.getUrl() + "radcheck";
+								
+									String createOutput = processRadiusRequests(createUrl, encodePassword, createUser.toString(), fw);
+									
+									if (createOutput.trim().contains(RadiusJobConstants.RADCHECK_OUTPUT)) {
+										
 										JSONObject object = new JSONObject();
 										object.put("username", clientdata.getSelfcareUsername());
 										object.put("groupname", planIdentification);
 										object.put("priority", Long.valueOf(1));
-
 										String url = data.getUrl() + "raduser";
-
+									
 										String output = processRadiusRequests(url, encodePassword, object.toString(), fw);
-
-										if (output.equalsIgnoreCase("UnauthorizedException")
-												|| output.equalsIgnoreCase("ResourceNotFoundException")) {
-											return;
-										} else if (output.trim().equalsIgnoreCase(RadiusJobConstants.RADUSER_CREATE_OUTPUT)) {
-											ReceiveMessage = "Success";
-										} else {
-											ReceiveMessage = RadiusJobConstants.FAILURE + output;
-										}
-
+										
+										if (output.trim().equalsIgnoreCase(RadiusJobConstants.RADUSER_CREATE_OUTPUT)) ReceiveMessage = "Success";
+										else if (output.equalsIgnoreCase("UnauthorizedException")
+												|| output.equalsIgnoreCase("ResourceNotFoundException")) return;
+										else ReceiveMessage = RadiusJobConstants.FAILURE + output;
+										
 										fw.append("Output from Server For Create Plan: " + output + " \r\n");
-
-									} else {
-
-										fw.append("Plan Identification should Not Mapped Properly, Plan Identification=" + planIdentification + " \r\n");
-										ReceiveMessage = RadiusJobConstants.FAILURE + "Plan Identification "
-												+ " should Not Mapped Properly and Plan Identification=" + planIdentification;
-									}
-
+									
+									} else if (createOutput.equalsIgnoreCase("UnauthorizedException")
+											|| createOutput.equalsIgnoreCase("ResourceNotFoundException")) return;
+									else ReceiveMessage = RadiusJobConstants.FAILURE + createOutput;
+									
+									fw.append("Output from Server For Create User: " + createOutput + " \r\n");
+								
+								} else if (data.getProvSystem().equalsIgnoreCase(RadiusJobConstants.RADIUS_VERSION_TWO)) {
+									
+									JSONObject object = new JSONObject();
+									object.put("username", clientdata.getSelfcareUsername());
+									object.put("password", clientdata.getSelfcarePassword());
+									object.put("srvid", planIdentification);
+									object.put("firstname", clientdata.getFirstName());
+									object.put("lastname", clientdata.getLastName());
+									object.put("expiration", "");
+									object.put("createdon", data.getUsername());
+									object.put("email", clientdata.getEmailId());
+									String createUrl = data.getUrl() + "raduser2";
+									
+									String createOutput = processRadiusRequests(createUrl, encodePassword, object.toString(), fw);
+									
+									if (createOutput.trim().equalsIgnoreCase(RadiusJobConstants.RADCHECK_V2_CREATE_OUTPUT)) ReceiveMessage = "Success";
+									else if (createOutput.equalsIgnoreCase("UnauthorizedException")
+											|| createOutput.equalsIgnoreCase("ResourceNotFoundException")) return;
+									else ReceiveMessage = RadiusJobConstants.FAILURE + createOutput;
+									
+									fw.append("Output from Server For Create User With Plan: " + createOutput + " \r\n");
+								
 								} else {
-									ReceiveMessage = RadiusJobConstants.FAILURE + createOutput;
+									String output = "UNKNOWN Radius Version, Please check in RadiusJobConstants.java";
+									fw.append(output + " \r\n");
+									ReceiveMessage = RadiusJobConstants.FAILURE + output;
 								}
-								fw.append("Output from Server For Create User: " + createOutput + " \r\n");
-
 							} catch (JSONException e) {
-
 								fw.append("JSON Exeception throwing. StockTrace:" + e.getMessage() + " \r\n");
 								ReceiveMessage = RadiusJobConstants.FAILURE + e.getMessage();
 							}
-
+					
 						} else if (entitlementsData.getRequestType().equalsIgnoreCase(RadiusJobConstants.DisConnection)) {
-
+							
 							try {
-								String userName = clientdata.getSelfcareUsername();
-								String deletePlanUrl = data.getUrl() + "raduser/" + userName;
-								String deleteUserUrl = data.getUrl() + "radcheck/" + userName;
-
-								String deleteOutput = processRadiusDeleteRequests(deletePlanUrl, encodePassword, fw);
-
-								if (deleteOutput.equalsIgnoreCase("UnauthorizedException")
-										|| deleteOutput.equalsIgnoreCase("ResourceNotFoundException")) {
-									return;
-
-								} else if (deleteOutput.trim().contains(RadiusJobConstants.RADIUS_DELETE_OUTPUT)) {
-
-									String deleteUserOutput = processRadiusDeleteRequests(deleteUserUrl, encodePassword, fw);
-
-									if (deleteUserOutput.equalsIgnoreCase("UnauthorizedException")
-											|| deleteUserOutput.equalsIgnoreCase("ResourceNotFoundException")) {
+								if (data.getProvSystem().equalsIgnoreCase(RadiusJobConstants.RADIUS_VERSION_ONE)) {
+									String userName = clientdata.getSelfcareUsername();
+									String deletePlanUrl = data.getUrl() + "raduser/" + userName;
+									String deleteUserUrl = data.getUrl() + "radcheck/" + userName;
+									String deleteOutput = processRadiusDeleteRequests(deletePlanUrl, encodePassword, fw);
+									
+									if (deleteOutput.trim().contains(RadiusJobConstants.RADIUS_DELETE_OUTPUT)) {
+										
+										String deleteUserOutput = processRadiusDeleteRequests(deleteUserUrl, encodePassword, fw);
+										
+										if (deleteUserOutput.trim().contains(RadiusJobConstants.RADIUS_DELETE_OUTPUT)) {
+											processRadiusSessionDisConnection(data.getMikrotikApi().trim(), userName);
+											ReceiveMessage = "Success";
+										} else if (deleteUserOutput.equalsIgnoreCase("UnauthorizedException")
+												|| deleteUserOutput.equalsIgnoreCase("ResourceNotFoundException")) return;
+										else ReceiveMessage = RadiusJobConstants.FAILURE + deleteUserOutput;
+										
+										fw.append("Output from Server For Delete User: " + deleteUserOutput + " \r\n");
+									
+									} else if (deleteOutput.equalsIgnoreCase("UnauthorizedException")
+											|| deleteOutput.equalsIgnoreCase("ResourceNotFoundException"))
 										return;
-									} else if (deleteUserOutput.trim().contains(RadiusJobConstants.RADIUS_DELETE_OUTPUT)) {
-										ReceiveMessage = "Success";
-									} else {
-										ReceiveMessage = RadiusJobConstants.FAILURE + deleteUserOutput;
-									}
-
-									fw.append("Output from Server For Delete User: " + deleteUserOutput + " \r\n");
-
+									else ReceiveMessage = RadiusJobConstants.FAILURE + deleteOutput;
+								
+									fw.append("Output from Server For Delete Plan: " + deleteOutput + " \r\n");
+								
+								} else if (data.getProvSystem().equalsIgnoreCase(RadiusJobConstants.RADIUS_VERSION_TWO)) {
+									
+									String userName = clientdata.getSelfcareUsername();
+									String deleteUserUrl = data.getUrl() + "raduser2/" + userName;
+									String deleteOutput = processRadiusDeleteRequests(deleteUserUrl, encodePassword, fw);
+									
+									if (deleteOutput.trim().contains(RadiusJobConstants.RADIUS_V2_DELETE_OUTPUT)) ReceiveMessage = "Success";
+									else if (deleteOutput.equalsIgnoreCase("UnauthorizedException")
+											|| deleteOutput.equalsIgnoreCase("ResourceNotFoundException")) return;
+									else ReceiveMessage = RadiusJobConstants.FAILURE + deleteOutput;
+									
+									fw.append("Output from Server For Delete Plan: " + deleteOutput + " \r\n");
+								
 								} else {
-									ReceiveMessage = RadiusJobConstants.FAILURE + deleteOutput;
+									String output = "UNKNOWN Radius Version, Please check in RadiusJobConstants.java";
+									fw.append(output + " \r\n");
+									ReceiveMessage = RadiusJobConstants.FAILURE + output;
 								}
-								fw.append("Output from Server For Delete Plan: " + deleteOutput + " \r\n");
-
+							
 							} catch (Exception e) {
-
 								fw.append("Exeception throwing. StockTrace:" + e.getMessage() + " \r\n");
-								ReceiveMessage = RadiusJobConstants.FAILURE + e.getMessage();
+								ReceiveMessage = RadiusJobConstants.FAILURE	+ e.getMessage();
 							}
-
+						
 						} else {
-
 							try {
 								fw.append("Request Type is:" + entitlementsData.getRequestType());
 								fw.append("Unknown Request Type for Server (or) This Request Type is Not Handle in Radius Job");
 								ReceiveMessage = RadiusJobConstants.FAILURE + "Unknown Request Type for Server";
-
 							} catch (Exception e) {
-
 								fw.append("Exeception throwing. StockTrace:" + e.getMessage() + " \r\n");
 								ReceiveMessage = RadiusJobConstants.FAILURE + e.getMessage();
-
 							}
 						}
-
 						// Updating the Response and status in
 						// b_process_request.
 						JsonObject object = new JsonObject();
@@ -908,37 +949,32 @@ public void processNotify() {
 						object.addProperty("receivedStatus", new Long(1));
 						object.addProperty("receiveMessage", ReceiveMessage);
 						String entityName = "ENTITLEMENT";
-						
 						fw.append("sending json data to EntitlementApi is:" + object.toString() + "\r\n");
-
 						final JsonElement element1 = fromApiJsonHelper.parse(object.toString());
 						JsonCommand comm = new JsonCommand(null, object.toString(), element1, fromApiJsonHelper,
-								entityName, entitlementsData.getId(), null, null, null, null, null, null,
+								entityName, entitlementsData.getId(), null, null, null, null, null, null, 
 								null, null, null, null);
 						CommandProcessingResult result = this.entitlementWritePlatformService.create(comm);
 						fw.append("Result From the EntitlementApi is:" + result.resourceId() + " \r\n");
 					}
-
-					fw.append("Radius Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + " /r/n");
+					
+					fw.append("Radius Job is Completed..." + ThreadLocalContextUtil.getTenant().getTenantIdentifier() + " /r/n");
 					fw.flush();
 					fw.close();
-
+				
 				} else {
 					System.out.println("Radius data is Empty...");
 				}
 				httpClient.getConnectionManager().shutdown();
 				System.out.println("Radius Job is Completed...");
 			}
-
-		} catch (DataIntegrityViolationException exception) {
-			System.out.println("catching the DataIntegrityViolationException, StockTrace: " + exception.getMessage());
-
-		} catch (IOException e) {
-			System.out.println("catching the IOException, StockTrace: " + e.getMessage());
-
-		} catch (Exception exception) {
+		
+		} catch (DataIntegrityViolationException exception) {	
+			System.out.println("catching the DataIntegrityViolationException, StockTrace: " + exception.getMessage());	
+		} catch (IOException e) {	
+			System.out.println("catching the IOException, StockTrace: " + e.getMessage());	
+		} catch (Exception exception) {	
 			System.out.println(exception.getMessage());
-
 		}
 	}
 
