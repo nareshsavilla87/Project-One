@@ -32,8 +32,6 @@ import org.mifosplatform.finance.billingmaster.api.BillingMasterApiResourse;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.finance.billingorder.service.InvoiceClient;
-import org.mifosplatform.infrastructure.configuration.domain.Configuration;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -1058,6 +1056,7 @@ public void reportStatmentPdf() {
 					if(output.isEmpty()){
 						fw.append("Exporting data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}else{
+						fw.append("No of records inserted :" + output.values());
 						fw.append("Exporting data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}
 				fw.flush();

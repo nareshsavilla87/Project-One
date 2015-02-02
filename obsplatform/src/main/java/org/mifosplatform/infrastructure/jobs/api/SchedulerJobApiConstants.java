@@ -54,6 +54,7 @@ public class SchedulerJobApiConstants {
     public static final String jobisCreateTicket="isCreateTicket";
     public static final String jobTicket="Ticket";
     public static final String JOB_MESSANGER = "Merge Messages";
+	public static final String JOB_EXPORT_DATA = "Export Data";
     
     public static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobIdentifierParamName,
             displayNameParamName, nextRunTimeParamName, initializingErrorParamName, cronExpressionParamName, jobActiveStatusParamName,
