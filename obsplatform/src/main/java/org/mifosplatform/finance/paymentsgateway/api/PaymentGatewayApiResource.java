@@ -388,38 +388,50 @@ public class PaymentGatewayApiResource {
 			String txnId = String.valueOf(output.get("txnId"));
 			String amount = String.valueOf(output.get("amount"));
 			String currency = String.valueOf(output.get("currency"));
+			String error = String.valueOf(output.get("error"));
+			String cardType = null;
+			String cardNumber = null;
 			
 			if(currency.equalsIgnoreCase("ISK")){
 				amount = amount.replace('.', ',');
+			}
+			
+			JSONObject apiObject = new JSONObject(apiRequestBodyAsJson);
+			
+			if(apiObject.has("cardType")){
+				cardType = apiObject.getString("cardType");
+			}
+			
+			if(apiObject.has("cardNumber")){
+				cardNumber = apiObject.getString("cardNumber");
 			}
 			
 			String totalAmount =  amount + " " + currency;
 			
 			Long clientId = Long.valueOf(client);
 			
-			
-			if(status.equalsIgnoreCase("FAILURE")){
+			if(status.equalsIgnoreCase("Success")){
 				
-				String error = String.valueOf(output.get("error"));
-				
-				JSONObject object = new JSONObject();
-				object.put("Result", "FAILURE");
-				object.put("Description", error);
-				object.put("Amount", totalAmount);
-				object.put("ObsPaymentId", "");
-				object.put("TransactionId", txnId);
-				
-				this.paymentGatewayWritePlatformService.emailSending(clientId, status, error, txnId, totalAmount);
-				
-				return object.toString();
-	
-			}else{
 				Long pgId = Long.valueOf(String.valueOf(output.get("pgId")));
 				String OutputData = this.paymentGatewayWritePlatformService.payment(clientId, pgId, txnId, amount);
 				
 				JSONObject object = new JSONObject(OutputData);
 				
-				this.paymentGatewayWritePlatformService.emailSending(clientId, object.getString("Result"), object.getString("Description"), txnId, totalAmount);
+				this.paymentGatewayWritePlatformService.emailSending(clientId, object.getString("Result"), 
+						object.getString("Description"), txnId, totalAmount, cardType, cardNumber);
+				
+				return object.toString();
+				
+			} else{
+				
+				JSONObject object = new JSONObject();
+				object.put("Result", status.toUpperCase());
+				object.put("Description", error);
+				object.put("Amount", totalAmount);
+				object.put("ObsPaymentId", "");
+				object.put("TransactionId", txnId);
+				
+				this.paymentGatewayWritePlatformService.emailSending(clientId, status, error, txnId, totalAmount, cardType, cardNumber);
 				
 				return object.toString();
 			}

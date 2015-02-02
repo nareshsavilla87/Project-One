@@ -32,14 +32,17 @@ public class VoucherData {
 	private String isProcessed;
 	private String planCode;
 	private Collection<OfficeData> offices;
+	private Long priceId;
+	private String pinNo;
+	private String status;
+	private Long clientId;
 
-	
 	public VoucherData(final String batchName, final Long officeId,
 			final Long length, final String pinCategory, final String pinType, final Long quantity,
 			final String serial, final Date expiryDate, final String beginWith,
-			final String pinValue, final Long id, final String planCode, final String isProcessed) {
+			final String pinValue, final Long id, final String planCode, final String isProcessed, 
+			final String pinNo, final String status, final Long clientId) {
 
-		// TODO Auto-generated constructor stub
 		this.batchName=batchName;
 		this.officeId=officeId;
 		this.length=length;
@@ -53,6 +56,9 @@ public class VoucherData {
 		this.id=id;
 		this.planCode=planCode;
 		this.isProcessed=isProcessed;
+		this.pinNo = pinNo;
+		this.status = status;
+		this.clientId = clientId;
 	}
 
 	/**
@@ -86,6 +92,15 @@ public class VoucherData {
 		this.pinValue = pinValue;
 		this.expiryDate = new LocalDate(expiryDate);
 		
+	}
+
+	public VoucherData(Long id,String batchName) {
+		
+		this.id = id;
+		this.batchName = batchName;
+	}
+	public VoucherData(Long priceId) {
+		this.priceId = priceId;
 	}
 
 	public List<EnumOptionData> getPinCategoryData() {
@@ -193,7 +208,5 @@ public class VoucherData {
 		return offices;
 	}
 
-	
-	
 
 }

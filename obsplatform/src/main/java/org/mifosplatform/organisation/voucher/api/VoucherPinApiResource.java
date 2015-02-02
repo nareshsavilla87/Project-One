@@ -7,8 +7,10 @@ import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -22,12 +24,14 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
@@ -47,6 +51,7 @@ import com.google.gson.JsonObject;
  * <p>A <code>VoucherPinApiResource</code> includes methods for 
  * Generating the Vouchers and Downloading the Vouchers List.
  * @author  ashokreddy
+ * @author rakesh
  */
 
 @Path("/vouchers")
@@ -135,7 +140,7 @@ public class VoucherPinApiResource {
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveTemplate(@Context final UriInfo uriInfo) {
+	public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("isBatchTemplate") final String isBatchTemplate) {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		
@@ -152,10 +157,9 @@ public class VoucherPinApiResource {
 		return this.toApiJsonSerializer.serialize(settings, voucherData, RESPONSE_PARAMETERS);
 	}
 
-	
 	/**
 	 * This method <code>retrieveVoucherGroups</code> 
-	 * used for Retrieving the All Voucherpin Groups/Batch Data.
+	 * used for Retrieving the All Voucherpins Data.
 	 * 
 	 * @param uriInfo
 	 * 			Containing Url information 
@@ -173,6 +177,32 @@ public class VoucherPinApiResource {
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		
 		return this.toApiJsonSerializer.serialize(settings, randomGenerator, RESPONSE_PARAMETERS);
+	}
+	
+	
+	/**
+	 * This method <code>retrieveVoucherGroups</code> 
+	 * used for Retrieving the All Voucherpin Groups/Batch wise Data.
+	 * 
+	 * @param uriInfo
+	 * 			Containing Url information 
+	 * @return
+	 */	
+	@Path("voucherslist/{id}")
+	@GET
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveVouchersByid(@Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch,
+			@QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset,
+			@QueryParam("statusType") final String statusType, @PathParam("id") final Long id) {
+		
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final SearchSqlQuery searchVoucher = SearchSqlQuery.forSearch(sqlSearch, offset,limit );
+		final Page<VoucherData> randomGenerator = this.readPlatformService.getAllVoucherById(searchVoucher, statusType, id);
+		
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		
+		return this.toApiJsonSerializer.serialize(randomGenerator);
 	}
 	
 	/**
@@ -247,5 +277,26 @@ public class VoucherPinApiResource {
 		return this.toApiJsonSerializer.serialize(settings, voucherData, RESPONSE_PARAMETERS);
 	}
 	
+	@PUT
+	@Path("{id}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String updateVoucherPins(@PathParam("id") final Long id, final String apiRequestBodyAsJson) {
+		
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateVoucherPin(id).withJson(apiRequestBodyAsJson).build();
+		final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+	}
+
+	@POST
+	@Path("delete/{id}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deleteVoucherPins(@PathParam("id") final Long id, final String apiRequestBodyAsJson) {
+		
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteVoucherPin(id).withJson(apiRequestBodyAsJson).build();
+		final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+	}
 
 }
