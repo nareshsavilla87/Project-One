@@ -122,7 +122,7 @@ public class DiscountMasterAPiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String createNewDiscount(final String apiRequestBodyAsJson) {
 
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		context.authenticatedUser();
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().createDiscount().withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
@@ -160,11 +160,9 @@ public class DiscountMasterAPiResource {
 	@Path("{discountId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String updateDiscount(
-			@PathParam("discountId") final Long discountId,
-			final String apiRequestBodyAsJson) {
+	public String updateDiscount(@PathParam("discountId") final Long discountId,final String apiRequestBodyAsJson) {
 
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		context.authenticatedUser();
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDiscount(discountId).withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
@@ -180,7 +178,7 @@ public class DiscountMasterAPiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String deleteDiscount(@PathParam("discountId") final Long discountId) {
 
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		context.authenticatedUser();
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteDiscount(discountId).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
