@@ -378,7 +378,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 					.getJSONObject("getTransactionsResponse")
 					.getJSONObject("getTransactionsResult");
 			
-			String resultsetString = (String)transactionResultset.get("resultset"); 
+			String resultsetString = (String)transactionResultset.get("resultset").toString(); 
 			
 			if(resultsetString.equalsIgnoreCase("")){
 				

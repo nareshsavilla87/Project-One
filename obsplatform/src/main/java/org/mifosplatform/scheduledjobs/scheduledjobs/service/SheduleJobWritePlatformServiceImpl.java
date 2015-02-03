@@ -19,16 +19,18 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.crm.ticketmaster.api.TicketMasterApiResource;
 import org.mifosplatform.crm.ticketmaster.service.TicketMasterReadPlatformService;
 import org.mifosplatform.finance.billingmaster.api.BillingMasterApiResourse;
@@ -669,7 +671,118 @@ public void processNotify() {
 		return output1;
 	}
 	
-	private void processRadiusSessionDisConnection(String mikrotikData, String userName) {
+	private static String processRadiusGetRequests(String url, String encodePassword, FileWriter fw) throws IOException{
+		
+		HttpClient httpDeleteClient = new DefaultHttpClient();
+		
+		fw.append("Request Send to :" + url + "\r\n");
+		
+		HttpGet getRequest = new HttpGet(url);
+		getRequest.setHeader("Authorization", "Basic " + encodePassword);
+		getRequest.setHeader("Content-Type", "application/json");
+		
+		HttpResponse response = httpDeleteClient.execute(getRequest);
+		
+		if (response.getStatusLine().getStatusCode() == 404) {
+			System.out.println("ResourceNotFoundException : HTTP error code : "
+							+ response.getStatusLine().getStatusCode());
+			fw.append("ResourceNotFoundException : HTTP error code : " 		
+					+ response.getStatusLine().getStatusCode() + ", Request url:" + url + "is not Found. \r\n");
+			
+			return "ResourceNotFoundException";
+
+		} else if (response.getStatusLine().getStatusCode() == 401) {
+			System.out.println(" Unauthorized Exception : HTTP error code : "
+							+ response.getStatusLine().getStatusCode());
+			fw.append(" Unauthorized Exception : HTTP error code : "
+					+ response.getStatusLine().getStatusCode()
+					+ " , The UserName or Password you entered is incorrect." + "\r\n");
+			
+			return "UnauthorizedException"; 
+
+		} else if (response.getStatusLine().getStatusCode() != 200) {
+			System.out.println("Failed : HTTP error code : " + response.getStatusLine().getStatusCode());
+			fw.append("Failed : HTTP error code : " + response.getStatusLine().getStatusCode() + " \r\n");
+		} else{
+			fw.append("Request executed Successfully... \r\n");
+		}
+		
+		BufferedReader br = new BufferedReader(new InputStreamReader((response.getEntity().getContent())));
+		String output,output1="";
+		
+		while ((output = br.readLine()) != null) {
+			output1 = output1 + output;
+		}
+		
+		br.close();
+		httpDeleteClient.getConnectionManager().shutdown();
+		
+		return output1;
+	}
+	
+	private void processRadiusSessionOperation(String mikrotikData, String userName, String requestType, String value) {
+		
+		try{
+			
+			if(null != mikrotikData && null != userName){
+				String prefixCommand = null;
+				JSONObject object = new JSONObject(mikrotikData);
+				String hostAddress = object.getString("ip");
+				String hostUName = object.getString("userName");
+				String password = object.getString("password");
+				String type = object.getString("type");
+				int port = Integer.parseInt(object.getString("port"));
+				
+				ApiConnection con = ApiConnection.connect(hostAddress,port);
+				con.login(hostUName,password); 
+				
+				if(type != null && type.equalsIgnoreCase(RadiusJobConstants.RADIUS_HOTSPOT))prefixCommand = "/ip/hotspot/";
+				
+				if(type != null && type.equalsIgnoreCase(RadiusJobConstants.RADIUS_PPPOE)) prefixCommand = "/ppp/";
+				
+				if(prefixCommand !=null && requestType != null && userName != null && !userName.isEmpty()){
+					
+					if(requestType.equalsIgnoreCase(RadiusJobConstants.DisConnection)){
+						List<Map<String, String>> res = con.execute(prefixCommand + "active/print where name=" + userName);
+				        for (Map<String, String> attr : res) {
+				            String id = attr.get(".id");
+				            con.execute(prefixCommand + "active/remove .id=" + id);
+				            System.out.println("Session Deleted For "+ userName);   
+				        }
+					}else if(requestType.equalsIgnoreCase(RadiusJobConstants.ChangePlan)){
+						if(null != value){
+							String name = "<"+ type + "-" + userName + ">";
+							String printCommand = "/queue/simple/print where name='"+name+"'";
+							System.out.println("Specific user command : " + printCommand);
+							List<Map<String, String>> res = con.execute(printCommand);
+							
+							for (Map<String, String> attr : res) {
+							    String id = attr.get(".id");
+							    String command = "/queue/simple/set max-limit=" + value + " limit-at=" + value + " .id="+id;
+							    System.out.println("Executing command : " + command);
+							    con.execute(command);
+							    System.out.println("plan changed Successfully. bandwidth="+value);
+							}
+						}	
+					}
+
+				} else{
+					System.out.println("Please Configure the Mikrotik Data Properly");
+				
+				}
+				
+			}	
+			
+		} catch (JSONException e) {
+			System.out.println("Mikrotik JobParameter is not a JsonObject");
+		} catch (MikrotikApiException e) {
+			System.out.println("Mikrotik Api Exception:" + e.getCause().getMessage());
+		} catch (InterruptedException e) {
+			System.out.println("Interrupted Exception:"+ e.getCause().getMessage());
+		}
+	}
+	
+	/*private void processRadiusSessionDisConnection(String mikrotikData, String userName) {
 		
 		try{
 			
@@ -710,7 +823,7 @@ public void processNotify() {
 		} catch (InterruptedException e) {
 			System.out.println("Interrupted Exception:"+ e.getCause().getMessage());
 		}
-	}
+	}*/
 
 	@Override
 	@CronTarget(jobName = JobName.RADIUS)
@@ -778,7 +891,7 @@ public void processNotify() {
 								String planIdentification = null;
 								JSONObject jsonObject = new JSONObject(entitlementsData.getProduct());
 								
-								if(jsonObject.has("planIdentification")){
+								if(jsonObject != null && jsonObject.has("planIdentification")){
 									planIdentification = jsonObject.getString("planIdentification");
 								}
 								
@@ -809,7 +922,21 @@ public void processNotify() {
 
 										String output = processRadiusRequests(url, encodePassword, object.toString(), fw);
 
-										if (output.trim().equalsIgnoreCase(RadiusJobConstants.RADUSER_CREATE_OUTPUT)) ReceiveMessage = "Success"; 
+										if (output.trim().equalsIgnoreCase(RadiusJobConstants.RADUSER_CREATE_OUTPUT)) {
+											
+											String groupUrl = data.getUrl() + "radservice/group?groupname=" + planIdentification;
+											String groupData = processRadiusGetRequests(groupUrl, encodePassword, fw);
+											String value = null;
+											JSONObject groupObject = (JSONObject)new JSONArray(groupData).get(0);
+											
+											if(groupObject.has("value")){
+												value = groupObject.getString("value");
+											}
+											
+											processRadiusSessionOperation(data.getMikrotikApi().trim(), userName, RadiusJobConstants.ChangePlan, value);
+											ReceiveMessage = "Success"; 
+											
+										}
 										else if (output.equalsIgnoreCase("UnauthorizedException")
 												|| output.equalsIgnoreCase("ResourceNotFoundException")) return;
 										else ReceiveMessage = RadiusJobConstants.FAILURE + output;
@@ -936,7 +1063,7 @@ public void processNotify() {
 
 										if (deleteUserOutput.trim().contains(RadiusJobConstants.RADIUS_DELETE_OUTPUT)) {
 											
-											processRadiusSessionDisConnection(data.getMikrotikApi().trim(), userName);
+											processRadiusSessionOperation(data.getMikrotikApi().trim(), userName, RadiusJobConstants.DisConnection, null);
 											ReceiveMessage = "Success";
 										
 										} 
@@ -961,7 +1088,11 @@ public void processNotify() {
 
 									String deleteOutput = processRadiusDeleteRequests(deleteUserUrl, encodePassword, fw);
 								
-									if (deleteOutput.trim().contains(RadiusJobConstants.RADIUS_V2_DELETE_OUTPUT)) ReceiveMessage = "Success";
+									if (deleteOutput.trim().contains(RadiusJobConstants.RADIUS_V2_DELETE_OUTPUT)){
+										
+										processRadiusSessionOperation(data.getMikrotikApi().trim(), userName, RadiusJobConstants.DisConnection, null);
+										ReceiveMessage = "Success";
+									}
 										
 									else if (deleteOutput.equalsIgnoreCase("UnauthorizedException")
 											|| deleteOutput.equalsIgnoreCase("ResourceNotFoundException")) return; 
@@ -1038,6 +1169,7 @@ public void processNotify() {
 		}
 
 	}
+
 
 @Override
 @CronTarget(jobName = JobName.EVENT_ACTION_PROCESSOR)
