@@ -53,7 +53,10 @@ public class SchedulerJobApiConstants {
     public static final String JOB_SIMULATOR="Simulator";
     public static final String jobisCreateTicket="isCreateTicket";
     public static final String jobTicket="Ticket";
-    public static final String JOB_MESSANGER = "Merge Messages";
+    public static final String JOB_MESSANGER ="Merge Messages";
+    public static final String JOB_EXPORT_DATA ="Export Data";
+	public static final String JOB_RESELLER_COMMISSION ="Reseller Commission";
+	
     
     public static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobIdentifierParamName,
             displayNameParamName, nextRunTimeParamName, initializingErrorParamName, cronExpressionParamName, jobActiveStatusParamName,
@@ -88,4 +91,5 @@ public class SchedulerJobApiConstants {
     public static final String JOB_RUN_HISTORY = "runhistory";
     public static final String JOB_PARAMETERS = "jopparameters";
     public static final String SCHEDULER_STATUS_PATH = "scheduler";
+
 }

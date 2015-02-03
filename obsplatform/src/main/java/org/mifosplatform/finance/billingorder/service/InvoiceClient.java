@@ -27,10 +27,6 @@ public class InvoiceClient {
 	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
 	private final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer;
 	
-	
-	
-	
-	
 	@Autowired
 	InvoiceClient(final BillingOrderReadPlatformService billingOrderReadPlatformService,final GenerateBillingOrderService generateBillingOrderService,
 			final BillingOrderWritePlatformService billingOrderWritePlatformService,final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer) {
@@ -59,14 +55,17 @@ public class InvoiceClient {
 		            	  
           	                        invoiceData=invoiceServices(billingOrderData,clientId,processDate);
                  	             
-          	                   if(invoiceData!=null){
+          	                       if(invoiceData!=null){
           	            	
-	                               invoiceAmount=invoiceAmount.add(invoiceData.getInvoiceAmount());
-	                               nextBillableDate=invoiceData.getNextBillableDay();
-          	            }
+	                                 invoiceAmount=invoiceAmount.add(invoiceData.getInvoiceAmount());
+	                                 nextBillableDate=invoiceData.getNextBillableDay();
+          	                   }
+		                }
+		     }if(invoiceData !=null){
+	         	return invoiceData.getInvoice();
+	         }else{
+			throw new BillingOrderNoRecordsFoundException();
 		}
-		               }
-		return invoiceData.getInvoice();
 	}
 	
 	public GenerateInvoiceData invoiceServices(BillingOrderData billingOrderData,Long clientId,LocalDate processDate){
@@ -84,7 +83,7 @@ public class InvoiceClient {
 			this.billingOrderWritePlatformService.updateClientBalance(invoice,clientId,false);
 
 			// Update order-price
-			 billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
+			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
 			 System.out.println("---------------------"+billingOrderCommands.get(0).getNextBillableDate());
 			 
 			/* //office commision
@@ -92,9 +91,6 @@ public class InvoiceClient {
 		     if(clientAgreement.getOfficeType().equalsIgnoreCase("Agent")&&clientAgreement.getId()!=null) {
 			     this.billingOrderWritePlatformService.UpdateOfficeCommision(invoice,clientAgreement.getId());
 	           }*/
-               if(invoice.getInvoiceAmount() == null){
-            	   return null;
-               }
 		return new GenerateInvoiceData(clientId,billingOrderCommands.get(0).getNextBillableDate(),invoice.getInvoiceAmount(),invoice);
 	}
 	
