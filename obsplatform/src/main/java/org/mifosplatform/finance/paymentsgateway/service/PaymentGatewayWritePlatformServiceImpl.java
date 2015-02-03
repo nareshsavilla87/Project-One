@@ -800,11 +800,11 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 		body = body.replace("<PARAM4>", amount);
 		body = body.replace("<PARAM5>", orderId);
 		
-		if(body.contains("<PARAM6>")){
+		if(body.contains("<PARAM6>") && cardType != null ){
 			body = body.replace("<PARAM6>", cardType);
 		}
 		
-		if(body.contains("<PARAM7>")){
+		if(body.contains("<PARAM7>") && cardNumber != null){
 			body = body.replace("<PARAM7>", cardNumber);
 		}
 		
