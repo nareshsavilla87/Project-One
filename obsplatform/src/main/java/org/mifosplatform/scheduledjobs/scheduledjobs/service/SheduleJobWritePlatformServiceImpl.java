@@ -673,22 +673,34 @@ public void processNotify() {
 		
 		try{
 			
-			if(null != mikrotikData){
-				
+			if(null != mikrotikData && null != userName){
+				String prefixCommand = null;
 				JSONObject object = new JSONObject(mikrotikData);
 				String hostAddress = object.getString("ip");
-				String hostUName = object.getString("uname");
-				String password = object.getString("pwd");
+				String hostUName = object.getString("userName");
+				String password = object.getString("password");
+				String type = object.getString("type");
+				int port = Integer.parseInt(object.getString("port"));
 				
-				ApiConnection con = ApiConnection.connect(hostAddress);
+				ApiConnection con = ApiConnection.connect(hostAddress,port);
 				con.login(hostUName,password); 
 				
-				List<Map<String, String>> res = con.execute("/ip/hotspot/active/print where name="+userName);
-		        for (Map<String, String> attr : res) {
-		            String id = attr.get(".id");
-		            con.execute("/ip/hotspot/active/remove .id=" + id);
-		            System.out.println("Session Deleted For "+ userName);   
-		        }
+				if(type != null && type.equalsIgnoreCase(RadiusJobConstants.RADIUS_HOTSPOT))prefixCommand = "/ip/hotspot/";
+				
+				if(type != null && type.equalsIgnoreCase(RadiusJobConstants.RADIUS_PPPOE)) prefixCommand = "/ppp/";
+				
+				if(prefixCommand !=null){
+					List<Map<String, String>> res = con.execute(prefixCommand + "active/print where name=" + userName);
+			        for (Map<String, String> attr : res) {
+			            String id = attr.get(".id");
+			            con.execute(prefixCommand + "active/remove .id=" + id);
+			            System.out.println("Session Deleted For "+ userName);   
+			        }
+				} else{
+					System.out.println("Please Configure the Mikrotik Data Properly");
+				
+				}
+				
 			}	
 			
 		} catch (JSONException e) {
