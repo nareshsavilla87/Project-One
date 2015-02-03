@@ -18,6 +18,8 @@ public class RadiusJobConstants {
 	 
 	 public static final String RADIUS_VERSION_ONE = "version-1";
 	 public static final String RADIUS_VERSION_TWO = "version-2";
+	 public static final String RADIUS_HOTSPOT = "hotspot";
+	 public static final String RADIUS_PPPOE = "pppoe";
 	 
 	 //for RADIUS_VERSION_TWO
 	 public static final String RADCHECK_V2_CREATE_OUTPUT = "Radcheck is created";

@@ -35,6 +35,7 @@ import org.mifosplatform.finance.billingmaster.api.BillingMasterApiResourse;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.finance.billingorder.service.InvoiceClient;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
@@ -673,22 +674,34 @@ public void processNotify() {
 		
 		try{
 			
-			if(null != mikrotikData){
-				
+			if(null != mikrotikData && null != userName){
+				String prefixCommand = null;
 				JSONObject object = new JSONObject(mikrotikData);
 				String hostAddress = object.getString("ip");
-				String hostUName = object.getString("uname");
-				String password = object.getString("pwd");
+				String hostUName = object.getString("userName");
+				String password = object.getString("password");
+				String type = object.getString("type");
+				int port = Integer.parseInt(object.getString("port"));
 				
-				ApiConnection con = ApiConnection.connect(hostAddress);
+				ApiConnection con = ApiConnection.connect(hostAddress,port);
 				con.login(hostUName,password); 
 				
-				List<Map<String, String>> res = con.execute("/ip/hotspot/active/print where name="+userName);
-		        for (Map<String, String> attr : res) {
-		            String id = attr.get(".id");
-		            con.execute("/ip/hotspot/active/remove .id=" + id);
-		            System.out.println("Session Deleted For "+ userName);   
-		        }
+				if(type != null && type.equalsIgnoreCase(RadiusJobConstants.RADIUS_HOTSPOT))prefixCommand = "/ip/hotspot/";
+				
+				if(type != null && type.equalsIgnoreCase(RadiusJobConstants.RADIUS_PPPOE)) prefixCommand = "/ppp/";
+				
+				if(prefixCommand !=null){
+					List<Map<String, String>> res = con.execute(prefixCommand + "active/print where name=" + userName);
+			        for (Map<String, String> attr : res) {
+			            String id = attr.get(".id");
+			            con.execute(prefixCommand + "active/remove .id=" + id);
+			            System.out.println("Session Deleted For "+ userName);   
+			        }
+				} else{
+					System.out.println("Please Configure the Mikrotik Data Properly");
+				
+				}
+				
 			}	
 			
 		} catch (JSONException e) {
@@ -1198,24 +1211,22 @@ public void reportStatmentPdf() {
 				fileHandler.createNewFile();
 				FileWriter fw = new FileWriter(fileHandler);
 				FileUtils.BILLING_JOB_PATH = fileHandler.getAbsolutePath();
-				/*DriverManagerDataSource ds=new DriverManagerDataSource();
-			    ds.setUrl(tenant.databaseURL());
-			    ds.setUsername(tenant.getSchemaUsername());
-			    ds.setPassword(tenant.getSchemaPassword());*/
 				fw.append("Processing export data....\r\n");
-			
+			    
+				//procedure calling
 				 SimpleJdbcCall simpleJdbcCall=new SimpleJdbcCall(this.jdbcTemplate);
-					simpleJdbcCall.setProcedureName("p_int_fa");//p --> procedure int --> integration fa --> financial account s/w
-					MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+				 MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+					simpleJdbcCall.setProcedureName("p_int_fa");//p --> procedure int --> integration fa --> financial account s/w {p_todt=2014-12-30}
 					if (data.isDynamic().equalsIgnoreCase("Y")) {
-					     parameterSource.addValue("p_todt", new LocalDate().toDate(), Types.DATE);
+					     parameterSource.addValue("p_todt", new LocalDate().toString(), Types.DATE);
 					   } else {
-						   parameterSource.addValue("p_todt", data.getProcessDate().toDate(), Types.DATE);		
+						   parameterSource.addValue("p_todt", data.getProcessDate().toString(), Types.DATE);		
 					 }
 					Map<String, Object> output = simpleJdbcCall.execute(parameterSource);
 					if(output.isEmpty()){
 						fw.append("Exporting data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}else{
+						fw.append("No of records inserted :" + output.values());
 						fw.append("Exporting data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}
 				fw.flush();
