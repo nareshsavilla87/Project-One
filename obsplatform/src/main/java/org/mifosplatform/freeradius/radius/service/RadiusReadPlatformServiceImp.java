@@ -116,7 +116,6 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 		try {
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
-			
 			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
@@ -210,8 +209,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	public String retrieveRadServiceDetail(final Long radServiceId) {
 
 		try {
-			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
-			
+			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());		
 			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
