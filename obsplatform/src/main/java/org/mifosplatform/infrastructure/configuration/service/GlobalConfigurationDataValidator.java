@@ -78,6 +78,9 @@ public class GlobalConfigurationDataValidator {
         
         final String hostName = this.fromApiJsonHelper.extractStringNamed(ConfigurationConstants.HOSTNAME, element);
         baseDataValidator.reset().parameter(ConfigurationConstants.HOSTNAME).value(hostName).notBlank();
+        
+        final String setContentString = this.fromApiJsonHelper.extractStringNamed(ConfigurationConstants.SETCONENTSTRING, element);
+        baseDataValidator.reset().parameter(ConfigurationConstants.SETCONENTSTRING).value(setContentString).notBlank();
             
 
         if (!dataValidationErrors.isEmpty()) { throw new PlatformApiDataValidationException(dataValidationErrors); }
