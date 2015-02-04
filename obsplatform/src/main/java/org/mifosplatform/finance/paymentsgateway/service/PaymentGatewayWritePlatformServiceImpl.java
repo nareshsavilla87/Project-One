@@ -379,7 +379,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 					.getJSONObject("getTransactionsResponse")
 					.getJSONObject("getTransactionsResult");
 			
-			String resultsetString = (String)transactionResultset.get("resultset"); 
+			String resultsetString = (String)transactionResultset.get("resultset").toString(); 
 			
 			if(resultsetString.equalsIgnoreCase("")){
 				
@@ -800,7 +800,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 		body = body.replace("<PARAM4>", amount);
 		body = body.replace("<PARAM5>", orderId);
 		
-		if(body.contains("<PARAM6>") && cardType != null ){
+		if(body.contains("<PARAM6>") && cardType != null){
 			body = body.replace("<PARAM6>", cardType);
 		}
 		

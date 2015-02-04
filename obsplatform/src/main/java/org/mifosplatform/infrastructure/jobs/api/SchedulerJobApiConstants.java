@@ -56,8 +56,7 @@ public class SchedulerJobApiConstants {
     public static final String JOB_MESSANGER ="Merge Messages";
     public static final String JOB_EXPORT_DATA ="Export Data";
 	public static final String JOB_RESELLER_COMMISSION ="Reseller Commission";
-	
-    
+
     public static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobIdentifierParamName,
             displayNameParamName, nextRunTimeParamName, initializingErrorParamName, cronExpressionParamName, jobActiveStatusParamName,
             currentlyRunningParamName, lastRunHistoryObjParamName,schedulerJobParamName,cronDescriptionParamName,jobIsDynamic,

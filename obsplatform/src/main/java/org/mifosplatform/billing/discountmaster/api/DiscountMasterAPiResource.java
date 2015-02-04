@@ -160,9 +160,7 @@ public class DiscountMasterAPiResource {
 	@Path("{discountId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String updateDiscount(
-			@PathParam("discountId") final Long discountId,
-			final String apiRequestBodyAsJson) {
+	public String updateDiscount(@PathParam("discountId") final Long discountId,final String apiRequestBodyAsJson) {
 
 		context.authenticatedUser();
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateDiscount(discountId).withJson(apiRequestBodyAsJson).build();

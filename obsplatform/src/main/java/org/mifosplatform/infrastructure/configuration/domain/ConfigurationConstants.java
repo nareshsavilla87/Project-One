@@ -44,9 +44,10 @@ public class ConfigurationConstants {
 	public static final String HOSTNAME = "hostName";
 	public static final String PORT = "port";
 	public static final String STARTTLS = "starttls";
+	public static final String SETCONENTSTRING = "setContentString";
 	public static final String CONFIGURATION_RESOURCE_NAME = "globalConfiguration";
 	public static final Set<String> UPDATE_CONFIGURATION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(ENABLED, VALUE));
-	public static final Set<String> CREATE_CONFIGURATION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(NAME, MAIL,PASSWORD,HOSTNAME,PORT,STARTTLS));
+	public static final Set<String> CREATE_CONFIGURATION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(NAME, MAIL,PASSWORD,HOSTNAME,PORT,STARTTLS,SETCONENTSTRING));
 	
 	//Paymentgateway configurations
 	public static final String PAYMENTGATEWAY_MPESA = "MPESA";

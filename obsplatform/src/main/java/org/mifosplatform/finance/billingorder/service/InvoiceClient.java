@@ -26,20 +26,21 @@ public class InvoiceClient {
 	private final GenerateBillingOrderService generateBillingOrderService;
 	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
 	private final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer;
-	
+
 	@Autowired
-	InvoiceClient(final BillingOrderReadPlatformService billingOrderReadPlatformService,final GenerateBillingOrderService generateBillingOrderService,
-			final BillingOrderWritePlatformService billingOrderWritePlatformService,final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer) {
+	InvoiceClient(final BillingOrderReadPlatformService billingOrderReadPlatformService,
+			final GenerateBillingOrderService generateBillingOrderService,
+			final BillingOrderWritePlatformService billingOrderWritePlatformService,
+			final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer) {
+
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.generateBillingOrderService = generateBillingOrderService;
 		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
-		this.apiJsonDeserializer=apiJsonDeserializer;
-		
+		this.apiJsonDeserializer = apiJsonDeserializer;
 	}
-	
-	
-	public Invoice invoicingSingleClient(Long clientId, LocalDate processDate) {
 
+	public Invoice invoicingSingleClient(Long clientId, LocalDate processDate) {
+		
 		     // Get list of qualified orders
     		List<BillingOrderData> billingOrderDatas= billingOrderReadPlatformService.retrieveOrderIds(clientId, processDate);
 		         if (billingOrderDatas.size() == 0) {
@@ -70,7 +71,6 @@ public class InvoiceClient {
 	
 	public GenerateInvoiceData invoiceServices(BillingOrderData billingOrderData,Long clientId,LocalDate processDate){
 		
-			
             // Get qualified order complete details			
 		    List<BillingOrderData> products = this.billingOrderReadPlatformService.retrieveBillingOrderData(clientId, processDate,billingOrderData.getOrderId());
 			
@@ -92,19 +92,21 @@ public class InvoiceClient {
 			     this.billingOrderWritePlatformService.UpdateOfficeCommision(invoice,clientAgreement.getId());
 	           }*/
 		return new GenerateInvoiceData(clientId,billingOrderCommands.get(0).getNextBillableDate(),invoice.getInvoiceAmount(),invoice);
-	}
-	
+
+  }
+
+
 	public CommandProcessingResult createInvoiceBill(JsonCommand command) {
 		try {
 			// validation not written
-			 this.apiJsonDeserializer.validateForCreate(command.json());
+			this.apiJsonDeserializer.validateForCreate(command.json());
 			LocalDate processDate = ProcessDate.fromJson(command);
-			Invoice invoice=this.invoicingSingleClient(command.entityId(), processDate);
-			
+			Invoice invoice = this.invoicingSingleClient(command.entityId(),processDate);
+
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(invoice.getId()).build();
 
 		} catch (DataIntegrityViolationException dve) {
-			return CommandProcessingResult.empty();
+			return new CommandProcessingResult(Long.valueOf(-1));
 		}
 
 	}
