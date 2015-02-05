@@ -84,8 +84,8 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		BigDecimal paymentAmount = BigDecimal.ZERO;
 		BigDecimal dueAmount = BigDecimal.ZERO;
 		BigDecimal taxAmount = BigDecimal.ZERO;
-		//BigDecimal adjustMentsAndPayments = BigDecimal.ZERO;
 		BigDecimal oneTimeSaleAmount = BigDecimal.ZERO;
+		
 		for (final BillDetail billDetail : billDetails) {
 			if ("SERVICE_CHARGES".equalsIgnoreCase(billDetail.getTransactionType())) {
 				if (billDetail.getAmount() != null)
