@@ -209,8 +209,8 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 				this.orderHistoryRepository.save(orderHistory);
 		return new CommandProcessingResult(entityId,order.getClientId());		
 	   }catch(final WarrantyEndDateExpireException e){
-		   String[] strObj = (String[])e.getDefaultUserMessageArgs();
-		   throw new WarrantyEndDateExpireException(strObj[0]);
+		   Object[] obj = e.getDefaultUserMessageArgs();
+		   throw new WarrantyEndDateExpireException(obj[0].toString());
 	  }catch(final Exception dve){
 		   if(dve.getCause() instanceof DataIntegrityViolationException){
 		   handleDataIntegrityIssues(command,dve);
