@@ -103,10 +103,11 @@ public class ConfigurationApiResource {
         defaultOne.put("payment", "false");
 		defaultOne.put("IPTV", "false");
 		defaultOne.put("IsClientIndividual", "false");
-		defaultOne.put("deviceAgrementType", "false");
+		defaultOne.put("deviceAgrementType", "SALE");
 		defaultOne.put("SubscriptionPayment", "false");
 		defaultOne.put("nationalId", "false");
 		defaultOne.put("date_format", "dd MMMM yyyy");
+		defaultOne.put("codeDefinitionLength", "10");
 		
 		/*********  Preparing 'defaultOneForClientList' JSONObject ******/
 		defaultOneForClientList.put("userName", "false");
