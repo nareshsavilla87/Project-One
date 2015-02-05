@@ -1,3 +1,5 @@
+SET SQL_SAFE_UPDATES = 0;
+
 update job set name ='Requestor' where display_name='Requestor';
 
 update job set name ='Invoice' where display_name='Invoice';
@@ -85,9 +87,9 @@ CREATE TABLE IF NOT EXISTS `b_payment_followup` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 insert IGNORE into m_code VALUES (null,'Suspension Reason',0,'Reason for Order Suspension');
-select @a_lid:=last_insert_id();
-insert IGNORE into m_code_value VALUES (null,@a_lid,'Payment Due',0);
-insert IGNORE into m_code_value VALUES (null,@a_lid,'Vacations',0);
+select @id=(select id from m_code where code_name='Suspension Reason');
+insert IGNORE into m_code_value VALUES (null,@id,'Payment Due',0);
+insert IGNORE into m_code_value VALUES (null,@id,'Vacations',0);
 
 insert ignore into r_enum_value VALUES ('order_status',7,'REACTIVE','REACTIVE');
 insert ignore into m_permission VALUES (null,'Ordering','REACTIVE_ORDER','ORDER','REACTIVE',0);
@@ -111,8 +113,7 @@ call addreactivedate();
 
 Drop procedure IF EXISTS addreactivedate;
 
-
-
+SET SQL_SAFE_UPDATES = 1;
 
 
 
