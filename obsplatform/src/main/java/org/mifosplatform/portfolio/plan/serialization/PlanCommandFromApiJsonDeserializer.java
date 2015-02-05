@@ -69,8 +69,8 @@ public final class PlanCommandFromApiJsonDeserializer {
         if(isPrepaid){
         	final String volumeType=fromApiJsonHelper.extractStringNamed("volume", element);
         	baseDataValidator.reset().parameter("volume").value(volumeType).notNull();
-        	final Long units=fromApiJsonHelper.extractLongNamed("units", element);
-        	baseDataValidator.reset().parameter("units").value(units).notBlank().notExceedingLengthOf(19);
+        	final String units=fromApiJsonHelper.extractStringNamed("units", element);
+        	 baseDataValidator.reset().parameter("units").value(units).notBlank().validateforNumeric().notExceedingLengthOf(19);
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         
