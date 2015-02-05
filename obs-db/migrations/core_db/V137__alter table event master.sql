@@ -8,16 +8,16 @@ Begin
   IF NOT EXISTS (
      SELECT * FROM information_schema.COLUMNS
      WHERE COLUMN_NAME = 'event_category'
-     and TABLE_NAME = 'b_event_master'
+     and TABLE_NAME = 'b_mod_master'
      and TABLE_SCHEMA = DATABASE())THEN
-ALTER TABLE `b_event_master` ADD column `event_category` varchar(50) DEFAULT NULL;
+ALTER TABLE `b_mod_master` ADD column `event_category` varchar(50) DEFAULT NULL;
 END IF;
 IF  EXISTS (
      SELECT * FROM information_schema.COLUMNS
      WHERE COLUMN_NAME = 'charge_code'
-     and TABLE_NAME = 'b_event_master'
+     and TABLE_NAME = 'b_mod_masterr'
      and TABLE_SCHEMA = DATABASE())THEN
-ALTER TABLE `b_event_master` MODIFY `charge_code` varchar(10) null;
+ALTER TABLE `b_mod_master` MODIFY `charge_code` varchar(10) null;
 END IF;
 END //
 DELIMITER ;

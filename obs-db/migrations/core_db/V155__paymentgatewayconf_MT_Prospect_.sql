@@ -37,20 +37,6 @@ call alterprospectemail();
 Drop procedure IF EXISTS alterprospectemail;
 
 
-Drop procedure IF EXISTS renameTemp; 
-DELIMITER //
-create procedure renameTemp() 
-Begin
-IF EXISTS (
-     SELECT * FROM information_schema.COLUMNS
-     WHERE TABLE_NAME = 'temp' 
-     and TABLE_SCHEMA = DATABASE())THEN
-rename table temp to b_client_register;
-END IF;
-END //
-DELIMITER ;
-call renameTemp();
-Drop procedure IF EXISTS renameTemp;
 
 
 
