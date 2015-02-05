@@ -11,13 +11,18 @@ import java.util.List;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.template.domain.Template;
 import org.mifosplatform.template.domain.TemplateEntity;
 import org.mifosplatform.template.domain.TemplateMapper;
 import org.mifosplatform.template.domain.TemplateRepository;
 import org.mifosplatform.template.domain.TemplateType;
 import org.mifosplatform.template.exception.TemplateNotFoundException;
+import org.mifosplatform.template.serialization.TemplateCommandFromApiJsonDeserializer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,38 +31,52 @@ import com.google.gson.JsonElement;
 
 @Service
 public class TemplateServiceImp implements TemplateService {
-
+	
+	private final static Logger LOGGER = LoggerFactory.getLogger(TemplateServiceImp.class);
     private static final String PROPERTY_NAME = "name";
     private static final String PROPERTY_TEXT = "text";
    // private static final String PROPERTY_MAPPERS = "mappers";
     private static final String PROPERTY_ENTITY = "entity";
     private static final String PROPERTY_TYPE = "type";
 
+    private final TemplateRepository templateRepository;
+    private final TemplateCommandFromApiJsonDeserializer apiJsonDeserializer;
+    
     @Autowired
-    private TemplateRepository templateRepository;
+    public TemplateServiceImp(final TemplateRepository templateRepository,
+    		final TemplateCommandFromApiJsonDeserializer apiJsonDeserializer){
+    	
+    	this.templateRepository = templateRepository;
+    	this.apiJsonDeserializer = apiJsonDeserializer;
+    }
     
     
 
     @Transactional
     @Override
     public CommandProcessingResult createTemplate(final JsonCommand command) {
-        // FIXME - no validation here of the data in the command object, is
-        // name, text populated etc
+       
+    try{
+    	this.apiJsonDeserializer.validateForCreate(command.json());
         // FIXME - handle cases where data integrity constraints are fired from
         // database when saving.
         final Template template = Template.fromJson(command);
         this.templateRepository.saveAndFlush(template);
         return new CommandProcessingResultBuilder().withEntityId(template.getId()).build();
+       }catch(final DataIntegrityViolationException dve){
+    	    handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+      }
     }
-
-    @Transactional
+    
+	@Transactional
     @Override
     public CommandProcessingResult updateTemplate(final Long templateId, final JsonCommand command) {
-        // FIXME - no validation here of the data in the command object, is
-        // name, text populated etc
+     
+		try{
+		this.apiJsonDeserializer.validateForCreate(command.json());
         // FIXME - handle cases where data integrity constraints are fired from
         // database when saving.
-
         final Template template = findOneById(templateId);
         template.setName(command.stringValueOfParameterNamed(PROPERTY_NAME));
         template.setText(command.stringValueOfParameterNamed(PROPERTY_TEXT));
@@ -87,7 +106,11 @@ public class TemplateServiceImp implements TemplateService {
         this.templateRepository.saveAndFlush(template);
 
         return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(template.getId()).build();
-    }
+    }catch(final DataIntegrityViolationException dve){
+	    handleCodeDataIntegrityIssues(command, dve);
+		return new CommandProcessingResult(Long.valueOf(-1));
+      }
+	}
 
     @Transactional
     @Override
@@ -124,4 +147,18 @@ public class TemplateServiceImp implements TemplateService {
         }
         return template;
     }
+    
+    private void handleCodeDataIntegrityIssues(final JsonCommand command,final DataIntegrityViolationException dve) {
+		final Throwable realCause = dve.getMostSpecificCause();
+		if (realCause.getMessage().contains("unq_name")) {
+			final String name = command.stringValueOfParameterNamed("name");
+			throw new PlatformDataIntegrityException("error.msg.tempalte.duplicate.name",
+					"A template with '" + name + "'already exists","name", name);
+		}
+
+		LOGGER.error(dve.getMessage(), dve);
+		throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue",
+				"Unknown data integrity issue with resource: "+ realCause.getMessage());
+
+	}
 }

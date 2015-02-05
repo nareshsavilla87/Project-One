@@ -24,8 +24,11 @@ CREATE TABLE IF NOT EXISTS `b_template_mappers` (
   PRIMARY KEY (`id`)
 );
 
+INSERT IGNORE INTO m_permission VALUES (null, 'administration', 'CREATE_TEMPLATE', 'TEMPLATE', 'CREATE', '0');
+INSERT IGNORE INTO m_permission VALUES(null, 'administration', 'UPDATE_TEMPLATE', 'TEMPLATE', 'UPDATE', '0');
+INSERT IGNORE INTO m_permission VALUES(null, 'administration', 'DELETE_TEMPLATE', 'TEMPLATE', 'DELETE', '0');
 
-
+INSERT IGNORE INTO b_eventaction_mapping VALUES(null,'Create Payment','Create Payment','workflow_events','N','N');
 
 
 
