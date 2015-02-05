@@ -79,6 +79,7 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
 			final String hostName=command.stringValueOfParameterNamed(ConfigurationConstants.HOSTNAME);
 			final String port=command.stringValueOfParameterNamed(ConfigurationConstants.PORT);
 			final String starttls=command.stringValueOfParameterNamed(ConfigurationConstants.STARTTLS);
+			final String setContentString = command.stringValueOfParameterNamed(ConfigurationConstants.SETCONENTSTRING);
 						
 			final String unencodedPassword = password;
 			String encodedString = Base64.encodeBase64String(unencodedPassword.getBytes());
@@ -95,6 +96,7 @@ public class GlobalConfigurationWritePlatformServiceJpaRepositoryImpl implements
 			json.addProperty("hostName", hostName);
 			json.addProperty("port", port);
 			json.addProperty("starttls", starttls);
+			json.addProperty("setContentString", setContentString);
 			final Configuration globalConfigurationProperty = Configuration.fromJson(command, userName, json.toString());
 	        
 			this.repository.save(globalConfigurationProperty);
