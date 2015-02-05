@@ -29,6 +29,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -54,6 +55,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 @Path("/paymentgateways")
@@ -530,6 +533,7 @@ public class PaymentGatewayApiResource {
 		final JSONObject jsonCustomData = new JSONObject(jsonObject);
 		final String dateFormat = "dd MMMM yyyy";
 		String screenName = jsonCustomData.getString("screenName");
+		String eventDataStr = jsonCustomData.getString("eventData");
 		Long orderId = null;
 
 		if (jsonCustomData.has("clientId"))
@@ -545,10 +549,38 @@ public class PaymentGatewayApiResource {
 			jsonCustomData.remove("orderId");
 			orderId = Long.valueOf(jsonCustomData.getString("orderId"));
 		}
+		
+		if (jsonCustomData.has("eventData"))
+			jsonCustomData.remove("eventData");
 
 		if (screenName.equalsIgnoreCase("vod")) {
 			
-			return "Payment Done Successfully.";
+			CommandProcessingResult resultEvents = null;
+			JSONArray eventDataArray = new JSONArray(eventDataStr);
+			
+			for(int i=0;i<eventDataArray.length();i++){
+				JSONObject item = eventDataArray.getJSONObject(i);
+				jsonCustomData.put("clientId", clientId);
+				jsonCustomData.put("dateFormat", dateFormat);
+				jsonCustomData.put("eventBookedDate", date);
+				jsonCustomData.put("locale", "en");
+				jsonCustomData.put("deviceId", jsonCustomData.getString("deviceId"));
+				jsonCustomData.put("eventId", item.getLong("eventId"));
+				jsonCustomData.put("formatType", item.getString("formatType"));
+				jsonCustomData.put("optType", item.getString("optType"));
+				
+				CommandWrapper commandRequest = new CommandWrapperBuilder().createEventOrder(clientId).withJson(jsonCustomData.toString()).build();
+				resultEvents = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+				if(resultEvents == null){
+					break;
+				}
+			}
+			
+		    if (resultEvents == null) {
+				return "failure : Payment Done and Event(s) Booking Failed";
+			} else {
+				return "Payment Done and Event(s) Booked Successfully. ";
+			}
 			
 		} else if (screenName.equalsIgnoreCase("additionalOrders")) {
 
