@@ -38,6 +38,7 @@ import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationWriteplatformService;
 import org.mifosplatform.portfolio.order.exceptions.NoGrnIdFoundException;
+import org.mifosplatform.portfolio.order.service.OrderAssembler;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.provisioning.provisioning.service.ProvisioningWritePlatformService;
@@ -82,7 +83,6 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 	private final InventoryTransactionHistoryJpaRepository inventoryTransactionHistoryJpaRepository;
 	private final InventoryItemCommandFromApiJsonDeserializer inventoryItemCommandFromApiJsonDeserializer;
 	private final InventoryItemAllocationCommandFromApiJsonDeserializer inventoryItemAllocationCommandFromApiJsonDeserializer;
-	
 	
 	@Autowired
 	public ItemDetailsWritePlatformServiceImp(final ItemDetailsReadPlatformService inventoryItemDetailsReadPlatformService, 
@@ -132,6 +132,13 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			ItemDetails inventoryItemDetails=null;			
 			inventoryItemCommandFromApiJsonDeserializer.validateForCreate(command);
 			inventoryItemDetails = ItemDetails.fromJson(command,fromJsonHelper);
+			ItemMaster itemMaster=this.itemRepository.findOne(command.longValueOfParameterNamed("itemMasterId"));
+			if(itemMaster != null) {
+				if(itemMaster.getWarranty() != null){
+					LocalDate warrantyEndDate = new LocalDate().plusMonths(itemMaster.getWarranty().intValue()).minusDays(1);
+					inventoryItemDetails.setWarrantyDate(warrantyEndDate);
+				}
+			}
 			InventoryGrn inventoryGrn = inventoryGrnRepository.findOne(inventoryItemDetails.getGrnId());
 
 			if(inventoryGrn != null){
@@ -229,6 +236,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 				inventoryItemAllocationCommandFromApiJsonDeserializer.validateForCreate(command.json());
 				final JsonElement element = fromJsonHelper.parse(command.json());
 				JsonArray allocationData = fromJsonHelper.extractJsonArrayNamed("serialNumber", element);
+				ItemMaster itemMasterData=this.itemRepository.findOne(command.longValueOfParameterNamed("itemId"));
 				//int i=1;
 					for(JsonElement j:allocationData){
 			        	
@@ -240,6 +248,8 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 						inventoryItemDetails.setItemMasterId(inventoryItemDetailsAllocation.getItemMasterId());
 						inventoryItemDetails.setClientId(inventoryItemDetailsAllocation.getClientId());
 						inventoryItemDetails.setStatus("In Use");
+						LocalDate warrantyEndDate = new LocalDate(oneTimeSale.getSaleDate()).plusMonths(itemMasterData.getWarranty().intValue()).minusDays(1);
+						inventoryItemDetails.setWarrantyDate(warrantyEndDate);
 						
 						this.inventoryItemDetailsRepository.saveAndFlush(inventoryItemDetails);
 						this.inventoryItemDetailsAllocationRepository.saveAndFlush(inventoryItemDetailsAllocation);

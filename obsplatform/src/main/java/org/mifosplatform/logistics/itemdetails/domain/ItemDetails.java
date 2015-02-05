@@ -1,14 +1,18 @@
 package org.mifosplatform.logistics.itemdetails.domain;
 
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -50,6 +54,10 @@ public class ItemDetails extends AbstractAuditableCustom<AppUser, Long>{
 	
 	@Column(name="warranty",nullable=true,length=20)
 	private Long warranty;
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="warranty_date",nullable=true,length=100)
+	private Date warrantyDate;
 	
 	@Column(name="remarks",nullable=true,length=100)
 	private String remarks;
@@ -274,6 +282,15 @@ public class ItemDetails extends AbstractAuditableCustom<AppUser, Long>{
 	public void setLocationId(Long locationId) {
 		this.locationId=locationId;
 		
+	}
+	
+	public Date getWarrantyDate() {
+		return warrantyDate;
+	}
+
+
+	public void setWarrantyDate(LocalDate warrabtyEndDate) {
+		this.warrantyDate = warrabtyEndDate.toDate();
 	}
 	
 }
