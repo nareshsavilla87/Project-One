@@ -1,3 +1,4 @@
+SET SQL_SAFE_UPDATES = 0;
 update c_configuration set name='rounding' where name='Rounding';
 update c_configuration set name='implicit-association' where name='Implicit Association';
 update c_configuration set name='date-format' where name='DateFormat';
@@ -52,3 +53,5 @@ END //
 DELIMITER ;
 call addUniqueInGrn();
 Drop procedure IF EXISTS addUniqueInGrn;
+
+SET SQL_SAFE_UPDATES = 1;
