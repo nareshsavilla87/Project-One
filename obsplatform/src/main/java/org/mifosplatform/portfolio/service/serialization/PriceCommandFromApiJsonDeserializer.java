@@ -50,7 +50,7 @@ public final class PriceCommandFromApiJsonDeserializer {
         final JsonElement element = fromApiJsonHelper.parse(json);
 
         final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode", element);
-        baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notBlank();
+        baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notBlank().notExceedingLengthOf(10);
         final Long discountId = fromApiJsonHelper.extractLongNamed("discountId", element);
         baseDataValidator.reset().parameter("discountId").value(discountId).notBlank();
         final Long chargevariant = fromApiJsonHelper.extractLongNamed("chargevariant", element);
