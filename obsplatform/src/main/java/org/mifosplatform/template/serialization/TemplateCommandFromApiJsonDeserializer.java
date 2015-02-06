@@ -59,7 +59,7 @@ public final class TemplateCommandFromApiJsonDeserializer {
 		final JsonElement element = fromApiJsonHelper.parse(json);
 
 		final String name = fromApiJsonHelper.extractStringNamed("name",element);
-		baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(20);
+		baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(80);
 
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
