@@ -1,6 +1,9 @@
 package org.mifosplatform.portfolio.association.data;
 
+import java.util.Collection;
 import java.util.List;
+
+import org.mifosplatform.billing.emun.data.EnumValuesData;
 
 public class AssociationData {
          private Long orderId;
@@ -16,6 +19,7 @@ public class AssociationData {
 		private String provisionNumber;
 		private Long saleId;
 		private Long itemId;
+		private Collection<EnumValuesData> enumValuesDatas;
 		
 	
 	public AssociationData(Long orderId,Long id, String planCode, String itemCode,String serialNum,Long planId) {
@@ -70,6 +74,11 @@ public class AssociationData {
 	public void addPlanDatas(List<AssociationData> planDatas){
 		this.planData=planDatas;
 	}
+	
+	public void addEnumValuesDatas(Collection<EnumValuesData> enumValuesDatas) {
+
+		this.enumValuesDatas = enumValuesDatas;
+	}
 
 	public Long getOrderId() {
 		return orderId;
@@ -123,7 +132,7 @@ public class AssociationData {
 	public Long getItemId() {
 		return itemId;
 	}
-	
+
 	
 	
 	
