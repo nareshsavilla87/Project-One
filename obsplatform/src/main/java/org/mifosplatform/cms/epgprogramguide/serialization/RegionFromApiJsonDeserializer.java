@@ -56,7 +56,7 @@ public class RegionFromApiJsonDeserializer {
 	     final JsonElement element = fromApiJsonHelper.parse(json);
 	     
 	     final String  regionCode = fromApiJsonHelper.extractStringNamed("regionCode", element);
-	        baseDataValidator.reset().parameter("regionCode").value(regionCode).notBlank();
+	        baseDataValidator.reset().parameter("regionCode").value(regionCode).notBlank().notExceedingLengthOf(10);
 	        
 	        final Long  countryId = fromApiJsonHelper.extractLongNamed("countryId", element);
 	        baseDataValidator.reset().parameter("countryId").value(countryId).notNull();
