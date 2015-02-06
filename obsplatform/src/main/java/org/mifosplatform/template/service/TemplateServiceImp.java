@@ -87,7 +87,7 @@ public class TemplateServiceImp implements TemplateService {
             case 0 :
                 type = TemplateType.DOCUMENT;
                 break;
-            case 2 :
+            case 1 :
                 type = TemplateType.SMS;
                 break;
         }

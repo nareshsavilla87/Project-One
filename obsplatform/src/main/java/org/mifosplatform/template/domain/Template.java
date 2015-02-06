@@ -78,7 +78,7 @@ public class Template extends AbstractPersistable<Long> {
             case 0 :
                 type = TemplateType.DOCUMENT;
                 break;
-            case 2 :
+            case 1 :
                 type = TemplateType.SMS;
                 break;
         }
