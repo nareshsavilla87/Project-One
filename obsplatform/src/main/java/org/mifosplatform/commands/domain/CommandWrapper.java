@@ -1245,4 +1245,9 @@ public class CommandWrapper {
 			
 			return this.entityName.equalsIgnoreCase("PARTNERAGREEMENT");
 		}
+
+		public boolean isMessageTemplate() {
+	
+			return this.entityName.equalsIgnoreCase("TEMPLATE");
+		}
 }
