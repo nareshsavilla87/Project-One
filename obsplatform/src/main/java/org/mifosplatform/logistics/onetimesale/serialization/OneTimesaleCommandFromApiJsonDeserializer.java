@@ -74,7 +74,7 @@ public final class OneTimesaleCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("discountId").value(discountId).notNull();
         
         final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode", element);
-        baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notBlank();
+        baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notBlank().notExceedingLengthOf(10);
         
         final BigDecimal totalPrice=fromApiJsonHelper.extractBigDecimalWithLocaleNamed("totalPrice", element);
         baseDataValidator.reset().parameter("totalPrice").value(totalPrice).notNull();

@@ -9,7 +9,7 @@ public interface ItemDetailsRepository extends JpaRepository<ItemDetails, Long>,
 
 	@Query("from ItemDetails item where item.serialNumber = :macId")
 	ItemDetails getInventoryItemDetailBySerialNum(@Param("macId") String macId);
-
+	
 }
 
 
