@@ -176,6 +176,13 @@ public class JobDetailDataValidator {
                 baseDataValidator.reset().parameter(SchedulerJobApiConstants.jobisCreateTicket).value(createTicket).notBlank();
             }
         	
+        }else  if(jobName.equalsIgnoreCase(SchedulerJobApiConstants.JOB_EXPORT_DATA)){
+        	
+        	if (this.fromApiJsonHelper.parameterExists(SchedulerJobApiConstants.jobProcessdate, element)) {
+                atLeastOneParameterPassedForUpdate = true;
+                final LocalDate processDate = this.fromApiJsonHelper.extractLocalDateNamed(SchedulerJobApiConstants.jobProcessdate, element);
+                baseDataValidator.reset().parameter(SchedulerJobApiConstants.jobProcessdate).value(processDate).notBlank();
+            }
         }
        
         if (!atLeastOneParameterPassedForUpdate) {

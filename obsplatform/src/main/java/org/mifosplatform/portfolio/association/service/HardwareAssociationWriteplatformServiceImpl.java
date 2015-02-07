@@ -1,5 +1,6 @@
 package org.mifosplatform.portfolio.association.service;
 
+import java.util.Date;
 import java.util.Map;
 
 import net.sf.json.JSONObject;
@@ -8,8 +9,11 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.logistics.itemdetails.domain.ItemDetails;
+import org.mifosplatform.logistics.itemdetails.domain.ItemDetailsRepository;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
 import org.mifosplatform.portfolio.association.exception.HardwareDetailsNotFoundException;
+import org.mifosplatform.portfolio.hardwareswapping.exception.WarrantyEndDateExpireException;
 import org.mifosplatform.portfolio.order.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
@@ -32,17 +36,20 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 	private final HardwareAssociationRepository associationRepository;
 	private final EventValidationReadPlatformService eventValidationReadPlatformService;
 	private final HardwareAssociationCommandFromApiJsonDeserializer fromApiJsonDeserializer;
+	private final ItemDetailsRepository itemDetailsRepository;
 	
     @Autowired
 	public HardwareAssociationWriteplatformServiceImpl(final PlatformSecurityContext context,
 			final HardwareAssociationCommandFromApiJsonDeserializer fromApiJsonDeserializer,final HardwareAssociationRepository associationRepository,
-			final OrderRepository orderRepository,final EventValidationReadPlatformService eventValidationReadPlatformService ){
+			final OrderRepository orderRepository,final EventValidationReadPlatformService eventValidationReadPlatformService ,
+			final ItemDetailsRepository itemDetailsRepository){
 		
 	    this.context=context;
 		this.associationRepository=associationRepository;
 		this.fromApiJsonDeserializer=fromApiJsonDeserializer;
 		this.orderRepository=orderRepository;
 		this.eventValidationReadPlatformService=eventValidationReadPlatformService;
+		this.itemDetailsRepository=itemDetailsRepository;
 	}
 	
 	@Override
@@ -130,6 +137,12 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 		      if(association == null){
 					throw new HardwareDetailsNotFoundException(associationId);
 				}
+		      ItemDetails itemDetails = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(association.getSerialNo());
+			    if(itemDetails.getWarrantyDate() != null){
+				    if(itemDetails.getWarrantyDate().before(new Date())){
+				    	throw new WarrantyEndDateExpireException(association.getSerialNo());
+				    }
+			    }
 		      
 		      JSONObject jsonObject=new JSONObject();
 		      jsonObject.put("clientId", association.getClientId());

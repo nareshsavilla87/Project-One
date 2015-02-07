@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author hugo
- * this api class used to create,update and delete diff discounts 
+ * this api class used to create,update and delete diff radius details 
  */
 @Path("/freeradius")
 @Component
