@@ -88,8 +88,14 @@ public class TemplateServiceImp implements TemplateService {
                 type = TemplateType.DOCUMENT;
                 break;
             case 1 :
-                type = TemplateType.SMS;
+                type = TemplateType.EMAIL;
                 break;
+            case 2 :
+            	type = TemplateType.SMS;
+            	 break;
+            case 3 :
+            	type = TemplateType.OSD;
+            	 break;
         }
         template.setType(type);
 
@@ -117,7 +123,8 @@ public class TemplateServiceImp implements TemplateService {
     public CommandProcessingResult removeTemplate(final Long templateId) {
     	
         final Template template = findOneById(templateId);
-        this.templateRepository.delete(template);
+        template.delete();
+        this.templateRepository.save(template);
         return new CommandProcessingResultBuilder().withEntityId(templateId).build();
     }
 
@@ -136,7 +143,7 @@ public class TemplateServiceImp implements TemplateService {
 
     @Override
     public List<Template> getAll() {
-        return this.templateRepository.findAll();
+        return this.templateRepository.findIsNotDeleted();
     }
 
     @Override
