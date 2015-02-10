@@ -1,6 +1,7 @@
 package org.mifosplatform.portfolio.plan.serialization;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -69,8 +70,8 @@ public final class PlanCommandFromApiJsonDeserializer {
         if(isPrepaid){
         	final String volumeType=fromApiJsonHelper.extractStringNamed("volume", element);
         	baseDataValidator.reset().parameter("volume").value(volumeType).notNull();
-        	final Long units=fromApiJsonHelper.extractLongNamed("units", element);
-        	baseDataValidator.reset().parameter("units").value(units).notBlank().notExceedingLengthOf(19);
+        	final BigDecimal units=fromApiJsonHelper.extractBigDecimalWithLocaleNamed("units", element);
+        	baseDataValidator.reset().parameter("units").value(units).notNull();
         }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
         

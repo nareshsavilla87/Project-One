@@ -21,7 +21,6 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 
 @Entity
@@ -55,7 +54,7 @@ public class Plan{
 
 	
 	@Column(name = "is_deleted", nullable = false)
-	private char deleted='n';
+	private char deleted='N';
 	
 	@Column(name = "is_prepaid", nullable = false)
 	private char isPrepaid='N';
@@ -154,13 +153,11 @@ public class Plan{
 		}
 
 		public void delete() {
-			if (this.deleted == ConfigurationConstants.CONST_IS_N) {
-				this.deleted = 'y';
+				this.deleted = 'Y';
 				this.planCode=this.planCode+"_"+this.getId()+"_DELETED";
 				for(PlanDetails planDetails:this.planDetails){
 					planDetails.delete();
 				}
-			}
 		}
 
 	public Map<String, Object> update(final JsonCommand command) {

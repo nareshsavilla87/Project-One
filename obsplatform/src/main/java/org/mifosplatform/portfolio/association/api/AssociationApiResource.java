@@ -1,6 +1,7 @@
 package org.mifosplatform.portfolio.association.api;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +18,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.billing.emun.data.EnumValuesConstants;
+import org.mifosplatform.billing.emun.data.EnumValuesData;
+import org.mifosplatform.billing.emun.service.EnumReadplaformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -45,17 +49,19 @@ public class AssociationApiResource {
 	    private final ApiRequestParameterHelper apiRequestParameterHelper;
 	    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	    private final HardwareAssociationReadplatformService associationReadplatformService;
+	    private final EnumReadplaformService enumReadplaformService;
 	    
 	    @Autowired
 	    public AssociationApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<AssociationData> toApiJsonSerializer, 
 	      final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-	      final HardwareAssociationReadplatformService associationReadplatformService) {
+	      final HardwareAssociationReadplatformService associationReadplatformService,final EnumReadplaformService enumReadplaformService) {
 	    	
 		        this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
 		        this.apiRequestParameterHelper = apiRequestParameterHelper; 
 		        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
 		        this.associationReadplatformService=associationReadplatformService;
+		        this.enumReadplaformService=enumReadplaformService;
 		      
 		    }		
 	@GET
@@ -82,12 +88,14 @@ public class AssociationApiResource {
 		AssociationData associationData = this.associationReadplatformService.retrieveSingleDetails(id);
 		List<AssociationData> HardwareDatas = this.associationReadplatformService.retrieveHardwareData(clientId);
 		List<AssociationData> planDatas= this.associationReadplatformService.retrieveplanData(clientId);
+		Collection<EnumValuesData> enumValuesDatas=this.enumReadplaformService.getEnumValues(EnumValuesConstants.ENUMVALUE_PROPERTY_DEVICE_SWAP);
 		HardwareDatas.add(new AssociationData(associationData.getSerialNum(),associationData.getProvisionNumber(),associationData.getAllocationType()));
 		AssociationData data=new AssociationData(associationData.getPlanId(),associationData.getPlanCode(),associationData.getOrderId());
 	    planDatas.add(data);
 		
 		associationData.addHardwareDatas(HardwareDatas);
 		associationData.addPlanDatas(planDatas);
+		associationData.addEnumValuesDatas(enumValuesDatas);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, associationData, RESPONSE_DATA_PARAMETERS);
  		}catch(NullPointerException n){

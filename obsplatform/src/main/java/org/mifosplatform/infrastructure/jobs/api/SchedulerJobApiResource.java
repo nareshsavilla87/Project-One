@@ -19,6 +19,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.lang.StringUtils;
+import org.mifosplatform.billing.emun.data.EnumValuesConstants;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -173,7 +174,7 @@ public class SchedulerJobApiResource {
     	context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
     	JobDetailData jobDetailData = this.schedulerJobRunnerReadService.retrieveOne(jobId);
         JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(jobDetailData.getDisplayName());
-        Collection<BillRuleData> provisionSysData = this.codeReadPlatformService.retrievebillRules("radius");
+        Collection<BillRuleData> provisionSysData = this.codeReadPlatformService.retrievebillRules(EnumValuesConstants.ENUMVALUE_PROPERTY_RADIUS);
         jobDetailData=handleTemplateData(jobDetailData);
         
            jobDetailData.setJobParameters(data);
