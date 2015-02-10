@@ -191,10 +191,10 @@ public class SchedulerJobApiResource {
     	      jobDetailData.setQueryData(queryData);
     	      if(jobDetailData.getName().equalsIgnoreCase(SchedulerJobApiConstants.JOB_MESSANGER)){
     	    	  
-    	    	 //final Collection<BillingMessageTemplateData> templateData = this.billingMesssageReadPlatformService.retrieveAllMessageTemplateParams();
-    	    	  //jobDetailData.setMessageData(templateData);
-    	    	  final List<Template> templateData = this.templateService.getAll();
-    	    	  jobDetailData.setTemplateData(templateData);
+    	    	 final Collection<BillingMessageTemplateData> templateData = this.billingMesssageReadPlatformService.retrieveAllMessageTemplateParams();
+    	    	 jobDetailData.setMessageData(templateData);
+    	    	 /* final List<Template> templateData = this.templateService.getAll();
+    	    	  jobDetailData.setTemplateData(templateData);*/
 		       }
     	
 		return jobDetailData;
