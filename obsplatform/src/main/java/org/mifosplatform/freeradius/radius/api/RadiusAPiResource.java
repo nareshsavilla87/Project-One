@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 
 /**
  * @author hugo
- * this api class used to create,update and delete diff discounts 
+ * this api class used to create,update and delete diff radius details 
  */
 @Path("/freeradius")
 @Component
@@ -135,6 +135,17 @@ public class RadiusAPiResource {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final String radServiceData = this.radiusReadPlatformService.deleteRadService(radServiceId);
 		return radServiceData;
+	}
+	
+	@GET
+	@Path("raduser2/template")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveRadserviceTemplateData() {
+
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final String radServiceTemplateData = this.radiusReadPlatformService.retrieveRadServiceTemplateData();
+		return radServiceTemplateData;
 	}
 
 

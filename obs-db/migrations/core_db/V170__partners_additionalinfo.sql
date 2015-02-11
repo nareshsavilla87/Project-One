@@ -25,7 +25,8 @@ INSERT IGNORE INTO  m_permission VALUES (null, 'organisation', 'READ_PARTNER', '
 INSERT IGNORE INTO  m_permission VALUES (null, 'organisation', 'UPDATE_PARTNER', 'PARTNER', 'UPDATE', 0);
 INSERT IGNORE INTO  m_permission VALUES (null,'organization', 'CREATE_PARTNERAGREEMENT', 'PARTNERAGREEMENT', 'CREATE', 0);
 INSERT IGNORE INTO  m_permission VALUES (null,'organization', 'UPDATE_PARTNERAGREEMENT', 'PARTNERAGREEMENT', 'UPDATE', 0);
-INSERT IGNORE INTO m_permission values(null, 'organisation', 'READ_PARTNERDISBURSEMENT', 'PARTNERDISBURSEMENT', 'READ', 0);
+INSERT IGNORE INTO  m_permission VALUES(null, 'organisation', 'DELETE_PARTNERAGREEMENT', 'PARTNERAGREEMENT', 'DELETE', 0);
+INSERT IGNORE INTO  m_permission VALUES(null, 'organisation', 'READ_PARTNERDISBURSEMENT', 'PARTNERDISBURSEMENT', 'READ', 0);
 
 
 CREATE TABLE IF NOT EXISTS `m_office_additional_info` (

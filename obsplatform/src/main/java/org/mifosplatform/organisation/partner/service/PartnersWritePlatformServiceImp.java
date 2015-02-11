@@ -29,6 +29,7 @@ import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.organisation.partner.serialization.PartnersCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.api.UsersApiResource;
 import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.useradministration.domain.AppUserRepository;
 import org.mifosplatform.useradministration.domain.Role;
 import org.mifosplatform.useradministration.domain.RoleRepository;
 import org.mifosplatform.useradministration.exception.RoleNotFoundException;
@@ -52,6 +53,7 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 	private final OfficeRepository officeRepository;
     private final RoleRepository roleRepository;
     private final UsersApiResource userApiResource;
+    private final AppUserRepository userRepository;
     private final OfficeAddressRepository addressRepository;
     private final OfficeAdditionalInfoRepository officeAdditionalInfoRepository;
 
@@ -59,13 +61,15 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 	public PartnersWritePlatformServiceImp(final PlatformSecurityContext context,
 			final PartnersCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final OfficeRepository officeRepository,final RoleRepository roleRepository,
-			final UsersApiResource userApiResource,final OfficeAddressRepository addressRepository,
+			final UsersApiResource userApiResource,final AppUserRepository userRepository,
+			final OfficeAddressRepository addressRepository,
 			final OfficeAdditionalInfoRepository officeAdditionalInfoRepository) {
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.officeRepository = officeRepository;
 		this.roleRepository = roleRepository;
 		this.userApiResource = userApiResource;
+		this.userRepository = userRepository;
 		this.addressRepository = addressRepository;
 		this.officeAdditionalInfoRepository = officeAdditionalInfoRepository;
 
@@ -275,9 +279,16 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
            this.officeRepository.saveAndFlush(office);
            
            //update user
-           Long  userId = command.longValueOfParameterNamed("userId");
+           final Long  userId = command.longValueOfParameterNamed("userId");
            final String loginName = command.stringValueOfParameterNamed("loginName");
-           final String[] roles = command.arrayValueOfParameterNamed("roles");
+           final AppUser user=this.userRepository.findOne(userId);
+           if(!user.getUsername().equalsIgnoreCase(loginName)){
+        	   user.setUsername(loginName);
+           }else if(!user.getEmail().equalsIgnoreCase(officeAddress.getEmail())){
+        	   user.setEmail(officeAddress.getEmail());
+           }else{}
+           this.userRepository.saveAndFlush(user);
+           /*final String[] roles = command.arrayValueOfParameterNamed("roles");
             JSONObject json = new JSONObject();
 		    json.put("username", loginName);
 		    json.put("firstname",office.getName());
@@ -286,7 +297,7 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 		    json.put("email",officeAddress.getEmail());
 		    json.put("officeId", office.getId());
 		    json.put("roles", roles);
-            this.userApiResource.updateUser(userId, json.toString());
+            this.userApiResource.updateUser(userId, json.toString());*/
             
 	        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 				       .withEntityId(officeAdditionalInfo.getId()).withOfficeId(office.getId()).with(officeChanges).build();
@@ -294,10 +305,7 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 		}  catch (final DataIntegrityViolationException e) {
 			handleDataIntegrityIssues(command, e);
 			return new CommandProcessingResult(Long.valueOf(-1l));
-		} catch( JSONException e){
-			e.printStackTrace();
-			return new CommandProcessingResult(Long.valueOf(-1l));
-		}
+		} 
 	}
 
 }

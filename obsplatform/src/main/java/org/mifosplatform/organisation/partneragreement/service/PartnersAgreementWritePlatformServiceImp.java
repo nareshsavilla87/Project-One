@@ -2,6 +2,7 @@ package org.mifosplatform.organisation.partneragreement.service;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.joda.time.LocalDate;
@@ -18,6 +19,7 @@ import org.mifosplatform.organisation.partneragreement.domain.Agreement;
 import org.mifosplatform.organisation.partneragreement.domain.AgreementDetails;
 import org.mifosplatform.organisation.partneragreement.domain.AgreementDetailsRepository;
 import org.mifosplatform.organisation.partneragreement.domain.AgreementRepository;
+import org.mifosplatform.organisation.partneragreement.exception.AgreementNotFoundException;
 import org.mifosplatform.organisation.partneragreement.serialization.PartnersAgreementCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -107,7 +109,7 @@ public class PartnersAgreementWritePlatformServiceImp implements PartnersAgreeme
 		try{
 			this.context.authenticatedUser();
 			this.apiJsonDeserializer.validateForUpdate(command.json());
-			Agreement agreement=this.agreementRepository.findOne(command.entityId());
+			Agreement agreement=this.agreementRetrieveById(command.entityId());
 			final Map<String, Object> changes = agreement.update(command);
 			final JsonArray partnerAgreementArray = command.arrayOfParameterNamed("sourceData").getAsJsonArray();
 			final JsonArray removeAgreementDetails = command.arrayOfParameterNamed("removeSourceData").getAsJsonArray();
@@ -162,5 +164,40 @@ public class PartnersAgreementWritePlatformServiceImp implements PartnersAgreeme
 		}	   
         
    }
+
+	@Override
+	public CommandProcessingResult deletePartnerAgreement(final Long agreementId) {
+
+		try {
+			context.authenticatedUser();
+			final Agreement agreement = this.agreementRetrieveById(agreementId);
+			List<AgreementDetails> details = agreement.getDetails();
+			for (AgreementDetails detail : details) {
+				detail.setSourceType(Long.valueOf((detail.getSourceType().toString() + detail.getId().toString())));
+				detail.setEndDate(new Date());
+				detail.setIsDeleted('Y');
+			}
+			agreement.delete();
+			this.agreementRepository.save(agreement);
+			return new CommandProcessingResultBuilder()
+					.withEntityId(agreement.getId())
+					.withOfficeId(agreement.getOfficeId()).build();
+
+		} catch (DataIntegrityViolationException dve) {
+
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+
+	}
+	
+	
+	private Agreement agreementRetrieveById(final Long entityId) {
+
+		Agreement agreement = this.agreementRepository.findOne(entityId);
+		if (agreement == null) {
+			throw new AgreementNotFoundException(entityId);
+		}
+		return agreement;
+	}
 	
 }

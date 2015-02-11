@@ -60,6 +60,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 	private int portNumber;
 	private String port;
 	private String starttlsValue;
+	private String setContentString;
 	private Configuration configuration;
 	
 	@Autowired
@@ -73,7 +74,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 	public void smtpDataProcessing() {
 		try {
 			
-			 configuration = repository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_SMTP);
+			configuration = repository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_SMTP);
 			String value = configuration.getValue();
 			JSONObject object = new JSONObject(value);
 			
@@ -88,6 +89,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 				portNumber = Integer.parseInt(port);
 			}
 			starttlsValue = (String) object.get("starttls");
+			setContentString = (String) object.get("setContentString");
 			
 		} catch (JSONException e) {
 			e.printStackTrace();
@@ -130,7 +132,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 
 				// 3) create MimeBodyPart object and set your message text
 				MimeBodyPart messageBodyPart = new MimeBodyPart();
-				messageBodyPart.setContent(messageBuilder.toString(),"text/html");
+				messageBodyPart.setContent(messageBuilder.toString(),setContentString);
 				
 				// 4) create new MimeBodyPart object and set DataHandler object to this object
 				MimeBodyPart mimeBodyAttachPart = new MimeBodyPart();

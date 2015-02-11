@@ -39,7 +39,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
     @Autowired
     public OfficeReadPlatformServiceImpl(final PlatformSecurityContext context,
-            final CurrencyReadPlatformService currencyReadPlatformService, final TenantAwareRoutingDataSource dataSource) {
+    		final CurrencyReadPlatformService currencyReadPlatformService, final TenantAwareRoutingDataSource dataSource) {
         this.context = context;
         this.currencyReadPlatformService = currencyReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);

@@ -44,8 +44,8 @@ public class SchedulerJobApiConstants {
     public static final String jobisAutoRenewal="isAutoRenewal";
     public static final String JOB_REPORTEMAIL="Report Email";
     public static final String JOB_EmailId="emailId";
-    public static final String JOB_MiddleWare="Middleware";
-    public static final String JOB_ProvSystem="ProvSystem";
+    public static final String JOB_MiddleWare="Radius Integration";
+    public static final String JOB_ProvSystem="system";
     public static final String JOB_URL="URL";
     public static final String JOB_Username="Username";
     public static final String JOB_Password="Password";
@@ -53,8 +53,10 @@ public class SchedulerJobApiConstants {
     public static final String JOB_SIMULATOR="Simulator";
     public static final String jobisCreateTicket="isCreateTicket";
     public static final String jobTicket="Ticket";
-    public static final String JOB_MESSANGER = "Merge Messages";
-    
+    public static final String JOB_MESSANGER ="Merge Messages";
+    public static final String JOB_EXPORT_DATA ="Export Data";
+	public static final String JOB_RESELLER_COMMISSION ="Reseller Commission";
+
     public static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobIdentifierParamName,
             displayNameParamName, nextRunTimeParamName, initializingErrorParamName, cronExpressionParamName, jobActiveStatusParamName,
             currentlyRunningParamName, lastRunHistoryObjParamName,schedulerJobParamName,cronDescriptionParamName,jobIsDynamic,
@@ -88,4 +90,5 @@ public class SchedulerJobApiConstants {
     public static final String JOB_RUN_HISTORY = "runhistory";
     public static final String JOB_PARAMETERS = "jopparameters";
     public static final String SCHEDULER_STATUS_PATH = "scheduler";
+
 }

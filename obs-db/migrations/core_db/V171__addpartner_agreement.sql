@@ -94,4 +94,5 @@ INSERT IGNORE INTO job VALUES(null, 'RESELLERCOMMISSION', 'Reseller Commission',
 SET @id=(select id from job where name='RESELLERCOMMISSION');
 
 INSERT IGNORE INTO job_parameters VALUES(null ,@id, 'processDate', 'DATE', 'NOW()', '26 January 2015', 'Y', NULL);
+INSERT IGNORE INTO job_parameters VALUES(null, @id, 'reportName', 'COMBO', NULL, 'Reseller Commission', 'Y', NULL);
 

@@ -26,24 +26,21 @@ public class InvoiceClient {
 	private final GenerateBillingOrderService generateBillingOrderService;
 	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
 	private final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer;
-	
-	
-	
-	
-	
+
 	@Autowired
-	InvoiceClient(final BillingOrderReadPlatformService billingOrderReadPlatformService,final GenerateBillingOrderService generateBillingOrderService,
-			final BillingOrderWritePlatformService billingOrderWritePlatformService,final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer) {
+	InvoiceClient(final BillingOrderReadPlatformService billingOrderReadPlatformService,
+			final GenerateBillingOrderService generateBillingOrderService,
+			final BillingOrderWritePlatformService billingOrderWritePlatformService,
+			final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer) {
+
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.generateBillingOrderService = generateBillingOrderService;
 		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
-		this.apiJsonDeserializer=apiJsonDeserializer;
-		
+		this.apiJsonDeserializer = apiJsonDeserializer;
 	}
-	
-	
-	public Invoice invoicingSingleClient(Long clientId, LocalDate processDate) {
 
+	public Invoice invoicingSingleClient(Long clientId, LocalDate processDate) {
+		
 		     // Get list of qualified orders
     		List<BillingOrderData> billingOrderDatas= billingOrderReadPlatformService.retrieveOrderIds(clientId, processDate);
 		         if (billingOrderDatas.size() == 0) {
@@ -59,19 +56,21 @@ public class InvoiceClient {
 		            	  
           	                        invoiceData=invoiceServices(billingOrderData,clientId,processDate);
                  	             
-          	                   if(invoiceData!=null){
+          	                       if(invoiceData!=null){
           	            	
-	                               invoiceAmount=invoiceAmount.add(invoiceData.getInvoiceAmount());
-	                               nextBillableDate=invoiceData.getNextBillableDay();
-          	            }
+	                                 invoiceAmount=invoiceAmount.add(invoiceData.getInvoiceAmount());
+	                                 nextBillableDate=invoiceData.getNextBillableDay();
+          	                   }
+		                }
+		     }if(invoiceData !=null){
+	         	return invoiceData.getInvoice();
+	         }else{
+			throw new BillingOrderNoRecordsFoundException();
 		}
-		               }
-		return invoiceData.getInvoice();
 	}
 	
 	public GenerateInvoiceData invoiceServices(BillingOrderData billingOrderData,Long clientId,LocalDate processDate){
 		
-			
             // Get qualified order complete details			
 		    List<BillingOrderData> products = this.billingOrderReadPlatformService.retrieveBillingOrderData(clientId, processDate,billingOrderData.getOrderId());
 			
@@ -84,7 +83,7 @@ public class InvoiceClient {
 			this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId,false);
 
 			// Update order-price
-			 billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
+			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
 			 System.out.println("---------------------"+billingOrderCommands.get(0).getNextBillableDate());
 			 
 			/* //office commision
@@ -92,23 +91,22 @@ public class InvoiceClient {
 		     if(clientAgreement.getOfficeType().equalsIgnoreCase("Agent")&&clientAgreement.getId()!=null) {
 			     this.billingOrderWritePlatformService.UpdateOfficeCommision(invoice,clientAgreement.getId());
 	           }*/
-               if(invoice.getInvoiceAmount() == null){
-            	   return null;
-               }
 		return new GenerateInvoiceData(clientId,billingOrderCommands.get(0).getNextBillableDate(),invoice.getInvoiceAmount(),invoice);
-	}
-	
+
+  }
+
+
 	public CommandProcessingResult createInvoiceBill(JsonCommand command) {
 		try {
 			// validation not written
-			 this.apiJsonDeserializer.validateForCreate(command.json());
+			this.apiJsonDeserializer.validateForCreate(command.json());
 			LocalDate processDate = ProcessDate.fromJson(command);
-			Invoice invoice=this.invoicingSingleClient(command.entityId(), processDate);
-			
+			Invoice invoice = this.invoicingSingleClient(command.entityId(),processDate);
+
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(invoice.getId()).build();
 
 		} catch (DataIntegrityViolationException dve) {
-			return CommandProcessingResult.empty();
+			return new CommandProcessingResult(Long.valueOf(-1));
 		}
 
 	}

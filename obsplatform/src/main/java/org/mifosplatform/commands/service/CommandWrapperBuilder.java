@@ -2642,28 +2642,61 @@ public class CommandWrapperBuilder {
 	}
 
 	public CommandWrapperBuilder updateAgreement(final Long agreementId) {
-		
 		this.actionName = "UPDATE";
 		this.entityName = "PARTNERAGREEMENT";
 		this.entityId = agreementId;
 		this.href = "";
 		return this;
 	}
+	
+	
+	public CommandWrapperBuilder deleteAgreement(final Long agreementId) {
+		this.actionName = "DELETE";
+		this.entityName = "PARTNERAGREEMENT";
+		this.entityId = agreementId;
+		this.href = "";
+		return this;
+	}
 
-public CommandWrapperBuilder updateVoucherPin(Long id) {
-	this.actionName = "UPDATE";
-	this.entityName = "VOUCHER";
-	this.entityId = id;
-	this.href = "/vouchers";
-	return this;
-}
-public CommandWrapperBuilder deleteVoucherPin(Long id) {
-	this.actionName = "DELETE";
-	this.entityName = "VOUCHER";
-	this.entityId = id;
-	this.href = "/vouchers";
-	return this;
-}
+	public CommandWrapperBuilder updateVoucherPin(Long id) {
+		this.actionName = "UPDATE";
+		this.entityName = "VOUCHER";
+		this.entityId = id;
+		this.href = "/vouchers";
+		return this;
+	}
+
+	public CommandWrapperBuilder deleteVoucherPin(Long id) {
+		this.actionName = "DELETE";
+		this.entityName = "VOUCHER";
+		this.entityId = id;
+		this.href = "/vouchers";
+		return this;
+	}
+
+	public CommandWrapperBuilder createTemplate() {
+		this.actionName = "CREATE";
+		this.entityName = "TEMPLATE";
+		this.entityId = null;
+		this.href = "/templates";
+		return this;
+	}
+
+	public CommandWrapperBuilder updateTemplate(final Long templateId) {
+		this.actionName = "UPDATE";
+		this.entityName = "TEMPLATE";
+		this.entityId = templateId;
+		this.href = "/templates/" + templateId;
+		return this;
+	}
+
+	public CommandWrapperBuilder deleteTemplate(final Long templateId) {
+		this.actionName = "DELETE";
+		this.entityName = "TEMPLATE";
+		this.entityId = templateId;
+		this.href = "/templates/" + templateId;
+		return this;
+	}
 
 }
 
