@@ -195,8 +195,9 @@ dependencies {
  	        )
 
  	 testCompile 'junit:junit:4.11',
+ 	             'junit:junit-dep:4.11',
                  'org.mockito:mockito-all:1.9.5',
-                 'com.jayway.restassured:rest-assured:1.7.2'
+                 'com.jayway.restassured:rest-assured:2.3.3'
 
 }
 

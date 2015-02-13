@@ -16,31 +16,35 @@ import com.jayway.restassured.specification.ResponseSpecification;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Random;
 
 @SuppressWarnings("unchecked")
 public class Utils {
 
-    private static final String LOGIN_URL = "/mifosng-provider/api/v1/authentication?username=mifos&password=password&tenantIdentifier=default";
+	
+	 public static final String TENANT_IDENTIFIER = "tenantIdentifier=default";
+	
+    private static final String LOGIN_URL = "/obsplatform/api/v1/authentication?username=billing&password=password&tenantIdentifier=default";
 
 
     public static void initializeRESTAssured() {
         RestAssured.baseURI ="https://localhost";
         RestAssured.port = 8443;
-        RestAssured.keystore("../keystore.jks", "openmf");
+        RestAssured.keystore("../keystore.jks", "openmf");//8985891857
     }
 
     public static String loginIntoServerAndGetBase64EncodedAuthenticationKey() {
         try {
             System.out.println("-----------------------------------LOGIN-----------------------------------------");
             String json = RestAssured.post(LOGIN_URL).asString();
-            assertThat("Failed to login into mifosx platform", StringUtils.isBlank(json), is(false));
+            assertThat("Failed to login into obs platform", StringUtils.isBlank(json), is(false));
             return JsonPath.with(json).get("base64EncodedAuthenticationKey");
         }
         catch (Exception e) {
             if (e instanceof HttpHostConnectException) {
                 HttpHostConnectException hh = (HttpHostConnectException) e;
-                fail("Failed to connect to mifosx platform:"+hh.getMessage());
+                fail("Failed to connect to obs platform:"+hh.getMessage());
             }
 
             throw new RuntimeException(e);
@@ -49,18 +53,27 @@ public class Utils {
 
     public static <T> T performServerGet(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String getURL, final String jsonAttributeToGetBack) {
-        String json = given().spec(requestSpec)
-                .expect().spec(responseSpec).log().ifError()
-                .when().get(getURL).andReturn().asString();
+        String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().get(getURL).andReturn().asString();
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 
     public static <T> T performServerPost(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
             final String postURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
-        String json = given().spec(requestSpec).body(jsonBodyToSend)
-                .expect().spec(responseSpec).log().ifError()
-                .when().post(postURL)
+        String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().post(postURL).andReturn().asString();
+        return (T) from(json).get(jsonAttributeToGetBack);
+    }
+    
+    public static <T> T performServerPut(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String putURL, final String jsonBodyToSend, final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).body(jsonBodyToSend).expect().spec(responseSpec).log().ifError().when().put(putURL)
                 .andReturn().asString();
+        return (T) from(json).get(jsonAttributeToGetBack);
+    }
+
+    public static <T> T performServerDelete(final RequestSpecification requestSpec, final ResponseSpecification responseSpec,
+            final String deleteURL, final String jsonAttributeToGetBack) {
+        final String json = given().spec(requestSpec).expect().spec(responseSpec).log().ifError().when().delete(deleteURL).andReturn()
+                .asString();
         return (T) from(json).get(jsonAttributeToGetBack);
     }
 
@@ -89,4 +102,18 @@ public class Utils {
     public static String randomStringGenerator(final String prefix, final int len) {
         return randomStringGenerator(prefix, len, "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ");
     }
+
+    public static String randomNameGenerator(final String prefix, final int lenOfRandomSuffix) {
+        return randomStringGenerator(prefix, lenOfRandomSuffix);
+    }
+    
+    public static String convertDateToURLFormat(final Calendar dateToBeConvert) {
+        return new SimpleDateFormat("dd MMMMMM yyyy").format(dateToBeConvert.getTime());
+    }
+    
+	public static String randomNumberGenerator(int min, int max) {
+		final Random random = new Random();
+		int randomNum = random.nextInt((max - min) + 1) + min;
+		return Integer.toString(randomNum);
+	}
 }
