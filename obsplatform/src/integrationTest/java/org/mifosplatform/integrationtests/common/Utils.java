@@ -8,6 +8,9 @@ import static org.junit.Assert.fail;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.conn.HttpHostConnectException;
+import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import com.jayway.restassured.RestAssured;
 import com.jayway.restassured.path.json.JsonPath;
@@ -111,9 +114,15 @@ public class Utils {
         return new SimpleDateFormat("dd MMMMMM yyyy").format(dateToBeConvert.getTime());
     }
     
-	public static String randomNumberGenerator(int min, int max) {
+	public static String randomNumberGenerator(final int min, final int max) {
 		final Random random = new Random();
 		int randomNum = random.nextInt((max - min) + 1) + min;
 		return Integer.toString(randomNum);
+	}
+
+	public static String convertDateToURLFormat(final LocalDate localDate,final String pattern) {
+		final DateTimeFormatter formatter = DateTimeFormat.forPattern(pattern);
+		final String formattedDate = formatter.print(localDate);
+		return formattedDate;
 	}
 }

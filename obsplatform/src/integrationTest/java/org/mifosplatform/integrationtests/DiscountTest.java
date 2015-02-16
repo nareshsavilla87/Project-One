@@ -49,7 +49,6 @@ public class DiscountTest {
 	public void testCreateDiscount() {
 
 		Integer discount = DiscountHelper.createDiscount(requestSpec,responseSpec);
-		System.out.println(discount);
 		Assert.assertNotNull(discount);
 
 	}
