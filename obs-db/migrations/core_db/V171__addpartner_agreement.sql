@@ -76,7 +76,6 @@ insert ignore into stretchy_report_parameter(report_id,parameter_id,report_param
 CREATE TABLE IF NOT EXISTS `b_office_commission` (
   `id` int(20) NOT NULL AUTO_INCREMENT,
   `charge_id` int(20) NOT NULL DEFAULT '0',
-  `partner_id` bigint(20) DEFAULT NULL,
   `office_id` bigint(20) NOT NULL,
   `invoice_date` datetime NOT NULL,
   `source` int(10),
