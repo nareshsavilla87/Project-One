@@ -49,6 +49,8 @@ import org.mifosplatform.portfolio.plan.data.BillRuleData;
 import org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobReadPlatformService;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.ScheduleJobData;
+import org.mifosplatform.template.domain.Template;
+import org.mifosplatform.template.service.TemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -69,6 +71,7 @@ public class SchedulerJobApiResource {
     private final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository;
     private final PlatformSecurityContext context;
     private final CodeReadPlatformService codeReadPlatformService;
+    private final TemplateService templateService;
     @Autowired
     public SchedulerJobApiResource(final SchedulerJobRunnerReadService schedulerJobRunnerReadService,final JobRegisterService jobRegisterService,
     		final ToApiJsonSerializer<JobDetailData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
@@ -76,7 +79,7 @@ public class SchedulerJobApiResource {
     		final SheduleJobReadPlatformService sheduleJobReadPlatformService,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
     		final BillingMesssageReadPlatformService billingMesssageReadPlatformService,final MCodeReadPlatformService mCodeReadPlatformService,
     		final PlatformSecurityContext context,final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository,
-    		final CodeReadPlatformService codeReadPlatformService) {
+    		final CodeReadPlatformService codeReadPlatformService,final TemplateService templateService) {
     	
         this.schedulerJobRunnerReadService = schedulerJobRunnerReadService;
         this.jobRegisterService = jobRegisterService;
@@ -90,6 +93,7 @@ public class SchedulerJobApiResource {
         this.context = context;
         this.scheduledJobRunHistoryRepository=scheduledJobRunHistoryRepository;
         this.codeReadPlatformService=codeReadPlatformService;
+        this.templateService = templateService;
     }
     
 
@@ -187,8 +191,10 @@ public class SchedulerJobApiResource {
     	      jobDetailData.setQueryData(queryData);
     	      if(jobDetailData.getName().equalsIgnoreCase(SchedulerJobApiConstants.JOB_MESSANGER)){
     	    	  
-    	    	  final Collection<BillingMessageTemplateData> templateData = this.billingMesssageReadPlatformService.retrieveAllMessageTemplateParams();
-    	    	  jobDetailData.setMessageData(templateData);
+    	    	 final Collection<BillingMessageTemplateData> templateData = this.billingMesssageReadPlatformService.retrieveAllMessageTemplateParams();
+    	    	 jobDetailData.setMessageData(templateData);
+    	    	 /* final List<Template> templateData = this.templateService.getAll();
+    	    	  jobDetailData.setTemplateData(templateData);*/
 		       }
     	
 		return jobDetailData;

@@ -408,10 +408,8 @@ try {
 
 @Override
 @CronTarget(jobName = JobName.MESSAGE_MERGE)
-public void processingMessages()
-{
-try
-{
+public void processingMessages(){
+try{
 JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.MESSAGE_MERGE.toString());
     
  if(data!=null){
@@ -442,6 +440,7 @@ JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobNam
         	 if(messageId!=null){
         		 fw.append("generating the message....... \r\n");
         		 this.billingMessageDataWritePlatformService.createMessageData(messageId,scheduleJobData.getQuery());
+        		 //this.billingMessageDataWritePlatformService.createMessageTemplate(messageId,scheduleJobData.getQuery());
         		 fw.append("messages are generated successfully....... \r\n");
 
         	 }

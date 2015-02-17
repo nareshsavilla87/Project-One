@@ -14,12 +14,13 @@ public enum TemplateType {
 
     @SerializedName("Document")
     DOCUMENT(0, "Document"),
+    @SerializedName("E-Mail") 
+    EMAIL(1, "E-Mail"),
     @SerializedName("SMS")
-    SMS(1, "SMS");
-
-    /**
-     * @SerializedName("E-Mail") EMAIL(1, "E-Mail")
-     */
+    SMS(2, "SMS"),
+    @SerializedName("OSD")
+    OSD(3, "OSD");
+    
     private int id;
     private String name;
 

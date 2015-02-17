@@ -16,9 +16,8 @@ public interface BillingMessageDataWritePlatformService {
 	 * @return
 	 */
 	CommandProcessingResult createMessageData(final Long command, final String json);
-	
-	
-	
-	
 
+	CommandProcessingResult createMessageTemplate(final Long messageId, final String query);
+	
+	
 }

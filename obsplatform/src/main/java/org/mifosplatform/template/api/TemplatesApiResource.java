@@ -180,7 +180,7 @@ public class TemplatesApiResource {
         @SuppressWarnings("unchecked")
         final HashMap<String, Object> result = new ObjectMapper().readValue(apiRequestBodyAsJson, HashMap.class);
 
-        final MultivaluedMap<String, String> parameters = uriInfo.getQueryParameters();
+        final MultivaluedMap<String, String> parameters = uriInfo.getQueryParameters();	
         final Map<String, Object> parametersMap = new HashMap<>();
         for (final Map.Entry<String, List<String>> entry : parameters.entrySet()) {
 

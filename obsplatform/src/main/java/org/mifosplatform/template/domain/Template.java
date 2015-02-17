@@ -19,7 +19,6 @@ import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -50,8 +49,12 @@ public class Template extends AbstractPersistable<Long> {
 
     @Column(name = "text", columnDefinition = "longtext", nullable = false)
     private String text;
+    
+    @Column(name = "is_deleted")
+	private char isDeleted = 'N';
 
     @OrderBy(value = "mapperorder")
+    /*@OneToMany(mappedBy = "template", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)*/
     @OneToMany(targetEntity = TemplateMapper.class, cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<TemplateMapper> mappers;
 
@@ -65,7 +68,7 @@ public class Template extends AbstractPersistable<Long> {
     }
 
     public Template() {
-        //
+       //default-constructor
     }
 
     public static Template fromJson(final JsonCommand command) {
@@ -79,7 +82,13 @@ public class Template extends AbstractPersistable<Long> {
                 type = TemplateType.DOCUMENT;
                 break;
             case 1 :
-                type = TemplateType.SMS;
+                type = TemplateType.EMAIL;
+                break;
+            case 2 :
+            	type = TemplateType.SMS;
+            	break;
+            case 3 :
+            	type = TemplateType.OSD;
                 break;
         }
 
@@ -88,10 +97,11 @@ public class Template extends AbstractPersistable<Long> {
         final List<TemplateMapper> mappersList = new ArrayList<>();
 
         for (final JsonElement element : array) {
-            mappersList.add(new TemplateMapper(element.getAsJsonObject()
-                    .get("mappersorder").getAsInt(), element.getAsJsonObject()
-                    .get("mapperskey").getAsString(), element.getAsJsonObject()
-                    .get("mappersvalue").getAsString()));
+        	
+        TemplateMapper mapper=new TemplateMapper(element.getAsJsonObject().get("mappersorder").getAsInt(), 
+        		      element.getAsJsonObject().get("mapperskey").getAsString(), 
+        		      element.getAsJsonObject().get("mappersvalue").getAsString());
+            mappersList.add(mapper);
         }
 
         return new Template(name, text, entity, type, mappersList);
@@ -144,4 +154,13 @@ public class Template extends AbstractPersistable<Long> {
     public void setText(final String text) {
         this.text = text;
     }
+
+	public void delete() {
+		
+		if(this.isDeleted=='N'){
+			this.isDeleted = 'Y';
+			this.name =this.name +"_"+ "Y";
+		}
+		
+	}
 }

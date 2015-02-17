@@ -3,15 +3,20 @@ package org.mifosplatform.organisation.message.service;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.joda.time.LocalDate;
+import org.joda.time.LocalTime;
 import org.mifosplatform.cms.media.domain.MediaTypeEnumaration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
@@ -34,11 +39,16 @@ import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetail
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.mifosplatform.provisioning.provisioning.domain.ProvisioningCommand;
 import org.mifosplatform.provisioning.provisioning.domain.ProvisioningCommandRepository;
+import org.mifosplatform.template.domain.Template;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.Mustache;
+import com.github.mustachejava.MustacheFactory;
 
 /**
  * 
@@ -61,6 +71,8 @@ public class BillingMesssageReadPlatformServiceImpl implements
 	private static FileWriter fw;
 	private static ConfigurationRepository globalConfigurationRepository;
 	private static ProvisioningCommandRepository provisioningCommandRepository;
+
+	
 
 	@SuppressWarnings("static-access")
 	@Autowired
@@ -386,4 +398,80 @@ public class BillingMesssageReadPlatformServiceImpl implements
 
 	}
 
+	@Override
+	public List<List<Map<String, Object>>> retrieveMessageQuery(final String query, final Template template) {
+
+		final TemplateMappers mapper = new TemplateMappers(template);
+		return this.jdbcTemplate.query(query, mapper, new Object[] {});
+	}
+
+	private static final class TemplateMappers implements RowMapper<List<Map<String, Object>>> {
+
+		Template template;
+
+		public TemplateMappers(final Template template) {
+
+			this.template = template;
+		}
+
+		@Override
+		public List<Map<String, Object>> mapRow(ResultSet rs, int rowNum) throws SQLException {
+
+			try {
+				final String messageType = this.template.getType().getName();
+				rs.beforeFirst();
+				final ResultSetMetaData metaData = rs.getMetaData();
+				final List<Map<String, Object>> scopes = new ArrayList<>();
+				final int row = metaData.getColumnCount();
+				final MustacheFactory mf = new DefaultMustacheFactory();
+			    Mustache mustache = mf.compile(new StringReader(this.template.getText()), this.template.getName());
+				locationInitialization();
+				if(rs!=null){
+				while(rs.next()) {
+					final Map<String, Object> scope = new HashMap<>();
+					 for (int i = 1; i <= row; i++) {
+						scope.put(metaData.getColumnName(i), rs.getObject(i));
+					  }
+					String emailTo=null;
+					for(String key:scope.keySet()){
+						if(key.contains("email")){
+						  emailTo=scope.get(key).toString();
+						}
+					}
+					if(emailTo == null) {
+						fw.append("current client doesn't have email id: \r\n");
+					}
+					final StringWriter stringWriter = new StringWriter();
+					mustache.execute(stringWriter, scope).flush();
+					if (messageType.equalsIgnoreCase("E-Mail") || messageType.equalsIgnoreCase("SMS")&&emailTo!=null) {
+						BillingMessage billingMessage = new BillingMessage("", stringWriter.toString(),"Thank you", 
+								emailTo,emailTo,this.template.getName(), "N", this.template.getId(),	messageType.charAt(0), null);
+						messageDataRepository.save(billingMessage);
+					}
+					scopes.add(scope);
+				}
+			}
+	  return scopes;
+	} catch (Exception e) {
+	  e.printStackTrace();
+	  return  null;
+		}
+
+}
+
+		private void locationInitialization() throws IOException {
+			
+				String fileUploadLocation = FileUtils.generateLogFileDirectory() + JobName.MESSAGE_MERGE.toString() + File.separator + "BillingMessage";
+				File file = new File(fileUploadLocation);
+				if (!file.isDirectory()) {
+					file.mkdirs();
+				}
+				LocalTime date=new LocalTime();
+		        String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
+				String path = fileUploadLocation + File.separator + "billingMessage_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".log";
+				File fileHandler = new File(path.trim());
+				fileHandler.createNewFile();
+				fw = new FileWriter(fileHandler);
+		}
+	}
 }

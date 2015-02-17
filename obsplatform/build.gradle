@@ -284,6 +284,7 @@ task integrationTest(type:Test){
 
     testClassesDir = project.sourceSets.integrationTest.output.classesDir
     classpath = project.sourceSets.integrationTest.runtimeClasspath
+    
 }
 
 

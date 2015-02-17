@@ -15,12 +15,17 @@ import org.mifosplatform.useradministration.domain.AppUser;
  * @author ashokreddy
  *
  */
-@SuppressWarnings("serial")
+
 @Entity
 @Table(name = "b_message_data")
 public class BillingMessage extends AbstractAuditableCustom<AppUser, Long> {
 
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Column(name = "message_to")
 	private String messageTo;
 	
@@ -52,6 +57,9 @@ public class BillingMessage extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name="msgtemplate_id")
     private BillingMessageTemplate billingMessageTemplate;
 	
+	@Column(name ="template_id")
+	private Long templateId;
+	
 	public BillingMessage(){
 		//default-constructor
 	}
@@ -68,9 +76,10 @@ public class BillingMessage extends AbstractAuditableCustom<AppUser, Long> {
 		this.messageTo=messageTo;
 		this.subject=subject;
 		this.status=status;
-		this.billingMessageTemplate=billingMessageTemplate;
+	    this.billingMessageTemplate=billingMessageTemplate;
 		this.messageType=messageType;
 		this.attachment=attachment;
+		this.templateId = null;
 	}
 
 	public char getMessageType() {
@@ -152,6 +161,32 @@ public class BillingMessage extends AbstractAuditableCustom<AppUser, Long> {
 
 	public void setAttachment(String attachment) {
 		this.attachment = attachment;
+	}
+	
+	public BillingMessage(final String header, final String body, final String footer,
+			final  String messageFrom, final String messageTo, final String subject,
+			final String status, final Long templateId, 
+			final char messageType, final String attachment) {
+        
+		this.header=header;
+		this.body=body;
+		this.footer=footer;
+		this.messageFrom=messageFrom;
+		this.messageTo=messageTo;
+		this.subject=subject;
+		this.status=status;
+		this.templateId=templateId;
+		this.messageType=messageType;
+		this.attachment=attachment;
+		this.billingMessageTemplate = null;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
 	}
 	
 	
