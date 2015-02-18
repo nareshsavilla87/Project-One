@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 
 import org.joda.time.LocalDate;
 
-public class DiscountDomain {
+public class DiscountDomain  {
 
 	private Long id;
 	private String discountCode;
@@ -92,7 +92,5 @@ public class DiscountDomain {
 	public void setDiscountStatus(String discountStatus) {
 		this.discountStatus = discountStatus;
 	}
-	
-	
 
 }

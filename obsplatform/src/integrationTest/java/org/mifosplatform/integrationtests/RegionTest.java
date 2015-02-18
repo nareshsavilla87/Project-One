@@ -1,14 +1,14 @@
 package org.mifosplatform.integrationtests;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.mifosplatform.integrationtests.common.Utils;
-import org.mifosplatform.integrationtests.common.discount.DiscountDomain;
-import org.mifosplatform.integrationtests.common.discount.DiscountHelper;
+import org.mifosplatform.integrationtests.common.regions.RegionHelper;
 
 import com.jayway.restassured.builder.RequestSpecBuilder;
 import com.jayway.restassured.builder.ResponseSpecBuilder;
@@ -16,7 +16,8 @@ import com.jayway.restassured.http.ContentType;
 import com.jayway.restassured.specification.RequestSpecification;
 import com.jayway.restassured.specification.ResponseSpecification;
 
-public class DiscountTest {
+public class RegionTest {
+
 
 	private ResponseSpecification responseSpec;
 	private RequestSpecification requestSpec;
@@ -29,27 +30,27 @@ public class DiscountTest {
 		this.requestSpec.header("X-Obs-Platform-TenantId", "default");
 		this.responseSpec = new ResponseSpecBuilder().expectStatusCode(200).build();
 	}
-
+	
 	
 	@Test
-	public void testDiscountElements() {
+	public void testRegionElements() {
 		
-        final String discountId="16";
-		DiscountDomain discount = DiscountHelper.getDiscountById(requestSpec,responseSpec,discountId);
-		System.out.println(discount);
+        final String regionId="1";
+		HashMap regionDetail = RegionHelper.getRegionById(requestSpec,responseSpec,regionId);
+		System.out.println(regionDetail);
 		
-		ArrayList<DiscountDomain> discountList = DiscountHelper.getAllDiscounts(requestSpec, responseSpec);
-		System.out.println(discountList);
+        ArrayList<HashMap>  regionsList = RegionHelper.getAllRegions(requestSpec, responseSpec);
+		System.out.println(regionsList);
 
 	}
 	
 	
 	@Ignore
 	@Test
-	public void testCreateDiscount() {
+	public void testCreateRegion() {
 
-		Integer discount = DiscountHelper.createDiscount(requestSpec,responseSpec);
-		Assert.assertNotNull(discount);
+		Integer region = RegionHelper.createRegion(requestSpec,responseSpec);
+		Assert.assertNotNull(region);
 
 	}
 
