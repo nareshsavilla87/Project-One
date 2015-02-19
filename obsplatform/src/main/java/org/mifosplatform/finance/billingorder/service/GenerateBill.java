@@ -320,7 +320,7 @@ public class GenerateBill {
 		LocalDate startDate = new LocalDate(billingOrderData.getBillStartDate());
 		LocalDate endDate = startDate;
 		LocalDate invoiceTillDate = startDate;
-		LocalDate nextbillDate = invoiceTillDate.plusDays(1);
+		LocalDate nextbillDate = invoiceTillDate;
 		BigDecimal price = billingOrderData.getPrice();
 
 		if (discountMasterData.getDiscountAmount().compareTo(BigDecimal.ZERO) >= 1) {
