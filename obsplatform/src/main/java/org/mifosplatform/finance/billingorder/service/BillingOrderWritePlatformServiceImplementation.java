@@ -74,6 +74,7 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 						    	
 							orderPriceData.setInvoiceTillDate(billingOrderCommand.getInvoiceTillDate());
 							orderPriceData.setNextBillableDay(billingOrderCommand.getNextBillableDate());
+						
 						}
 					}
 				}

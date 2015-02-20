@@ -57,8 +57,8 @@ public class BillingMessage extends AbstractAuditableCustom<AppUser, Long> {
     @JoinColumn(name="msgtemplate_id")
     private BillingMessageTemplate billingMessageTemplate;
 	
-	@Column(name ="template_id")
-	private Long templateId;
+	/*@Column(name ="template_id")
+	private Long templateId;*/
 	
 	public BillingMessage(){
 		//default-constructor
@@ -79,7 +79,7 @@ public class BillingMessage extends AbstractAuditableCustom<AppUser, Long> {
 	    this.billingMessageTemplate=billingMessageTemplate;
 		this.messageType=messageType;
 		this.attachment=attachment;
-		this.templateId = null;
+		//this.templateId = null;
 	}
 
 	public char getMessageType() {
@@ -175,19 +175,19 @@ public class BillingMessage extends AbstractAuditableCustom<AppUser, Long> {
 		this.messageTo=messageTo;
 		this.subject=subject;
 		this.status=status;
-		this.templateId=templateId;
+	//	this.templateId=templateId;
 		this.messageType=messageType;
 		this.attachment=attachment;
 		this.billingMessageTemplate = null;
 	}
 
-	public Long getTemplateId() {
+	/*public Long getTemplateId() {
 		return templateId;
 	}
 
 	public void setTemplateId(Long templateId) {
 		this.templateId = templateId;
-	}
+	}*/
 	
 	
 	
