@@ -31,6 +31,7 @@ public class ConfigurationConstants {
 	public static final String CONFIG_PROPERTY_OSD_PROVISIONING_SYSTEM= "osd-provisioningSystem";
 	public static final String CONFIG_PROPERTY_WALLET_ENABLE= "is-wallet-enable";
 	public static final String CONFIG_PROPERTY_MEDIA_CRASH_EMAIL = "systemadmin-emailId";
+
 	public static final String CONFIG_PROPERTY_REPROCESS_INTERVAL = "reProcess-interval";
 	public static final String CONFIG_PROPERTY_PAYMENT_EMAIL_DESC = "payment-email-description";
 
@@ -86,13 +87,13 @@ public class ConfigurationConstants {
 	public static final char CONST_IS_Y = 'Y';
 	public static final char CONST_IS_N = 'N';
 	public static final String OSM_COMMAND = "OSM";
-	
-	
+
 	//Globalpay URL Configurations
 	public static final String GLOBALPAY_URL = "https://demo.globalpay.com.ng/GlobalpayWebService_demo/service.asmx";
 	public static final String GLOBALPAY_HOST = "demo.globalpay.com.ng";
 	public static final String GLOBALPAY_CHARSET = "application/soap+xml; charset=utf-8";
 	
-	
 
 }
+
+

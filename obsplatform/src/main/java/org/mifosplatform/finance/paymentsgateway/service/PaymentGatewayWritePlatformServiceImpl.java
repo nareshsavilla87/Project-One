@@ -367,6 +367,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			String userName = pgConfigJsonObj.getString("userName");
 			String password = pgConfigJsonObj.getString("password");
 
+
 			String data = editGlobalScript(MerchantTxnRef, merchantId, userName, password);
 
 			URL oURL = new URL(ConfigurationConstants.GLOBALPAY_URL);
@@ -483,7 +484,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			
 			PaymentGatewayConfiguration pgConfig = this.paymentGatewayConfigurationRepository.findOneByName(ConfigurationConstants.NETELLER_PAYMENTGATEWAY);
 			
-			if (null == pgConfig || null == pgConfig.getValue() || pgConfig.isEnabled()) {
+			if (null == pgConfig || null == pgConfig.getValue() || !pgConfig.isEnabled()) {
 				throw new PaymentGatewayConfigurationException(ConfigurationConstants.NETELLER_PAYMENTGATEWAY);
 			}
 			
@@ -629,16 +630,15 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			return processOnlinePayment(commandJson,command.json());
 
 		} catch (DataIntegrityViolationException dve) {
-			
-			final Throwable realCause = dve.getMostSpecificCause(); 
-			
-			if(realCause.getMessage().contains("receipt_no")){
-			          throw new ReceiptNoDuplicateException(command.stringValueOfParameterNamed("transactionId"));
+
+			final Throwable realCause = dve.getMostSpecificCause();
+
+			if (realCause.getMessage().contains("receipt_no")) {
+				throw new ReceiptNoDuplicateException(command.stringValueOfParameterNamed("transactionId"));
 			} else {
 				return new CommandProcessingResult(Long.valueOf(-1));
 			}
-			
-			
+
 		} catch (JSONException e) {
 			return new CommandProcessingResult(Long.valueOf(-1));
 			
@@ -762,7 +762,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				}
 				
 			} else if(paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_PENDING)){
-				
+
 				EventAction eventAction=new EventAction(new Date(), "Create Payment", "PAYMENT", EventActionConstants.EVENT_CREATE_PAYMENT,
 						"/payments/"+clientId, id,object.toString(),null,clientId);	
 				eventAction.updateStatus('P');

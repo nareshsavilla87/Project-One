@@ -439,7 +439,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		  if(plan.isPrepaid() == 'Y'){
 			  ServiceMaster service=this.serviceMasterRepository.findOne(orderprice.getServiceId()); 
 			  Price price=this.priceRepository.findOneByPlanAndService(plan.getId(), service.getServiceCode(),
-					  contractDetails.getSubscriptionPeriod());
+					  contractDetails.getSubscriptionPeriod(),orderprice.getChargeCode());
 				if(price != null){
 					ChargeCodeMaster chargeCode=this.chargeCodeRepository.findOneByChargeCode(price.getChargeCode());
 					orderprice.setChargeCode(chargeCode.getChargeCode());

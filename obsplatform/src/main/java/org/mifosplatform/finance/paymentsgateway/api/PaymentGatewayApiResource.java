@@ -29,6 +29,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.FileUtils;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.XML;
@@ -515,7 +516,7 @@ public class PaymentGatewayApiResource {
 		} 
 	   catch(Exception e){
 		   e.printStackTrace();
-		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.";
+		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";
 		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus + "</Strong>";
 		   return htmlData;   
 	   }
@@ -526,10 +527,11 @@ public class PaymentGatewayApiResource {
 		try {
 			
 			JSONObject jsonCustomData = new JSONObject(jsonObject);
-			
+
 			final String dateFormat = "dd MMMM yyyy";
 			String screenName = jsonCustomData.getString("screenName");
 			Long orderId = null;
+			String eventDataStr = null;
 
 			if (jsonCustomData.has("clientId"))
 				jsonCustomData.remove("clientId");
@@ -544,10 +546,40 @@ public class PaymentGatewayApiResource {
 				orderId = Long.valueOf(jsonCustomData.getString("orderId"));
 				jsonCustomData.remove("orderId");
 			}
-
-			if (screenName.equalsIgnoreCase("vod")) {
+			
+			if (jsonCustomData.has("eventData")){
+				eventDataStr = jsonCustomData.getString("eventData");
+				jsonCustomData.remove("eventData");
+			}
 				
-				return "Payment Done Successfully.";
+			if (screenName.equalsIgnoreCase("vod")) {
+			
+				CommandProcessingResult resultEvents = null;
+				JSONArray eventDataArray = new JSONArray(eventDataStr);
+				
+				for(int i=0;i<eventDataArray.length();i++){
+					JSONObject item = eventDataArray.getJSONObject(i);
+					jsonCustomData.put("clientId", clientId);
+					jsonCustomData.put("dateFormat", dateFormat);
+					jsonCustomData.put("eventBookedDate", date);
+					jsonCustomData.put("locale", "en");
+					jsonCustomData.put("deviceId", jsonCustomData.getString("deviceId"));
+					jsonCustomData.put("eventId", item.getLong("eventId"));
+					jsonCustomData.put("formatType", item.getString("formatType"));
+					jsonCustomData.put("optType", item.getString("optType"));
+					
+					CommandWrapper commandRequest = new CommandWrapperBuilder().createEventOrder(clientId).withJson(jsonCustomData.toString()).build();
+					resultEvents = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+					if(resultEvents == null){
+						break;
+					}
+				}
+				
+			    if (resultEvents == null) {
+					return "failure : Payment Done and Event(s) Booking Failed";
+				} else {
+					return "Payment Done and Event(s) Booked Successfully. ";
+				}
 				
 			} else if (screenName.equalsIgnoreCase("additionalOrders")) {
 
@@ -603,7 +635,6 @@ public class PaymentGatewayApiResource {
 			}else {
 				return "Payment Done Successfully.";
 			}
-			
 			
 		} catch (JSONException e) {
 			return "failure : Payment Done and Plan Booking Failed with throwing JSONException";
