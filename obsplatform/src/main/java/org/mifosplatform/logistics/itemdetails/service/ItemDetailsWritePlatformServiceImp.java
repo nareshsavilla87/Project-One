@@ -236,7 +236,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 				inventoryItemAllocationCommandFromApiJsonDeserializer.validateForCreate(command.json());
 				final JsonElement element = fromJsonHelper.parse(command.json());
 				JsonArray allocationData = fromJsonHelper.extractJsonArrayNamed("serialNumber", element);
-				ItemMaster itemMasterData=this.itemRepository.findOne(command.longValueOfParameterNamed("itemMasterId"));
+				ItemMaster itemMasterData=this.itemRepository.findOne(command.longValueOfParameterNamed("itemId"));
 				//int i=1;
 					for(JsonElement j:allocationData){
 			        	

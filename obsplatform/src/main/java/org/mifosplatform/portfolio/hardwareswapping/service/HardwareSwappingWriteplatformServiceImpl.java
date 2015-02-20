@@ -168,7 +168,7 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 		 
 		 serialNumber.put(allocation);
 		 allocation1.put("quantity",1);
-		 allocation1.put("itemMasterId",inventoryItemDetailsAllocation.getItemMasterId());
+		 allocation1.put("itemId",inventoryItemDetailsAllocation.getItemMasterId());
 		 allocation1.put("serialNumber",serialNumber);
 		 
 		//ReAllocate HardWare
