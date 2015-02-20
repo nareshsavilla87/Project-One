@@ -31,7 +31,8 @@ public class ConfigurationConstants {
 	public static final String CONFIG_PROPERTY_OSD_PROVISIONING_SYSTEM= "osd-provisioningSystem";
 	public static final String CONFIG_PROPERTY_WALLET_ENABLE= "is-wallet-enable";
 	public static final String CONFIG_PROPERTY_MEDIA_CRASH_EMAIL = "systemadmin-emailId";
-	//public static final String CONFIG_PROPERTY_ONLINEPAYMODE = "online-paymode";
+	public static final String CONFIG_PROPERTY_REPROCESS_INTERVAL = "reProcess-interval";
+	public static final String CONFIG_PROPERTY_PAYMENT_EMAIL_DESC = "payment-email-description";
 
 	public static final String CONFIG_PROPERTY_SMTP= "smtp";
 
@@ -49,10 +50,21 @@ public class ConfigurationConstants {
 	public static final Set<String> UPDATE_CONFIGURATION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(ENABLED, VALUE));
 	public static final Set<String> CREATE_CONFIGURATION_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(NAME, MAIL,PASSWORD,HOSTNAME,PORT,STARTTLS,SETCONENTSTRING));
 	
+	//paymentgateway output 
+	public static final String PAYMENTGATEWAY_SUCCESS = "Success";
+	public static final String PAYMENTGATEWAY_FAILURE = "Failed";
+	public static final String PAYMENTGATEWAY_PENDING = "Pending";
+	public static final String PAYMENTGATEWAY_ALREADY_EXIST = "Decline";
+	
 	//Paymentgateway configurations
 	public static final String PAYMENTGATEWAY_MPESA = "MPESA";
 	public static final String PAYMENTGATEWAY_TIGO = "TIGO";
 	public static final String PAYMENTGATEWAY_ONLINEPAYMENT = "ONLINE_PAYMENT";
+	public static final String PAYMENT_SUCCESS_DESCRIPTION = "Transaction Successfully Completed";
+	public static final String PAYMENT_FAILURE_DESCRIPTION = "Transaction Rejected";
+	public static final String PAYMENT_PENDING_DESCRIPTION = "Transaction Pending";
+	public static final String PAYMENT_ALREADY_EXIST_DESCRIPTION = "Transaction Already Exist with this TransactionId";
+	public static final String PAYMENT_ERROR_DESCRIPTION = "Transaction Failed";
 
 	public static final String KORTA_PAYMENTGATEWAY = "korta";
 	public static final String DALPAY_PAYMENTGATEWAY = "dalpay";
@@ -74,6 +86,13 @@ public class ConfigurationConstants {
 	public static final char CONST_IS_Y = 'Y';
 	public static final char CONST_IS_N = 'N';
 	public static final String OSM_COMMAND = "OSM";
+	
+	
+	//Globalpay URL Configurations
+	public static final String GLOBALPAY_URL = "https://demo.globalpay.com.ng/GlobalpayWebService_demo/service.asmx";
+	public static final String GLOBALPAY_HOST = "demo.globalpay.com.ng";
+	public static final String GLOBALPAY_CHARSET = "application/soap+xml; charset=utf-8";
+	
 	
 
 }
