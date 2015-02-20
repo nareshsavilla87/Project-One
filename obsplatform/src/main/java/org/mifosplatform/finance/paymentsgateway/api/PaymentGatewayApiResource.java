@@ -55,8 +55,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 @Path("/paymentgateways")
@@ -533,7 +531,6 @@ public class PaymentGatewayApiResource {
 		final JSONObject jsonCustomData = new JSONObject(jsonObject);
 		final String dateFormat = "dd MMMM yyyy";
 		String screenName = jsonCustomData.getString("screenName");
-		String eventDataStr = jsonCustomData.getString("eventData");
 		Long orderId = null;
 
 		if (jsonCustomData.has("clientId"))
@@ -546,8 +543,8 @@ public class PaymentGatewayApiResource {
 			jsonCustomData.remove("screenName");
 		
 		if(jsonCustomData.has("orderId")){
-			jsonCustomData.remove("orderId");
 			orderId = Long.valueOf(jsonCustomData.getString("orderId"));
+			jsonCustomData.remove("orderId");
 		}
 		
 		if (jsonCustomData.has("eventData"))
@@ -555,6 +552,7 @@ public class PaymentGatewayApiResource {
 
 		if (screenName.equalsIgnoreCase("vod")) {
 			
+			String eventDataStr = jsonCustomData.getString("eventData");
 			CommandProcessingResult resultEvents = null;
 			JSONArray eventDataArray = new JSONArray(eventDataStr);
 			

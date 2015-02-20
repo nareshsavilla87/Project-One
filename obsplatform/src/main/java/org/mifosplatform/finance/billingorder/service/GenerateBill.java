@@ -315,17 +315,27 @@ public class GenerateBill {
 	// One Time Bill
 	public BillingOrderCommand getOneTimeBill(BillingOrderData billingOrderData,DiscountMasterData discountMasterData) {
 
+		LocalDate endDate=null;
+		LocalDate invoiceTillDate=null;
+		LocalDate nextbillDate=null;
 		List<InvoiceTaxCommand> listOfTaxes = new ArrayList<InvoiceTaxCommand>();
 
 		LocalDate startDate = new LocalDate(billingOrderData.getBillStartDate());
-		LocalDate endDate = startDate;
-		LocalDate invoiceTillDate = startDate;
-		LocalDate nextbillDate = invoiceTillDate;
 		BigDecimal price = billingOrderData.getPrice();
+		
+		if(billingOrderData.getStartDate()!=null){
+			endDate = startDate.plusMonths(billingOrderData.getChargeDuration()).minusDays(1);
+			invoiceTillDate = endDate;
+			nextbillDate = invoiceTillDate.plusDays(1);
+			
+		}else{
+			endDate = startDate;
+		    invoiceTillDate = startDate;
+		    nextbillDate = invoiceTillDate;
+		}
 
 		if (discountMasterData.getDiscountAmount().compareTo(BigDecimal.ZERO) >= 1) {
-			listOfTaxes = this.calculateTax(billingOrderData,
-					discountMasterData.getDiscountedChargeAmount());
+			listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());
 		} else {
 			listOfTaxes = this.calculateTax(billingOrderData,billingOrderData.getPrice());
 		}

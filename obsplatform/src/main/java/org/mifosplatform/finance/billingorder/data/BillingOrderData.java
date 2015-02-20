@@ -72,7 +72,7 @@ public class BillingOrderData {
 		
 		this.clientOrderId = itemId;
 		this.clientId = clientId;
-		this.startDate = startDate;
+		this.billStartDate = startDate;
 		this.chargeCode = chargeCode;
 		this.chargeType = chargeType;
 		this.price = price;
