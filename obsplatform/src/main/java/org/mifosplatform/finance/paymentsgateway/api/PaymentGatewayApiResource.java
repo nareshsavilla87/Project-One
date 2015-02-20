@@ -518,8 +518,8 @@ public class PaymentGatewayApiResource {
 
 		} 
 	   catch(Exception e){
-		   
-		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  "+ e.getCause().getMessage();
+		   e.printStackTrace();
+		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";
 		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus + "</Strong>";
 		   return htmlData;   
 	   }
@@ -626,9 +626,9 @@ public class PaymentGatewayApiResource {
 			final CommandProcessingResult resultOrder = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 			
 			if (resultOrder == null) {
-				return "failure : Payment Done and renewal Plan Booking Failed";
+				return "failure : Payment Done and  Plan changed Failed";
 			} else {
-				return "Payment Done and renewal Plan Booked Successfully. ";
+				return "Payment Done and  Plan changed Successfully. ";
 			}
 			
 		}else {
