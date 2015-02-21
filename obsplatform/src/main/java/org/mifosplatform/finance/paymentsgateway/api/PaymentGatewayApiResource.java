@@ -546,8 +546,8 @@ public class PaymentGatewayApiResource {
 			jsonCustomData.remove("screenName");
 		
 		if(jsonCustomData.has("orderId")){
-			jsonCustomData.remove("orderId");
 			orderId = Long.valueOf(jsonCustomData.getString("orderId"));
+			jsonCustomData.remove("orderId");
 		}
 		
 		if (jsonCustomData.has("eventData"))
