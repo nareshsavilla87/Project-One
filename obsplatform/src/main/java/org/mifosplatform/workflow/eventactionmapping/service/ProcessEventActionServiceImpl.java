@@ -11,6 +11,7 @@ import org.mifosplatform.finance.billingorder.service.InvoiceClient;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
 import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
@@ -138,7 +139,7 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 						final ProcessRequest processRequest=new ProcessRequest(none,eventActionData.getClientId(),none,ProvisioningApiConstants.PROV_BEENIUS,
 													ProvisioningApiConstants.REQUEST_TERMINATE,'N','N');
 						final ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(none,none,null,"success",associationDatas.get(0).getProvSerialNum(), 
-																	new Date(), null, new Date(),null,'N', ProvisioningApiConstants.REQUEST_TERMINATE,null);
+																	DateUtils.getDateOfTenant(), null, DateUtils.getDateOfTenant(),null,'N', ProvisioningApiConstants.REQUEST_TERMINATE,null);
 						processRequest.add(processRequestDetails);
 						this.processRequestRepository.save(processRequest);
 					}

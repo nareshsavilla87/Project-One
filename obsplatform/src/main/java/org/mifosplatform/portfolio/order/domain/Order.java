@@ -17,6 +17,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.useradministration.domain.AppUser;
 
@@ -308,7 +309,7 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 
 
 	public void updateDisconnectionstate() {
-		this.endDate =new Date();
+		this.endDate =DateUtils.getDateOfTenant();
 		this.disconnectReason="Change Plan";
 		this.isDeleted='Y';
 		this.userAction=UserActionStatusTypeEnum.DISCONNECTION.toString();

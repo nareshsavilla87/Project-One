@@ -199,7 +199,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			String type = fromApiJsonHelper.extractStringNamed("TYPE", element);
 			String tStatus = fromApiJsonHelper.extractStringNamed("STATUS", element);
 			String details = fromApiJsonHelper.extractStringNamed("COMPANYNAME", element);		 
-			Date date = new Date();		
+			Date date = DateUtils.getDateOfTenant();		
 			String source = ConfigurationConstants.PAYMENTGATEWAY_TIGO;
 
 			PaymentGateway paymentGateway = new PaymentGateway(serialNumberId, txnId, amountPaid, phoneNo, type, tStatus, details, date, source);
@@ -762,7 +762,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				
 			} else if(paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_PENDING)){
 				
-				EventAction eventAction=new EventAction(new Date(), "Create Payment", "PAYMENT", EventActionConstants.EVENT_CREATE_PAYMENT,
+				EventAction eventAction=new EventAction(DateUtils.getDateOfTenant(), "Create Payment", "PAYMENT", EventActionConstants.EVENT_CREATE_PAYMENT,
 						"/payments/"+clientId, id,object.toString(),null,clientId);	
 				eventAction.updateStatus('P');
 				this.eventActionRepository.save(eventAction);

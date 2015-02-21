@@ -28,6 +28,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
 import org.mifosplatform.portfolio.allocation.service.AllocationReadPlatformService;
@@ -1011,7 +1012,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		 PaymentFollowup paymentFollowup = this.paymentFollowupRepository.findOneByorderId(order.getId());
 		
 		 if(paymentFollowup != null){
-			 paymentFollowup.setReactiveDate(new Date());
+			 paymentFollowup.setReactiveDate(DateUtils.getDateOfTenant());
 			 this.paymentFollowupRepository.save(paymentFollowup);
 		 }	
 			

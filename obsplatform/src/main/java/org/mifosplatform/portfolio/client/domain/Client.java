@@ -551,7 +551,7 @@ public final class Client extends AbstractPersistable<Long> {
     	return displayName;
     }
     public Date getActivationDate() {
-    	final Date date=new Date();
+    	final Date date=DateUtils.getDateOfTenant();
 		return date;
 	}
     public String getAccountNo(){
