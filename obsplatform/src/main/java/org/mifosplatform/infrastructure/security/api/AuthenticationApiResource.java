@@ -21,6 +21,7 @@ import org.mifosplatform.billing.loginhistory.domain.LoginHistory;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistoryRepository;
 import org.mifosplatform.crm.userchat.service.UserChatReadplatformReadService;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -80,7 +81,7 @@ public class AuthenticationApiResource {
              * @author rakesh
              * */
             if (req.getSession().isNew() && !username.equalsIgnoreCase("selfcare")) { 
-        	    LoginHistory loginHistory=new LoginHistory(ipAddress,null,session,new Date(),null,username,"ACTIVE");
+        	    LoginHistory loginHistory=new LoginHistory(ipAddress,null,session,DateUtils.getDateOfTenant(),null,username,"ACTIVE");
         		this.loginHistoryRepository.save(loginHistory);
         		Long loginHistoryId=loginHistory.getId();
         		req.getSession().setAttribute("lId", loginHistoryId);

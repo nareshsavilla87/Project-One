@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import org.joda.time.LocalDate;
 import org.mifosplatform.crm.ticketmaster.command.TicketMasterCommand;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "b_ticket_master")
@@ -138,7 +139,7 @@ public class TicketMaster {
 		this.source = "Manual";
 		this.resolutionDescription = resolutionDescription;
 		this.assignedTo = assignedTo;	
-		this.createdDate = new Date();
+		this.createdDate = DateUtils.getDateOfTenant();
 		this.createdbyId = null;
 		this.sourceOfTicket = sourceOfTicket;
 		this.dueDate = dueTime;
@@ -203,9 +204,9 @@ public class TicketMaster {
 		this.status = "CLOSED";
 	    this.statusCode = Integer.parseInt(command.stringValueOfParameterNamed("status"));
 		this.resolutionDescription = command.stringValueOfParameterNamed("resolutionDescription");
-		this.closedDate = new Date();
+		this.closedDate = DateUtils.getDateOfTenant();
 		this.lastModifyId = userId;
-		this.lastModifydate = new Date();
+		this.lastModifydate = DateUtils.getDateOfTenant();
 		
 	}
 	

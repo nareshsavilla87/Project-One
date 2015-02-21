@@ -35,6 +35,7 @@ import org.mifosplatform.infrastructure.configuration.domain.Configuration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.configuration.exception.ConfigurationPropertyNotFoundException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.message.data.BillingMessageDataForProcessing;
 import org.mifosplatform.organisation.message.domain.BillingMessage;
 import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
@@ -245,7 +246,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 
 		if(configuration != null){
 			
-			Date date=new Date();
+			Date date=DateUtils.getDateOfTenant();
 			String dateTime=date.getHours()+""+date.getMinutes();
 		    String fileName="ReportEmail_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".pdf";
 		    Properties props = new Properties();

@@ -9,6 +9,7 @@ import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 import com.google.gson.JsonElement;
@@ -58,7 +59,7 @@ public class CreditDistribution extends AbstractAuditableCustom<AppUser, Long>{
 	final Long clientId = fromJsonHelper.extractLongNamed("clientId", j);
 	final Long invoiceId = fromJsonHelper.extractLongNamed("invoiceId", j);
 	final BigDecimal amount = fromJsonHelper.extractBigDecimalWithLocaleNamed("amount", j);
-	final Date distributionDate = new Date();
+	final Date distributionDate = DateUtils.getDateOfTenant();
 	return new CreditDistribution(paymentId,clientId,invoiceId,amount,distributionDate);
 	
 	}
