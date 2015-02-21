@@ -12,11 +12,12 @@ public class OrderPriceData {
 	private final Long id;
 	private final Long orderId;
 	private final Long serviceId;
-	private  String chargeCode;
 	private final String chargeDuration;
 	private final String durationType;
 	private final BigDecimal price;
 
+	private String chargeCode;
+	private String chargeType;
 	private LocalDate invoiceTillDate;
 	private Long createdBy;
 	private Date createdDate;
@@ -28,22 +29,19 @@ public class OrderPriceData {
 	private LocalDate nextBillDate;
 	private String billingCycle;
 	private String billingFrequency;
-	private String serviceDescrption;
-	private String chargedesc;
-	private String chargeType;
-
-	
+	private String chargeDescription;
+	private String serviceDescription;
 
 
-	public OrderPriceData(Long id, Long clientId, Long serviceId,String serviceDescrption, String chargedesc, String chargeDuration,
+	public OrderPriceData(Long id,Long orderId,Long clientId,String serviceDescription, String chargeDescription, String chargeDuration,
 			String durationtype, BigDecimal price, LocalDate billStartDate, LocalDate billEndDate, LocalDate nextBillDate,
 			LocalDate invoiceTillDate, String billingAlign, String billingFrequency) {
 
 		this.id=id;
-		this.orderId=clientId;
-		this.clientId=serviceId;
-		this.serviceDescrption=serviceDescrption;
-		this.chargedesc=chargedesc;
+		this.orderId=orderId;
+		this.clientId=clientId;
+		this.serviceDescription=serviceDescription;
+		this.chargeDescription=chargeDescription;
 		this.chargeDuration=chargeDuration;
 		this.durationType=durationtype;
 		this.price=price;
@@ -199,5 +197,20 @@ public class OrderPriceData {
 		return lastModifiedBy;
 	}
 
+	public String getChargeDescription() {
+		return chargeDescription;
+	}
+
+	public void setChargeDescription(String chargeDescription) {
+		this.chargeDescription = chargeDescription;
+	}
+
+	public String getServiceDescription() {
+		return serviceDescription;
+	}
+
+	public void setServiceDescription(String serviceDescription) {
+		this.serviceDescription = serviceDescription;
+	}
 
 }
