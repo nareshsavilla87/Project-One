@@ -237,7 +237,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 				final JsonElement element = fromJsonHelper.parse(command.json());
 				JsonArray allocationData = fromJsonHelper.extractJsonArrayNamed("serialNumber", element);
 				//ItemMaster itemMasterData=this.itemRepository.findOne(command.longValueOfParameterNamed("itemMasterId"));
-				ItemMaster itemMasterData=this.itemRepository.findOne(fromJsonHelper.extractLongNamed("itemMasterId", element));
+				ItemMaster itemMasterData=this.itemRepository.findOne(fromJsonHelper.extractLongNamed("itemId", element));
 				//int i=1;
 					for(JsonElement j:allocationData){
 			        	
