@@ -719,7 +719,13 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 
   try{
 	  this.fromApiJsonDeserializer.validateForCreate(command.json());
-	 LocalDate startDate=command.localDateValueOfParameterNamed("start_date");
+	  LocalDate startDate=command.localDateValueOfParameterNamed("start_date");
+	  
+	  char status = 'N';
+	  if(command.hasParameter("status")){
+		  status = command.stringValueOfParameterNamed("status").trim().charAt(0);
+	  }
+	 
 	
 		EventAction  eventAction=null;
 		JSONObject jsonObject=new JSONObject();
@@ -748,6 +754,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
         	   
         	    eventAction=new EventAction(startDate.toDate(), "CREATE", "ORDER",EventActionConstants.ACTION_NEW,"/orders/"+clientId, 
         			  clientId,command.json(),null,clientId);
+        	    eventAction.updateStatus(status);
         	    
         	  this.eventActionRepository.save(eventAction);
         	  return  new CommandProcessingResult(command.entityId(),clientId);

@@ -13,6 +13,7 @@ import org.mifosplatform.finance.paymentsgateway.data.PaymentEnum;
 import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayData;
 import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayDownloadData;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentEnumClass;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.core.data.MediaEnumoptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
@@ -62,9 +63,9 @@ public class PaymentGatewayReadPlatformServiceImpl implements PaymentGatewayRead
 	private static final class PaymentMapper implements RowMapper<PaymentGatewayData> {
 
 		public String schema() {
-			return " p.id as id,p.key_id as serialNo,p.party_id as phoneNo,p.payment_date as paymentDate," +
+			return " p.id as id,p.key_id as serialNo,p.party_id as phoneNo,p.payment_date as paymentDate,p.source as source," +
 					" p.amount_paid as amountPaid,p.receipt_no as receiptNo,p.t_details as clientName,p.status as status," +
-					" p.Remarks as remarks,p.obs_id as paymentId from b_paymentgateway p";
+					" p.Remarks as remarks,p.obs_id as paymentId,p.reprocess_detail as reprocessDetail from b_paymentgateway p";
 		}
 		
 		@Override
@@ -79,8 +80,10 @@ public class PaymentGatewayReadPlatformServiceImpl implements PaymentGatewayRead
 			String status = rs.getString("status");
 			Long paymentId = rs.getLong("paymentId");
 			String remarks = rs.getString("remarks");
+			String reprocessDetail = rs.getString("reprocessDetail");
+			String source = rs.getString("source");
 			
-			return new PaymentGatewayData(id,serialNo,phoneNo,paymentDate,amountPaid,receiptNo,clientName,status,paymentId,remarks);
+			return new PaymentGatewayData(id,serialNo,phoneNo,paymentDate,amountPaid,receiptNo,clientName,status,paymentId,remarks,reprocessDetail,source);
 		}
 
 	}
@@ -260,6 +263,33 @@ public class PaymentGatewayReadPlatformServiceImpl implements PaymentGatewayRead
 			return new PaymentGatewayDownloadData(SerialNumber,PaymentDate,AmountPaid,PhoneMSISDN,Remarks,Status,ReceiptNo,paymentId);
 		}
 	}
+
+	@Override
+	public List<PaymentGatewayData> retrievePendingDetails() {
+		try{
+			//this.context.authenticatedUser();
+			PaymentMapper mapper=new PaymentMapper();
+			String sql = "select "+mapper.schema()+ " where p.status=?";
+			return jdbcTemplate.query(sql, mapper, new Object[]{ConfigurationConstants.PAYMENTGATEWAY_PENDING});
+		} catch(EmptyResultDataAccessException e){
+			return null;
+		}
+		
+	}
+	
+	/*private static final class PaymentGatewayPendingMapper implements RowMapper<PaymentGatewayData>{
+		
+		@Override
+		public PaymentGatewayData mapRow(ResultSet rs, int rowNum)
+				throws SQLException {
+			return null;
+		}
+
+		public String schema() {
+			// TODO Auto-generated method stub
+			return null;
+		}
+	}*/
 	
 }
 	

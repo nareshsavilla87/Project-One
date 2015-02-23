@@ -367,6 +367,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			String userName = pgConfigJsonObj.getString("userName");
 			String password = pgConfigJsonObj.getString("password");
 
+
 			String data = editGlobalScript(MerchantTxnRef, merchantId, userName, password);
 
 			URL oURL = new URL(ConfigurationConstants.GLOBALPAY_URL);
@@ -483,7 +484,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			
 			PaymentGatewayConfiguration pgConfig = this.paymentGatewayConfigurationRepository.findOneByName(ConfigurationConstants.NETELLER_PAYMENTGATEWAY);
 			
-			if (null == pgConfig || null == pgConfig.getValue() || pgConfig.isEnabled()) {
+			if (null == pgConfig || null == pgConfig.getValue() || !pgConfig.isEnabled()) {
 				throw new PaymentGatewayConfigurationException(ConfigurationConstants.NETELLER_PAYMENTGATEWAY);
 			}
 			
@@ -587,7 +588,6 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			
 		}
 
-
 		@Override
 		public CommandProcessingResult onlinePaymentGateway(JsonCommand command) {
 
@@ -648,6 +648,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 		} catch (ParseException e) {
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
+		
 	}
 
 	private CommandProcessingResult processOnlinePayment(String jsonData, String requestJson ) throws JSONException {
@@ -691,7 +692,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 		}
 		
 		this.paymentGatewayRepository.save(paymentGateway);
-		
+	
 		withChanges.put("clientId", clientId);
 		withChanges.put("txnId", txnId);
 		withChanges.put("amount", amount);
