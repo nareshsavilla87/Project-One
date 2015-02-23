@@ -27,7 +27,11 @@ public interface SheduleJobWritePlatformService {
     
 	void processExportData();
 
+<<<<<<< HEAD
 	void processPartnersCommission();
+=======
+	void reProcessEventAction();
+>>>>>>> obsplatform-2.03
 
 
 	

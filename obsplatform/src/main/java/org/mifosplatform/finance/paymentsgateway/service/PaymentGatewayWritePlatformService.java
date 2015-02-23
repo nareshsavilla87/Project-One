@@ -18,7 +18,6 @@ public interface PaymentGatewayWritePlatformService {
 
 	void emailSending(Long clientId, String result, String description,String txnId, String amount, String cardType, String cardNumber) throws JSONException;
 
-	String globalPayProcessing(String MerchantTxnRef, String jsonData) throws JSONException, IOException;
+	String globalPayProcessing(String transactionId, String remarks) throws JSONException, IOException;
 	
-
 }
