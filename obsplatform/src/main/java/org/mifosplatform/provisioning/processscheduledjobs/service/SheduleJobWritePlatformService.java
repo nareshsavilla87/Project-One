@@ -29,6 +29,8 @@ public interface SheduleJobWritePlatformService {
 
 	void processPartnersCommission();
 
+	void reProcessEventAction();
+
 
 	
 }

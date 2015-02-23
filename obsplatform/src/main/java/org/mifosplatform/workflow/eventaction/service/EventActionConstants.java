@@ -4,9 +4,9 @@ public class EventActionConstants {
 	
 	//Events
 	public static final String EVENT_CREATE_PAYMENT="Create Payment";
-	public static final String  EVENT_CREATE_CLIENT="Create Client";
-	public static final String  EVENT_CREATE_LIVE_EVENT="Create Live Event";
-	public static final String  EVENT_CLOSE_CLIENT="Close Client";
+	public static final String EVENT_CREATE_CLIENT="Create Client";
+	public static final String EVENT_CREATE_LIVE_EVENT="Create Live Event";
+	public static final String EVENT_CLOSE_CLIENT="Close Client";
 	public static final String EVENT_CREATE_ORDER="Order Booking";
 	public static final String EVENT_ACTIVE_ORDER="Order activation";
 	public static final String EVENT_ORDER_RENEWAL="Order Renewal";
@@ -32,10 +32,7 @@ public class EventActionConstants {
 	public static final String ACTION_PROVISION_IT="Provision IT";
 	public static final String ACTION_ACTIVE_LIVE_EVENT = "Active Live Event";
 	public static final String ACTION_INACTIVE_LIVE_EVENT = "InActive Live Event";
-	
-	
-	
-	
+	public static final String ACTION_CREATE_PAYMENT="Create Payment";
 
 }
 

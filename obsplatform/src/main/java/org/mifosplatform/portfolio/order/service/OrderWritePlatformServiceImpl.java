@@ -228,7 +228,7 @@ try{
 		}
 		
 		//	For Order History
-		OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),commandId,requstStatus,userId,null);
+		OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),commandId,requstStatus,userId,null);
 		this.orderHistoryRepository.save(orderHistory);
 	}
 	
@@ -284,7 +284,7 @@ try{
 		this.OrderPriceRepository.save(orderPrice);
 		
 		//For Order History
-		OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),null,"UPDATE PRICE",userId,null);
+		OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),null,"UPDATE PRICE",userId,null);
 		this.orderHistoryRepository.save(orderHistory);
 		return new CommandProcessingResultBuilder() //
 		.withCommandId(command.commandId()) //
@@ -333,7 +333,7 @@ try{
 	this.orderRepository.save(order);
 	
 	//For Order History
-	OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),null,"CANCELLED",userId,null);
+	OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),null,"CANCELLED",userId,null);
 	this.orderHistoryRepository.save(orderHistory);
 	return new CommandProcessingResult(order.getId(),order.getClientId());
 }
@@ -346,7 +346,7 @@ try{
     	Order order = this.orderRepository.findOne(orderId);
     	
     	final LocalDate disconnectionDate = command.localDateValueOfParameterNamed("disconnectionDate");
-    	LocalDate currentDate = new LocalDate();
+    	LocalDate currentDate = DateUtils.getLocalDateOfTenant();
     	currentDate.toDate();
     	final Configuration configurationProperty = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_DISCONNECT);
     	List<OrderPrice> orderPrices = order.getPrice();
@@ -390,7 +390,7 @@ try{
 				
 	
 		//For Order History
-		final OrderHistory orderHistory = new OrderHistory(order.getId(), new LocalDate(), new LocalDate(), processingResultId, requstStatus, getUserId(), null);
+		final OrderHistory orderHistory = new OrderHistory(order.getId(), DateUtils.getLocalDateOfTenant(), DateUtils.getLocalDateOfTenant(), processingResultId, requstStatus, getUserId(), null);
 		this.orderHistoryRepository.save(orderHistory);
  
 		  return new CommandProcessingResult(Long.valueOf(order.getId()),order.getClientId());	
@@ -430,7 +430,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		  }
 					
 	  } else if(orderDetails.getStatus().equals(StatusTypeEnum.DISCONNECTED.getValue().longValue())){
-		  newStartdate=new LocalDate(); 
+		  newStartdate = DateUtils.getLocalDateOfTenant(); 
 		  requstStatus=UserActionStatusEnumaration.OrderStatusType(UserActionStatusTypeEnum.RENEWAL_AFTER_AUTOEXIPIRY).getValue();
 		  if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
 			  orderDetails.setStatus(StatusTypeEnum.PENDING.getValue().longValue());
@@ -481,7 +481,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		     }
 
 		     //For Order History
-   			OrderHistory orderHistory=new OrderHistory(orderDetails.getId(),new LocalDate(),newStartdate,resourceId,requstStatus,userId,description);
+   			OrderHistory orderHistory=new OrderHistory(orderDetails.getId(),DateUtils.getLocalDateOfTenant(),newStartdate,resourceId,requstStatus,userId,description);
    			this.orderHistoryRepository.save(orderHistory);
    			
    			return new CommandProcessingResult(Long.valueOf(orderDetails.getClientId()),orderDetails.getClientId());
@@ -519,7 +519,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		if(order == null){
 			throw new NoOrdersFoundException(orderId);
 		}
-		final LocalDate startDate=new LocalDate();
+		final LocalDate startDate = DateUtils.getLocalDateOfTenant();
 		List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyOrder(orderId);
 		Contract contractPeriod=this.subscriptionRepository.findOne(subscriptionDatas.get(0).getId());
 		LocalDate EndDate=this.orderAssembler.calculateEndDate(startDate,contractPeriod.getSubscriptionType(),contractPeriod.getUnits());
@@ -559,7 +559,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		this.orderRepository.save(order);
 		
 		//For Order History
-		OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),processingResultId,requstStatus,getUserId(),null);
+		OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),processingResultId,requstStatus,getUserId(),null);
 		this.orderHistoryRepository.save(orderHistory);
 		return new CommandProcessingResult(order.getId(),order.getClientId());
 	
@@ -629,7 +629,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 				this.processRequestRepository.save(processRequest);*/
 
 				this.orderRepository.save(order);
-				final OrderHistory orderHistory = new OrderHistory(order.getId(),new LocalDate(), new LocalDate(), resourceId,
+				final OrderHistory orderHistory = new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(), DateUtils.getLocalDateOfTenant(), resourceId,
 						requstStatus, getUserId(),null);
 				this.orderHistoryRepository.save(orderHistory);
 				
@@ -660,7 +660,7 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 	 if(!property.isEnabled()){
 		 Configuration dcConfiguration= this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_DISCONNECT);
 		 if(dcConfiguration.isEnabled()){
-			 this.reverseInvoice.reverseInvoiceServices(order.getId(), order.getClientId(),new LocalDate());
+			 this.reverseInvoice.reverseInvoiceServices(order.getId(), order.getClientId(),DateUtils.getLocalDateOfTenant());
 		 }
 	 }	
 	 
@@ -703,7 +703,7 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 			}
 		     
     	// For Order History
-			OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),processResuiltId,
+			OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),processResuiltId,
 					UserActionStatusTypeEnum.CHANGE_PLAN.toString(),userId,null);
 			this.orderHistoryRepository.save(orderHistory);
 			
@@ -753,7 +753,13 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 
   try{
 	  this.fromApiJsonDeserializer.validateForCreate(command.json());
-	 LocalDate startDate=command.localDateValueOfParameterNamed("start_date");
+	  LocalDate startDate=command.localDateValueOfParameterNamed("start_date");
+	  
+	  char status = 'N';
+	  if(command.hasParameter("status")){
+		  status = command.stringValueOfParameterNamed("status").trim().charAt(0);
+	  }
+	 
 	
 		EventAction  eventAction=null;
 		JSONObject jsonObject=new JSONObject();
@@ -782,6 +788,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
         	   
         	    eventAction=new EventAction(startDate.toDate(), "CREATE", "ORDER",EventActionConstants.ACTION_NEW,"/orders/"+clientId, 
         			  clientId,command.json(),null,clientId);
+        	    eventAction.updateStatus(status);
         	    
         	  this.eventActionRepository.save(eventAction);
         	  return  new CommandProcessingResult(command.entityId(),clientId);
@@ -880,7 +887,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	        	}
 
 	        	//For Order History
-			OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),entityId,
+			OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),entityId,
 		    UserActionStatusTypeEnum.EXTENSION.toString(),userId,extensionReason);
 			this.orderHistoryRepository.save(orderHistory);
 			return new CommandProcessingResult(entityId,order.getClientId());
@@ -921,7 +928,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			order.setuserAction(UserActionStatusTypeEnum.TERMINATION.toString());
 			this.orderRepository.saveAndFlush(order);
 			
-			OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),resourceId,
+			OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resourceId,
 					UserActionStatusTypeEnum.TERMINATION.toString(),appUser.getId(),null);
 			
 			this.orderHistoryRepository.save(orderHistory);	
@@ -970,7 +977,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 							StatusTypeEnum.ACTIVE.toString(),StatusTypeEnum.SUSPENDED.toString());
 					this.paymentFollowupRepository.save(paymentFollowup);
 					this.orderRepository.save(order);
-					final OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),resourceId,UserActionStatusTypeEnum.TERMINATION.toString(),
+					final OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resourceId,UserActionStatusTypeEnum.TERMINATION.toString(),
 							appUser.getId(),null);
                      this.orderHistoryRepository.save(orderHistory);	
 				    
@@ -1017,7 +1024,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		 }	
 			
 		 this.orderRepository.save(order);
-		 final OrderHistory orderHistory = new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),resourceId,UserActionStatusTypeEnum.REACTIVATION.toString(),
+		 final OrderHistory orderHistory = new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resourceId,UserActionStatusTypeEnum.REACTIVATION.toString(),
 				 appUser.getId(),null);
             this.orderHistoryRepository.save(orderHistory);	
 		    

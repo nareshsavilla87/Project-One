@@ -13,6 +13,7 @@ import javax.persistence.Table;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 
 @Entity
 @Table(name = "b_ticket_details")
@@ -72,7 +73,7 @@ public class TicketDetail {
         this.comments = comments;
         this.attachments = fileLocation;
         this.assignedTo = assignedTo;
-        this.createdDate = new LocalDate().toDate();
+        this.createdDate = DateUtils.getLocalDateOfTenant().toDate();
         this.createdbyId = createdbyId;	
 	}
 
