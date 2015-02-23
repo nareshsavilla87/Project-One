@@ -16,6 +16,7 @@ import org.mifosplatform.finance.billingorder.domain.BillingOrder;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.billingorder.domain.InvoiceTax;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -96,7 +97,7 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 		
 		TaxMappingRateData tax=this.billingOrderReadPlatformService.retriveExemptionTaxDetails(billingOrderCommands.get(0).getClientId());
 		
-		Invoice invoice = new Invoice(billingOrderCommands.get(0).getClientId(), new LocalDate().toDate(), invoiceAmount, invoiceAmount, 
+		Invoice invoice = new Invoice(billingOrderCommands.get(0).getClientId(), DateUtils.getLocalDateOfTenant().toDate(), invoiceAmount, invoiceAmount, 
 				                         netTaxAmount, "active");
 		
 		for (BillingOrderCommand billingOrderCommand : billingOrderCommands) {

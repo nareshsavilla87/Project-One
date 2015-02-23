@@ -183,7 +183,7 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 
 	public void delete() {
 		this.isDeleted = 'y';
-        this.endDate=new LocalDate().toDate();
+        this.endDate = DateUtils.getLocalDateOfTenant().toDate();
 	}
 
 	public void update(JsonCommand command, Long orderStatus) {
