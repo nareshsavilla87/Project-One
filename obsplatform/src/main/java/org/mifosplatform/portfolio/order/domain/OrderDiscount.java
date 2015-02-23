@@ -11,6 +11,7 @@ import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -98,7 +99,7 @@ public class OrderDiscount extends AbstractPersistable<Long> {
 
 	public void updateDates(BigDecimal discountRate, String discountType, LocalDate enddate) {
          
-		  this.discountStartdate=new Date();
+		  this.discountStartdate=DateUtils.getDateOfTenant();
 		  if(enddate != null){
 		  this.discountEndDate=enddate.toDate();
 		  }

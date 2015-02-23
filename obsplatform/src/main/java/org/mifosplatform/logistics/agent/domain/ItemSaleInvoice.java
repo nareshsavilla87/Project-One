@@ -11,6 +11,7 @@ import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 
@@ -61,7 +62,7 @@ public class ItemSaleInvoice extends AbstractAuditableCustom<AppUser,Long>{
 		final BigDecimal chargeAmount=command.bigDecimalValueOfParameterNamed("chargeAmount");
 		final BigDecimal taxPercantage=command.bigDecimalValueOfParameterNamed("taxPercantage");
 		
-		return new ItemSaleInvoice(new Date(),chargeAmount,taxPercantage);
+		return new ItemSaleInvoice(DateUtils.getDateOfTenant(),chargeAmount,taxPercantage);
 		
 	}
 

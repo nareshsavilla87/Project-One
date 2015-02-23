@@ -17,6 +17,7 @@ import org.mifosplatform.crm.ticketmaster.domain.TicketMaster;
 import org.mifosplatform.crm.ticketmaster.domain.TicketMasterRepository;
 import org.mifosplatform.crm.ticketmaster.service.TicketMasterReadPlatformService;
 import org.mifosplatform.finance.billingorder.api.BillingOrderApiResourse;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.message.domain.BillingMessage;
 import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
@@ -197,7 +198,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				          		}
 				          		jsonObject.put("renewalPeriod",subscriptionDatas.get(0).getId());	
 				          		jsonObject.put("description","Order Renewal By Scheduler");
-				          		eventAction=new EventAction(new Date(), "CREATE", "PAYMENT",EventActionConstants.ACTION_RENEWAL.toString(),"/orders/renewal", 
+				          		eventAction=new EventAction(DateUtils.getDateOfTenant(), "CREATE", "PAYMENT",EventActionConstants.ACTION_RENEWAL.toString(),"/orders/renewal", 
 			        			 Long.parseLong(resourceId), jsonObject.toString(),actionProcedureData.getOrderId(),clientId);
 				          		this.eventActionRepository.save(eventAction);
 				         break; 		
@@ -211,8 +212,8 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
                         jsonObject.put("paytermCode","Monthly");
                         jsonObject.put("planCode",actionProcedureData.getPlanId());
                         jsonObject.put("isNewplan","true");
-                        jsonObject.put("start_date",dateFormat.format(new Date()));
-                        eventAction=new EventAction(new Date(), "CREATE", "PAYMENT",actionProcedureData.getActionName(),"/orders/"+clientId, 
+                        jsonObject.put("start_date",dateFormat.format(DateUtils.getDateOfTenant()));
+                        eventAction=new EventAction(DateUtils.getDateOfTenant(), "CREATE", "PAYMENT",actionProcedureData.getActionName(),"/orders/"+clientId, 
                         		Long.parseLong(resourceId), jsonObject.toString(),null,clientId);
 			        	this.eventActionRepository.save(eventAction);
 			        	   
@@ -220,7 +221,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	
 				    case EventActionConstants.ACTION_DISCONNECT :
 
-			        	   eventAction=new EventAction(new Date(), "CREATE", "PAYMENT",EventActionConstants.ACTION_ACTIVE.toString(),"/orders/reconnect/"+clientId, 
+			        	   eventAction=new EventAction(DateUtils.getDateOfTenant(), "CREATE", "PAYMENT",EventActionConstants.ACTION_ACTIVE.toString(),"/orders/reconnect/"+clientId, 
 			        	   Long.parseLong(resourceId), jsonObject.toString(),actionProcedureData.getOrderId(),clientId);
 			        	   this.eventActionRepository.save(eventAction);
 
@@ -230,9 +231,9 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	  
 			        	  jsonObject.put("dateFormat","dd MMMM yyyy");
 			        	  jsonObject.put("locale","en");
-			        	  jsonObject.put("systemDate",dateFormat.format(new Date()));
+			        	  jsonObject.put("systemDate",dateFormat.format(DateUtils.getDateOfTenant()));
 			        	  	if(detailsData.IsSynchronous().equalsIgnoreCase("N")){
-			        	  		eventAction=new EventAction(new Date(), "CREATE",EventActionConstants.EVENT_ACTIVE_ORDER.toString(),
+			        	  		eventAction=new EventAction(DateUtils.getDateOfTenant(), "CREATE",EventActionConstants.EVENT_ACTIVE_ORDER.toString(),
 			        	  		EventActionConstants.ACTION_INVOICE.toString(),"/billingorder/"+clientId,Long.parseLong(resourceId),
 			        	  		jsonObject.toString(),Long.parseLong(resourceId),clientId);
 					        	this.eventActionRepository.save(eventAction);
@@ -273,7 +274,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 								
 							for(EventOrderdetials details:eventDetails){
 								ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(details.getId(),details.getEventDetails().getId(),jsonObject.toString(),
-										response,null,eventMaster.getEventStartDate(), eventMaster.getEventEndDate(),new Date(),new Date(),'N',
+										response,null,eventMaster.getEventStartDate(), eventMaster.getEventEndDate(),DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),'N',
 										ProvisioningApiConstants.REQUEST_ACTIVATION_VOD,null);
 								processRequest.add(processRequestDetails);
 							}
@@ -283,7 +284,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						
 				    case EventActionConstants.ACTION_SEND_PROVISION : 
 
-				    	eventAction=new EventAction(new Date(), "CLOSE", "Client",EventActionConstants.ACTION_SEND_PROVISION.toString(),"/processrequest/"+clientId, 
+				    	eventAction=new EventAction(DateUtils.getDateOfTenant(), "CLOSE", "Client",EventActionConstants.ACTION_SEND_PROVISION.toString(),"/processrequest/"+clientId, 
 				    	Long.parseLong(resourceId),jsonObject.toString(),clientId,clientId);
 				    	this.eventActionRepository.save(eventAction);
 				  	
