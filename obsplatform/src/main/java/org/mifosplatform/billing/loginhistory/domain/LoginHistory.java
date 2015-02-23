@@ -9,6 +9,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -70,8 +71,8 @@ public class LoginHistory extends AbstractPersistable<Long> {
 		 	final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
 		  
 	        final String logoutTimeParamName = "logoutTime";
-	        this.logoutTime = new Date();
-	        Date d = new Date();
+	        this.logoutTime = DateUtils.getDateOfTenant();
+	        Date d = DateUtils.getDateOfTenant();
 	        actualChanges.put(logoutTimeParamName, d);
 			/*if (command.isChangeInLocalDateParameterNamed(logoutTimeParamName,
 					new LocalDate(this.logoutTime))) {

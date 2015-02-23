@@ -22,6 +22,7 @@ import org.json.JSONException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetails;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetailsRepository;
@@ -543,7 +544,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			final String startDate = object.getString("startDate");
 
 			DateFormat dateformater = new SimpleDateFormat(dateFormat);
-			String todayDate = dateformater.format(new Date());
+			String todayDate = dateformater.format(DateUtils.getDateOfTenant());
 
 			String logFileLocation = object.getString("logFileLocation");
 			String datearray[] = calculateDate(days, startDate, dateFormat);
@@ -595,7 +596,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		Long defaultValue=Long.valueOf(0);
 		ProcessRequest processRequest=new ProcessRequest(defaultValue,clientId,defaultValue, provisioningSystem, requestType,'N','N');
 		 ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(defaultValue,defaultValue,"None","Recieved",
-				 hardwareId,new Date(),new Date(),null,null,'N',requestType,null);
+				 hardwareId,DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),null,null,'N',requestType,null);
 		 processRequest.add(processRequestDetails);
 		 this.processRequestRepository.save(processRequest);
 		return new CommandProcessingResult(processRequest.getId());

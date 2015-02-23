@@ -49,14 +49,13 @@ import org.mifosplatform.infrastructure.core.data.MediaEnumoptionData;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 @Path("/paymentgateways")
@@ -520,8 +519,9 @@ public class PaymentGatewayApiResource {
 
 		} 
 	   catch(Exception e){
-		   
-		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  "+ e.getCause();//.getMessage();
+
+		   e.printStackTrace();
+		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";
 		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus + "</Strong>";
 		   return htmlData;   
 	   }
@@ -533,7 +533,6 @@ public class PaymentGatewayApiResource {
 		final JSONObject jsonCustomData = new JSONObject(jsonObject);
 		final String dateFormat = "dd MMMM yyyy";
 		String screenName = jsonCustomData.getString("screenName");
-		String eventDataStr = jsonCustomData.getString("eventData");
 		Long orderId = null;
 
 		if (jsonCustomData.has("clientId"))
@@ -546,15 +545,16 @@ public class PaymentGatewayApiResource {
 			jsonCustomData.remove("screenName");
 		
 		if(jsonCustomData.has("orderId")){
-			jsonCustomData.remove("orderId");
 			orderId = Long.valueOf(jsonCustomData.getString("orderId"));
+			jsonCustomData.remove("orderId");
 		}
 		
 		if (jsonCustomData.has("eventData"))
 			jsonCustomData.remove("eventData");
 
 		if (screenName.equalsIgnoreCase("vod")) {
-
+			
+			String eventDataStr = jsonCustomData.getString("eventData");
 			CommandProcessingResult resultEvents = null;
 			JSONArray eventDataArray = new JSONArray(eventDataStr);
 			
@@ -628,9 +628,9 @@ public class PaymentGatewayApiResource {
 			final CommandProcessingResult resultOrder = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 			
 			if (resultOrder == null) {
-				return "failure : Payment Done and renewal Plan Booking Failed";
+				return "failure : Payment Done and  Plan changed Failed";
 			} else {
-				return "Payment Done and renewal Plan Booked Successfully. ";
+				return "Payment Done and  Plan changed Successfully. ";
 			}
 			
 		}else {
@@ -664,7 +664,7 @@ public class PaymentGatewayApiResource {
                
 				Long clientId = apiJson.getLong("clientId");
 				SimpleDateFormat daformat = new SimpleDateFormat("dd MMMM yyyy");
-				String date = daformat.format(new Date());
+				String date = daformat.format(DateUtils.getDateOfTenant());
 				
 				apiJson.remove("currency");
 				apiJson.remove("total_amount");

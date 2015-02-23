@@ -21,6 +21,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.annotation.ComparableFields;
 import org.mifosplatform.cms.eventprice.domain.EventPrice;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
@@ -119,7 +120,7 @@ public class EventMaster extends AbstractPersistable<Long> {
 		this.eventStartDate = eventStartDate;
 		this.eventEndDate = eventEndDate != null ? eventEndDate : null;
 		this.eventValidity = eventValidity.toDate();
-		this.createdDate = new Date();
+		this.createdDate = DateUtils.getDateOfTenant();
 		this.eventCategory = eventCategory;
 		this.chargeCode = chargeCode;
 	}
@@ -139,7 +140,7 @@ public class EventMaster extends AbstractPersistable<Long> {
 	}
 	
 	public void delete() {
-		this.eventEndDate = new Date();
+		this.eventEndDate = DateUtils.getDateOfTenant();
 	}
 	
 	

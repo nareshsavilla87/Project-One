@@ -17,6 +17,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConsta
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.data.MediaEnumoptionData;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
@@ -289,7 +290,7 @@ public class BillingMesssageReadPlatformServiceImpl implements
 					file.mkdirs();
 				}
 				
-				Date date = new Date();
+				Date date = DateUtils.getDateOfTenant();
 				String dateTime = date.getHours() + "" + date.getMinutes() + "" + date.getSeconds();
 				String path = fileUploadLocation + File.separator + "billingMessage_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".log";
 				
@@ -353,7 +354,7 @@ public class BillingMesssageReadPlatformServiceImpl implements
 					processRequest.setNotify();
 					
 					ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(
-							id, id, body, "Recieved", columndata.get(0).toString(), new Date(), null,
+							id, id, body, "Recieved", columndata.get(0).toString(), DateUtils.getDateOfTenant(), null,
 							null, null, 'N', requstStatus, null);
 					processRequest.add(processRequestDetails);
 					processRequestRepository.save(processRequest);

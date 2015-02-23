@@ -19,6 +19,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.redemption.exception.PinNumberAlreadyUsedException;
 import org.mifosplatform.organisation.redemption.exception.PinNumberNotFoundException;
@@ -102,7 +103,7 @@ public class RedemptionWritePlatformServiceImpl implements
 	public CommandProcessingResult createRedemption(final JsonCommand command) {
 	
 		try {
-			 final String simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy").format(new Date());
+			 final String simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy").format(DateUtils.getDateOfTenant());
 			context.authenticatedUser();
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
 			final Long clientId = command.longValueOfParameterNamed("clientId");
@@ -129,10 +130,15 @@ public class RedemptionWritePlatformServiceImpl implements
 				json.addProperty("adjustment_date", simpleDateFormat);
 				final JsonCommand commd = new JsonCommand(null, json.toString(), json, fromJsonHelper, null, clientId, null, null, clientId, null, null, null, null, null, null,null);
 				
-				result=this.adjustmentWritePlatformService.createAdjustments(commd);
+					result=this.adjustmentWritePlatformService.createAdjustments(commd);
 				resourceId=result.resourceId();
-				
-				
+
+				  JournalVoucher journalVoucher=new JournalVoucher(voucher.getOfficeId(),DateUtils.getDateOfTenant(),"Redemption",null,
+						  pinValue.doubleValue(),Long.valueOf(0));
+					this.journalvoucherRepository.save(journalVoucher);
+					
+					journalVoucher=new JournalVoucher(resourceId,DateUtils.getDateOfTenant(),"Redemption",pinValue.doubleValue(),null,clientId);
+						this.journalvoucherRepository.save(journalVoucher);
 			}
 			 
 			if(pinType.equalsIgnoreCase(PRODUCE_PINTYPE) && pinTypeValue != null){
@@ -193,7 +199,7 @@ public class RedemptionWritePlatformServiceImpl implements
 			  
 			voucherDetails.setClientId(clientId);
 			voucherDetails.setStatus(USED);
-			voucherDetails.setSaleDate(new Date());
+			voucherDetails.setSaleDate(DateUtils.getDateOfTenant());
 			
 			this.voucherDetailsRepository.save(voucherDetails);
 			 
