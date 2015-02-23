@@ -45,6 +45,7 @@ import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepos
 import org.mifosplatform.organisation.message.service.MessagePlatformEmailService;
 import org.mifosplatform.portfolio.activationprocess.exception.ClientAlreadyCreatedException;
 import org.mifosplatform.portfolio.activationprocess.serialization.ActivationProcessCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.client.service.ClientIdentifierWritePlatformService;
 import org.mifosplatform.portfolio.client.service.ClientWritePlatformService;
 import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
 import org.slf4j.Logger;
@@ -75,6 +76,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 	private final SelfCareTemporaryRepository selfCareTemporaryRepository;
 	private final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService;
 	private final CodeValueRepository codeValueRepository;
+	private final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService;
 	
 	
 	
@@ -87,7 +89,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
     		final SelfCareTemporaryRepository selfCareTemporaryRepository,final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService,
     		final CodeValueRepository codeValueRepository,final ItemRepository itemRepository,
     		final BillingMessageTemplateRepository billingMessageTemplateRepository,final MessagePlatformEmailService messagePlatformEmailService,
-    		final BillingMessageRepository messageDataRepository) {
+    		final BillingMessageRepository messageDataRepository,final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService) {
 
         
     	this.context = context;
@@ -104,6 +106,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
         this.selfCareTemporaryRepository = selfCareTemporaryRepository;
         this.portfolioCommandSourceWritePlatformService = portfolioCommandSourceWritePlatformService;
         this.codeValueRepository = codeValueRepository;
+        this.clientIdentifierWritePlatformService = clientIdentifierWritePlatformService;
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
@@ -222,6 +225,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			String deviceAgreementType = command.stringValueOfParameterNamed("deviceAgreementType");
 			String password = command.stringValueOfParameterNamed("password");
 			String isMailCheck=command.stringValueOfParameterNamed("isMailCheck");
+			String passport=command.stringValueOfParameterNamed("passport");
 			SelfCareTemporary temporary =null;
 			
 			if(isMailCheck == null || isMailCheck.isEmpty()){
@@ -278,6 +282,18 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 
 				if (resultClient == null) {
 					throw new PlatformDataIntegrityException("error.msg.client.creation.failed", "Client Creation Failed","Client Creation Failed");
+				}
+				
+				if(passport != null && !passport.equalsIgnoreCase("")){
+					CodeValue passportcodeValue=this.codeValueRepository.findOneByCodeValue("Passport");
+					JSONObject clientIdentifierJson = new JSONObject();
+					clientIdentifierJson.put("documentTypeId", passportcodeValue.getId());
+					clientIdentifierJson.put("documentKey", passport);
+					final JsonElement idenfierJsonEement = fromJsonHelper.parse(clientIdentifierJson.toString());
+					JsonCommand idenfierJsonCommand = new JsonCommand(null,clientIdentifierJson.toString(), idenfierJsonEement, fromJsonHelper,
+							null, null, null, null, null, null, null, null, null, null, 
+							null, null);
+					this.clientIdentifierWritePlatformService.addClientIdentifier(resultClient.getClientId(), idenfierJsonCommand);
 				}
 				
 				if(temporary != null){
