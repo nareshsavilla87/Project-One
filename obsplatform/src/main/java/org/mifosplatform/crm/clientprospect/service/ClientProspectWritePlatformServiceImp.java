@@ -21,6 +21,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.slf4j.Logger;
@@ -147,7 +148,7 @@ public class ClientProspectWritePlatformServiceImp implements
 		
 		try {
 			SimpleDateFormat formatter = new SimpleDateFormat("dd MMMM yyyy");
-			String activationDate = formatter.format(new Date());
+			String activationDate = formatter.format(DateUtils.getDateOfTenant());
 
 			final Long officeId = currentUser.getOffice().getId();
 			newClientJsonObject.put("dateFormat", "dd MMMM yyyy");

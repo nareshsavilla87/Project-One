@@ -8,6 +8,7 @@ import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 import com.google.gson.JsonElement;
@@ -116,7 +117,7 @@ public class ItemDetailsAllocation extends AbstractAuditableCustom<AppUser,Long>
 		final Long clientId = fromJsonHelper.extractLongNamed("clientId", j);
 		final Long itemMasterId = fromJsonHelper.extractLongNamed("itemMasterId", j);
 		final String serialNumber = fromJsonHelper.extractStringNamed("serialNumber", j);
-		final Date allocationDate = new Date();
+		final Date allocationDate = DateUtils.getDateOfTenant();
 		final String status = fromJsonHelper.extractStringNamed("status", j);
 		return new ItemDetailsAllocation(orderId,clientId,itemMasterId,serialNumber,allocationDate,status);
 	}

@@ -28,6 +28,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
 import org.mifosplatform.logistics.item.domain.ItemRepository;
@@ -211,7 +212,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			CommandProcessingResult resultOrder = null;
 			String device = null;
 			String dateFormat = "dd MMMM yyyy";
-			String activationDate = new SimpleDateFormat(dateFormat).format(new Date());
+			String activationDate = new SimpleDateFormat(dateFormat).format(DateUtils.getDateOfTenant());
 
 			String fullname = command.stringValueOfParameterNamed("fullname");
 			String firstName = command.stringValueOfParameterNamed("firstname");

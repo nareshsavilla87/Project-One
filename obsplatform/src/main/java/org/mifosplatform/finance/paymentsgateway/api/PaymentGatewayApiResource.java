@@ -49,6 +49,7 @@ import org.mifosplatform.infrastructure.core.data.MediaEnumoptionData;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -662,7 +663,7 @@ public class PaymentGatewayApiResource {
                
 				Long clientId = apiJson.getLong("clientId");
 				SimpleDateFormat daformat = new SimpleDateFormat("dd MMMM yyyy");
-				String date = daformat.format(new Date());
+				String date = daformat.format(DateUtils.getDateOfTenant());
 				
 				apiJson.remove("currency");
 				apiJson.remove("total_amount");

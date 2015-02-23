@@ -16,6 +16,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.infrastructure.security.service.RandomPasswordGenerator;
 import org.mifosplatform.organisation.message.domain.BillingMessage;
@@ -175,7 +176,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 
 			selfCareRepository.save(selfCare);
 			String username=selfCare.getUserName();
-			LoginHistory loginHistory=new LoginHistory(ipAddress,null,session,new Date(),null,username,"ACTIVE");
+			LoginHistory loginHistory=new LoginHistory(ipAddress,null,session,DateUtils.getDateOfTenant(),null,username,"ACTIVE");
     		this.loginHistoryRepository.save(loginHistory);
     		loginHistoryId=loginHistory.getId();
 			}
