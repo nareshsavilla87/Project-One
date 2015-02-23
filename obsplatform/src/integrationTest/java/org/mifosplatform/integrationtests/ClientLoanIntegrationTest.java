@@ -52,6 +52,7 @@ public class ClientLoanIntegrationTest {
     }
 
     private Integer createLoanProduct() {
+    	
         System.out.println("------------------------------CREATING NEW LOAN PRODUCT ---------------------------------------");
         String loanProductJSON = new LoanProductTestBuilder().withPrincipal("12,000.00").withNumberOfRepayments("4")
                 .withRepaymentAfterEvery("1").withRepaymentTypeAsMonth().withinterestRatePerPeriod("2")
@@ -61,6 +62,7 @@ public class ClientLoanIntegrationTest {
     }
 
     private Integer applyForLoanApplication(final Integer clientID, final Integer loanProductID) {
+    	
         System.out.println("--------------------------------APPLYING FOR LOAN APPLICATION--------------------------------");
         String loanApplicationJSON = new LoanApplicationTestBuilder().withPrincipal("12,000.00").withLoanTermFrequency("4")
                 .withLoanTermFrequencyAsMonths().withNumberOfRepayments("4").withRepaymentEveryAfter("1")
@@ -72,6 +74,7 @@ public class ClientLoanIntegrationTest {
     }
 
     private void verifyLoanRepaymentSchedule(final ArrayList<HashMap> loanSchedule) {
+    	
         System.out.println("--------------------VERIFYING THE PRINCIPAL DUES,INTEREST DUE AND DUE DATE--------------------------");
 
         assertEquals("Checking for Due Date for 1st Month", new ArrayList<Integer>(Arrays.asList(2011, 10, 20)),
