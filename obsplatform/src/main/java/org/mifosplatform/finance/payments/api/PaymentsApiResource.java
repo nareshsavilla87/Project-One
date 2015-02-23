@@ -38,6 +38,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -156,7 +157,7 @@ public class PaymentsApiResource {
 			   	returnUrl = returnUrl.replace("index.html", "index.html#/"+screenName);
 			   	  
 				if (clientId !=null && clientId > 0) {
-					final String date = new SimpleDateFormat("dd MMMM yyyy").format(new Date());
+					final String date = new SimpleDateFormat("dd MMMM yyyy").format(DateUtils.getDateOfTenant());
 					final JsonObject object = new JsonObject();
 					object.addProperty("txn_id", orderNumber);
 					object.addProperty("dateFormat", "dd MMMM yyyy");

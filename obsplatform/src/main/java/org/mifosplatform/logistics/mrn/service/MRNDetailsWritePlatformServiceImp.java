@@ -8,6 +8,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.agent.domain.ItemSale;
 import org.mifosplatform.logistics.agent.domain.ItemSaleRepository;
@@ -166,7 +167,7 @@ public class MRNDetailsWritePlatformServiceImp implements MRNDetailsWritePlatfor
 				throw new PlatformDataIntegrityException("received.quantity.is.full", "received.quantity.is.full", "received.quantity.is.full");
 			}
 
-			InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(new Date(), itemId,"Move ItemSale",serialNumber, 
+			InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(DateUtils.getDateOfTenant(), itemId,"Move ItemSale",serialNumber, 
 					mrnDetails.getItemId(), mrnDetails.getPurchaseFrom(), mrnDetails.getPurchaseBy());
 			
 			details.setOfficeId(mrnDetails.getPurchaseBy());

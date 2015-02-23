@@ -44,6 +44,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationReposi
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.data.AddressData;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
@@ -189,7 +190,7 @@ public class SelfCareApiResource {
         Long loginHistoryId=null;
         careData.setClientId(clientId);
        // if(request.getSession().isNew()){
-        	LoginHistory loginHistory=new LoginHistory(ipAddress, serialNo, sessionId, new Date(),null , username,"ACTIVE");
+        	LoginHistory loginHistory=new LoginHistory(ipAddress, serialNo, sessionId, DateUtils.getDateOfTenant(),null , username,"ACTIVE");
         	this.loginHistoryRepository.save(loginHistory);
         	loginHistoryId=loginHistory.getId();
         //}
