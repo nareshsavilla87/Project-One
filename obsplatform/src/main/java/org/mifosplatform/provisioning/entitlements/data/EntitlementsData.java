@@ -125,7 +125,8 @@ public class EntitlementsData {
 			String hardwareId, String provisioingSystem, String product,
 			Long clientId, Long planId, String orderNo, Long orderId,
 			LocalDate startDate, LocalDate endDate, String servicetype,
-			String displayName, String login, String password) {
+			String displayName, String login, String password, String userName, 
+			String userPassword, String firstName, String lastName, String email) {
 		
 		this.id = id;
 		this.prdetailsId = prdetailsId;
@@ -143,7 +144,11 @@ public class EntitlementsData {
 		this.displayName = displayName;
 		this.login = login;
 		this.password = password;
-		
+		this.selfcareUsername = userName;
+		this.selfcarePassword = userPassword;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
 	}
 
 	public Long getId() {

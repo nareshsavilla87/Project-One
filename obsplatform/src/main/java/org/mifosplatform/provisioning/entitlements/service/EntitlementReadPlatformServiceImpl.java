@@ -77,9 +77,15 @@ public class EntitlementReadPlatformServiceImpl implements
 		    String displayName = rs.getString("displayName");
 		    String login = rs.getString("login");
 		    String password = rs.getString("password"); 
+		    String userName = rs.getString("username");
+		    String userPassword = rs.getString("userPassword");
+		    String firstName = rs.getString("firstName");
+		    String lastName = rs.getString("lastName");
+		    String email = rs.getString("email");
 
 			return new EntitlementsData(id, prdetailsId, requestType,hardwareId, provisioingSystem, product, clientId, planId,
-					orderNo, orderId, startDate, endDate, servicetype, displayName, login, password);
+					orderNo, orderId, startDate, endDate, servicetype, displayName, login, password, 
+					userName, userPassword, firstName, lastName, email);
 
 
 		}
@@ -88,10 +94,12 @@ public class EntitlementReadPlatformServiceImpl implements
 
 			return " p.id AS id,p.client_id AS clientId,p.provisioing_system AS provisioingSystem,pr.id AS prdetailsId,pr.service_type as servicetype," +
 					" pr.sent_message AS sentMessage,pr.hardware_id AS hardwareId,pr.request_type AS requestType,o.plan_id AS planId,o.order_no AS orderNo," +
-					" o.id as orderId,o.start_date as startDate,o.end_date as endDate, c.account_no as accountNo," +
+					" o.id as orderId,o.start_date as startDate,o.end_date as endDate, c.account_no as accountNo, c.email as email," +
+					" c.firstname as firstName,c.lastname as lastName, u.unique_reference as username,u.password as userPassword," +
 					" ifnull(c.fullname, c.firstname) as displayName, ifnull(c.login,c.id) as login, ifnull(c.password,'0000') as password" +
-					" FROM b_process_request_detail pr, b_process_request p LEFT JOIN b_orders o" +
-					" ON o.id = p.order_id LEFT JOIN m_client c ON c.id = p.client_id WHERE p.id = pr.processrequest_id AND p.is_processed = 'N'";
+					" FROM b_process_request_detail pr, b_process_request p " +
+					" LEFT JOIN b_orders o ON o.id = p.order_id LEFT JOIN m_client c ON c.id = p.client_id" +
+					" LEFT JOIN b_clientuser u ON u.client_id = p.client_id WHERE p.id = pr.processrequest_id AND p.is_processed = 'N'";
 
 		}
 

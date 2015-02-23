@@ -52,6 +52,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -394,10 +395,6 @@ public class PaymentGatewayApiResource {
 			String cardType = null;
 			String cardNumber = null;
 			
-			if(currency.equalsIgnoreCase("ISK")){
-				amount = amount.replace('.', ',');
-			}
-			
 			JSONObject apiObject = new JSONObject(apiRequestBodyAsJson);
 			
 			if(apiObject.has("cardType")){
@@ -412,7 +409,7 @@ public class PaymentGatewayApiResource {
 			
 			Long clientId = Long.valueOf(client);
 			
-			if(status.equalsIgnoreCase("Success")){
+			if(status.equalsIgnoreCase("Success") || status.equalsIgnoreCase("Pending")){
 				
 				Long pgId = Long.valueOf(String.valueOf(output.get("pgId")));
 				String OutputData = this.paymentGatewayWritePlatformService.payment(clientId, pgId, txnId, amount);
@@ -526,115 +523,126 @@ public class PaymentGatewayApiResource {
 	   }
 	 }
 	 
-	public String orderBooking(String jsonObject, String date, Long clientId)
-			throws JSONException {
-
-		final JSONObject jsonCustomData = new JSONObject(jsonObject);
-		final String dateFormat = "dd MMMM yyyy";
-		String screenName = jsonCustomData.getString("screenName");
-		Long orderId = null;
-
-		if (jsonCustomData.has("clientId"))
-			jsonCustomData.remove("clientId");
-
-		if (jsonCustomData.has("returnUrl"))
-			jsonCustomData.remove("returnUrl");
-
-		if (jsonCustomData.has("screenName"))
-			jsonCustomData.remove("screenName");
+	public String orderBooking(String jsonObject, String date, Long clientId) {
 		
-		if(jsonCustomData.has("orderId")){
-			orderId = Long.valueOf(jsonCustomData.getString("orderId"));
-			jsonCustomData.remove("orderId");
-		}
-		
-		if (jsonCustomData.has("eventData"))
-			jsonCustomData.remove("eventData");
+		try {
+			
+			JSONObject jsonCustomData = new JSONObject(jsonObject);
 
-		if (screenName.equalsIgnoreCase("vod")) {
+			final String dateFormat = "dd MMMM yyyy";
+			String screenName = jsonCustomData.getString("screenName");
+			Long orderId = null;
+			String eventDataStr = null;
+
+			if (jsonCustomData.has("clientId"))
+				jsonCustomData.remove("clientId");
+
+			if (jsonCustomData.has("returnUrl"))
+				jsonCustomData.remove("returnUrl");
+
+			if (jsonCustomData.has("screenName"))
+				jsonCustomData.remove("screenName");
 			
-			String eventDataStr = jsonCustomData.getString("eventData");
-			CommandProcessingResult resultEvents = null;
-			JSONArray eventDataArray = new JSONArray(eventDataStr);
+			if(jsonCustomData.has("orderId")){
+				orderId = Long.valueOf(jsonCustomData.getString("orderId"));
+				jsonCustomData.remove("orderId");
+			}
 			
-			for(int i=0;i<eventDataArray.length();i++){
-				JSONObject item = eventDataArray.getJSONObject(i);
-				jsonCustomData.put("clientId", clientId);
-				jsonCustomData.put("dateFormat", dateFormat);
-				jsonCustomData.put("eventBookedDate", date);
-				jsonCustomData.put("locale", "en");
-				jsonCustomData.put("deviceId", jsonCustomData.getString("deviceId"));
-				jsonCustomData.put("eventId", item.getLong("eventId"));
-				jsonCustomData.put("formatType", item.getString("formatType"));
-				jsonCustomData.put("optType", item.getString("optType"));
+			if (jsonCustomData.has("eventData")){
+				eventDataStr = jsonCustomData.getString("eventData");
+				jsonCustomData.remove("eventData");
+			}
 				
-				CommandWrapper commandRequest = new CommandWrapperBuilder().createEventOrder(clientId).withJson(jsonCustomData.toString()).build();
-				resultEvents = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-				if(resultEvents == null){
-					break;
+			if (screenName.equalsIgnoreCase("vod")) {
+			
+				CommandProcessingResult resultEvents = null;
+				JSONArray eventDataArray = new JSONArray(eventDataStr);
+				
+				for(int i=0;i<eventDataArray.length();i++){
+					JSONObject item = eventDataArray.getJSONObject(i);
+					jsonCustomData.put("clientId", clientId);
+					jsonCustomData.put("dateFormat", dateFormat);
+					jsonCustomData.put("eventBookedDate", date);
+					jsonCustomData.put("locale", "en");
+					jsonCustomData.put("deviceId", jsonCustomData.getString("deviceId"));
+					jsonCustomData.put("eventId", item.getLong("eventId"));
+					jsonCustomData.put("formatType", item.getString("formatType"));
+					jsonCustomData.put("optType", item.getString("optType"));
+					
+					CommandWrapper commandRequest = new CommandWrapperBuilder().createEventOrder(clientId).withJson(jsonCustomData.toString()).build();
+					resultEvents = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+					if(resultEvents == null){
+						break;
+					}
 				}
+				
+			    if (resultEvents == null) {
+					return "failure : Payment Done and Event(s) Booking Failed";
+				} else {
+					return "Payment Done and Event(s) Booked Successfully. ";
+				}
+				
+			} else if (screenName.equalsIgnoreCase("additionalOrders")) {
+
+				jsonCustomData.put("billAlign", false);
+				jsonCustomData.put("isNewplan", true);
+				jsonCustomData.put("dateFormat", dateFormat);
+				jsonCustomData.put("start_date", date);
+
+				CommandWrapper commandRequest = new CommandWrapperBuilder().createOrder(clientId).withJson(jsonCustomData.toString()).build();
+				CommandProcessingResult resultOrder = this.writePlatformService.logCommandSource(commandRequest);
+
+				if (resultOrder == null) {
+					return "failure : Payment Done and Plan Booking Failed";
+				} else {
+					return "Payment Done and Plan Booked Successfully. ";
+				}
+
+			} else if (screenName.equalsIgnoreCase("renewalorder")) {
+				
+				Long renewalOrder = Long.valueOf(jsonCustomData.getString("renewalPeriod"));
+				
+				JSONObject object = new JSONObject();
+				object.put("renewalPeriod", renewalOrder);
+				object.put("description", jsonCustomData.getString("description"));
+
+				final CommandWrapper commandRequest = new CommandWrapperBuilder().renewalOrder(orderId).withJson(object.toString()).build();
+				final CommandProcessingResult resultOrder = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+				
+				if (resultOrder == null) {
+					return "failure : Payment Done and renewal Plan Booking Failed";
+				} else {
+					return "Payment Done and renewal Plan Booked Successfully. ";
+				}
+				
+			} else if (screenName.equalsIgnoreCase("changeorder")) {
+				
+				jsonCustomData.put("billAlign", false);
+				jsonCustomData.put("isNewplan", false);
+				jsonCustomData.put("dateFormat", dateFormat);
+				jsonCustomData.put("start_date", date);
+				jsonCustomData.put("disconnectionDate", date);
+				jsonCustomData.put("disconnectReason", "Not Interested");
+
+				final CommandWrapper commandRequest = new CommandWrapperBuilder().changePlan(orderId).withJson(jsonCustomData.toString()).build();
+				final CommandProcessingResult resultOrder = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+				
+				if (resultOrder == null) {
+					return "failure : Payment Done and renewal Plan Booking Failed";
+				} else {
+					return "Payment Done and renewal Plan Booked Successfully. ";
+				}
+				
+			}else {
+				return "Payment Done Successfully.";
 			}
 			
-		    if (resultEvents == null) {
-				return "failure : Payment Done and Event(s) Booking Failed";
-			} else {
-				return "Payment Done and Event(s) Booked Successfully. ";
-			}
-			
-		} else if (screenName.equalsIgnoreCase("additionalOrders")) {
-
-			jsonCustomData.put("billAlign", false);
-			jsonCustomData.put("isNewplan", true);
-			jsonCustomData.put("dateFormat", dateFormat);
-			jsonCustomData.put("start_date", date);
-
-			CommandWrapper commandRequest = new CommandWrapperBuilder().createOrder(clientId).withJson(jsonCustomData.toString()).build();
-			CommandProcessingResult resultOrder = this.writePlatformService.logCommandSource(commandRequest);
-
-			if (resultOrder == null) {
-				return "failure : Payment Done and Plan Booking Failed";
-			} else {
-				return "Payment Done and Plan Booked Successfully. ";
-			}
-
-		} else if (screenName.equalsIgnoreCase("renewalorder")) {
-			
-			Long renewalOrder = Long.valueOf(jsonCustomData.getString("renewalPeriod"));
-			
-			JSONObject object = new JSONObject();
-			object.put("renewalPeriod", renewalOrder);
-			object.put("description", jsonCustomData.getString("description"));
-
-			final CommandWrapper commandRequest = new CommandWrapperBuilder().renewalOrder(orderId).withJson(object.toString()).build();
-			final CommandProcessingResult resultOrder = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-			
-			if (resultOrder == null) {
-				return "failure : Payment Done and renewal Plan Booking Failed";
-			} else {
-				return "Payment Done and renewal Plan Booked Successfully. ";
-			}
-			
-		} else if (screenName.equalsIgnoreCase("changeorder")) {
-			
-			jsonCustomData.put("billAlign", false);
-			jsonCustomData.put("isNewplan", false);
-			jsonCustomData.put("dateFormat", dateFormat);
-			jsonCustomData.put("start_date", date);
-			jsonCustomData.put("disconnectionDate", date);
-			jsonCustomData.put("disconnectReason", "Not Interested");
-
-			final CommandWrapper commandRequest = new CommandWrapperBuilder().changePlan(orderId).withJson(jsonCustomData.toString()).build();
-			final CommandProcessingResult resultOrder = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-			
-			if (resultOrder == null) {
-				return "failure : Payment Done and  Plan changed Failed";
-			} else {
-				return "Payment Done and  Plan changed Successfully. ";
-			}
-			
-		}else {
-			return "Payment Done Successfully.";
+		} catch (JSONException e) {
+			return "failure : Payment Done and Plan Booking Failed with throwing JSONException";
+		} catch (ActivePlansFoundException e) {
+			return "failure : Payment Done and Plan Booking Failed with throwing ActivePlansFoundException";
 		}
+		
 	}
 	 
 	 
