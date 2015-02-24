@@ -211,11 +211,13 @@ try{
 	String requstStatus =UserActionStatusTypeEnum.ACTIVATION.toString();
 	
 	if(isNewPlan){
+		
 		final AccountNumberGenerator orderNoGenerator = this.accountIdentifierGeneratorFactory.determineClientAccountNoGenerator(order.getId());
 		order.updateOrderNum(orderNoGenerator.generate());
 		Set<PlanDetails> planDetails=plan.getDetails();
 		ServiceMaster service=this.serviceMasterRepository.findOneByServiceCode(planDetails.iterator().next().getServiceCode());
 		Long commandId=Long.valueOf(0);
+		
 		if(service != null && service.isAuto() == 'Y' && !plan.getProvisionSystem().equalsIgnoreCase("None")){
 				
 			CommandProcessingResult processingResult=this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,requstStatus);
