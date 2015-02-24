@@ -15,6 +15,7 @@ import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.data.OrderData;
@@ -70,7 +71,7 @@ public boolean checkClientBalanceForOrderrenewal(OrderData orderData,Long client
          ClientBalance clientBalance=this.clientBalanceRepository.findByClientId(clientId);
          BigDecimal orderPrice=new BigDecimal(orderData.getPrice());
           
-       if(this.generateBill.isDiscountApplicable(new LocalDate(),discountMasterData,new LocalDate().plusMonths(1))){
+       if(this.generateBill.isDiscountApplicable(DateUtils.getLocalDateOfTenant(),discountMasterData,DateUtils.getLocalDateOfTenant().plusMonths(1))){
           discountMasterData = this.generateBill.calculateDiscount(discountMasterData,  orderPrice);
           discountAmount=discountMasterData.getDiscountAmount();
          }
