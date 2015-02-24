@@ -1,5 +1,6 @@
 package org.mifosplatform.finance.billingorder.service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;

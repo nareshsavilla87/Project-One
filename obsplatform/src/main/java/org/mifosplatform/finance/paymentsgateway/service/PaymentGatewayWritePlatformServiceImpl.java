@@ -749,6 +749,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 					withChanges.put("Amount", amount);
 					withChanges.put("ObsPaymentId", result.resourceId().toString());
 					withChanges.put("TransactionId", txnId);
+					withChanges.put("pgId", id);
 					
 				} else {
 					paymentGateway.setStatus(ConfigurationConstants.PAYMENTGATEWAY_FAILURE);
@@ -759,6 +760,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 					withChanges.put("Amount", amount);
 					withChanges.put("ObsPaymentId", "");
 					withChanges.put("TransactionId", txnId);
+					withChanges.put("pgId", id);
 				}
 				
 			} else if(paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_PENDING)){
@@ -773,6 +775,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				withChanges.put("Amount", amount);	
 				withChanges.put("ObsPaymentId", "");	
 				withChanges.put("TransactionId", txnId);
+				withChanges.put("pgId", id);
 			}
 			
 			this.paymentGatewayRepository.save(paymentGateway);

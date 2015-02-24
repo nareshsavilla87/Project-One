@@ -2,7 +2,6 @@ package org.mifosplatform.infrastructure.jobs.service;
 
 import java.util.Date;
 
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
@@ -90,7 +89,7 @@ public class SchedulerJobListener implements JobListener {
         scheduledJobDetails.updateCurrentlyRunningStatus(false);
         String filePath= FileUtils.BILLING_JOB_PATH;
        
-        ScheduledJobRunHistory runHistory = new ScheduledJobRunHistory(scheduledJobDetails, version, context.getFireTime(), DateUtils.getDateOfTenant(),
+        ScheduledJobRunHistory runHistory = new ScheduledJobRunHistory(scheduledJobDetails, version, context.getFireTime(), new Date(),
                 status, errorMessage, triggerType, errorLog, filePath);
 
         schedularService.saveOrUpdate(scheduledJobDetails, runHistory);
