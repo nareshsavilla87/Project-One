@@ -187,7 +187,7 @@ public class RedemptionWritePlatformServiceImpl implements
 						}
 				}
 				
-				this.billingOrderWritePlatformService.updateClientBalance(pinValue.negate(), clientId, false);
+				this.billingOrderWritePlatformService.updateClientVoucherBalance(pinValue.negate(), clientId, false);
 			}
 			
 			  JournalVoucher journalVoucher=new JournalVoucher(voucher.getOfficeId(),new Date(),"Redemption",null,
