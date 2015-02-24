@@ -13,6 +13,8 @@ public interface BillingOrderWritePlatformService {
 	CommandProcessingResult updateBillingOrder(List<BillingOrderCommand> billingOrderCommands);
 	
 	void updateClientBalance(Invoice invoice,Long clientId, boolean isWalletEnable);
+	
+	void updateClientVoucherBalance(BigDecimal amount,Long clientId, boolean isWalletEnable);
 
 	void UpdateOfficeCommision(Invoice invoice, Long agreementId);
 
