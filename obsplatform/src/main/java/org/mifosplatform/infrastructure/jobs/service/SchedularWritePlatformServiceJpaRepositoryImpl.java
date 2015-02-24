@@ -7,7 +7,6 @@ import java.util.Map;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.jobs.data.JobDetailDataValidator;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetailRepository;
@@ -125,7 +124,7 @@ public class SchedularWritePlatformServiceJpaRepositoryImpl implements Schedular
     	boolean isStopExecution = false;
     final ScheduledJobDetail scheduledJobDetail = this.scheduledJobDetailsRepository.findByJobKey(jobKey);
     if (scheduledJobDetail.isCurrentlyRunning()
-            || (triggerType == SchedulerServiceConstants.TRIGGER_TYPE_CRON && scheduledJobDetail.getNextRunTime().after(DateUtils.getDateOfTenant()))) {
+            || (triggerType == SchedulerServiceConstants.TRIGGER_TYPE_CRON && scheduledJobDetail.getNextRunTime().after(new Date()))) {
         isStopExecution = true;
     }
     final SchedulerDetail schedulerDetail = retriveSchedulerDetail();

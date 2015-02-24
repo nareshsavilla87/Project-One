@@ -46,6 +46,7 @@ public class InvoiceClient {
 		if (billingOrderDatas.size() == 0) {
 			throw new BillingOrderNoRecordsFoundException();
 		}
+
 		BigDecimal invoiceAmount = BigDecimal.ZERO;
 		Date nextBillableDate = null;
 		GenerateInvoiceData invoiceData = null;
@@ -80,7 +81,7 @@ public class InvoiceClient {
 		Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
 
 		// Update Client Balance
-		this.billingOrderWritePlatformService.updateClientBalance(invoice,clientId, false);
+		this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId, false);
 
 		// Update order-price
 		this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
