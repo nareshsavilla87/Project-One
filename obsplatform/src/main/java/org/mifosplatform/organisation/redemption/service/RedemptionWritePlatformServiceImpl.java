@@ -32,7 +32,6 @@ import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
-import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
@@ -187,7 +186,9 @@ public class RedemptionWritePlatformServiceImpl implements
 						}
 				}
 				
-				this.billingOrderWritePlatformService.updateClientVocherBalance(pinValue.negate(), clientId, false);
+
+				this.billingOrderWritePlatformService.updateClientVoucherBalance(pinValue.negate(), clientId, false);
+
 			}
 			
 			  JournalVoucher journalVoucher=new JournalVoucher(voucher.getOfficeId(),new Date(),"Redemption",null,

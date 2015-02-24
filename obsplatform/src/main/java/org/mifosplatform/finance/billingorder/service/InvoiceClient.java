@@ -93,7 +93,9 @@ public class InvoiceClient {
 		     if(clientAgreement.getOfficeType().equalsIgnoreCase("Agent")&&clientAgreement.getId()!=null) {
 			     this.billingOrderWritePlatformService.UpdateOfficeCommision(invoice,clientAgreement.getId());
 	           }*/
-		return new GenerateInvoiceData(clientId, billingOrderCommands.get(0).getNextBillableDate(), invoice.getInvoiceAmount(), invoice);
+
+		return new GenerateInvoiceData(clientId,billingOrderCommands.get(0).getNextBillableDate(),invoice.getInvoiceAmount(),invoice);
+
 	}
 
 

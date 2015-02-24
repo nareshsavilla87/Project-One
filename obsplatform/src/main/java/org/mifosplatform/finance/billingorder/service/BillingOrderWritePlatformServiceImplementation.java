@@ -85,7 +85,8 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 	}
 
 	@Override
-	public void updateClientVocherBalance(BigDecimal amount,Long clientId,boolean isWalletEnable) {
+	public void updateClientVoucherBalance(BigDecimal amount,Long clientId,boolean isWalletEnable) {
+
 		
 		BigDecimal balance=null;
 		
@@ -108,7 +109,8 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 
 		this.clientBalanceRepository.saveAndFlush(clientBalance);
 		
-	/*	final Client client = this.clientRepository.findOne(clientId);
+
+		/*final Client client = this.clientRepository.findOne(clientId);
 		final OfficeAdditionalInfo officeAdditionalInfo = this.infoRepository.findoneByoffice(client.getOffice());
 		if (officeAdditionalInfo != null) {
 			if (officeAdditionalInfo.getIsCollective()) {
@@ -119,26 +121,26 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 */
 	}
 	
+	
 	@Override
-	public void updateClientBalance(Invoice invoice,Long clientId,boolean isWalletEnable) {
+	public void updateClientBalance(Invoice invoice, Long clientId,boolean isWalletEnable) {
 		
 		BigDecimal balance=null;
 		
 		ClientBalance clientBalance = this.clientBalanceRepository.findByClientId(clientId);
 		
 		if(clientBalance == null){
-			clientBalance =new ClientBalance(clientId,invoice.getInvoiceAmount(),isWalletEnable?'Y':'N');
+			clientBalance =new ClientBalance(clientId, invoice.getInvoiceAmount(), isWalletEnable?'Y':'N');
 		}else{
 			if(isWalletEnable){
-				balance=clientBalance.getWalletAmount().add(invoice.getInvoiceAmount());
+				balance=clientBalance.getWalletAmount().add( invoice.getInvoiceAmount());
 				clientBalance.setWalletAmount(balance);
 				
 			}else{
-				balance=clientBalance.getBalanceAmount().add(invoice.getInvoiceAmount());
+				balance=clientBalance.getBalanceAmount().add( invoice.getInvoiceAmount());
 				clientBalance.setBalanceAmount(balance);
 			}
 			
-
 		}
 
 		this.clientBalanceRepository.saveAndFlush(clientBalance);

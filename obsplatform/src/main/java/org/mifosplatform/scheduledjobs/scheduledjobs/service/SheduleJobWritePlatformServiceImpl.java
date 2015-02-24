@@ -1399,6 +1399,7 @@ public void reportStatmentPdf() {
 	}
 	
 
+
 	@Override
 	@CronTarget(jobName = JobName.REPROCESS)
 	public void reProcessEventAction() {
@@ -1564,6 +1565,7 @@ public void reportStatmentPdf() {
 			System.out.println(exception.getMessage());	
 		}
 	}
+
 
 }
 

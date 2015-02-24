@@ -188,8 +188,8 @@ public class PaymentGateway extends AbstractAuditableCustom<AppUser, Long> {
 		return remarks;
 	}
 
-	public void setRemarks(String remarks) {
-		this.remarks = remarks;
+	public void setRemarks(Object remarks) {
+		this.remarks = (String)remarks;
 	}
 
 	public String getReProcessDetail() {
@@ -198,6 +198,12 @@ public class PaymentGateway extends AbstractAuditableCustom<AppUser, Long> {
 
 	public void setReProcessDetail(String reProcessDetail) {
 		this.reProcessDetail = reProcessDetail;
+	}
+
+	public void setErrorRemarks(Object printStackTrace) {
+		// TODO Auto-generated method stub
+		
+		
 	}
 	
 }
