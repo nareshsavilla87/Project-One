@@ -516,6 +516,7 @@ public class PaymentGatewayApiResource {
 
 		} 
 	   catch(Exception e){
+
 		   e.printStackTrace();
 		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";
 		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus + "</Strong>";
