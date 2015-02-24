@@ -7,7 +7,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +39,20 @@ import org.mifosplatform.finance.billingmaster.api.BillingMasterApiResourse;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.finance.billingorder.service.InvoiceClient;
+import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayData;
+import org.mifosplatform.finance.paymentsgateway.domain.PaymentGateway;
+import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayRepository;
+import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayReadPlatformService;
+import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayWritePlatformService;
+import org.mifosplatform.infrastructure.configuration.domain.Configuration;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
@@ -77,7 +87,11 @@ import org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobWri
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.EventActionData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.ScheduleJobData;
+import org.mifosplatform.workflow.eventaction.domain.EventAction;
+import org.mifosplatform.workflow.eventaction.domain.EventActionRepository;
 import org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
+import org.mifosplatform.workflow.eventaction.service.EventActionConstants;
+import org.mifosplatform.workflow.eventaction.service.EventActionReadPlatformService;
 import org.mifosplatform.workflow.eventaction.service.ProcessEventActionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -118,6 +132,12 @@ private final OrderRepository orderRepository;
 private final MCodeReadPlatformService codeReadPlatformService;
 private final JdbcTemplate jdbcTemplate;
 private  String ReceiveMessage;
+private final PaymentGatewayRepository paymentGatewayRepository;
+private final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService;
+private final EventActionRepository eventActionRepository;
+private final PaymentGatewayReadPlatformService paymentGatewayReadPlatformService;
+private final ConfigurationRepository configurationRepository;
+private final EventActionReadPlatformService eventActionReadPlatformService;
 
 @Autowired
 public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,final FromJsonHelper fromApiJsonHelper,
@@ -131,7 +151,10 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
 	   final EntitlementWritePlatformService entitlementWritePlatformService,final ReadReportingService readExtraDataAndReportingService,
 	   final OrderRepository orderRepository,final TicketMasterApiResource ticketMasterApiResource, 
 	   final TicketMasterReadPlatformService ticketMasterReadPlatformService,final MCodeReadPlatformService codeReadPlatformService,
-	   final TenantAwareRoutingDataSource dataSource) {
+	   final TenantAwareRoutingDataSource dataSource, final PaymentGatewayRepository paymentGatewayRepository,
+	   final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService,final EventActionRepository eventActionRepository, 
+	   final PaymentGatewayReadPlatformService paymentGatewayReadPlatformService,final ConfigurationRepository configurationRepository,
+	   final EventActionReadPlatformService eventActionReadPlatformService) {
 
 	this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
 	this.invoiceClient = invoiceClient;
@@ -156,7 +179,12 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
 	this.ticketMasterReadPlatformService = ticketMasterReadPlatformService;
 	this.codeReadPlatformService = codeReadPlatformService;
     this.jdbcTemplate = new JdbcTemplate(dataSource);
-	
+    this.paymentGatewayRepository = paymentGatewayRepository;
+    this.paymentGatewayWritePlatformService = paymentGatewayWritePlatformService;
+    this.eventActionRepository =eventActionRepository;
+    this.paymentGatewayReadPlatformService = paymentGatewayReadPlatformService;
+    this.configurationRepository = configurationRepository;
+	this.eventActionReadPlatformService = eventActionReadPlatformService;
 }
 
 
@@ -1370,6 +1398,173 @@ public void reportStatmentPdf() {
 		}
 	}
 	
+
+	@Override
+	@CronTarget(jobName = JobName.REPROCESS)
+	public void reProcessEventAction() {
+		try {
+			
+			System.out.println("Processing ReProcess Request Job .....");
+			MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+			LocalTime date=new LocalTime(zone);
+			String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
+
+			String path=FileUtils.generateLogFileDirectory()+ JobName.REPROCESS.toString() + File.separator +"ReProcess_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+			File fileHandler = new File(path.trim());
+			fileHandler.createNewFile();
+			FileWriter fw = new FileWriter(fileHandler);
+			FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
+			
+			List<PaymentGatewayData> datas = this.paymentGatewayReadPlatformService.retrievePendingDetails();
+			SimpleDateFormat dateformat = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
+				
+			for (PaymentGatewayData data : datas) {
+
+				JSONObject reProcessObject;
+				boolean processingFlag;
+			
+				Configuration reProcessInterval = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_REPROCESS_INTERVAL);
+				int intervalTime=0;
+				
+				if(reProcessInterval != null && reProcessInterval.getValue() != null && !reProcessInterval.getValue().isEmpty()){
+					intervalTime = Integer.parseInt(reProcessInterval.getValue());
+				}
+				
+				PaymentGateway paymentGateway = this.paymentGatewayRepository.findOne(data.getId());
+
+				if (null == paymentGateway.getReProcessDetail() || paymentGateway.getReProcessDetail().isEmpty()) {
+					processingFlag = true;
+					reProcessObject = new JSONObject();
+					reProcessObject.put("id", 0);
+					reProcessObject.put("response", "");
+					reProcessObject.put("processTime", "");
+
+				} else {
+					reProcessObject = new JSONObject(data.getReprocessDetail());
+					
+					Date reProcessingDate = dateformat.parse(reProcessObject.get("processTime").toString());
+					Date newDate = new Date();
+					long diff = newDate.getTime() - reProcessingDate.getTime();
+					long hours = diff / (60 * 60 * 1000);
+					
+					if(intervalTime<=hours) processingFlag = true;
+					else processingFlag = false;
+				}
+
+				if (processingFlag) {
+					
+					if(paymentGateway.getSource().equalsIgnoreCase(ConfigurationConstants.GLOBALPAY_PAYMENTGATEWAY)){
+						
+						final String formattedDate =dateformat.format(new Date());
+
+						int id = reProcessObject.getInt("id");
+						reProcessObject.remove("id");
+						reProcessObject.remove("response");
+						reProcessObject.remove("processTime");
+						reProcessObject.put("id", id + 1);
+						
+						JSONObject object = new JSONObject(paymentGateway.getRemarks());
+						
+						String transactionId = object.getString("transactionId");
+						
+						String output = this.paymentGatewayWritePlatformService.globalPayProcessing(transactionId, paymentGateway.getRemarks());
+						
+						final JSONObject json = new JSONObject(output);
+						
+						String status = json.getString("status");
+						String error = json.getString("error");
+						
+						reProcessObject.put("response", error);
+						reProcessObject.put("processTime", formattedDate);
+						
+						if(status.equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_SUCCESS)){
+							
+							List<EventActionData> eventActionDatas = this.eventActionReadPlatformService.retrievePendingActionRequest(paymentGateway.getId());
+							
+							for(EventActionData eventActionData:eventActionDatas){
+								
+								fw.append("Process Response id="+eventActionData.getId()+" ,PaymentGatewayId="+eventActionData.getResourceId()+" ,Provisiong System="+eventActionData.getActionName()+ " \r\n");
+								System.out.println("EventAction Id:"+eventActionData.getId()+", PaymentGatewayId:"+eventActionData.getResourceId());
+							
+								EventAction eventAction = this.eventActionRepository.findOne(eventActionData.getId());
+								
+								if(eventAction.getActionName().equalsIgnoreCase(EventActionConstants.EVENT_CREATE_PAYMENT)){
+									
+									JSONObject paymentObject = new JSONObject(eventActionData.getJsonData());
+									paymentObject.put("paymentDate", formattedDate);
+									
+									eventAction.updateStatus('N');
+									eventAction.setTransDate(DateUtils.getLocalDateOfTenant().toDate());
+									eventAction.setCommandAsJson(paymentObject.toString());
+									
+								} else if (eventAction.getActionName().equalsIgnoreCase(EventActionConstants.EVENT_CREATE_ORDER)) {
+									
+									JSONObject createOrder = new JSONObject(eventAction.getCommandAsJson());
+									createOrder.remove("start_date");
+									eventAction.updateStatus('N');
+									eventAction.setTransDate(DateUtils.getLocalDateOfTenant().toDate());
+									createOrder.put("start_date", DateUtils.getLocalDateOfTenant().toDate());
+									eventAction.setCommandAsJson(createOrder.toString());
+									
+								} else{
+									System.out.println("Does Not Implement the Code....");
+								}
+								
+								this.eventActionRepository.save(eventAction);
+							}
+					
+						}else if (status.equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_FAILURE)) {
+								
+							List<EventActionData> eventActionDatas = this.eventActionReadPlatformService.retrievePendingActionRequest(paymentGateway.getId());
+							
+							for(EventActionData eventActionData:eventActionDatas){
+								
+								fw.append("Process Response id="+eventActionData.getId()+" ,PaymentGatewayId="+eventActionData.getResourceId()+" ,Provisiong System="+eventActionData.getActionName()+ " \r\n");
+								System.out.println("EventAction Id:"+eventActionData.getId()+", PaymentGatewayId:"+eventActionData.getResourceId());
+							
+								EventAction eventAction = this.eventActionRepository.findOne(eventActionData.getId());
+								
+								if(eventAction.getActionName().equalsIgnoreCase(EventActionConstants.EVENT_CREATE_PAYMENT) || 
+										eventAction.getActionName().equalsIgnoreCase(EventActionConstants.EVENT_CREATE_ORDER)){
+									
+									eventAction.updateStatus('F');
+									eventAction.setTransDate(DateUtils.getLocalDateOfTenant().toDate());
+	
+								} else{
+									System.out.println("Does Not Implement the Code....");
+								}
+								
+								this.eventActionRepository.save(eventAction);					
+						
+							}
+					
+						} else {
+							System.out.println("Still get Pending Response from PaymentGateway");
+						}
+						
+						paymentGateway.setStatus(status);
+						
+						paymentGateway.setReProcessDetail(reProcessObject.toString());
+											
+						this.paymentGatewayRepository.save(paymentGateway);
+					}
+			
+				}
+			}
+		
+			System.out.println("ReProcess Requests are Processed....");				
+			fw.append("ReProcess Requests are Completed.... \r\n");				
+			fw.flush();				
+			fw.close();	
+			
+		} catch (DataIntegrityViolationException e) {			
+			System.out.println(e.getMessage());		
+		}catch (Exception exception) {				
+			System.out.println(exception.getMessage());	
+		}
+	}
+
 }
 
 
