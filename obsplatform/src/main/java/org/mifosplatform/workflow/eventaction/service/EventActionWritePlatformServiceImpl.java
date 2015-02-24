@@ -169,6 +169,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	  	}
 				        	
 				        	}else if(detailsData.getEventName().equalsIgnoreCase(EventActionConstants.EVENT_CLOSE_TICKET)){
+				        		
 				        	  	if(!user.getEmail().isEmpty()){
 				        	  			BillingMessage billingMessage = new BillingMessage("CLOSED TICKET", data.getProblemDescription()+"<br/>"
 				        	  			+ticketMaster.getDescription()+"<br/>"+"RESOLUTION: \t"+ticketMaster.getResolutionDescription()+"<br/>"+removeUrl, "", user.getEmail(), user.getEmail(),

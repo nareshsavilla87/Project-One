@@ -128,7 +128,7 @@ public class ServiceMasterReadPlatformServiceImpl implements  ServiceMasterReadP
 
 		public String schema() {
 			return "da.id as id, da.service_code as service_code, da.service_description as service_description "
-					+ " from b_service da where da.is_deleted='n' ";
+					+ " from b_service da where da.is_deleted='N' ";
 
 		}
 

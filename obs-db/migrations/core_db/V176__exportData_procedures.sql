@@ -129,4 +129,7 @@ DELIMITER ;
 
 
 
+<<<<<<< HEAD:obs-db/migrations/core_db/V168__exportData_procedures.sql
 
+=======
+>>>>>>> obsplatform-2.03:obs-db/migrations/core_db/V176__exportData_procedures.sql

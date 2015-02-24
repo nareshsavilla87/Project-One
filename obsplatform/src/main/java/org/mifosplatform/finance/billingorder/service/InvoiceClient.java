@@ -67,6 +67,7 @@ public class InvoiceClient {
 	         }else{
 			throw new BillingOrderNoRecordsFoundException();
 		}
+
 	}
 	
 	public GenerateInvoiceData invoiceServices(BillingOrderData billingOrderData,Long clientId,LocalDate processDate){
@@ -86,14 +87,14 @@ public class InvoiceClient {
 			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
 			 System.out.println("---------------------"+billingOrderCommands.get(0).getNextBillableDate());
 			 
-			/* //office commision
+			 
+		/* //office commision
 			 AgreementData clientAgreement=this.billingOrderReadPlatformService.retriveClientOfficeDetails(clientId);
 		     if(clientAgreement.getOfficeType().equalsIgnoreCase("Agent")&&clientAgreement.getId()!=null) {
 			     this.billingOrderWritePlatformService.UpdateOfficeCommision(invoice,clientAgreement.getId());
 	           }*/
-		return new GenerateInvoiceData(clientId,billingOrderCommands.get(0).getNextBillableDate(),invoice.getInvoiceAmount(),invoice);
-
-  }
+		return new GenerateInvoiceData(clientId, billingOrderCommands.get(0).getNextBillableDate(), invoice.getInvoiceAmount(), invoice);
+	}
 
 
 	public CommandProcessingResult createInvoiceBill(JsonCommand command) {
