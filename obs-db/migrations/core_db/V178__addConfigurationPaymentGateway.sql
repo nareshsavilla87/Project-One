@@ -1,4 +1,3 @@
- 
 Drop procedure IF EXISTS configurationValue; 
 DELIMITER //
 create procedure configurationValue() 
