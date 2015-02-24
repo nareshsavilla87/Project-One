@@ -3,6 +3,8 @@ package org.mifosplatform.finance.paymentsgateway.api;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -40,6 +42,8 @@ import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.finance.payments.exception.ReceiptNoDuplicateException;
 import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayData;
 import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayDownloadData;
+import org.mifosplatform.finance.paymentsgateway.domain.PaymentGateway;
+import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayRepository;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayReadPlatformService;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayWritePlatformService;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
@@ -95,13 +99,15 @@ public class PaymentGatewayApiResource {
 	private JSONObject jsonData;
 	private Long errorCode;
 	private final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService;
+	private final PaymentGatewayRepository paymentGatewayRepository;
 
 	@Autowired
 	public PaymentGatewayApiResource(final PlatformSecurityContext context,final PaymentGatewayReadPlatformService readPlatformService,
 			final DefaultToApiJsonSerializer<PaymentGatewayData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
 			final PortfolioCommandSourceWritePlatformService writePlatformService,
 			final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-    		final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService) {
+    		final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService,
+    		final PaymentGatewayRepository paymentGatewayRepository) {
 
 		this.toApiJsonSerializer = toApiJsonSerializer;
 		this.writePlatformService = writePlatformService;
@@ -110,6 +116,7 @@ public class PaymentGatewayApiResource {
 		this.apiRequestParameterHelper=apiRequestParameterHelper;
 		this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     	this.paymentGatewayWritePlatformService = paymentGatewayWritePlatformService;
+    	this.paymentGatewayRepository = paymentGatewayRepository;
 	}
 
 	/**
@@ -505,7 +512,23 @@ public class PaymentGatewayApiResource {
 				
 				 jsonCustomData.remove("clientId");
 				 jsonCustomData.remove("returnUrl");
-				 paymentStatus = orderBooking(customData, date, clientId);
+				 String pgId = resultJsonObject.getString("pgId");
+				 try{
+					 paymentStatus = orderBooking(customData, date, clientId);
+				 } catch (Exception e){
+					 PaymentGateway  paymentGateway= this.paymentGatewayRepository.findOne(new Long(pgId));
+					
+					 if(e.getCause() !=null && e.getCause().getMessage() != null){
+						 paymentGateway.setRemarks(e.getCause().getMessage());
+					 } else if (e.getMessage() !=null) {
+						 paymentGateway.setRemarks(e.getMessage());
+					 } else{
+						 StringWriter errors = new StringWriter();
+						 e.printStackTrace(new PrintWriter(errors));
+						 paymentGateway.setRemarks(errors.toString());	 
+						 paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";					 }
+				 }
+				 
 				
 			} else {
 				paymentStatus = " Payment Failed, Please Contact to Your Service Provider, Reason="+Description;
@@ -517,8 +540,6 @@ public class PaymentGatewayApiResource {
 
 		} 
 	   catch(Exception e){
-
-		   e.printStackTrace();
 		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";
 		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus + "</Strong>";
 		   return htmlData;   
@@ -630,9 +651,9 @@ public class PaymentGatewayApiResource {
 				final CommandProcessingResult resultOrder = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 				
 				if (resultOrder == null) {
-					return "failure : Payment Done and renewal Plan Booking Failed";
+					return "failure : Payment Done and Plan Changing Failed";
 				} else {
-					return "Payment Done and renewal Plan Booked Successfully. ";
+					return "Payment Done and Plan Changing Successfully. ";
 				}
 				
 			}else {
