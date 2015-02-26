@@ -80,7 +80,8 @@ repositories {
         url "http://download.java.net/maven/2"
     }
     maven {
-    	url "http://repository.pentaho.org/artifactory/pentaho/"
+    	/*url "http://repository.pentaho.org/artifactory/pentaho/"*/
+    	 url "http://nexus.pentaho.org/content/repositories/pentaho-public-release-repos/"
     }
 }
 
