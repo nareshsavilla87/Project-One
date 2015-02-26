@@ -200,7 +200,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 		context.authenticatedUser();
 		String sql;
 		final retrieveMapper mapper=new retrieveMapper();
-	    sql = "SELECT  " + mapper.schema();
+	    sql = "SELECT  " + mapper.schema() + "and c.is_delete = 'N'";
 	
 		return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { cityName });
 	}catch (EmptyResultDataAccessException e) {
