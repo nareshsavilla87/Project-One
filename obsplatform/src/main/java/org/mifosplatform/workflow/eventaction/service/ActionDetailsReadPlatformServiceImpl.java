@@ -123,24 +123,23 @@ public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPl
 	public List<EventActionData> retrieveAllActionsForProccessing() {
 		try{
 			EventActionMapper mapper = new EventActionMapper();
-			String sql = "select " + mapper.schema();
+			String sql = "select " + mapper.schema() + " WHERE a.is_processed = 'N'  and a.trans_date <=now()";
 			return this.jdbcTemplate.query(sql, mapper, new Object[] { });
 		}catch(EmptyResultDataAccessException accessException){
 			return null;	
 		}
 	}
+	
 	private static final class EventActionMapper implements RowMapper<EventActionData> {
 
 		public String schema() {
 			return " a.id as id,a.event_action AS eventaction,a.entity_name AS entityName,a.action_name AS actionName, a.command_as_json as json,a.resource_id as resourceId, " +
-					" a.order_id as orderId,a.client_id as clientId FROM b_event_actions a WHERE a.is_processed = 'N'  and a.trans_date <=now()";
+					" a.order_id as orderId,a.client_id as clientId FROM b_event_actions a";
 
 		}
 
 		@Override
-		public EventActionData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+		public EventActionData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 			Long id = rs.getLong("id");
 			String eventaction = rs.getString("eventaction");
 			String entityName = rs.getString("entityName");
@@ -150,7 +149,7 @@ public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPl
 			Long orderId=rs.getLong("orderId");
 			Long clientId=rs.getLong("clientId");
 			return new EventActionData(id,eventaction,entityName,actionName,jsonData,resourceId,orderId,clientId,null,null);
-
+			
 		}
 	}
 	

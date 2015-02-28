@@ -27,10 +27,13 @@ public class PaymentGatewayData {
 	private String remarks;
 	private LocalDate paymendDate;
 	private Object phoneMSISDN;
+	private String reprocessDetail;
+	private String source;
 
 	public PaymentGatewayData(final Long id, final String serialNo, final String phoneNo,
 			final DateTime paymentDate, final BigDecimal amountPaid, final String receiptNo,
-			final String clientName, final String status, final Long paymentId, final String remarks) {
+			final String clientName, final String status, final Long paymentId, final String remarks,
+			final String reprocessDetail, final String source) {
 		this.id=id;
 		this.paymentId=paymentId;
 		this.serialNo=serialNo;
@@ -41,7 +44,8 @@ public class PaymentGatewayData {
 		this.phoneNo=phoneNo;
 		this.clientName=clientName;
 		this.remarks=remarks;
-		
+		this.reprocessDetail = reprocessDetail;
+		this.source = source;
 	}
 
 	
@@ -101,9 +105,18 @@ public class PaymentGatewayData {
 	public Object getPhoneMSISDN() {
 		return phoneMSISDN;
 	}
-	
-	
-	
+
+	public String getReprocessDetail() {
+		return reprocessDetail;
+	}
+
+	public void setReprocessDetail(String reprocessDetail) {
+		this.reprocessDetail = reprocessDetail;
+	}
+
+	public String getSource() {
+		return source;
+	}
 	
 	
 }

@@ -17,6 +17,7 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -52,7 +53,7 @@ public RegionMaster()
 
 	  this.regionCode=regionCode;
 	  this.regionName=regionName;
-	  this.createdDate=new Date();
+	  this.createdDate=DateUtils.getDateOfTenant();
 	
 	}
 
