@@ -11,10 +11,12 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
+import org.mifosplatform.finance.payments.exception.DalpayRequestFailureException;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.security.exception.InvalidTenantIdentiferException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -38,7 +40,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
 
         private StringBuilder sqlBuilder = new StringBuilder(
                 "id, name, schema_name as schemaName,identifier as identifier, schema_server as schemaServer, schema_server_port as schemaServerPort, auto_update as autoUpdate, ")//
-                .append(" schema_username as schemaUsername, schema_password as schemaPassword , timezone_id as timezoneId ")//
+                .append(" schema_username as schemaUsername, schema_password as schemaPassword , timezone_id as timezoneId,license_key as licensekey ")//
                 .append(" from tenants t");//
 
         public String schema() {
@@ -58,9 +60,10 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
             String timezoneId = rs.getString("timezoneId");
             boolean autoUpdateEnabled = rs.getBoolean("autoUpdate");
             String identifier = rs.getString("identifier");
+            String licensekey = rs.getString("licensekey");
 
             return new MifosPlatformTenant(id, name, schemaName, schemaServer, schemaServerPort, schemaUsername, schemaPassword,
-                    timezoneId, autoUpdateEnabled,identifier);
+                    timezoneId, autoUpdateEnabled,identifier,licensekey);
         }
     }
 
@@ -85,4 +88,15 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
         List<MifosPlatformTenant> mifosPlatformTenants = jdbcTemplate.query(sql, rm, new Object[] {});
         return mifosPlatformTenants;
     }
+
+	@Override
+	public void updateLicenseKey(String licenseKey) {
+		try{
+			 this.jdbcTemplate.update("update tenants set license_key = ? where identifier = 'default'",licenseKey);
+			
+		}catch(DataIntegrityViolationException exception){
+			
+		}
+		
+	}
 }

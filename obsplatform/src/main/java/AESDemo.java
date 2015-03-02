@@ -1,90 +1,76 @@
-import java.security.AlgorithmParameters;
-import java.security.SecureRandom;
-import javax.crypto.BadPaddingException;
+
+
+import java.math.BigInteger;
+import java.security.Key;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.SecretKey;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+
 import org.apache.commons.codec.binary.Base64;
- 
-public class AESDemo {
- 
-    private static final String password = "hugoadmin";
-    private static String salt;
-    private static int pswdIterations = 65536  ;
-    private static int keySize = 128;
-    private byte[] ivBytes;
- 
-    public String encrypt(String plainText) throws Exception {  
-         
-        //get salt
-        salt = generateSalt();     
-        byte[] saltBytes = salt.getBytes("UTF-8");
-         
-        // Derive the key
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        PBEKeySpec spec = new PBEKeySpec(
-                password.toCharArray(),
-                saltBytes,
-                pswdIterations,
-                keySize
-                );
- 
-        SecretKey secretKey = factory.generateSecret(spec);
-        SecretKeySpec secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
- 
-        //encrypt the message
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.ENCRYPT_MODE, secret);
-        AlgorithmParameters params = cipher.getParameters();
-        ivBytes = params.getParameterSpec(IvParameterSpec.class).getIV();
-        byte[] encryptedTextBytes = cipher.doFinal(plainText.getBytes("UTF-8"));
-        return new Base64().encodeAsString(encryptedTextBytes);
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
+
+public class AESDemo 
+{
+private static String algorithm = "AES";
+//private static byte[] keyValue=new byte[] {'A','S','H','O','K','R','E','D','D','Y','R','E','D','D','Y','A'};// your key
+private static byte[] keyValue=new String("hugoadminhugoadm").getBytes();
+
+    // Performs Encryption
+    public static String encrypt(String plainText) throws Exception 
+    {
+            Key key = generateKey();
+            Cipher chiper = Cipher.getInstance(algorithm);
+            chiper.init(Cipher.ENCRYPT_MODE, key);
+            byte[] encVal = chiper.doFinal(plainText.getBytes());
+            String encryptedValue = new String(Base64.encodeBase64(encVal));
+            return encryptedValue;
     }
- 
-    @SuppressWarnings("static-access")
-    public String decrypt(String encryptedText) throws Exception {
- 
-        byte[] saltBytes = salt.getBytes("UTF-8");
-        byte[] encryptedTextBytes = new Base64().decodeBase64(encryptedText);
- 
-        // Derive the key
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        PBEKeySpec spec = new PBEKeySpec(
-                password.toCharArray(),
-                saltBytes,
-                pswdIterations,
-                keySize
-                );
- 
-        SecretKey secretKey = factory.generateSecret(spec);
-        SecretKeySpec secret = new SecretKeySpec(secretKey.getEncoded(), "AES");
- 
-        // Decrypt the message
-        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        cipher.init(Cipher.DECRYPT_MODE, secret, new IvParameterSpec(ivBytes));
-     
- 
-        byte[] decryptedTextBytes = null;
-        try {
-            decryptedTextBytes = cipher.doFinal(encryptedTextBytes);
-        } catch (IllegalBlockSizeException e) {
-            e.printStackTrace();
-        } catch (BadPaddingException e) {
-            e.printStackTrace();
-        }
- 
-        return new String(decryptedTextBytes);
+
+    // Performs decryption
+    public static String decrypt(String encryptedText) throws Exception 
+    {
+            // generate key new BASE64Decoder().decodeBuffer(encryptedText);
+            Key key = generateKey();
+            Cipher chiper = Cipher.getInstance(algorithm);
+            chiper.init(Cipher.DECRYPT_MODE, key);
+            byte[] decordedValue = Base64.decodeBase64(encryptedText);
+            byte[] decValue = chiper.doFinal(decordedValue);
+            String decryptedValue = new String(decValue);
+            return decryptedValue;
     }
- 
-    public String generateSalt() {
-        SecureRandom random = new SecureRandom();
-        byte bytes[] = new byte[20];
-        random.nextBytes(bytes);
-        String s = new String(bytes);
-        return s;
+
+//generateKey() is used to generate a secret key for AES algorithm
+    private static Key generateKey() throws Exception 
+    {
+            Key key = new SecretKeySpec(keyValue, algorithm);
+            return key;
+    }
+
+    // performs encryption & decryption 
+    public static void main(String[] args) throws Exception 
+    {
+
+            String plainText = "Default Demo Tenant=4-03-2015";
+            String encryptedText = AESDemo.encrypt(plainText);
+            System.out.println(encryptedText);
+           // String decordedValue1 = String.format("%040x", encryptedText.getBytes());//new String(Base64.decodeBase64(encryptedText));
+            String  decordedValue1 =  String.format("%040x", new BigInteger(1, encryptedText.getBytes(/*YOUR_CHARSET?*/)));
+            String decryptedText = AESDemo.decrypt(encryptedText);
+
+            System.out.println("Plain Text : " + plainText);
+            System.out.println("Encrypted Text : " + decordedValue1);
+            System.out.println("Decrypted Text : " + decryptedText);
+            String[] strings=decryptedText.split("=");
+            SimpleDateFormat dateFormat=new SimpleDateFormat("dd-MM-yyyy");
+            System.out.println(dateFormat.format(new Date()));
+            
+            Date date=dateFormat.parse(strings[1]);
+            System.out.println(Days.daysBetween( new LocalDate(), new LocalDate(date)).getDays());
+            System.out.println(date.after(new Date()));
     }
 }
+
+

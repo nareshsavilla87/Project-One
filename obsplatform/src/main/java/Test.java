@@ -1,14 +1,14 @@
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
  
 public class Test {
      
     public static void main(String[] args) throws Exception {
         // TODO Auto-generated method stub
  
-        AESDemo d = new AESDemo();
-             
-        System.out.println("Encrypted string:" + d.encrypt("Hello"));          
-        String encryptedText = d.encrypt("Hello");
-        System.out.println("Decrypted string:" + d.decrypt(encryptedText));        
+        SimpleDateFormat dateFormat=new SimpleDateFormat("dd-MM-yyyy");
+        System.out.println(dateFormat.parse("26-03-2015"));
  
     }
 }
