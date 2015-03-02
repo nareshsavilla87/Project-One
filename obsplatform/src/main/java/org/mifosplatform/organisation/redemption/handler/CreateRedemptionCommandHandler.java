@@ -21,6 +21,7 @@ public class CreateRedemptionCommandHandler implements NewCommandSourceHandler {
 	@Transactional
 	@Override
 	public CommandProcessingResult processCommand(final JsonCommand command) {
+		
 		return this.redemptionWritePlatformService.createRedemption(command);
 	}
 

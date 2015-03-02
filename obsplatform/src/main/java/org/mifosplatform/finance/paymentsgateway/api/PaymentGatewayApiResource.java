@@ -61,6 +61,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 @Path("/paymentgateways")
@@ -545,7 +547,7 @@ public class PaymentGatewayApiResource {
 		   return htmlData;   
 	   }
 	 }
-	 
+
 	public String orderBooking(String jsonObject, String date, Long clientId) {
 		
 		try {
@@ -559,7 +561,6 @@ public class PaymentGatewayApiResource {
 
 			if (jsonCustomData.has("clientId"))
 				jsonCustomData.remove("clientId");
-
 			if (jsonCustomData.has("returnUrl"))
 				jsonCustomData.remove("returnUrl");
 

@@ -14,8 +14,8 @@ import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfoRepository;
 import org.mifosplatform.organisation.office.domain.OfficeCommision;
 import org.mifosplatform.organisation.office.domain.OfficeCommisionRepository;
+import org.mifosplatform.organisation.partner.domain.OfficeControlBalance;
 import org.mifosplatform.organisation.partner.domain.PartnerBalanceRepository;
-import org.mifosplatform.organisation.partner.domain.PartnerControlBalance;
 import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
@@ -88,7 +88,6 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 	public void updateClientVoucherBalance(BigDecimal amount,Long clientId,boolean isWalletEnable) {
 		
 		BigDecimal balance=null;
-		
 		ClientBalance clientBalance = this.clientBalanceRepository.findByClientId(clientId);
 		
 		if(clientBalance == null){
@@ -146,22 +145,24 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		final OfficeAdditionalInfo officeAdditionalInfo = this.infoRepository.findoneByoffice(client.getOffice());
 		if (officeAdditionalInfo != null) {
 			if (officeAdditionalInfo.getIsCollective()) {
-				
-				this.updatePartnerBalance(client.getOffice(), invoice);
+				System.out.println(officeAdditionalInfo.getIsCollective());
+				this.updatePartnerBalance(client.getOffice(), invoice.getInvoiceAmount());
+
 			}
 		}
 
 	}
 
-	private void updatePartnerBalance(final Office office,final Invoice invoice) {
+	private void updatePartnerBalance(final Office office,final BigDecimal amount) {
 
 		final String accountType = "INVOICE";
-		PartnerControlBalance partnerControlBalance = this.partnerBalanceRepository.findOneWithPartnerAccount(office.getId(), accountType);
+		OfficeControlBalance partnerControlBalance = this.partnerBalanceRepository.findOneWithPartnerAccount(office.getId(), accountType);
 		if (partnerControlBalance != null) {
-			partnerControlBalance.update(invoice.getInvoiceAmount(), office.getId());
+			partnerControlBalance.update(amount, office.getId());
 
 		} else {
-			partnerControlBalance = PartnerControlBalance.create(invoice.getInvoiceAmount(), accountType,office.getId());
+			partnerControlBalance = OfficeControlBalance.create(amount, accountType,office.getId());
+
 		}
 
 		this.partnerBalanceRepository.save(partnerControlBalance);

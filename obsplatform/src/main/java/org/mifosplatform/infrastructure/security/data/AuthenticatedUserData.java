@@ -41,6 +41,7 @@ public class AuthenticatedUserData {
     private final Long loginHistoryId;
     @SuppressWarnings("unused")
 	private Set<Role> userRole;
+    private final String notificationMessage;
 
     public AuthenticatedUserData(final String username, final Collection<String> permissions) {
         this.username = username;
@@ -54,12 +55,14 @@ public class AuthenticatedUserData {
         this.session=null;
         this.maxTime=null;
         this.loginHistoryId=null;
+        this.notificationMessage = null;
     }
 
     public AuthenticatedUserData(final String username, final Collection<RoleData> roles, final Collection<String> permissions,
             final Long userId, final String base64EncodedAuthenticationKey,final Long unreadMessages,final String remoteHost,
-            final String session, int maxTime,Long loginHistoryId, Set<Role> userRole) {
-        this.username = username;
+            final String session, int maxTime,Long loginHistoryId, Set<Role> userRole,String notificationMessage) {
+
+    	this.username = username;
         this.userId = userId;
         this.base64EncodedAuthenticationKey = base64EncodedAuthenticationKey;
         this.authenticated = true;
@@ -71,5 +74,6 @@ public class AuthenticatedUserData {
         this.maxTime = maxTime;
         this.loginHistoryId=loginHistoryId;
         this.userRole =userRole;
+        this.notificationMessage = notificationMessage;
     }
 }

@@ -58,6 +58,7 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 	
 	@Override
 	public CommandProcessingResult create(JsonCommand command) {
+		
 		String authPin = null;
 		String message = null;	
 		String provSystem = command.stringValueOfParameterNamed("provSystem");

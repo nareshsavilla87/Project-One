@@ -40,7 +40,7 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfoRepository;
 import org.mifosplatform.organisation.partner.domain.PartnerBalanceRepository;
-import org.mifosplatform.organisation.partner.domain.PartnerControlBalance;
+import org.mifosplatform.organisation.partner.domain.OfficeControlBalance;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
@@ -178,12 +178,12 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 	private void updatePartnerBalance(final Office office,final Payment payment) {
 
 		final String accountType = "PAYMENTS";
-		PartnerControlBalance partnerControlBalance = this.partnerBalanceRepository.findOneWithPartnerAccount(office.getId(), accountType);
+		OfficeControlBalance partnerControlBalance = this.partnerBalanceRepository.findOneWithPartnerAccount(office.getId(), accountType);
 		if (partnerControlBalance != null) {
 			partnerControlBalance.update(payment.getAmountPaid(), office.getId());
 
 		} else {
-			partnerControlBalance = PartnerControlBalance.create(payment.getAmountPaid(), accountType,office.getId());
+			partnerControlBalance = OfficeControlBalance.create(payment.getAmountPaid(), accountType,office.getId());
 		}
 
 		this.partnerBalanceRepository.save(partnerControlBalance);
