@@ -69,6 +69,10 @@ public class PaymentGateway extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "is_auto" ,nullable = false)
 	private boolean isAuto=true;
 	
+	@Column(name = "reprocess_detail")
+	private String reProcessDetail;
+	
+	
 	public PaymentGateway(){
 		
 	}
@@ -184,9 +188,22 @@ public class PaymentGateway extends AbstractAuditableCustom<AppUser, Long> {
 		return remarks;
 	}
 
-	public void setRemarks(String remarks) {
-		this.remarks = remarks;
+	public void setRemarks(Object remarks) {
+		this.remarks = (String)remarks;
 	}
 
+	public String getReProcessDetail() {
+		return reProcessDetail;
+	}
+
+	public void setReProcessDetail(String reProcessDetail) {
+		this.reProcessDetail = reProcessDetail;
+	}
+
+	public void setErrorRemarks(Object printStackTrace) {
+		// TODO Auto-generated method stub
+		
+		
+	}
 	
 }

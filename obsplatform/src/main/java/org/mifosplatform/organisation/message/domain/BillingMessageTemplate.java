@@ -191,9 +191,9 @@ public class BillingMessageTemplate extends AbstractAuditableCustom<AppUser, Lon
 		this.messageParamDetails.add(billingMessageParam);
 	}
 
-	public void setMessageData(BillingMessage billingMessage) {
+	/*public void setMessageData(BillingMessage billingMessage) {
 		billingMessage.setupdate(this);
-	}
+	}*/
 
 	public Map<String, Object> updateMessageTemplate(final JsonCommand command) {
 		// TODO Auto-generated method stub

@@ -77,7 +77,6 @@ insert ignore into stretchy_report_parameter(report_id,parameter_id,report_param
 CREATE TABLE IF NOT EXISTS `b_office_commission` (
   `id` int(20) NOT NULL AUTO_INCREMENT,
   `charge_id` int(20) NOT NULL DEFAULT '0',
-  `partner_id` bigint(20) DEFAULT NULL,
   `office_id` bigint(20) NOT NULL,
   `invoice_date` datetime NOT NULL,
   `source` int(10),
@@ -95,4 +94,10 @@ SET @id=(select id from job where name='RESELLERCOMMISSION');
 
 INSERT IGNORE INTO job_parameters VALUES(null ,@id, 'processDate', 'DATE', 'NOW()', '26 January 2015', 'Y', NULL);
 INSERT IGNORE INTO job_parameters VALUES(null, @id, 'reportName', 'COMBO', NULL, 'Reseller Commission', 'Y', NULL);
+<<<<<<< HEAD
+=======
+
+
+
+>>>>>>> upstream/master
 

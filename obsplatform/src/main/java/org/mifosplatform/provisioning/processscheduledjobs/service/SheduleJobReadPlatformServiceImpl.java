@@ -85,7 +85,9 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 					private static final class MessageIdMapper implements RowMapper<Long> {
 
 					public String getmessageId() {
-					return "mt.id as id from b_message_template mt where mt.template_description=?";
+					//return "mt.id as id from b_template mt where mt.name=?";
+				     return "mt.id as id from b_message_template mt where mt.template_description=?";
+
 					}
 					@Override
 					public Long mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {

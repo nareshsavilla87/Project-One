@@ -129,7 +129,3 @@ DELIMITER ;
 
 
 
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream/master

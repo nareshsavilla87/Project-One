@@ -74,6 +74,7 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 						    	
 							orderPriceData.setInvoiceTillDate(billingOrderCommand.getInvoiceTillDate());
 							orderPriceData.setNextBillableDay(billingOrderCommand.getNextBillableDate());
+						
 						}
 					}
 				}
@@ -84,8 +85,8 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 	}
 
 	@Override
-	public void updateClientBalance(final BigDecimal amount,final Long clientId,boolean isWalletEnable) {
-
+	public void updateClientVoucherBalance(BigDecimal amount,Long clientId,boolean isWalletEnable) {
+		
 		BigDecimal balance=null;
 		ClientBalance clientBalance = this.clientBalanceRepository.findByClientId(clientId);
 		
@@ -104,12 +105,39 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 
 		}
 
-		/*if (clientBalance != null) {
-
-			clientBalance = updateClientBalance.calculateUpdateClientBalance("DEBIT",invoice.getInvoiceAmount(),clientBalance);
-		} else if (clientBalance == null) {
-			clientBalance = updateClientBalance.calculateCreateClientBalance("DEBIT",invoice.getInvoiceAmount(), clientBalance,invoice.getClientId());
+		this.clientBalanceRepository.saveAndFlush(clientBalance);
+		
+		/*final Client client = this.clientRepository.findOne(clientId);
+		final OfficeAdditionalInfo officeAdditionalInfo = this.infoRepository.findoneByoffice(client.getOffice());
+		if (officeAdditionalInfo != null) {
+			if (officeAdditionalInfo.getIsCollective()) {
+				
+				this.updatePartnerBalance(client.getOffice(), invoice);
+			}
 		}*/
+
+	}
+	
+	@Override
+	public void updateClientBalance(Invoice invoice, Long clientId,boolean isWalletEnable) {
+		
+		BigDecimal balance=null;
+		
+		ClientBalance clientBalance = this.clientBalanceRepository.findByClientId(clientId);
+		
+		if(clientBalance == null){
+			clientBalance =new ClientBalance(clientId, invoice.getInvoiceAmount(), isWalletEnable?'Y':'N');
+		}else{
+			if(isWalletEnable){
+				balance=clientBalance.getWalletAmount().add( invoice.getInvoiceAmount());
+				clientBalance.setWalletAmount(balance);
+				
+			}else{
+				balance=clientBalance.getBalanceAmount().add( invoice.getInvoiceAmount());
+				clientBalance.setBalanceAmount(balance);
+			}
+			
+		}
 
 		this.clientBalanceRepository.saveAndFlush(clientBalance);
 		
@@ -118,7 +146,7 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		if (officeAdditionalInfo != null) {
 			if (officeAdditionalInfo.getIsCollective()) {
 				System.out.println(officeAdditionalInfo.getIsCollective());
-				this.updatePartnerBalance(client.getOffice(), amount);
+				this.updatePartnerBalance(client.getOffice(), invoice.getInvoiceAmount());
 
 			}
 		}

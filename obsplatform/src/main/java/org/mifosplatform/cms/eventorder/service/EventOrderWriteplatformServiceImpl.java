@@ -32,6 +32,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationReposi
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
 import org.mifosplatform.logistics.onetimesale.serialization.EventOrderCommandFromApiJsonDeserializer;
@@ -130,7 +131,7 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 				  CommandProcessingResult commandProcessingResult=this.invoiceOneTimeSale.invoiceOneTimeSale(eventOrder.getClientId(), oneTimeSaleData,walletConfiguration.isEnabled());
 				  this.updateOneTimeSale(oneTimeSaleData);
 				  if(walletConfiguration.isEnabled()){
-					  JournalVoucher journalVoucher=new JournalVoucher(commandProcessingResult.resourceId(),new Date(),"Event Sale",null,
+					  JournalVoucher journalVoucher=new JournalVoucher(commandProcessingResult.resourceId(),DateUtils.getDateOfTenant(),"Event Sale",null,
 							  eventOrder.getBookedPrice(),eventOrder.getClientId());
 						this.journalvoucherRepository.save(journalVoucher);
 				  }

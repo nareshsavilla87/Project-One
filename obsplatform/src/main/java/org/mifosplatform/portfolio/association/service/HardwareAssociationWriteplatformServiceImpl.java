@@ -8,6 +8,7 @@ import net.sf.json.JSONObject;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetails;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetailsRepository;
@@ -139,7 +140,7 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 				}
 		      ItemDetails itemDetails = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(association.getSerialNo());
 			    if(itemDetails.getWarrantyDate() != null){
-				    if(itemDetails.getWarrantyDate().before(new Date())){
+				    if(itemDetails.getWarrantyDate().before(DateUtils.getDateOfTenant())){
 				    	throw new WarrantyEndDateExpireException(association.getSerialNo());
 				    }
 			    }

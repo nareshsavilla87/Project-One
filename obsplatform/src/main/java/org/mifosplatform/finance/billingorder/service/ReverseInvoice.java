@@ -39,6 +39,8 @@ public class ReverseInvoice {
 		
 		List<BillingOrderCommand> billingOrderCommands = this.generateReverseBillingOrderService.generateReverseBillingOrder(billingOrderProducts,disconnectionDate);
 		
+		if(billingOrderCommands.size() !=0){
+			
 		if(billingOrderCommands.get(0).getChargeType().equalsIgnoreCase("RC")){
 			 invoice = this.generateBillingOrderService. generateInvoice(billingOrderCommands);
 			 invoiceAmount=invoice.getInvoiceAmount();
@@ -49,12 +51,16 @@ public class ReverseInvoice {
 		
 		//List<ClientBalanceData> clientBalancesDatas = clientBalanceReadPlatformService.retrieveAllClientBalances(clientId);
 		
-		this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId,false);
+		this.billingOrderWritePlatformService.updateClientBalance(invoice,clientId,false);
 		
 		this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
 	    //this.billingOrderWritePlatformService.updateOrderPrice(billingOrderCommands);
 		 
 		return invoiceAmount;
+	}else{
+		return invoiceAmount;
 	}
-
+	
+	}
 }
+	

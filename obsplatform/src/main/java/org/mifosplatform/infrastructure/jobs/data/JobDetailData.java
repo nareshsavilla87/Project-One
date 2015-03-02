@@ -5,42 +5,29 @@ import java.util.Date;
 import java.util.List;
 
 import org.mifosplatform.organisation.message.data.BillingMessageTemplateData;
-import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.portfolio.plan.data.BillRuleData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.ScheduleJobData;
+import org.mifosplatform.template.domain.Template;
 
 public class JobDetailData {
 
     private final Long jobId;
-    
     private final String displayName;
-    
     private final String name;
-
     private final Date nextRunTime;
-
     private final String initializingError;
-    
     private final String cronExpression;
-    
     private final String cronDescription;
-
     private final boolean active;
-
     private final boolean currentlyRunning;
-
     private final JobDetailHistoryData lastRunHistory;
-    
     private  List<ScheduleJobData> queryData;
-    
-    private   Collection<BillingMessageTemplateData> billingMessageDatas;
-
+    private Collection<BillingMessageTemplateData> billingMessageDatas;
 	private JobParameterData jobparameters;
-
 	private Long historyId;
-	
 	private Collection<BillRuleData> provisionSysData;
+	private List<Template> templateData;
 
     public JobDetailData(final Long jobId, final String displayName, String name, final Date nextRunTime, final String initializingError,
             final String cronExpression,final boolean active, final boolean currentlyRunning, final JobDetailHistoryData lastRunHistory, 
@@ -140,6 +127,18 @@ public class JobDetailData {
 	public Long getHistoryId() {
 		return historyId;
 	}
+	
+	public void setTemplateData(List<Template> templateDatas) {
+		
+		this.templateData = templateDatas;
+		
+	}
+
+	public List<Template> getTemplateData() {
+		return templateData;
+	}
+    
+	
     
 	
     

@@ -2,9 +2,11 @@ package org.mifosplatform.organisation.message.service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import org.mifosplatform.organisation.message.data.BillingMessageDataForProcessing;
 import org.mifosplatform.organisation.message.data.BillingMessageTemplateData;
+import org.mifosplatform.template.domain.Template;
 
 /**
  * 
@@ -30,4 +32,7 @@ public interface BillingMesssageReadPlatformService {
 
 	Long retrieveClientId(String hardwareId) throws IOException;
 
+	List<List<Map<String, Object>>> retrieveMessageQuery(String query,Template template);
+
+	
 }

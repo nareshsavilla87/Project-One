@@ -11,6 +11,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.groupsdetails.domain.GroupsDetails;
 import org.mifosplatform.organisation.groupsdetails.domain.GroupsDetailsRepository;
@@ -94,7 +95,7 @@ public class GroupsDetailsWritePlatformServiceImpl implements GroupsDetailsWrite
 			 final JsonObject json = new JsonObject();
 			 
 			 final String dateFormat = "dd MMMM yyyy";
-			 final String simpleDateFormat = new SimpleDateFormat(dateFormat).format(new Date());
+			 final String simpleDateFormat = new SimpleDateFormat(dateFormat).format(DateUtils.getDateOfTenant());
 			 
 			 json.addProperty("clientId", 0);json.addProperty("orderId", 0);
 			 json.addProperty("provisioingSystem","packetspan");json.addProperty("requestType", "Add_Group");

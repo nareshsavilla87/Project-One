@@ -119,7 +119,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 					serialNumber.addProperty("clientId", oneTimeSale.getClientId());
 					serialNumber.addProperty("orderId", oneTimeSale.getId());
 				}
-				jsonObject.addProperty("itemMasterId", oneTimeSale.getItemId());
+				jsonObject.addProperty("itemId", oneTimeSale.getItemId());
 				jsonObject.addProperty("quantity", oneTimeSale.getQuantity());
 				jsonObject.add("serialNumber", serialData);
 				JsonCommand jsonCommand = new JsonCommand(null,jsonObject.toString(), element, fromJsonHelper, null, null,
