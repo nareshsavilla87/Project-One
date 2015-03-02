@@ -113,7 +113,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 	private static final class AddressMapper1 implements RowMapper<String> {
 
 		public String sqlschema(final String placeholder,final String tablename) {
-			return placeholder+" as data from b_"+tablename;
+			return placeholder+" as data from b_"+tablename+" ";
 
 		}
 
@@ -146,7 +146,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 		context.authenticatedUser();
 		final AddressMapper1 mapper = new AddressMapper1();
 
-		final String sql = "select " + mapper.sqlschema("city_name","city");
+		final String sql = "select " + mapper.sqlschema("city_name","city")+ " where is_delete = 'N'";
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 
@@ -200,7 +200,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 		context.authenticatedUser();
 		String sql;
 		final retrieveMapper mapper=new retrieveMapper();
-	    sql = "SELECT  " + mapper.schema();
+	    sql = "SELECT  " + mapper.schema() + "and c.is_delete = 'N'";
 	
 		return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { cityName });
 	}catch (EmptyResultDataAccessException e) {
