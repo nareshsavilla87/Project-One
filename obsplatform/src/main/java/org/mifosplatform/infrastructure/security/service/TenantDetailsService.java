@@ -15,4 +15,6 @@ public interface TenantDetailsService {
 
     List<MifosPlatformTenant> findAllTenants();
 
+	void updateLicenseKey(String licenseKey);
+
 }
