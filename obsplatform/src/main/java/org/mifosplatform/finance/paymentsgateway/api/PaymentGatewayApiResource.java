@@ -524,8 +524,10 @@ public class PaymentGatewayApiResource {
 					 } else{
 						 StringWriter errors = new StringWriter();
 						 e.printStackTrace(new PrintWriter(errors));
-						 paymentGateway.setRemarks(errors.toString());	 
-						 paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";					 }
+						 paymentGateway.setRemarks(errors.toString());	 	
+					 }
+					 this.paymentGatewayRepository.save(paymentGateway);
+					 paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";	
 				 }
 				 
 				

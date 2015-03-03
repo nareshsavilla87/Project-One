@@ -359,4 +359,87 @@ public class EntitlementReadPlatformServiceImpl implements
 
 	}
 
+	@Override
+	public List<EntitlementsData> getCubiWareProcessingData(Long id, String provisioningSystem) {
+		
+		CubiWareServicesMapper mapper = new CubiWareServicesMapper();
+
+		String sql = "select " + mapper.schema();
+		
+		if (provisioningSystem != null) sql = sql + " and bpr.provisioing_system = '" + provisioningSystem + "' ";
+
+		sql = sql + "group by bpr.id";
+		
+		if (id != null) sql = sql + " limit " + id;
+		
+		return jdbcTemplate.query(sql, mapper, new Object[] {});
+
+	}
+	
+	
+	protected static final class CubiWareServicesMapper implements RowMapper<EntitlementsData> {
+
+		@Override
+		public EntitlementsData mapRow(final ResultSet rs, final int rowNum)
+				throws SQLException {
+
+			Long id = rs.getLong("id");
+			
+			Long clientId = rs.getLong("clientId");
+			String firstName = rs.getString("firstName");
+			String lastName = rs.getString("lastName");
+			String phone = rs.getString("phone");
+			String email = rs.getString("email");
+			String city = rs.getString("city");
+			String zip  = rs.getString("zip");
+			String street = rs.getString("street");
+			String country = rs.getString("country");
+			Long countryId = rs.getLong("countryId");
+			
+			String provisioingSystem = rs.getString("provisioingSystem");
+			Long serviceId = rs.getLong("serviceId");
+			Long prdetailsId = rs.getLong("prdetailsId");
+			String product = rs.getString("sentMessage");
+			String macId = rs.getString("macId");
+			String deviceId = rs.getString("deviceId");
+			String requestType = rs.getString("requestType");
+			
+			Long zebraSubscriberId = rs.getLong("zebraSubscriberId");
+			Long regionId = rs.getLong("regionId");
+			String regionName = rs.getString("regionName");
+			String selfcareUsername = rs.getString("selfcareUsername");
+			String selfcarePassword = rs.getString("selfcarePassword");
+
+			return new EntitlementsData(id, clientId, firstName, lastName, phone, email, city, zip, street, country, countryId,
+					provisioingSystem, serviceId, prdetailsId, product, macId, deviceId, requestType,
+					zebraSubscriberId, regionId, regionName, selfcareUsername, selfcarePassword);
+		}
+
+		public String schema() {
+
+			return " bpr.id as id, c.id as clientId,c.firstname as firstName,c.lastname as lastName, c.phone as phone," +
+					" c.email as email,bca.city as city,bca.zip as zip,bca.street as street,bca.country as country,bpd.country_id as countryId," +
+					" bpr.provisioing_system AS provisioingSystem,bprd.service_id AS serviceId,bprd.id AS prdetailsId," +
+					" bprd.sent_message AS sentMessage, ifnull(bid.provisioning_serialno ,oh.provisioning_serial_number) AS macId," +
+					" ifnull(bid.serial_no ,oh.serial_number) AS deviceId, bprd.request_type AS requestType," +
+					" bcu.zebra_subscriber_id as zebraSubscriberId, bcu.unique_reference as selfcareUsername, bcu.password as selfcarePassword, " +
+					" bprm.id as regionId, bprm.priceregion_name as regionName" +
+					" from m_client c " +
+					" left join m_office o on (o.id = c.office_id) " +
+					" left join b_process_request bpr on (c.id = bpr.client_id ) " +
+					" left join  b_clientuser  bcu on (c.id = bcu.client_id ) " +
+					" left join b_process_request_detail bprd on (bpr.id = bprd.processrequest_id )" +
+					" left join b_client_address bca on (c.id=bca.client_id and address_key='PRIMARY')" +
+					" left join b_state bs on (bca.state = bs.state_name ) " +
+					" left JOIN b_priceregion_detail bpd ON ((bpd.state_id = bs.id or bpd.state_id=0)  and bpd.country_id=bs.parent_code AND bpd.is_deleted = 'N')" +
+					" left join b_priceregion_master bprm on (bpd.priceregion_id = bprm.id ) " +
+					" left join b_ippool_details bipd on (bpr.client_id = bipd.client_id)" +
+					" left join b_item_detail bid on (bprd.hardware_id = bid.provisioning_serialno) " +
+					" left join b_item_master bim on (bid.item_master_id = bim.id) " +
+					" left join b_owned_hardware oh on (bprd.hardware_id =oh.provisioning_serial_number AND oh.is_deleted = 'N')" +
+					" WHERE bpr.is_processed = 'N' ";
+		}
+
+	}
+
 }
