@@ -95,6 +95,7 @@ public class InvoiceClient {
 
 	}
 
+
 	public CommandProcessingResult createInvoiceBill(JsonCommand command) {
 		try {
 			// validation not written
