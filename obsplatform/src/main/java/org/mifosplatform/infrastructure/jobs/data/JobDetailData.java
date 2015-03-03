@@ -13,35 +13,20 @@ import org.mifosplatform.template.domain.Template;
 public class JobDetailData {
 
     private final Long jobId;
-    
     private final String displayName;
-    
     private final String name;
-
     private final Date nextRunTime;
-
     private final String initializingError;
-    
     private final String cronExpression;
-    
     private final String cronDescription;
-
     private final boolean active;
-
     private final boolean currentlyRunning;
-
     private final JobDetailHistoryData lastRunHistory;
-    
     private  List<ScheduleJobData> queryData;
-    
     private Collection<BillingMessageTemplateData> billingMessageDatas;
-
 	private JobParameterData jobparameters;
-
 	private Long historyId;
-	
 	private Collection<BillRuleData> provisionSysData;
-
 	private List<Template> templateData;
 
     public JobDetailData(final Long jobId, final String displayName, String name, final Date nextRunTime, final String initializingError,

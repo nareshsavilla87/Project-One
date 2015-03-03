@@ -18,7 +18,6 @@ import javax.persistence.OneToMany;
 import javax.persistence.OrderBy;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
-
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jackson.map.annotate.JsonSerialize;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -68,7 +67,6 @@ public class Template extends AbstractPersistable<Long> {
     }
 
     public Template() {
-       //default-constructor
     }
 
     public static Template fromJson(final JsonCommand command) {

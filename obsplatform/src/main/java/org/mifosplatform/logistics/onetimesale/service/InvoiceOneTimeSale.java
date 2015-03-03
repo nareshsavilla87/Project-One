@@ -18,6 +18,7 @@ import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformS
 import org.mifosplatform.finance.billingorder.service.GenerateBill;
 import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderService;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public CommandProcessingResult invoiceOneTimeSale(final Long clientId, final One
 		 List<BillingOrderCommand> billingOrderCommands = new ArrayList<BillingOrderCommand>();
 
 			
-				BillingOrderData billingOrderData = new BillingOrderData(oneTimeSaleData.getId(),oneTimeSaleData.getClientId(),	new LocalDate().toDate(),
+				BillingOrderData billingOrderData = new BillingOrderData(oneTimeSaleData.getId(),oneTimeSaleData.getClientId(),	DateUtils.getLocalDateOfTenant().toDate(),
 						oneTimeSaleData.getChargeCode(),oneTimeSaleData.getChargeType(),oneTimeSaleData.getTotalPrice(),oneTimeSaleData.getTaxInclusive());
 				
 				
@@ -76,7 +77,7 @@ public CommandProcessingResult invoiceOneTimeSale(final Long clientId, final One
 				Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
 
 				// To fetch record from client_balance table
-				this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId,isWalletEnable);
+				this.billingOrderWritePlatformService.updateClientBalance(invoice,clientId,isWalletEnable);
 				
 				/* //office commision
 				 AgreementData clientAgreement=this.billingOrderReadPlatformService.retriveClientOfficeDetails(clientId);

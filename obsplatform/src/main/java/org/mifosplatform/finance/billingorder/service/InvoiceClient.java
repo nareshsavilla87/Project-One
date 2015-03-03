@@ -67,7 +67,6 @@ public class InvoiceClient {
 	         }else{
 			throw new BillingOrderNoRecordsFoundException();
 		}
-		     
 	}
 	
 	public GenerateInvoiceData invoiceServices(BillingOrderData billingOrderData,Long clientId,LocalDate processDate){
@@ -81,7 +80,7 @@ public class InvoiceClient {
 			Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
 			
 			//Update Client Balance
-			this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId,false);
+			this.billingOrderWritePlatformService.updateClientBalance(invoice,clientId,false);
 
 			// Update order-price
 			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
@@ -94,7 +93,8 @@ public class InvoiceClient {
 	           }*/
 		return new GenerateInvoiceData(clientId,billingOrderCommands.get(0).getNextBillableDate(),invoice.getInvoiceAmount(),invoice);
 
-  }
+	}
+
 
 	public CommandProcessingResult createInvoiceBill(JsonCommand command) {
 		try {

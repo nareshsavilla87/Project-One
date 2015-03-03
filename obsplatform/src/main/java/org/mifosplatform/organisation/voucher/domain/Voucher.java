@@ -108,7 +108,12 @@ public class Voucher extends AbstractAuditableCustom<AppUser, Long>  {
 		    final String pinType = command.stringValueOfParameterNamed("pinType");
 		    final Long pinVal = command.longValueOfParameterNamed("pinValue");
 		    final LocalDate expiryDate = command.localDateValueOfParameterNamed("expiryDate");
-		    final Long priceId = command.longValueOfParameterNamed("priceId");
+		    Long priceId;
+		    if(command.hasParameter("priceId")){
+		    	priceId = command.longValueOfParameterNamed("priceId");
+		    }else{
+		    	priceId = (long) 0;
+		    }
 		    final String pinValue=String.valueOf(pinVal);
 		    return new Voucher(batchName,length.longValue(),beginWith,pinCategory,quantity.longValue(),serialNo.longValue(),pinType,pinValue,expiryDate.toDate(),priceId);
 	}

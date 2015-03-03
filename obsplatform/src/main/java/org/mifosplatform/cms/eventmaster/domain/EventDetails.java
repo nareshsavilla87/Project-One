@@ -10,6 +10,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
@@ -56,7 +57,7 @@ public class EventDetails extends AbstractPersistable<Long> {
 	 * @param event
 	 * */
 	public void delete(final EventMaster event) { 
-		final LocalDate date = new LocalDate();
+		final LocalDate date = DateUtils.getLocalDateOfTenant();
 		this.event = event;
 		event.setEventEndDate(date.toDate());
 	}

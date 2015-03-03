@@ -47,8 +47,7 @@ public class ClientProspectReadPlatformServiceImp implements
 		return jdbcTemplate.query(sql, rowMapper);
 	}
 
-	public Page<ClientProspectData> retriveClientProspect(
-			final SearchSqlQuery searchClientProspect, final Long userId) {
+	public Page<ClientProspectData> retriveClientProspect(final SearchSqlQuery searchClientProspect, final Long userId) {
 
 		final ClientProspectMapperForNewClient rowMapper = new ClientProspectMapperForNewClient();
 		final StringBuilder sqlBuilder = new StringBuilder(200);

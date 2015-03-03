@@ -148,9 +148,11 @@ public class Agreement extends AbstractAuditableCustom<AppUser, Long> {
 		final String endDateParamName = "endDate";
 		if (command.isChangeInLocalDateParameterNamed(endDateParamName,new LocalDate(this.endDate))) {
 			final LocalDate newValue = command.localDateValueOfParameterNamed(endDateParamName);
+			
 			if(newValue !=null){
-			actualChanges.put(endDateParamName, newValue);
-			this.endDate = newValue.toDate();
+				actualChanges.put(endDateParamName, newValue);
+			   this.endDate = newValue.toDate();
+
 			}
 		}
 		

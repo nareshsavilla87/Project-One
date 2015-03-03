@@ -130,6 +130,7 @@ public class PartnersAgreementWritePlatformServiceImp implements PartnersAgreeme
 			
 			  if(partnerAgreementArray.size() !=0){
 				 for(int i=0; i<partnerAgreementArray.size(); i++){
+					 
 						final JsonElement element = fromApiJsonHelper.parse(partnerAgreementArray.get(i).toString());
 						final Long detailId = fromApiJsonHelper.extractLongNamed("detailId", element);
 						final Long source = fromApiJsonHelper.extractLongNamed("source", element);

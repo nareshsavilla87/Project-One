@@ -15,7 +15,6 @@ public interface PaymentGatewayWritePlatformService {
 	CommandProcessingResult onlinePaymentGateway(JsonCommand command);
 	
 	String payment(Long clientId, Long id, String txnId, String amount) throws JSONException;
-
 	void emailSending(Long clientId, String result, String description,String txnId, String amount, String cardType, String cardNumber) throws JSONException;
 
 	String globalPayProcessing(String transactionId, String remarks) throws JSONException, IOException;

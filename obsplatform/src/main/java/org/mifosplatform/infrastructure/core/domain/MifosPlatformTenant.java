@@ -17,10 +17,11 @@ public class MifosPlatformTenant {
     private final String timezoneId;
     private final boolean autoUpdateEnabled;
 	private final String tenantIdentifier;
+	private final String licensekey;
 
     public MifosPlatformTenant(final Long id, final String name, final String schemaName, final String schemaServer,
             final String schemaServerPort, final String schemaUsername, final String schemaPassword, String timezoneId,
-            final boolean autoUpdateEnabled, String identifier) {
+            final boolean autoUpdateEnabled, String identifier, String licensekey) {
         this.id = id;
         this.name = name;
         this.schemaName = schemaName;
@@ -31,6 +32,7 @@ public class MifosPlatformTenant {
         this.timezoneId = timezoneId;
         this.autoUpdateEnabled = autoUpdateEnabled;
         this.tenantIdentifier=identifier;
+        this.licensekey=licensekey;
 
     }
 
@@ -71,5 +73,11 @@ public class MifosPlatformTenant {
 	public String getTenantIdentifier() {
 		 return this.tenantIdentifier;
 	}
+
+	public String getLicensekey() {
+		return licensekey;
+	}
+	
+	
 
 }
