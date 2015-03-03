@@ -18,6 +18,8 @@ public interface EntitlementReadPlatformService {
 
 	List<EntitlementsData> getBeeniusProcessingData(Long no, String provisioningSystem);
 
-	List<EntitlementsData> getZebraOTTProcessingData(Long no,String provisioningSystem);
+	List<EntitlementsData> getZebraOTTProcessingData(Long no, String provisioningSystem);
+
+	List<EntitlementsData> getCubiWareProcessingData(Long no, String provisioningSystem);
 	
 }
