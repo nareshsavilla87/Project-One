@@ -199,7 +199,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			String type = fromApiJsonHelper.extractStringNamed("TYPE", element);
 			String tStatus = fromApiJsonHelper.extractStringNamed("STATUS", element);
 			String details = fromApiJsonHelper.extractStringNamed("COMPANYNAME", element);		 
-			Date date = new Date();		
+			Date date = DateUtils.getDateOfTenant();		
 			String source = ConfigurationConstants.PAYMENTGATEWAY_TIGO;
 
 			PaymentGateway paymentGateway = new PaymentGateway(serialNumberId, txnId, amountPaid, phoneNo, type, tStatus, details, date, source);
@@ -367,6 +367,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			String userName = pgConfigJsonObj.getString("userName");
 			String password = pgConfigJsonObj.getString("password");
 
+
 			String data = editGlobalScript(MerchantTxnRef, merchantId, userName, password);
 
 			URL oURL = new URL(ConfigurationConstants.GLOBALPAY_URL);
@@ -483,7 +484,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			
 			PaymentGatewayConfiguration pgConfig = this.paymentGatewayConfigurationRepository.findOneByName(ConfigurationConstants.NETELLER_PAYMENTGATEWAY);
 			
-			if (null == pgConfig || null == pgConfig.getValue() || pgConfig.isEnabled()) {
+			if (null == pgConfig || null == pgConfig.getValue() || !pgConfig.isEnabled()) {
 				throw new PaymentGatewayConfigurationException(ConfigurationConstants.NETELLER_PAYMENTGATEWAY);
 			}
 			
@@ -587,7 +588,6 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			
 		}
 
-
 		@Override
 		public CommandProcessingResult onlinePaymentGateway(JsonCommand command) {
 
@@ -648,6 +648,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 		} catch (ParseException e) {
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
+		
 	}
 
 	private CommandProcessingResult processOnlinePayment(String jsonData, String requestJson ) throws JSONException {
@@ -691,7 +692,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 		}
 		
 		this.paymentGatewayRepository.save(paymentGateway);
-		
+	
 		withChanges.put("clientId", clientId);
 		withChanges.put("txnId", txnId);
 		withChanges.put("amount", amount);
@@ -748,6 +749,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 					withChanges.put("Amount", amount);
 					withChanges.put("ObsPaymentId", result.resourceId().toString());
 					withChanges.put("TransactionId", txnId);
+					withChanges.put("pgId", id);
 					
 				} else {
 					paymentGateway.setStatus(ConfigurationConstants.PAYMENTGATEWAY_FAILURE);
@@ -758,11 +760,12 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 					withChanges.put("Amount", amount);
 					withChanges.put("ObsPaymentId", "");
 					withChanges.put("TransactionId", txnId);
+					withChanges.put("pgId", id);
 				}
 				
 			} else if(paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_PENDING)){
 				
-				EventAction eventAction=new EventAction(new Date(), "Create Payment", "PAYMENT", EventActionConstants.EVENT_CREATE_PAYMENT,
+				EventAction eventAction=new EventAction(DateUtils.getDateOfTenant(), "Create Payment", "PAYMENT", EventActionConstants.EVENT_CREATE_PAYMENT,
 						"/payments/"+clientId, id,object.toString(),null,clientId);	
 				eventAction.updateStatus('P');
 				this.eventActionRepository.save(eventAction);
@@ -772,6 +775,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				withChanges.put("Amount", amount);	
 				withChanges.put("ObsPaymentId", "");	
 				withChanges.put("TransactionId", txnId);
+				withChanges.put("pgId", id);
 			}
 			
 			this.paymentGatewayRepository.save(paymentGateway);

@@ -156,4 +156,14 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		}
 	}
 
+
+	@Override
+	public void updateClientVocherBalance(BigDecimal amount, Long clientId,
+			boolean isWalletEnable) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+
 }

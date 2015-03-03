@@ -2,6 +2,7 @@ package org.mifosplatform.workflow.eventaction.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.joda.time.DateTime;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
@@ -122,6 +123,14 @@ public class EventActionReadPlatformServiceImpl implements EventActionReadPlatfo
 			return new EventActionData(id, eventaction, entityName, actionName, jsonData, resourceId, orderId, clientId, status, transactionDate);
 
 		}
+	}
+	@Override
+	public List<EventActionData> retrievePendingActionRequest(Long paymentGatewayId) {
+		// TODO Auto-generated method stub
+		EventActionMapper mapper = new EventActionMapper();
+		String sql = "select " + mapper.schema() + " where a.is_processed='P' and a.resource_id = ?";
+
+		return this.jdbcTemplate.query(sql, mapper, new Object[] {paymentGatewayId});
 	}
 
 }

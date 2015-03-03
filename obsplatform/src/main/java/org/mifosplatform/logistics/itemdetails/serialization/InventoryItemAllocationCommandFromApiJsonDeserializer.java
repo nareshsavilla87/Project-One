@@ -24,7 +24,7 @@ import com.google.gson.reflect.TypeToken;
 @Component
 public class InventoryItemAllocationCommandFromApiJsonDeserializer {
 
-	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("orderId","clientId","itemMasterId","serialNumber","status","quantity","swapHw"));
+	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("orderId","clientId","itemMasterId","serialNumber","status","quantity","swapHw","itemId"));
 	
 	private final FromJsonHelper fromApiJsonHelper;
 	

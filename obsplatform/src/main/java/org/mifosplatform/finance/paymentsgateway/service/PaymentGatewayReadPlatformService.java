@@ -30,10 +30,7 @@ public interface PaymentGatewayReadPlatformService {
 
 	List<PaymentGatewayDownloadData> retriveDataForDownload(String source,
 			String startDate, String endDate, String status);
-	
-	
-	
-	
-	
+
+	List<PaymentGatewayData> retrievePendingDetails();
 
 }

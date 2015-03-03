@@ -80,9 +80,15 @@ repositories {
         url "http://download.java.net/maven/2"
     }
     maven {
+<<<<<<< HEAD
     	/*url "http://repository.pentaho.org/artifactory/pentaho/"*/
     	 url "http://nexus.pentaho.org/content/repositories/pentaho-public-release-repos/"
     }
+=======
+    /*	url "http://repository.pentaho.org/artifactory/pentaho/" */
+      url "http://nexus.pentaho.org/content/repositories/pentaho-public-release-repos/" 
+   }
+>>>>>>> obsplatform-2.03
 }
 
 configurations {

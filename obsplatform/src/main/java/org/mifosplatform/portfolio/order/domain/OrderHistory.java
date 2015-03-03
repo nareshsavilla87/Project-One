@@ -6,6 +6,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -55,7 +56,7 @@ public class OrderHistory extends AbstractPersistable<Long> {
 		this.prepareId=provisioningId;
 		this.transactionType=tranType;
 		this.createdbyId=userId;
-		this.createdDate=new Date();
+		this.createdDate=DateUtils.getDateOfTenant();
 		this.remarks=extensionReason;
 	}
  

@@ -5,9 +5,9 @@
  */
 package org.mifosplatform.infrastructure.security.api;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.POST;
@@ -17,10 +17,17 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 
+import org.joda.time.Days;
+import org.joda.time.LocalDate;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistory;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistoryRepository;
 import org.mifosplatform.crm.userchat.service.UserChatReadplatformReadService;
+import org.mifosplatform.infrastructure.configuration.data.LicenseData;
+import org.mifosplatform.infrastructure.configuration.service.LicenseUpdateService;
+import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.security.data.AuthenticatedUserData;
 import org.mifosplatform.useradministration.data.RoleData;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -44,6 +51,7 @@ public class AuthenticationApiResource {
     private final DaoAuthenticationProvider customAuthenticationProvider;
     private final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService;
     private final RoleReadPlatformService roleReadPlatformService;
+    private final LicenseUpdateService licenseUpdateService; 
     private final UserChatReadplatformReadService userChatReadplatformReadService;
     private final LoginHistoryRepository loginHistoryRepository;
     
@@ -51,10 +59,13 @@ public class AuthenticationApiResource {
     public AuthenticationApiResource(
             @Qualifier("customAuthenticationProvider") final DaoAuthenticationProvider customAuthenticationProvider,
             final ToApiJsonSerializer<AuthenticatedUserData> apiJsonSerializerService, final RoleReadPlatformService roleReadPlatformService,
-            final  UserChatReadplatformReadService userChatReadplatformReadService,final LoginHistoryRepository loginHistoryRepository) {
+            final  UserChatReadplatformReadService userChatReadplatformReadService,final LoginHistoryRepository loginHistoryRepository,
+            final LicenseUpdateService licenseUpdateService) {
+    	
         this.customAuthenticationProvider = customAuthenticationProvider;
         this.apiJsonSerializerService = apiJsonSerializerService;
         this.roleReadPlatformService = roleReadPlatformService;
+        this.licenseUpdateService = licenseUpdateService;
         this.userChatReadplatformReadService=userChatReadplatformReadService;
         this.loginHistoryRepository=loginHistoryRepository;
     }
@@ -66,6 +77,15 @@ public class AuthenticationApiResource {
     	
         Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
         Authentication authenticationCheck = customAuthenticationProvider.authenticate(authentication);
+        MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        System.out.println(tenant.getLicensekey());
+        String notificationMessage=null;
+        LicenseData licenseData= this.licenseUpdateService.getLicenseDetails(tenant);
+        int days = Days.daysBetween( new LocalDate(), new LocalDate(licenseData.getKeyDate())).getDays();
+       
+        if(days < 7){
+        	notificationMessage="License will be exipired on "+new SimpleDateFormat("dd-MMM-yyyy").format(licenseData.getKeyDate())+". Please Update";
+        }
         Collection<String> permissions = new ArrayList<String>();
         AuthenticatedUserData authenticatedUserData = new AuthenticatedUserData(username, permissions);
       
@@ -80,7 +100,7 @@ public class AuthenticationApiResource {
              * @author rakesh
              * */
             if (req.getSession().isNew() && !username.equalsIgnoreCase("selfcare")) { 
-        	    LoginHistory loginHistory=new LoginHistory(ipAddress,null,session,new Date(),null,username,"ACTIVE");
+        	    LoginHistory loginHistory=new LoginHistory(ipAddress,null,session,DateUtils.getDateOfTenant(),null,username,"ACTIVE");
         		this.loginHistoryRepository.save(loginHistory);
         		Long loginHistoryId=loginHistory.getId();
         		req.getSession().setAttribute("lId", loginHistoryId);
@@ -97,7 +117,8 @@ public class AuthenticationApiResource {
             Long unreadMessages=this.userChatReadplatformReadService.getUnreadMessages(username);
 
             authenticatedUserData = new AuthenticatedUserData(username, roles, permissions, principal.getId(), new String(
-                    base64EncodedAuthenticationKey),unreadMessages,ipAddress,session,maxTime,(Long)req.getSession().getAttribute("lId"),principal.getRoles());
+                    base64EncodedAuthenticationKey),unreadMessages,ipAddress,session,maxTime,(Long)req.getSession().getAttribute("lId"),notificationMessage);
+
         }
 
         return this.apiJsonSerializerService.serialize(authenticatedUserData);

@@ -33,6 +33,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
@@ -159,7 +160,7 @@ public class JournalEntryWritePlatformServiceJpaRepositoryImpl implements Journa
         final LocalDate entryLocalDate = command.getTransactionDate();
         final Date transactionDate = entryLocalDate.toDateMidnight().toDate();
         // shouldn't be in the future
-        final Date todaysDate = new Date();
+        final Date todaysDate = DateUtils.getDateOfTenant();
         if (transactionDate.after(todaysDate)) { throw new JournalEntryInvalidException(GL_JOURNAL_ENTRY_INVALID_REASON.FUTURE_DATE,
                 transactionDate, null, null); }
         // shouldn't be before an accounting closure

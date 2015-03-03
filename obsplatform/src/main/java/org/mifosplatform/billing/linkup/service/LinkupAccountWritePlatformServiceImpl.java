@@ -16,6 +16,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
 import org.mifosplatform.logistics.item.domain.ItemRepository;
@@ -82,7 +83,7 @@ public class LinkupAccountWritePlatformServiceImpl implements LinkupAccountWrite
 			if(repository != null){	
 				
 				String dateFormat = "dd MMMM yyyy";
-				String activationDate = new SimpleDateFormat(dateFormat).format(new Date());
+				String activationDate = new SimpleDateFormat(dateFormat).format(DateUtils.getDateOfTenant());
 				
 				JSONObject bookDevice = new JSONObject();
 				List<ItemMaster> itemMaster = this.itemRepository.findAll();
