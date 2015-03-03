@@ -29,7 +29,7 @@ END //
 DELIMITER ;
 call paymentGatewayReprocess();
 Drop procedure IF EXISTS paymentGatewayReprocess;
-<<<<<<< HEAD
+
 
 Drop procedure IF EXISTS configurationValue; 
 DELIMITER //
@@ -52,6 +52,3 @@ INSERT IGNORE INTO m_code_value VALUES(null,@id,'CubiWare',8);
 INSERT IGNORE INTO m_code_value VALUES(null,@id,'CMS',9);
 
 
-
-=======
->>>>>>> upstream/master
