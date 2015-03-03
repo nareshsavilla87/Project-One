@@ -57,6 +57,13 @@ public class EntitlementsData {
 	
 	private String selfcareUsername;
 	private String selfcarePassword;
+	
+	private String street;
+	private String country;
+	private Long countryId;
+	private String macId;
+	private Long regionId;
+	
 
 	public EntitlementsData() {
 
@@ -149,6 +156,39 @@ public class EntitlementsData {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+	}
+
+	//cubiware
+	public EntitlementsData(Long id, Long clientId, String firstName, String lastName, 
+			String phone, String email, String city, String zip, String street, String country, Long countryId,
+			String provisioingSystem, Long serviceId, Long prdetailsId, String product, String macId, 
+			String deviceId, String requestType, Long zebraSubscriberId, Long regionId, String regionName,
+			String selfcareUsername, String selfcarePassword) {
+		
+		this.id = id;
+		this.clientId = clientId;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.phone = phone;
+		this.email = email;
+		this.city = city;
+		this.zip = zip;
+		this.street = street;
+		this.country = country;
+		this.countryId = countryId;
+		this.provisioingSystem = provisioingSystem;
+		this.serviceId = serviceId;
+		this.prdetailsId = prdetailsId;
+		this.product = product;
+		this.macId = macId;
+		this.deviceId = deviceId;
+		this.requestType = requestType;
+		this.zebraSubscriberId = zebraSubscriberId;
+		this.regionId = regionId;
+		this.regionName = regionName;
+		this.selfcareUsername = selfcareUsername;
+		this.selfcarePassword = selfcarePassword;
+		
 	}
 
 	public Long getId() {
