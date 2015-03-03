@@ -71,9 +71,13 @@ Drop procedure if exists loginHistory;
 drop procedure if exists p_int_fa ;
 DELIMITER //
 
+<<<<<<< HEAD
 
 CREATE PROCEDURE `p_int_fa`(p_todt date)
 
+=======
+create  procedure p_int_fa(p_todt date) 
+>>>>>>> upstream/master
 begin
 
 DECLARE _exists  TINYINT(1) DEFAULT 0;
@@ -81,7 +85,12 @@ DECLARE _exists  TINYINT(1) DEFAULT 0;
     SELECT COUNT(*) INTO _exists
     FROM information_schema.tables 
     WHERE table_schema =  DATABASE()
+<<<<<<< HEAD
     AND table_name =  'INT_FA';
+=======
+    AND table_name =  'int_fa';
+
+>>>>>>> upstream/master
 
 if _exists =0 then call p_int_fa0(p_todt) ;
 else 
@@ -93,36 +102,57 @@ min(activation_date) fromdt, max(activation_date) todt,count(id) records,
 'clients.csv',1 createdby_id,current_date() created_dt
 from m_client 
 where activation_date between 
+<<<<<<< HEAD
 (select max(to_dt) from INT_FA where obsTable='m_client')  and p_todt 
 and id > (select max(to_id) from INT_FA where obsTable='m_client')
+=======
+(select max(to_dt) from int_fa where obsTable='m_client')  and p_todt 
+and id > (select max(to_id) from int_fa where obsTable='m_client')
+>>>>>>> upstream/master
 union all
 select null id, current_date() int_date,'b_invoice' obsTable,
 min(id),max(id), min(invoice_date) , max(invoice_date) , count(id), 'invoices.csv',
 1 createdby_id,now() created_dt
 from b_invoice 
 where invoice_date between 
+<<<<<<< HEAD
 (select max(to_dt) from INT_FA where obsTable='b_invoice')  and p_todt 
 and id > (select max(to_id) from INT_FA where obsTable='b_invoice')
+=======
+(select max(to_dt) from int_fa where obsTable='b_invoice')  and p_todt 
+and id > (select max(to_id) from int_fa where obsTable='b_invoice')
+>>>>>>> upstream/master
 union all 
 select null id, current_date() int_date,'b_payments' obsTable,
 min(id),max(id), min(payment_date) , max(payment_date) , count(id), 'payments.csv',
 1 createdby_id,now() created_dt
 from b_payments 
 where payment_date between 
+<<<<<<< HEAD
 (select max(to_dt) from INT_FA where obsTable='b_payments')  and p_todt
 and id > (select max(to_id) from INT_FA where obsTable='b_payments')
+=======
+(select max(to_dt) from int_fa where obsTable='b_payments')  and p_todt
+and id > (select max(to_id) from int_fa where obsTable='b_payments')
+>>>>>>> upstream/master
 union all 
 select null id, current_date() int_date,'b_adjustments' obsTable,
 min(id),max(id), min(adjustment_date) , max(adjustment_date) , count(id), 'adjustments.csv',
 1 createdby_id,now() created_dt
 from b_adjustments 
 where adjustment_date between 
+<<<<<<< HEAD
 (select max(to_dt) from INT_FA where obsTable='b_adjustments')  and p_todt
  and id > (select max(to_id) from INT_FA where obsTable='b_adjustments')
+=======
+(select max(to_dt) from int_fa where obsTable='b_adjustments')  and p_todt
+ and id > (select max(to_id) from int_fa where obsTable='b_adjustments')
+>>>>>>> upstream/master
 )a
 where records >0;
 
 end if;
+<<<<<<< HEAD
 end //
 DELIMITER ;
 
@@ -185,8 +215,20 @@ SET @ID=(SELECT id FROM stretchy_report WHERE report_name='List of Transactions'
 INSERT IGNORE INTO `stretchy_report_parameter` VALUES (null, @ID, 1, 'From Date');
 INSERT IGNORE INTO `stretchy_report_parameter` VALUES (null, @ID, 2, 'To Date');
 
+=======
+end  // 
+DELIMITER ;
+
+>>>>>>> upstream/master
 
 
 
 
+<<<<<<< HEAD
 
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> upstream/master
+>>>>>>> upstream/master

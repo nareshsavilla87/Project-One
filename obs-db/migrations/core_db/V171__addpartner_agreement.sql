@@ -1,3 +1,4 @@
+
 CREATE TABLE IF NOT EXISTS `m_office_agreement` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `office_id` bigint(20) NOT NULL,
@@ -93,7 +94,10 @@ SET @id=(select id from job where name='RESELLERCOMMISSION');
 
 INSERT IGNORE INTO job_parameters VALUES(null ,@id, 'processDate', 'DATE', 'NOW()', '26 January 2015', 'Y', NULL);
 INSERT IGNORE INTO job_parameters VALUES(null, @id, 'reportName', 'COMBO', NULL, 'Reseller Commission', 'Y', NULL);
+<<<<<<< HEAD
+=======
 
 
 
+>>>>>>> upstream/master
 

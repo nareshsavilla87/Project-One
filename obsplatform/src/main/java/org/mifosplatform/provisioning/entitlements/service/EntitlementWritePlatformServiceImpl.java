@@ -19,6 +19,7 @@ import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.mifosplatform.provisioning.processrequest.service.ProcessRequestWriteplatformService;
+import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -58,13 +59,14 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 	
 	@Override
 	public CommandProcessingResult create(JsonCommand command) {
+		
 		String authPin = null;
 		String message = null;	
 		String provSystem = command.stringValueOfParameterNamed("provSystem");
 		String requestType = command.stringValueOfParameterNamed("requestType");
 		
-		if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase("Beenius") 
-				&& requestType.equalsIgnoreCase("CLIENT ACTIVATION")){
+		if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase(ProvisioningApiConstants.PROV_BEENIUS) 
+				&& requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CLIENT_ACTIVATION)){
 			
 			authPin = command.stringValueOfParameterNamed("authPin");
 			Long clientId = command.longValueOfParameterNamed("clientId");	
@@ -106,8 +108,8 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 			
 		}
 		
-		if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase("ZebraOTT") 
-				&& requestType.equalsIgnoreCase("CLIENT ACTIVATION")){
+		if(provSystem != null && requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CLIENT_ACTIVATION) &&
+				(provSystem.equalsIgnoreCase(ProvisioningApiConstants.PROV_ZEBRAOTT) || provSystem.equalsIgnoreCase(ProvisioningApiConstants.PROV_CUBIWARE)) ){
 			
 			String zebraSubscriberId = command.stringValueOfParameterNamed("zebraSubscriberId");
 			Long clientId = command.longValueOfParameterNamed("clientId");	

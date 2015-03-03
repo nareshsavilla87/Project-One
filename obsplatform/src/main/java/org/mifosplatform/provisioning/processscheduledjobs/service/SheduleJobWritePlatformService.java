@@ -31,7 +31,5 @@ public interface SheduleJobWritePlatformService {
 
 	void reProcessEventAction();
 
-
-
 	
 }

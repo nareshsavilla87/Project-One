@@ -1397,7 +1397,8 @@ public void reportStatmentPdf() {
 			e.printStackTrace();
 		}
 	}
-	
+
+	@Override
 	@CronTarget(jobName = JobName.REPROCESS)
 	public void reProcessEventAction() {
 		try {
@@ -1496,7 +1497,7 @@ public void reportStatmentPdf() {
 									eventAction.setTransDate(DateUtils.getLocalDateOfTenant().toDate());
 									eventAction.setCommandAsJson(paymentObject.toString());
 									
-								} else if (eventAction.getActionName().equalsIgnoreCase(EventActionConstants.EVENT_CREATE_ORDER)) {
+								} else if (eventAction.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_NEW)) {
 									
 									JSONObject createOrder = new JSONObject(eventAction.getCommandAsJson());
 									createOrder.remove("start_date");

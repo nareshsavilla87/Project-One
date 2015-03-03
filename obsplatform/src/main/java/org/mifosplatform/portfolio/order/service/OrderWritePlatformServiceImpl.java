@@ -438,6 +438,9 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 			  orderDetails.setStatus(StatusTypeEnum.PENDING.getValue().longValue());
 		   }else{
 			   orderDetails.setStatus(StatusTypeEnum.ACTIVE.getValue().longValue());
+			   Client client = this.clientRepository.findOne(orderDetails.getClientId());
+				client.setStatus(ClientStatus.ACTIVE.getValue());
+				this.clientRepository.saveAndFlush(client);
 			}
 		  requestStatusForProv="RENEWAL_AE";//UserActionStatusTypeEnum.ACTIVATION.toString();
 		  orderDetails.setNextBillableDay(null);

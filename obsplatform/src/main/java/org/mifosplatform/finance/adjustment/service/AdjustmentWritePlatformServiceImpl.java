@@ -18,7 +18,7 @@ import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfoRepository;
 import org.mifosplatform.organisation.partner.domain.PartnerBalanceRepository;
-import org.mifosplatform.organisation.partner.domain.PartnerControlBalance;
+import org.mifosplatform.organisation.partner.domain.OfficeControlBalance;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -133,7 +133,7 @@ public class AdjustmentWritePlatformServiceImpl implements
 	private void updatePartnerBalance(final Office office,final Adjustment adjustment) {
 
 		final String accountType = "ADJUSTMENTS";
-		PartnerControlBalance partnerControlBalance = this.partnerBalanceRepository.findOneWithPartnerAccount(office.getId(), accountType);
+		OfficeControlBalance partnerControlBalance = this.partnerBalanceRepository.findOneWithPartnerAccount(office.getId(), accountType);
 		if (partnerControlBalance != null) {
 			if(adjustment.getAdjustmentType().equalsIgnoreCase("CREDIT")){
 				partnerControlBalance.update(adjustment.getAmountPaid().negate(), office.getId());
@@ -143,9 +143,9 @@ public class AdjustmentWritePlatformServiceImpl implements
 
 		} else {
 		  if(adjustment.getAdjustmentType().equalsIgnoreCase("CREDIT")){
-			  partnerControlBalance = PartnerControlBalance.create(adjustment.getAmountPaid().negate(), accountType,office.getId());
+			  partnerControlBalance = OfficeControlBalance.create(adjustment.getAmountPaid().negate(), accountType,office.getId());
 		  }else{
-			  partnerControlBalance = PartnerControlBalance.create(adjustment.getAmountPaid(), accountType,office.getId());
+			  partnerControlBalance = OfficeControlBalance.create(adjustment.getAmountPaid(), accountType,office.getId());
 		}
 	}
 		this.partnerBalanceRepository.save(partnerControlBalance);

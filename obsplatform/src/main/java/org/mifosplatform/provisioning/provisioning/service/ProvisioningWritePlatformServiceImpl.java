@@ -320,12 +320,13 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		}
 	}
 
+    @Transactional
 	@Override
 	public CommandProcessingResult postOrderDetailsForProvisioning(final Order order,final String planName,final String requestType, 
 			final Long prepareId,final String groupname,final String serialNo,final Long orderId,final String provisioningSys,Long addonId) {
 
 
-	try {
+	//try {
 		Long commandProcessId=null;
 		String serialNumber = null;
 		HardwareAssociation hardwareAssociation = this.associationRepository.findOneByOrderId(order.getId());
@@ -374,10 +375,10 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			commandProcessId=commandProcessingResult.resourceId();
 		}
 			return new CommandProcessingResult(commandProcessId);
-		} catch (DataIntegrityViolationException dve) {
-			handleCodeDataIntegrityIssues(null, dve);
-			return new CommandProcessingResult(Long.valueOf(-1));
-		} 
+		//} catch (DataIntegrityViolationException dve) {
+		//	handleCodeDataIntegrityIssues(null, dve);
+			//return new CommandProcessingResult(Long.valueOf(-1));
+	//	} 
 
 	}
 

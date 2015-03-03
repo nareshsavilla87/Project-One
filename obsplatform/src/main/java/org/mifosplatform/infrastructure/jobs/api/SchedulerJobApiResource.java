@@ -40,8 +40,6 @@ import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.jobs.service.JobRegisterService;
 import org.mifosplatform.infrastructure.jobs.service.SchedulerJobRunnerReadService;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
-import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.message.data.BillingMessageTemplateData;
 import org.mifosplatform.organisation.message.service.BillingMesssageReadPlatformService;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
@@ -49,8 +47,6 @@ import org.mifosplatform.portfolio.plan.data.BillRuleData;
 import org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobReadPlatformService;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.ScheduleJobData;
-import org.mifosplatform.template.domain.Template;
-import org.mifosplatform.template.service.TemplateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -67,19 +63,18 @@ public class SchedulerJobApiResource {
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
     private final BillingMesssageReadPlatformService billingMesssageReadPlatformService;
-    private final MCodeReadPlatformService  mCodeReadPlatformService;
     private final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository;
     private final PlatformSecurityContext context;
     private final CodeReadPlatformService codeReadPlatformService;
-    private final TemplateService templateService;
+
     @Autowired
     public SchedulerJobApiResource(final SchedulerJobRunnerReadService schedulerJobRunnerReadService,final JobRegisterService jobRegisterService,
     		final ToApiJsonSerializer<JobDetailData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
     		final ToApiJsonSerializer<JobDetailHistoryData> jobHistoryToApiJsonSerializer,
     		final SheduleJobReadPlatformService sheduleJobReadPlatformService,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-    		final BillingMesssageReadPlatformService billingMesssageReadPlatformService,final MCodeReadPlatformService mCodeReadPlatformService,
+    		final BillingMesssageReadPlatformService billingMesssageReadPlatformService,
     		final PlatformSecurityContext context,final ScheduledJobRunHistoryRepository scheduledJobRunHistoryRepository,
-    		final CodeReadPlatformService codeReadPlatformService,final TemplateService templateService) {
+    		final CodeReadPlatformService codeReadPlatformService) {
     	
         this.schedulerJobRunnerReadService = schedulerJobRunnerReadService;
         this.jobRegisterService = jobRegisterService;
@@ -89,11 +84,9 @@ public class SchedulerJobApiResource {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.sheduleJobReadPlatformService=sheduleJobReadPlatformService;
         this.billingMesssageReadPlatformService=billingMesssageReadPlatformService;
-        this.mCodeReadPlatformService=mCodeReadPlatformService;
         this.context = context;
         this.scheduledJobRunHistoryRepository=scheduledJobRunHistoryRepository;
         this.codeReadPlatformService=codeReadPlatformService;
-        this.templateService = templateService;
     }
     
 

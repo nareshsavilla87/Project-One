@@ -117,8 +117,7 @@ public class AuthenticationApiResource {
             Long unreadMessages=this.userChatReadplatformReadService.getUnreadMessages(username);
 
             authenticatedUserData = new AuthenticatedUserData(username, roles, permissions, principal.getId(), new String(
-                    base64EncodedAuthenticationKey),unreadMessages,ipAddress,session,maxTime,(Long)req.getSession().getAttribute("lId"),notificationMessage);
-
+                    base64EncodedAuthenticationKey),unreadMessages,ipAddress,session,maxTime,(Long)req.getSession().getAttribute("lId"),principal.getRoles(),notificationMessage);
         }
 
         return this.apiJsonSerializerService.serialize(authenticatedUserData);
