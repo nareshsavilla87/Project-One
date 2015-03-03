@@ -3,12 +3,16 @@ package org.mifosplatform.provisioning.provisioning.api;
 /**......*/
 public class ProvisioningApiConstants {
 	
+	//Provisioning Systems
 	public static final String PROV_PACKETSPAN="Packetspan";
 	public static final String PROV_COMVENIENT="Comvenient";
 	public static final String PROV_STALKER="Stalker";
 	public static final String PROV_BEENIUS="Beenius";
-
-	//Request Status	
+	public static final String PROV_ZEBRAOTT="ZebraOTT";
+	public static final String PROV_CUBIWARE="CubiWare";
+	
+	
+	//Events
 	public static final String REQUEST_TERMINATE="TERMINATE";
 	public static final String REQUEST_ACTIVATION_VOD="ACTIVATION_VOD";
 	public static final String REQUEST_ACTIVATION="ACTIVATION";
