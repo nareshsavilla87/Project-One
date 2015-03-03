@@ -242,37 +242,37 @@ public class EntitlementReadPlatformServiceImpl implements
 			String regionCode = rs.getString("regionCode");
 			String regionName = rs.getString("regionName");
 			String ipAddress = rs.getString("ipAddress");
+			String userName = rs.getString("userName");
+			String password = rs.getString("userPassword");
+			String subscriberId = rs.getString("subscriberId");
 			
 			
 			return new EntitlementsData(id,prdetailsId,provisioingSystem,serviceId,product,macId,requestType,itemCode
-					,itemDescription,clientId,accountNo,firstName,lastName,officeUID,branch,regionCode,regionName,deviceId,ipAddress);
+					,itemDescription,clientId,accountNo,firstName,lastName,officeUID,branch,regionCode,regionName,deviceId,ipAddress,userName,password,subscriberId);
 		}
 
 		public String schema() {
 		
-			return " bpr.id as id, c.id as clientId, c.account_no as accountNo,c.firstname as firstName,c.lastname as lastName, " +
-					" o.external_id as officeUID,o.name as branch," +
-					" bpr.provisioing_system AS provisioingSystem,bprd.service_id AS serviceId," +
-					" bprd.id AS prdetailsId,bprd.sent_message AS sentMessage," +
-					" ifnull(bid.provisioning_serialno ,oh.provisioning_serial_number) AS macId," +
-					" ifnull(bid.serial_no ,oh.serial_number) AS deviceId," +
-					" bprd.request_type AS requestType," +
-					" bipd.ip_address as ipAddress," +
-					" bim.item_code as itemCode,bim.item_description as itemDescription," +
-					" bprm.priceregion_code as regionCode, bprm.priceregion_name as regionName" +
-					" from m_client c" +
-					" left join m_office o on (o.id = c.office_id)" +
-					" left join b_process_request bpr on (c.id = bpr.client_id )" +
-					" left join b_process_request_detail bprd on (bpr.id = bprd.processrequest_id )" +
-					" left join b_client_address bca on (c.id=bca.client_id and address_key='PRIMARY')" +
-					" left join b_state bs on (bca.state = bs.state_name )" +
-					" LEFT JOIN b_priceregion_detail bpd ON ((bpd.state_id = bs.id or bpd.state_id=0)  and bpd.country_id=bs.parent_code AND bpd.is_deleted = 'N')" +
-					" left join b_priceregion_master bprm on (bpd.priceregion_id = bprm.id ) " +
-					" left join b_ippool_details bipd on (bpr.client_id = bipd.client_id)" +
-					" left join b_item_detail bid on (bprd.hardware_id = bid.provisioning_serialno) " +
-					" left join b_item_master bim on (bid.item_master_id = bim.id) " +
-					" left join b_owned_hardware oh on (bprd.hardware_id =oh.provisioning_serial_number AND oh.is_deleted = 'N')" +
-					" WHERE bpr.is_processed = 'N'";
+			return "  bpr.id as id, c.id as clientId, c.account_no as accountNo,c.firstname as firstName,c.lastname as lastName,o.external_id as officeUID," +
+				   "  bpr.provisioing_system AS provisioingSystem,bprd.id AS prdetailsId,bprd.sent_message AS sentMessage," +
+				   "  ifnull(bid.provisioning_serialno ,oh.provisioning_serial_number) AS macId, ifnull(bid.serial_no ,oh.serial_number) AS deviceId," +
+				   "  bprd.request_type AS requestType,bipd.ip_address as ipAddress,bim.item_code as itemCode,bim.item_description as itemDescription," +
+				   "  bprm.priceregion_code as regionCode, bprm.priceregion_name as regionName, bcu.username as userName,bcu.password as userPassword," +
+				   "  bcu.zebra_subscriber_id as subscriberId " +
+				   "  from m_client c" +
+				   "  left join m_office o on (o.id = c.office_id)" +
+				   "  left join b_process_request bpr on (c.id = bpr.client_id )" +
+				   "  left join b_process_request_detail bprd on (bpr.id = bprd.processrequest_id )" +
+				   "  left join b_client_address bca on (c.id=bca.client_id and address_key='PRIMARY')" +
+				   "  left join  b_clientuser  bcu on (c.id=bcu.client_id )" +
+				   "  left join b_state bs on (bca.state = bs.state_name )" +
+				   "  LEFT JOIN b_priceregion_detail bpd ON ((bpd.state_id = bs.id or bpd.state_id=0)  and bpd.country_id=bs.parent_code AND bpd.is_deleted = 'N')" +
+				   "  left join b_priceregion_master bprm on (bpd.priceregion_id = bprm.id )" +
+				   "  left join b_ippool_details bipd on (bpr.client_id = bipd.client_id)" +
+				   "  left join b_item_detail bid on (bprd.hardware_id = bid.provisioning_serialno)" +
+				   "  left join b_item_master bim on (bid.item_master_id = bim.id)" +
+				   "  left join b_owned_hardware oh on (bprd.hardware_id =oh.provisioning_serial_number AND oh.is_deleted = 'N')" +
+				   "  WHERE bpr.is_processed = 'N'";
 		}
 
 	}

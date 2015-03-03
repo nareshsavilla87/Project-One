@@ -26,7 +26,6 @@ import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
@@ -65,23 +64,20 @@ public class OrdersApiResource {
 	  private final OrderReadPlatformService orderReadPlatformService;
 	  private final MCodeReadPlatformService mCodeReadPlatformService;
 	  private final ApiRequestParameterHelper apiRequestParameterHelper;
-	  private final ConfigurationRepository configurationRepository;
 	  private final OrderAddOnsReadPlaformService orderAddOnsReadPlaformService;
 	  private final DefaultToApiJsonSerializer<OrderData> toApiJsonSerializer;
 	  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	  
 
 	  @Autowired
-	   public OrdersApiResource(final PlatformSecurityContext context,final ConfigurationRepository configurationRepository,  
-	   final DefaultToApiJsonSerializer<OrderData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-	   final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,final OrderReadPlatformService orderReadPlatformService,
-	   final PlanReadPlatformService planReadPlatformService, final MCodeReadPlatformService mCodeReadPlatformService,
-	   final OrderAddOnsReadPlaformService orderAddOnsReadPlaformService) {
+	   public OrdersApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<OrderData> toApiJsonSerializer, 
+	   final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+	   final OrderReadPlatformService orderReadPlatformService,final PlanReadPlatformService planReadPlatformService, 
+	   final MCodeReadPlatformService mCodeReadPlatformService,final OrderAddOnsReadPlaformService orderAddOnsReadPlaformService) {
 
 		        this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
 		        this.planReadPlatformService=planReadPlatformService;
-		        this.configurationRepository=configurationRepository;
 		        this.mCodeReadPlatformService=mCodeReadPlatformService;
 		        this.orderReadPlatformService=orderReadPlatformService;
 		        this.orderAddOnsReadPlaformService=orderAddOnsReadPlaformService;

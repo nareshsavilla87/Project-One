@@ -192,6 +192,12 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 			 Order oldOrder=this.orderRepository.findOldOrderByOrderNO(order.getOrderNo());
 			 List<OrderLine> orderdetails=oldOrder.getServices();
 			 
+			 planMapping= this.planMappingRepository.findOneByPlanId(oldOrder.getPlanId());
+			 
+			 if(planMapping != null){
+				 jsonObject.put("oldPlanIdentification", planMapping.getPlanIdentification());
+			 }
+			 
 			 for(OrderLine orderLine:orderdetails){
 				 
 				 JSONObject oldsubjson = new JSONObject();

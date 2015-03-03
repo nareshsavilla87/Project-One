@@ -286,7 +286,7 @@ public class Office extends AbstractPersistable<Long> {
 
 		final String name = command.stringValueOfParameterNamed("partnerName");
 		final LocalDate openingDate = new LocalDate();
-		final String externalId = "";
+		 final String externalId = command.stringValueOfParameterNamed("externalId");
 		final Long officeType = command.longValueOfParameterNamed("officeType");
 		return new Office(parentOffice, name, openingDate, externalId,officeType);
 	}
