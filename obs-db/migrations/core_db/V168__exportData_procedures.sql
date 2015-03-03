@@ -71,7 +71,9 @@ Drop procedure if exists loginHistory;
 drop procedure if exists p_int_fa ;
 DELIMITER //
 
+
 CREATE PROCEDURE `p_int_fa`(p_todt date)
+
 begin
 
 DECLARE _exists  TINYINT(1) DEFAULT 0;
@@ -80,6 +82,7 @@ DECLARE _exists  TINYINT(1) DEFAULT 0;
     FROM information_schema.tables 
     WHERE table_schema =  DATABASE()
     AND table_name =  'INT_FA';
+
 
 
 if _exists =0 then call p_int_fa0(p_todt) ;
@@ -92,36 +95,45 @@ min(activation_date) fromdt, max(activation_date) todt,count(id) records,
 'clients.csv',1 createdby_id,current_date() created_dt
 from m_client 
 where activation_date between 
+
 (select max(to_dt) from INT_FA where obsTable='m_client')  and p_todt 
 and id > (select max(to_id) from INT_FA where obsTable='m_client')
+
 union all
 select null id, current_date() int_date,'b_invoice' obsTable,
 min(id),max(id), min(invoice_date) , max(invoice_date) , count(id), 'invoices.csv',
 1 createdby_id,now() created_dt
 from b_invoice 
 where invoice_date between 
+
 (select max(to_dt) from INT_FA where obsTable='b_invoice')  and p_todt 
 and id > (select max(to_id) from INT_FA where obsTable='b_invoice')
+
 union all 
 select null id, current_date() int_date,'b_payments' obsTable,
 min(id),max(id), min(payment_date) , max(payment_date) , count(id), 'payments.csv',
 1 createdby_id,now() created_dt
 from b_payments 
 where payment_date between 
+
 (select max(to_dt) from INT_FA where obsTable='b_payments')  and p_todt
 and id > (select max(to_id) from INT_FA where obsTable='b_payments')
+
 union all 
 select null id, current_date() int_date,'b_adjustments' obsTable,
 min(id),max(id), min(adjustment_date) , max(adjustment_date) , count(id), 'adjustments.csv',
 1 createdby_id,now() created_dt
 from b_adjustments 
 where adjustment_date between 
+
 (select max(to_dt) from INT_FA where obsTable='b_adjustments')  and p_todt
  and id > (select max(to_id) from INT_FA where obsTable='b_adjustments')
+
 )a
 where records >0;
 
 end if;
+
 end //
 DELIMITER ;
 

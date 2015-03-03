@@ -104,7 +104,7 @@ public class AddonsApiResource {
 
 	private AddonsData handleTemplateDate(AddonsData addonsData) {
 		
-		List<PlanCodeData> planDatas = this.orderReadPlatformService.retrieveAllPlatformData(Long.valueOf(0));
+		List<PlanCodeData> planDatas = this.orderReadPlatformService.retrieveAllPlatformData(Long.valueOf(0),null);
 		List<ChargeCodeData> chargeCodeDatas = this.chargeCodeReadPlatformService.retrieveAllChargeCodes();
 		List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
 		final List<ServiceMappingData> servicedatas = this.serviceMappingReadPlatformService.retrieveOptionalServices("Y");

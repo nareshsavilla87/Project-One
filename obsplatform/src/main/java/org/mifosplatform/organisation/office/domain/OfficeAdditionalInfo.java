@@ -110,6 +110,8 @@ public class OfficeAdditionalInfo extends AbstractPersistable<Long> {
 			actualChanges.put(contactNameParamName, newValue);
 			this.contactName = StringUtils.defaultIfEmpty(newValue,null);
 		}
+		
+		
 
 		final char isCollectiveParamName = command.booleanPrimitiveValueOfParameterNamed("isCollective")?'Y':'N';
 		

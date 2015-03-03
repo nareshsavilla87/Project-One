@@ -362,7 +362,7 @@ try{
     		}else{
     			orderStatus = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId();
     		}
-			if(configurationProperty.isEnabled()){
+			if(configurationProperty.isEnabled() && plan.isPrepaid() == 'N'){
 				if(plan.getBillRule() != 400 && plan.getBillRule() != 300){ 
 					this.reverseInvoice.reverseInvoiceServices(orderId, order.getClientId(), disconnectionDate);
 				}

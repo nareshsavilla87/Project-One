@@ -267,9 +267,7 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService {
 		private final PriceReadPlatformServiceImpl priceReadPlatformServiceImp;
 		private final String region;
 
-		public PlanAndPricingMapper(
-				PriceReadPlatformServiceImpl priceReadPlatformServiceImpl,
-				String region) {
+		public PlanAndPricingMapper(PriceReadPlatformServiceImpl priceReadPlatformServiceImpl,String region) {
 			this.priceReadPlatformServiceImp = priceReadPlatformServiceImpl;
 			this.region = region;
 
@@ -283,8 +281,7 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService {
 			Long planId = rs.getLong("planId");
 			String planCode = rs.getString("planCode");
 			String isPrepaid = rs.getString("isPrepaid");
-			List<ServiceData> pricingData = this.priceReadPlatformServiceImp
-					.retrievePriceDetails(planId, region);
+			List<ServiceData> pricingData = this.priceReadPlatformServiceImp.retrievePriceDetails(planId, region);
 
 			return new PricingData(planId, planCode, isPrepaid, pricingData);
 		}

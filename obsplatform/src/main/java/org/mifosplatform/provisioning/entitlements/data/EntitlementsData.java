@@ -54,7 +54,7 @@ public class EntitlementsData {
 	private String displayName;
 	private String login;
 	private String password;
-	
+	private String subscriberId;
 	private String selfcareUsername;
 	private String selfcarePassword;
 	
@@ -72,7 +72,8 @@ public class EntitlementsData {
 	//Beenius
 	public EntitlementsData(Long id, Long prdetailsId,String provisioingSystem, Long serviceId, String product,String hardwareId, 
 			String requestType, String itemCode,String itemDescription, Long clientId, String accountNo,String firstName, String lastName,
-			String officeUId, String branch,String regionCode, String regionName, String deviceId,String ipAddress) {
+			String officeUId, String branch,String regionCode, String regionName, String deviceId,String ipAddress, String userName,
+			 String selfcarePassword, String subscriberId) {
 
 		this.id = id;
 		this.prdetailsId = prdetailsId;
@@ -85,7 +86,9 @@ public class EntitlementsData {
 		this.itemDescription = itemDescription;
 		this.clientId = clientId;
 		this.accountNo = accountNo;
-
+        this.selfcarePassword = selfcarePassword;
+        this.selfcareUsername = userName;
+        this.subscriberId = subscriberId;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.officeUId = officeUId;

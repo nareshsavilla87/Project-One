@@ -597,6 +597,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 
 	@Override
 	public CommandProcessingResult postDetailsForProvisioning(Long clientId, String requestType,String provisioningSystem,String hardwareId) {
+		
 		Long defaultValue=Long.valueOf(0);
 		ProcessRequest processRequest=new ProcessRequest(defaultValue,clientId,defaultValue, provisioningSystem, requestType,'N','N');
 		 ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(defaultValue,defaultValue,"None","Recieved",
