@@ -18,6 +18,8 @@ import org.apache.commons.lang.time.StopWatch;
 import org.mifosplatform.infrastructure.cache.domain.CacheType;
 import org.mifosplatform.infrastructure.cache.service.CacheWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
+import org.mifosplatform.infrastructure.configuration.exception.InvalidLicenseKeyException;
+import org.mifosplatform.infrastructure.configuration.service.LicenseUpdateService;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
@@ -74,19 +76,22 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
     private ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
     private final ConfigurationDomainService configurationDomainService;
     private final CacheWritePlatformService cacheWritePlatformService;
+    private final LicenseUpdateService licenseUpdateService; 
     private String tenantRequestHeader = "X-Obs-Platform-TenantId";
     private boolean exceptionIfHeaderMissing = true;
 
     @Autowired
     public TenantAwareBasicAuthenticationFilter(final AuthenticationManager authenticationManager,final AuthenticationEntryPoint authenticationEntryPoint,
     		final ConfigurationDomainService configurationDomainService,final CacheWritePlatformService cacheWritePlatformService,
-    		final TenantDetailsService tenantDetailsService,final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer) {
+    		final TenantDetailsService tenantDetailsService,final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer,
+    		final LicenseUpdateService licenseUpdateService) {
     	
         super(authenticationManager, authenticationEntryPoint);
         this.configurationDomainService=configurationDomainService;
         this.cacheWritePlatformService=cacheWritePlatformService;
         this.tenantDetailsService=tenantDetailsService;
         this.toApiJsonSerializer=toApiJsonSerializer;
+        this.licenseUpdateService=licenseUpdateService;
     }
 
     @Override
@@ -110,7 +115,12 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
            	    String username= request.getParameter("username");
                 String password= request.getParameter("password");
                 
-                final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");             	
+                final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");
+                
+	             boolean isValid =  this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
+	        	 if(!isValid){
+	        		 throw new InvalidLicenseKeyException("License key Exipired.");
+	        	 }
 	             ThreadLocalContextUtil.setTenant(tenant);
                 
                 if(!(org.apache.commons.lang.StringUtils.isBlank(username) || org.apache.commons.lang.StringUtils.isBlank(password))){
@@ -132,13 +142,31 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 
            }else if(path.contains("/api/v1/entitlements/get") && request.getMethod().equalsIgnoreCase("GET")){
            	
-               final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");             	
+               final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");    
+               
+	             boolean isValid =  this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
+	        	 if(!isValid){
+	        		 throw new InvalidLicenseKeyException("License key Exipired.");
+	        	 }
 	             ThreadLocalContextUtil.setTenant(tenant);
 	             super.doFilter(req, res, chain);
                
-          }else {
+          }else if(path.contains("/api/v1/licensekey")){
+        	  
+        	  final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");    
+        	  
+        	  this.licenseUpdateService.updateLicenseKey(req,tenant);
+        	//  response.sendError(HttpServletResponse.SC_BAD_REQUEST,"send Error");
+        	 
+             	
+            /*  final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");             	
+	             ThreadLocalContextUtil.setTenant(tenant);
+	             super.doFilter(req, res, chain);*/
+              
+         }else {
 
                String tenantId = request.getHeader(tenantRequestHeader);
+             
                if (org.apache.commons.lang.StringUtils.isBlank(tenantId)) {
                    tenantId = request.getParameter("tenantIdentifier");
                }
@@ -150,7 +178,14 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                // check tenants database for tenantId
                final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantId);
 	             ThreadLocalContextUtil.setTenant(tenant);
-               if (!firstRequestProcessed) {
+	            
+	             
+	             boolean isValid =  this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
+	        	 if(!isValid){
+	        		 throw new InvalidLicenseKeyException("License key Exipired.");
+	        	 }
+               
+	             if (!firstRequestProcessed) {
                    final boolean ehcacheEnabled = this.configurationDomainService.isEhcacheEnabled();
                    if (ehcacheEnabled) {
                        this.cacheWritePlatformService.switchToCache(CacheType.SINGLE_NODE);
@@ -166,7 +201,6 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                //ashok changed
            }
             
-               //     response.addHeader("Authorization", "YmlsbGluZzpwYXNzd29yZA==");
             //super.doFilter(req, res, chain); //active this line
         } catch (InvalidTenantIdentiferException e) {
             // deal with exception at low level
