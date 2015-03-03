@@ -29,3 +29,26 @@ END //
 DELIMITER ;
 call paymentGatewayReprocess();
 Drop procedure IF EXISTS paymentGatewayReprocess;
+
+
+Drop procedure IF EXISTS configurationValue; 
+DELIMITER //
+create procedure configurationValue() 
+Begin
+  IF EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'value'
+     and TABLE_NAME = 'c_configuration'
+     and TABLE_SCHEMA = DATABASE())THEN
+ALTER TABLE c_configuration change COLUMN `value` `value` LONGTEXT  CHARACTER SET utf8 DEFAULT NULL;
+END IF;
+END //
+DELIMITER ;
+call configurationValue();
+Drop procedure IF EXISTS configurationValue;
+
+SET @id = (select id from m_code where code_name='Provisioning');
+INSERT IGNORE INTO m_code_value VALUES(null,@id,'CubiWare',8);
+INSERT IGNORE INTO m_code_value VALUES(null,@id,'CMS',9);
+
+

@@ -1397,8 +1397,6 @@ public void reportStatmentPdf() {
 			e.printStackTrace();
 		}
 	}
-	
-
 
 	@Override
 	@CronTarget(jobName = JobName.REPROCESS)
@@ -1565,7 +1563,6 @@ public void reportStatmentPdf() {
 			System.out.println(exception.getMessage());	
 		}
 	}
-
 
 }
 

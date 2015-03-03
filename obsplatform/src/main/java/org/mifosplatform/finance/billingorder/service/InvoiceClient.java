@@ -67,6 +67,7 @@ public class InvoiceClient {
 	         }else{
 			throw new BillingOrderNoRecordsFoundException();
 		}
+
 	}
 	
 	public GenerateInvoiceData invoiceServices(BillingOrderData billingOrderData,Long clientId,LocalDate processDate){
@@ -94,7 +95,6 @@ public class InvoiceClient {
 		return new GenerateInvoiceData(clientId,billingOrderCommands.get(0).getNextBillableDate(),invoice.getInvoiceAmount(),invoice);
 
 	}
-
 
 	public CommandProcessingResult createInvoiceBill(JsonCommand command) {
 		try {
