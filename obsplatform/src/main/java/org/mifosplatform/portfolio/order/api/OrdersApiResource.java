@@ -75,6 +75,7 @@ public class OrdersApiResource {
 	   final OrderReadPlatformService orderReadPlatformService,final PlanReadPlatformService planReadPlatformService, 
 	   final MCodeReadPlatformService mCodeReadPlatformService,final OrderAddOnsReadPlaformService orderAddOnsReadPlaformService) {
 
+
 		        this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
 		        this.planReadPlatformService=planReadPlatformService;
@@ -100,15 +101,15 @@ public class OrdersApiResource {
 	@Path("template")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveOrderTemplate(@QueryParam("planId")Long planId,@Context final UriInfo uriInfo) {
+	public String retrieveOrderTemplate(@QueryParam("planId")Long planId,@QueryParam("clientId")Long clientId,@Context final UriInfo uriInfo) {
 	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-	OrderData orderData = handleTemplateRelatedData(planId);
+	OrderData orderData = handleTemplateRelatedData(planId,clientId);
 	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
     return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
 	}
 	
-	private OrderData handleTemplateRelatedData(Long planId) {
-		List<PlanCodeData> planDatas = this.orderReadPlatformService.retrieveAllPlatformData(planId);
+	private OrderData handleTemplateRelatedData(Long planId, Long clientId) {
+		List<PlanCodeData> planDatas = this.orderReadPlatformService.retrieveAllPlatformData(planId,clientId);
 		List<PaytermData> data=new ArrayList<PaytermData>();
 		List<SubscriptionData> contractPeriod=this.planReadPlatformService.retrieveSubscriptionData(null,null);
 		return new OrderData(planDatas,data,contractPeriod,null);
@@ -120,7 +121,7 @@ public class OrdersApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String getBillingFrequency(@PathParam("planCode") final Long planCode,@Context final UriInfo uriInfo) {
 	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-	OrderData orderData = handleTemplateRelatedData(new Long(0));
+	OrderData orderData = handleTemplateRelatedData(new Long(0),null);
 	List<PaytermData> datas  = this.orderReadPlatformService.getChargeCodes(planCode);
 	if(datas.size()==0){
 		throw new BillingOrderNoRecordsFoundException(planCode);

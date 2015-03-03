@@ -125,11 +125,3 @@ end if;
 end  // 
 DELIMITER ;
 
-
-
-
-
-<<<<<<< HEAD
-
-=======
->>>>>>> upstream/master
