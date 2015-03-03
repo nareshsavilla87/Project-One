@@ -41,7 +41,8 @@ public class AuthenticatedUserData {
     private final Long loginHistoryId;
     @SuppressWarnings("unused")
 	private Set<Role> userRole;
-    private final String notificationMessage;
+    @SuppressWarnings("unused")
+	private final String notificationMessage;
 
     public AuthenticatedUserData(final String username, final Collection<String> permissions) {
         this.username = username;
@@ -75,5 +76,6 @@ public class AuthenticatedUserData {
         this.loginHistoryId=loginHistoryId;
         this.userRole =userRole;
         this.notificationMessage = notificationMessage;
+
     }
 }
