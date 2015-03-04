@@ -64,6 +64,11 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		String message = null;	
 		String provSystem = command.stringValueOfParameterNamed("provSystem");
 		String requestType = command.stringValueOfParameterNamed("requestType");
+		String zebraSubscriberId = null;
+		
+		if(command.hasParameter("zebraSubscriberId")){
+			zebraSubscriberId = command.stringValueOfParameterNamed("zebraSubscriberId");
+		}
 		
 		if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase(ProvisioningApiConstants.PROV_BEENIUS) 
 				&& requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CLIENT_ACTIVATION)){
@@ -108,10 +113,9 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 			
 		}
 		
-		if(provSystem != null && requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CLIENT_ACTIVATION) &&
-				(provSystem.equalsIgnoreCase(ProvisioningApiConstants.PROV_ZEBRAOTT) || provSystem.equalsIgnoreCase(ProvisioningApiConstants.PROV_CUBIWARE)) ){
+		if(zebraSubscriberId != null && requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CLIENT_ACTIVATION) &&
+				(!zebraSubscriberId.isEmpty())){
 			
-			String zebraSubscriberId = command.stringValueOfParameterNamed("zebraSubscriberId");
 			Long clientId = command.longValueOfParameterNamed("clientId");	
 			
 			if(clientId !=null && zebraSubscriberId !=null && zebraSubscriberId.length()>0 && clientId>0){
