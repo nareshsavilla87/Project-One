@@ -30,6 +30,9 @@ import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundExcepti
 import org.mifosplatform.organisation.ippool.domain.IpPoolManagementDetail;
 import org.mifosplatform.organisation.ippool.domain.IpPoolManagementJpaRepository;
 import org.mifosplatform.organisation.ippool.exception.IpNotAvailableException;
+import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
+import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
 import org.mifosplatform.portfolio.association.exception.PairingNotExistException;
 import org.mifosplatform.portfolio.order.domain.HardwareAssociationRepository;
@@ -82,6 +85,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	private final IpPoolManagementJpaRepository ipPoolManagementJpaRepository;
 	private final ProvisionHelper provisionHelper;
 	private final PlanRepository planRepository;
+	private final OfficeRepository officeRepository;
 	private final PrepareRequestReadplatformService prepareRequestReadplatformService;
 	private final ItemDetailsRepository inventoryItemDetailsRepository;
 	private final ProvisioningCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -94,7 +98,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			final OrderReadPlatformService orderReadPlatformService,final ProvisioningCommandRepository provisioningCommandRepository,
 			final ServiceParametersRepository parametersRepository,final ProcessRequestRepository processRequestRepository,
 			final OrderRepository orderRepository,final FromJsonHelper fromJsonHelper,final HardwareAssociationRepository associationRepository,
-			final ServiceMasterRepository serviceMasterRepository,final ProvisionHelper provisionHelper,
+			final ServiceMasterRepository serviceMasterRepository,final ProvisionHelper provisionHelper,final OfficeRepository officeRepository,
 			final ProcessRequestReadplatformService processRequestReadplatformService,final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,
 			final ProcessRequestWriteplatformService processRequestWriteplatformService,final PlanRepository planRepository,
 			final PrepareRequestReadplatformService prepareRequestReadplatformService) {
@@ -111,6 +115,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		this.serviceParametersRepository = parametersRepository;
 		this.processRequestRepository = processRequestRepository;
 		this.prepareRequestReadplatformService=prepareRequestReadplatformService;
+		this.officeRepository = officeRepository;
 		this.orderReadPlatformService = orderReadPlatformService;
 		this.provisioningCommandRepository = provisioningCommandRepository;
 		this.ipPoolManagementJpaRepository = ipPoolManagementJpaRepository;
@@ -320,7 +325,6 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		}
 	}
 
-   
 	@Override
 	public CommandProcessingResult postOrderDetailsForProvisioning(final Order order,final String planName,final String requestType, 
 			final Long prepareId,final String groupname,final String serialNo,final Long orderId,final String provisioningSys,Long addonId) {
@@ -596,11 +600,22 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	}
 
 	@Override
-	public CommandProcessingResult postDetailsForProvisioning(Long clientId, String requestType,String provisioningSystem,String hardwareId) {
+	public CommandProcessingResult postDetailsForProvisioning(Long clientId,Long resourceId, String requestType,String provisioningSystem,String hardwareId) {
 		
 		Long defaultValue=Long.valueOf(0);
-		ProcessRequest processRequest=new ProcessRequest(defaultValue,clientId,defaultValue, provisioningSystem, requestType,'N','N');
-		 ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(defaultValue,defaultValue,"None","Recieved",
+		String desc = null;
+		if(requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CREATE_AGENT)){
+			Office office=this.officeRepository.findOne(resourceId);
+			if(office !=null){
+				  OfficeAdditionalInfo additionalInfo=office.getOfficeAdditionalInfo();
+				       if(additionalInfo != null){
+				    	    desc = additionalInfo.getContactName();
+				       }
+			}
+		}
+		
+		ProcessRequest processRequest=new ProcessRequest(defaultValue,clientId,resourceId, provisioningSystem, requestType,'N','N');
+		 ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(defaultValue,defaultValue,desc,"Recieved",
 				 hardwareId,DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),null,null,'N',requestType,null);
 		 processRequest.add(processRequestDetails);
 		 this.processRequestRepository.save(processRequest);

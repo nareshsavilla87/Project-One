@@ -296,6 +296,31 @@ public class Office extends AbstractPersistable<Long> {
 		return officeAddress;
 	}
 
+	
+	public void setParent(Office parent) {
+		this.parent = parent;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setHierarchy(String hierarchy) {
+		this.hierarchy = hierarchy;
+	}
+
+	public void setOpeningDate(Date openingDate) {
+		this.openingDate = openingDate;
+	}
+
+	public void setOfficeType(Long officeType) {
+		this.officeType = officeType;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
+	}
+
 	public void setOfficeAddress(OfficeAddress officeAddress) {
 		this.officeAddress = officeAddress;
 	}

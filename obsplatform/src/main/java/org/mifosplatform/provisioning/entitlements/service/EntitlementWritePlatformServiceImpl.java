@@ -12,6 +12,8 @@ import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
@@ -33,20 +35,18 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 	private final SelfCareRepository selfCareRepository;
 	private final BillingMessageTemplateRepository billingMessageTemplateRepository;
 	private final BillingMessageRepository messageDataRepository;
-	
+	private final OfficeRepository officeRepository;
 
 	@Autowired
-	public EntitlementWritePlatformServiceImpl(
-			final ProcessRequestWriteplatformService processRequestWriteplatformService,
-			final ProcessRequestRepository entitlementRepository, 
-			final ClientRepository clientRepository,
-			final SelfCareRepository selfCareRepository,
-			final BillingMessageTemplateRepository billingMessageTemplateRepository,
-			final BillingMessageRepository messageDataRepository) {
+	public EntitlementWritePlatformServiceImpl(final ProcessRequestWriteplatformService processRequestWriteplatformService,
+			final ProcessRequestRepository entitlementRepository, final ClientRepository clientRepository,
+			final SelfCareRepository selfCareRepository,final BillingMessageTemplateRepository billingMessageTemplateRepository,
+			final BillingMessageRepository messageDataRepository,final OfficeRepository officeRepository) {
 
 		this.processRequestWriteplatformService = processRequestWriteplatformService;
 		this.entitlementRepository = entitlementRepository;
 		this.clientRepository = clientRepository;
+		this.officeRepository = officeRepository;
 		this.selfCareRepository = selfCareRepository;
 		this.billingMessageTemplateRepository = billingMessageTemplateRepository;
 		this.messageDataRepository = messageDataRepository;
@@ -64,6 +64,7 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		String message = null;	
 		String provSystem = command.stringValueOfParameterNamed("provSystem");
 		String requestType = command.stringValueOfParameterNamed("requestType");
+		String  agentResourceId = command.stringValueOfParameterNamed("agentResourceId");	
 		String zebraSubscriberId = null;
 		
 		if(command.hasParameter("zebraSubscriberId")){
@@ -139,6 +140,18 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		}
 		
 		ProcessRequest processRequest = this.entitlementRepository.findOne(command.entityId());
+		if(requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CREATE_AGENT)){
+			
+			if(agentResourceId !=null ){
+				
+				Office office = this.officeRepository.findOne(processRequest.getOrderId());
+				office.setExternalId(agentResourceId);
+				this.officeRepository.saveAndFlush(office);
+			}
+			
+		}
+		
+		
 		String receiveMessage = command.stringValueOfParameterNamed("receiveMessage");
 		char status;
 		if (receiveMessage.contains("failure :")) {
