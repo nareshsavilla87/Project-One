@@ -52,12 +52,15 @@ private static byte[] keyValue=new String("hugoadminhugoadm").getBytes();
     // performs encryption & decryption 
     public static void main(String[] args) throws Exception 
     {
+    	
+    	String s="kiran";
+		System.out.println(s.substring(50));
 
-            String plainText = "Default Demo Tenant=4-12-2015";
+           /* String plainText = "Default Demo Tenant=4-12-2015";
             String encryptedText = AESDemo.encrypt(plainText);
             System.out.println(encryptedText);
            // String decordedValue1 = String.format("%040x", encryptedText.getBytes());//new String(Base64.decodeBase64(encryptedText));
-            String  decordedValue1 =  String.format("%040x", new BigInteger(1, encryptedText.getBytes(/*YOUR_CHARSET?*/)));
+            String  decordedValue1 =  String.format("%040x", new BigInteger(1, encryptedText.getBytes(YOUR_CHARSET?)));
             String decryptedText = AESDemo.decrypt(encryptedText);
 
             System.out.println("Plain Text : " + plainText);
@@ -69,7 +72,7 @@ private static byte[] keyValue=new String("hugoadminhugoadm").getBytes();
             
             Date date=dateFormat.parse(strings[1]);
             System.out.println(Days.daysBetween( new LocalDate(), new LocalDate(date)).getDays());
-            System.out.println(date.after(new Date()));
+            System.out.println(date.after(new Date()));*/
     }
 }
 

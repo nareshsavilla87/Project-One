@@ -25,6 +25,7 @@ public class ProvisioningApiConstants {
 	public static final String REQUEST_SUSPENTATION ="SUSPENTATION";
 	public static final String REQUEST_ADDON_ACTIVATION="ADDON_ACTIVATION";
 	public static final String REQUEST_CLIENT_ACTIVATION="CLIENT ACTIVATION";
+	public static final String REQUEST_CREATE_AGENT="CREATE AGENT";
 	public static final String REQUEST_RELEASE_DEVICE="RELEASE DEVICE";
 	
 	//Json Data
@@ -54,6 +55,7 @@ public class ProvisioningApiConstants {
 	
 	//Provisioning Actions
 	public static final String PROV_EVENT_CREATE_CLIENT="Create Client";
+	public static final String PROV_EVENT_CREATE_AGENT="Create Agent";
 	public static final String PROV_EVENT_CLOSE_CLIENT="Close Client";
 	public static final String PROV_EVENT_RELEASE_DEVICE="Release Device";
 
