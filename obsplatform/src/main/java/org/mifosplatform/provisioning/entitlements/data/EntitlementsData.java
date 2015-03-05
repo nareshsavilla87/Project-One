@@ -64,16 +64,17 @@ public class EntitlementsData {
 	private String macId;
 	private Long regionId;
 	
-
-	public EntitlementsData() {
-
+	
+	public EntitlementsData(){
+		
 	}
+	
 	
 	//Beenius
 	public EntitlementsData(Long id, Long prdetailsId,String provisioingSystem, Long serviceId, String product,String hardwareId, 
 			String requestType, String itemCode,String itemDescription, Long clientId, String accountNo,String firstName, String lastName,
 			String officeUId, String branch,String regionCode, String regionName, String deviceId,String ipAddress, String userName,
-			 String selfcarePassword, String subscriberId) {
+			 String selfcarePassword, Long subscriberId,Long orderId,LocalDate startDate,LocalDate endDate) {
 
 		this.id = id;
 		this.prdetailsId = prdetailsId;
@@ -86,9 +87,9 @@ public class EntitlementsData {
 		this.itemDescription = itemDescription;
 		this.clientId = clientId;
 		this.accountNo = accountNo;
-        this.selfcarePassword = selfcarePassword;
-        this.selfcareUsername = userName;
-        this.subscriberId = subscriberId;
+        this.selfcarePassword=selfcarePassword;
+        this.selfcareUsername=userName;
+        this.zebraSubscriberId = subscriberId;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.officeUId = officeUId;
@@ -97,6 +98,9 @@ public class EntitlementsData {
 		this.regionName = regionName;
 		this.deviceId = deviceId;
 		this.ipAddress = ipAddress;
+		this.orderId =orderId;
+		this.startDate = startDate;
+		this.endDate = endDate;
 
 	}
 
@@ -154,8 +158,8 @@ public class EntitlementsData {
 		this.displayName = displayName;
 		this.login = login;
 		this.password = password;
-		this.selfcareUsername = userName;
-		this.selfcarePassword = userPassword;
+		this.selfcareUsername=userName;
+		this.selfcarePassword=userPassword;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
@@ -365,6 +369,13 @@ public class EntitlementsData {
 	public String getPassword() {
 		return password;
 	}
-	
-	
+
+	public String getSelfcareUsername() {
+		return selfcareUsername;
+	}
+
+	public String getSelfcarePassword() {
+		return selfcarePassword;
+	}
+
 }

@@ -1339,7 +1339,7 @@ public void reportStatmentPdf() {
 					if(output.isEmpty()){
 						fw.append("Exporting data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}else{
-						fw.append("No of records inserted :" + output.values());
+						fw.append("No of records inserted :" + output.values() +"\r\n");
 						fw.append("Exporting data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}
 				fw.flush();
@@ -1382,7 +1382,7 @@ public void reportStatmentPdf() {
 				if (output.isEmpty()) {
 					fw.append("Reseller commission process failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 				} else {
-					fw.append("No of records inserted :" +output.values());
+					fw.append("No of records inserted :" +output.values() + "\r\n");
 					fw.append("Reseller commission processed successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 				}
 				fw.flush();
