@@ -366,7 +366,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
         	   ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_RELEASE_DEVICE);
                if(provisionActions != null && provisionActions.isEnable() == 'Y'){
    				
-   				this.provisioningWritePlatformService.postDetailsForProvisioning(clientId,ProvisioningApiConstants.REQUEST_RELEASE_DEVICE,
+   				this.provisioningWritePlatformService.postDetailsForProvisioning(clientId,Long.valueOf(0),ProvisioningApiConstants.REQUEST_RELEASE_DEVICE,
    						               provisionActions.getProvisioningSystem(),serialNo);
    			}       	   
         	   return new CommandProcessingResult(command.entityId(),clientId);
