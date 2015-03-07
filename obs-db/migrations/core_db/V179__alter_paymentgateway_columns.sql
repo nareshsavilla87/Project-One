@@ -30,7 +30,6 @@ DELIMITER ;
 call paymentGatewayReprocess();
 Drop procedure IF EXISTS paymentGatewayReprocess;
 
-
 Drop procedure IF EXISTS configurationValue; 
 DELIMITER //
 create procedure configurationValue() 
