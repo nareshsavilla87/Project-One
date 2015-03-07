@@ -1376,7 +1376,9 @@ public void reportStatmentPdf() {
 
 				// procedure calling
 				SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(this.jdbcTemplate);
-				//String sql="SHOW PROCEDURE STATUS LIKE 'proc_office_commission'";
+				String sql="SELECT count(*) FROM Information_schema.Routines WHERE Routine_schema ='"+tenant.getSchemaName()+"'AND specific_name = 'proc_office_commission' AND Routine_Type = 'PROCEDURE'";
+				String procdeureStatus=simpleJdbcCall.getJdbcTemplate().queryForObject(sql, String.class);
+				if(Integer.valueOf(procdeureStatus)>=1){
 				simpleJdbcCall.setProcedureName("proc_office_commission");
 				Map<String, Object> output = simpleJdbcCall.execute();
 				if (output.isEmpty()) {
@@ -1385,9 +1387,15 @@ public void reportStatmentPdf() {
 					fw.append("No of records inserted :" +output.values() + "\r\n");
 					fw.append("Reseller commission processed successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 				}
-				fw.flush();
-				fw.close();
-				System.out.println("Reseller commission processed successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+				   fw.flush();
+				   fw.close();
+				   System.out.println("Reseller commission processed successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+				}else{
+					fw.append("Procedure with name 'proc_office_commission' not exists....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+					fw.flush();
+					fw.close();	
+					System.out.println("Reseller commission processed failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+				}
 			}
 		} catch (DataIntegrityViolationException e) {
 			System.out.println(e.getMessage());
@@ -1397,7 +1405,57 @@ public void reportStatmentPdf() {
 			e.printStackTrace();
 		}
 	}
+	
+	@Override
+	@CronTarget(jobName = JobName.AGING_DISTRIBUTION)
+	public void processAgingDistribution() {
 
+		try {
+			System.out.println("Processing aging distribution data....");
+			//JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.EXPORT_DATA.toString());
+			///if (data != null) {
+			MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+			LocalTime date = new LocalTime(zone);
+			String dateTime = date.getHourOfDay() + "_"+ date.getMinuteOfHour() + "_"+ date.getSecondOfMinute();
+			String path = FileUtils.generateLogFileDirectory()+ JobName.AGING_DISTRIBUTION.toString() + File.separator	+ "Distribution"+ new LocalDate().toString().replace("-", "") + "_"+ dateTime + ".log";
+			File fileHandler = new File(path.trim());
+			fileHandler.createNewFile();
+			FileWriter fw = new FileWriter(fileHandler);
+			FileUtils.BILLING_JOB_PATH = fileHandler.getAbsolutePath();
+			fw.append("Processing aging distribution data....\r\n");
+			    
+			//procedure calling
+			SimpleJdbcCall simpleJdbcCall=new SimpleJdbcCall(this.jdbcTemplate);
+			String sql="SELECT count(*) FROM Information_schema.Routines WHERE Routine_schema ='"+tenant.getSchemaName()+"'AND specific_name = 'proc_distrib' AND Routine_Type = 'PROCEDURE'";
+			String procdeureStatus=simpleJdbcCall.getJdbcTemplate().queryForObject(sql, String.class);
+			 if(Integer.valueOf(procdeureStatus)>=1){
+				simpleJdbcCall.setProcedureName("proc_distrib");
+				Map<String, Object> output = simpleJdbcCall.execute();
+				if(output.isEmpty()){
+					fw.append("Distribution data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+				}else{
+					fw.append("No of records inserted :" + output.values() + "\r\n");
+					fw.append("Distribution data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+				}
+				    fw.flush();
+				    fw.close();
+				    System.out.println("Distribution data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+				} else{
+					fw.append("Procedure with name 'proc_distrib' not exists....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+					fw.flush();
+				    fw.close();
+				    System.out.println("Distribution data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+			}
+		} catch (DataIntegrityViolationException e) {
+			System.out.println(e.getMessage());
+			    e.printStackTrace();
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			    e.printStackTrace();
+		}
+	}
+	
 	@Override
 	@CronTarget(jobName = JobName.REPROCESS)
 	public void reProcessEventAction() {

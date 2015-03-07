@@ -44,6 +44,7 @@ public class ClientApiConstants {
     public static final String groupParamName = "groupId";
     public static final String entryTypeParamName = "entryType";
     public static final String deviceParamName = "device";
+    public static final String userNameParamName = "userName";
    
     // response parameters
     public static final String statusParamName = "status";
@@ -74,7 +75,7 @@ public class ClientApiConstants {
     public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, accountNoParamName, externalIdParamName, firstnameParamName, middlenameParamName,clientCategoryParamName,
             lastnameParamName, fullnameParamName, activeParamName, activationDateParamName,clientCategoryParamName,phoneParamName,homePhoneNumberParamName,
-            emailParamName,officeIdParamName,groupParamName,entryTypeParamName));
+            emailParamName,officeIdParamName,groupParamName,entryTypeParamName,userNameParamName,passwordParamName));
     
     public static final Set<String> CLIENT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, closureDateParamName, closureReasonIdParamName));
