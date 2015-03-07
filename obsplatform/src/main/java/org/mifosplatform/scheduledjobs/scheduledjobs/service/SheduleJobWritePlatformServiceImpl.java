@@ -1327,6 +1327,7 @@ public void reportStatmentPdf() {
 				//procedure calling
 				 SimpleJdbcCall simpleJdbcCall=new SimpleJdbcCall(this.jdbcTemplate);
 				 MapSqlParameterSource parameterSource = new MapSqlParameterSource();
+
 				 simpleJdbcCall.setProcedureName("p_int_fa");//p --> procedure int --> integration fa --> financial account s/w {p_todt=2014-12-30}
 					if (data.isDynamic().equalsIgnoreCase("Y")) {
 					     parameterSource.addValue("p_todt", new LocalDate().toString(), Types.DATE);
@@ -1337,6 +1338,7 @@ public void reportStatmentPdf() {
 					if(output.isEmpty()){
 						fw.append("Exporting data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}else{
+
                 		fw.append("No of records inserted :" + output.values()+ "\r\n");
 						fw.append("Exporting data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}
