@@ -602,24 +602,27 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	@Override
 	public CommandProcessingResult postDetailsForProvisioning(Long clientId,Long resourceId, String requestType,String provisioningSystem,String hardwareId) {
 		
-		Long defaultValue=Long.valueOf(0);
-		String desc = null;
-		if(requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CREATE_AGENT)){
-			Office office=this.officeRepository.findOne(resourceId);
-			if(office !=null){
-				  OfficeAdditionalInfo additionalInfo=office.getOfficeAdditionalInfo();
-				       if(additionalInfo != null){
-				    	    desc = additionalInfo.getContactName();
-				       }
-			}
-		}
-		
-		ProcessRequest processRequest=new ProcessRequest(defaultValue,clientId,resourceId, provisioningSystem, requestType,'N','N');
-		 ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(defaultValue,defaultValue,desc,"Recieved",
-				 hardwareId,DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),null,null,'N',requestType,null);
-		 processRequest.add(processRequestDetails);
-		 this.processRequestRepository.save(processRequest);
-		return new CommandProcessingResult(processRequest.getId());
-
-	}
+		  Long defaultValue=Long.valueOf(0);
+		  JSONObject jsonObject = new JSONObject();
+		  if(requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CREATE_AGENT)){
+		   Office office=this.officeRepository.findOne(resourceId);
+		   if(office !=null){
+		      OfficeAdditionalInfo additionalInfo=office.getOfficeAdditionalInfo();
+		           if(additionalInfo != null){
+		            
+		       jsonObject.put("agentName", office.getName());
+		       jsonObject.put("agentId", office.getId());
+		       jsonObject.put("agentDescription", additionalInfo.getContactName());
+		             
+		           }
+		   }
+		  }
+		  
+		  ProcessRequest processRequest=new ProcessRequest(defaultValue,clientId,resourceId, provisioningSystem, requestType,'N','N');
+		   ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(defaultValue,defaultValue,jsonObject.toString(),"Recieved",
+		     hardwareId,DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),null,null,'N',requestType,null);
+		   processRequest.add(processRequestDetails);
+		   this.processRequestRepository.save(processRequest);
+		  return new CommandProcessingResult(processRequest.getId());
+   }
 }
