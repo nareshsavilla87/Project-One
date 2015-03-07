@@ -58,6 +58,10 @@ public class ProvisioningApiConstants {
 	public static final String PROV_EVENT_CREATE_AGENT="Create Agent";
 	public static final String PROV_EVENT_CLOSE_CLIENT="Close Client";
 	public static final String PROV_EVENT_RELEASE_DEVICE="Release Device";
+	public static final String PROV_EVENT_CREATE_NAS="Create Nas";
+	public static final String PROV_EVENT_CREATE_RADSERVICE="Create RadSevice";
+	public static final String PROV_EVENT_Change_CREDENTIALS="Change Credentials";
+	
 
 }
 
