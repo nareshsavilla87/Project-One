@@ -19,6 +19,8 @@ import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
+import org.mifosplatform.billing.selfcare.exception.SelfCareIdNotFoundException;
+import org.mifosplatform.billing.selfcare.exception.SelfcareEmailIdNotFoundException;
 import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -109,7 +111,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ClientDataValidator fromApiJsonDeserializer;
     private final GroupsDetailsRepository groupsDetailsRepository;
     private final ProvisioningActionsRepository provisioningActionsRepository;
-  
+    
     
    
 
@@ -342,6 +344,24 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final Map<String, Object> changes = clientForUpdate.update(command);
             clientForUpdate.setOffice(clientOffice);
             this.clientRepository.saveAndFlush(clientForUpdate);
+            
+            Configuration isSelfcareUser = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
+            if(isSelfcareUser.isEnabled()){
+            	SelfCare selfCare =selfCareRepository.findOneByClientId(clientId);
+                if(selfCare != null){				
+    				
+    				if(command.parameterExists("userName")){
+    					String userName = command.stringValueOfParameterNamed("userName");
+    					selfCare.setUserName(userName);
+    				}
+    				if(command.parameterExists("password")){
+    					String password = command.stringValueOfParameterNamed("password");
+    					selfCare.setPassword(password);
+    				}
+    				this.selfCareRepository.save(selfCare);
+    			
+    			}
+            }
             
             if (changes.containsKey(ClientApiConstants.groupParamName)) {
             	
