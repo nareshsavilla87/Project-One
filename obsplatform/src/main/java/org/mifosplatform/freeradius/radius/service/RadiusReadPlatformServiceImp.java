@@ -3,6 +3,9 @@ package org.mifosplatform.freeradius.radius.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
@@ -16,11 +19,17 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mifosplatform.freeradius.radius.data.RadiusServiceData;
+import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.portfolio.order.exceptions.RadiusDetailsNotFoundException;
+import org.mifosplatform.portfolio.plan.data.ServiceData;
 import org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobReadPlatformService;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 /**
@@ -31,9 +40,12 @@ import org.springframework.stereotype.Service;
 public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 	private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
-	
+	private final JdbcTemplate jdbcTemplate;
 	@Autowired
-	public RadiusReadPlatformServiceImp(final SheduleJobReadPlatformService sheduleJobReadPlatformService){
+	public RadiusReadPlatformServiceImp(final SheduleJobReadPlatformService sheduleJobReadPlatformService,
+			final TenantAwareRoutingDataSource dataSource){
+		
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
 		
 	}
@@ -361,10 +373,10 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 		}
 
 	@Override
-	public String retrieveRadServiceTemplateData() {
+	public List<RadiusServiceData> retrieveRadServiceTemplateData() {
 		
 		try {
-			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
+			/*JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
 			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
@@ -374,13 +386,42 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			byte[] encoded = Base64.encodeBase64(credentials.getBytes());
 			String encodedPassword = new String(encoded);
 			String radServiceTemplateData = this.processRadiusGet(url, encodedPassword);
-			return radServiceTemplateData;
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-			return e.getMessage();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return e.getMessage();
+			return radServiceTemplateData;*/
+			
+
+
+
+			
+			ServiceDetailsMapper mapper = new ServiceDetailsMapper();
+
+			String sql = "select " + mapper.schema();
+
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+
+		
+
+			
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		} 
+	}
+	
+	private static final class ServiceDetailsMapper implements RowMapper<RadiusServiceData> {
+
+		public String schema() {
+			return " rs.srvid as id,rs.srvname as serviceName from rm_services rs;";
+
+		}
+
+		@Override
+		public RadiusServiceData mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+
+			Long id = rs.getLong("id");
+			String serviceName = rs.getString("serviceName");
+			return new RadiusServiceData(id,serviceName);
+
 		}
 	}
 

@@ -1,5 +1,9 @@
 package org.mifosplatform.freeradius.radius.service;
 
+import java.util.List;
+
+import org.mifosplatform.freeradius.radius.data.RadiusServiceData;
+
 
 /**
  * @author hugo
@@ -23,7 +27,7 @@ public interface RadiusReadPlatformService {
 	
 	String deleteRadService(Long radServiceId);
 
-	String retrieveRadServiceTemplateData();
+	List<RadiusServiceData> retrieveRadServiceTemplateData();
 
 
 
