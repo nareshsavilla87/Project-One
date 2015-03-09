@@ -29,6 +29,7 @@ public interface SheduleJobWritePlatformService {
 
 	void reProcessEventAction();
 
+	void processAgingDistribution();
 
 	
 }
