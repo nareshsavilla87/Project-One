@@ -3,6 +3,7 @@ package org.mifosplatform.freeradius.radius.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Date;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
@@ -19,7 +20,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.portfolio.order.exceptions.RadiusDetailsNotFoundException;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobReadPlatformService;
+import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
+import org.mifosplatform.provisioning.provsionactions.domain.ProvisionActions;
+import org.mifosplatform.provisioning.provsionactions.domain.ProvisioningActionsRepository;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -32,10 +39,15 @@ import org.springframework.stereotype.Service;
 public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 	private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
+	private final ProvisioningActionsRepository provisioningActionsRepository;
+	private final ProcessRequestRepository processRequestRepository;
 	
 	@Autowired
-	public RadiusReadPlatformServiceImp(final SheduleJobReadPlatformService sheduleJobReadPlatformService){
+	public RadiusReadPlatformServiceImp(final SheduleJobReadPlatformService sheduleJobReadPlatformService, 
+			final ProvisioningActionsRepository provisioningActionsRepository, final ProcessRequestRepository processRequestRepository){
 		this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
+		this.provisioningActionsRepository = provisioningActionsRepository;
+		this.processRequestRepository = processRequestRepository;
 		
 	}
 	
@@ -109,7 +121,24 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			byte[] encoded = Base64.encodeBase64(credentials.getBytes());
 			String encodedPassword = new String(encoded);
 			String nasData = this.processRadiusPost(url, encodedPassword,jsonData);
+			
+			ProvisionActions provisionActions = this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_NAS);
+			
+			if(provisionActions.getIsEnable() == 'Y'){
+				
+				 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), Long.valueOf(0), Long.valueOf(0),
+						 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
+
+				 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
+						 Long.valueOf(0), jsonData, "Recieved",
+						 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
+
+				 processRequest.add(processRequestDetails);
+				 this.processRequestRepository.save(processRequest);
+				
+			}
 			return nasData;
+			
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 			return e.getMessage();
@@ -207,6 +236,22 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			byte[] encoded = Base64.encodeBase64(credentials.getBytes());
 			String encodedPassword = new String(encoded);
 			String radServiceData = this.processRadiusPost(url, encodedPassword,Json);
+			
+			ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_RADSERVICE);
+			
+			if(provisionActions.getIsEnable() == 'Y'){
+				
+				 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), Long.valueOf(0), Long.valueOf(0),
+						 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
+
+				 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
+						 Long.valueOf(0), Json, "Recieved",
+						 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
+
+				 processRequest.add(processRequestDetails);
+				 this.processRequestRepository.save(processRequest);
+				
+			}
 			return radServiceData;
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
