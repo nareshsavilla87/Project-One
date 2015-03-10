@@ -1176,11 +1176,20 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             }else if(wrapper.isLinkupAccount()){
             	if(wrapper.isCreate()){
             		 handler = applicationContext.getBean("createLinkupAccountCommandHandler",NewCommandSourceHandler.class);
-            	}
-            	
-            }else {
+            	}else {
             	throw new UnsupportedCommandException(wrapper.commandName());
 		     }
+            }else if(wrapper.isRadService()){
+	            	if(wrapper.isCreate()) {
+				         handler = applicationContext.getBean("createRadServiceCommandHandler",NewCommandSourceHandler.class);
+				     } else if(wrapper.isUpdate()) {
+						 handler = applicationContext.getBean("updateRadServiceCommandHandler",NewCommandSourceHandler.class);
+					 }else if(wrapper.isDelete()){
+						 handler = applicationContext.getBean("deleteRadServiceCommandHandler",NewCommandSourceHandler.class);
+					 } else{
+				           throw new UnsupportedCommandException(wrapper.commandName());
+					 }
+	        }
 	       return handler;
 	}
 }
