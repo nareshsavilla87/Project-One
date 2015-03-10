@@ -239,10 +239,11 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
 			byte[] encoded = Base64.encodeBase64(credentials.getBytes());
 			String encodedPassword = new String(encoded);
-			String radServiceData = this.processRadiusPost(url, encodedPassword,Json);
+			
 			JSONObject jsonObject = new JSONObject(Json); 
 			RadServiceTemp radServiceTemp=RadServiceTemp.fromJson(jsonObject);
 			jsonObject.put("srvid", radServiceTemp.getId());
+			String radServiceData = this.processRadiusPost(url, encodedPassword,Json);
 			this.radServuceTempRepository.saveAndFlush(radServiceTemp);
 			
 			
@@ -254,7 +255,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 						 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
 
 				 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
-						 Long.valueOf(0), Json, "Recieved",
+						 Long.valueOf(0), jsonObject.toString(), "Recieved",
 						 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
 
 				 processRequest.add(processRequestDetails);
