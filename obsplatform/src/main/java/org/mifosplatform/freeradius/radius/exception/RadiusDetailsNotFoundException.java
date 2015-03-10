@@ -13,5 +13,10 @@ public class RadiusDetailsNotFoundException extends AbstractPlatformDomainRuleEx
 		super("error.msg.radius.server.details.not.found","Radius server details are not found","");
 		
 	}
+	
+    public RadiusDetailsNotFoundException(final Long radServiceId) {
+	   super("error.msg.radService.not.found", "RadService with this id"+radServiceId+"not exist",radServiceId);
+	        
+	 }
 
 }

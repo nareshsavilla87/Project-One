@@ -52,6 +52,7 @@ join (select @Did:=0) d
 SET SQL_SAFE_UPDATES = 1;
 END //
 
+SET SQL_SAFE_UPDATES = 0;
 
 Insert ignore into b_provisioning_actions(id,provision_type,action,provisioning_system,is_enable,is_delete) 
  values(null,'Create Nas','CREATE NAS','Radius','Y','N');
@@ -63,4 +64,6 @@ Insert ignore into b_provisioning_actions(id,provision_type,action,provisioning_
  values(null,'Change Credentials','CHANGE CREDENTIALS','Radius','Y','N');
 
 Alter  table b_provisioning_actions modify column provision_type varchar(30) NOT NULL;
+
+SET SQL_SAFE_UPDATES = 1;
 

@@ -1,20 +1,29 @@
 package org.mifosplatform.portfolio.order.domain;
 
 import java.math.BigDecimal;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Table;
 
+import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "rm_services")
 public class RadServiceTemp extends AbstractAuditableCustom<AppUser, Long> {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@GeneratedValue
 	@Column(name = "srvid")
@@ -307,6 +316,76 @@ public class RadServiceTemp extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		return null;
 
+	}
+
+	public Map<String, Object> update(final JsonCommand command) {
+		
+		final Map<String, Object> actualChanges = new ConcurrentHashMap<String, Object>(1);
+		final String srvNameParam = "srvname";
+		
+		if (command.isChangeInStringParameterNamed(srvNameParam,this.srvname)) {
+			final String newValue = command.stringValueOfParameterNamed(srvNameParam);
+			actualChanges.put(srvNameParam, newValue);
+			this.srvname = StringUtils.defaultIfEmpty(newValue, null);	
+		}
+	/*	
+	 * 		final String value = "value";
+	 *      if (command.isChangeInStringParameterNamed(value,this.val)) {
+			final String newValue = command.stringValueOfParameterNamed(value);
+			actualChanges.put(value, newValue);
+			this.value = StringUtils.defaultIfEmpty(newValue, null);
+		}*/
+		
+		final String downrate = "downrate";
+		if (command.isChangeInLongParameterNamed(downrate, this.downrate)) {
+			final Long newValue = command.longValueOfParameterNamed(downrate);
+			actualChanges.put(downrate, newValue);
+			this.downrate = newValue;	
+		}
+		
+		final String uprate = "uprate";
+		if (command.isChangeInLongParameterNamed(uprate, this.uprate)) {
+			final Long newValue = command.longValueOfParameterNamed(uprate);
+			actualChanges.put(uprate, newValue);
+			this.uprate = newValue;	
+		}
+		
+		final String trafficunitdl = "trafficunitdl";
+		if (command.isChangeInLongParameterNamed(trafficunitdl, this.trafficunitdl)) {
+			final Long newValue = command.longValueOfParameterNamed(trafficunitdl);
+			actualChanges.put(trafficunitdl, newValue);
+			this.trafficunitdl = newValue;	
+		}
+		
+		final String islimitcomb= "islimitcomb";
+		if (command.isChangeInBooleanParameterNamed(islimitcomb, this.limitcomb)) {
+			final Boolean newValue = command.booleanObjectValueOfParameterNamed(islimitcomb);
+			actualChanges.put(islimitcomb, newValue);
+			this.limitcomb = newValue;	
+		}
+		
+		final String limitexpiration= "limitexpiration";
+		if (command.isChangeInBooleanParameterNamed(limitexpiration, this.limitexpiration)) {
+			final Boolean newValue = command.booleanObjectValueOfParameterNamed(limitexpiration);
+			actualChanges.put(limitexpiration, newValue);
+			this.limitexpiration = newValue;	
+		}
+		
+		final String renew= "renew";
+		if (command.isChangeInBooleanParameterNamed(islimitcomb, this.renew)) {
+			final Boolean newValue = command.booleanObjectValueOfParameterNamed(renew);
+			actualChanges.put(renew, newValue);
+			this.renew = newValue;	
+		}
+		
+		final String nextsrvid = "nextsrvid";
+		if (command.isChangeInLongParameterNamed(uprate, this.nextsrvid)) {
+			final Long newValue = command.longValueOfParameterNamed(nextsrvid);
+			actualChanges.put(nextsrvid, newValue);
+			this.nextsrvid = newValue;	
+		}
+		
+		return actualChanges;
 	}
 
 }
