@@ -243,6 +243,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			JSONObject jsonObject = new JSONObject(Json); 
 			RadServiceTemp radServiceTemp=RadServiceTemp.fromJson(jsonObject);
 			jsonObject.put("srvid", radServiceTemp.getId());
+			jsonObject.put("limitul", radServiceTemp.isLimitul());
 			String radServiceData = this.processRadiusPost(url, encodedPassword,Json);
 			this.radServuceTempRepository.saveAndFlush(radServiceTemp);
 			

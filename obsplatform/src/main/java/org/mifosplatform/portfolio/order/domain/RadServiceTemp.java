@@ -276,6 +276,16 @@ public class RadServiceTemp extends AbstractAuditableCustom<AppUser, Long> {
 
 	
 	}
+	
+	
+
+	public boolean isLimitul() {
+		return limitul;
+	}
+
+	public void setLimitul(boolean limitul) {
+		this.limitul = limitul;
+	}
 
 	public static RadServiceTemp fromJson(JSONObject jsonObject) {
 		try {
