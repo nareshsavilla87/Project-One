@@ -3,6 +3,7 @@ package org.mifosplatform.freeradius.radius.service;
 import java.util.List;
 
 import org.mifosplatform.freeradius.radius.data.RadiusServiceData;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 
 /**
@@ -21,7 +22,7 @@ public interface RadiusReadPlatformService {
 	
 	String retrieveAllRadServiceDetails(String attribute);
 
-	String createRadService(String Json);
+	CommandProcessingResult createRadService(String Json);
 
 	String retrieveRadServiceDetail(Long radServiceId);
 	

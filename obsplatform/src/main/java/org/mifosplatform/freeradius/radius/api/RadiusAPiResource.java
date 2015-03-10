@@ -21,6 +21,7 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.freeradius.radius.data.RadiusServiceData;
 import org.mifosplatform.freeradius.radius.service.RadiusReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -139,8 +140,8 @@ public class RadiusAPiResource {
 	public String createRadService(final String apiRequestBodyAsJson) {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		final String radServiceData = this.radiusReadPlatformService.createRadService(apiRequestBodyAsJson);
-		return radServiceData;
+		final CommandProcessingResult result = this.radiusReadPlatformService.createRadService(apiRequestBodyAsJson);
+		  return this.toApiJsonSerializer.serialize(result);
 	}
 	
 	@DELETE

@@ -21,8 +21,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifosplatform.freeradius.radius.data.RadiusServiceData;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
+import org.mifosplatform.portfolio.order.domain.RadServiceTemp;
+import org.mifosplatform.portfolio.order.domain.RadServuceTempRepository;
 import org.mifosplatform.portfolio.order.exceptions.RadiusDetailsNotFoundException;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
@@ -47,16 +50,18 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 	private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
 	private final JdbcTemplate jdbcTemplate;
-
+    private final RadServuceTempRepository radServuceTempRepository;
 	private final ProvisioningActionsRepository provisioningActionsRepository;
 	private final ProcessRequestRepository processRequestRepository;
 	
 	@Autowired
 	public RadiusReadPlatformServiceImp(final SheduleJobReadPlatformService sheduleJobReadPlatformService, final TenantAwareRoutingDataSource dataSource,
-			final ProvisioningActionsRepository provisioningActionsRepository, final ProcessRequestRepository processRequestRepository){
+			final ProvisioningActionsRepository provisioningActionsRepository, final ProcessRequestRepository processRequestRepository,
+			final RadServuceTempRepository radServuceTempRepository){
 		
 		this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
 		this.provisioningActionsRepository = provisioningActionsRepository;
+		this.radServuceTempRepository = radServuceTempRepository;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.processRequestRepository = processRequestRepository;
 		
@@ -217,7 +222,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	}
 	
 	@Override
-	public String createRadService(final String Json) {
+	public CommandProcessingResult createRadService(final String Json) {
 		
 		try {
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
@@ -235,12 +240,14 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			byte[] encoded = Base64.encodeBase64(credentials.getBytes());
 			String encodedPassword = new String(encoded);
 			String radServiceData = this.processRadiusPost(url, encodedPassword,Json);
-			
+			JSONObject jsonObject = new JSONObject(Json); 
+			RadServiceTemp radServiceTemp=RadServiceTemp.fromJson(jsonObject);
+			jsonObject.put("srvid", radServiceTemp.getId());
+			this.radServuceTempRepository.saveAndFlush(radServiceTemp);
 			
 			
 			
 			ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_RADSERVICE);
-			
 			if(provisionActions.getIsEnable() == 'Y'){
 				
 				 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), Long.valueOf(0), Long.valueOf(0),
@@ -254,13 +261,15 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 				 this.processRequestRepository.save(processRequest);
 				
 			}
-			return radServiceData;
+			return new CommandProcessingResult(radServiceTemp.getId());
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return new CommandProcessingResult(Long.valueOf(-1));
 		} catch (IOException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return new CommandProcessingResult(Long.valueOf(-1));
+		} catch (JSONException e) {
+			return new CommandProcessingResult(Long.valueOf(-1));
 		}
 	}
 	
