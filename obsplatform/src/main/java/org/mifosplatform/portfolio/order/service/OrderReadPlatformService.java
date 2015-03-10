@@ -12,7 +12,7 @@ import org.mifosplatform.portfolio.plan.data.PlanCodeData;
 
 public interface OrderReadPlatformService {
 
-	List<PlanCodeData> retrieveAllPlatformData(Long planId);
+	List<PlanCodeData> retrieveAllPlatformData(Long planId, Long clientId);
 
 	List<PaytermData> retrieveAllPaytermData();
 	

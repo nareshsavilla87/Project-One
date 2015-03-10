@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.client.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -19,6 +20,8 @@ import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
+import org.mifosplatform.billing.selfcare.exception.SelfCareIdNotFoundException;
+import org.mifosplatform.billing.selfcare.exception.SelfcareEmailIdNotFoundException;
 import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -65,6 +68,9 @@ import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.mifosplatform.provisioning.preparerequest.service.PrepareRequestReadplatformService;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.provisioning.provisioning.domain.ServiceParameters;
 import org.mifosplatform.provisioning.provisioning.domain.ServiceParametersRepository;
@@ -109,7 +115,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ClientDataValidator fromApiJsonDeserializer;
     private final GroupsDetailsRepository groupsDetailsRepository;
     private final ProvisioningActionsRepository provisioningActionsRepository;
-  
+    private final ProcessRequestRepository processRequestRepository;
     
    
 
@@ -123,7 +129,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final GroupsDetailsRepository groupsDetailsRepository,final OrderRepository orderRepository,final PlanRepository planRepository,
             final PrepareRequestWriteplatformService prepareRequestWriteplatformService,final ClientReadPlatformService clientReadPlatformService,
             final SelfCareRepository selfCareRepository,final PortfolioCommandSourceWritePlatformService  portfolioCommandSourceWritePlatformService,
-            final ProvisioningActionsRepository provisioningActionsRepository,final PrepareRequestReadplatformService prepareRequestReadplatformService) {
+            final ProvisioningActionsRepository provisioningActionsRepository,final PrepareRequestReadplatformService prepareRequestReadplatformService,
+            final ProcessRequestRepository processRequestRepository) {
     	
         this.context = context;
         this.ProvisioningWritePlatformService=ProvisioningWritePlatformService;
@@ -146,6 +153,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.selfCareRepository=selfCareRepository;
         this.codeValueRepository=codeValueRepository;
         this.configurationRepository=configurationRepository;
+        this.processRequestRepository = processRequestRepository;
        
     }
 
@@ -341,7 +349,50 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (clientOffice == null) { throw new OfficeNotFoundException(officeId); }
             final Map<String, Object> changes = clientForUpdate.update(command);
             clientForUpdate.setOffice(clientOffice);
+            
             this.clientRepository.saveAndFlush(clientForUpdate);
+            
+            Configuration isSelfcareUser = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
+            if(isSelfcareUser.isEnabled()){
+            	SelfCare selfCare =selfCareRepository.findOneByClientId(clientId);
+            	String newUserName = command.stringValueOfParameterNamed("userName");
+            	String newPassword = command.stringValueOfParameterNamed("password");
+            	String existingUserName = selfCare.getUserName();
+            	String existingPassword = selfCare.getPassword();
+            	
+                if((selfCare != null) && (newUserName != null && newPassword != null) && 
+                		((!existingUserName.equalsIgnoreCase(newUserName)) || (!existingPassword.equalsIgnoreCase(newPassword)))){				
+                	
+                	selfCare.setUserName(newUserName);
+                	selfCare.setPassword(newPassword);
+                	
+    				this.selfCareRepository.save(selfCare);
+    				
+    				ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_Change_CREDENTIALS);
+    				if(provisionActions.getIsEnable() == 'Y'){
+    					JSONObject object = new JSONObject();
+    					try {
+							object.put("newUserName", newUserName);
+							object.put("newPassword", newPassword);
+							object.put("existingUserName", existingUserName);
+							object.put("existingPassword", existingPassword);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+    					 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), clientId, Long.valueOf(0),
+    							 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
+
+    					 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
+    							 Long.valueOf(0), object.toString(), "Recieved",
+    							 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
+
+    					 processRequest.add(processRequestDetails);
+    					 this.processRequestRepository.save(processRequest);
+    					
+    				}
+    			
+    			}
+            }
             
             if (changes.containsKey(ClientApiConstants.groupParamName)) {
             	

@@ -357,7 +357,7 @@ try{
     		}else{
     			orderStatus = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId();
     		}
-			if(configurationProperty.isEnabled()){
+			if(configurationProperty.isEnabled() && plan.isPrepaid() == 'N'){
 				if(plan.getBillRule() != 400 && plan.getBillRule() != 300){ 
 					this.reverseInvoice.reverseInvoiceServices(orderId, order.getClientId(), disconnectionDate);
 				}
@@ -720,7 +720,10 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand command) {
 
   try{
-	  this.fromApiJsonDeserializer.validateForCreate(command.json());
+	  String actionType = command.stringValueOfParameterNamed("actionType");
+	  if(!actionType.equalsIgnoreCase("renewalorder")){
+		  this.fromApiJsonDeserializer.validateForCreate(command.json());
+	  }
 	  LocalDate startDate=command.localDateValueOfParameterNamed("start_date");
 	  
 	  char status = 'N';
@@ -732,6 +735,40 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		EventAction  eventAction=null;
 		JSONObject jsonObject=new JSONObject();
 		Long userId=getUserId();
+		
+		if(actionType.equalsIgnoreCase("renewalorder")){
+			
+			//Check for Custome_Validation
+			this.eventValidationReadPlatformService.checkForCustomValidations(clientId,EventActionConstants.EVENT_ORDER_RENEWAL,command.json(),userId);
+		    	  
+		    	  	jsonObject.put("renewalPeriod",command.longValueOfParameterNamed("renewalPeriod"));
+		    	  	jsonObject.put("description",command.stringValueOfParameterNamed("description"));
+	        	   
+	        	    eventAction=new EventAction(DateUtils.getLocalDateOfTenant().toDate(), "RENEWAL", "ORDER",EventActionConstants.ACTION_RENEWAL,"/orders/renewalorder/"+clientId, 
+	        			  clientId,command.json(),null,clientId);
+	        	    
+	        	    
+	        	  
+		}else if(actionType.equalsIgnoreCase("changeorder")){
+			
+			//Check for Custome_Validation
+			this.eventValidationReadPlatformService.checkForCustomValidations(clientId,EventActionConstants.EVENT_CHANGE_ORDER,command.json(),userId);
+				
+		    	  	jsonObject.put("billAlign",command.booleanPrimitiveValueOfParameterNamed("billAlign"));
+		    	  	jsonObject.put("contractPeriod",command.longValueOfParameterNamed("contractPeriod"));
+		    	  	jsonObject.put("dateFormat",command.booleanPrimitiveValueOfParameterNamed("dateFormat"));
+		    	  	jsonObject.put("locale",command.booleanPrimitiveValueOfParameterNamed("locale"));
+		    	  	jsonObject.put("isNewPlan",command.booleanPrimitiveValueOfParameterNamed("isNewPlan"));
+		    	  	jsonObject.put("paytermCode",command.stringValueOfParameterNamed("paytermCode"));
+		    	  	jsonObject.put("planCode",command.longValueOfParameterNamed("planCode"));
+		    	  	jsonObject.put("start_date",command.stringValueOfParameterNamed("start_date"));
+		    	  	jsonObject.put("disconnectionDate",command.stringValueOfParameterNamed("disconnectionDate"));
+		    	  	jsonObject.put("disconnectReason",command.stringValueOfParameterNamed("disconnectReason"));
+	        	   
+	        	    eventAction=new EventAction(startDate.toDate(), "CHANGEPLAN", "ORDER",EventActionConstants.ACTION_CHNAGE_PLAN,"/orders/changPlan/"+clientId, 
+	        			  clientId,command.json(),null,clientId);
+			
+		}else{
 		
 		//Check for Custome_Validation
 		this.eventValidationReadPlatformService.checkForCustomValidations(clientId,EventActionConstants.EVENT_CREATE_ORDER,command.json(),userId);
@@ -756,9 +793,11 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
         	   
         	    eventAction=new EventAction(startDate.toDate(), "CREATE", "ORDER",EventActionConstants.ACTION_NEW,"/orders/"+clientId, 
         			  clientId,command.json(),null,clientId);
-        	    eventAction.updateStatus(status);
         	    
-        	  this.eventActionRepository.save(eventAction);
+         }
+		
+			  eventAction.updateStatus(status);
+			  this.eventActionRepository.save(eventAction);
         	  return  new CommandProcessingResult(command.entityId(),clientId);
 	
   }catch(DataIntegrityViolationException dve){

@@ -137,7 +137,6 @@ cast(`mc`.`activation_date`as date) AS `date`,
 `mc`.`display_name` AS `details` ,
 'New' as `transactionType`
 from (`INT_FA` `i` join `m_client` `mc`) where (`mc`.`id` between `i`.`From_id` and `i`.`to_id`) 
-
 union all 
 select cast(`i`.`int_date` as date) AS `int_date`,
 'b_invoice' AS `obsTable`,
@@ -152,7 +151,6 @@ cast(`b`.`invoice_date` as date) AS `invoice_date`,
 `b`.`invoice_status` AS `invoice_status` ,
 'Invoice' as `transactionType`
 from (`INT_FA` `i` join `b_invoice` `b`) where (`b`.`id` between `i`.`From_id` and `i`.`to_id`) 
-
 union all 
 select cast(`i`.`int_date` as date) AS `int_date`,
 'b_payments' AS `obsTable`,
@@ -163,7 +161,6 @@ concat('-',round(`b`.`amount_paid`,2)) AS `amount_paid`,
 `b`.`Remarks` AS `remarks`, 
 'Payment' as `transactionType`
 from (`INT_FA` `i` join `b_payments` `b`) where (`b`.`id` between `i`.`From_id` and `i`.`to_id`) 
-
 union all
  select cast(`i`.`int_date` as date) AS `int_date`,
 'b_adjustments' AS `obsTable`,
@@ -180,12 +177,12 @@ cast(`b`.`adjustment_date` as date) AS `adjustment_date`,
 
 
 INSERT IGNORE INTO `stretchy_report` VALUES(null,'List of Customers', 'Table', '', 'Client', 'SELECT id as Id ,transactionType,details as Name FROM int_fa_v where obsTable=''m_clients'' and int_date  between ''${startDate}'' and ''${endDate}''', 'export newly created customers to other financial  systems', '0', '1');
-SET @ID=(SELECT * FROM stretchy_report WHERE report_name='List of Customers');
+SET @ID=(SELECT id FROM stretchy_report WHERE report_name='List of Customers');
 INSERT IGNORE INTO `stretchy_report_parameter` VALUES (null, @ID, 1, 'From Date');
 INSERT IGNORE INTO `stretchy_report_parameter` VALUES (null, @ID, 2, 'To Date');
 
 INSERT IGNORE INTO `stretchy_report` VALUES(null,'List of Transactions','Table', '', 'Billing', 'SELECT id ,client_id as clientId,transactionType,amount FROM int_fa_v where int_date between ''${startDate}'' and ''${endDate}'' and obstable<>''m_clients'' order by clientId', 'exports client transactions to other financial systems', '0', '1');
-SET @ID=(SELECT * FROM stretchy_report WHERE report_name='List of Transactions');
+SET @ID=(SELECT id FROM stretchy_report WHERE report_name='List of Transactions');
 INSERT IGNORE INTO `stretchy_report_parameter` VALUES (null, @ID, 1, 'From Date');
 INSERT IGNORE INTO `stretchy_report_parameter` VALUES (null, @ID, 2, 'To Date');
 
