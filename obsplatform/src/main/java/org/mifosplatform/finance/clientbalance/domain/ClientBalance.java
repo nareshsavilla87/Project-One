@@ -30,8 +30,7 @@ public class ClientBalance {
 
 
 
-	public static ClientBalance create(Long clientId,
-			BigDecimal balanceAmount, char isWalletPayment) {
+	public static ClientBalance create(Long clientId,BigDecimal balanceAmount, char isWalletPayment) {
 		
 		return new ClientBalance(clientId, balanceAmount,isWalletPayment);
 	}
