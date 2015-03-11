@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `b_payment_followup` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 insert IGNORE into m_code VALUES (null,'Suspension Reason',0,'Reason for Order Suspension');
-select @id=(select id from m_code where code_name='Suspension Reason');
+SET @id=(select id from m_code where code_name='Suspension Reason');
 insert IGNORE into m_code_value VALUES (null,@id,'Payment Due',0);
 insert IGNORE into m_code_value VALUES (null,@id,'Vacations',0);
 

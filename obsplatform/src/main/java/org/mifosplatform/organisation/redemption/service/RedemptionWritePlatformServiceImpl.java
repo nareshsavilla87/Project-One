@@ -102,6 +102,7 @@ public class RedemptionWritePlatformServiceImpl implements
 	public CommandProcessingResult createRedemption(final JsonCommand command) {
 	
 		try {
+			
 			 final String simpleDateFormat = new SimpleDateFormat("dd MMMM yyyy").format(DateUtils.getDateOfTenant());
 			context.authenticatedUser();
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
@@ -126,10 +127,12 @@ public class RedemptionWritePlatformServiceImpl implements
 				json.addProperty("Remarks", "Adjustment Post By Redemption");
 				json.addProperty("locale", "en");
 				json.addProperty("dateFormat","dd MMMM yyyy");
-				json.addProperty("adjustment_date", simpleDateFormat);
+				json.addProperty("adjustment_date",simpleDateFormat);
+				json.addProperty("isWalletPayment",true);
 				final JsonCommand commd = new JsonCommand(null, json.toString(), json, fromJsonHelper, null, clientId, null, null, clientId, null, null, null, null, null, null,null);
-					result=this.adjustmentWritePlatformService.createAdjustments(commd);
-				resourceId=result.resourceId();
+				
+				result=this.adjustmentWritePlatformService.createAdjustment(commd);
+				 resourceId=result.resourceId();
 
 				  JournalVoucher journalVoucher=new JournalVoucher(voucher.getOfficeId(),DateUtils.getDateOfTenant(),"Redemption",null,
 						  pinValue.doubleValue(),Long.valueOf(0));
