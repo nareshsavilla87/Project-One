@@ -50,6 +50,9 @@ end //
 
 DELIMITER ;
 
+SET date=CURDATE();
+call p_int_fa0(date);
+
 
 Drop procedure if exists loginHistory;
 DELIMITER //

@@ -29,7 +29,7 @@ public class GenerateSign {
 	public static void main(String []arg) throws ClientProtocolException, IOException, JSONException{
 		
 		HttpClient  httpClient=new DefaultHttpClient();  
-		HttpGet request = new HttpGet("http://catchup2.ip888.tv:8088/iptv/ApiOBS?username=obs_integrator&operation=get_time");
+		HttpGet request = new HttpGet("http://cms.ip888.tv:8088/iptv/ApiOBS?username=obs_integrator&operation=get_time");
 		request.addHeader("User-Agent", "Mozilla/5.0");
 		//request.
 		HttpResponse response = httpClient.execute(request);
@@ -39,26 +39,28 @@ public class GenerateSign {
 		  while ((output = br.readLine()) != null) {
 		   output1 = output1.concat(output);
 		  } 
-		  System.out.println(output1);
+		  System.out.println("time is"+output1);
 		  JSONObject ob=new JSONObject(output1);
 		  long time=ob.getLong("timestamp")+1;
 		  System.out.println(time);
 		  //System.out.println(time+1);
 		 
 		Map<String, Object>map = new HashMap<String, Object>();  
-		map.put("timestamp", time);
+      map.put("timestamp", time);
 		
-	    //map.put("operation", "user_detail");
-		map.put("operation", "edit_box");
+	    map.put("operation", "user_list");
+		/*map.put("operation", "edit_box");
 		map.put("box_id", "5363");
 		map.put("mac", "11:11:bd:b0:00:f9");
-		map.put("sn", "11:11:bd:b0:00:f9");
+		map.put("sn", "11:11:bd:b0:00:f9");*/
 		//map.put("memberType_id", "9");
 		map.put("username", "obs_integrator");
 		String signature= sign_post(map,"19dk3d!s22");
 		System.out.println(signature);
-		System.out.println("http://catchup2.ip888.tv:8088/iptv/ApiOBS?username=obs_integrator&operation=user_list&timestamp="+time+"&sign="+signature);
-		request = new HttpGet("http://catchup2.ip888.tv:8088/iptv/ApiOBS?username=obs_integrator&operation=edit_box&box_id=5363&timestamp="+time+"&mac=11:11:bd:b0:00:f9&sn=11:11:bd:b0:00:f9&sign="+signature);
+		
+		//System.out.println("http://catchup2.ip888.tv:8088/iptv/ApiOBS?username=obs_integrator&operation=user_list&timestamp="+time+"&sign="+signature);
+		request = new HttpGet("http://cms.ip888.tv:8088/iptv/ApiOBS?username=obs_integrator&operation=user_list&timestamp="+time+"&sign="+signature);
+		//request = new HttpGet("http://catchup2.ip888.tv:8088/iptv/ApiOBS?username=obs_integrator&operation=edit_box&box_id=5363&timestamp="+time+"&mac=11:11:bd:b0:00:f9&sn=11:11:bd:b0:00:f9&sign="+signature);
 		//request = new HttpGet("http://catchup2.ip888.tv:8088/iptv/ApiOBS?username=obs_integrator&operation=user_detail&user_id=1389&timestamp="+time+"&sign="+signature);
 		//request = new HttpGet("http://catchup2.ip888.tv:8088/iptv/ApiOBS?username=obs_integrator&operation=get_products&memberType_id=9&timestamp="+time+"&sign="+signature);
 		//request = new HttpGet("http://catchup2.ip888.tv:8088/iptv/ApiOBS?username=obs_integrator&operation=get_products&memberType_id=9&timestamp="+time+"&sign="+signature);
@@ -75,8 +77,8 @@ public class GenerateSign {
 		  System.out.println(output1);
 
 	
-	}
 	
+	}
 	private static String sign_post(Map<String, Object> parms, String pass) {
 		  String sig, data = "";
 		  Set<String> set = parms.keySet();

@@ -447,7 +447,6 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			
 	            if(paymentStatus.equalsIgnoreCase(ConfigurationConstants.GLOBALPAY_SUCCESS)){
 	            	pgConfigJsonObj.put("status", ConfigurationConstants.PAYMENTGATEWAY_SUCCESS);
-	            	//pgConfigJsonObj.put("status", ConfigurationConstants.PAYMENTGATEWAY_PENDING);
 	    			pgConfigJsonObj.put("error", paymentDesc);
 	            }else if (paymentStatus.equalsIgnoreCase(ConfigurationConstants.GLOBALPAY_PENDING)) {
 	            	pgConfigJsonObj.put("status", ConfigurationConstants.PAYMENTGATEWAY_PENDING);

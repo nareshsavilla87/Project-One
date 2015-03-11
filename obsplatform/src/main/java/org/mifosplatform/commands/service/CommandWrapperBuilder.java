@@ -2698,6 +2698,34 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+public CommandWrapperBuilder cancelVoucherPin(Long id) {
+	
+	this.actionName = "CANCEL";
+	this.entityName = "VOUCHER";
+	this.entityId = id;
+	this.href = "/vouchers";
+	return this;
+}
+
+public CommandWrapperBuilder updateRadService(final Long radServiceId) {
+	
+	this.actionName = "UPDATE";
+	this.entityName = "RADSERVICE";
+	this.entityId = radServiceId;
+	this.href = "/radservice/"+radServiceId;
+	return this;
+}
+
+public CommandWrapperBuilder deleteRadService(final Long radServiceId) {
+	
+	this.actionName = "DELETE";
+	this.entityName = "RADSERVICE";
+	this.entityId = radServiceId;
+	this.href = "/radservice/"+radServiceId;
+	return this;
+	
+}
+
 }
 
 
