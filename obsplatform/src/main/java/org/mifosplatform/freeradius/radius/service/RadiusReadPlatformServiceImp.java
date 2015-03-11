@@ -426,7 +426,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	}
 	
 	//delete
-	private  String processRadiusDelete(String url, String encodePassword) throws ClientProtocolException, IOException{
+	public  String processRadiusDelete(String url, String encodePassword) throws ClientProtocolException, IOException{
 		
 		 HttpClient httpClient = new DefaultHttpClient();
 		 HttpDelete deleteRequest = new HttpDelete(url);

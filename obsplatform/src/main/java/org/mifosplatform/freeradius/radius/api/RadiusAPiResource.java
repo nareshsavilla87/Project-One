@@ -9,6 +9,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -17,6 +18,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.freeradius.radius.data.RadiusServiceData;
 import org.mifosplatform.freeradius.radius.service.RadiusReadPlatformService;
@@ -25,7 +28,6 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.plan.data.PlanData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -45,9 +47,10 @@ public class RadiusAPiResource {
 
 	private final String resourceNameForPermissions = "RADIUS";
 	private final PlatformSecurityContext context;
-	 private final ApiRequestParameterHelper apiRequestParameterHelper;
+	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final RadiusReadPlatformService radiusReadPlatformService;
-	 private final DefaultToApiJsonSerializer<RadiusServiceData> toApiJsonSerializer;
+    private final DefaultToApiJsonSerializer<RadiusServiceData> toApiJsonSerializer;
+    private final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService;
 	
 	@Autowired
 	public RadiusAPiResource(final PlatformSecurityContext context,final ApiRequestParameterHelper apiRequestParameterHelper,
@@ -58,6 +61,7 @@ public class RadiusAPiResource {
 		this.radiusReadPlatformService = radiusReadPlatformService;
 		this.toApiJsonSerializer = toApiJsonSerializer;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
+		this.commandSourceWritePlatformService = commandSourceWritePlatformService;
 	}
 
 	/**
@@ -143,6 +147,20 @@ public class RadiusAPiResource {
 		final CommandProcessingResult result = this.radiusReadPlatformService.createRadService(apiRequestBodyAsJson);
 		  return this.toApiJsonSerializer.serialize(result);
 	}
+
+	
+	@PUT
+	@Path("radservice/{radServiceId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String editRadService(@PathParam("radServiceId") final Long radServiceId,final String apiRequestBodyAsJson) {
+
+		context.authenticatedUser();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateRadService(radServiceId).withJson(apiRequestBodyAsJson).build();
+		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+	}
+	
 	
 	@DELETE
 	@Path("radservice/{radServiceId}")
@@ -150,9 +168,11 @@ public class RadiusAPiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String deleteRadService(@PathParam("radServiceId") final Long radServiceId) {
 
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		final String radServiceData = this.radiusReadPlatformService.deleteRadService(radServiceId);
-		return radServiceData;
+		context.authenticatedUser();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteRadService(radServiceId).build();
+		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+	
 	}
 	
 	@GET

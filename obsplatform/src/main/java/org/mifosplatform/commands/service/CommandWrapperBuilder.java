@@ -2566,7 +2566,8 @@ public CommandWrapperBuilder updateVoucherPin(Long id) {
 	this.href = "/vouchers";
 	return this;
 }
-public CommandWrapperBuilder deleteVoucherPin(Long id) {
+public CommandWrapperBuilder deleteVoucherPin(final Long id) {
+	
 	this.actionName = "DELETE";
 	this.entityName = "VOUCHER";
 	this.entityId = id;
@@ -2581,6 +2582,25 @@ public CommandWrapperBuilder cancelVoucherPin(Long id) {
 	this.entityId = id;
 	this.href = "/vouchers";
 	return this;
+}
+
+public CommandWrapperBuilder updateRadService(final Long radServiceId) {
+	
+	this.actionName = "UPDATE";
+	this.entityName = "RADSERVICE";
+	this.entityId = radServiceId;
+	this.href = "/radservice/"+radServiceId;
+	return this;
+}
+
+public CommandWrapperBuilder deleteRadService(final Long radServiceId) {
+	
+	this.actionName = "DELETE";
+	this.entityName = "RADSERVICE";
+	this.entityId = radServiceId;
+	this.href = "/radservice/"+radServiceId;
+	return this;
+	
 }
 
 }

@@ -1228,4 +1228,8 @@ public class CommandWrapper {
 		public boolean isLinkupAccount() {
 			return this.entityName.equalsIgnoreCase("LINKUPACCOUNT");
 		}
+
+		public boolean isRadService() {
+			return this.entityName.equalsIgnoreCase("RADSERVICE");
+		}
 }
