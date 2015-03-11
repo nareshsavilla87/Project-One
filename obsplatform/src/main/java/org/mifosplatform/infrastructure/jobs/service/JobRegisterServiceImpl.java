@@ -56,6 +56,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
     @Autowired
     public JobRegisterServiceImpl(final ApplicationContext applicationContext, final SchedularWritePlatformService schedularService,
             final TenantDetailsService tenantDetailsService) {
+    	
         this.applicationContext = applicationContext;
         this.schedularWritePlatformService = schedularService;
         this.tenantDetailsService = tenantDetailsService;
@@ -337,6 +338,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
      * @return
      */
     private Trigger createTrigger(final ScheduledJobDetail scheduledJobDetails, final JobDetail jobDetail) {
+    	
         MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
         cronTriggerFactoryBean.setName(scheduledJobDetails.getJobName() + "Trigger" + tenant.getTenantIdentifier());

@@ -3,7 +3,10 @@ package org.mifosplatform.freeradius.radius.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
@@ -17,7 +20,12 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mifosplatform.freeradius.radius.data.RadiusServiceData;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
+import org.mifosplatform.portfolio.order.domain.RadServiceTemp;
+import org.mifosplatform.portfolio.order.domain.RadServuceTempRepository;
 import org.mifosplatform.portfolio.order.exceptions.RadiusDetailsNotFoundException;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
@@ -28,7 +36,11 @@ import org.mifosplatform.provisioning.provsionactions.domain.ProvisionActions;
 import org.mifosplatform.provisioning.provsionactions.domain.ProvisioningActionsRepository;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author hugo
@@ -38,14 +50,20 @@ import org.springframework.stereotype.Service;
 public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 	private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
+	private final JdbcTemplate jdbcTemplate;
+    private final RadServuceTempRepository radServuceTempRepository;
 	private final ProvisioningActionsRepository provisioningActionsRepository;
 	private final ProcessRequestRepository processRequestRepository;
 	
 	@Autowired
-	public RadiusReadPlatformServiceImp(final SheduleJobReadPlatformService sheduleJobReadPlatformService, 
-			final ProvisioningActionsRepository provisioningActionsRepository, final ProcessRequestRepository processRequestRepository){
+	public RadiusReadPlatformServiceImp(final SheduleJobReadPlatformService sheduleJobReadPlatformService, final TenantAwareRoutingDataSource dataSource,
+			final ProvisioningActionsRepository provisioningActionsRepository, final ProcessRequestRepository processRequestRepository,
+			final RadServuceTempRepository radServuceTempRepository){
+		
 		this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
 		this.provisioningActionsRepository = provisioningActionsRepository;
+		this.radServuceTempRepository = radServuceTempRepository;
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		this.processRequestRepository = processRequestRepository;
 		
 	}
@@ -173,24 +191,48 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 				throw new RadiusDetailsNotFoundException();
 			}
 			String url ="";
+			String radServiceData =null;
+			JSONObject jsonObj = new JSONObject();
 			if(data.getProvSystem().equalsIgnoreCase("version-1")){
 				if(attribute!=null){
 					url= data.getUrl() + "radservice?attribute="+attribute;
 				}else{
 					url= data.getUrl() + "radservice";
 				}
+				String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+				byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+				String encodedPassword = new String(encoded);
+				 radServiceData = this.processRadiusGet(url, encodedPassword);
+				jsonObj.put("radiusVersion", data.getProvSystem().toLowerCase());
+				jsonObj.put("radServiceData", new JSONArray(radServiceData));
+				radServiceData = jsonObj.toString();
+				
+				
 			}else if(data.getProvSystem().equalsIgnoreCase("version-2")){
-				url= data.getUrl() + "service2";
+				
+				ServiceDetailsMapper mapper = new ServiceDetailsMapper();
+				String sql = "select " + mapper.schema();
+				List<RadiusServiceData> radiusServiceDatas = this.jdbcTemplate.query(sql, mapper, new Object[] {});
+				JSONArray jsonArray =new JSONArray();
+				
+				for(RadiusServiceData serviceData:radiusServiceDatas){
+					JSONObject jsonObject=new  JSONObject();
+					jsonObject.put("serviceId", serviceData.getId());
+					jsonObject.put("serviceName", serviceData.getServiceName());
+					jsonObject.put("uprate", serviceData.getUpRate());
+					jsonObject.put("downRate", serviceData.getDownRate());
+					jsonObject.put("nextServicId", serviceData.getNextServicId());
+					jsonObject.put("trafficUnitdl", serviceData.getTrafficUnitdl());
+					jsonObject.put("nextService", serviceData.getNextService());
+					jsonArray.put(jsonObject);
+				}
+				jsonObj.put("radiusVersion", data.getProvSystem().toLowerCase());
+				jsonObj.put("radServiceData", jsonArray);
+				radServiceData = jsonObj.toString();
+				
 			}
-			String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
-			byte[] encoded = Base64.encodeBase64(credentials.getBytes());
-			String encodedPassword = new String(encoded);
-			String radServiceData = this.processRadiusGet(url, encodedPassword);
-			JSONObject jsonObj = new JSONObject();
-			jsonObj.put("radiusVersion", data.getProvSystem().toLowerCase());
-			jsonObj.put("radServiceData", new JSONArray(radServiceData));
-			radServiceData = jsonObj.toString();
 			return radServiceData;
+			
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
 			return e.getMessage();
@@ -204,8 +246,9 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 	}
 	
+	@Transactional
 	@Override
-	public String createRadService(final String Json) {
+	public CommandProcessingResult createRadService(final String Json) {
 		
 		try {
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
@@ -213,39 +256,48 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 				throw new RadiusDetailsNotFoundException();
 			}
 			String url = "";
+			 JSONObject jsonObject = new JSONObject(Json); 
+			 Long resultId=Long.valueOf(0);
 			if(data.getProvSystem().equalsIgnoreCase("version-1")){
 				 url = data.getUrl() + "radservice";
+					String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+					byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+					String encodedPassword = new String(encoded);
+					String radServiceData = this.processRadiusPost(url, encodedPassword,Json);
 			}
+			
 			else if(data.getProvSystem().equalsIgnoreCase("version-2")){
 				 url = data.getUrl() + "service2";
-			}
-			String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
-			byte[] encoded = Base64.encodeBase64(credentials.getBytes());
-			String encodedPassword = new String(encoded);
-			String radServiceData = this.processRadiusPost(url, encodedPassword,Json);
-			
-			ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_RADSERVICE);
-			
-			if(provisionActions.getIsEnable() == 'Y'){
-				
-				 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), Long.valueOf(0), Long.valueOf(0),
-						 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
+					RadServiceTemp radServiceTemp=RadServiceTemp.fromJson(jsonObject);
+					this.radServuceTempRepository.save(radServiceTemp);
+					jsonObject.put("srvid", radServiceTemp.getserviceId());
+					jsonObject.put("limitul", radServiceTemp.isLimitul());
+					jsonObject.put("limitdl", radServiceTemp.isLimitdl());
+					resultId=radServiceTemp.getserviceId();
+					
+					ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_RADSERVICE);
+					if(provisionActions.getIsEnable() == 'Y'){
+						
+						 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), Long.valueOf(0), Long.valueOf(0),
+								 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
 
-				 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
-						 Long.valueOf(0), Json, "Recieved",
-						 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
+						 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
+								 Long.valueOf(0), jsonObject.toString(), "Recieved",
+								 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
 
-				 processRequest.add(processRequestDetails);
-				 this.processRequestRepository.save(processRequest);
-				
+						 processRequest.add(processRequestDetails);
+						 this.processRequestRepository.save(processRequest);
+					}
 			}
-			return radServiceData;
+			return new CommandProcessingResult(resultId);
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return new CommandProcessingResult(Long.valueOf(-1));
 		} catch (IOException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return new CommandProcessingResult(Long.valueOf(-1));
+		} catch (JSONException e) {
+			return new CommandProcessingResult(Long.valueOf(-1));
 		}
 	}
 	
@@ -374,7 +426,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	}
 	
 	//delete
-	private  String processRadiusDelete(String url, String encodePassword) throws ClientProtocolException, IOException{
+	public  String processRadiusDelete(String url, String encodePassword) throws ClientProtocolException, IOException{
 		
 		 HttpClient httpClient = new DefaultHttpClient();
 		 HttpDelete deleteRequest = new HttpDelete(url);
@@ -406,10 +458,10 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 		}
 
 	@Override
-	public String retrieveRadServiceTemplateData() {
+	public List<RadiusServiceData> retrieveRadServiceTemplateData() {
 		
 		try {
-			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
+			/*JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
 			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
@@ -419,13 +471,48 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			byte[] encoded = Base64.encodeBase64(credentials.getBytes());
 			String encodedPassword = new String(encoded);
 			String radServiceTemplateData = this.processRadiusGet(url, encodedPassword);
-			return radServiceTemplateData;
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-			return e.getMessage();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return e.getMessage();
+			return radServiceTemplateData;*/
+			
+
+
+
+			
+			ServiceDetailsMapper mapper = new ServiceDetailsMapper();
+
+			String sql = "select " + mapper.schema();
+
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+
+		
+
+			
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		} 
+	}
+	
+	private static final class ServiceDetailsMapper implements RowMapper<RadiusServiceData> {
+
+		public String schema() {
+			return "  rs.srvid AS id, rs.srvname AS serviceName,rs.downrate as downRate, s.srvname as nextService,rs.uprate as upRate,rs.nextsrvid as nextServicId," +
+					" rs.trafficunitdl as trafficUnitdl  FROM rm_services rs left join rm_services as s on s.srvid = rs.nextsrvid";
+
+		}
+
+		@Override
+		public RadiusServiceData mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+
+			Long id = rs.getLong("id");
+			String serviceName = rs.getString("serviceName");
+			String nextService = rs.getString("nextService");
+			String downRate = rs.getString("downRate");
+			String upRate = rs.getString("upRate");
+			Long nextServicId = rs.getLong("nextServicId");
+			Long trafficUnitdl = rs.getLong("trafficUnitdl");
+			return new RadiusServiceData(id,serviceName,downRate,upRate,nextServicId,trafficUnitdl,nextService);
+
 		}
 	}
 
