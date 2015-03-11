@@ -915,6 +915,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 							handler = applicationContext.getBean("updateVoucherPinCommandHandler",NewCommandSourceHandler.class);
 						}else if(wrapper.isDelete()){
 							handler = applicationContext.getBean("deleteVoucherPinCommandHandler",NewCommandSourceHandler.class);
+						}else if(wrapper.isCancel()){
+							handler = applicationContext.getBean("cancelVoucherPinCommandHandler",NewCommandSourceHandler.class);
 						}else{
 							throw new UnsupportedCommandException(wrapper.commandName());
 						}
@@ -1176,11 +1178,20 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
             }else if(wrapper.isLinkupAccount()){
             	if(wrapper.isCreate()){
             		 handler = applicationContext.getBean("createLinkupAccountCommandHandler",NewCommandSourceHandler.class);
-            	}
-            	
-            }else {
+            	}else {
             	throw new UnsupportedCommandException(wrapper.commandName());
 		     }
+            }else if(wrapper.isRadService()){
+	            	if(wrapper.isCreate()) {
+				         handler = applicationContext.getBean("createRadServiceCommandHandler",NewCommandSourceHandler.class);
+				     } else if(wrapper.isUpdate()) {
+						 handler = applicationContext.getBean("updateRadServiceCommandHandler",NewCommandSourceHandler.class);
+					 }else if(wrapper.isDelete()){
+						 handler = applicationContext.getBean("deleteRadServiceCommandHandler",NewCommandSourceHandler.class);
+					 } else{
+				           throw new UnsupportedCommandException(wrapper.commandName());
+					 }
+	        }
 	       return handler;
 	}
 }

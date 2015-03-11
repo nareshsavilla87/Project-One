@@ -1,11 +1,8 @@
 package org.mifosplatform.organisation.voucher.service;
 
 import java.text.ParseException;
-import java.util.Map;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.json.JSONObject;
-import org.mifosplatform.billing.discountmaster.exception.DiscountMasterNotFoundException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
@@ -22,15 +19,10 @@ import org.mifosplatform.organisation.voucher.exception.AlreadyProcessedExceptio
 import org.mifosplatform.organisation.voucher.exception.VoucherDetailsNotFoundException;
 import org.mifosplatform.organisation.voucher.exception.VoucherLengthMatchException;
 import org.mifosplatform.organisation.voucher.serialization.VoucherCommandFromApiJsonDeserializer;
-import org.mifosplatform.workflow.eventactionmapping.domain.EventActionMapping;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 
 /**
  * 
@@ -339,6 +331,13 @@ public class VoucherWritePlatformServiceImpl implements
 			handleCodeDataIntegrityIssues(command, dve);
 			return null;
 		}
+	}
+
+	@Override
+	public CommandProcessingResult cancelUpdateVoucherPins(Long entityId,
+			JsonCommand command) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

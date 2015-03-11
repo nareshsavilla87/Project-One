@@ -17,8 +17,6 @@ import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
-import org.mifosplatform.finance.clientbalance.service.ClientBalanceReadPlatformService;
-import org.mifosplatform.finance.clientbalance.service.UpdateClientBalance;
 import org.mifosplatform.finance.payments.domain.ChequePayment;
 import org.mifosplatform.finance.payments.domain.ChequePaymentRepository;
 import org.mifosplatform.finance.payments.domain.Payment;
@@ -30,9 +28,7 @@ import org.mifosplatform.finance.payments.exception.ReceiptNoDuplicateException;
 import org.mifosplatform.finance.payments.serialization.PaymentCommandFromApiJsonDeserializer;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfiguration;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfigurationRepository;
-import org.mifosplatform.infrastructure.configuration.domain.Configuration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -71,7 +67,6 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 	private final ClientBalanceRepository clientBalanceRepository;
 	private final ChequePaymentRepository chequePaymentRepository;
 	private final PaypalEnquireyRepository paypalEnquireyRepository;
-	private final ConfigurationRepository globalConfigurationRepository;
 	private final PaymentGatewayConfigurationRepository paymentGatewayConfigurationRepository;
 	private final PaymentCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final ActionDetailsReadPlatformService actionDetailsReadPlatformService; 
@@ -82,7 +77,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			final PaymentCommandFromApiJsonDeserializer fromApiJsonDeserializer,final ClientBalanceRepository clientBalanceRepository,
 			final ChequePaymentRepository chequePaymentRepository,final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
 			final ActiondetailsWritePlatformService actiondetailsWritePlatformService,final InvoiceRepository invoiceRepository,
-			final ConfigurationRepository globalConfigurationRepository,final PaypalEnquireyRepository paypalEnquireyRepository,
+			final PaypalEnquireyRepository paypalEnquireyRepository,
 			final FromJsonHelper fromApiJsonHelper,final PaymentGatewayConfigurationRepository paymentGatewayConfigurationRepository) {
 		
 		this.context = context;
@@ -94,7 +89,6 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 		this.chequePaymentRepository=chequePaymentRepository;
 		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 		this.paypalEnquireyRepository=paypalEnquireyRepository;
-		this.globalConfigurationRepository=globalConfigurationRepository;
 		this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
 		this.actiondetailsWritePlatformService=actiondetailsWritePlatformService; 
 		
