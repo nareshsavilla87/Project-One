@@ -41,18 +41,18 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 	private final ProvisioningActionsRepository provisioningActionsRepository;
 	private final ProcessRequestRepository processRequestRepository;
 	private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
-	private final RadiusReadPlatformServiceImp radiusReadPlatformServiceImp;
+	private final RadiusReadPlatformService radiusReadPlatformService;
 
 	@Autowired
 	public RadiusWritePlatformServiceImp(final PlatformSecurityContext context,final RadServuceTempRepository radServiceRepository,
 			final ProvisioningActionsRepository provisioningActionsRepository,final ProcessRequestRepository processRequestRepository,
-			final SheduleJobReadPlatformService sheduleJobReadPlatformService,final RadiusReadPlatformServiceImp radiusReadPlatformServiceImp) {
+			final SheduleJobReadPlatformService sheduleJobReadPlatformService,final RadiusReadPlatformService radiusReadPlatformService) {
 		this.context = context;
 		this.radServiceRepository = radServiceRepository;
 		this.provisioningActionsRepository = provisioningActionsRepository;
 		this.processRequestRepository =  processRequestRepository;
 		this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
-		this.radiusReadPlatformServiceImp = radiusReadPlatformServiceImp;
+		this.radiusReadPlatformService = radiusReadPlatformService;
 
 	}
 
@@ -101,7 +101,7 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 		      String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
 		      byte[] encoded = Base64.encodeBase64(credentials.getBytes());
 		      String encodedPassword = new String(encoded);
-			  String radServiceData = this.radiusReadPlatformServiceImp.processRadiusDelete(url, encodedPassword);
+			  String radServiceData = this.radiusReadPlatformService.processRadiusDelete(url, encodedPassword);
 			  return new CommandProcessingResult(radServiceData);
 		 }else{
 		      RadServiceTemp radService=this.radServiceRetrieveById(radServiceId);
