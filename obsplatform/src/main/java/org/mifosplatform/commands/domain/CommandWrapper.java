@@ -932,7 +932,7 @@ public class CommandWrapper {
 			return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("EVENTACTIONMAP");
 		}
 		public boolean isCancel() {
-			return this.actionName.equalsIgnoreCase("CANCEL") && this.entityName.equalsIgnoreCase("PAYMENT");
+			return this.actionName.equalsIgnoreCase("CANCEL");
 		}
 
 		public boolean isChangePlan() {

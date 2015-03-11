@@ -2575,6 +2575,15 @@ public CommandWrapperBuilder deleteVoucherPin(final Long id) {
 	return this;
 }
 
+public CommandWrapperBuilder cancelVoucherPin(Long id) {
+	
+	this.actionName = "CANCEL";
+	this.entityName = "VOUCHER";
+	this.entityId = id;
+	this.href = "/vouchers";
+	return this;
+}
+
 public CommandWrapperBuilder updateRadService(final Long radServiceId) {
 	
 	this.actionName = "UPDATE";

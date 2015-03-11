@@ -915,6 +915,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 							handler = applicationContext.getBean("updateVoucherPinCommandHandler",NewCommandSourceHandler.class);
 						}else if(wrapper.isDelete()){
 							handler = applicationContext.getBean("deleteVoucherPinCommandHandler",NewCommandSourceHandler.class);
+						}else if(wrapper.isCancel()){
+							handler = applicationContext.getBean("cancelVoucherPinCommandHandler",NewCommandSourceHandler.class);
 						}else{
 							throw new UnsupportedCommandException(wrapper.commandName());
 						}

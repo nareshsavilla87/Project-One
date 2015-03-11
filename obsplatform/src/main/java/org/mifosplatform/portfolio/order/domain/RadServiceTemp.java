@@ -7,24 +7,20 @@ import java.util.concurrent.ConcurrentHashMap;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import javax.persistence.Table;
 
 import org.apache.commons.lang.StringUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
-import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "rm_services")
-public class RadServiceTemp extends AbstractAuditableCustom<AppUser, Long> {
-
-	/**
-	 * 
-	 */
+public class RadServiceTemp  {
+	
 	private static final long serialVersionUID = 1L;
-
+	@Id
 	@GeneratedValue
 	@Column(name = "srvid")
 	private Long srvid;
@@ -217,13 +213,14 @@ public class RadServiceTemp extends AbstractAuditableCustom<AppUser, Long> {
 		this. trafficunitdl = trafficunitdl;
 		this.limitcomb = islimitcomb;
 		this.limitexpiration = limitexpiration;
-		this.limitdl = true;
 		this.renew = renew;
 		this.descr = srvname;
 		if(this.limitcomb){
-			this.limitul = true;
-		}else{
 			this.limitul = false;
+			this.limitdl = false;
+		}else{
+			this.limitul = true;
+			this.limitdl = true;
 		}
 		this.limituptime = false;
 		this.poolname="";
@@ -291,6 +288,10 @@ public class RadServiceTemp extends AbstractAuditableCustom<AppUser, Long> {
 	public boolean isLimitul() {
 		return limitul;
 	}
+	
+	public boolean isLimitdl() {
+		return limitdl;
+	}
 
 	public void setLimitul(boolean limitul) {
 		this.limitul = limitul;
@@ -318,6 +319,10 @@ public class RadServiceTemp extends AbstractAuditableCustom<AppUser, Long> {
 
 	}
 
+	public Long getserviceId() {
+		return this.srvid;
+	}
+	
 	public Map<String, Object> update(final JsonCommand command) {
 		
 		final Map<String, Object> actualChanges = new ConcurrentHashMap<String, Object>(1);

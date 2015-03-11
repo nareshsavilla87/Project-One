@@ -79,7 +79,7 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 			        }	
 		         }
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-				       .withEntityId(radService.getId()).with(changes).build();
+				       .withEntityId(radService.getserviceId()).with(changes).build();
 		}catch(final DataIntegrityViolationException dve){
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
@@ -105,7 +105,7 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 			  return new CommandProcessingResult(radServiceData);
 		 }else{
 		      RadServiceTemp radService=this.radServiceRetrieveById(radServiceId);
-		      this.radServiceRepository.delete(radService.getId());
+		      this.radServiceRepository.delete(radService.getserviceId());
 		      ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_REMOVE_RADSERVICE);
 				if(provisionActions.getIsEnable() == 'Y'){
 					 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), Long.valueOf(0), Long.valueOf(0),provisionActions.getProvisioningSystem(),
@@ -115,7 +115,7 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 					 processRequest.add(processRequestDetails);
 					 this.processRequestRepository.save(processRequest);
 			        }
-		      return new CommandProcessingResult(radService.getId());
+		      return new CommandProcessingResult(radService.getserviceId());
 		}
        }catch (IOException e) {
     	   

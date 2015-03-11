@@ -1,15 +1,12 @@
 package org.mifosplatform.finance.adjustment.service;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 import org.mifosplatform.finance.adjustment.domain.Adjustment;
 import org.mifosplatform.finance.adjustment.domain.AdjustmentRepository;
 import org.mifosplatform.finance.adjustment.serializer.AdjustmentCommandFromApiJsonDeserializer;
-import org.mifosplatform.finance.clientbalance.data.ClientBalanceData;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
-import org.mifosplatform.finance.clientbalance.service.ClientBalanceReadPlatformService;
-import org.mifosplatform.finance.clientbalance.service.UpdateClientBalance;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -20,86 +17,57 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class AdjustmentWritePlatformServiceImpl implements
-		AdjustmentWritePlatformService {
+public class AdjustmentWritePlatformServiceImpl implements AdjustmentWritePlatformService {
 
 	private final PlatformSecurityContext context;
 	private final AdjustmentRepository adjustmentRepository;
 	private final ClientBalanceRepository clientBalanceRepository;
-	private final UpdateClientBalance updateClientBalance;
-	private final ClientBalanceReadPlatformService clientBalanceReadPlatformService;
-	private final AdjustmentReadPlatformService adjustmentReadPlatformService;
 	private final AdjustmentCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
 	@Autowired
 	public AdjustmentWritePlatformServiceImpl(final PlatformSecurityContext context,final AdjustmentRepository adjustmentRepository,
-			final ClientBalanceRepository clientBalanceRepository,final AdjustmentCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-			final UpdateClientBalance updateClientBalance,final ClientBalanceReadPlatformService clientBalanceReadPlatformService,
-			final AdjustmentReadPlatformService adjustmentReadPlatformService) {
+			final ClientBalanceRepository clientBalanceRepository,final AdjustmentCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
 		
 		this.context = context;
 		this.adjustmentRepository = adjustmentRepository;
 		this.clientBalanceRepository = clientBalanceRepository;
-		this.updateClientBalance = updateClientBalance;
-		this.clientBalanceReadPlatformService = clientBalanceReadPlatformService;
-		this.adjustmentReadPlatformService = adjustmentReadPlatformService;
 		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 	}
 
 
 	@Transactional
 	@Override
-	public Long createAdjustment(final Long id2, final Long id, final Long clientId, final JsonCommand command) {
-		// TODO Auto-generated method stub
+	public CommandProcessingResult createAdjustment(final JsonCommand command) {
 
 		try {
+			
 			this.context.authenticatedUser();
-			Adjustment adjustment = null;
-			adjustment = Adjustment.fromJson(command);
-			ClientBalance clientBalance = null;
-			if (id != null){
-				clientBalance = clientBalanceRepository.findOne(id);
-			}
-
-			if (clientBalance != null) {
-			clientBalance = updateClientBalance	.doUpdateAdjustmentClientBalance(command, clientBalance);
-
-			} else if (clientBalance == null) {
-				clientBalance = updateClientBalance.createAdjustmentClientBalance(command, clientBalance);
-			}
-
-			updateClientBalance.saveClientBalanceEntity(clientBalance);
-
-			this.adjustmentRepository.saveAndFlush(adjustment);
-			return adjustment.getId();
-		} catch (DataIntegrityViolationException dve) {
-			return Long.valueOf(-1);
-		}
-	}
-
-	@Override
-	public CommandProcessingResult createAdjustments(final JsonCommand command) {
-
-		try {
-			context.authenticatedUser();
-
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
-			final List<ClientBalanceData> clientBalancedatas = clientBalanceReadPlatformService.retrieveAllClientBalances(command.entityId());
-			final List<ClientBalanceData> adjustmentBalancesDatas = adjustmentReadPlatformService.retrieveAllAdjustments(command.entityId());
-			Long id = Long.valueOf(-1);
-			if (clientBalancedatas.size() == 1 && adjustmentBalancesDatas.size() == 1){
-				id = createAdjustment(clientBalancedatas.get(0).getId(),
-						adjustmentBalancesDatas.get(0).getId(),
-						command.entityId(), command);
-			}
-			else{
-				id = createAdjustment(command.entityId(), command.entityId(),
-						command.entityId(), command);
-			}
+			Adjustment adjustment = Adjustment.fromJson(command);
+			ClientBalance clientBalance = null;
+			BigDecimal balance=BigDecimal.ZERO;
+			clientBalance = clientBalanceRepository.findByClientId(adjustment.getClientId());
+			this.adjustmentRepository.saveAndFlush(adjustment);
+			
+			boolean isWalletPayment=command.booleanPrimitiveValueOfParameterNamed("isWalletPayment");
+			if (clientBalance != null) {
 
+				clientBalance.updateBalance(adjustment.getAdjustmentType(),adjustment.getAmountPaid(),isWalletPayment?'Y':'N');
+			} else if (clientBalance == null) {
+				
+				   if("CREDIT".equalsIgnoreCase(adjustment.getAdjustmentType())){
+				       balance=BigDecimal.ZERO.subtract(adjustment.getAmountPaid());
+				   }else{
+					    balance=BigDecimal.ZERO.add(adjustment.getAmountPaid());
+				   }
+					   
+					clientBalance =ClientBalance.create(adjustment.getClientId(),balance,isWalletPayment?'Y':'N');
+			}
+                     this.clientBalanceRepository.saveAndFlush(clientBalance);
 			return new CommandProcessingResultBuilder()
-					.withCommandId(command.commandId()).withEntityId(id).withClientId(command.entityId())
-					.build();
+			.withCommandId(command.commandId()).withEntityId(adjustment.getId()).withClientId(command.entityId())
+			.build();
+			
 		} catch (DataIntegrityViolationException dve) {
 			return CommandProcessingResult.empty();
 		}
