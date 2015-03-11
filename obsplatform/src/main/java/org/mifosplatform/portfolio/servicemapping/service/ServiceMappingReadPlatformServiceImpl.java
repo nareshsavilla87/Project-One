@@ -58,7 +58,7 @@ public class ServiceMappingReadPlatformServiceImpl implements
 
 	public Page<ServiceMappingData> getServiceMapping(SearchSqlQuery searchCodes) {
 		ServiceMappingMapper mapper = new ServiceMappingMapper();
-		String sql = "Select " + mapper.schema() + " ORDER BY ISNULL(ps.sort_by), ps.sort_by ASC ";
+		String sql = "select SQL_CALC_FOUND_ROWS " + mapper.schema() + " ORDER BY ISNULL(ps.sort_by), ps.sort_by ASC ";
 		StringBuilder sqlBuilder = new StringBuilder(200);
 		sqlBuilder.append(sql);
 		if (searchCodes.isLimited()) {
