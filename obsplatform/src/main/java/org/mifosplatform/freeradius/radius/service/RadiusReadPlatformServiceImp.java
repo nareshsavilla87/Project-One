@@ -314,7 +314,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	
 	
 	@Override
-	public String retrieveRadServiceDetail(final Long radServiceId) {
+	public RadiusServiceData retrieveRadServiceDetail(final Long radServiceId) {
 
 		try {
 
@@ -322,55 +322,69 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
-			String url = data.getUrl() + "radservice/"+radServiceId;
-			String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
-			byte[] encoded = Base64.encodeBase64(credentials.getBytes());
-			String encodedPassword = new String(encoded);
-			String radServiceData = this.processRadiusGet(url, encodedPassword);
-			return radServiceData;
-		} catch (ClientProtocolException e) {
-			e.printStackTrace();
-			
-			return e.getMessage();
-		} catch (IOException e) {
-			e.printStackTrace();
-			return e.getMessage();
-		}
-
-	}
-	
-	@Override
-	public String deleteRadService(final Long radServiceId) {
-
-		try {
-			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
-			if(data == null){
-				throw new RadiusDetailsNotFoundException();
-			}
-			String url = "";
+			RadiusServiceData radServiceData=null;
 			if(data.getProvSystem().equalsIgnoreCase("version-1")){
-			  url = data.getUrl() + "radservice/"+radServiceId;
+			       String url = data.getUrl() + "radservice/"+radServiceId;
+			       String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+			       byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+			       String encodedPassword = new String(encoded);
+			       String radService = this.processRadiusGet(url, encodedPassword);
+			      radServiceData= new RadiusServiceData(data.getProvSystem().toLowerCase(),new JSONObject(radService));
+			       
+			}else if(data.getProvSystem().equalsIgnoreCase("version-2")){
+				try{
+					final RadServiceMapper mapper=new RadServiceMapper();
+					String sql = "select " + mapper.schema() + "where rs.srvid = ? ";
+					radServiceData = this.jdbcTemplate.queryForObject(sql, mapper,new Object[] { radServiceId });
+				}catch(EmptyResultDataAccessException e){
+					return null;
+				}
 			}
-			/*else if(data.getProvSystem().equalsIgnoreCase("version-2")){
-				url = data.getUrl() + "radservice/"+radServiceId;
-			}*/
-			String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
-			byte[] encoded = Base64.encodeBase64(credentials.getBytes());
-			String encodedPassword = new String(encoded);
-			String radServiceData = this.processRadiusDelete(url, encodedPassword);
-			return radServiceData;
+		 return radServiceData;
+		 
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return null;
 		} catch (IOException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			 return null;
+		} catch (JSONException e) {
+			e.printStackTrace();
+			 return null;
 		}
 
 	}
 	
+	private static final class RadServiceMapper implements RowMapper<RadiusServiceData> {
+
+   
+	 public String schema() {
+		
+	      	return  "  rs.srvid AS id, rs.srvname AS serviceName,rs.downrate as downRate,rs.uprate as upRate,rs.nextsrvid as nextServiceId," +
+					" rs.trafficunitdl as trafficUnitdl ,limitcomb as limitComb,limitexpiration as limitExpiration,renew as renew FROM rm_services rs ";
+       }
+
+	@Override
+	public RadiusServiceData mapRow(ResultSet rs, int rowNum)	throws SQLException {
+
+		final Long id = rs.getLong("id");
+		final String serviceName = rs.getString("serviceName");
+		final String downRate = rs.getString("downRate");
+		final String upRate = rs.getString("upRate");
+		final Long trafficUnitdl = rs.getLong("trafficUnitdl");
+		final Long nextServiceId = rs.getLong("nextServiceId");
+		final Long limitComb = rs.getLong("limitComb");
+		final Long limitExpiration = rs.getLong("limitExpiration");
+		final Long renew = rs.getLong("renew");
+
+		return new RadiusServiceData(id, serviceName,downRate, upRate, trafficUnitdl, nextServiceId,limitComb,limitExpiration,renew);
+
+	}
+	}
+
 	//get
-	private  String processRadiusGet(String url, String encodePassword) throws ClientProtocolException, IOException{
+	@Override
+	public  String processRadiusGet(String url, String encodePassword) throws ClientProtocolException, IOException{
 		
 		 HttpClient httpClient = new DefaultHttpClient();
 		 HttpGet getRequest = new HttpGet(url);
@@ -400,9 +414,9 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			return output1;
 		 
 		}
-	
 	//post
-	private  String processRadiusPost(String url, String encodePassword, String data) throws IOException{
+	@Override
+	public  String processRadiusPost(String url, String encodePassword, String data) throws IOException{
 		
 		HttpClient httpClient = new DefaultHttpClient();
 		StringEntity se = new StringEntity(data.trim());
@@ -472,7 +486,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 		}
 
 	@Override
-	public List<RadiusServiceData> retrieveRadServiceTemplateData() {
+	public List<RadiusServiceData> retrieveRadServiceTemplateData(final Long radServiceId) {
 		
 		try {
 			/*JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
@@ -487,19 +501,15 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			String radServiceTemplateData = this.processRadiusGet(url, encodedPassword);
 			return radServiceTemplateData;*/
 			
-
-
-
-			
 			ServiceDetailsMapper mapper = new ServiceDetailsMapper();
 
 			String sql = "select " + mapper.schema();
+			if(radServiceId>=1){
+				sql = sql + " where rs.srvid <> ?";
+			}
 
-			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {radServiceId});
 
-		
-
-			
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		} 
@@ -514,9 +524,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 		}
 
 		@Override
-		public RadiusServiceData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+		public RadiusServiceData mapRow(final ResultSet rs,final int rowNum)throws SQLException {
 
 			Long id = rs.getLong("id");
 			String serviceName = rs.getString("serviceName");
