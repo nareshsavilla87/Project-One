@@ -3,7 +3,6 @@ package org.mifosplatform.freeradius.radius.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Date;
@@ -18,14 +17,11 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.freeradius.radius.data.RadiusServiceData;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.portfolio.order.domain.RadServiceTemp;
@@ -349,11 +345,12 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	
 	private static final class RadServiceMapper implements RowMapper<RadiusServiceData> {
 
-       public String schema() {
+   
+	 public String schema() {
+		
 	      	return  "  rs.srvid AS id, rs.srvname AS serviceName,rs.downrate as downRate,rs.uprate as upRate,rs.nextsrvid as nextServiceId," +
-					" rs.trafficunitdl as trafficUnitdl ,limitcomb as limitComb,limitexpiration as limitExpiration FROM rm_services rs ";
-
-      }
+					" rs.trafficunitdl as trafficUnitdl ,limitcomb as limitComb,limitexpiration as limitExpiration,renew as renew FROM rm_services rs ";
+       }
 
 	@Override
 	public RadiusServiceData mapRow(ResultSet rs, int rowNum)	throws SQLException {
@@ -366,8 +363,9 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 		final Long nextServiceId = rs.getLong("nextServiceId");
 		final Long limitComb = rs.getLong("limitComb");
 		final Long limitExpiration = rs.getLong("limitExpiration");
+		final Long renew = rs.getLong("renew");
 
-		return new RadiusServiceData(id, serviceName,downRate, upRate, trafficUnitdl, nextServiceId,limitComb,limitExpiration);
+		return new RadiusServiceData(id, serviceName,downRate, upRate, trafficUnitdl, nextServiceId,limitComb,limitExpiration,renew);
 
 	}
 	}
@@ -476,7 +474,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 		}
 
 	@Override
-	public List<RadiusServiceData> retrieveRadServiceTemplateData() {
+	public List<RadiusServiceData> retrieveRadServiceTemplateData(final Long radServiceId) {
 		
 		try {
 			/*JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
@@ -494,8 +492,11 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			ServiceDetailsMapper mapper = new ServiceDetailsMapper();
 
 			String sql = "select " + mapper.schema();
+			if(radServiceId>=1){
+				sql = sql + " where rs.srvid <> ?";
+			}
 
-			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {radServiceId});
 
 		} catch (EmptyResultDataAccessException e) {
 			return null;

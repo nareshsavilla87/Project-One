@@ -135,7 +135,7 @@ public class RadiusAPiResource {
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		final RadiusServiceData radServiceData = this.radiusReadPlatformService.retrieveRadServiceDetail(radServiceId);
 		if(settings.isTemplate()){
-		final List<RadiusServiceData> radServiceTemplateData = this.radiusReadPlatformService.retrieveRadServiceTemplateData();
+		final List<RadiusServiceData> radServiceTemplateData = this.radiusReadPlatformService.retrieveRadServiceTemplateData(radServiceId);
 		radServiceData.setRadServiceTemplateData(radServiceTemplateData);
 		}
 		return this.toApiJsonSerializer.serialize(settings,radServiceData,RESPONSE_DATA_PARAMETERS);
@@ -188,7 +188,7 @@ public class RadiusAPiResource {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		final List<RadiusServiceData> radServiceTemplateData = this.radiusReadPlatformService.retrieveRadServiceTemplateData();
+		final List<RadiusServiceData> radServiceTemplateData = this.radiusReadPlatformService.retrieveRadServiceTemplateData(Long.valueOf(-1));
 		return this.toApiJsonSerializer.serialize(settings, radServiceTemplateData, RESPONSE_DATA_PARAMETERS);
 	}
 

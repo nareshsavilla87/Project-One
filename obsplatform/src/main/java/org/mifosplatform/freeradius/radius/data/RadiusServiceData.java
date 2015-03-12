@@ -17,10 +17,10 @@ public class RadiusServiceData {
 	private boolean limitExpiration;
 	private String radVersion;
 	private List<RadiusServiceData> radServiceTemplateData;
+	private boolean renew;
 
-	public RadiusServiceData(Long id, String serviceName, String downRate,
-			String upRate, Long nextServicId, Long trafficUnitdl,
-			String nextService) {
+	public RadiusServiceData(Long id, String serviceName, String downRate,String upRate, Long nextServicId,
+			Long trafficUnitdl,String nextService) {
 
 		this.id = id;
 		this.serviceName = serviceName;
@@ -31,10 +31,8 @@ public class RadiusServiceData {
 		this.nextService = nextService;
 	}
 
-	public RadiusServiceData(final Long id, final String serviceName,
-			final String downRate, final String upRate,
-			final Long trafficUnitdl, final Long nextServiceId,
-			final Long limitComb, final Long limitExpiration) {
+	public RadiusServiceData(final Long id, final String serviceName,final String downRate, final String upRate,
+			final Long trafficUnitdl, final Long nextServiceId,final Long limitComb, final Long limitExpiration,final Long renew) {
 
 		this.id = id;
 		this.serviceName = serviceName;
@@ -44,6 +42,7 @@ public class RadiusServiceData {
 		this.trafficUnitdl = trafficUnitdl;
 		this.limitComb = (limitComb == 0 ? false : true);
 		this.limitExpiration = (limitExpiration == 0 ? false : true);
+		this.renew = (renew == 0 ? false : true);
 
 	}
 
@@ -111,5 +110,15 @@ public class RadiusServiceData {
 	public void setRadServiceTemplateData(List<RadiusServiceData> radServiceTemplateData) {
 		this.radServiceTemplateData = radServiceTemplateData;
 	}
+
+	public boolean isRenew() {
+		return renew;
+	}
+
+	public void setRenew(boolean renew) {
+		this.renew = renew;
+	}
+	
+	
 
 }
