@@ -322,7 +322,7 @@ public class VoucherWritePlatformServiceImpl implements VoucherWritePlatformServ
 	}
 
 	@Override
-	public CommandProcessingResult cancelUpdateVoucherPins(Long entityId,JsonCommand command) {
+	public CommandProcessingResult cancelVoucherPins(Long entityId,JsonCommand command) {
               
 		try{
 			this.context.authenticatedUser();
@@ -340,11 +340,14 @@ public class VoucherWritePlatformServiceImpl implements VoucherWritePlatformServ
 			}else if(voucher.getPinType().equalsIgnoreCase(TYPE_PRODUCT)){
 				throw new UnableToCancelVoucherException();
 			}
-			voucherDetails.setCancelReason(command.stringValueOfParameterNamed("cancelReason"));
-			this.voucherDetailsRepository.save(voucherDetails);
+			
+			
 			 JournalVoucher journalVoucher=new JournalVoucher(voucherDetails.getId(),DateUtils.getDateOfTenant(),"VOUCHER CANCEL",null,
 					 value.doubleValue(),voucherDetails.getClientId());
 				this.journalvoucherRepository.save(journalVoucher);
+				
+				voucherDetails.update(command.stringValueOfParameterNamed("cancelReason"));
+				this.voucherDetailsRepository.save(voucherDetails);
 				
 		}catch(DataIntegrityViolationException dve){
 			

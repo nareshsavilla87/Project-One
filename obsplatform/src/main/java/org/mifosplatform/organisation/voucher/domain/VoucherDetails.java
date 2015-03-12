@@ -130,10 +130,15 @@ public class VoucherDetails extends AbstractPersistable<Long> {
 		this.isDeleted = isDeleted;
 	}
 
-	public void setCancelReason(String cancelReason) {
-		this.cancelReason=cancelReason;
+	public void update(String cancelReason) {
+		this.cancelReason = cancelReason;
+		this.clientId = null;
+		this.saleDate = null;
+		this.status = "NEW";
 		
-	}	
+	}
+
+		
 	
 	
 

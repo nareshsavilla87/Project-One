@@ -36,6 +36,7 @@ import org.mifosplatform.infrastructure.core.data.MediaEnumoptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
@@ -200,7 +201,7 @@ public class MediaAssestApiResource {
     	 final List<MediaassetAttribute> data   = this.mediaAssetReadPlatformService.retrieveMediaAttributes();
     	 final List<MediaassetAttribute> mediaFormat = this.mediaAssetReadPlatformService.retrieveMediaFormatType();
     	 final List<MediaEnumoptionData> mediaTypeData = this.mediaAssetReadPlatformService.retrieveMediaTypeData();
-    	 final Collection<MCodeData> eventCategeorydata = this.mCodeReadPlatformService.getCodeValue("Event Category");
+    	 final Collection<MCodeData> eventCategeorydata = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_EVENT_CATEGORY);
     	 final List<McodeData> mediaCategeorydata=this.mediaAssetReadPlatformService.retrieveMedaiCategory();
     	 final List<McodeData> languageCategeory=this.mediaAssetReadPlatformService.retrieveLanguageCategeories();
     	 final List<McodeData> contentProviderData=this.mediaAssetReadPlatformService.retrieveContentProviders();
@@ -222,7 +223,7 @@ public class MediaAssestApiResource {
          final List<MediaassetAttribute> data = this.mediaAssetReadPlatformService.retrieveMediaAttributes();
          final List<MediaassetAttribute> mediaFormat = this.mediaAssetReadPlatformService.retrieveMediaFormatType();
          final List<MediaEnumoptionData> mediaTypeData = this.mediaAssetReadPlatformService.retrieveMediaTypeData();
-         final Collection<MCodeData> eventCategeorydata = this.mCodeReadPlatformService.getCodeValue("Event Category");
+         final Collection<MCodeData> eventCategeorydata = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_EVENT_CATEGORY);
          final List<McodeData> mediaCategeorydata = this.mediaAssetReadPlatformService.retrieveMedaiCategory();
          final List<McodeData> mediaLanguageData = this.mediaAssetReadPlatformService.retrieveLanguageCategeories();
          final List<McodeData> contentProviderData = this.mediaAssetReadPlatformService.retrieveContentProviders();
