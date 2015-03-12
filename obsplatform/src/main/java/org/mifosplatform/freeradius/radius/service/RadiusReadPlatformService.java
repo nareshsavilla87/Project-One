@@ -39,5 +39,4 @@ public interface RadiusReadPlatformService {
    String processRadiusDelete(String url, String encodePassword) throws ClientProtocolException, IOException;
 
 
-
 }
