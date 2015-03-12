@@ -19,7 +19,6 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 @Table(name = "rm_services")
 public class RadServiceTemp  {
 	
-	private static final long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue
 	@Column(name = "srvid")
@@ -333,13 +332,6 @@ public class RadServiceTemp  {
 			actualChanges.put(srvNameParam, newValue);
 			this.srvname = StringUtils.defaultIfEmpty(newValue, null);	
 		}
-	/*	
-	 * 		final String value = "value";
-	 *      if (command.isChangeInStringParameterNamed(value,this.val)) {
-			final String newValue = command.stringValueOfParameterNamed(value);
-			actualChanges.put(value, newValue);
-			this.value = StringUtils.defaultIfEmpty(newValue, null);
-		}*/
 		
 		final String downrate = "downrate";
 		if (command.isChangeInLongParameterNamed(downrate, this.downrate)) {
