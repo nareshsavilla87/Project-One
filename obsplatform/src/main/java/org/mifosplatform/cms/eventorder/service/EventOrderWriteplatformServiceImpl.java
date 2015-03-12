@@ -222,7 +222,7 @@ private Long getUserId() {
 			return new CommandProcessingResultBuilder().withResourceIdAsString(eventPricing.getPrice().toString()).build();
 	}
 	
-	
+	@Override
 	public boolean checkClientBalance(Double bookedPrice, Long clientId, boolean isWalletEnable) {
 		
 		  boolean isBalanceAvailable = false;
@@ -242,7 +242,7 @@ private Long getUserId() {
 			  }
 		  }
 		  if (!isBalanceAvailable) {
-				throw new InsufficientAmountException();
+				throw new InsufficientAmountException("bookevent");
 			}
 		  return isBalanceAvailable;
 	
