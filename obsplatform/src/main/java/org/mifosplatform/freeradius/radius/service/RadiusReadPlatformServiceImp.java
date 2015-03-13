@@ -364,10 +364,9 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 		final Long limitComb = rs.getLong("limitComb");
 		final Long limitExpiration = rs.getLong("limitExpiration");
 		final Long renew = rs.getLong("renew");
-
 		return new RadiusServiceData(id, serviceName,downRate, upRate, trafficUnitdl, nextServiceId,limitComb,limitExpiration,renew);
-
-	}
+		
+	   }
 	}
 
 	//get
@@ -492,13 +491,10 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			ServiceDetailsMapper mapper = new ServiceDetailsMapper();
 
 			String sql = "select " + mapper.schema();
-			if(radServiceId>=1){
-				sql = sql + " where rs.srvid <> ?";
-			}
-
+			
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {radServiceId});
 
-		} catch (EmptyResultDataAccessException e) {
+		}catch (EmptyResultDataAccessException e) {
 			return null;
 		} 
 	}
@@ -507,20 +503,20 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 		public String schema() {
 			return "  rs.srvid AS id, rs.srvname AS serviceName,rs.downrate as downRate, s.srvname as nextService,rs.uprate as upRate,rs.nextsrvid as nextServicId," +
-					" rs.trafficunitdl as trafficUnitdl  FROM rm_services rs left join rm_services as s on s.srvid = rs.nextsrvid";
+					" rs.trafficunitdl as trafficUnitdl  FROM rm_services rs left join rm_services as s on s.srvid = rs.nextsrvid  where rs.srvid <> ?";
 
 		}
 
 		@Override
 		public RadiusServiceData mapRow(final ResultSet rs,final int rowNum)throws SQLException {
 
-			Long id = rs.getLong("id");
-			String serviceName = rs.getString("serviceName");
-			String nextService = rs.getString("nextService");
-			String downRate = rs.getString("downRate");
-			String upRate = rs.getString("upRate");
-			Long nextServicId = rs.getLong("nextServicId");
-			Long trafficUnitdl = rs.getLong("trafficUnitdl");
+			final Long id = rs.getLong("id");
+			final String serviceName = rs.getString("serviceName");
+			final String nextService = rs.getString("nextService");
+			final String downRate = rs.getString("downRate");
+			final String upRate = rs.getString("upRate");
+			final Long nextServicId = rs.getLong("nextServicId");
+			final Long trafficUnitdl = rs.getLong("trafficUnitdl");
 			return new RadiusServiceData(id,serviceName,downRate,upRate,nextServicId,trafficUnitdl,nextService);
 
 		}
