@@ -76,7 +76,6 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 	private final ClientBalanceRepository clientBalanceRepository;
 	private final ChequePaymentRepository chequePaymentRepository;
 	private final PaypalEnquireyRepository paypalEnquireyRepository;
-	private final ConfigurationRepository globalConfigurationRepository;
 	private final PaymentGatewayConfigurationRepository paymentGatewayConfigurationRepository;
 	private final PaymentCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final ActionDetailsReadPlatformService actionDetailsReadPlatformService; 
@@ -104,7 +103,6 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 		this.chequePaymentRepository=chequePaymentRepository;
 		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 		this.paypalEnquireyRepository=paypalEnquireyRepository;
-		this.globalConfigurationRepository=globalConfigurationRepository;
 		this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
 		this.actiondetailsWritePlatformService=actiondetailsWritePlatformService; 
 		this.clientRepository = clientRepository;

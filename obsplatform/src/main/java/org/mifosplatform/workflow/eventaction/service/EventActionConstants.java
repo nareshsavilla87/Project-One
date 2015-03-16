@@ -8,6 +8,7 @@ public class EventActionConstants {
 	public static final String EVENT_CREATE_LIVE_EVENT="Create Live Event";
 	public static final String EVENT_CLOSE_CLIENT="Close Client";
 	public static final String EVENT_CREATE_ORDER="Order Booking";
+	public static final String EVENT_CHANGE_ORDER="change order";
 	public static final String EVENT_ACTIVE_ORDER="Order activation";
 	public static final String EVENT_ORDER_RENEWAL="Order Renewal";
 	public static final String EVENT_CREATE_TICKET="Create Ticket";
@@ -26,6 +27,7 @@ public class EventActionConstants {
 	public static final String ACTION_ACTIVE="Active";
 	public static final String ACTION_DISCONNECT="DISCONNECTED";
 	public static final String ACTION_CREATE_PLAN="CREATE PLAN";
+	public static final String ACTION_CHNAGE_PLAN="CHANGE PLAN";
 	public static final String ACTION_SUSPEND="SUSPEND";
 	public static final String ACTION_SEND_PROVISION="SEND PROVISION";
 	public static final String ACTION_SEND_EMAIL="Send Email";

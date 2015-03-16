@@ -262,7 +262,7 @@ public class EntitlementReadPlatformServiceImpl implements
 				   "  bcu.zebra_subscriber_id as subscriberId ,ord.id as orderId,ord.start_date as startDate,ord.end_date as endDate " +
 				   "  from m_client c" +
 				   "  LEFT JOIN m_office o ON (o.id = c.office_id)" +
-				   "  Right JOIN b_process_request bpr ON (c.id = bpr.client_id )" +
+				   "  RIGHT JOIN b_process_request bpr ON (c.id = bpr.client_id )" +
 				   "  LEFT JOIN b_process_request_detail bprd ON (bpr.id = bprd.processrequest_id )" +
 				   "  LEFT JOIN b_client_address bca ON (c.id=bca.client_id and address_key='PRIMARY')" +
 				   "  LEFT JOIN b_clientuser  bcu ON (c.id=bcu.client_id )" +
