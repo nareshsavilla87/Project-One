@@ -501,8 +501,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			return radServiceTemplateData;*/
 			
 			ServiceDetailsMapper mapper = new ServiceDetailsMapper();
-
-			String sql = "select " + mapper.schema() + " where rs.srvid <> ? ";
+			String sql = "select " + mapper.schema() + " where rs.srvid <> ?";
 			
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {radServiceId});
 

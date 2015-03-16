@@ -29,6 +29,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
@@ -109,7 +110,7 @@ public class DiscountMasterAPiResource {
 
 	private DiscountMasterData handleTemplateData() {
 		final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
-		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue("type");
+		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
 		return new DiscountMasterData(statusData, discountTypeData);
 	}
 
@@ -144,7 +145,7 @@ public class DiscountMasterAPiResource {
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		if(settings.isTemplate()){
 		final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
-		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue("type");
+		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
 		discountMasterData.setStatusData(statusData);
 		discountMasterData.setDiscountTypeData(discountTypeData);
 	    }

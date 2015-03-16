@@ -31,11 +31,9 @@ public class VoucherCommandFromApiJsonDeserializer {
 	/**
 	 * The parameters supported for this command.
 	 */
-	private final Set<String> supportedParameters = new HashSet<String>(
-			Arrays.asList("id", "batchName", "length",
-					"beginWith", "pinCategory", "pinType", "quantity",
-					"serialNo", "expiryDate", "dateFormat", "pinValue",
-					"pinNO", "locale", "pinExtention","officeId","priceId","status","voucherIds"));
+	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "batchName", "length",
+					"beginWith", "pinCategory", "pinType", "quantity","serialNo", "expiryDate", "dateFormat", "pinValue",
+					"pinNO", "locale", "pinExtention","officeId","priceId","status","voucherIds","cancelReason"));
 	
 	private final FromJsonHelper fromApiJsonHelper;
 
@@ -170,5 +168,26 @@ public void validateForUpdate(final String json, Boolean isUpdateVoucher) {
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 
 	}
+
+public void validateForCancel(String json, boolean b) {
+	
+	if (StringUtils.isBlank(json)) {
+		throw new InvalidJsonException();
+	}
+
+	final Type typeOfMap = new TypeToken<Map<String, Object>>() {
+	}.getType();
+	
+	fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+
+	final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+	final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("voucher");
+
+	 final JsonElement element = fromApiJsonHelper.parse(json);
+		final String cancelReason = fromApiJsonHelper.extractStringNamed("cancelReason", element);
+		baseDataValidator.reset().parameter("cancelReason").value(cancelReason).notBlank();
+	throwExceptionIfValidationWarningsExist(dataValidationErrors);
+
+}
 
 }

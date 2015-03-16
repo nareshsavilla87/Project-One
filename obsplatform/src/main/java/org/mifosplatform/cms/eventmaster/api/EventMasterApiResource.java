@@ -39,6 +39,7 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -121,7 +122,7 @@ public class EventMasterApiResource {
 	    final List<MediaAssetData> mediaData   = this.assetReadPlatformService.retrieveAllAssetdata();
 		final List<EnumOptionData> statusData = this.eventMasterReadPlatformService.retrieveNewStatus();
 		final List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();
-		final Collection<MCodeData> eventCategeorydata = this.mCodeReadPlatformService.getCodeValue("Event Category");
+		final Collection<MCodeData> eventCategeorydata = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_EVENT_CATEGORY);
 		final EventMasterData singleEvent  = new EventMasterData(mediaData, statusData, null, chargeDatas, eventCategeorydata);
 		
 		return singleEvent;	
@@ -147,7 +148,7 @@ public class EventMasterApiResource {
 		final List<EnumOptionData> statusData = this.eventMasterReadPlatformService.retrieveNewStatus();
 		final List<EventDetailsData> eventdetails = this.eventMasterReadPlatformService.retrieveEventDetailsData(eventId);
 		final List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();
-		final Collection<MCodeData> eventCategeorydata = this.mCodeReadPlatformService.getCodeValue("Event Category");
+		final Collection<MCodeData> eventCategeorydata = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_EVENT_CATEGORY);
 		final EventMasterData event = this.eventMasterReadPlatformService.retrieveEventMasterDetails(eventId);
 		
 		int mediaDataSize = mediaData.size();

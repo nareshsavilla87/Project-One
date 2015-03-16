@@ -602,6 +602,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	@Override
 	public CommandProcessingResult postDetailsForProvisioning(Long clientId,Long resourceId, String requestType,String provisioningSystem,String hardwareId) {
 		
+
 		  Long defaultValue=Long.valueOf(0);
 		  JSONObject jsonObject = new JSONObject();
 		  if(requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CREATE_AGENT)){

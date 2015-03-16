@@ -38,6 +38,7 @@ import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -146,7 +147,7 @@ public class ClientProspectApiResource {
 		
 		context.authenticatedUser().validateHasReadPermission(RESOURCETYPE);
 		
-		final Collection<MCodeData> sourceOfPublicityData = codeReadPlatformService.getCodeValue("Source Type");
+		final Collection<MCodeData> sourceOfPublicityData = codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_SOURCE_TYPE);
 		final ClientProspectData clientProspectData = new ClientProspectData();// .clientProspectReadPlatformService.retriveClientProspectTemplate();
 		final Collection<ProspectPlanCodeData> planData = clientProspectReadPlatformService.retrivePlans();
 		clientProspectData.setPlanData(planData);
@@ -194,7 +195,7 @@ public class ClientProspectApiResource {
 		AppUser user = context.authenticatedUser();
 		user.validateHasReadPermission(RESOURCETYPE);
 		final ClientProspectData clientData = clientProspectReadPlatformService.retriveSingleClient(prospectId, user.getId());
-		final Collection<MCodeData> sourceOfPublicityData = codeReadPlatformService.getCodeValue("Source Type");
+		final Collection<MCodeData> sourceOfPublicityData = codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_SOURCE_TYPE);
 		final Collection<ProspectPlanCodeData> planData = clientProspectReadPlatformService.retrivePlans();
 		clientData.setPlanData(planData);
 		clientData.setSourceOfPublicityData(sourceOfPublicityData);
@@ -242,7 +243,7 @@ public class ClientProspectApiResource {
 			@PathParam("prospectId") final Long prospectId) {
 		
 		context.authenticatedUser().validateHasReadPermission(RESOURCETYPE);
-		final Collection<MCodeData> mCodeData = codeReadPlatformService.getCodeValue("Status Remark");
+		final Collection<MCodeData> mCodeData = codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_STATUS_REMARK);
 		final List<ProspectStatusRemarkData> statusRemarkData = new ArrayList<ProspectStatusRemarkData>();
 		
 		for (MCodeData codeData : mCodeData) {
@@ -291,7 +292,7 @@ public class ClientProspectApiResource {
 		user.validateHasReadPermission(RESOURCETYPE);
 		
 		final ProspectDetailData clientProspectData = this.clientProspectReadPlatformService.retriveClientProspect(prospectId);
-		final Collection<MCodeData> mCodeData = codeReadPlatformService.getCodeValue("Call Status");
+		final Collection<MCodeData> mCodeData = codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CALL_STATUS);
 		final List<ProspectDetailCallStatus> callStatusData = new ArrayList<ProspectDetailCallStatus>();
 		final List<ProspectDetailAssignedToData> assignedToData = clientProspectReadPlatformService.retrieveUsers();
 		

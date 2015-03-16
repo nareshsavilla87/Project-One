@@ -119,21 +119,21 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 	}
 	
 	@Override
-	public void updateClientBalance(Invoice invoice, Long clientId,boolean isWalletEnable) {
+	public void updateClientBalance(BigDecimal amount, Long clientId,boolean isWalletEnable) {
 		
 		BigDecimal balance=null;
 		
 		ClientBalance clientBalance = this.clientBalanceRepository.findByClientId(clientId);
 		
 		if(clientBalance == null){
-			clientBalance =new ClientBalance(clientId, invoice.getInvoiceAmount(), isWalletEnable?'Y':'N');
+			clientBalance =new ClientBalance(clientId, amount, isWalletEnable?'Y':'N');
 		}else{
 			if(isWalletEnable){
-				balance=clientBalance.getWalletAmount().add( invoice.getInvoiceAmount());
+				balance=clientBalance.getWalletAmount().add(amount);
 				clientBalance.setWalletAmount(balance);
 				
 			}else{
-				balance=clientBalance.getBalanceAmount().add( invoice.getInvoiceAmount());
+				balance=clientBalance.getBalanceAmount().add(amount);
 				clientBalance.setBalanceAmount(balance);
 			}
 			
@@ -146,7 +146,7 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		if (officeAdditionalInfo != null) {
 			if (officeAdditionalInfo.getIsCollective()) {
 				System.out.println(officeAdditionalInfo.getIsCollective());
-				this.updatePartnerBalance(client.getOffice(), invoice.getInvoiceAmount());
+				this.updatePartnerBalance(client.getOffice(), amount);
 
 			}
 		}

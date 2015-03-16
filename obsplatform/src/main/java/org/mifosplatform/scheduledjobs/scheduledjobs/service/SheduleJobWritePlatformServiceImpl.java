@@ -60,6 +60,7 @@ import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.jobs.service.RadiusJobConstants;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.message.data.BillingMessageDataForProcessing;
@@ -335,7 +336,7 @@ public void processSimulator() {
 			for (ProcessingDetailsData detailsData : processingDetails) {
 				ProcessRequest processRequest = this.processRequestRepository.findOne(detailsData.getId());
 				Order order=this.orderRepository.findOne(processRequest.getOrderId());
-				Collection<MCodeData> problemsData = this.codeReadPlatformService.getCodeValue("Problem Code");
+				Collection<MCodeData> problemsData = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROBLEM_CODE);
 				List<EnumOptionData> priorityData = this.ticketMasterReadPlatformService.retrievePriorityData();
 				Long userId=0L;
 				JSONObject jsonobject = new JSONObject();

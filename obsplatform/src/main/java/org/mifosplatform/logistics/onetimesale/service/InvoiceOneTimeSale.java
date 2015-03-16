@@ -77,7 +77,7 @@ public CommandProcessingResult invoiceOneTimeSale(final Long clientId, final One
 				Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
 
 				// To fetch record from client_balance table
-				this.billingOrderWritePlatformService.updateClientBalance(invoice,clientId,isWalletEnable);
+				this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId,isWalletEnable);
 				
 				/* //office commision
 				 AgreementData clientAgreement=this.billingOrderReadPlatformService.retriveClientOfficeDetails(clientId);
