@@ -9,4 +9,6 @@ public interface EventOrderWriteplatformService {
 
 	CommandProcessingResult updateEventOrderPrice(JsonCommand command);
 
+	boolean checkClientBalance(Double bookedPrice, Long clientId,boolean isWalletEnable);
+
 }

@@ -1,12 +1,18 @@
 package org.mifosplatform.organisation.voucher.service;
 
+import java.math.BigDecimal;
 import java.text.ParseException;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.mifosplatform.cms.eventorder.exception.InsufficientAmountException;
+import org.mifosplatform.cms.eventorder.service.EventOrderWriteplatformService;
+import org.mifosplatform.cms.journalvoucher.domain.JournalVoucher;
+import org.mifosplatform.cms.journalvoucher.domain.JournalvoucherRepository;
+import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
@@ -16,6 +22,7 @@ import org.mifosplatform.organisation.voucher.domain.VoucherDetails;
 import org.mifosplatform.organisation.voucher.domain.VoucherDetailsRepository;
 import org.mifosplatform.organisation.voucher.domain.VoucherRepository;
 import org.mifosplatform.organisation.voucher.exception.AlreadyProcessedException;
+import org.mifosplatform.organisation.voucher.exception.UnableToCancelVoucherException;
 import org.mifosplatform.organisation.voucher.exception.VoucherDetailsNotFoundException;
 import org.mifosplatform.organisation.voucher.exception.VoucherLengthMatchException;
 import org.mifosplatform.organisation.voucher.serialization.VoucherCommandFromApiJsonDeserializer;
@@ -31,8 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
  *
  */
 @Service
-public class VoucherWritePlatformServiceImpl implements
-		VoucherWritePlatformService {
+public class VoucherWritePlatformServiceImpl implements VoucherWritePlatformService {
 	
 	private int remainingKeyLength;
 	private char status = 0;
@@ -45,33 +51,35 @@ public class VoucherWritePlatformServiceImpl implements
 
 	private static final String ALPHA = "Alpha";
 	private static final String NUMERIC = "Numeric";
+	private static final String TYPE_PRODUCT = "PRODUCT";
+	private static final String  TYPE_VALUE = "VALUE";
 	private static final String ALPHANUMERIC = "AlphaNumeric";
 	
 	private final PlatformSecurityContext context;
-	private final VoucherRepository randomGeneratorRepository;
-	private final VoucherDetailsRepository randomGeneratorDetailsRepository;
+	private final VoucherRepository voucherRepository;
+	private final VoucherDetailsRepository voucherDetailsRepository;
+	private final EventOrderWriteplatformService eventOrderWriteplatformService;
 	private final VoucherCommandFromApiJsonDeserializer fromApiJsonDeserializer;
-	private final VoucherReadPlatformService randomGeneratorReadPlatformService;
+	private final VoucherReadPlatformService voucherReadPlatformService;
 	private final OfficeRepository officeRepository;
-	private final FromJsonHelper fromJsonHelper;
+	private final JournalvoucherRepository journalvoucherRepository;
+	private final BillingOrderWritePlatformService billingOrderWritePlatformService; 
 	
 	@Autowired
-	public VoucherWritePlatformServiceImpl(
-			final PlatformSecurityContext context,
-			final VoucherRepository randomGeneratorRepository,
-			final VoucherReadPlatformService randomGeneratorReadPlatformService,
-			final VoucherCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-			final VoucherDetailsRepository randomGeneratorDetailsRepository,
-			final OfficeRepository officeRepository,
-			final FromJsonHelper fromJsonHelper) {
+	public VoucherWritePlatformServiceImpl(final PlatformSecurityContext context,final VoucherRepository voucherRepository,
+			final VoucherReadPlatformService voucherReadPlatformService,final VoucherCommandFromApiJsonDeserializer fromApiJsonDeserializer,
+			final VoucherDetailsRepository voucherDetailsRepository,final OfficeRepository officeRepository,final JournalvoucherRepository journalvoucherRepository,
+			final EventOrderWriteplatformService eventOrderWriteplatformService,final BillingOrderWritePlatformService billingOrderWritePlatformService) {
 		
 		this.context = context;
-		this.randomGeneratorRepository = randomGeneratorRepository;
+		this.voucherRepository = voucherRepository;
 		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
-		this.randomGeneratorReadPlatformService = randomGeneratorReadPlatformService;
-		this.randomGeneratorDetailsRepository=randomGeneratorDetailsRepository;
+		this.voucherReadPlatformService = voucherReadPlatformService;
+		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
+		this.eventOrderWriteplatformService = eventOrderWriteplatformService;
+		this.voucherDetailsRepository=voucherDetailsRepository;
+		this.journalvoucherRepository = journalvoucherRepository;
 		this.officeRepository = officeRepository;
-		this.fromJsonHelper = fromJsonHelper;
 	}
 
 	@Transactional
@@ -99,7 +107,7 @@ public class VoucherWritePlatformServiceImpl implements
 			Voucher voucherpin = Voucher.fromJson(command);
 			voucherpin.setOfficeId(officeId);
 			
-			this.randomGeneratorRepository.save(voucherpin);	
+			this.voucherRepository.save(voucherpin);	
 			return new CommandProcessingResult(voucherpin.getId());
 
 		}  catch (DataIntegrityViolationException dve) {
@@ -114,46 +122,26 @@ public class VoucherWritePlatformServiceImpl implements
 	@Transactional
 	@Override
 	public CommandProcessingResult generateVoucherPinKeys(final Long batchId) {
-			
+		
 		try{
-			
-			voucher = this.randomGeneratorRepository.findOne(batchId);
-			
+			voucher = this.voucherRepository.findOne(batchId);
 			if(voucher == null){
-				
 				throw new PlatformDataIntegrityException("error.msg.code.batchId.not.found", "VoucherBatch with id :'" + batchId + "'does not exists", "batchId", batchId);
-				
 			} 
-			
 			if(voucher.getIsProcessed() == enable){
-				
 				status = 'F';
-				
 				final Long voucherId = generateRandomNumbers();
-				
 				status = 'Y';
-				
 				return new CommandProcessingResult(voucherId);
-				
 			} else{	
-				
 				throw new AlreadyProcessedException("VoucherPin Already Generated with this " + voucher.getBatchName());
-				
 			}
-			
 		} finally{
-			
 			if(voucher != null && voucher.getIsProcessed() == 'N'){
-				
 				voucher.setIsProcessed(status);
-				
-				this.randomGeneratorRepository.save(voucher);
-				
+				this.voucherRepository.save(voucher);
 			}
-			
 		}
-		
-		
 		
 	}
 
@@ -196,7 +184,7 @@ public class VoucherWritePlatformServiceImpl implements
 		final Long minNo = Long.parseLong(minSerialSeries);
 		final Long maxNo = Long.parseLong(maxSerialSeries);
 
-		long currentSerialNumber = this.randomGeneratorReadPlatformService.retrieveMaxNo(minNo, maxNo);
+		long currentSerialNumber = this.voucherReadPlatformService.retrieveMaxNo(minNo, maxNo);
 
 		if (currentSerialNumber == 0) {
 			currentSerialNumber = minNo;
@@ -214,7 +202,7 @@ public class VoucherWritePlatformServiceImpl implements
 			
 			String name = voucher.getBeginWith() + generateRandomSingleCode();
 
-			String value = this.randomGeneratorReadPlatformService.retrieveIndividualPin(name);
+			String value = this.voucherReadPlatformService.retrieveIndividualPin(name);
 			
 			if (value == null) {
 				
@@ -222,7 +210,7 @@ public class VoucherWritePlatformServiceImpl implements
 				
 				VoucherDetails voucherDetails = new VoucherDetails(name, currentSerialNumber, voucher);
 				
-				this.randomGeneratorDetailsRepository.save(voucherDetails);
+				this.voucherDetailsRepository.save(voucherDetails);
 
 			} else {
 				quantityValidator = quantityValidator - 1;
@@ -285,7 +273,7 @@ public class VoucherWritePlatformServiceImpl implements
 				final VoucherDetails voucherpinDetails = voucherDetailsRetrieveById(Long.valueOf(id));
 				if(!voucherpinDetails.getStatus().equalsIgnoreCase("USED")){
 					voucherpinDetails.setStatus(status);
-					this.randomGeneratorDetailsRepository.save(voucherpinDetails);
+					this.voucherDetailsRepository.save(voucherpinDetails);
 				}
 			}
 			
@@ -300,7 +288,7 @@ public class VoucherWritePlatformServiceImpl implements
 
 	private VoucherDetails voucherDetailsRetrieveById(final Long id) {
 
-		final VoucherDetails voucherDetails = this.randomGeneratorDetailsRepository.findOne(id);
+		final VoucherDetails voucherDetails = this.voucherDetailsRepository.findOne(id);
 
 		if (voucherDetails == null) {
 			throw new VoucherDetailsNotFoundException(id);
@@ -321,7 +309,7 @@ public class VoucherWritePlatformServiceImpl implements
 				final VoucherDetails voucherpinDetails = voucherDetailsRetrieveById(Long.valueOf(id));
 				if(!voucherpinDetails.getStatus().equalsIgnoreCase("USED")){
 					voucherpinDetails.setIsDeleted('Y');
-					this.randomGeneratorDetailsRepository.save(voucherpinDetails);
+					this.voucherDetailsRepository.save(voucherpinDetails);
 				}
 			}
 			
@@ -334,10 +322,40 @@ public class VoucherWritePlatformServiceImpl implements
 	}
 
 	@Override
-	public CommandProcessingResult cancelUpdateVoucherPins(Long entityId,
-			JsonCommand command) {
-		// TODO Auto-generated method stub
-		return null;
+	public CommandProcessingResult cancelVoucherPins(Long entityId,JsonCommand command) {
+              
+		try{
+			this.context.authenticatedUser();
+			this.fromApiJsonDeserializer.validateForCancel(command.json(), false);
+			VoucherDetails voucherDetails=this.voucherDetailsRetrieveById(entityId);
+			voucher = voucherDetails.getVoucher();
+			BigDecimal value=new BigDecimal(voucher.getPinValue());
+			
+			if(voucher.getPinType().equalsIgnoreCase(TYPE_VALUE)){
+				boolean isSufficient = this.eventOrderWriteplatformService.checkClientBalance(value.doubleValue(),voucherDetails.getClientId(), true);
+				if(!isSufficient){
+					throw new InsufficientAmountException("cancelvoucher");
+				}
+				this.billingOrderWritePlatformService.updateClientBalance(value,voucherDetails.getClientId(), true);
+			}else if(voucher.getPinType().equalsIgnoreCase(TYPE_PRODUCT)){
+				throw new UnableToCancelVoucherException();
+			}
+			
+			
+			 JournalVoucher journalVoucher=new JournalVoucher(voucherDetails.getId(),DateUtils.getDateOfTenant(),"VOUCHER CANCEL",null,value.doubleValue(),
+					 voucherDetails.getClientId());
+				this.journalvoucherRepository.save(journalVoucher);
+				
+				voucherDetails.update(command.stringValueOfParameterNamed("cancelReason"));
+				this.voucherDetailsRepository.save(voucherDetails);
+				
+				return new CommandProcessingResult(voucherDetails.getId());
+				
+		}catch(DataIntegrityViolationException dve){
+			handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+			
 	}
 
 }

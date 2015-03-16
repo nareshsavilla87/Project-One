@@ -28,6 +28,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.contract.data.PeriodData;
@@ -101,7 +102,7 @@ public class PromotionCodesApiResource {
 	public String retrievePromotionTemplateData(@Context final UriInfo uriInfo) {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue("type");
+		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
 		final List<PeriodData> contractTypedata = contractPeriodReadPlatformService.retrieveAllPlatformPeriod();
 		final PromotionCodeData data = new PromotionCodeData(discountTypeData,contractTypedata);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -139,7 +140,7 @@ public class PromotionCodesApiResource {
 		PromotionCodeData promotionCodeData = this.promotionCodeReadPlatformService.retriveSinglePromotionCodeDetails(promotionId);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		if(settings.isTemplate()){
-			final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue("type");
+			final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
 			final List<PeriodData> contractTypedata = contractPeriodReadPlatformService.retrieveAllPlatformPeriod();
 			promotionCodeData.setDiscounTypeData(discountTypeData);
 			promotionCodeData.setContractTypedata(contractTypedata);

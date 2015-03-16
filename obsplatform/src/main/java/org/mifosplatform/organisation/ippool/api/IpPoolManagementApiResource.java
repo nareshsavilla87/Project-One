@@ -30,6 +30,7 @@ import org.mifosplatform.organisation.ippool.data.IpGeneration;
 import org.mifosplatform.organisation.ippool.data.IpPoolData;
 import org.mifosplatform.organisation.ippool.data.IpPoolManagementData;
 import org.mifosplatform.organisation.ippool.service.IpPoolManagementReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -146,7 +147,7 @@ public class IpPoolManagementApiResource {
 	public String retrieveTemplate(@Context final UriInfo uriInfo) {
 		
 		this.context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		Collection<MCodeData> codeValueDatas=this.codeReadPlatformService.getCodeValue("IP Type");
+		Collection<MCodeData> codeValueDatas=this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_IP_TYPE);
 		IpPoolData ipPoolData=new IpPoolData(codeValueDatas);
 		return this.toApiJsonSerializer.serialize(ipPoolData);
 
@@ -227,7 +228,7 @@ public class IpPoolManagementApiResource {
 	public String retrieveSingleIpPoolDetails(@Context final UriInfo uriInfo,@PathParam("poolId") final Long poolId) {
 		
 		this.context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		final Collection<MCodeData> codeValueDatas=this.codeReadPlatformService.getCodeValue("IP Type");
+		final Collection<MCodeData> codeValueDatas=this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_IP_TYPE);
 		final List<IpPoolManagementData> ipPoolManagementDatas = ipPoolManagementReadPlatformService.retrieveSingleIpPoolDetails(poolId);
 		final IpPoolData singleIpPoolData=new IpPoolData(codeValueDatas,ipPoolManagementDatas);
 		return this.toApiJsonSerializer.serialize(singleIpPoolData);

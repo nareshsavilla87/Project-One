@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.plan.data.BillRuleData;
@@ -122,7 +123,7 @@ public class PlansApiResource  {
 		 final List<ServiceData> data = this.serviceMasterReadPlatformService.retrieveAllServices();
 	     final List<BillRuleData> billData = this.codeReadPlatformService.retrievebillRules(EnumValuesConstants.ENUMVALUE_PROPERTY_BILLING_RULES);
 		 final List<EnumOptionData> status = this.planReadPlatformService.retrieveNewStatus();
-		 final Collection<MCodeData> provisionSysData = this.mCodeReadPlatformService.getCodeValue("Provisioning");
+		 final Collection<MCodeData> provisionSysData = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROVISIONING);
 		 final List<EnumOptionData> volumeType = this.planReadPlatformService.retrieveVolumeTypes();
 		 List<ServiceData> services = new ArrayList<>();
 		 
