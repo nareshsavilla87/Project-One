@@ -37,6 +37,7 @@ import org.mifosplatform.logistics.itemdetails.data.ItemSerialNumberData;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetailsAllocation;
 import org.mifosplatform.logistics.itemdetails.service.ItemDetailsReadPlatformService;
 import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -190,8 +191,8 @@ public class ItemDetailsApiResource {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForGrnPermissions);
 		Collection<InventoryGrnData> inventoryGrnData = this.inventoryGrnReadPlatformService.retriveGrnIds();
-		Collection<MCodeData> qualityDatas=this.mCodeReadPlatformService.getCodeValue("Item Quality");
-		Collection<MCodeData> statusDatas=this.mCodeReadPlatformService.getCodeValue("Item Status");
+		Collection<MCodeData> qualityDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_ITEM_QUALITY);
+		Collection<MCodeData> statusDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_ITEM_STATUS);
 		ItemDetailsData itemDetailsData=new ItemDetailsData(inventoryGrnData,qualityDatas,statusDatas,null,null);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializerForItem.serialize(settings,itemDetailsData,RESPONSE_DATA_GRN_IDS_PARAMETERS);

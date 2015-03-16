@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
@@ -235,7 +236,7 @@ public class OrdersApiResource {
 	 @Produces({MediaType.APPLICATION_JSON})
 	 public String retrieveOrderDisconnectDetails(@Context final UriInfo uriInfo) {
 		 context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-	     final Collection<MCodeData> disconnectDetails = this.mCodeReadPlatformService.getCodeValue("Disconnect Reason");
+	     final Collection<MCodeData> disconnectDetails = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_DISCONNECT_REASON);
 	     OrderData orderData = new OrderData(disconnectDetails);
 	     final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	     return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
@@ -339,8 +340,8 @@ public class OrdersApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String getOfExtension(@Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-        Collection<MCodeData> extensionPeriodDatas=this.mCodeReadPlatformService.getCodeValue("Extension Period");
-		Collection<MCodeData> extensionReasonDatas=this.mCodeReadPlatformService.getCodeValue("Extension Reason");
+        Collection<MCodeData> extensionPeriodDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_EXTENSION_PERIOD);
+		Collection<MCodeData> extensionReasonDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_EXTENSION_REASON);
         OrderData extensionData=new OrderData(extensionPeriodDatas,extensionReasonDatas);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, extensionData, RESPONSE_DATA_PARAMETERS);
@@ -368,7 +369,7 @@ public class OrdersApiResource {
 	  public String getSuspentationReasons(@Context final UriInfo uriInfo) {
 		  
 	        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-			final Collection<MCodeData> reasonDatas=this.mCodeReadPlatformService.getCodeValue("Suspension Reason");
+			final Collection<MCodeData> reasonDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_SUSPENSION_REASON);
 	        final OrderData orderData=new OrderData(null,reasonDatas);
 	        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	        return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
