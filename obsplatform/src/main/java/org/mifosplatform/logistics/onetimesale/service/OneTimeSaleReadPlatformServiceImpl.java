@@ -91,7 +91,7 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 					+ "o.quantity as quantity,o.total_price as totalPrice,o.hardware_allocated as hardwareAllocated,o.units as units,o.device_mode as saleType,id.warranty_date as warrantyDate "
 					+ "  FROM b_item_master i,b_onetime_sale o" +
 					" left join b_allocation a on a.order_id=o.id and a.is_deleted = 'N' "+
-					" left join b_item_detail id on id.item_master_id=o.id and id.is_deleted = 'N'  ";
+					" left join   b_item_detail id ON id.serial_no = a.serial_no AND id.is_deleted = 'N'  ";
 
 		}
 
@@ -109,7 +109,7 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 			final String serialNo = rs.getString("serialNo");
 			final String units = rs.getString("units");
 			final String saleType = rs.getString("saleType");
-			final LocalDate warrantyDate = JdbcSupport.getLocalDate(rs, "saleDate");
+			final LocalDate warrantyDate = JdbcSupport.getLocalDate(rs, "warrantyDate");
 			return new OneTimeSaleData(id, saleDate, itemCode, chargeCode,quantity, totalPrice,haardwareAllocated,itemClass,serialNo,units,saleType,warrantyDate);
 
 		}

@@ -342,17 +342,20 @@ public class VoucherWritePlatformServiceImpl implements VoucherWritePlatformServ
 			}
 			
 			
-			 JournalVoucher journalVoucher=new JournalVoucher(voucherDetails.getId(),DateUtils.getDateOfTenant(),"VOUCHER CANCEL",null,
-					 value.doubleValue(),voucherDetails.getClientId());
+			 JournalVoucher journalVoucher=new JournalVoucher(voucherDetails.getId(),DateUtils.getDateOfTenant(),"VOUCHER CANCEL",value.doubleValue(),
+					 null,voucherDetails.getClientId());
 				this.journalvoucherRepository.save(journalVoucher);
 				
 				voucherDetails.update(command.stringValueOfParameterNamed("cancelReason"));
 				this.voucherDetailsRepository.save(voucherDetails);
 				
+				return new CommandProcessingResult(voucherDetails.getId());
+				
 		}catch(DataIntegrityViolationException dve){
-			
+			handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
 		}
-			return null;
+			
 	}
 
 }
