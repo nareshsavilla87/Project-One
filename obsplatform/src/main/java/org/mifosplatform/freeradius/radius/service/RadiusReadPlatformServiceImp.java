@@ -490,7 +490,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			
 			ServiceDetailsMapper mapper = new ServiceDetailsMapper();
 
-			String sql = "select " + mapper.schema();
+			String sql = "select " + mapper.schema() + " where rs.srvid <> ?";
 			
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {radServiceId});
 
@@ -503,7 +503,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 		public String schema() {
 			return "  rs.srvid AS id, rs.srvname AS serviceName,rs.downrate as downRate, s.srvname as nextService,rs.uprate as upRate,rs.nextsrvid as nextServicId," +
-					" rs.trafficunitdl as trafficUnitdl  FROM rm_services rs left join rm_services as s on s.srvid = rs.nextsrvid  where rs.srvid <> ?";
+					" rs.trafficunitdl as trafficUnitdl  FROM rm_services rs left join rm_services as s on s.srvid = rs.nextsrvid ";
 
 		}
 
