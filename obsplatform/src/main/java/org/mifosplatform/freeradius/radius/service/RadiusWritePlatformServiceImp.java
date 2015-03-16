@@ -41,7 +41,9 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 	private final ProvisioningActionsRepository provisioningActionsRepository;
 	private final ProcessRequestRepository processRequestRepository;
 	private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
-	private final RadiusReadPlatformService radiusReadPlatformService; 
+
+	private final RadiusReadPlatformService radiusReadPlatformService;
+
 	@Autowired
 	public RadiusWritePlatformServiceImp(final PlatformSecurityContext context,final RadServuceTempRepository radServiceRepository,
 			final ProvisioningActionsRepository provisioningActionsRepository,final ProcessRequestRepository processRequestRepository,
@@ -60,6 +62,7 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 	public CommandProcessingResult updateRadService(final Long radServiceId,final JsonCommand command) {
 		
 		try{
+			context.authenticatedUser();
 			RadServiceTemp radService=this.radServiceRetrieveById(radServiceId);
 			final Map<String, Object> changes = radService.update(command);
 			if(!changes.isEmpty()){
