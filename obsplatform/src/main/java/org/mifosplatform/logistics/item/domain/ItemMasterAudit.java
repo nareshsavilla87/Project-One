@@ -19,6 +19,9 @@ public class ItemMasterAudit extends AbstractPersistable<Long>{
 	@Column(name = "itemmaster_id")
 	private Long itemMasterId;
 	
+	@Column(name = "region_id")
+	private String regionId;
+	
 	@Column(name = "item_code")
 	private String itemCode;
 
@@ -31,7 +34,7 @@ public class ItemMasterAudit extends AbstractPersistable<Long>{
 	public ItemMasterAudit(){}
 	
 	
-	public ItemMasterAudit(Long itemId,int existingUnitPrice, JsonCommand command) {
+	public ItemMasterAudit(Long itemId,int existingUnitPrice, String regionId, JsonCommand command) {
 		
 		final String itemCode = command.stringValueOfParameterNamed("itemCode");
 		final BigDecimal unitPrice = new BigDecimal(existingUnitPrice);
@@ -41,6 +44,7 @@ public class ItemMasterAudit extends AbstractPersistable<Long>{
 		this.itemCode = itemCode;
 		this.unitPrice = unitPrice;
 		this.changedDate = changedDate;
+		this.regionId = regionId;
 		
 	}
 
