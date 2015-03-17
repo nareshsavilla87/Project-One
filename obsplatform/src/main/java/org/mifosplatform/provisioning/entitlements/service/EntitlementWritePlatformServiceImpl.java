@@ -139,6 +139,31 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 			
 		}
 		
+		if(zebraSubscriberId != null && requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_ACTIVATION) &&
+				(!zebraSubscriberId.isEmpty())){
+			
+			Long clientId = command.longValueOfParameterNamed("clientId");	
+			
+			if(clientId !=null && zebraSubscriberId !=null && zebraSubscriberId.length()>0 && clientId>0){
+				
+				Client client = this.clientRepository.findOne(clientId);
+				SelfCare selfcare = this.selfCareRepository.findOneByClientId(clientId);
+				
+				if(client == null){
+					throw new ClientNotFoundException(clientId);
+				}
+				
+				if(selfcare == null){
+					throw new PlatformDataIntegrityException("client does not exist", "client not registered","clientId", "client is null ");
+				}
+				
+				selfcare.setZebraSubscriberId(new Long(zebraSubscriberId));
+				this.selfCareRepository.save(selfcare);
+								
+			}
+			
+		}
+		
 		ProcessRequest processRequest = this.entitlementRepository.findOne(command.entityId());
 		if(requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CREATE_AGENT)){
 			
