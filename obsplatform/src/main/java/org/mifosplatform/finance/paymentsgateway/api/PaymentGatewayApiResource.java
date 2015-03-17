@@ -723,6 +723,27 @@ public class PaymentGatewayApiResource {
 		}
 	}
 	 
+	/**
+	 * This method is using for posting data to create payment using paypal
+	 */
+	 @POST
+	 @Path("paypalrecurring")
+	 @Consumes("application/x-www-form-urlencoded")
+	 @Produces("text/html")
+	 public String paypalRecurringPayment(@FormParam("parameters") final String parameters){
+		 
+		String returnUrl = null;
+		
+		try {
+			
+			return null;
+		} 
+	   catch(Exception e){
+		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";
+		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus + "</Strong>";
+		   return htmlData;   
+	   }
+	 }
 	 
 }
 
