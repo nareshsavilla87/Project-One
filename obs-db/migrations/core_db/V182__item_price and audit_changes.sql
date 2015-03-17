@@ -8,14 +8,14 @@ CREATE TABLE IF NOT EXISTS `b_item_price` (
   UNIQUE KEY `itemid_with_region_uniquekey` (`item_id`,`region_id`),
   KEY `fk_item_price_id` (`item_id`),
   CONSTRAINT `fk_item_price_id` FOREIGN KEY (`item_id`) REFERENCES `b_item_master` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8
+) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
 
 
 Drop procedure IF EXISTS regionIdToItemAudit; 
 DELIMITER //
 create procedure regionIdToItemAudit() 
 Begin
-  IF EXISTS (
+  IF NOT EXISTS (
      SELECT * FROM information_schema.COLUMNS
      WHERE COLUMN_NAME = 'region_id'
      and TABLE_NAME = 'b_item_audit'
