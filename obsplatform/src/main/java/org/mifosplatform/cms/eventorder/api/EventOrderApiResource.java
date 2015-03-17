@@ -33,6 +33,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -93,7 +94,7 @@ public class EventOrderApiResource {
 			//final List<EventMasterData> events = eventOrderReadplatformServie.getEvents();
 			final List<EventMasterData> events = this.eventMasterReadPlatformService.retrieveEventMasterDataForEventOrders();
 			final List<EnumOptionData> optType = this.eventMasterReadPlatformService.retrieveOptTypeData();
-			final Collection<MCodeData> codes = this.codeReadPlatformService.getCodeValue("MediaFormat");
+			final Collection<MCodeData> codes = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_MEDIAFORMAT);
 			final List<ClientTypeData> clientType = this.eventPricingReadService.clientType();
 			final EventOrderData data = new EventOrderData(devices,events,optType,codes,clientType);
 			final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());

@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.ippool.data.IpPoolData;
 import org.mifosplatform.organisation.ippool.service.IpPoolManagementReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.client.service.GroupData;
@@ -221,7 +222,7 @@ public class ProvisioningApiResource {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final List<ServiceParameterData> parameterDatas = this.serviceMappingReadPlatformService.getSerivceParameters(orderId, serviceId);
 		final List<ServiceParameterData> serviceDatas = this.provisioningReadPlatformService.getProvisionedSerivceParameters(orderId);
-		final Collection<MCodeData> vlanDatas = this.codeReadPlatformService.getCodeValue("VLANS");
+		final Collection<MCodeData> vlanDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_VLANS);
 		final List<IpPoolData> ipPoolDatas = this.ipPoolManagementReadPlatformService.getUnallocatedIpAddressDetailds();
 		final List<OrderLineData> services = this.orderReadPlatformService.retrieveOrderServiceDetails(orderId);
 		final Collection<GroupData> groupDatas = this.groupReadPlatformService.retrieveGroupServiceDetails(orderId);
