@@ -130,7 +130,6 @@ public class ItemApiResource {
    		itemData.setRegionDatas(regionDatas);
    		itemData.setItemPricesDatas(itemPricesDatas);
    		return this.toApiJsonSerializer.serialize(settings, itemData, RESPONSE_ITEM_DATA_PARAMETERS);
-   		
 	}
 
 	@PUT
