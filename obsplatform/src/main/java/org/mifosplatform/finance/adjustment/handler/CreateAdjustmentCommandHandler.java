@@ -21,7 +21,7 @@ public class CreateAdjustmentCommandHandler  implements NewCommandSourceHandler{
 	@Override
 	public CommandProcessingResult processCommand(final JsonCommand command) {
 		
-		return writePlatformService.createAdjustments(command);
+		return writePlatformService.createAdjustment(command);
 		
 	}
 

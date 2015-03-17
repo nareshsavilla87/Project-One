@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -25,6 +24,7 @@ import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
+import org.mifosplatform.infrastructure.codes.CodeConstants;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -33,6 +33,9 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.voucher.data.VoucherData;
@@ -62,40 +65,30 @@ public class VoucherPinApiResource {
 	/**
 	 * The set of parameters that are supported in response for {@link CodeData}
 	 */
-	private static final Set<String> RESPONSE_PARAMETERS = new HashSet<String>(
-			Arrays.asList("id", "batchName", "batchDescription", "length",
-					"beginWith", "pinCategory", "pinType", "quantity",
-					"serialNo", "expiryDate", "dateFormat", "pinValue",
-					"pinNO", "locale", "pinExtention"));
+	private static final Set<String> RESPONSE_PARAMETERS = new HashSet<String>(Arrays.asList("id", "batchName", "batchDescription", "length",
+					"beginWith", "pinCategory", "pinType", "quantity","serialNo", "expiryDate", "dateFormat", "pinValue","pinNO", "locale", "pinExtention"));
 
-	/** The value is used for Create Permission Checking. */
+
 	private static String resourceNameForPermissions = "VOUCHER";
-
-	/** The value is used for Download Permission Checking. */
 	private static String resourceNameFordownloadFilePermissions = "DOWNLOAD_FILE";
-
-	/** The Object is used for Authentication Checking. */
-	private PlatformSecurityContext context;
 	
-	/** The Below Objects are used for Program. */
-	private VoucherReadPlatformService readPlatformService;
-	private DefaultToApiJsonSerializer<VoucherData> toApiJsonSerializer;
-	private ApiRequestParameterHelper apiRequestParameterHelper;
-	private PortfolioCommandSourceWritePlatformService writePlatformService;
+	private final PlatformSecurityContext context;
+	private final VoucherReadPlatformService readPlatformService;
+	private final DefaultToApiJsonSerializer<VoucherData> toApiJsonSerializer;
+	private final ApiRequestParameterHelper apiRequestParameterHelper;
+	private final PortfolioCommandSourceWritePlatformService writePlatformService;
 	private final OfficeReadPlatformService officeReadPlatformService;
-
+	private final MCodeReadPlatformService  mCodeReadPlatformService;
 	@Autowired
-	public VoucherPinApiResource(
-			final PlatformSecurityContext context,
-			final VoucherReadPlatformService readPlatformService,
-			final DefaultToApiJsonSerializer<VoucherData> toApiJsonSerializer,
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PortfolioCommandSourceWritePlatformService writePlatformService,
-			final OfficeReadPlatformService officeReadPlatformService) {
+	public VoucherPinApiResource(final PlatformSecurityContext context,final VoucherReadPlatformService readPlatformService,
+			final DefaultToApiJsonSerializer<VoucherData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
+			final PortfolioCommandSourceWritePlatformService writePlatformService,final OfficeReadPlatformService officeReadPlatformService,
+			final MCodeReadPlatformService  mCodeReadPlatformService) {
 
 		this.context = context;
 		this.readPlatformService = readPlatformService;
 		this.toApiJsonSerializer = toApiJsonSerializer;
+		this.mCodeReadPlatformService = mCodeReadPlatformService;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.writePlatformService = writePlatformService;
 		this.officeReadPlatformService = officeReadPlatformService;
@@ -121,9 +114,7 @@ public class VoucherPinApiResource {
 	public String createVoucherBatch(final String requestData) {
 		
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().createVoucherGroup().withJson(requestData).build();
-		
 		final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
-		
 		return this.toApiJsonSerializer.serialize(result);
 	}
 
@@ -143,17 +134,25 @@ public class VoucherPinApiResource {
 	public String retrieveTemplate(@Context final UriInfo uriInfo, @QueryParam("isBatchTemplate") final String isBatchTemplate) {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		
 		final List<EnumOptionData> pinCategoryData = this.readPlatformService.pinCategory();
-		
 		final List<EnumOptionData> pinTypeData = this.readPlatformService.pinType();	
-		
 		final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOffices();
-		
 		final VoucherData voucherData = new VoucherData(pinCategoryData, pinTypeData, offices);
-		
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		
+		return this.toApiJsonSerializer.serialize(settings, voucherData, RESPONSE_PARAMETERS);
+	}
+	
+	@GET
+	@Path("cancel/template")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrievevoucherCancelTemplate(@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final Collection<MCodeData> reasondatas = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_VOUCHER_CANCEL_REASON);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		final VoucherData voucherData = new VoucherData(reasondatas);
 		return this.toApiJsonSerializer.serialize(settings, voucherData, RESPONSE_PARAMETERS);
 	}
 
@@ -171,11 +170,8 @@ public class VoucherPinApiResource {
 	public String retrieveVoucherGroups(@Context final UriInfo uriInfo) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		
 		final List<VoucherData> randomGenerator = this.readPlatformService.getAllData();
-		
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		
 		return this.toApiJsonSerializer.serialize(settings, randomGenerator, RESPONSE_PARAMETERS);
 	}
 	
@@ -199,9 +195,6 @@ public class VoucherPinApiResource {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final SearchSqlQuery searchVoucher = SearchSqlQuery.forSearch(sqlSearch, offset,limit );
 		final Page<VoucherData> randomGenerator = this.readPlatformService.getAllVoucherById(searchVoucher, statusType, id);
-		
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		
 		return this.toApiJsonSerializer.serialize(randomGenerator);
 	}
 	
@@ -225,9 +218,7 @@ public class VoucherPinApiResource {
 	public Response retrieveVoucherPinList(@PathParam("batchId") final Long batchId, @Context final UriInfo uriInfo) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameFordownloadFilePermissions);
-		
 		final StreamingOutput result = this.readPlatformService.retrieveVocherDetailsCsv(batchId);
-		
 		return Response.ok().entity(result).type("application/x-msdownload")
 				.header("Content-Disposition", "attachment;filename=" + "Vochers_" + batchId + ".csv")
 				.build();
@@ -253,12 +244,8 @@ public class VoucherPinApiResource {
 		
 		final JsonObject object = new JsonObject();
 		object.addProperty("batchId", batchId);
-		
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().generateVoucherPin(batchId)
-				.withJson(object.toString()).build();
-		
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().generateVoucherPin(batchId).withJson(object.toString()).build();
 		final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
-		
 		return this.toApiJsonSerializer.serialize(result);
 	}
 	
@@ -269,11 +256,8 @@ public class VoucherPinApiResource {
 	public String retrieveVoucherPinDetails(@QueryParam("pinNumber") final String pinNumber, @Context final UriInfo uriInfo) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		
 		List<VoucherData> voucherData = this.readPlatformService.retrivePinDetails(pinNumber);
-		
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		
 		return this.toApiJsonSerializer.serialize(settings, voucherData, RESPONSE_PARAMETERS);
 	}
 	
@@ -298,5 +282,17 @@ public class VoucherPinApiResource {
 		final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}
+	
+	@PUT
+	@Path("cancel/{id}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String cancelVoucherPin(@PathParam("id") final Long id, final String apiRequestBodyAsJson) {
+		
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().cancelVoucherPin(id).withJson(apiRequestBodyAsJson).build();
+		final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+	}
+
 
 }

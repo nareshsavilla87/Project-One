@@ -932,7 +932,7 @@ public class CommandWrapper {
 			return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("EVENTACTIONMAP");
 		}
 		public boolean isCancel() {
-			return this.actionName.equalsIgnoreCase("CANCEL") && this.entityName.equalsIgnoreCase("PAYMENT");
+			return this.actionName.equalsIgnoreCase("CANCEL");
 		}
 
 		public boolean isChangePlan() {
@@ -1227,5 +1227,9 @@ public class CommandWrapper {
 		
 		public boolean isLinkupAccount() {
 			return this.entityName.equalsIgnoreCase("LINKUPACCOUNT");
+		}
+
+		public boolean isRadService() {
+			return this.entityName.equalsIgnoreCase("RADSERVICE");
 		}
 }
