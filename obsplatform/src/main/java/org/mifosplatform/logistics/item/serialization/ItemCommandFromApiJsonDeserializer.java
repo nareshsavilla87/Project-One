@@ -18,6 +18,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
@@ -26,7 +27,7 @@ public class ItemCommandFromApiJsonDeserializer {
 	 
 	
 	 	Set<String> supportedParameters = new HashSet<String>(Arrays.asList("itemCode","itemDescription","units","chargeCode","locale","unitPrice","warranty","itemClass",
-	 			"reorderLevel","chargeCode"));
+	 			"reorderLevel","chargeCode", "itemPrices", "regionId", "price", "removeItemPrices"));
 	    private final FromJsonHelper fromApiJsonHelper;
 
 	    @Autowired
@@ -69,6 +70,27 @@ public class ItemCommandFromApiJsonDeserializer {
 			baseDataValidator.reset().parameter("itemClass").value(itemClass).notBlank();
 			baseDataValidator.reset().parameter("units").value(units).notBlank();
 			baseDataValidator.reset().parameter("unitPrice").value(unitPrice).notNull();
+			
+			final JsonArray itemPricesArray = fromApiJsonHelper.extractJsonArrayNamed("itemPrices", element);
+	        String[] itemPriceRegions = null;
+	        itemPriceRegions = new String[itemPricesArray.size()];
+	        final int itemPricesArraySize = itemPricesArray.size();
+		    baseDataValidator.reset().parameter("itemPrices").value(itemPricesArraySize).integerGreaterThanZero();
+		    for(int i = 0; i < itemPricesArray.size(); i++){
+		    	itemPriceRegions[i] = itemPricesArray.get(i).toString();
+		    	
+		    }
+	
+			 for (final String itemPriceRegion : itemPriceRegions) {
+				 
+				     final JsonElement attributeElement = fromApiJsonHelper.parse(itemPriceRegion);
+				     final BigDecimal price = fromApiJsonHelper.extractBigDecimalNamed("price", attributeElement, fromApiJsonHelper.extractLocaleParameter(attributeElement.getAsJsonObject()));
+				     baseDataValidator.reset().parameter("price").value(price).notNull().notExceedingLengthOf(22);
+				 
+				     final Long regionId = fromApiJsonHelper.extractLongNamed("regionId", attributeElement);
+				     baseDataValidator.reset().parameter("regionId").value(regionId).notBlank().notExceedingLengthOf(30);
+				
+			  }
 
 	        throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	    }
