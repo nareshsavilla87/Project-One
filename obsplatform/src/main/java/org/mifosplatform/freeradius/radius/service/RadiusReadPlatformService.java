@@ -26,12 +26,17 @@ public interface RadiusReadPlatformService {
 
 	CommandProcessingResult createRadService(String Json);
 
-	String retrieveRadServiceDetail(Long radServiceId);
+	RadiusServiceData retrieveRadServiceDetail(Long radServiceId);
 	
-	String deleteRadService(Long radServiceId);
+	//String deleteRadService(Long radServiceId);
 
-	List<RadiusServiceData> retrieveRadServiceTemplateData();
+	String processRadiusDelete(String url, String encodePassword)
+			throws ClientProtocolException, IOException;
+
+   List<RadiusServiceData> retrieveRadServiceTemplateData(Long radServiceId);
 	
-	String processRadiusDelete(String url, String encodePassword) throws ClientProtocolException, IOException;
+   String processRadiusGet(String url, String encodePassword) throws ClientProtocolException, IOException;
+   
+   String processRadiusPost(String url, String encodePassword, String data) throws  IOException;
 
 }

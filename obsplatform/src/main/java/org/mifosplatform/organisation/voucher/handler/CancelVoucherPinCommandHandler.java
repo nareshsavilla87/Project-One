@@ -31,6 +31,6 @@ public class CancelVoucherPinCommandHandler implements NewCommandSourceHandler {
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-       return this.writePlatformService.cancelUpdateVoucherPins(command.entityId(), command);
+       return this.writePlatformService.cancelVoucherPins(command.entityId(), command);
     }
 }

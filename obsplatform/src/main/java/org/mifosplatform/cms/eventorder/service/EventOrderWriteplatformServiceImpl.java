@@ -123,7 +123,10 @@ public class EventOrderWriteplatformServiceImpl implements EventOrderWriteplatfo
 			this.eventValidationReadPlatformService.checkForCustomValidations(clientId,EventActionConstants.EVENT_EVENT_ORDER, command.json(),getUserId());
 			EventOrder eventOrder=assembleEventOrderDetails(command,clientId);
 			Configuration walletConfiguration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_WALLET_ENABLE);
-			this.checkClientBalance(eventOrder.getBookedPrice(), clientId,walletConfiguration.isEnabled());
+			boolean isBalanceAvailable=this.checkClientBalance(eventOrder.getBookedPrice(), clientId,walletConfiguration.isEnabled());
+			 if (!isBalanceAvailable) {
+					throw new InsufficientAmountException("bookevent");
+				}
 			this.eventOrderRepository.save(eventOrder);
 			
 			List<OneTimeSaleData> oneTimeSaleDatas = eventOrderReadplatformServie.retrieveEventOrderData(eventOrder.getClientId());
@@ -222,7 +225,7 @@ private Long getUserId() {
 			return new CommandProcessingResultBuilder().withResourceIdAsString(eventPricing.getPrice().toString()).build();
 	}
 	
-	
+	@Override
 	public boolean checkClientBalance(Double bookedPrice, Long clientId, boolean isWalletEnable) {
 		
 		  boolean isBalanceAvailable = false;
@@ -241,9 +244,7 @@ private Long getUserId() {
 			     isBalanceAvailable = true;
 			  }
 		  }
-		  if (!isBalanceAvailable) {
-				throw new InsufficientAmountException();
-			}
+		 
 		  return isBalanceAvailable;
 	
 	}

@@ -61,6 +61,7 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 	public CommandProcessingResult updateRadService(final Long radServiceId,final JsonCommand command) {
 		
 		try{
+			context.authenticatedUser();
 			RadServiceTemp radService=this.radServiceRetrieveById(radServiceId);
 			final Map<String, Object> changes = radService.update(command);
 			if(!changes.isEmpty()){

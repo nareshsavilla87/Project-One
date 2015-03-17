@@ -5,8 +5,8 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
 
 public class InsufficientAmountException extends AbstractPlatformDomainRuleException {
 
-    public InsufficientAmountException() {
-        super("error.msg.insufficient.amount.amount", "Insufficient Amount to Book The Order");
+    public InsufficientAmountException(String msg) {
+        super("error.msg.insufficient.amount.for."+msg, "Insufficient Amount to Book The Order");
     }
     
     public InsufficientAmountException(Long clientId) {
