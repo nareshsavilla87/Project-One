@@ -49,7 +49,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 		this.configurationDomainService = configurationDomainService;
 	}
 	
-	@Transactional
+	//@Transactional
 	@Override
 	public CommandProcessingResult processAndLogCommand(final CommandWrapper wrapper, final JsonCommand command,
 			final boolean isApprovedByChecker) {
