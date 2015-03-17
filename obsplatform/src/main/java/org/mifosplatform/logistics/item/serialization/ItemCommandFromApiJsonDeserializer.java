@@ -27,7 +27,7 @@ public class ItemCommandFromApiJsonDeserializer {
 	 
 	
 	 	Set<String> supportedParameters = new HashSet<String>(Arrays.asList("itemCode","itemDescription","units","chargeCode","locale","unitPrice","warranty","itemClass",
-	 			"reorderLevel","chargeCode", "itemPrices", "regionId", "price"));
+	 			"reorderLevel","chargeCode", "itemPrices", "regionId", "price", "removeItemPrices"));
 	    private final FromJsonHelper fromApiJsonHelper;
 
 	    @Autowired

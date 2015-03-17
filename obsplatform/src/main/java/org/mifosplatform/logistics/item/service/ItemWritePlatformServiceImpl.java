@@ -14,6 +14,7 @@ import org.mifosplatform.logistics.item.domain.ItemAuditRepository;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
 import org.mifosplatform.logistics.item.domain.ItemMasterAudit;
 import org.mifosplatform.logistics.item.domain.ItemPrice;
+import org.mifosplatform.logistics.item.domain.ItemPriceRepository;
 import org.mifosplatform.logistics.item.domain.ItemRepository;
 import org.mifosplatform.logistics.item.exception.ItemNotFoundException;
 import org.mifosplatform.logistics.item.serialization.ItemCommandFromApiJsonDeserializer;
@@ -29,6 +30,7 @@ import com.google.gson.JsonElement;
 public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
 
 	private final ItemRepository itemRepository;
+	private final ItemPriceRepository itemPriceRepository;
 	private final PlatformSecurityContext context;
 	private final ItemAuditRepository itemAuditRepository;
 	private final ItemCommandFromApiJsonDeserializer itemCommandFromApiJsonDeserializer; 
@@ -37,13 +39,14 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
  @Autowired
  public ItemWritePlatformServiceImpl(final PlatformSecurityContext context,final ItemRepository itemrepository,
 		 final ItemCommandFromApiJsonDeserializer itemCommandFromApiJsonDeserializer,final ItemAuditRepository itemAuditRepository,
-		 final FromJsonHelper fromApiJsonHelper){
+		 final FromJsonHelper fromApiJsonHelper, final ItemPriceRepository itemPriceRepository){
 
 	 this.context=context;
 	 this.itemRepository=itemrepository;
 	 this.itemCommandFromApiJsonDeserializer = itemCommandFromApiJsonDeserializer;
 	 this.itemAuditRepository=itemAuditRepository;
 	 this.fromApiJsonHelper = fromApiJsonHelper;
+	 this.itemPriceRepository = itemPriceRepository;
  }
 	
     @Transactional
@@ -68,7 +71,7 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
 							 
 				final JsonElement element = fromApiJsonHelper.parse(itemPriceRegionData);
 				
-				final Long regionId = fromApiJsonHelper.extractLongNamed("regionId", element);
+				final String regionId = fromApiJsonHelper.extractStringNamed("regionId", element);
 				final BigDecimal price = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("price", element);
 				
 				ItemPrice itemPrice = new ItemPrice(regionId, price);
@@ -108,17 +111,76 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
     		 this.context.authenticatedUser();
     		 this.itemCommandFromApiJsonDeserializer.validateForCreate(command.json());
     		 ItemMaster itemMaster = retrieveCodeBy(itemId);
-    		 final int unitPrice = command.integerValueOfParameterNamed("unitPrice");
+    		 
+    		 /*final int unitPrice = command.integerValueOfParameterNamed("unitPrice");
     		 final int existingUnitPrice = itemMaster.getUnitPrice().intValueExact();
     		 
     		 if(unitPrice!=existingUnitPrice){
     			 final ItemMasterAudit itemMasterAudit = new ItemMasterAudit(itemId,existingUnitPrice,command);
     			 this.itemAuditRepository.save(itemMasterAudit);
-    		 }
+    		 }*/
     		 final Map<String, Object> changes = itemMaster.update(command);
-    		 if(changes.isEmpty()){
-    			 itemRepository.save(itemMaster);
-    		 }
+    		 
+    		 final JsonArray itemPricesArray = command.arrayOfParameterNamed("itemPrices").getAsJsonArray();
+    		 final JsonArray removeItemPricesArray = command.arrayOfParameterNamed("removeItemPrices").getAsJsonArray();
+ 			 String[] itemPriceRegions = new String[itemPricesArray.size()];
+ 			
+ 			 for(int i = 0; i < itemPricesArray.size(); i++){
+ 				itemPriceRegions[i] = itemPricesArray.get(i).toString();
+ 			 }
+ 			 
+ 			 for (final String itemPriceRegionData : itemPriceRegions) {
+ 							 
+ 				final JsonElement element = fromApiJsonHelper.parse(itemPriceRegionData);
+ 				final Long itemPriceId = fromApiJsonHelper.extractLongNamed("id", element);
+ 				final String regionId = fromApiJsonHelper.extractStringNamed("regionId", element);
+	 			final BigDecimal price = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("price", element);
+	 			
+ 				if(itemPriceId != null){
+ 					ItemPrice itemPrice =this.itemPriceRepository.findOne(itemPriceId);
+ 					final int existingUnitPrice = itemPrice.getPrice().intValueExact();
+ 	 				itemPrice.setRegionId(regionId);
+ 	 				itemPrice.setPrice(price);
+ 	 				itemPriceRepository.saveAndFlush(itemPrice);
+ 	 				if(price.intValueExact() != existingUnitPrice){
+		    			 final ItemMasterAudit itemMasterAudit = new ItemMasterAudit(itemId, existingUnitPrice, regionId, command);
+		    			 this.itemAuditRepository.save(itemMasterAudit);
+		    		}
+ 				}else{
+ 					
+ 					ItemPrice itemPrice = new ItemPrice(regionId, price);
+ 					itemMaster.addItemPrices(itemPrice);
+ 				}
+
+ 					
+ 			 }	
+ 			 if(removeItemPricesArray.size() != 0){
+ 				 
+ 				String[] removedItemPriceRegions = new String[removeItemPricesArray.size()];
+ 	 			
+ 	 			 for(int i = 0; i < removeItemPricesArray.size(); i++){
+ 	 				removedItemPriceRegions[i] = removeItemPricesArray.get(i).toString();
+ 	 			 }
+ 	 			 
+ 	 			 for (final String itemPriceRegionData : removedItemPriceRegions) {
+ 	 							 
+ 	 				final JsonElement element = fromApiJsonHelper.parse(itemPriceRegionData);
+ 	 				final Long itemPriceId = fromApiJsonHelper.extractLongNamed("id", element);
+ 	 				final String regionId = fromApiJsonHelper.extractStringNamed("regionId", element);
+ 		 			final BigDecimal price = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("price", element);
+ 		 			
+ 	 				if(itemPriceId != null){
+ 	 					ItemPrice itemPrice =this.itemPriceRepository.findOne(itemPriceId);
+ 	 	 				itemPrice.setRegionId(regionId+"_Y");
+ 	 	 				itemPrice.setPrice(price);
+ 	 	 				itemPrice.setIsDeleted("Y");
+ 	 	 				itemPriceRepository.saveAndFlush(itemPrice);
+ 	 				}	
+ 	 			 }	
+ 			 }
+    		 
+ 			 itemRepository.save(itemMaster);
+    		
 	   return new CommandProcessingResultBuilder() //
        .withCommandId(command.commandId()) //
        .withEntityId(itemId) //

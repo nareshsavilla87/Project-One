@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.mifosplatform.billing.chargecode.data.ChargesData;
+import org.mifosplatform.cms.mediadetails.data.MediaLocationData;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.service.Page;
@@ -20,6 +21,7 @@ import org.mifosplatform.logistics.item.domain.ItemEnumType;
 import org.mifosplatform.logistics.item.domain.ItemTypeData;
 import org.mifosplatform.logistics.item.domain.UnitEnumType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -97,7 +99,7 @@ private static final class SalesDataMapper implements
 		RowMapper<ItemData> {
 
 	public String schema() {
-		return " a.id as id,a.item_code as itemCode,a.item_description as itemDescription,a.item_class as itemClass,a.units as units,a.charge_code as chargeCode,round(a.unit_price,2) price,a.warranty as warranty,"+
+		return " a.id as id,a.item_code as itemCode,a.item_description as itemDescription,a.item_class as itemClass,a.units as units,a.charge_code as chargeCode,round(a.unit_price,2) price,a.warranty as warranty,a.reorder_level as reorderLevel,"+
 				"b.Used as used,b.Available as available,b.Total_items as totalItems from b_item_master a "+
 				"left join ( Select item_master_id,Sum(Case When Client_id IS NULL "+
                 "        Then 1 "+
@@ -127,7 +129,8 @@ private static final class SalesDataMapper implements
 		final Long used = rs.getLong("used");
 		final Long available = rs.getLong("available");
 		final Long totalItems = rs.getLong("totalItems");
-		return new ItemData(id,itemCode,itemDescription,itemClass,units,chargeCode,warranty,unitPrice,used,available,totalItems);
+		final Long reorderLevel = rs.getLong("reorderLevel");
+		return new ItemData(id,itemCode,itemDescription,itemClass,units,chargeCode,warranty,unitPrice,used,available,totalItems, reorderLevel);
 
 
 	}
@@ -186,7 +189,7 @@ public Page<ItemData> retrieveAllItems(SearchSqlQuery searchItems) {
 @Override
 public List<ItemData> retrieveAuditDetails(final Long itemId) {
 	
-	String sql="select bia.id as id,bia.itemmaster_id as itemMasterId,bia.item_code as itemCode,bia.unit_price as unitPrice,"+
+	String sql="select bia.id as id,bia.itemmaster_id as itemMasterId,bia.item_code as itemCode,bia.unit_price as unitPrice,bia.region_id as regionId,"+
 				"bia.changed_date as changedDate from b_item_audit bia where itemmaster_id=?";
 	
 	final RowMapper<ItemData> rm = new AuditMapper();
@@ -204,8 +207,42 @@ private static final class AuditMapper implements RowMapper<ItemData> {
     	final String itemCode = rs.getString("itemCode");
     	final BigDecimal unitPrice = rs.getBigDecimal("unitPrice");
     	final Date changedDate = rs.getDate("changedDate");
-        return new ItemData(id,itemMasterId,itemCode,unitPrice,changedDate);
+    	final Long regionId = rs.getLong("regionId");
+        return new ItemData(id,itemMasterId,itemCode,unitPrice,changedDate, regionId);
     }
+}
+
+
+@Override
+public List<ItemData> retrieveItemPrice(Long itemId) {
+	try{
+		final RetrieveItemPriceDataMapper mapper = new RetrieveItemPriceDataMapper();			
+		final String sql = "select " + mapper.scheme() + itemId+" and is_deleted = 'N'";
+    	return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+	
+	}catch (final EmptyResultDataAccessException e) {
+	    return null;
+	}
+}
+
+private static final class RetrieveItemPriceDataMapper implements RowMapper<ItemData> {
+
+	public String scheme() {
+		return " id as id,item_id as itemId,region_id as regionId,price as price from b_item_price where item_id = ";
+	}
+	
+	@Override
+	public ItemData mapRow(final ResultSet resultSet, final int rowNum)
+			throws SQLException {
+		
+		final Long id = resultSet.getLong("id");
+		final Long itemId = resultSet.getLong("itemId");
+		final Long regionId = resultSet.getLong("regionId");
+		final String price = resultSet.getString("price");
+		
+		
+		return new ItemData(id, itemId, regionId, price);
+	}
 }
 
 }

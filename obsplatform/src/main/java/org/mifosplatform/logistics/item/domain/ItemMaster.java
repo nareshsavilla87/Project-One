@@ -196,6 +196,14 @@ public class ItemMaster extends AbstractPersistable<Long>{
 		itemPrice.update(this);
         this.itemPrices.add(itemPrice);
 	}
+
+	public List<ItemPrice> getItemPrices() {
+		return itemPrices;
+	}
+
+	public void setItemPrices(List<ItemPrice> itemPrices) {
+		this.itemPrices = itemPrices;
+	}
 	
 	
 
