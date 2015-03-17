@@ -24,4 +24,6 @@ public interface ItemReadPlatformService {
 
 	List<ItemData> retrieveAuditDetails(Long itemId);
 
+	List<ItemData> retrieveItemPrice(Long itemId);
+
 }

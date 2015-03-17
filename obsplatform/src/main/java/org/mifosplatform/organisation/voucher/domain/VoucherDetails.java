@@ -44,6 +44,9 @@ public class VoucherDetails extends AbstractPersistable<Long> {
 	@Column(name = "is_deleted")
 	private char isDeleted = 'N';
 	
+	@Column(name = "cancel_reason")
+	private String cancelReason;
+	
 	/**
 	 * Default/Zero-Parameterized Constructor
 	 */
@@ -125,7 +128,17 @@ public class VoucherDetails extends AbstractPersistable<Long> {
 
 	public void setIsDeleted(char isDeleted) {
 		this.isDeleted = isDeleted;
-	}	
+	}
+
+	public void update(String cancelReason) {
+		this.cancelReason = cancelReason;
+		this.clientId = null;
+		this.saleDate = null;
+		this.status = "NEW";
+		
+	}
+
+		
 	
 	
 

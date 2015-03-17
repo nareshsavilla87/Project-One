@@ -41,6 +41,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.useradministration.domain.AppUser;
@@ -174,11 +175,11 @@ public class TicketMasterApiResource {
 			final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 			
 			if(templateFor != null && "closeticket".equalsIgnoreCase(templateFor)){
-				final Collection<MCodeData> closedStatusdata = this.codeReadPlatformService.getCodeValue("Ticket Status", "2");
+				final Collection<MCodeData> closedStatusdata = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TICKET_STATUS, "2");
 				return this.statusToApiJsonSerializer.serialize(settings, closedStatusdata, RESPONSE_PARAMETERS);
 				
 			}else{
-				final Collection<MCodeData> sourceData = codeReadPlatformService.getCodeValue("Ticket Source");
+				final Collection<MCodeData> sourceData = codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TICKET_SOURCE);
 				final TicketMasterData templateData = handleTicketTemplateData(sourceData);
 				return this.toApiJsonSerializer.serialize(settings, templateData, RESPONSE_PARAMETERS);
 			}

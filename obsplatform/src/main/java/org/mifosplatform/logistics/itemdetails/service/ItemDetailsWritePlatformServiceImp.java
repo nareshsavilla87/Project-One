@@ -183,7 +183,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 
 	        logger.error(dve.getMessage(), dve);   	
 	}
-		@Transactional
+		
 		@Override
 		public CommandProcessingResult updateItem(Long id,JsonCommand command)
 		{
