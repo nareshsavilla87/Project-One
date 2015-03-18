@@ -159,7 +159,7 @@ public ItemData retrieveSingleItemDetails(final Long clientId, final Long itemId
 		SalesDataMapper mapper = new SalesDataMapper();
 		String sql;
 		if(isWithClientId){
-			sql = "select " + mapper.schemaWithClientId(clientId)+" where a.id=? and  a.is_deleted='n' group by p.id"; 
+			sql = "select " + mapper.schemaWithClientId(clientId)+" where a.id=? and  a.is_deleted='n' group by a.id"; 
 		}else{
 			sql = "select " + mapper.schema()+" where a.id=? and  a.is_deleted='n'"; 
 		}
