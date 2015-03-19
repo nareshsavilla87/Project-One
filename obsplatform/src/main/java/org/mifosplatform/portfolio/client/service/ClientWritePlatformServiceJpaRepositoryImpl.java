@@ -207,6 +207,14 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,command.entityId(), clientId.toString(),null);
 			}
 			
+			  ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CLOSE_CLIENT);
+				
+	            if(provisionActions != null && provisionActions.isEnable() == 'Y'){
+				
+					this.ProvisioningWritePlatformService.postDetailsForProvisioning(clientId,Long.valueOf(0),ProvisioningApiConstants.REQUEST_TERMINATION,
+							               provisionActions.getProvisioningSystem(),null);
+				}
+			
 			
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //

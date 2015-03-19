@@ -40,8 +40,10 @@ public class ClientBalance {
 		this.clientId = clientId;
 		if(isWalletPayment == 'Y'){
 			this.walletAmount= balanceAmount;
+			this.balanceAmount=	BigDecimal.ZERO;
 		}else{
 		   this.balanceAmount = balanceAmount;
+		   this.walletAmount= BigDecimal.ZERO;
 		}
 	}
 

@@ -78,10 +78,10 @@ public class OneTimeSaleData {
 			String isInvoiced, Long itemId, Long discountId,Integer taxInclusive) {
 		this.id = oneTimeSaleId;
 		this.clientId = clientId;
-		this.setUnits(units);
+		this.units=units;
 		this.chargeCode = chargeCode;
 		this.chargeType = chargeType;
-		this.setUnitPrice(unitPrice);
+		this.unitPrice= unitPrice;
 		this.quantity = quantity;
 		this.totalPrice = totalPrice;
 		this.isInvoiced = isInvoiced;

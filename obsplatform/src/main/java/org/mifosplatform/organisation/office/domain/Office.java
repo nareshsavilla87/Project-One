@@ -45,7 +45,7 @@ public class Office extends AbstractPersistable<Long> {
 
 	@OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
-    private final List<Office> children = new LinkedList<Office>();
+    private final List<Office> children = new LinkedList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
@@ -230,7 +230,7 @@ public class Office extends AbstractPersistable<Long> {
     public void generateHierarchy() {
 
         if (parent != null) {
-            this.hierarchy = this.parent.hierarchyOf(this.getId());
+            this.hierarchy = this.parent.hierarchyOf(getId());
         } else {
             this.hierarchy = ".";
         }
