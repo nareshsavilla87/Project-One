@@ -118,7 +118,7 @@ public class ItemApiResource {
 	public String retrieveSingletemData(@PathParam("itemId") final Long itemId, @Context final UriInfo uriInfo) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		ItemData itemData=this.itemReadPlatformService.retrieveSingleItemDetails(itemId);
+		ItemData itemData=this.itemReadPlatformService.retrieveSingleItemDetails(null, itemId, false); // If you pass clientId set to 'true' else 'false'
 		final List<EnumOptionData> itemClassdata = this.itemReadPlatformService.retrieveItemClassType();
 		final List<EnumOptionData> unitTypeData = this.itemReadPlatformService.retrieveUnitTypes();
 		final List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();
