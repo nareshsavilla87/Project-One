@@ -171,7 +171,7 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
  		 			
  	 				if(itemPriceId != null){
  	 					ItemPrice itemPrice =this.itemPriceRepository.findOne(itemPriceId);
- 	 	 				itemPrice.setRegionId(regionId+"_Y");
+ 	 	 				itemPrice.setRegionId(regionId+"_"+itemPriceId+"_Y");
  	 	 				itemPrice.setPrice(price);
  	 	 				itemPrice.setIsDeleted("Y");
  	 	 				itemPriceRepository.saveAndFlush(itemPrice);
