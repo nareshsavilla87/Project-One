@@ -304,7 +304,7 @@ public class GenerateDisconnectionBill {
 			BigDecimal price = billingOrderData.getPrice();//totalPrice
 			  if(discountMasterData !=null){	
 		    		if (discountMasterData.getDiscountType().equalsIgnoreCase("percentage")){
-		    			BigDecimal discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100))).setScale(2, RoundingMode.HALF_UP);
+		    			BigDecimal discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100))).setScale(Integer.parseInt(roundingDecimal()), RoundingMode.HALF_UP);
 			               price = price.subtract(discountAmount);
 			               discountMasterData.setDiscountAmount(discountAmount);
 		    		 }else if(discountMasterData.getDiscountType().equalsIgnoreCase("flat")){
