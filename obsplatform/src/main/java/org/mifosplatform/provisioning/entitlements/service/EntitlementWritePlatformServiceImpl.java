@@ -235,9 +235,12 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		 for (ProcessRequestDetails processRequestDetails : details) {
 			Long id = command.longValueOfParameterNamed("prdetailsId");
 			if (processRequestDetails.getId().longValue() == id.longValue()) {
-		     processRequestDetails.setReceiveMessage(processRequestDetails.getReceiveMessage());
+			   String receiveMessage = command.stringValueOfParameterNamed("receiveMessage");	
+		       processRequestDetails.setReceiveMessage(receiveMessage);
 			}
 		}
+		 processRequest.setProcessStatus('F');
+		 this.entitlementRepository.saveAndFlush(processRequest);
 		return new CommandProcessingResult(Long.valueOf(-1L));
 	}
 	}
