@@ -1254,4 +1254,8 @@ public class CommandWrapper {
 		public boolean isRadService() {
 			return this.entityName.equalsIgnoreCase("RADSERVICE");
 		}
+		
+		public boolean isVendorManagement(){
+			return this.entityName.equalsIgnoreCase("VENDOR");
+		}
 }

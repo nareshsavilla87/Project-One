@@ -2726,6 +2726,14 @@ public CommandWrapperBuilder deleteRadService(final Long radServiceId) {
 	
 }
 
+public CommandWrapperBuilder createVendorManagement() {
+	this.actionName = "CREATE";
+	this.entityName = "VENDOR";
+	this.entityId = null;
+	this.href = "/vendorandloyalty/template";
+	return this;
+}
+
 }
 
 
