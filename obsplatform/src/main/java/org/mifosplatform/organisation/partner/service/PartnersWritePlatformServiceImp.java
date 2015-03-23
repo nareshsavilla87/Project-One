@@ -133,7 +133,7 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 			
             if(provisionActions != null && provisionActions.isEnable() == 'Y'){
 				
-				this.provisioningWritePlatformService.postDetailsForProvisioning(Long.valueOf(0),office.getId(),ProvisioningApiConstants.REQUEST_CREATE_AGENT,
+				this.provisioningWritePlatformService.postDetailsForProvisioning(Long.valueOf(0),Long.valueOf(0),ProvisioningApiConstants.REQUEST_CREATE_AGENT,
 						               provisionActions.getProvisioningSystem(),null);
 			}
 			

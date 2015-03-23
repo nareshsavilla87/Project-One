@@ -2,6 +2,8 @@ package org.mifosplatform.provisioning.entitlements.service;
 
 import java.util.List;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
 import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -14,6 +16,7 @@ import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConst
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
+import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
@@ -168,12 +171,24 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		if(requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CREATE_AGENT)){
 			
 			if(agentResourceId !=null ){
-				
-				Office office = this.officeRepository.findOne(processRequest.getOrderId());
-				office.setExternalId(agentResourceId);
-				this.officeRepository.saveAndFlush(office);
+				Long officeId = null ;
+			 try {
+				final Long prdetailsId = command.longValueOfParameterNamed("prdetailsId");
+				 List<ProcessRequestDetails>  ProcessRequestDetails = processRequest.getProcessRequestDetails();
+			     for(ProcessRequestDetails ProcessRequestDetail:ProcessRequestDetails){
+			    	 if(ProcessRequestDetail.getId().equals(prdetailsId)){
+			    		JSONObject object = new JSONObject(ProcessRequestDetail.getSentMessage());
+			    		 officeId = object.getLong("agentId");
+			    		 Office office = this.officeRepository.findOne(officeId);
+			    		 office.setExternalId(agentResourceId);
+			    		 this.officeRepository.saveAndFlush(office);
+			    		 break;
+			    	 }
+			     }
+			  }catch(Exception e){
+				  throw new OfficeNotFoundException(officeId);
 			}
-			
+	    	}	
 		}
 		
 		
