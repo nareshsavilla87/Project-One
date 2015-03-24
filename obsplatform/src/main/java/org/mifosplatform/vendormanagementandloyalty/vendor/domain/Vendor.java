@@ -1,8 +1,11 @@
 package org.mifosplatform.vendormanagementandloyalty.vendor.domain;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,10 +13,12 @@ import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.logistics.item.exception.ItemNotFoundException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -124,9 +129,107 @@ public class Vendor extends  AbstractPersistable<Long> {
 	}
 
 
-	public void addMediaLocations(final VendorDetail vendorDetails) {
+	public void addVendorDetails(final VendorDetail vendorDetails) {
 		vendorDetails.update(this);
         this.vendorDetails.add(vendorDetails);
+	}
+	
+	public Map<String, Object> update(JsonCommand command){
+	
+		final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
+		
+		final String vendorCodeParamName = "vendorCode";
+		if(command.isChangeInStringParameterNamed(vendorCodeParamName, this.vendorCode)){
+			final String newValue = command.stringValueOfParameterNamed(vendorCodeParamName);
+			actualChanges.put(vendorCodeParamName, newValue);
+			this.vendorCode = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		final String vendorDescriptionParamName = "vendorDescription";
+		if(command.isChangeInStringParameterNamed(vendorDescriptionParamName, this.vendorDescription)){
+			final String newValue = command.stringValueOfParameterNamed(vendorDescriptionParamName);
+			actualChanges.put(vendorDescriptionParamName, newValue);
+			this.vendorDescription = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String vendorEmailIdParamName = "vendorEmailId";
+		if(command.isChangeInStringParameterNamed(vendorEmailIdParamName,this.vendorEmailid)){
+			final String newValue = command.stringValueOfParameterNamed(vendorEmailIdParamName);
+			actualChanges.put(vendorEmailIdParamName, newValue);
+			this.vendorEmailid = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		
+		final String contactNameParamName = "contactName";
+		if(command.isChangeInStringParameterNamed(contactNameParamName,this.vendorContactName)){
+			final String newValue = command.stringValueOfParameterNamed(contactNameParamName);
+			actualChanges.put(contactNameParamName, newValue);
+			this.vendorContactName = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		
+		final String vendormobileNoParamName = "vendormobileNo";
+		if(command.isChangeInStringParameterNamed(vendormobileNoParamName, this.vendorMobileno)){
+			final String newValue = command.stringValueOfParameterNamed(vendormobileNoParamName);
+			actualChanges.put(vendormobileNoParamName, newValue);
+			this.vendorMobileno = StringUtils.defaultIfEmpty(newValue,null); 
+		}
+		
+		final String vendorTelephoneNoParamName = "vendorTelephoneNo";
+		if(command.isChangeInStringParameterNamed(vendorTelephoneNoParamName, this.vendorTelephoneno)){
+			final String newValue = command.stringValueOfParameterNamed(vendorTelephoneNoParamName);
+			actualChanges.put(vendorTelephoneNoParamName, newValue);
+			this.vendorTelephoneno = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		
+		final String vendorAddressParamName = "vendorAddress";
+		if(command.isChangeInStringParameterNamed(vendorAddressParamName, this.vendorAddress)){
+			final String newValue = command.stringValueOfParameterNamed(vendorAddressParamName);
+			actualChanges.put(vendorAddressParamName, newValue);
+			this.vendorAddress = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		
+		final String agreementStatusParamName = "agreementStatus";
+		if(command.isChangeInStringParameterNamed(agreementStatusParamName, this.agreementStatus)){
+			final String newValue = command.stringValueOfParameterNamed(agreementStatusParamName);
+			actualChanges.put(agreementStatusParamName, newValue);
+			this.agreementStatus = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		
+		final String vendorCountryParamName = "vendorCountry";
+		if(command.isChangeInStringParameterNamed(vendorCountryParamName, this.vendorCountry)){
+			final String newValue = command.stringValueOfParameterNamed(vendorCountryParamName);
+			actualChanges.put(vendorCountryParamName, newValue);
+			this.vendorCountry = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		
+		final String vendorCurrencyParamName = "vendorCurrency";
+		if(command.isChangeInStringParameterNamed(vendorCurrencyParamName, this.vendorCurrency)){
+			final String newValue = command.stringValueOfParameterNamed(vendorCurrencyParamName);
+			actualChanges.put(vendorCurrencyParamName, newValue);
+			this.vendorCurrency = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		
+		final String agreementStartDateParamName = "agreementStartDate";
+		if(command.isChangeInDateParameterNamed(agreementStartDateParamName, this.agreementStartdate)){
+			final LocalDate newValue = command.localDateValueOfParameterNamed(agreementStartDateParamName);
+			actualChanges.put(agreementStartDateParamName,newValue.toDate());
+			this.agreementStartdate = newValue.toDate();
+		}
+		
+		final String agreementEndDateParamName = "agreementEndDate";
+		if(command.isChangeInDateParameterNamed(agreementEndDateParamName, this.agreementEnddate)){
+			final LocalDate newValue = command.localDateValueOfParameterNamed(agreementEndDateParamName);
+			actualChanges.put(agreementEndDateParamName,newValue.toDate());
+			this.agreementEnddate = newValue.toDate();
+		}
+		
+		final String contentTypeParamName = "contentType";
+		if(command.isChangeInStringParameterNamed(contentTypeParamName, this.contentType)){
+			final String newValue = command.stringValueOfParameterNamed(contentTypeParamName);
+			actualChanges.put(contentTypeParamName, newValue);
+			this.contentType = StringUtils.defaultIfEmpty(newValue,null);
+		}
+		
+		return actualChanges;
+	
 	}
 	
 }

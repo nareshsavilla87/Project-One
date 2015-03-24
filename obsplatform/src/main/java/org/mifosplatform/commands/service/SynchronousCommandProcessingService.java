@@ -1244,7 +1244,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 	      }else if(wrapper.isVendorManagement()){
             	if(wrapper.isCreate()) {
 			         handler = applicationContext.getBean("createVendorManagementCommandHandler",NewCommandSourceHandler.class);
-			    }else{
+			    }else if(wrapper.isUpdate()) {
+					 handler = applicationContext.getBean("updateVendorManagementCommandHandler",NewCommandSourceHandler.class);
+				 }else{
 			           throw new UnsupportedCommandException(wrapper.commandName());
 				}
 	      }

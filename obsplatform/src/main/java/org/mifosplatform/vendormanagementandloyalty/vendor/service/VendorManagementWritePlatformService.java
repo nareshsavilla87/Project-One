@@ -12,4 +12,6 @@ public interface VendorManagementWritePlatformService {
 
     CommandProcessingResult createVendorAndLoyaltyCalucation(JsonCommand command);
 
+	CommandProcessingResult updateUser(Long vendorId, JsonCommand command);
+
 }

@@ -1,21 +1,19 @@
-/*package org.mifosplatform.vendormanagementandloyalty.vendor.service;
-
-public class VendorManagementWritePlatformServiceImpl {
-
-}
-*/
 package org.mifosplatform.vendormanagementandloyalty.vendor.service;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.vendormanagementandloyalty.vendor.domain.Vendor;
 import org.mifosplatform.vendormanagementandloyalty.vendor.domain.VendorDetail;
+import org.mifosplatform.vendormanagementandloyalty.vendor.domain.VendorDetailRepository;
 import org.mifosplatform.vendormanagementandloyalty.vendor.domain.VendorRepository;
+import org.mifosplatform.vendormanagementandloyalty.vendor.exception.VendorNotFoundException;
 import org.mifosplatform.vendormanagementandloyalty.vendor.serialization.VendorManagementCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,16 +35,19 @@ public class VendorManagementWritePlatformServiceImpl implements VendorManagemen
 	private VendorRepository vendorRepository; 
 	private VendorManagementCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final FromJsonHelper fromApiJsonHelper;
+	private final VendorDetailRepository vendorDetailRepository;
 	 
 	@Autowired
 	public VendorManagementWritePlatformServiceImpl(final PlatformSecurityContext context, 
 			final VendorRepository vendorRepository, 
 			final VendorManagementCommandFromApiJsonDeserializer fromApiJsonDeserializer,
-			final FromJsonHelper fromApiJsonHelper) {
+			final FromJsonHelper fromApiJsonHelper,
+			final VendorDetailRepository vendorDetailRepository) {
 		this.context = context;
 		this.vendorRepository = vendorRepository;
 		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 		this.fromApiJsonHelper = fromApiJsonHelper;
+		this.vendorDetailRepository = vendorDetailRepository;
 	}
 	
 	@Transactional
@@ -80,8 +81,8 @@ public class VendorManagementWritePlatformServiceImpl implements VendorManagemen
 				final Long priceRegion = fromApiJsonHelper.extractLongNamed("priceRegion", element);
 				final BigDecimal contentCost = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("contentCost", element);
 				
-				final VendorDetail mediaassetLocation = new VendorDetail(contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost);
-				vendor.addMediaLocations(mediaassetLocation);
+				final VendorDetail vendorDetail = new VendorDetail(contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost);
+				vendor.addVendorDetails(vendorDetail);
 			}		 
 			
 			this.vendorRepository.save(vendor);
@@ -116,5 +117,92 @@ public class VendorManagementWritePlatformServiceImpl implements VendorManagemen
 				"Unknown data integrity issue with resource: " + realCause.getMessage());
 
 	}
+
+	@Override
+	public CommandProcessingResult updateUser(Long vendorId, JsonCommand command) {
+		
+		this.context.authenticatedUser();
+		this.fromApiJsonDeserializer.validateForCreate(command.json());
+		Vendor vendor=retrieveCodeBy(vendorId);
+		
+		final Map<String, Object> changes = vendor.update(command);
+		 
+		 final JsonArray vendorDetailsArray = command.arrayOfParameterNamed("vendorDetails").getAsJsonArray();
+		 final JsonArray removevendorDetailsArray = command.arrayOfParameterNamed("removeVendorDetails").getAsJsonArray();
+		
+		 String[] vendorDetails = new String[vendorDetailsArray.size()];
+		
+		 for(int i = 0; i < vendorDetailsArray.size(); i++){
+			 vendorDetails[i] = vendorDetailsArray.get(i).toString();
+		 }
+		 
+		 for (final String vendorDetailsData : vendorDetails) {
+						 
+			final JsonElement element = fromApiJsonHelper.parse(vendorDetailsData);
+			
+			final Long vendorDetailId = fromApiJsonHelper.extractLongNamed("id", element);
+			final String contentCode = fromApiJsonHelper.extractStringNamed("contentCode", element);
+			final String loyaltyType = fromApiJsonHelper.extractStringNamed("loyaltyType", element);
+			final BigDecimal loyaltyShare = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("loyaltyShare", element);
+			final Long priceRegion = fromApiJsonHelper.extractLongNamed("priceRegion", element);
+			final BigDecimal contentCost = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("contentCost", element);
+			
+			if(vendorDetailId != null){
+				VendorDetail vendordetail =this.vendorDetailRepository.findOne(vendorDetailId);
+				vendordetail.setContentCode(contentCode);
+				vendordetail.setLoyaltyType(loyaltyType);
+				vendordetail.setLoyaltyShare(loyaltyShare);
+				vendordetail.setPriceRegion(priceRegion);
+				if("NONE".equalsIgnoreCase(loyaltyType)){
+					vendordetail.setContentCost(contentCost);
+				}else{
+					vendordetail.setContentCost(null);
+				}
+				this.vendorDetailRepository.saveAndFlush(vendordetail);
+ 				
+			}else{
+				
+				final VendorDetail vendordetail = new VendorDetail(contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost);
+				vendor.addVendorDetails(vendordetail);
+			}
+
+		 }	
+		 
+		 if(removevendorDetailsArray.size() != 0){
+				 
+				String[] removedvendorDetails = new String[removevendorDetailsArray.size()];
+	 			
+	 			 for(int i = 0; i < removevendorDetailsArray.size(); i++){
+	 				removedvendorDetails[i] = removevendorDetailsArray.get(i).toString();
+	 			 }
+	 			 
+	 			 for (final String removedvendorDetailsData : removedvendorDetails) {
+	 							 
+	 				final JsonElement element = fromApiJsonHelper.parse(removedvendorDetailsData);
+	 				final Long vendorDetailId = fromApiJsonHelper.extractLongNamed("id", element);
+	 				final String contentCode = fromApiJsonHelper.extractStringNamed("contentCode", element);
+		 			
+	 				if(vendorDetailId != null){
+	 					VendorDetail vendorDetail =this.vendorDetailRepository.findOne(vendorDetailId);
+	 					vendorDetail.setContentCode(contentCode+"_"+vendorDetailId+"_"+"Y");
+	 	 				vendorDetail.setIsDeleted("Y");
+	 	 				vendorDetailRepository.saveAndFlush(vendorDetail);
+	 				}	
+	 			 }	
+			 }
+		
+		this.vendorRepository.save(vendor);
+		return new CommandProcessingResultBuilder() //
+	       .withCommandId(command.commandId()) //
+	       .withEntityId(vendorId) //
+	       .with(changes) //
+	       .build();
+	}
+	
+	private Vendor retrieveCodeBy(final Long vendorId) {
+        final Vendor vendor = this.vendorRepository.findOne(vendorId);
+        if (vendor == null) { throw new VendorNotFoundException(vendorId.toString()); }
+        return vendor;
+    }
 
 }

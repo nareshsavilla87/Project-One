@@ -2734,6 +2734,14 @@ public CommandWrapperBuilder createVendorManagement() {
 	return this;
 }
 
+public CommandWrapperBuilder updateVendorManagement(final Long radServiceId) {
+	this.actionName = "UPDATE";
+	this.entityName = "VENDOR";
+	this.entityId = radServiceId;
+	this.href = "/vendorandloyalty/"+radServiceId;
+	return this;
+}
+
 }
 
 

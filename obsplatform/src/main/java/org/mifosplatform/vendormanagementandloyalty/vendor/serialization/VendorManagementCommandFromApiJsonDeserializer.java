@@ -35,7 +35,7 @@ public final class VendorManagementCommandFromApiJsonDeserializer {
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("vendorCode", "vendorDescription",
     		  "vendorEmailId", "contactName", "vendormobileNo", "vendorTelephoneNo", "vendorAddress", "agreementStatus", "vendorCountry", "vendorCurrency",
     		  "agreementStartDate", "agreementEndDate", "contentType", "vendorDetails", "contentCode", "loyaltyType", "loyaltyShare",
-    		  "priceRegion", "contentCost", "dateFormat", "locale"));
+    		  "priceRegion", "contentCost", "dateFormat", "locale", "removeVendorDetails"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -124,9 +124,11 @@ public final class VendorManagementCommandFromApiJsonDeserializer {
 			     final Integer priceRegion = fromApiJsonHelper.extractIntegerSansLocaleNamed("priceRegion", attributeElement);
 			     baseDataValidator.reset().parameter("priceRegion").value(priceRegion).notBlank().integerGreaterThanZero().notExceedingLengthOf(20);
 			     
-			     final BigDecimal contentCost = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("contentCost", attributeElement);
-			     baseDataValidator.reset().parameter("contentCost").value(contentCost).inMinAndMaxAmountRange(BigDecimal.ZERO, BigDecimal.valueOf(100));
-			             
+			     if("NONE".equalsIgnoreCase(loyaltyType)){
+			    	 final BigDecimal contentCost = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("contentCost", attributeElement);
+				     baseDataValidator.reset().parameter("contentCost").value(contentCost).notBlank();
+			     }
+			           
 		  }
               
         throwExceptionIfValidationWarningsExist(dataValidationErrors);

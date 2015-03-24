@@ -32,7 +32,10 @@ public class VendorDetail extends AbstractPersistable<Long> {
 	@ManyToOne
     @JoinColumn(name="vendor_id")
 	private Vendor vendor;
- 
+	
+	@Column(name = "is_deleted")
+	private String isDeleted="N";
+	
 	public VendorDetail(){
 	}
 
@@ -55,5 +58,63 @@ public class VendorDetail extends AbstractPersistable<Long> {
 		this.vendor=vendor;
 		
 	}
+
+	public String getContentCode() {
+		return contentCode;
+	}
+
+	public Long getPriceRegion() {
+		return priceRegion;
+	}
+
+	public String getLoyaltyType() {
+		return loyaltyType;
+	}
+
+	public BigDecimal getLoyaltyShare() {
+		return loyaltyShare;
+	}
+
+	public BigDecimal getContentCost() {
+		return contentCost;
+	}
+
+	public Vendor getVendor() {
+		return vendor;
+	}
+
+	public String getIsDeleted() {
+		return isDeleted;
+	}
+
+	public void setContentCode(String contentCode) {
+		this.contentCode = contentCode;
+	}
+
+	public void setPriceRegion(Long priceRegion) {
+		this.priceRegion = priceRegion;
+	}
+
+	public void setLoyaltyType(String loyaltyType) {
+		this.loyaltyType = loyaltyType;
+	}
+
+	public void setLoyaltyShare(BigDecimal loyaltyShare) {
+		this.loyaltyShare = loyaltyShare;
+	}
+
+	public void setContentCost(BigDecimal contentCost) {
+		this.contentCost = contentCost;
+	}
+
+	public void setVendor(Vendor vendor) {
+		this.vendor = vendor;
+	}
+
+	public void setIsDeleted(String isDeleted) {
+		this.isDeleted = isDeleted;
+	}
+	
+	
 	
 }
