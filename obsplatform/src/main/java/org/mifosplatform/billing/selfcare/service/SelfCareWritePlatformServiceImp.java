@@ -24,6 +24,7 @@ import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
 import org.mifosplatform.organisation.message.service.MessagePlatformEmailService;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
@@ -124,6 +125,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				if(mailnotification){
 				//platformEmailService.sendToUserAccount(new EmailDetail("OBS Self Care Organisation ", "SelfCare",email, selfCare.getUserName()), unencodedPassword); 
 				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_CREATE_SELFCARE);
+				if(messageDetails !=null){
 				String subject=messageDetails.getSubject();
 				String body=messageDetails.getBody();
 				String footer=messageDetails.getFooter();
@@ -140,8 +142,11 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				
 				this.messageDataRepository.save(billingMessage);
 				//messagePlatformEmailService.sendGeneralMessage(selfCare.getUniqueReference(), prepareEmail.toString().trim(), subject);
+				}else{
+					throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_CREATE_SELFCARE);
 				}
-			}else{
+				}else{
+				}
 				throw new PlatformDataIntegrityException("client does not exist", "client not registered","clientId", "client is null ");
 			}
 			
@@ -289,6 +294,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				String generatedKey = selfCareTemporary.getGeneratedKey() + "11011";
 				
 				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SELFCARE_REGISTER);
+				if(messageDetails!=null){
 				String subject=messageDetails.getSubject();
 				String body=messageDetails.getBody();
 				String header=messageDetails.getHeader()+",";
@@ -307,6 +313,9 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				
 				//this.messagePlatformEmailService.sendGeneralMessage(selfCareTemporary.getUserName(), prepareEmail.toString().trim(), subject);
 				return new CommandProcessingResultBuilder().withEntityId(selfCareTemporary.getId()).withClientId(clientId).build();
+			   }else{
+					throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SELFCARE_REGISTER);
+				}
 			}
 				
 		}catch(DataIntegrityViolationException dve){
@@ -370,6 +379,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				selfCare.setPassword(generatedKey);
 				
 				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NEW_SELFCARE_PASSWORD);
+				if(messageDetails!=null){
 				String subject=messageDetails.getSubject();
 				String body=messageDetails.getBody();
 				String footer=messageDetails.getFooter();
@@ -387,6 +397,9 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 						subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 				
 				this.messageDataRepository.save(billingMessage);
+				}else{
+					throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NEW_SELFCARE_PASSWORD);
+				}
 			}
 			
 			return new CommandProcessingResultBuilder().withEntityId(selfCare.getId()).withClientId(selfCare.getClientId()).build();

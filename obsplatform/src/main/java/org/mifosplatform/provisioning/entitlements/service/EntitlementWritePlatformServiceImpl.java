@@ -12,6 +12,7 @@ import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
@@ -88,7 +89,7 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 				String Name = client.getLastname();
 				
 				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PROVISION_CREDENTIALS);
-				
+				if(messageDetails!=null){
 				String subject=messageDetails.getSubject();
 				String body=messageDetails.getBody();
 				String header=messageDetails.getHeader()+","+"\n"+"\n";
@@ -102,7 +103,9 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 						subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 				
 				this.messageDataRepository.save(billingMessage);
-						
+			  }else{
+				  throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PROVISION_CREDENTIALS);
+			  }
 			}
 			
 		}
