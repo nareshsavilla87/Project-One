@@ -18,10 +18,12 @@ public interface ItemReadPlatformService {
 
 	List<ItemData> retrieveAllItems();
 
-	ItemData retrieveSingleItemDetails(Long itemId);
+	ItemData retrieveSingleItemDetails(Long clientId, Long itemId, boolean isWithClientId);
 
 	Page<ItemData> retrieveAllItems(SearchSqlQuery searchItems);
 
 	List<ItemData> retrieveAuditDetails(Long itemId);
+
+	List<ItemData> retrieveItemPrice(Long itemId);
 
 }

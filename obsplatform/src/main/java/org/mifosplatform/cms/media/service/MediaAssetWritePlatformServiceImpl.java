@@ -12,6 +12,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,7 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 			 
 			 final String language = command.stringValueOfParameterNamed("languageId");
 			 Long languageId = null;
-			 final Collection<MCodeData> codeValuedatasForLanguages = this.mCodeReadPlatformService.getCodeValue("Asset language");
+			 final Collection<MCodeData> codeValuedatasForLanguages = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_ASSET_LANGUAGE);
 			 for (final MCodeData codeValuedatasForLanguage : codeValuedatasForLanguages) {
 			 
 				 if(codeValuedatasForLanguage.getmCodeValue().equalsIgnoreCase(language)){
@@ -155,7 +156,7 @@ public class MediaAssetWritePlatformServiceImpl implements MediaAssetWritePlatfo
 	        
 	        final String language = command.stringValueOfParameterNamed("languageId");
 			Long languageId = null;
-			final Collection<MCodeData> codeValuedatasForLanguages = this.mCodeReadPlatformService.getCodeValue("Asset language");
+			final Collection<MCodeData> codeValuedatasForLanguages = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_ASSET_LANGUAGE);
 			for (final MCodeData codeValuedatasForLanguage : codeValuedatasForLanguages) {
 				 
 				if(codeValuedatasForLanguage.getmCodeValue().equalsIgnoreCase(language)){

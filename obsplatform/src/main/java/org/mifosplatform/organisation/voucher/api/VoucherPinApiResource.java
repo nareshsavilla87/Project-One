@@ -24,6 +24,7 @@ import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
+import org.mifosplatform.infrastructure.codes.CodeConstants;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -32,6 +33,9 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.organisation.voucher.data.VoucherData;
@@ -67,21 +71,24 @@ public class VoucherPinApiResource {
 
 	private static String resourceNameForPermissions = "VOUCHER";
 	private static String resourceNameFordownloadFilePermissions = "DOWNLOAD_FILE";
-	private PlatformSecurityContext context;
-	private VoucherReadPlatformService readPlatformService;
-	private DefaultToApiJsonSerializer<VoucherData> toApiJsonSerializer;
-	private ApiRequestParameterHelper apiRequestParameterHelper;
-	private PortfolioCommandSourceWritePlatformService writePlatformService;
+	
+	private final PlatformSecurityContext context;
+	private final VoucherReadPlatformService readPlatformService;
+	private final DefaultToApiJsonSerializer<VoucherData> toApiJsonSerializer;
+	private final ApiRequestParameterHelper apiRequestParameterHelper;
+	private final PortfolioCommandSourceWritePlatformService writePlatformService;
 	private final OfficeReadPlatformService officeReadPlatformService;
-
+	private final MCodeReadPlatformService  mCodeReadPlatformService;
 	@Autowired
 	public VoucherPinApiResource(final PlatformSecurityContext context,final VoucherReadPlatformService readPlatformService,
 			final DefaultToApiJsonSerializer<VoucherData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PortfolioCommandSourceWritePlatformService writePlatformService,final OfficeReadPlatformService officeReadPlatformService) {
+			final PortfolioCommandSourceWritePlatformService writePlatformService,final OfficeReadPlatformService officeReadPlatformService,
+			final MCodeReadPlatformService  mCodeReadPlatformService) {
 
 		this.context = context;
 		this.readPlatformService = readPlatformService;
 		this.toApiJsonSerializer = toApiJsonSerializer;
+		this.mCodeReadPlatformService = mCodeReadPlatformService;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.writePlatformService = writePlatformService;
 		this.officeReadPlatformService = officeReadPlatformService;
@@ -133,6 +140,19 @@ public class VoucherPinApiResource {
 		final VoucherData voucherData = new VoucherData(pinCategoryData, pinTypeData, offices);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		
+		return this.toApiJsonSerializer.serialize(settings, voucherData, RESPONSE_PARAMETERS);
+	}
+	
+	@GET
+	@Path("cancel/template")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrievevoucherCancelTemplate(@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final Collection<MCodeData> reasondatas = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_VOUCHER_CANCEL_REASON);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		final VoucherData voucherData = new VoucherData(reasondatas);
 		return this.toApiJsonSerializer.serialize(settings, voucherData, RESPONSE_PARAMETERS);
 	}
 
