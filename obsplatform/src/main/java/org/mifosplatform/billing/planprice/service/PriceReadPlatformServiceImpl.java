@@ -59,7 +59,7 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService {
 			final String payterm_type = rs.getString("paytermType");
 			final String units = rs.getString("units");
 			final String contractPeriod = units.concat(payterm_type);
-			return new SubscriptionData(id, contractPeriod, null);
+			return new SubscriptionData(id, contractPeriod, null,null);
 
 		}
 	}
