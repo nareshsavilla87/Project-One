@@ -2728,17 +2728,25 @@ public CommandWrapperBuilder deleteRadService(final Long radServiceId) {
 
 public CommandWrapperBuilder createVendorManagement() {
 	this.actionName = "CREATE";
-	this.entityName = "VENDOR";
+	this.entityName = "VENDORMANAGEMENT";
 	this.entityId = null;
-	this.href = "/vendorandloyalty/template";
+	this.href = "/vendormanagement/template";
 	return this;
 }
 
 public CommandWrapperBuilder updateVendorManagement(final Long radServiceId) {
 	this.actionName = "UPDATE";
-	this.entityName = "VENDOR";
+	this.entityName = "VENDORMANAGEMENT";
 	this.entityId = radServiceId;
-	this.href = "/vendorandloyalty/"+radServiceId;
+	this.href = "/vendormanagement/"+radServiceId;
+	return this;
+}
+
+public CommandWrapperBuilder deleteVendorManagement(final Long radServiceId) {
+	this.actionName = "DELETE";
+	this.entityName = "VENDORMANAGEMENT";
+	this.entityId = radServiceId;
+	this.href = "/vendormanagement/"+radServiceId;
 	return this;
 }
 

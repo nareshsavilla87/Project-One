@@ -1256,6 +1256,6 @@ public class CommandWrapper {
 		}
 		
 		public boolean isVendorManagement(){
-			return this.entityName.equalsIgnoreCase("VENDOR");
+			return this.entityName.equalsIgnoreCase("VENDORMANAGEMENT");
 		}
 }
