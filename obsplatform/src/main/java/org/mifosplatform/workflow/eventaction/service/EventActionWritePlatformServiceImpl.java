@@ -1,7 +1,6 @@
 package org.mifosplatform.workflow.eventaction.service;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import net.java.dev.obs.beesmart.AddExternalBeesmartMethod;
@@ -23,6 +22,7 @@ import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
 import org.mifosplatform.organisation.message.exception.EmailNotFoundException;
 import org.mifosplatform.portfolio.association.data.AssociationData;
 import org.mifosplatform.portfolio.association.exception.HardwareDetailsNotFoundException;
@@ -121,6 +121,8 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				          TicketMaster ticketMaster=this.repository.findOne(new Long(resourceId));
 				          AppUserData user = this.readPlatformService.retrieveUser(new Long(data.getUserId()));
 				          BillingMessageTemplate billingMessageTemplate = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_TICKET_TEMPLATE);
+				          
+				          if(billingMessageTemplate !=null){
 				          String value=ticketURL+""+resourceId;
 				          String removeUrl="<br/><b>URL : </b>"+"<a href="+value+">View Ticket</a>";
 				         // removeUrl.replaceAll("(PARAMURL)", ticketURL+""+resourceId); 	
@@ -187,6 +189,9 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						        	        this.messageDataRepository.save(billingMessage);
 					        	  }
 				        	  	}
+				        	  }
+				          }else{
+				        		throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_TICKET_TEMPLATE);
 				        	  }
 				      
 				       break;

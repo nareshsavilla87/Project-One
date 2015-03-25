@@ -4,6 +4,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.mifosplatform.billing.chargecode.data.ChargesData;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.discountmaster.service.DiscountReadPlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -57,6 +59,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 	private final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService;
 	private final ItemDetailsWritePlatformService inventoryItemDetailsWritePlatformService;
 	private final EventValidationReadPlatformService eventValidationReadPlatformService;
+	private final ChargeCodeRepository chargeCodeRepository;
 
 	@Autowired
 	public OneTimeSaleWritePlatformServiceImpl(final PlatformSecurityContext context,final OneTimeSaleRepository oneTimeSaleRepository,
@@ -64,7 +67,9 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			final InvoiceOneTimeSale invoiceOneTimeSale,final ItemReadPlatformService itemReadPlatformService,
 			final FromJsonHelper fromJsonHelper,final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService,
 			final ItemDetailsWritePlatformService inventoryItemDetailsWritePlatformService,
-			final EventValidationReadPlatformService eventValidationReadPlatformService,final DiscountReadPlatformService discountReadPlatformService) {
+			final EventValidationReadPlatformService eventValidationReadPlatformService,
+			final DiscountReadPlatformService discountReadPlatformService,
+			final ChargeCodeRepository chargeCodeRepository) {
 
 		
 		this.context = context;
@@ -78,6 +83,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		this.oneTimeSaleReadPlatformService = oneTimeSaleReadPlatformService;
 		this.inventoryItemDetailsWritePlatformService = inventoryItemDetailsWritePlatformService;
 		this.eventValidationReadPlatformService = eventValidationReadPlatformService;
+		this.chargeCodeRepository = chargeCodeRepository;
 
 	}
 
@@ -163,7 +169,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 	public void updateOneTimeSale(final OneTimeSaleData oneTimeSaleData) {
 
 		OneTimeSale oneTimeSale = oneTimeSaleRepository.findOne(oneTimeSaleData.getId());
-		oneTimeSale.setIsInvoiced('y');
+		oneTimeSale.setIsInvoiced('Y');
 		oneTimeSaleRepository.save(oneTimeSale);
 
 	}
@@ -222,6 +228,16 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		OneTimeSale oneTimeSale = null;
 		try {
 			oneTimeSale = oneTimeSaleRepository.findOne(entityId);
+		/*	if(oneTimeSale.getDeviceMode().equalsIgnoreCase("NEWSALE")&&oneTimeSale.getIsInvoiced()=='Y'){
+				
+				ChargeCodeMaster chargeCode=this.chargeCodeRepository.findOneByChargeCode(oneTimeSale.getChargeCode());
+				OneTimeSaleData oneTimeSaleData = new OneTimeSaleData(oneTimeSale.getId(),oneTimeSale.getClientId(), oneTimeSale.getUnits(), oneTimeSale.getChargeCode(), 
+						                             chargeCode.getChargeType(),oneTimeSale.getUnitPrice(),oneTimeSale.getQuantity(), oneTimeSale.getTotalPrice(), "Y",
+						                             oneTimeSale.getItemId(),oneTimeSale.getDiscountId(),chargeCode.getTaxInclusive());
+				
+				this.invoiceOneTimeSale.reverseInvoiceForOneTimeSale(oneTimeSale.getClientId(),oneTimeSaleData,false);
+			 }*/
+			
 			oneTimeSale.setIsDeleted('Y');
 			this.oneTimeSaleRepository.save(oneTimeSale);
 
