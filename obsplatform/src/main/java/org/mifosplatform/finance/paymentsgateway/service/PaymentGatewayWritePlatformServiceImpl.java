@@ -4,15 +4,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
@@ -931,5 +937,57 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			return ConfigurationConstants.PAYMENTGATEWAY_SUCCESS;
 		}
 		
+	}
+
+	@SuppressWarnings("rawtypes")
+	@Override
+	public String paypalRecurringVerification(HttpServletRequest request) throws IllegalStateException, ClientProtocolException, IOException, JSONException {
+
+		PaymentGatewayConfiguration pgConfig = this.paymentGatewayConfigurationRepository.findOneByName(ConfigurationConstants.PAYPAL_PAYMENTGATEWAY);
+		
+		if (null == pgConfig || null == pgConfig.getValue() || !pgConfig.isEnabled()) {
+			throw new PaymentGatewayConfigurationException(ConfigurationConstants.PAYPAL_PAYMENTGATEWAY);
+		}
+		
+		JSONObject pgConfigJsonObj = new JSONObject(pgConfig.getValue());
+		String paypalUrl = pgConfigJsonObj.getString("paypalUrl");
+		//String paypalEmailId = pgConfigJsonObj.getString("paypalEmailId");
+		
+		String[] urlData = paypalUrl.split("\\?");
+		
+		//2. Prepare 'notify-validate' command with exactly the same parameters
+		Enumeration en = request.getParameterNames();
+		StringBuilder cmd = new StringBuilder("cmd=_notify-validate");
+		String paramName;
+		String paramValue;
+		while (en.hasMoreElements()) {
+
+			paramName = (String) en.nextElement();
+			paramValue = request.getParameter(paramName);
+			if ("password".equalsIgnoreCase(paramName) || "username".equalsIgnoreCase(paramName) || "rm".equalsIgnoreCase(paramName)) {
+					//System.out.println(paramName + ":" + paramValue);
+			} else {
+				cmd.append("&").append(paramName).append("=").append(URLEncoder.encode(paramValue, request.getParameter("charset")));
+			}
+		}
+		 
+		//3. Post above command to Paypal IPN URL {@link IpnConfig#ipnUrl}
+		URL u = new URL(urlData[0].trim());
+		HttpsURLConnection uc = (HttpsURLConnection) u.openConnection();
+		uc.setDoOutput(true);
+		uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+		uc.setRequestProperty("Host", u.getHost());
+		//uc.setRequestProperty("Host", "www.sandbox.paypal.com");
+		uc.setRequestMethod("POST");
+		PrintWriter pw = new PrintWriter(uc.getOutputStream());
+		pw.println(cmd.toString());
+		pw.close();
+		 
+		//4. Read response from Paypal
+		BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream()));
+		String res = in.readLine();
+		in.close(); 
+		return res;
+
 	}
 }

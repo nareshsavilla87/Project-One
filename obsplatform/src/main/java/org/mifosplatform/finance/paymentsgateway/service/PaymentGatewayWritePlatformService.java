@@ -1,7 +1,11 @@
 package org.mifosplatform.finance.paymentsgateway.service;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.http.client.ClientProtocolException;
 import org.json.JSONException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -19,5 +23,8 @@ public interface PaymentGatewayWritePlatformService {
 	void emailSending(Long clientId, String result, String description,String txnId, String amount, String cardType, String cardNumber) throws JSONException;
 
 	String globalPayProcessing(String transactionId, String remarks) throws JSONException, IOException;
+	
+	public String paypalRecurringVerification(HttpServletRequest request) 
+			throws UnsupportedEncodingException, IllegalStateException, ClientProtocolException, IOException, JSONException;
 	
 }

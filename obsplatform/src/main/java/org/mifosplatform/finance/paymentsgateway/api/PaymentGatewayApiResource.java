@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -42,6 +43,7 @@ import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.finance.payments.exception.ReceiptNoDuplicateException;
 import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayData;
 import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayDownloadData;
+import org.mifosplatform.finance.paymentsgateway.data.RecurringPaymentTransactionTypeConstants;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGateway;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayRepository;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayReadPlatformService;
@@ -728,22 +730,63 @@ public class PaymentGatewayApiResource {
 	 */
 	 @POST
 	 @Path("paypalrecurring")
-	 @Consumes("application/x-www-form-urlencoded")
+	 @Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
 	 @Produces("text/html")
-	 public String paypalRecurringPayment(@FormParam("parameters") final String parameters){
-		 
-		String returnUrl = null;
-		
+	public void paypalRecurringPayment(@Context HttpServletRequest request) {
+
 		try {
+			String verifiyMessage = this.paymentGatewayWritePlatformService.paypalRecurringVerification(request);
 			
-			return null;
-		} 
-	   catch(Exception e){
-		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";
-		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus + "</Strong>";
-		   return htmlData;   
-	   }
-	 }
+			if ("VERIFIED".equals(verifiyMessage)) {
+				// Your business code comes here
+				System.out.println("Success");
+				
+				String txnType = request.getParameter(RecurringPaymentTransactionTypeConstants.RECURRING_TXNTYPE);
+				
+				switch (txnType) {
+				
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_PROFILE_CREATED:
+					
+					break;
+					
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT:
+					
+					break;
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_EXPIRED:
+	
+					break;
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILED:
+	
+					break;
+
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SKIPPED:
+					
+					break;
+
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUSPENDED:
+					
+					break;
+					
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUSPENDED_DUR_TO_MAX_FAILED_PAYMENT:
+					
+					break;
+				
+				default:
+					break;
+				}
+				
+				
+			}else {
+				System.out.println("Failure");
+			}
+		
+		} catch (Exception e) {
+			System.out.println(e.getMessage());
+			
+		}
+
+	}
+	 
 	 
 }
 
