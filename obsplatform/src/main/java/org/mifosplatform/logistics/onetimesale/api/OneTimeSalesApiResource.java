@@ -34,6 +34,7 @@ import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSeria
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.data.ItemData;
+import org.mifosplatform.logistics.item.exception.NoItemRegionalPriceFound;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
@@ -43,6 +44,7 @@ import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
+import org.mifosplatform.portfolio.order.exceptions.NoRegionalPriceFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -156,12 +158,15 @@ public class OneTimeSalesApiResource {
 	@Path("{itemId}/item")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveSingleItemDetails(@PathParam("itemId") final Long itemId,@Context final UriInfo uriInfo) {
+	public String retrieveSingleItemDetails(@PathParam("itemId") final Long itemId, @QueryParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final List<ItemData> itemCodeData = this.oneTimeSaleReadPlatformService.retrieveItemData();
 		final List<DiscountMasterData> discountdata = this.discountReadPlatformService.retrieveAllDiscounts();
-	    ItemData itemData = this.itemMasterReadPlatformService.retrieveSingleItemDetails(itemId);
+	    ItemData itemData = this.itemMasterReadPlatformService.retrieveSingleItemDetails(clientId, itemId, true); // If you pass clientId set to 'true' else 'false'
+	    if(itemData == null){
+	    	throw new NoItemRegionalPriceFound();
+	    }
 		final List<ChargesData> chargesDatas = this.itemMasterReadPlatformService.retrieveChargeCode();
 		itemData = new ItemData(itemCodeData, itemData, null, null,discountdata, chargesDatas);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());

@@ -1,15 +1,22 @@
 package org.mifosplatform.logistics.item.domain;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
+import org.mifosplatform.cms.mediadetails.domain.MediaassetLocation;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.logistics.item.exception.ItemNotFoundException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -46,6 +53,10 @@ public class ItemMaster extends AbstractPersistable<Long>{
 	
 	@Column(name = "is_deleted", nullable = false)
 	private char deleted = 'n';
+	
+	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "itemMaster", orphanRemoval = true)
+	private List<ItemPrice> itemPrices = new ArrayList<ItemPrice>();
 	
 	public ItemMaster(){}
 	
@@ -181,7 +192,18 @@ public class ItemMaster extends AbstractPersistable<Long>{
 		return new ItemMaster(itemCode, itemDescription, itemClass, unitPrice, units, warranty, chargeCode, reorderLevel);
 	}
 	
-	
+	public void addItemPrices(final ItemPrice itemPrice) {
+		itemPrice.update(this);
+        this.itemPrices.add(itemPrice);
+	}
+
+	public List<ItemPrice> getItemPrices() {
+		return itemPrices;
+	}
+
+	public void setItemPrices(List<ItemPrice> itemPrices) {
+		this.itemPrices = itemPrices;
+	}
 	
 	
 

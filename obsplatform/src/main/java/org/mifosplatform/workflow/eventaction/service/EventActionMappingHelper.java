@@ -10,6 +10,7 @@ import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
 import org.mifosplatform.organisation.message.exception.EmailNotFoundException;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ public class EventActionMappingHelper {
 		
 		
 		  BillingMessageTemplate billingMessageTemplate = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_TICKET_TEMPLATE);
+		  if(billingMessageTemplate!=null){
 		  String value=ticketURL+""+resourceId;
 		  BillingMessage billingMessage =null;
 		  String removeUrl="<br/><b>URL : </b>"+"<a href="+value+">View Ticket</a>";
@@ -67,8 +69,10 @@ public class EventActionMappingHelper {
 					BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
     	  }
 		  	this.messageDataRepository.save(billingMessage);
+		}else{
+			throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_TICKET_TEMPLATE);
 		}
-	
+	}
 private AppUser getUser() {
 		
 	AppUser appUser=null;
