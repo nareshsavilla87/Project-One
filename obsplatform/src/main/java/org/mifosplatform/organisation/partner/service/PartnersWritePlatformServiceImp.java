@@ -267,11 +267,11 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
             }
 
             final OfficeAdditionalInfo officeAdditionalInfo=this.officeAdditionalInfoRepository.findOne(partnerId);
-           /* final Office office = this.validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeAdditionalInfo.getOffice().getId());
+            final Office office = this.validateUserPriviledgeOnOfficeAndRetrieve(currentUser, officeAdditionalInfo.getOffice().getId());
             if(office==null){
             	throw new OfficeNotFoundException(partnerId);
-            }*/
-            final Office office = officeAdditionalInfo.getOffice();
+            }
+           // final Office office = officeAdditionalInfo.getOffice();
             //update office
             final Map<String, Object> officeChanges = office.update(command);
             if (officeChanges.containsKey("parentId")) {
@@ -305,16 +305,6 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
         	   user.setEmail(officeAddress.getEmail());
            }else{}
            this.userRepository.saveAndFlush(user);
-           /*final String[] roles = command.arrayValueOfParameterNamed("roles");
-            JSONObject json = new JSONObject();
-		    json.put("username", loginName);
-		    json.put("firstname",office.getName());
-		    json.put("lastname", office.getName());
-		    json.put("sendPasswordToEmail",Boolean.FALSE);
-		    json.put("email",officeAddress.getEmail());
-		    json.put("officeId", office.getId());
-		    json.put("roles", roles);
-            this.userApiResource.updateUser(userId, json.toString());*/
             
 	        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 				       .withEntityId(officeAdditionalInfo.getId()).withOfficeId(office.getId()).with(officeChanges).build();
