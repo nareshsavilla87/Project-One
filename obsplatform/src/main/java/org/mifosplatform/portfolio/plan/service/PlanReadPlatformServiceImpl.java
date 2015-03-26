@@ -127,15 +127,23 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 			RowMapper<SubscriptionData> {
 
 		public String schema() {
-			return " sb.id as id,sb.contract_period as contractPeriod,sb.contract_duration as units,sb.contract_type as contractType "
+			return " sb.id as id,sb.contract_period as contractPeriod,sb.contract_duration as units,sb.contract_type as contractType,0 as priceId "
 					+ " from b_contract_period sb where is_deleted='N'";
 
 		}
 		
 		public String schemaForPrepaidPlans() {
-			return "  sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType" +
+			/*return "  sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType" +
 					" FROM b_contract_period sb, b_orders o, b_plan_pricing p WHERE sb.is_deleted = 'N' and sb.contract_period=p.duration " +
-					" and o.plan_id = p.plan_id  ";
+					" and o.plan_id = p.plan_id  ";*/
+			return "  sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType,"+
+                    " p.id as  priceId,prm.priceregion_code as priceRegionCode, p.plan_id as planId,p.service_code as serviceCode "+
+                    " FROM b_contract_period sb, b_orders o left join b_client_address ca on ca.client_id = o.client_id "+ 
+                    " left join b_state s on s.state_name = ca.state left join b_priceregion_detail pd " +
+                    " on (pd.state_id = s.id or (pd.state_id = 0 and pd.country_id = s.parent_code)) " +
+                    " left join b_priceregion_master prm ON prm.id = pd.priceregion_id "+
+                    " join b_plan_pricing p on p.plan_id = o.plan_id and p.price_region_id = prm.id "+
+                    "  WHERE  sb.is_deleted = 'N' AND sb.contract_period = p.duration AND o.plan_id = p.plan_id  ";
 
 		}
 
@@ -146,7 +154,8 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 			final Long id = rs.getLong("id");
 			final String contractPeriod = rs.getString("contractPeriod");
 			final String subscriptionType = rs.getString("contractType");
-			return new SubscriptionData(id,contractPeriod,subscriptionType);
+			final Long priceId = rs.getLong("priceId");
+			return new SubscriptionData(id,contractPeriod,subscriptionType,priceId);
 		}
 
 	}
