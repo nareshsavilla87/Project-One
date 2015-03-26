@@ -610,13 +610,12 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		   if(office !=null){
 		      OfficeAdditionalInfo additionalInfo=office.getOfficeAdditionalInfo();
 		           if(additionalInfo != null){
-		            
-		       jsonObject.put("agentName", office.getName());
-		       jsonObject.put("agentId", office.getId());
-		       jsonObject.put("agentDescription", additionalInfo.getContactName());
-		             
+		               jsonObject.put("agentName", office.getName());
+		               jsonObject.put("agentId", office.getId());
+		               jsonObject.put("agentDescription", additionalInfo.getContactName());
 		           }
-		   }
+		           resourceId=Long.valueOf(0L);
+		      }
 		  }
 		  
 		  ProcessRequest processRequest=new ProcessRequest(defaultValue,clientId,resourceId, provisioningSystem, requestType,'N','N');

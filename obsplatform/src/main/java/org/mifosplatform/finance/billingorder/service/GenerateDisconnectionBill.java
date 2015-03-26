@@ -279,8 +279,7 @@ public class GenerateDisconnectionBill {
 	}
 
 	// Daily Bill
-	public BillingOrderCommand getDailyBill(final BillingOrderData billingOrderData,
-			DiscountMasterData discountMasterData) {
+	public BillingOrderCommand getDailyBill(final BillingOrderData billingOrderData,DiscountMasterData discountMasterData) {
 
 		startDate = new LocalDate(billingOrderData.getBillStartDate());
 		endDate = startDate;
@@ -294,6 +293,33 @@ public class GenerateDisconnectionBill {
 	                                         discountMasterData);
 
 	}
+	
+	// Reverse One Time Bill
+	public BillingOrderCommand getReverseOneTimeBill(BillingOrderData billingOrderData,DiscountMasterData discountMasterData) {
+
+			LocalDate startDate = new LocalDate(billingOrderData.getBillStartDate());
+			LocalDate  endDate = startDate;
+			LocalDate  invoiceTillDate = startDate;
+			LocalDate   nextbillDate = invoiceTillDate;
+			BigDecimal price = billingOrderData.getPrice();//totalPrice
+			  if(discountMasterData !=null){	
+		    		if (discountMasterData.getDiscountType().equalsIgnoreCase("percentage")){
+		    			BigDecimal discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100))).setScale(Integer.parseInt(roundingDecimal()), RoundingMode.HALF_UP);
+			               price = price.subtract(discountAmount);
+			               discountMasterData.setDiscountAmount(discountAmount);
+		    		 }else if(discountMasterData.getDiscountType().equalsIgnoreCase("flat")){
+		    		       price = price.subtract(discountMasterData.getDiscountRate());
+		    		       discountMasterData.setDiscountAmount(discountMasterData.getDiscountRate());
+		              }
+		        }
+
+		  List<InvoiceTaxCommand>  listOfTaxes = this.calculateTax(billingOrderData,price,startDate);
+
+		return this.createBillingOrderCommand(billingOrderData, startDate,endDate,invoiceTillDate,nextbillDate,price,
+					listOfTaxes,discountMasterData);
+		}
+	
+	
 
 	// Tax Calculation
 	public List<InvoiceTaxCommand> calculateTax(final BillingOrderData billingOrderData, final BigDecimal billPrice, LocalDate disconnectionDate) {
@@ -332,7 +358,7 @@ public class GenerateDisconnectionBill {
 					
 					taxRate = taxMappingRateData.getRate();
 					taxCode = taxMappingRateData.getTaxCode();
-					if(billingOrderData.getChargeType().equalsIgnoreCase("RC")){
+					if(billingOrderData.getChargeType().equalsIgnoreCase("RC")||billingOrderData.getChargeType().equalsIgnoreCase("NRC")){
 					      taxAmount =taxRate;
 					}else{
 					BigDecimal numberOfMonthsPrice = BigDecimal.ZERO;

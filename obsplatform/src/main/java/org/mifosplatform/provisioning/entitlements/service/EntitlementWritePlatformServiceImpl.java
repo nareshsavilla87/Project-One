@@ -2,6 +2,7 @@ package org.mifosplatform.provisioning.entitlements.service;
 
 import java.util.List;
 
+import org.json.JSONObject;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
 import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -12,6 +13,7 @@ import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -66,6 +68,7 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		String requestType = command.stringValueOfParameterNamed("requestType");
 		String  agentResourceId = command.stringValueOfParameterNamed("agentResourceId");	
 		String zebraSubscriberId = null;
+	try {	
 		
 		if(command.hasParameter("zebraSubscriberId")){
 			zebraSubscriberId = command.stringValueOfParameterNamed("zebraSubscriberId");
@@ -96,6 +99,7 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 				
 				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PROVISION_CREDENTIALS);
 				
+				if(messageDetails !=null){
 				String subject=messageDetails.getSubject();
 				String body=messageDetails.getBody();
 				String header=messageDetails.getHeader()+","+"\n"+"\n";
@@ -110,8 +114,10 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 				
 				this.messageDataRepository.save(billingMessage);
 						
+			}else{
+				throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PROVISION_CREDENTIALS);
 			}
-			
+		 }
 		}
 		
 		if(zebraSubscriberId != null && requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CLIENT_ACTIVATION) &&
@@ -168,12 +174,19 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		if(requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CREATE_AGENT)){
 			
 			if(agentResourceId !=null ){
-				
-				Office office = this.officeRepository.findOne(processRequest.getOrderId());
-				office.setExternalId(agentResourceId);
-				this.officeRepository.saveAndFlush(office);
-			}
-			
+				List<ProcessRequestDetails> details = processRequest.getProcessRequestDetails();
+				for (ProcessRequestDetails processRequestDetails : details) {
+					Long id = command.longValueOfParameterNamed("prdetailsId");
+					if (processRequestDetails.getId().longValue() == id.longValue()) {
+			    		JSONObject object = new JSONObject(processRequestDetails.getSentMessage());
+			    		Long officeId = object.getLong("agentId");
+			    		 Office office = this.officeRepository.findOne(officeId);
+			    		 office.setExternalId(agentResourceId);
+			    		 this.officeRepository.saveAndFlush(office);
+			    		 break;
+			    	 }
+			     }
+	    	}	
 		}
 		
 		
@@ -212,9 +225,25 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		this.processRequestWriteplatformService.notifyProcessingDetails(processRequest, status);
 		
 		return new CommandProcessingResult(processRequest.getId());
+		
+	}catch(Exception e){
+		
+		ProcessRequest processRequest = this.entitlementRepository.findOne(command.entityId());
+		
+        List<ProcessRequestDetails> details = processRequest.getProcessRequestDetails();
 
+		 for (ProcessRequestDetails processRequestDetails : details) {
+			Long id = command.longValueOfParameterNamed("prdetailsId");
+			if (processRequestDetails.getId().longValue() == id.longValue()) {
+			   String receiveMessage = command.stringValueOfParameterNamed("receiveMessage");	
+		       processRequestDetails.setReceiveMessage(receiveMessage);
+			}
+		}
+		 processRequest.setProcessStatus('F');
+		 this.entitlementRepository.saveAndFlush(processRequest);
+		return new CommandProcessingResult(Long.valueOf(-1L));
 	}
-
+	}
 	/*private boolean checkProcessDetailsUpdated(List<ProcessRequestDetails> details) {
 		boolean flag = true;
 		if (details.get(0).getReceiveMessage().contains("failure : Exce")) {

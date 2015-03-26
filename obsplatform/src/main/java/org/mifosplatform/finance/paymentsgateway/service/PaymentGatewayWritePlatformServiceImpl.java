@@ -52,6 +52,7 @@ import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
 import org.mifosplatform.organisation.message.exception.EmailNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
@@ -845,6 +846,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 	
 		BillingMessageTemplate messageDetails = this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT_RECEIPT);
 		
+		if(messageDetails !=null){
 		String subject=messageDetails.getSubject();
 		String body=messageDetails.getBody();
 		String header=messageDetails.getHeader();
@@ -868,6 +870,9 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 		
 		this.messageDataRepository.save(billingMessage);
+	}else{
+		throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT_RECEIPT);
+	}
 	}
 	
 	private static String processPostNetellerRequests(String url, String encodePassword, String data, 
