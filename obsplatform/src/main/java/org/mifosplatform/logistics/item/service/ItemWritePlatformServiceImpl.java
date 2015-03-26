@@ -59,10 +59,10 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
     		ItemMaster itemMaster=ItemMaster.fromJson(command);
     		
     		
-    		/*final JsonArray itemPricesArray = command.arrayOfParameterNamed("itemPrices").getAsJsonArray();
+    		final JsonArray itemPricesArray = command.arrayOfParameterNamed("itemPrices").getAsJsonArray();
 			String[] itemPriceRegions = null;
 			itemPriceRegions = new String[itemPricesArray.size()];
-			
+			if(itemPricesArray.size() > 0){
 			for(int i = 0; i < itemPricesArray.size(); i++){
 				itemPriceRegions[i] = itemPricesArray.get(i).toString();
 			}
@@ -77,8 +77,8 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
 				ItemPrice itemPrice = new ItemPrice(regionId, price);
 				itemMaster.addItemPrices(itemPrice);
 				
-			}*/		 
-			
+			}		 
+			}
     		this.itemRepository.save(itemMaster);
     		return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(itemMaster.getId()).build();
     
@@ -124,7 +124,8 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
     		/* final JsonArray itemPricesArray = command.arrayOfParameterNamed("itemPrices").getAsJsonArray();
     		 final JsonArray removeItemPricesArray = command.arrayOfParameterNamed("removeItemPrices").getAsJsonArray();
  			 String[] itemPriceRegions = new String[itemPricesArray.size()];
- 			
+ 			 
+ 			 if(itemPricesArray.size() > 0){
  			 for(int i = 0; i < itemPricesArray.size(); i++){
  				itemPriceRegions[i] = itemPricesArray.get(i).toString();
  			 }
@@ -154,6 +155,7 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
 
  					
  			 }	
+ 			 }
  			 if(removeItemPricesArray.size() != 0){
  				 
  				String[] removedItemPriceRegions = new String[removeItemPricesArray.size()];
