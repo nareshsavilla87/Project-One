@@ -162,7 +162,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 	public void updateOneTimeSale(final OneTimeSaleData oneTimeSaleData) {
 
 		OneTimeSale oneTimeSale = oneTimeSaleRepository.findOne(oneTimeSaleData.getId());
-		oneTimeSale.setIsInvoiced('y');
+		oneTimeSale.setIsInvoiced('Y');
 		oneTimeSaleRepository.save(oneTimeSale);
 
 	}
