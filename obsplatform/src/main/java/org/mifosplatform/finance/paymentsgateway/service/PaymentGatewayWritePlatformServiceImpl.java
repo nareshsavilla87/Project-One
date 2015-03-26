@@ -870,9 +870,9 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 		
 		this.messageDataRepository.save(billingMessage);
-	}else{
-		throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT_RECEIPT);
-	}
+		}else{
+			throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT_RECEIPT);
+		}
 	}
 	
 	private static String processPostNetellerRequests(String url, String encodePassword, String data, 

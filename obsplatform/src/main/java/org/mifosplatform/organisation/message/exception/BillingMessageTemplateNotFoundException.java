@@ -8,9 +8,8 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 @SuppressWarnings("serial")
 public class BillingMessageTemplateNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-    public BillingMessageTemplateNotFoundException(final String templateName) {
-        super("error.msg.template.not.found", "message template with this name" + templateName + "not exist", templateName);
-        
-    }
-}
+	 public BillingMessageTemplateNotFoundException(final String templateName) {
+	 super("error.msg.template.not.found", "message template with this name" + templateName + "not exist", templateName);
 
+	 }
+}

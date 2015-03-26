@@ -98,8 +98,7 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 				String Name = client.getLastname();
 				
 				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PROVISION_CREDENTIALS);
-				
-				if(messageDetails !=null){
+				if(messageDetails!=null){
 				String subject=messageDetails.getSubject();
 				String body=messageDetails.getBody();
 				String header=messageDetails.getHeader()+","+"\n"+"\n";
