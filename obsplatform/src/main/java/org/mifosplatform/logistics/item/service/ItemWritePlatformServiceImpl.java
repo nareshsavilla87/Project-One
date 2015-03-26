@@ -116,7 +116,7 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
     		 final int existingUnitPrice = itemMaster.getUnitPrice().intValueExact();
     		 
     		 if(unitPrice!=existingUnitPrice){
-    			 final ItemMasterAudit itemMasterAudit = new ItemMasterAudit(itemId,existingUnitPrice,"",command);
+    			 final ItemMasterAudit itemMasterAudit = new ItemMasterAudit(itemId,existingUnitPrice,null,command);
     			 this.itemAuditRepository.save(itemMasterAudit);
     		 }
     		 final Map<String, Object> changes = itemMaster.update(command);
@@ -139,12 +139,12 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
 	 			
  				if(itemPriceId != null){
  					ItemPrice itemPrice =this.itemPriceRepository.findOne(itemPriceId);
- 					final int existingUnitPrice = itemPrice.getPrice().intValueExact();
+ 					final int existingRegionalUnitPrice = itemPrice.getPrice().intValueExact();
  	 				itemPrice.setRegionId(regionId);
  	 				itemPrice.setPrice(price);
  	 				itemPriceRepository.saveAndFlush(itemPrice);
- 	 				if(price.intValueExact() != existingUnitPrice){
-		    			 final ItemMasterAudit itemMasterAudit = new ItemMasterAudit(itemId, existingUnitPrice, regionId, command);
+ 	 				if(price.intValueExact() != existingRegionalUnitPrice){
+		    			 final ItemMasterAudit itemMasterAudit = new ItemMasterAudit(itemId, existingRegionalUnitPrice, regionId, command);
 		    			 this.itemAuditRepository.save(itemMasterAudit);
 		    		}
  				}else{
