@@ -6,8 +6,7 @@ SET SQL_SAFE_UPDATES = 0;
 update job_parameters set param_name='system' where param_name='ProvSystem';
 
 SET @id=(select id from job where name='RADIUS');
-insert ignore into job_parameters values(null,@id,'Mikrotik_api','String',null,
-'{"ip":"","uname":"","pwd":""}','N',null);
+insert ignore into job_parameters values(null,@id,'Mikrotik_api','String',null,'{"ip":"","uname":"","pwd":""}','N',null);
 
 Drop procedure IF EXISTS addWarrantyDate;
 DELIMITER //

@@ -1,3 +1,5 @@
+SET SQL_SAFE_UPDATES = 0;
+
 INSERT IGNORE INTO job VALUES(null, 'AGINGDISTRIBUTION','Aging Distribution Data','0 30 23 1/1 * ? *', 'Daily once at Midnight', '0001-01-01 00:00:00', '5', NULL, '2014-03-07 14:40:12', NULL, 'AGINGDISTRIBUTIONJobDetaildefault _ DEFAULT', NULL, '0', '0', '1', '0', '0', '1');
 
 
@@ -63,7 +65,20 @@ Insert ignore into b_provisioning_actions(id,provision_type,action,provisioning_
 Insert ignore into b_provisioning_actions(id,provision_type,action,provisioning_system,is_enable,is_delete) 
  values(null,'Change Credentials','CHANGE CREDENTIALS','Radius','Y','N');
 
+DELIMITER //
+create procedure provisioningActions() 
+Begin
+IF EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'provision_type'
+     and TABLE_NAME = 'b_provisioning_actions'
+     and TABLE_SCHEMA = DATABASE())THEN
 Alter  table b_provisioning_actions modify column provision_type varchar(30) NOT NULL;
+END IF;
+END //
+DELIMITER ;
+call provisioningActions();
+Drop procedure IF EXISTS provisioningActions; 
 
 SET SQL_SAFE_UPDATES = 1;
 

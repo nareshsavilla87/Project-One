@@ -1,5 +1,7 @@
+SET SQL_SAFE_UPDATES = 0;
+
 INSERT IGNORE INTO  m_permission VALUES(null, 'portfolio', 'CREATE_PARENTCLIENT', 'PARENTCLIENT', 'CREATE', '0');
-insert IGNORE into m_permission values (null,'Ordering','CONFIRM_PROVISIONINGDETAILS','PROVISIONINGDETAILS','CONFIRM',0);
+INSERT IGNORE INTO m_permission values (null,'Ordering','CONFIRM_PROVISIONINGDETAILS','PROVISIONINGDETAILS','CONFIRM',0);
   
 Drop procedure IF EXISTS parentclient; 
 DELIMITER //
