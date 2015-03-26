@@ -442,7 +442,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  for(OrderPrice orderprice:orderPrices){
 		  if(plan.isPrepaid() == 'Y'){
 			  final Long priceId = command.longValueOfParameterNamed("priceId");
-			  ServiceMaster service=this.serviceMasterRepository.findOne(orderprice.getServiceId()); 
+			 // ServiceMaster service=this.serviceMasterRepository.findOne(orderprice.getServiceId()); 
 			    Price price=this.priceRepository.findOne(priceId);
 			 /* Price price=this.priceRepository.findOneByPlanAndService(plan.getId(), service.getServiceCode(),
 					  contractDetails.getSubscriptionPeriod(),orderprice.getChargeCode());*/

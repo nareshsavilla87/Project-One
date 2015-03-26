@@ -80,9 +80,8 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService {
 	private static final class PeriodMapper implements RowMapper<ServiceData> {
 
 		@Override
-		public ServiceData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+		public ServiceData mapRow(final ResultSet rs, final int rowNum)throws SQLException {
+			
 			Long id = rs.getLong("id");
 			String planCode = rs.getString("planCode");
 			String serviceCode = rs.getString("service_code");
@@ -177,9 +176,7 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService {
 	private static final class ServiceMapper implements RowMapper<ServiceData> {
 
 		@Override
-		public ServiceData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+		public ServiceData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
 			final Long id = rs.getLong("id");
 			final Long planId = rs.getLong("planId");
@@ -224,9 +221,7 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService {
 		}
 
 		@Override
-		public PricingData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+		public PricingData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
 			final Long planId = rs.getLong("planId");
 			final Long priceId = rs.getLong("priceId");
@@ -276,9 +271,7 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService {
 		}
 
 		@Override
-		public PricingData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+		public PricingData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
 			Long planId = rs.getLong("planId");
 			String planCode = rs.getString("planCode");
