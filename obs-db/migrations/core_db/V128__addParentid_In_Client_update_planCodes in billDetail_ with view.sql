@@ -79,7 +79,6 @@ AS
                    `bm`.`Due_amount` AS `Due_amount`,
                    `bm`.`filename` AS `filename`,
                    `bm`.`Promotion_description` AS `Promotion_description`,
-                   -- `bm`.`adjustments_payments` AS `adjustments_payments`,
                    `ca`.`address_id` AS `address_id`,
                    `ca`.`address_key` AS `address_key`,
                    `ca`.`address_no` AS `address_no`,
@@ -124,7 +123,7 @@ AS
            ON ((    (`ca`.`client_id` = `c`.`id`)
                 AND (`ca`.`address_key` = 'PRIMARY'))));
 				
-				CREATE OR REPLACE VIEW `bdetails_vw_sn`
+CREATE OR REPLACE VIEW `bdetails_vw_sn`
 AS
    SELECT DISTINCT
           `bm`.`id` AS `Bill_Id`,
@@ -142,7 +141,6 @@ AS
           `bm`.`Due_amount` AS `Due_amount`,
           `bm`.`filename` AS `filename`,
           `bm`.`Promotion_description` AS `Promotion_description`,
-          --`bm`.`adjustments_payments` AS `adjustments_payments`,
           `bpm`.`plan_description` AS `plan_description`,
           `bo`.`billing_frequency` AS `billing_frequency`,
           concat(cast(`bo`.`start_date` AS date),

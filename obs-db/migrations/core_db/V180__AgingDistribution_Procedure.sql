@@ -54,6 +54,8 @@ join (select @Did:=0) d
 SET SQL_SAFE_UPDATES = 1;
 END //
 
+delimiter;
+
 SET SQL_SAFE_UPDATES = 0;
 
 Insert ignore into b_provisioning_actions(id,provision_type,action,provisioning_system,is_enable,is_delete) 

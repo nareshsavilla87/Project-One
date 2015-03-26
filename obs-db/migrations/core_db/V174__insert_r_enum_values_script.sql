@@ -2,12 +2,6 @@ insert ignore into r_enum_value VALUES ('radius',1,'version-1','version-1');
 insert ignore into r_enum_value VALUES ('radius',2,'version-2','version-2');
 insert ignore into r_enum_value VALUES ('device_swap',1,'Replacement','Replacement');
 
-SET SQL_SAFE_UPDATES = 0;
-update job_parameters set param_name='system' where param_name='ProvSystem';
-
-SET @id=(select id from job where name='RADIUS');
-insert ignore into job_parameters values(null,@id,'Mikrotik_api','String',null,'{"ip":"","uname":"","pwd":""}','N',null);
-
 Drop procedure IF EXISTS addWarrantyDate;
 DELIMITER //
 create procedure addWarrantyDate() 
@@ -25,6 +19,10 @@ DELIMITER ;
 call addWarrantyDate();
 Drop procedure IF EXISTS addWarrantyDate;
 
+SET SQL_SAFE_UPDATES = 0;
+update job_parameters set param_name='system' where param_name='ProvSystem';
 
-SET SQL_SAFE_UPDATES = 1;
+SET @id=(select id from job where name='RADIUS');
+insert ignore into job_parameters values(null,@id,'Mikrotik_api','String',null,'{"ip":"","uname":"","pwd":""}','N',null);
+
 
