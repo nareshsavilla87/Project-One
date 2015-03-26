@@ -21,8 +21,6 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.billing.chargecode.data.ChargesData;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.discountmaster.service.DiscountReadPlatformService;
-import org.mifosplatform.cms.eventorder.data.EventOrderData;
-import org.mifosplatform.cms.eventorder.service.EventOrderReadplatformServie;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -44,7 +42,6 @@ import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
-import org.mifosplatform.portfolio.order.exceptions.NoRegionalPriceFound;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -163,7 +160,7 @@ public class OneTimeSalesApiResource {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final List<ItemData> itemCodeData = this.oneTimeSaleReadPlatformService.retrieveItemData();
 		final List<DiscountMasterData> discountdata = this.discountReadPlatformService.retrieveAllDiscounts();
-	    ItemData itemData = this.itemMasterReadPlatformService.retrieveSingleItemDetails(clientId, itemId, true); // If you pass clientId set to 'true' else 'false'
+	    ItemData itemData = this.itemMasterReadPlatformService.retrieveSingleItemDetails(clientId, itemId, true); // If you pass clientId you can set to 'true' else 'false'
 	    if(itemData == null){
 	    	throw new NoItemRegionalPriceFound();
 	    }

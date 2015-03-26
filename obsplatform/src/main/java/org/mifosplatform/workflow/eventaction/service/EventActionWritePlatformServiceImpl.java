@@ -121,7 +121,6 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				          TicketMaster ticketMaster=this.repository.findOne(new Long(resourceId));
 				          AppUserData user = this.readPlatformService.retrieveUser(new Long(data.getUserId()));
 				          BillingMessageTemplate billingMessageTemplate = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_TICKET_TEMPLATE);
-				          
 				          if(billingMessageTemplate !=null){
 				          String value=ticketURL+""+resourceId;
 				          String removeUrl="<br/><b>URL : </b>"+"<a href="+value+">View Ticket</a>";
@@ -190,10 +189,9 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 					        	  }
 				        	  	}
 				        	  }
-				          }else{
-				        		throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_TICKET_TEMPLATE);
-				        	  }
-				      
+				        	}else{
+				        		  throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_TICKET_TEMPLATE);
+				          }
 				       break;
 				       
 				    case EventActionConstants.ACTION_ACTIVE : 
