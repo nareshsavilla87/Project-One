@@ -87,7 +87,7 @@ public class VendorManagementApiResource {
     public String newUserTemplateDetails(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
-        VendorManagementData vendor=handleTemplateData();
+        VendorManagementData vendor = handleTemplateData();
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, vendor, RESPONSE_DATA_PARAMETERS);
     }
