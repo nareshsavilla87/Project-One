@@ -57,7 +57,7 @@ public class JpaUserDomainService implements UserDomainService {
             		.append(emailDetail.getContactName()).append(" user account creation.");*/
             
             BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_CREATE_USER);
-            if(messageDetails !=null){
+            if(messageDetails!=null){
 			String subject=messageDetails.getSubject();
 			String body=messageDetails.getBody();
 			String footer=messageDetails.getFooter();
@@ -71,11 +71,11 @@ public class JpaUserDomainService implements UserDomainService {
 			
 			this.messageDataRepository.save(billingMessage);
 
-          //  this.emailService.sendToUserAccount(emailDetail, unencodedPassword); 
+          //  this.emailService.sendToUserAccount(emailDetail, unencodedPassword);      
         }else{
         	throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_CREATE_USER);
         }
-        }
+       }
     }
 
     private void generateKeyUsedForPasswordSalting(final AppUser appUser) {

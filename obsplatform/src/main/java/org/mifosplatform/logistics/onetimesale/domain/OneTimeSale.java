@@ -86,7 +86,7 @@ public class OneTimeSale extends AbstractAuditableCustom<AppUser, Long> {
 	this.discountId=discountId;
 	this.officeId=officeId;
 	if(saleType.equalsIgnoreCase("SECONDSALE")){
-			this.isInvoiced='y';
+			this.isInvoiced='Y';
 		}
 	this.deviceMode=saleType;
 	this.contractPeriod=contractPeriod;

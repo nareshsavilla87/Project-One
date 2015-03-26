@@ -25,6 +25,7 @@ import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -117,11 +118,12 @@ public class LinkupAccountWritePlatformServiceImpl implements LinkupAccountWrite
 				String footer = "<br/><br/>Thanks";
 				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription("NONE");
 				
+				if(messageDetails!=null){
 				BillingMessage billingMessage = new BillingMessage(header, body, footer, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM, emailId,
 						subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 				
 				this.messageDataRepository.save(billingMessage);	
-				
+				}
 			}else{
 				throw new ClientNotFoundException(uniqueReference);
 			}
