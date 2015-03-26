@@ -128,8 +128,6 @@ public class GenerateDisconnectionBill {
            }
 		   }
 
-
-			
 			this.startDate = disconnectionDate;
 			this.endDate = new LocalDate(billingOrderData.getInvoiceTillDate());
 			invoiceTillDate = new LocalDate(billingOrderData.getInvoiceTillDate());

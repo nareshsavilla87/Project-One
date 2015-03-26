@@ -12,6 +12,7 @@ import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.planprice.domain.Price;
 import org.mifosplatform.billing.planprice.domain.PriceRepository;
+import org.mifosplatform.billing.planprice.exceptions.PriceNotFoundException;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeMaster;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeRepository;
 import org.mifosplatform.billing.promotioncodes.exception.PromotionCodeNotFoundException;
@@ -449,9 +450,11 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 
 	  for(OrderPrice orderprice:orderPrices){
 		  if(plan.isPrepaid() == 'Y'){
-			  ServiceMaster service=this.serviceMasterRepository.findOne(orderprice.getServiceId()); 
-			  Price price=this.priceRepository.findOneByPlanAndService(plan.getId(), service.getServiceCode(),
-					  contractDetails.getSubscriptionPeriod(),orderprice.getChargeCode());
+			  final Long priceId = command.longValueOfParameterNamed("priceId");
+			 // ServiceMaster service=this.serviceMasterRepository.findOne(orderprice.getServiceId()); 
+			    Price price=this.priceRepository.findOne(priceId);
+			 /* Price price=this.priceRepository.findOneByPlanAndService(plan.getId(), service.getServiceCode(),
+					  contractDetails.getSubscriptionPeriod(),orderprice.getChargeCode());*/
 				if(price != null){
 					ChargeCodeMaster chargeCode=this.chargeCodeRepository.findOneByChargeCode(price.getChargeCode());
 					orderprice.setChargeCode(chargeCode.getChargeCode());
@@ -459,6 +462,8 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 					orderprice.setChargeType(chargeCode.getChargeType());
 					orderprice.setChargeDurationType(chargeCode.getDurationType());
 					orderprice.setPrice(price.getPrice());
+				}else{
+					throw new PriceNotFoundException(priceId);
 				}
 		  	}
 		  orderprice.setDatesOnOrderStatus(newStartdate,renewalEndDate,orderDetails.getUserAction());//setBillEndDate(renewalEndDate);
