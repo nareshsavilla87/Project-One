@@ -1,6 +1,5 @@
 package org.mifosplatform.vendoragreement.domain;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -18,7 +17,6 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.logistics.item.exception.ItemNotFoundException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity

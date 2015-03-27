@@ -1,9 +1,3 @@
-/*package org.mifosplatform.vendormanagementandloyalty.vendor.service;
-
-public class VendorManagementReadPlatformServiceImpl {
-
-}*/
-
 /**
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
@@ -14,28 +8,13 @@ package org.mifosplatform.vendoragreement.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
-import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.office.data.OfficeData;
-import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
-import org.mifosplatform.organisation.voucher.data.VoucherData;
-import org.mifosplatform.useradministration.data.AppUserData;
-import org.mifosplatform.useradministration.data.RoleData;
-import org.mifosplatform.useradministration.domain.AppUser;
-import org.mifosplatform.useradministration.domain.AppUserRepository;
-import org.mifosplatform.useradministration.domain.Role;
-import org.mifosplatform.useradministration.exception.UserNotFoundException;
-import org.mifosplatform.useradministration.service.RoleReadPlatformService;
 import org.mifosplatform.vendoragreement.data.VendorAgreementData;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -46,18 +25,10 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
-    private final OfficeReadPlatformService officeReadPlatformService;
-    private final RoleReadPlatformService roleReadPlatformService;
-    private final AppUserRepository appUserRepository;
 
     @Autowired
-    public VendorAgreementReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            final OfficeReadPlatformService officeReadPlatformService, final RoleReadPlatformService roleReadPlatformService,
-            final AppUserRepository appUserRepository) {
+    public VendorAgreementReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
         this.context = context;
-        this.officeReadPlatformService = officeReadPlatformService;
-        this.roleReadPlatformService = roleReadPlatformService;
-        this.appUserRepository = appUserRepository;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 

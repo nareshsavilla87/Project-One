@@ -5,14 +5,15 @@
  */
 package org.mifosplatform.vendoragreement.data;
 
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.organisation.address.data.CountryDetails;
-import org.mifosplatform.organisation.monetary.data.CurrencyData;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.priceregion.data.PriceRegionData;
 import org.mifosplatform.portfolio.plan.data.PlanCodeData;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
@@ -51,14 +52,20 @@ public class VendorAgreementData {
     private Long vendorId;
     private List<VendorAgreementData> singleVendorData;
     private List<VendorAgreementData> vendorDetailsData;
+    private Collection<MCodeData> agreementTypes;
+    private String name;
+    private String fileName;
+    private InputStream inputStream;
+    private String fileUploadLocation;
+    private LocalDate localdate;
     
     
 	public VendorAgreementData(List<PriceRegionData> priceRegionData,
-			List<EnumOptionData> statusData, List<ServiceData> servicesData,
+			Collection<MCodeData> agreementTypes, List<ServiceData> servicesData,
 			List<PlanCodeData> planDatas) {
 		
 		this.priceRegionData = priceRegionData;
-		this.statusData = statusData;
+		this.agreementTypes = agreementTypes;
 		this.servicesData = servicesData;
 		this.planDatas = planDatas;
 	}
@@ -99,6 +106,15 @@ public class VendorAgreementData {
 		this.contentCost = contentCost;
 	}
 
+	public VendorAgreementData(String name, String fileName,
+			InputStream inputStream, String fileUploadLocation, LocalDate localdate) {
+		this.name = name;
+		this.fileName = fileName;
+		this.inputStream = inputStream;
+		this.fileUploadLocation = fileUploadLocation;
+		this.localdate = localdate;
+	}
+
 	public List<VendorAgreementData> getSingleVendorData() {
 		return singleVendorData;
 	}
@@ -115,5 +131,46 @@ public class VendorAgreementData {
 		this.vendorDetailsData = vendorDetailsData;
 	}
 
+	public String getFileName() {
+		return fileName;
+	}
+
+	public InputStream getInputStream() {
+		return inputStream;
+	}
+
+	public String getFileUploadLocation() {
+		return fileUploadLocation;
+	}
+
+	public LocalDate getLocaldate() {
+		return localdate;
+	}
+
+	public void setFileName(String fileName) {
+		this.fileName = fileName;
+	}
+
+	public void setInputStream(InputStream inputStream) {
+		this.inputStream = inputStream;
+	}
+
+	public void setFileUploadLocation(String fileUploadLocation) {
+		this.fileUploadLocation = fileUploadLocation;
+	}
+
+	public void setLocaldate(LocalDate localdate) {
+		this.localdate = localdate;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	
 	
 }

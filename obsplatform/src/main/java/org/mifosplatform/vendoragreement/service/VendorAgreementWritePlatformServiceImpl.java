@@ -1,14 +1,19 @@
 package org.mifosplatform.vendoragreement.service;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.vendoragreement.data.VendorAgreementData;
 import org.mifosplatform.vendoragreement.domain.VendorAgreement;
 import org.mifosplatform.vendoragreement.domain.VendorAgreementDetail;
 import org.mifosplatform.vendoragreement.domain.VendorAgreementDetailRepository;
@@ -53,12 +58,18 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 	@Transactional
 	@Override
 	public CommandProcessingResult createVendorAndLoyaltyCalucation(
-			JsonCommand command) {
+			JsonCommand command) throws JSONException, IOException {
 		
 		try{
 			
 		 this.context.authenticatedUser();
-		 this.fromApiJsonDeserializer.validateForCreate(command.json());
+		// this.fromApiJsonDeserializer.validateForCreate(command.json());
+		 JSONObject object = new JSONObject(command.json());
+		 final VendorAgreementData vendorData = (VendorAgreementData)object.get("vendorAgreementData");
+		 
+		 String fileLocation=null;
+		 fileLocation = FileUtils.saveToFileSystem(vendorData.getInputStream(), vendorData.getFileUploadLocation(),vendorData.getFileName());
+			
 		 final VendorAgreement vendor=VendorAgreement.fromJson(command);
 		 
 		 
