@@ -83,20 +83,24 @@ public class VendorManagementWritePlatformServiceImpl implements VendorManagemen
 	@Transactional
 	@Override
 	public CommandProcessingResult updateVendorManagement(Long vendorId, JsonCommand command) {
-		
+		try{
 		this.context.authenticatedUser();
 		this.fromApiJsonDeserializer.validateForCreate(command.json());
 		VendorManagement vendor=retrieveCodeBy(vendorId);
 		
 		final Map<String, Object> changes = vendor.update(command);
 		if(!changes.isEmpty()){
-			this.vendormanagementRepository.save(vendor);
+			this.vendormanagementRepository.saveAndFlush(vendor);
 		}
 		return new CommandProcessingResultBuilder() //
 	       .withCommandId(command.commandId()) //
 	       .withEntityId(vendorId) //
 	       .with(changes) //
 	       .build();
+		}catch (DataIntegrityViolationException dve) {
+			 handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
 	}
 	
 	private VendorManagement retrieveCodeBy(final Long vendorId) {
