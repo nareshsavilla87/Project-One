@@ -3,8 +3,9 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this file,
  * You can obtain one at http://mozilla.org/MPL/2.0/.
  */
-package org.mifosplatform.vendormanagement.vendor.api;
+package org.mifosplatform.vendoragreement.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -28,25 +28,38 @@ import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.data.CountryDetails;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
 import org.mifosplatform.organisation.monetary.service.CurrencyReadPlatformService;
+import org.mifosplatform.organisation.office.data.OfficeData;
+import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
+import org.mifosplatform.organisation.priceregion.data.PriceRegionData;
+import org.mifosplatform.organisation.priceregion.service.RegionalPriceReadplatformService;
+import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
+import org.mifosplatform.portfolio.plan.data.BillRuleData;
+import org.mifosplatform.portfolio.plan.data.PlanCodeData;
+import org.mifosplatform.portfolio.plan.data.PlanData;
+import org.mifosplatform.portfolio.plan.data.ServiceData;
+import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
+import org.mifosplatform.portfolio.service.service.ServiceMasterReadPlatformService;
 import org.mifosplatform.useradministration.data.AppUserData;
-import org.mifosplatform.vendoragreement.exception.VendorNotFoundException;
-import org.mifosplatform.vendormanagement.vendor.data.VendorManagementData;
-import org.mifosplatform.vendormanagement.vendor.service.VendorManagementReadPlatformService;
+import org.mifosplatform.vendoragreement.data.VendorAgreementData;
+import org.mifosplatform.vendoragreement.service.VendorAgreementReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
-@Path("/vendormanagement")
+@Path("/vendoragreement")
 @Component
 @Scope("singleton")
-public class VendorManagementApiResource {
+public class VendorAgreementApiResource {
 
     /**
      * The set of parameters that are supported in response for
@@ -54,57 +67,68 @@ public class VendorManagementApiResource {
      */
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id"));
 
-    private static final String RESOURCENAMEFORPERMISSIONS = "VENDORMANAGEMENT";
+    private static final String RESOURCENAMEFORPERMISSIONS = "VENDORAGREEMENT";
     private final PlatformSecurityContext context;
-    private final VendorManagementReadPlatformService readPlatformService;
-    private final DefaultToApiJsonSerializer<VendorManagementData> toApiJsonSerializer;
+    private final VendorAgreementReadPlatformService readPlatformService;
+    private final RegionalPriceReadplatformService regionalPriceReadplatformService;
+    private final DefaultToApiJsonSerializer<VendorAgreementData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final PlanReadPlatformService planReadPlatformService;
+    private final ServiceMasterReadPlatformService serviceMasterReadPlatformService;
+    private final OrderReadPlatformService orderReadPlatformService;
     private final AddressReadPlatformService addressReadPlatformService;
     private final CurrencyReadPlatformService currencyReadPlatformService;
 
     @Autowired
-    public VendorManagementApiResource(final PlatformSecurityContext context, final VendorManagementReadPlatformService readPlatformService,
-    		final DefaultToApiJsonSerializer<VendorManagementData> toApiJsonSerializer,
+    public VendorAgreementApiResource(final PlatformSecurityContext context, final VendorAgreementReadPlatformService readPlatformService,
+    		final RegionalPriceReadplatformService regionalPriceReadplatformService, final DefaultToApiJsonSerializer<VendorAgreementData> toApiJsonSerializer,
             final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final AddressReadPlatformService addressReadPlatformService,
+            final PlanReadPlatformService planReadPlatformService, final ServiceMasterReadPlatformService serviceMasterReadPlatformService,
+            final OrderReadPlatformService orderReadPlatformService, final AddressReadPlatformService addressReadPlatformService,
             final CurrencyReadPlatformService currencyReadPlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
+        this.regionalPriceReadplatformService = regionalPriceReadplatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.planReadPlatformService = planReadPlatformService;
+        this.serviceMasterReadPlatformService = serviceMasterReadPlatformService;
+        this.orderReadPlatformService = orderReadPlatformService;
         this.addressReadPlatformService = addressReadPlatformService;
         this.currencyReadPlatformService = currencyReadPlatformService;
     }
-    
-    
+
     @GET
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String vendorManagementTemplateDetails(@Context final UriInfo uriInfo) {
+    public String vendorAgreementTemplateDetails(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
-        VendorManagementData vendor = handleTemplateData();
+        VendorAgreementData vendor=handleTemplateData();
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, vendor, RESPONSE_DATA_PARAMETERS);
     }
     
-    private VendorManagementData handleTemplateData() {
+    private VendorAgreementData handleTemplateData() {
 		
-        final List<CountryDetails> countryData = this.addressReadPlatformService.retrieveCountries();
-        final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllPlatformCurrencies();
+    	final List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
+        final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
+        final List<ServiceData> servicesData = this.serviceMasterReadPlatformService.retrieveAllServices("N");
+        final List<PlanCodeData> planDatas = this.orderReadPlatformService.retrieveAllPlatformData((long)0, null);
 		 
-		return new VendorManagementData(countryData, currencyOptions);
+		return new VendorAgreementData(priceRegionData, statusData, servicesData,
+					planDatas);
 			
 	}
     
     @POST
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String createVendor(final String apiRequestBodyAsJson) {
+    public String createVendoragreement(final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .createVendorManagement() //
@@ -119,11 +143,11 @@ public class VendorManagementApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveVendors(@Context final UriInfo uriInfo) {
+    public String retrieveVendorAgreements(@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 
-        final List<VendorManagementData> vendor = this.readPlatformService.retrieveAllVendorManagements();
+        final List<VendorAgreementData> vendor = this.readPlatformService.retrieveAllVendorAndLoyalties();
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, vendor, RESPONSE_DATA_PARAMETERS);
@@ -133,23 +157,21 @@ public class VendorManagementApiResource {
     @Path("{vendorId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveSingleVendor(@PathParam("vendorId") final Long vendorId, @Context final UriInfo uriInfo) {
+    public String retrieveSingleVendorAgreement(@PathParam("vendorId") final Long vendorId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        VendorManagementData vendor = this.readPlatformService.retrieveSigleVendorManagement(vendorId);
-        if(vendor == null){
-        	throw new VendorNotFoundException(vendorId.toString());
-        }
-        
-        if (settings.isTemplate()) {
-        	final List<CountryDetails> countryData = this.addressReadPlatformService.retrieveCountries();
-            final Collection<CurrencyData> currencyOptions = this.currencyReadPlatformService.retrieveAllPlatformCurrencies();
-            vendor.setCountryData(countryData);
-            vendor.setCurrencyOptions(currencyOptions);
-        }
+        List<VendorAgreementData> singleVendorData = this.readPlatformService.retrieveVendor(vendorId);
+        List<VendorAgreementData> vendorDetailsData = this.readPlatformService.retrieveVendorDetails(vendorId);
+        VendorAgreementData vendor=handleTemplateData();
+        vendor.setSingleVendorData(singleVendorData);
+        vendor.setVendorDetailsData(vendorDetailsData);
+        /*if (settings.isTemplate()) {
+            final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
+            vendor = VendorData.template(vendor, offices);
+        }*/
 
         return this.toApiJsonSerializer.serialize(settings, vendor, RESPONSE_DATA_PARAMETERS);
     }
@@ -158,26 +180,11 @@ public class VendorManagementApiResource {
     @Path("{vendorId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateVendor(@PathParam("vendorId") final Long vendorId, final String apiRequestBodyAsJson) {
+    public String updateVendorAgreement(@PathParam("vendorId") final Long vendorId, final String apiRequestBodyAsJson) {
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
                 .updateVendorManagement(vendorId) //
                 .withJson(apiRequestBodyAsJson) //
-                .build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }
-    
-    @DELETE
-    @Path("{vendorId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String deleteVendor(@PathParam("vendorId") final Long vendorId) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .deleteVendorManagement(vendorId) //
                 .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
