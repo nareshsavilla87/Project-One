@@ -42,6 +42,21 @@ public class DiscountMasterData {
 		this.discountStatus = discountStatus;
 
 	}
+	
+	public DiscountMasterData(final Long id, final String discountCode,
+			final String discountDescription, final String discountType,
+			final BigDecimal discountRate, final LocalDate startDate,
+			final String discountStatus,final BigDecimal discountAmount) {
+		this.id = id;
+		this.discountCode = discountCode;
+		this.discountDescription = discountDescription;
+		this.discountType = discountType;
+		this.discountRate = discountRate;
+		this.discountStartDate = startDate;
+		this.discountStatus = discountStatus;
+		this.discountAmount = discountAmount;
+
+	}
 
 	public DiscountMasterData(final Long id, final Long orderPriceId,
 			final Long orderDiscountId, final LocalDate discountStartDate,

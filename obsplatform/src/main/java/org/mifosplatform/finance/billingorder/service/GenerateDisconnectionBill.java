@@ -294,24 +294,19 @@ public class GenerateDisconnectionBill {
 	
 	// Reverse One Time Bill
 	public BillingOrderCommand getReverseOneTimeBill(BillingOrderData billingOrderData,DiscountMasterData discountMasterData) {
-
+            
+		  List<InvoiceTaxCommand> listOfTaxes = new ArrayList<InvoiceTaxCommand>();
 			LocalDate startDate = new LocalDate(billingOrderData.getBillStartDate());
 			LocalDate  endDate = startDate;
 			LocalDate  invoiceTillDate = startDate;
 			LocalDate   nextbillDate = invoiceTillDate;
 			BigDecimal price = billingOrderData.getPrice();//totalPrice
-			  if(discountMasterData !=null){	
-		    		if (discountMasterData.getDiscountType().equalsIgnoreCase("percentage")){
-		    			BigDecimal discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100))).setScale(Integer.parseInt(roundingDecimal()), RoundingMode.HALF_UP);
-			               price = price.subtract(discountAmount);
-			               discountMasterData.setDiscountAmount(discountAmount);
-		    		 }else if(discountMasterData.getDiscountType().equalsIgnoreCase("flat")){
-		    		       price = price.subtract(discountMasterData.getDiscountRate());
-		    		       discountMasterData.setDiscountAmount(discountMasterData.getDiscountRate());
-		              }
+			  if(discountMasterData !=null && discountMasterData.getDiscountAmount() .compareTo(BigDecimal.ZERO) > 0){	
+				   BigDecimal discountedPrice = price.subtract(discountMasterData.getDiscountAmount());
+				   listOfTaxes = this.calculateTax(billingOrderData,discountedPrice,startDate);
+		        }else{
+		           listOfTaxes = this.calculateTax(billingOrderData,price,startDate);
 		        }
-
-		  List<InvoiceTaxCommand>  listOfTaxes = this.calculateTax(billingOrderData,price,startDate);
 
 		return this.createBillingOrderCommand(billingOrderData, startDate,endDate,invoiceTillDate,nextbillDate,price,
 					listOfTaxes,discountMasterData);
