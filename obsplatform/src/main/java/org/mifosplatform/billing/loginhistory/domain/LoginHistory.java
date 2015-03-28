@@ -35,6 +35,9 @@ public class LoginHistory extends AbstractPersistable<Long> {
 	@Column(name = "logout_time")
 	private Date logoutTime;
 	
+	@Column(name = "session_lastupdate")
+	private Date sessionLastupdate;
+	
 	@Column(name = "status")
 	private String status;
 
@@ -87,6 +90,10 @@ public class LoginHistory extends AbstractPersistable<Long> {
 		      actualChanges.put(statusParamName, "INACTIVE");
 	        return actualChanges;
 
+	}
+
+	public void updateActiveTime() {
+		 this.sessionLastupdate = DateUtils.getDateOfTenant();
 	}
 }
 

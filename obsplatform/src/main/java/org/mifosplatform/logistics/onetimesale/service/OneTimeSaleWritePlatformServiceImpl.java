@@ -198,6 +198,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		    List<ItemData> itemCodeData = this.oneTimeSaleReadPlatformService.retrieveItemData();
 			List<DiscountMasterData> discountdata = this.discountReadPlatformService.retrieveAllDiscounts();
 			ItemData itemData = this.itemReadPlatformService.retrieveSingleItemDetails(null, itemId, false);
+			itemData.setUnitPrice(itemprice);
 			List<ChargesData> chargesDatas = this.itemReadPlatformService.retrieveChargeCode();
 
 		    if(UnitEnumType.PIECES.toString().equalsIgnoreCase(units)){

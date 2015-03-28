@@ -227,6 +227,12 @@ public class ItemData {
 		this.reorderLevel = reorderLevel;
 	}
 
+	public void setUnitPrice(BigDecimal itemprice) {
+	    this.unitPrice = itemprice;
+	    		
+		
+	}
+
 	
 	
 }
