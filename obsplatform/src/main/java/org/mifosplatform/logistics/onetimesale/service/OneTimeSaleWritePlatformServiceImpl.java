@@ -26,6 +26,7 @@ import org.mifosplatform.logistics.itemdetails.service.ItemDetailsWritePlatformS
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSaleRepository;
+import org.mifosplatform.logistics.onetimesale.exception.DeviceSaleNotFoundException;
 import org.mifosplatform.logistics.onetimesale.serialization.OneTimesaleCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.workflow.eventvalidation.service.EventValidationReadPlatformService;
@@ -235,23 +236,20 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 
 		OneTimeSale oneTimeSale = null;
 		try {
-			oneTimeSale = oneTimeSaleRepository.findOne(entityId);
-		 if(oneTimeSale.getDeviceMode().equalsIgnoreCase("NEWSALE")&&oneTimeSale.getIsInvoiced()=='Y'){
-				
+			oneTimeSale = this.findOneById(entityId);
+		    if(oneTimeSale.getDeviceMode().equalsIgnoreCase("NEWSALE")&&oneTimeSale.getIsInvoiced()=='Y'){
+		    	
 				ChargeCodeMaster chargeCode=this.chargeCodeRepository.findOneByChargeCode(oneTimeSale.getChargeCode());
-				if(oneTimeSale.getInvoiceId()!=null){
-				 Invoice oldInvoice=this.invoiceRepository.findOne(oneTimeSale.getInvoiceId());
-				 if(oldInvoice !=null){
-				 OneTimeSaleData oneTimeSaleData = new OneTimeSaleData(oneTimeSale.getId(),oneTimeSale.getClientId(), oneTimeSale.getUnits(), oneTimeSale.getChargeCode(), 
+				if(oneTimeSale.getInvoiceId()!=null){//check for old onetimesale's
+				   Invoice oldInvoice=this.invoiceRepository.findOne(oneTimeSale.getInvoiceId());
+				   List<BillingOrder> charge=oldInvoice.getCharges();
+				   BigDecimal discountAmount=charge.get(0).getDiscountAmount();
+				   OneTimeSaleData oneTimeSaleData = new OneTimeSaleData(oneTimeSale.getId(),oneTimeSale.getClientId(), oneTimeSale.getUnits(), oneTimeSale.getChargeCode(), 
 						                             chargeCode.getChargeType(),oneTimeSale.getUnitPrice(),oneTimeSale.getQuantity(), oneTimeSale.getTotalPrice(), "Y",
 						                             oneTimeSale.getItemId(),oneTimeSale.getDiscountId(),chargeCode.getTaxInclusive());
-				List<BillingOrder> charge=oldInvoice.getCharges();
-				BigDecimal discountAmount=charge.get(0).getDiscountAmount();
-				this.invoiceOneTimeSale.reverseInvoiceForOneTimeSale(oneTimeSale.getClientId(),oneTimeSaleData,discountAmount,false);
-				}
-				}
+				   this.invoiceOneTimeSale.reverseInvoiceForOneTimeSale(oneTimeSale.getClientId(),oneTimeSaleData,discountAmount,false);
+				  }
 			 }
-			
 			oneTimeSale.setIsDeleted('Y');
 			this.oneTimeSaleRepository.save(oneTimeSale);
 
@@ -260,5 +258,15 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		}
 		return new CommandProcessingResult(Long.valueOf(oneTimeSale.getId()),
 				oneTimeSale.getClientId());
+	}
+
+	private OneTimeSale findOneById(final Long saleId) {
+	
+		try{
+			OneTimeSale oneTimeSale=this.oneTimeSaleRepository.findOne(saleId);
+			return oneTimeSale;
+		}catch(Exception e){
+			throw new DeviceSaleNotFoundException(saleId.toString());
+		}
 	}
 }
