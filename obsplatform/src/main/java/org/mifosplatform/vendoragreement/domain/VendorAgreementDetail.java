@@ -11,7 +11,7 @@ import javax.persistence.Table;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "b_vendor_management_detail")
+@Table(name = "b_vendor_agmt_detail")
 public class VendorAgreementDetail extends AbstractPersistable<Long> {
 	
 	@Column(name = "content_code")
@@ -30,7 +30,7 @@ public class VendorAgreementDetail extends AbstractPersistable<Long> {
 	private BigDecimal contentCost;
 	
 	@ManyToOne
-    @JoinColumn(name="vendor_id")
+    @JoinColumn(name="vendor_agmt_id")
 	private VendorAgreement vendor;
 	
 	@Column(name = "is_deleted")

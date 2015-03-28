@@ -50,14 +50,15 @@ public class VendorAgreementData {
     private List<ServiceData> servicesData;
     private List<PlanCodeData> planDatas;
     private Long vendorId;
-    private List<VendorAgreementData> singleVendorData;
-    private List<VendorAgreementData> vendorDetailsData;
+    private List<VendorAgreementData> vendorAgreementDetailsData;
     private Collection<MCodeData> agreementTypes;
     private String name;
     private String fileName;
     private InputStream inputStream;
     private String fileUploadLocation;
     private LocalDate localdate;
+    private String documentLocation;
+    private Long vendorAgreementId;
     
     
 	public VendorAgreementData(List<PriceRegionData> priceRegionData,
@@ -93,18 +94,6 @@ public class VendorAgreementData {
 		this.contentType = contentType;
 	}
 	
-	public VendorAgreementData(Long id, Long vendorId, String contentCode,
-			String loyaltyType, BigDecimal loyaltyShare, Long priceRegion,
-			BigDecimal contentCost) {
-		
-		this.id = id;
-		this.vendorId = vendorId;
-		this.loyaltyType = loyaltyType;
-		this.loyaltyShare = loyaltyShare;
-		this.contentCode = contentCode;
-		this.priceRegion = priceRegion;
-		this.contentCost = contentCost;
-	}
 
 	public VendorAgreementData(String name, String fileName,
 			InputStream inputStream, String fileUploadLocation, LocalDate localdate) {
@@ -115,20 +104,32 @@ public class VendorAgreementData {
 		this.localdate = localdate;
 	}
 
-	public List<VendorAgreementData> getSingleVendorData() {
-		return singleVendorData;
+	public VendorAgreementData(Long id, Long vendorId,
+			String agreementStatus, Date agreementStartDate,
+			Date agreementEndDate, String contentType,
+			String documentLocation) {
+		
+		this.id = id;
+		this.vendorId = vendorId;
+		this.agreementStatus = agreementStatus;
+		this.agreementStartDate = agreementStartDate;
+		this.agreementEndDate = agreementEndDate;
+		this.contentType = contentType;
+		this.documentLocation = documentLocation;
 	}
 
-	public List<VendorAgreementData> getVendorDetailsData() {
-		return vendorDetailsData;
-	}
-
-	public void setSingleVendorData(List<VendorAgreementData> singleVendorData) {
-		this.singleVendorData = singleVendorData;
-	}
-
-	public void setVendorDetailsData(List<VendorAgreementData> vendorDetailsData) {
-		this.vendorDetailsData = vendorDetailsData;
+	public VendorAgreementData(Long id, Long vendorAgreementId,
+			String contentCode, String loyaltyType, BigDecimal loyaltyShare,
+			Long priceRegion, BigDecimal contentCost) {
+		
+		this.id = id;
+		this.vendorAgreementId = vendorAgreementId;
+		this.contentCode = contentCode;
+		this.loyaltyType = loyaltyType;
+		this.loyaltyShare = loyaltyShare;
+		this.priceRegion = priceRegion;
+		this.contentCost = contentCost;
+		
 	}
 
 	public String getFileName() {
@@ -169,6 +170,47 @@ public class VendorAgreementData {
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public List<VendorAgreementData> getVendorAgreementDetailsData() {
+		return vendorAgreementDetailsData;
+	}
+
+	public void setVendorAgreementDetailsData(
+			List<VendorAgreementData> vendorAgreementDetailsData) {
+		this.vendorAgreementDetailsData = vendorAgreementDetailsData;
+	}
+
+	public List<PriceRegionData> getPriceRegionData() {
+		return priceRegionData;
+	}
+
+	public List<ServiceData> getServicesData() {
+		return servicesData;
+	}
+
+	public Collection<MCodeData> getAgreementTypes() {
+		return agreementTypes;
+	}
+
+	public void setPriceRegionData(List<PriceRegionData> priceRegionData) {
+		this.priceRegionData = priceRegionData;
+	}
+
+	public void setServicesData(List<ServiceData> servicesData) {
+		this.servicesData = servicesData;
+	}
+
+	public void setAgreementTypes(Collection<MCodeData> agreementTypes) {
+		this.agreementTypes = agreementTypes;
+	}
+
+	public List<PlanCodeData> getPlanDatas() {
+		return planDatas;
+	}
+
+	public void setPlanDatas(List<PlanCodeData> planDatas) {
+		this.planDatas = planDatas;
 	}
 
 	

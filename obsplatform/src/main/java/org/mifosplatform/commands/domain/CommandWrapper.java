@@ -1258,4 +1258,8 @@ public class CommandWrapper {
 		public boolean isVendorManagement(){
 			return this.entityName.equalsIgnoreCase("VENDORMANAGEMENT");
 		}
+		
+		public boolean isVendorAgreement(){
+			return this.entityName.equalsIgnoreCase("VENDORAGREEMENT");
+		}
 }

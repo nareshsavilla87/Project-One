@@ -6,6 +6,7 @@
 package org.mifosplatform.vendoragreement.api;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -59,6 +60,7 @@ import org.mifosplatform.portfolio.service.service.ServiceMasterReadPlatformServ
 import org.mifosplatform.scheduledjobs.dataupload.command.DataUploadCommand;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.vendoragreement.data.VendorAgreementData;
+import org.mifosplatform.vendoragreement.exception.VendorNotFoundException;
 import org.mifosplatform.vendoragreement.service.VendorAgreementReadPlatformService;
 import org.mifosplatform.vendoragreement.service.VendorAgreementWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,29 +142,14 @@ public class VendorAgreementApiResource {
 			
 	}
     
-   /* @POST
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-    public String createVendoragreement(final String apiRequestBodyAsJson) {
-
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .createVendorManagement() //
-                .withJson(apiRequestBodyAsJson) //
-                .build();
-
-        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
-        return this.toApiJsonSerializer.serialize(result);
-    }*/
-    
     @POST
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
     public String createUploadFile(@HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
             @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart,
-            @FormDataParam("jsonData") final String name) throws JSONException {
+            @FormDataParam("jsonData") final String jsonData) throws JSONException, IOException {
 
-        FileUtils.validateFileSizeWithinPermissibleRange(fileSize, name, ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
+        FileUtils.validateFileSizeWithinPermissibleRange(fileSize, jsonData, ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
         inputStreamObject=inputStream;
         DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
         final Date date = DateUtils.getDateOfTenant();
@@ -173,15 +160,13 @@ public class VendorAgreementApiResource {
         	if (!new File(fileUploadLocation).isDirectory()) {
         		new File(fileUploadLocation).mkdirs();
         	}
-        JSONObject object = new JSONObject();
+        JSONObject object = new JSONObject(jsonData);
+        String fileLocation=null;
+        fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, fileName);
+        object.put("fileLocation", fileLocation);
         
-        final VendorAgreementData vendorAgreementData = new VendorAgreementData(name,fileName,inputStream,fileUploadLocation,localdate);
-        object.put("vendorAgreementData", vendorAgreementData);
-        
-        //CommandProcessingResult id = this.vendorAgreementWritePlatformService.createVendorAndLoyaltyCalucation(vendorAgreementData);
-       // return Response.ok().entity(id.toString()).build();
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-        .createVendorManagement() //
+        .createVendorAgreement() //
         .withJson(object.toString()) //
         .build();
 
@@ -197,49 +182,75 @@ public class VendorAgreementApiResource {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 
-        final List<VendorAgreementData> vendor = this.readPlatformService.retrieveAllVendorAndLoyalties();
+        final List<VendorAgreementData> vendor = this.readPlatformService.retrieveAllVendorAgreements();
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, vendor, RESPONSE_DATA_PARAMETERS);
     }
     
     @GET
-    @Path("{vendorId}")
+    @Path("{vendorAgreementId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveSingleVendorAgreement(@PathParam("vendorId") final Long vendorId, @Context final UriInfo uriInfo) {
+    public String retrieveSingleVendorAgreement(@PathParam("vendorAgreementId") final Long vendorAgreementId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        List<VendorAgreementData> singleVendorData = this.readPlatformService.retrieveVendor(vendorId);
-        List<VendorAgreementData> vendorDetailsData = this.readPlatformService.retrieveVendorDetails(vendorId);
-        VendorAgreementData vendor=handleTemplateData();
-        vendor.setSingleVendorData(singleVendorData);
-        vendor.setVendorDetailsData(vendorDetailsData);
-        /*if (settings.isTemplate()) {
-            final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
-            vendor = VendorData.template(vendor, offices);
-        }*/
+        VendorAgreementData vendorAgreeData = this.readPlatformService.retrieveVendorAgreement(vendorAgreementId);
+        if(vendorAgreeData == null){
+        	throw new VendorNotFoundException(vendorAgreementId.toString());
+        }
+        List<VendorAgreementData> vendorAgreementDetailsData = this.readPlatformService.retrieveVendorAgreementDetails(vendorAgreementId);
+        vendorAgreeData.setVendorAgreementDetailsData(vendorAgreementDetailsData);
+        
+        if (settings.isTemplate()) {
+        	final List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
+        	final Collection<MCodeData> agreementTypes = this.mCodeReadPlatformService.getCodeValue("Agreement Type");
+            final List<ServiceData> servicesData = this.serviceMasterReadPlatformService.retrieveAllServices("N");
+            final List<PlanCodeData> planDatas = this.orderReadPlatformService.retrieveAllPlatformData((long)0, null);
+            vendorAgreeData.setPriceRegionData(priceRegionData);
+            vendorAgreeData.setPlanDatas(planDatas);
+            vendorAgreeData.setAgreementTypes(agreementTypes);
+            vendorAgreeData.setServicesData(servicesData);
+        }
 
-        return this.toApiJsonSerializer.serialize(settings, vendor, RESPONSE_DATA_PARAMETERS);
+        return this.toApiJsonSerializer.serialize(settings, vendorAgreeData, RESPONSE_DATA_PARAMETERS);
     }
     
     @PUT
-    @Path("{vendorId}")
-    @Consumes({ MediaType.APPLICATION_JSON })
+    @Path("{vendorAgreementId}")
+    @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateVendorAgreement(@PathParam("vendorId") final Long vendorId, final String apiRequestBodyAsJson) {
+    public String updateVendorAgreement(@HeaderParam("Content-Length") final Long fileSize, @FormDataParam("file") final InputStream inputStream,
+            @FormDataParam("file") final FormDataContentDisposition fileDetails, @FormDataParam("file") final FormDataBodyPart bodyPart,
+            @FormDataParam("jsonData") final String jsonData,@PathParam("vendorAgreementId") final Long vendorAgreementId) throws JSONException, IOException {
 
+        FileUtils.validateFileSizeWithinPermissibleRange(fileSize, jsonData, ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
+        inputStreamObject=inputStream;
+        DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+        final Date date = DateUtils.getDateOfTenant();
+        final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd MMMM yyyy");
+        final LocalDate localdate = dtf.parseLocalDate(dateFormat.format(date));
+        final String fileUploadLocation = FileUtils.generateXlsFileDirectory();
+        final String fileName=fileDetails.getFileName();
+        	if (!new File(fileUploadLocation).isDirectory()) {
+        		new File(fileUploadLocation).mkdirs();
+        	}
+        JSONObject object = new JSONObject(jsonData);
+        String fileLocation=null;
+        fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, fileName);
+        object.put("fileLocation", fileLocation);
+        
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .updateVendorManagement(vendorId) //
-                .withJson(apiRequestBodyAsJson) //
-                .build();
+        .updateVendorManagement(vendorAgreementId) //
+        .withJson(object.toString()) //
+        .build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
         return this.toApiJsonSerializer.serialize(result);
-    }
+ }
 
 }

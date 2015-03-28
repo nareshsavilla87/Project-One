@@ -1,6 +1,7 @@
 package org.mifosplatform.vendoragreement.service;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.util.Map;
 
@@ -58,20 +59,15 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 	@Transactional
 	@Override
 	public CommandProcessingResult createVendorAndLoyaltyCalucation(
-			JsonCommand command) throws JSONException, IOException {
+			JsonCommand command) {
 		
 		try{
 			
 		 this.context.authenticatedUser();
-		// this.fromApiJsonDeserializer.validateForCreate(command.json());
-		 JSONObject object = new JSONObject(command.json());
-		 final VendorAgreementData vendorData = (VendorAgreementData)object.get("vendorAgreementData");
-		 
-		 String fileLocation=null;
-		 fileLocation = FileUtils.saveToFileSystem(vendorData.getInputStream(), vendorData.getFileUploadLocation(),vendorData.getFileName());
-			
-		 final VendorAgreement vendor=VendorAgreement.fromJson(command);
-		 
+		 this.fromApiJsonDeserializer.validateForCreate(command.json());
+		 String fileLocation = command.stringValueOfParameterNamed("fileLocation");
+		
+		 final VendorAgreement vendor = VendorAgreement.fromJson(command, fileLocation);
 		 
 		 final JsonArray vendorDetailsArray = command.arrayOfParameterNamed("vendorDetails").getAsJsonArray();
 			String[] vendorDetails = null;
@@ -130,13 +126,14 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 	}
 
 	@Override
-	public CommandProcessingResult updateUser(Long vendorId, JsonCommand command) {
+	public CommandProcessingResult updateUser(Long vendorAgreementId, JsonCommand command) {
 		
 		this.context.authenticatedUser();
 		this.fromApiJsonDeserializer.validateForCreate(command.json());
-		VendorAgreement vendor=retrieveCodeBy(vendorId);
+		String fileLocation = command.stringValueOfParameterNamed("fileLocation");
+		VendorAgreement vendor=retrieveCodeBy(vendorAgreementId);
 		
-		final Map<String, Object> changes = vendor.update(command);
+		final Map<String, Object> changes = vendor.update(command,fileLocation);
 		 
 		 final JsonArray vendorDetailsArray = command.arrayOfParameterNamed("vendorDetails").getAsJsonArray();
 		 final JsonArray removevendorDetailsArray = command.arrayOfParameterNamed("removeVendorDetails").getAsJsonArray();
@@ -154,8 +151,8 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 			final Long vendorDetailId = fromApiJsonHelper.extractLongNamed("id", element);
 			final String contentCode = fromApiJsonHelper.extractStringNamed("contentCode", element);
 			final String loyaltyType = fromApiJsonHelper.extractStringNamed("loyaltyType", element);
-			final BigDecimal loyaltyShare = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("loyaltyShare", element);
 			final Long priceRegion = fromApiJsonHelper.extractLongNamed("priceRegion", element);
+			final BigDecimal loyaltyShare = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("loyaltyShare", element);
 			final BigDecimal contentCost = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("contentCost", element);
 			
 			if(vendorDetailId != null){
@@ -164,11 +161,12 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 				vendordetail.setLoyaltyType(loyaltyType);
 				vendordetail.setLoyaltyShare(loyaltyShare);
 				vendordetail.setPriceRegion(priceRegion);
-				if("NONE".equalsIgnoreCase(loyaltyType)){
+				vendordetail.setContentCost(contentCost);
+				/*if("NONE".equalsIgnoreCase(loyaltyType)){
 					vendordetail.setContentCost(contentCost);
 				}else{
 					vendordetail.setContentCost(null);
-				}
+				}*/
 				this.vendorDetailRepository.saveAndFlush(vendordetail);
  				
 			}else{
@@ -205,7 +203,7 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 		this.vendorRepository.save(vendor);
 		return new CommandProcessingResultBuilder() //
 	       .withCommandId(command.commandId()) //
-	       .withEntityId(vendorId) //
+	       .withEntityId(vendorAgreementId) //
 	       .with(changes) //
 	       .build();
 	}

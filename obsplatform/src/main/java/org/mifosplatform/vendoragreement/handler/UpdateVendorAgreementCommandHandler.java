@@ -28,8 +28,8 @@ public class UpdateVendorAgreementCommandHandler implements NewCommandSourceHand
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        final Long vendorId = command.entityId();
+        final Long vendorAgreementId = command.entityId();
         
-        return this.writePlatformService.updateUser(vendorId, command);
+        return this.writePlatformService.updateUser(vendorAgreementId, command);
     }
 }

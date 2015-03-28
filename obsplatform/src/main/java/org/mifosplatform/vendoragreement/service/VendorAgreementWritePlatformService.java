@@ -14,8 +14,8 @@ import org.mifosplatform.vendoragreement.data.VendorAgreementData;
 
 public interface VendorAgreementWritePlatformService {
 
-    CommandProcessingResult createVendorAndLoyaltyCalucation(JsonCommand command) throws JSONException, IOException;
+    CommandProcessingResult createVendorAndLoyaltyCalucation(JsonCommand command);
 
-	CommandProcessingResult updateUser(Long vendorId, JsonCommand command);
+	CommandProcessingResult updateUser(Long vendorAgreementId, JsonCommand command);
 
 }

@@ -32,9 +32,8 @@ public final class VendorAgreementCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("vendorCode", "vendorDescription",
-    		  "vendorEmailId", "contactName", "vendormobileNo", "vendorTelephoneNo", "vendorAddress", "agreementStatus", "vendorCountry", "vendorCurrency",
-    		  "agreementStartDate", "agreementEndDate", "contentType", "vendorDetails", "contentCode", "loyaltyType", "loyaltyShare",
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("vendorCode", "agreementStatus",
+    		  "startDate", "endDate", "contentType", "vendorDetails", "contentCode", "loyaltyType", "loyaltyShare",
     		  "priceRegion", "contentCost", "dateFormat", "locale", "removeVendorDetails"));
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -54,40 +53,13 @@ public final class VendorAgreementCommandFromApiJsonDeserializer {
 
         final JsonElement element = fromApiJsonHelper.parse(json);
 
-        final String vendorCode = fromApiJsonHelper.extractStringNamed("vendorCode", element);
-        baseDataValidator.reset().parameter("vendorCode").value(vendorCode).notBlank().notExceedingLengthOf(10);
-        
-        final String vendorDescription = fromApiJsonHelper.extractStringNamed("vendorDescription", element);
-        baseDataValidator.reset().parameter("vendorDescription").value(vendorDescription).notBlank().notExceedingLengthOf(500);
-        
-        final String vendorEmailId = fromApiJsonHelper.extractStringNamed("vendorEmailId", element);
-        baseDataValidator.reset().parameter("vendorEmailId").value(vendorEmailId).notBlank().notExceedingLengthOf(100);
-        
-        final String contactName = fromApiJsonHelper.extractStringNamed("contactName", element);
-        baseDataValidator.reset().parameter("contactName").value(contactName).notBlank().notExceedingLengthOf(50);
-        
-        final String vendormobileNo = fromApiJsonHelper.extractStringNamed("vendormobileNo", element);
-        baseDataValidator.reset().parameter("vendormobileNo").value(vendormobileNo).notBlank().notExceedingLengthOf(20);
-        
-        final String vendorTelephoneNo = fromApiJsonHelper.extractStringNamed("vendorTelephoneNo", element);
-        baseDataValidator.reset().parameter("vendorTelephoneNo").value(vendorTelephoneNo).notBlank().notExceedingLengthOf(20);
-        
-        final String vendorAddress = fromApiJsonHelper.extractStringNamed("vendorAddress", element);
-        baseDataValidator.reset().parameter("vendorAddress").value(vendorAddress).notBlank().notExceedingLengthOf(200);
-        
         final String agreementStatus = fromApiJsonHelper.extractStringNamed("agreementStatus", element);
         baseDataValidator.reset().parameter("agreementStatus").value(agreementStatus).notBlank().notExceedingLengthOf(20);
         
-        final String vendorCountry = fromApiJsonHelper.extractStringNamed("vendorCountry", element);
-        baseDataValidator.reset().parameter("vendorCountry").value(vendorCountry).notBlank().notExceedingLengthOf(20);
-        
-        final String vendorCurrency = fromApiJsonHelper.extractStringNamed("vendorCurrency", element);
-        baseDataValidator.reset().parameter("vendorCurrency").value(vendorCurrency).notBlank().notExceedingLengthOf(20);
-        
-        final LocalDate agreementStartDate = fromApiJsonHelper.extractLocalDateNamed("agreementStartDate", element);
+        final LocalDate agreementStartDate = fromApiJsonHelper.extractLocalDateNamed("startDate", element);
         baseDataValidator.reset().parameter("agreementStartDate").value(agreementStartDate).notBlank();
         
-        final LocalDate agreementEndDate = fromApiJsonHelper.extractLocalDateNamed("agreementEndDate", element);
+        final LocalDate agreementEndDate = fromApiJsonHelper.extractLocalDateNamed("endDate", element);
         baseDataValidator.reset().parameter("agreementEndDate").value(agreementEndDate).notBlank();
          
         final String contentType=fromApiJsonHelper.extractStringNamed("contentType", element);
@@ -95,22 +67,22 @@ public final class VendorAgreementCommandFromApiJsonDeserializer {
         
         /** Vendor Details */
         final JsonArray vendorDetailsArray = fromApiJsonHelper.extractJsonArrayNamed("vendorDetails", element);
-        // baseDataValidator.reset().parameter("vendorDetails").value(mediaAssetLocationsArray).arrayNotEmpty();
-        String[] mediaAssetLocations = null;
-        mediaAssetLocations = new String[vendorDetailsArray.size()];
+        baseDataValidator.reset().parameter("vendorDetails").value(vendorDetailsArray).arrayNotEmpty();
+        String[] vendorDetailsData = null;
+        vendorDetailsData = new String[vendorDetailsArray.size()];
         final int mediaassetLocationSize = vendorDetailsArray.size();
 	    baseDataValidator.reset().parameter("mediaAssetLocations").value(mediaassetLocationSize).integerGreaterThanZero();
 	    for(int i = 0; i < vendorDetailsArray.size(); i++){
-	    	mediaAssetLocations[i] = vendorDetailsArray.get(i).toString();
+	    	vendorDetailsData[i] = vendorDetailsArray.get(i).toString();
 	    }
 	    
 	   /**
 	    * For Vendor Details Validation
 	    * */
 	    
-		 for (final String mediaAssetLocation : mediaAssetLocations) {
+		 for (final String vendorData : vendorDetailsData) {
 			 
-			     final JsonElement attributeElement = fromApiJsonHelper.parse(mediaAssetLocation);
+			     final JsonElement attributeElement = fromApiJsonHelper.parse(vendorData);
 			     
 			     final String contentCode = fromApiJsonHelper.extractStringNamed("contentCode", attributeElement);
 			     baseDataValidator.reset().parameter("contentCode").value(contentCode).notBlank().notExceedingLengthOf(10);
@@ -118,15 +90,15 @@ public final class VendorAgreementCommandFromApiJsonDeserializer {
 			     final String loyaltyType = fromApiJsonHelper.extractStringNamed("loyaltyType", attributeElement);
 			     baseDataValidator.reset().parameter("loyaltyType").value(loyaltyType).notBlank().notExceedingLengthOf(10);
 			     
-			     final BigDecimal loyaltyShare = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("loyaltyShare", attributeElement);
-			     baseDataValidator.reset().parameter("loyaltyShare").value(loyaltyShare).inMinAndMaxAmountRange(BigDecimal.ZERO, BigDecimal.valueOf(100));
-			     
 			     final Integer priceRegion = fromApiJsonHelper.extractIntegerSansLocaleNamed("priceRegion", attributeElement);
 			     baseDataValidator.reset().parameter("priceRegion").value(priceRegion).notBlank().integerGreaterThanZero().notExceedingLengthOf(20);
 			     
 			     if("NONE".equalsIgnoreCase(loyaltyType)){
 			    	 final BigDecimal contentCost = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("contentCost", attributeElement);
 				     baseDataValidator.reset().parameter("contentCost").value(contentCost).notBlank();
+			     }else{
+			    	 final BigDecimal loyaltyShare = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("loyaltyShare", attributeElement);
+				     baseDataValidator.reset().parameter("loyaltyShare").value(loyaltyShare).inMinAndMaxAmountRange(BigDecimal.ZERO, BigDecimal.valueOf(100));
 			     }
 			           
 		  }

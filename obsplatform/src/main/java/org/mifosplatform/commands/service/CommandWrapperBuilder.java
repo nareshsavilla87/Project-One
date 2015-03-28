@@ -2734,19 +2734,35 @@ public CommandWrapperBuilder createVendorManagement() {
 	return this;
 }
 
-public CommandWrapperBuilder updateVendorManagement(final Long radServiceId) {
+public CommandWrapperBuilder updateVendorManagement(final Long vendorId) {
 	this.actionName = "UPDATE";
 	this.entityName = "VENDORMANAGEMENT";
-	this.entityId = radServiceId;
-	this.href = "/vendormanagement/"+radServiceId;
+	this.entityId = vendorId;
+	this.href = "/vendormanagement/"+vendorId;
 	return this;
 }
 
-public CommandWrapperBuilder deleteVendorManagement(final Long radServiceId) {
+public CommandWrapperBuilder deleteVendorManagement(final Long vendorId) {
 	this.actionName = "DELETE";
 	this.entityName = "VENDORMANAGEMENT";
-	this.entityId = radServiceId;
-	this.href = "/vendormanagement/"+radServiceId;
+	this.entityId = vendorId;
+	this.href = "/vendormanagement/"+vendorId;
+	return this;
+}
+
+public CommandWrapperBuilder createVendorAgreement() {
+	this.actionName = "CREATE";
+	this.entityName = "VENDORAGREEMENT";
+	this.entityId = null;
+	this.href = "/vendoragreement/template";
+	return this;
+}
+
+public CommandWrapperBuilder updateVendorAgreement(final Long vendorAgreementId) {
+	this.actionName = "UPDATE";
+	this.entityName = "VENDORMANAGEMENT";
+	this.entityId = vendorAgreementId;
+	this.href = "/vendoragreement/"+vendorAgreementId;
 	return this;
 }
 

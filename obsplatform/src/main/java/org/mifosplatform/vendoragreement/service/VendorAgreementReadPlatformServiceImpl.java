@@ -33,7 +33,7 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
     }
 
 	@Override
-	public List<VendorAgreementData> retrieveAllVendorAndLoyalties() {
+	public List<VendorAgreementData> retrieveAllVendorAgreements() {
 		try {
 			context.authenticatedUser();
 			String sql;
@@ -49,11 +49,9 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 	private static final class RetrieveMapper implements RowMapper<VendorAgreementData> {
 
 		public String schema() {
-			return " bvm.id as id, bvm.vendor_code as vendorCode, bvm.vendor_description as vendorDescription, "+
-					"bvm.vendor_emailid as vendorEmailId, bvm.vendor_contact_name as contactName, bvm.vendor_mobileno as vendormobileNo, "+
-					"bvm.vendor_telephoneno as vendorTelephoneNo, bvm.vendor_address as vendorAddress, bvm.agreement_status as agreementStatus, "+
-					"bvm.vendor_country as vendorCountry, bvm.vendor_currency as vendorCurrency, bvm.agreement_startdate as agreementStartDate, "+
-					"bvm.agreement_enddate as agreementEndDate, bvm.content_type as contentType from b_vendor_management bvm ";
+			return " bva.id as id, bva.vendor_id as vendorId, bva.vendor_agmt_status as agreementStatus, "+
+					"bva.vendor_agmt_startdate as startDate, bva.vendor_agmt_enddate as endDate, bva.content_type as contentType,"+
+					"bva.vendor_agmt_document as documentLocation from b_vendor_agreement bva  ";
 
 		}
 
@@ -62,46 +60,38 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 				throws SQLException {
 			
 			Long id = rs.getLong("id");
-			String vendorCode = rs.getString("vendorCode");
-			String vendorDescription = rs.getString("vendorDescription");
-			String vendorEmailId = rs.getString("vendorEmailId");
-			String contactName = rs.getString("contactName");
-			String vendormobileNo = rs.getString("vendormobileNo");
-			String vendorTelephoneNo = rs.getString("vendorTelephoneNo");
-			String vendorAddress = rs.getString("vendorAddress");
+			Long vendorId = rs.getLong("vendorId");
 			String agreementStatus = rs.getString("agreementStatus");
-			String vendorCountry = rs.getString("vendorCountry");
-			String vendorCurrency = rs.getString("vendorCurrency");
-			Date agreementStartDate = rs.getDate("agreementStartDate");
-			Date agreementEndDate = rs.getDate("agreementEndDate");
+			Date agreementStartDate = rs.getDate("startDate");
+			Date agreementEndDate = rs.getDate("endDate");
 			String contentType = rs.getString("contentType");
+			String documentLocation = rs.getString("documentLocation");
 			
-			return new VendorAgreementData(id, vendorCode, vendorDescription, vendorEmailId, contactName, vendormobileNo, vendorTelephoneNo, 
-					vendorAddress, agreementStatus, vendorCountry, vendorCurrency, agreementStartDate, agreementEndDate, contentType);
+			return new VendorAgreementData(id, vendorId, agreementStatus, agreementStartDate, agreementEndDate, contentType, documentLocation);
 		}
 	}
 	
 	@Override
-	public List<VendorAgreementData> retrieveVendor(Long vendorId) {
+	public VendorAgreementData retrieveVendorAgreement(Long vendorAgreementId) {
 		try {
 			context.authenticatedUser();
 			String sql;
 			RetrieveMapper mapper = new RetrieveMapper();
-			sql = "SELECT  " + mapper.schema() +" where bvm.id = "+vendorId;
+			sql = "SELECT  " + mapper.schema() +" where bva.id = "+vendorAgreementId;
 
-			return this.jdbcTemplate.query(sql, mapper, new Object[] { });
+			return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { });
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
 
 	@Override
-	public List<VendorAgreementData> retrieveVendorDetails(Long vendorId) {
+	public List<VendorAgreementData> retrieveVendorAgreementDetails(Long vendorAgreementId) {
 		try {
 			context.authenticatedUser();
 			String sql;
 			RetrieveVendorDetailMapper mapper = new RetrieveVendorDetailMapper();
-			sql = "SELECT  " + mapper.schema() +" where bvmd.id = "+vendorId;
+			sql = "SELECT  " + mapper.schema() +" where bvad.id = "+vendorAgreementId+" and bvad.is_deleted = 'N'";
 
 			return this.jdbcTemplate.query(sql, mapper, new Object[] { });
 		} catch (EmptyResultDataAccessException e) {
@@ -112,9 +102,9 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 	private static final class RetrieveVendorDetailMapper implements RowMapper<VendorAgreementData> {
 
 		public String schema() {
-			return " bvmd.id as id, bvmd.vendor_id as vendorId, bvmd.content_code as contentCode, "+
-					"bvmd.loyalty_type as loyaltyType, bvmd.loyalty_share as loyaltyShare, bvmd.price_region as priceRegion, "+
-					"bvmd.content_cost as contentCost from b_vendor_management_detail bvmd ";
+			return " bvad.id as id, bvad.vendor_agmt_id as vendorAgreementId, bvad.content_code as contentCode,"+
+					"bvad.loyalty_type as loyaltyType, bvad.loyalty_share as loyaltyShare, bvad.price_region as priceRegion, "+
+					"bvad.content_cost as contentCost from b_vendor_agmt_detail bvad ";
 
 		}
 
@@ -123,14 +113,15 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 				throws SQLException {
 			
 			Long id = rs.getLong("id");
-			Long vendorId = rs.getLong("vendorId");
+			Long vendorAgreementId = rs.getLong("vendorAgreementId");
 			String contentCode = rs.getString("contentCode");
 			String loyaltyType = rs.getString("loyaltyType");
 			BigDecimal loyaltyShare = rs.getBigDecimal("loyaltyShare");
 			Long priceRegion = rs.getLong("priceRegion");
 			BigDecimal contentCost = rs.getBigDecimal("contentCost");
 			
-			return new VendorAgreementData(id, vendorId, contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost);
+			return new VendorAgreementData(id, vendorAgreementId, contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost);
+			
 		}
 	}
 	

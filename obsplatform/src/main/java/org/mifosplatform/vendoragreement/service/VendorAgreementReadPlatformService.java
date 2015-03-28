@@ -11,10 +11,10 @@ import org.mifosplatform.vendoragreement.data.VendorAgreementData;
 
 public interface VendorAgreementReadPlatformService {
 
-	List<VendorAgreementData> retrieveAllVendorAndLoyalties();
+	List<VendorAgreementData> retrieveAllVendorAgreements();
 
-	List<VendorAgreementData> retrieveVendor(Long vendorId);
+	VendorAgreementData retrieveVendorAgreement(Long vendorAgreementId);
 
-	List<VendorAgreementData> retrieveVendorDetails(Long vendorId);
+	List<VendorAgreementData> retrieveVendorAgreementDetails(Long vendorAgreementId);
 
 }
