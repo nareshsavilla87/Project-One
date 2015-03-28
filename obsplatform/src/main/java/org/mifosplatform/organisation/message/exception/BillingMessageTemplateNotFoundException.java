@@ -13,3 +13,4 @@ public class BillingMessageTemplateNotFoundException extends AbstractPlatformRes
 
 	 }
 }
+

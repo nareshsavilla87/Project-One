@@ -71,7 +71,7 @@ public class ItemCommandFromApiJsonDeserializer {
 			baseDataValidator.reset().parameter("units").value(units).notBlank();
 			baseDataValidator.reset().parameter("defaultPrice").value(defaultPrice).notNull();
 			
-			/*final JsonArray itemPricesArray = fromApiJsonHelper.extractJsonArrayNamed("itemPrices", element);
+			final JsonArray itemPricesArray = fromApiJsonHelper.extractJsonArrayNamed("itemPrices", element);
 	        String[] itemPriceRegions = null;
 	        itemPriceRegions = new String[itemPricesArray.size()];
 	        final int itemPricesArraySize = itemPricesArray.size();
@@ -91,13 +91,8 @@ public class ItemCommandFromApiJsonDeserializer {
 				     final Long regionId = fromApiJsonHelper.extractLongNamed("regionId", attributeElement);
 				     baseDataValidator.reset().parameter("regionId").value(regionId).notBlank().notExceedingLengthOf(30);
 				
-<<<<<<< HEAD
-			  }*/
-
-=======
 			  }
 	        }
->>>>>>> obsplatform-2.03
 	        throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	    }
 	    

@@ -1,7 +1,5 @@
 package org.mifosplatform.billing.selfcare.service;
 
-import java.util.Date;
-
 import org.apache.commons.lang.RandomStringUtils;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistory;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistoryRepository;
@@ -146,12 +144,10 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 					throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_CREATE_SELFCARE);
 				}
 				}else{
-				
 				throw new PlatformDataIntegrityException("client does not exist", "client not registered","clientId", "client is null ");
 			
 				}
 			}
-			
 		}catch(DataIntegrityViolationException dve){
 			handleDataIntegrityIssues(command, dve);
 			throw new PlatformDataIntegrityException("duplicate.username", "duplicate.username","duplicate.username", "duplicate.username");
@@ -319,7 +315,6 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 					throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SELFCARE_REGISTER);
 				}
 			}
-		  		
 		}catch(DataIntegrityViolationException dve){
 			handleDataIntegrityIssues(command, dve);
 			throw new PlatformDataIntegrityException("duplicate.username", "duplicate.username","duplicate.username", "duplicate.username");
