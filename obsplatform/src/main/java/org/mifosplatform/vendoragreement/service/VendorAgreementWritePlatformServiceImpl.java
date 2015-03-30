@@ -58,7 +58,7 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 	
 	@Transactional
 	@Override
-	public CommandProcessingResult createVendorAndLoyaltyCalucation(
+	public CommandProcessingResult createVendorAgreement(
 			JsonCommand command) {
 		
 		try{
@@ -126,7 +126,7 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 	}
 
 	@Override
-	public CommandProcessingResult updateUser(Long vendorAgreementId, JsonCommand command) {
+	public CommandProcessingResult updateVendorAgreement(Long vendorAgreementId, JsonCommand command) {
 		
 		this.context.authenticatedUser();
 		this.fromApiJsonDeserializer.validateForCreate(command.json());

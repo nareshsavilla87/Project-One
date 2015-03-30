@@ -28,7 +28,7 @@ public class CreateVendorAgreementCommandHandler implements NewCommandSourceHand
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.createVendorAndLoyaltyCalucation(command);
+        return this.writePlatformService.createVendorAgreement(command);
     	
     }
 }

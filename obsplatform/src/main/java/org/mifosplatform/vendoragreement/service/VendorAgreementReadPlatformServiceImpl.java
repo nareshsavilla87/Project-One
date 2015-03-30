@@ -91,7 +91,7 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 			context.authenticatedUser();
 			String sql;
 			RetrieveVendorDetailMapper mapper = new RetrieveVendorDetailMapper();
-			sql = "SELECT  " + mapper.schema() +" where bvad.id = "+vendorAgreementId+" and bvad.is_deleted = 'N'";
+			sql = "SELECT  " + mapper.schema() +" where bvad.vendor_agmt_id = "+vendorAgreementId+" and bvad.is_deleted = 'N'";
 
 			return this.jdbcTemplate.query(sql, mapper, new Object[] { });
 		} catch (EmptyResultDataAccessException e) {
@@ -114,7 +114,7 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 			
 			Long id = rs.getLong("id");
 			Long vendorAgreementId = rs.getLong("vendorAgreementId");
-			String contentCode = rs.getString("contentCode");
+			Long contentCode = rs.getLong("contentCode");
 			String loyaltyType = rs.getString("loyaltyType");
 			BigDecimal loyaltyShare = rs.getBigDecimal("loyaltyShare");
 			Long priceRegion = rs.getLong("priceRegion");
@@ -122,6 +122,20 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 			
 			return new VendorAgreementData(id, vendorAgreementId, contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost);
 			
+		}
+	}
+
+	@Override
+	public List<VendorAgreementData> retrieveRespectiveAgreementData(Long vendorId) {
+		try {
+			context.authenticatedUser();
+			String sql;
+			RetrieveMapper mapper = new RetrieveMapper();
+			sql = "SELECT  " + mapper.schema()+" where bva.vendor_id = ?";
+
+			return this.jdbcTemplate.query(sql, mapper, new Object[] { vendorId });
+		} catch (EmptyResultDataAccessException e) {
+			return null;
 		}
 	}
 	

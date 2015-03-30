@@ -40,7 +40,7 @@ public class VendorAgreementData {
     private Date agreementEndDate;
     private String contentType;
     
-    private String contentCode;
+    private Long contentCode;
     private String loyaltyType;
     private BigDecimal loyaltyShare;
     private Long priceRegion;
@@ -119,7 +119,7 @@ public class VendorAgreementData {
 	}
 
 	public VendorAgreementData(Long id, Long vendorAgreementId,
-			String contentCode, String loyaltyType, BigDecimal loyaltyShare,
+			Long contentCode, String loyaltyType, BigDecimal loyaltyShare,
 			Long priceRegion, BigDecimal contentCost) {
 		
 		this.id = id;

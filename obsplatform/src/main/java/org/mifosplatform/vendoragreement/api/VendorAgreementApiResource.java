@@ -50,6 +50,7 @@ import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
+import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 import org.mifosplatform.organisation.priceregion.data.PriceRegionData;
 import org.mifosplatform.organisation.priceregion.service.RegionalPriceReadplatformService;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
@@ -155,15 +156,20 @@ public class VendorAgreementApiResource {
         final Date date = DateUtils.getDateOfTenant();
         final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd MMMM yyyy");
         final LocalDate localdate = dtf.parseLocalDate(dateFormat.format(date));
+        JSONObject object = new JSONObject(jsonData);
+        
+        if(fileDetails != null){
         final String fileUploadLocation = FileUtils.generateXlsFileDirectory();
         final String fileName=fileDetails.getFileName();
         	if (!new File(fileUploadLocation).isDirectory()) {
         		new File(fileUploadLocation).mkdirs();
         	}
-        JSONObject object = new JSONObject(jsonData);
+        
         String fileLocation=null;
         fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, fileName);
         object.put("fileLocation", fileLocation);
+        
+        }
         
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
         .createVendorAgreement() //
@@ -189,7 +195,19 @@ public class VendorAgreementApiResource {
     }
     
     @GET
-    @Path("{vendorAgreementId}")
+	@Path("{vendorId}") /** vendorId*/
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveVendorAgreementData(	@PathParam("vendorId") final Long vendorId,@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
+		List<VendorAgreementData> agreementData = this.readPlatformService.retrieveRespectiveAgreementData(vendorId);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializer.serialize(settings, agreementData,RESPONSE_DATA_PARAMETERS);
+	}
+    
+    @GET
+    @Path("{vendorAgreementId}/details")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveSingleVendorAgreement(@PathParam("vendorAgreementId") final Long vendorAgreementId, @Context final UriInfo uriInfo) {
@@ -219,7 +237,7 @@ public class VendorAgreementApiResource {
         return this.toApiJsonSerializer.serialize(settings, vendorAgreeData, RESPONSE_DATA_PARAMETERS);
     }
     
-    @PUT
+    @POST
     @Path("{vendorAgreementId}")
     @Consumes({ MediaType.MULTIPART_FORM_DATA })
     @Produces({ MediaType.APPLICATION_JSON })
@@ -233,18 +251,22 @@ public class VendorAgreementApiResource {
         final Date date = DateUtils.getDateOfTenant();
         final DateTimeFormatter dtf = DateTimeFormat.forPattern("dd MMMM yyyy");
         final LocalDate localdate = dtf.parseLocalDate(dateFormat.format(date));
+        JSONObject object = new JSONObject(jsonData);
+        
+        if(fileDetails != null){
         final String fileUploadLocation = FileUtils.generateXlsFileDirectory();
         final String fileName=fileDetails.getFileName();
         	if (!new File(fileUploadLocation).isDirectory()) {
         		new File(fileUploadLocation).mkdirs();
         	}
-        JSONObject object = new JSONObject(jsonData);
+        
         String fileLocation=null;
         fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, fileName);
         object.put("fileLocation", fileLocation);
+        }
         
         final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-        .updateVendorManagement(vendorAgreementId) //
+        .updateVendorAgreement(vendorAgreementId) //
         .withJson(object.toString()) //
         .build();
 

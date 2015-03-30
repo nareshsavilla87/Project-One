@@ -17,4 +17,6 @@ public interface VendorAgreementReadPlatformService {
 
 	List<VendorAgreementData> retrieveVendorAgreementDetails(Long vendorAgreementId);
 
+	List<VendorAgreementData> retrieveRespectiveAgreementData(Long vendorId);
+
 }

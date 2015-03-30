@@ -30,6 +30,6 @@ public class UpdateVendorAgreementCommandHandler implements NewCommandSourceHand
 
         final Long vendorAgreementId = command.entityId();
         
-        return this.writePlatformService.updateUser(vendorAgreementId, command);
+        return this.writePlatformService.updateVendorAgreement(vendorAgreementId, command);
     }
 }

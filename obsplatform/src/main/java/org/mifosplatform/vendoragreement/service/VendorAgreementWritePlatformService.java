@@ -14,8 +14,8 @@ import org.mifosplatform.vendoragreement.data.VendorAgreementData;
 
 public interface VendorAgreementWritePlatformService {
 
-    CommandProcessingResult createVendorAndLoyaltyCalucation(JsonCommand command);
+    CommandProcessingResult createVendorAgreement(JsonCommand command);
 
-	CommandProcessingResult updateUser(Long vendorAgreementId, JsonCommand command);
+	CommandProcessingResult updateVendorAgreement(Long vendorAgreementId, JsonCommand command);
 
 }

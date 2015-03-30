@@ -34,7 +34,7 @@ public final class VendorAgreementCommandFromApiJsonDeserializer {
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("vendorCode", "agreementStatus",
     		  "startDate", "endDate", "contentType", "vendorDetails", "contentCode", "loyaltyType", "loyaltyShare",
-    		  "priceRegion", "contentCost", "dateFormat", "locale", "removeVendorDetails"));
+    		  "priceRegion", "contentCost", "dateFormat", "locale", "removeVendorDetails","vendorId","fileLocation"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired
@@ -67,7 +67,6 @@ public final class VendorAgreementCommandFromApiJsonDeserializer {
         
         /** Vendor Details */
         final JsonArray vendorDetailsArray = fromApiJsonHelper.extractJsonArrayNamed("vendorDetails", element);
-        baseDataValidator.reset().parameter("vendorDetails").value(vendorDetailsArray).arrayNotEmpty();
         String[] vendorDetailsData = null;
         vendorDetailsData = new String[vendorDetailsArray.size()];
         final int mediaassetLocationSize = vendorDetailsArray.size();

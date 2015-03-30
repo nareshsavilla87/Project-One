@@ -2760,7 +2760,7 @@ public CommandWrapperBuilder createVendorAgreement() {
 
 public CommandWrapperBuilder updateVendorAgreement(final Long vendorAgreementId) {
 	this.actionName = "UPDATE";
-	this.entityName = "VENDORMANAGEMENT";
+	this.entityName = "VENDORAGREEMENT";
 	this.entityId = vendorAgreementId;
 	this.href = "/vendoragreement/"+vendorAgreementId;
 	return this;
