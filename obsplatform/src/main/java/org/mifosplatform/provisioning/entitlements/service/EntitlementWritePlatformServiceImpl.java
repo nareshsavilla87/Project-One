@@ -66,9 +66,13 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		String message = null;	
 		String provSystem = command.stringValueOfParameterNamed("provSystem");
 		String requestType = command.stringValueOfParameterNamed("requestType");
-		String  agentResourceId = command.stringValueOfParameterNamed("agentResourceId");	
+		String  agentResourceId = null;
 		String zebraSubscriberId = null;
 	try {	
+		
+		if(command.hasParameter("agentResourceId")){
+			agentResourceId = command.stringValueOfParameterNamed("agentResourceId");
+		}
 		
 		if(command.hasParameter("zebraSubscriberId")){
 			zebraSubscriberId = command.stringValueOfParameterNamed("zebraSubscriberId");
