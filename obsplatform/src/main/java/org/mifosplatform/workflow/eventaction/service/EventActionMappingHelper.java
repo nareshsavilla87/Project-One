@@ -67,6 +67,7 @@ public class EventActionMappingHelper {
 					BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
     	  }
 		  	this.messageDataRepository.save(billingMessage);
+
 		}else{
 			throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_TICKET_TEMPLATE);
 		}

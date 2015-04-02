@@ -50,8 +50,8 @@ end //
 
 DELIMITER ;
 
-SET date=CURDATE();
-call p_int_fa0(date);
+SET date1=CURDATE();
+call p_int_fa0(date1);
 
 
 Drop procedure if exists loginHistory;

@@ -66,9 +66,13 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		String message = null;	
 		String provSystem = command.stringValueOfParameterNamed("provSystem");
 		String requestType = command.stringValueOfParameterNamed("requestType");
-		String  agentResourceId = command.stringValueOfParameterNamed("agentResourceId");	
+		String  agentResourceId = null;
 		String zebraSubscriberId = null;
 	try {	
+		
+		if(command.hasParameter("agentResourceId")){
+			agentResourceId = command.stringValueOfParameterNamed("agentResourceId");
+		}
 		
 		if(command.hasParameter("zebraSubscriberId")){
 			zebraSubscriberId = command.stringValueOfParameterNamed("zebraSubscriberId");
@@ -110,8 +114,9 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 			
 				BillingMessage billingMessage = new BillingMessage(header, body, footer, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM, client.getEmail(),
 						subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
-				
-				this.messageDataRepository.save(billingMessage);	
+			
+				this.messageDataRepository.save(billingMessage);
+						
 			}else{
 				throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PROVISION_CREDENTIALS);
 			}
@@ -138,8 +143,8 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 				
 				selfcare.setZebraSubscriberId(new Long(zebraSubscriberId));
 				this.selfCareRepository.save(selfcare);
-								
 			  }
+
 			}
 		
 		if(zebraSubscriberId != null && requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_ACTIVATION) &&
