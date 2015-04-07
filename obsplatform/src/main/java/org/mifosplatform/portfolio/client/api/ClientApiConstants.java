@@ -17,6 +17,7 @@ public class ClientApiConstants {
 
     // request parameters
     public static final String idParamName = "id";
+    public static final String titleParamName = "title";
     public static final String groupIdParamName = "groupId";
     public static final String accountNoParamName = "accountNo";
     public static final String externalIdParamName = "externalId";
@@ -65,17 +66,40 @@ public class ClientApiConstants {
     public static final String closureDateParamName = "closureDate";
     public static final String closureReasonIdParamName = "closureReasonId";
     public static final String balanceCheckParam="balanceCheck";
-    public static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+    
+    // Client additional data 
+    public static final String jobTitleParamName ="jobTitle";
+    public static final String fiananceIdParamName ="financeId";
+    public static final String utsCustomerIdParamName ="utsCustomerId";
+    public static final String genderParamName ="gender";
+    public static final String dateOfBirthParamName ="dateOfBirth";
+    public static final String nationalityParamName ="nationality";
+    public static final String idTypeParamName ="idType";
+    public static final String idNumberParamName ="idNumber";
+    public static final String remarksParamName ="remarks";
+    public static final String preferredLangParamName ="preferredLang";
+    public static final String ageGroupParamName ="ageGroup";
+    public static final String preferredCommunicationParamName ="preferredCommunication";
+    
+    
+    
+    
+    
+    public static final Set<String> CLIENT_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,titleParamName,
             dateFormatParamName, groupIdParamName, accountNoParamName, externalIdParamName, firstnameParamName, middlenameParamName,
             lastnameParamName, fullnameParamName, officeIdParamName, activeParamName, activationDateParamName,clientCategoryParamName,
             addressNoParamName,cityParamName,countryParamName,emailParamName,phoneParamName,homePhoneNumberParamName,stateParamName,streetParamName,
-            zipCodeParamName,loginParamName,passwordParamName,flagParamName,groupParamName,entryTypeParamName,deviceParamName));
+            zipCodeParamName,loginParamName,passwordParamName,flagParamName,groupParamName,entryTypeParamName,deviceParamName,
+            jobTitleParamName,fiananceIdParamName,utsCustomerIdParamName,genderParamName,dateOfBirthParamName,nationalityParamName,idTypeParamName,
+            idNumberParamName,remarksParamName,preferredLangParamName,ageGroupParamName,preferredCommunicationParamName));
 
 
-    public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
+    public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,titleParamName,
             dateFormatParamName, accountNoParamName, externalIdParamName, firstnameParamName, middlenameParamName,clientCategoryParamName,
             lastnameParamName, fullnameParamName, activeParamName, activationDateParamName,clientCategoryParamName,phoneParamName,homePhoneNumberParamName,
-            emailParamName,officeIdParamName,groupParamName,entryTypeParamName,userNameParamName,passwordParamName));
+            emailParamName,officeIdParamName,groupParamName,entryTypeParamName,userNameParamName,passwordParamName,
+            jobTitleParamName,fiananceIdParamName,utsCustomerIdParamName,genderParamName,dateOfBirthParamName,nationalityParamName,idTypeParamName,
+            idNumberParamName,remarksParamName,preferredLangParamName,ageGroupParamName,preferredCommunicationParamName));
     
     public static final Set<String> CLIENT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, closureDateParamName, closureReasonIdParamName));
