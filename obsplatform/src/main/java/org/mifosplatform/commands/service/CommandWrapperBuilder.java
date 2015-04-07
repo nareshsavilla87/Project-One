@@ -2726,6 +2726,14 @@ public CommandWrapperBuilder deleteRadService(final Long radServiceId) {
 	
 }
 
+public CommandWrapperBuilder createProperty() {
+	this.actionName = "CREATE";
+	this.entityName = "PROPERTY";
+	this.entityId = null;
+	this.href = "/property/";
+	return this;
+}
+
 }
 
 

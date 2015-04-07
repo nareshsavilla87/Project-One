@@ -85,19 +85,22 @@ final public class ClientData implements Comparable<ClientData> {
     private SelfCare selfcare;
     private final String userName;
     private final String clientPassword;
+    private final String title;
     private final String parentId;
+	private ClientAdditionalData clientAdditionalData;
    
 
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions,
     		Collection<ClientCategoryData> categoryDatas,Collection<GroupData> groupDatas,List<CodeValueData> closureReasons) {
         return new ClientData(null, null,null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, officeOptions, null,
-        		categoryDatas,null,null,null, null, null, null, null, null, null, null,null,null,null,null,groupDatas,closureReasons,null,null,null,null,null,null,null);
+        		categoryDatas,null,null,null, null, null, null, null, null, null, null,null,null,null,null,groupDatas,closureReasons,null,null,null,null,
+        		 null,null,null,null);
         }
 	
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions, Collection<ClientCategoryData> categoryDatas,
     		List<CodeValueData> closureReasons) {
         return new ClientData(null, null,null, officeId, null, null, null, null, null, null, null, null, joinedDate, null, officeOptions, null,
-        		categoryDatas,null,null,null, null, null, null, null, null, null, null,null,null,null,null,null,closureReasons,null,null,null,null,null,null,null);
+        		categoryDatas,null,null,null, null, null, null, null, null, null, null,null,null,null,null,null,closureReasons,null,null,null,null,null,null,null,null);
     }
 
     public static ClientData templateOnTop(final ClientData clientData, final List<OfficeData> allowedOffices, Collection<ClientCategoryData> categoryDatas,
@@ -109,7 +112,7 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.externalId, clientData.activationDate, clientData.imageKey, allowedOffices, clientData.groups,
                 categoryDatas,clientData.categoryType,clientData.email,clientData.phone,clientData.homePhoneNumber,clientData.addressNo,clientData.street,
                 clientData.city,clientData.state,clientData.country,clientData.zip,clientData.balanceAmount,allocationDetailsDatas,clientData.hwSerialNumber,
-                clientData.currency, groupDatas,null,balanceCheck,clientData.taxExemption,clientData.entryType,clientData.walletAmount,null,null,null);
+                clientData.currency, groupDatas,null,balanceCheck,clientData.taxExemption,clientData.entryType,clientData.walletAmount,null,null,null,null);
     }
 
     public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupGeneralData> parentGroups) {
@@ -120,7 +123,7 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.clientCategoryDatas,clientData.categoryType,clientData.email,clientData.phone,clientData.homePhoneNumber,
                 clientData.addressNo,clientData.street,clientData.city,clientData.state,clientData.country,clientData.zip,clientData.balanceAmount,
                 clientData.hardwareDetails,clientData.hwSerialNumber,clientData.currency, clientData.groupNameDatas,null,null,clientData.taxExemption,clientData.entryType,
-                clientData.walletAmount,null,null,null);
+                clientData.walletAmount,null,null,null,null);
 
     }
 
@@ -129,12 +132,12 @@ final public class ClientData implements Comparable<ClientData> {
             final String officeName) {
 
         return new ClientData(accountNo,null, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName, null,
-                null, null, null, null,null,null,null,null, null,null, null,null, null, null,null,null,null,null,null, null,null,null,null,null,null,null,null,null);
+                null, null, null, null,null,null,null,null, null,null, null,null, null, null,null,null,null,null,null, null,null,null,null,null,null,null,null,null,null);
     }
 
     public static ClientData lookup(final Long id, final String displayName, final Long officeId, final String officeName) {
         return new ClientData(null,null, null, officeId, officeName, id, null, null, null, null, displayName, null, null, null, null, null,null,null,null,null,
-        		null,null,null, null,null,null,null,null,null,null,null, null,null,null,null,null,null,null,null,null);
+        		null,null,null, null,null,null,null,null,null,null,null, null,null,null,null,null,null,null,null,null,null);
 
     }
 
@@ -142,11 +145,11 @@ final public class ClientData implements Comparable<ClientData> {
     		final String firstname, final String middlename, final String lastname, final String fullname,final String displayName, final String externalId,
     		final LocalDate activationDate, final String imageKey,final String categoryType,final String email,final String phone,final String homePhoneNumber,final String addrNo,final String street,
     		final String city,final String state,final String country,final String zip,final BigDecimal balanceAmount,final String hwSerialNumber,final String currency,final String taxExemption,
-    		String entryType,final BigDecimal walletAmount,final String userName,final String clientPassword,final String parentId) {
+    		String entryType,final BigDecimal walletAmount,final String userName,final String clientPassword,final String parentId, String title) {
     	
         return new ClientData(accountNo,groupName, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
                 externalId, activationDate, imageKey, null, null,null,categoryType,email,phone,homePhoneNumber,addrNo,street,city,state,country,zip,
-                balanceAmount,null,hwSerialNumber,currency, null,null,null,taxExemption,entryType,walletAmount,userName,clientPassword,parentId);
+                balanceAmount,null,hwSerialNumber,currency, null,null,null,taxExemption,entryType,walletAmount,userName,clientPassword,parentId,title);
 
     }
 
@@ -155,7 +158,8 @@ final public class ClientData implements Comparable<ClientData> {
     		final String imageKey, final Collection<OfficeData> allowedOffices,final Collection<GroupGeneralData> groups, Collection<ClientCategoryData> clientCategoryDatas,
     		final String categoryType,final String email,final String phone,final String homePhoneNumber,final String addrNo,final String street,final String city,final String state,
     		final String country,final String zip, BigDecimal balanceAmount,final List<String> hardwareDetails,final String hwSerialNumber,final String currency, Collection<GroupData> groupNameDatas, 
-    		List<CodeValueData> closureReasons, String balanceCheck,final String taxExemption, String entryType,final BigDecimal walletAmount,final String userName,final String clientPassword,final String parentId) {
+    		List<CodeValueData> closureReasons, String balanceCheck,final String taxExemption, String entryType,final BigDecimal walletAmount,final String userName,final String clientPassword,
+    		final String parentId,final String title) {
 
         this.accountNo = accountNo;
         this.groupName=groupName;
@@ -177,6 +181,7 @@ final public class ClientData implements Comparable<ClientData> {
         this.activationDate = activationDate;
         this.walletAmount=walletAmount;
         this.imageKey = imageKey;
+        this.title = title;
         if (imageKey != null) {
             this.imagePresent = Boolean.TRUE;
         } else {
@@ -378,6 +383,11 @@ final public class ClientData implements Comparable<ClientData> {
 	public void setConfigurationProperty(Configuration configurationProperty) {
 		this.loginConfigurationProperty=configurationProperty;
 		
+	}
+
+	public void setClientAdditionalData(ClientAdditionalData clientAdditionalData) {
+
+		  this.clientAdditionalData = clientAdditionalData;
 	}
 	
 	

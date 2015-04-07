@@ -20,8 +20,6 @@ import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
-import org.mifosplatform.billing.selfcare.exception.SelfCareIdNotFoundException;
-import org.mifosplatform.billing.selfcare.exception.SelfcareEmailIdNotFoundException;
 import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -47,6 +45,7 @@ import org.mifosplatform.organisation.address.domain.Address;
 import org.mifosplatform.organisation.address.domain.AddressRepository;
 import org.mifosplatform.organisation.groupsdetails.domain.GroupsDetails;
 import org.mifosplatform.organisation.groupsdetails.domain.GroupsDetailsRepository;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
@@ -55,6 +54,8 @@ import org.mifosplatform.portfolio.client.data.ClientDataValidator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientAdditionalFieldsRepository;
+import org.mifosplatform.portfolio.client.domain.ClientAdditionalfields;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
@@ -108,6 +109,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final OrderRepository orderRepository;
     private final PlatformSecurityContext context;
     private final OfficeRepository officeRepository;
+    private final ClientAdditionalFieldsRepository clientAdditionalFieldsRepository;
     private final AddressRepository addressRepository;
     private final SelfCareRepository selfCareRepository;
     private final CodeValueRepository codeValueRepository;
@@ -130,7 +132,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final PrepareRequestWriteplatformService prepareRequestWriteplatformService,final ClientReadPlatformService clientReadPlatformService,
             final SelfCareRepository selfCareRepository,final PortfolioCommandSourceWritePlatformService  portfolioCommandSourceWritePlatformService,
             final ProvisioningActionsRepository provisioningActionsRepository,final PrepareRequestReadplatformService prepareRequestReadplatformService,
-            final ProcessRequestRepository processRequestRepository) {
+            final ProcessRequestRepository processRequestRepository,final ClientAdditionalFieldsRepository clientAdditionalFieldsRepository) {
     	
         this.context = context;
         this.ProvisioningWritePlatformService=ProvisioningWritePlatformService;
@@ -143,6 +145,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.orderReadPlatformService=orderReadPlatformService;
         this.clientReadPlatformService = clientReadPlatformService;
         this.serviceParametersRepository = serviceParametersRepository;
+        this.clientAdditionalFieldsRepository = clientAdditionalFieldsRepository;
         this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
         this.portfolioCommandSourceWritePlatformService=portfolioCommandSourceWritePlatformService;
         this.orderRepository=orderRepository;
@@ -266,7 +269,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         try {
             context.authenticatedUser();
-            final Configuration configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
+             Configuration configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
             
             if(configuration == null){
             	throw new ConfigurationPropertyNotFoundException(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
@@ -308,8 +311,32 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 						.withJson(selfcarecreation.toString()).build();
 				this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
 			}
-
-            
+			
+			configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_CLIENT_ADDITIONAL_DATA);
+			if(configuration != null && configuration.isEnabled()){
+				
+			final Long genderId = command.longValueOfParameterNamed(ClientApiConstants.genderParamName);
+			final CodeValue gender = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_GENDER, genderId);
+				
+			final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityParamName);
+			final CodeValue nationality = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_NATIONALITY, nationalityId);
+				
+			final Long customerTypeId = command.longValueOfParameterNamed(ClientApiConstants.idTypeParamName);
+			final CodeValue customerIdentifier = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_CUSTOMER_IDENTIFIER, customerTypeId);
+			
+			final Long prefLangId = command.longValueOfParameterNamed(ClientApiConstants.preferredLangParamName);
+			final CodeValue preferLang = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_LANG, prefLangId);
+				
+			final Long prefCommId = command.longValueOfParameterNamed(ClientApiConstants.preferredCommunicationParamName);
+			final CodeValue preferCommunication = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_COMMUNICATION, prefCommId);
+				
+			final Long ageGroupId = command.longValueOfParameterNamed(ClientApiConstants.ageGroupParamName);
+			final CodeValue ageGroup = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_AGE_GROUP, ageGroupId);
+			
+			ClientAdditionalfields clientAdditionalData = ClientAdditionalfields.fromJson(newClient.getId(),gender,nationality,customerIdentifier,preferLang,preferCommunication,ageGroup,command);
+			this.clientAdditionalFieldsRepository.save(clientAdditionalData);
+			
+			}
             
             final List<ActionDetaislData> actionDetailsDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_CLIENT);
             if(!actionDetailsDatas.isEmpty()){
@@ -358,6 +385,33 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (clientOffice == null) { throw new OfficeNotFoundException(officeId); }
             final Map<String, Object> changes = clientForUpdate.update(command);
             clientForUpdate.setOffice(clientOffice);
+            
+            Configuration configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_CLIENT_ADDITIONAL_DATA);
+			
+            if(configuration != null && configuration.isEnabled()){
+				ClientAdditionalfields additionalfields=this.clientAdditionalFieldsRepository.findOneByClientId(clientId);
+			final Long genderId = command.longValueOfParameterNamed(ClientApiConstants.genderParamName);
+			final CodeValue gender = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_GENDER, genderId);
+				
+			final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityParamName);
+			final CodeValue nationality = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_NATIONALITY, nationalityId);
+				
+			final Long customerTypeId = command.longValueOfParameterNamed(ClientApiConstants.idTypeParamName);
+			final CodeValue customerIdentifier = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_CUSTOMER_IDENTIFIER, customerTypeId);
+			
+			final Long prefLangId = command.longValueOfParameterNamed(ClientApiConstants.preferredLangParamName);
+			final CodeValue preferLang = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_LANG, prefLangId);
+				
+			final Long prefCommId = command.longValueOfParameterNamed(ClientApiConstants.preferredCommunicationParamName);
+			final CodeValue preferCommunication = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_COMMUNICATION, prefCommId);
+				
+			final Long ageGroupId = command.longValueOfParameterNamed(ClientApiConstants.ageGroupParamName);
+			final CodeValue ageGroup = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_AGE_GROUP, ageGroupId);
+			
+			additionalfields.upadate(gender,nationality,customerIdentifier,preferLang,preferCommunication,ageGroup,command);
+			this.clientAdditionalFieldsRepository.save(additionalfields);
+			
+			}
             
             this.clientRepository.saveAndFlush(clientForUpdate);
             

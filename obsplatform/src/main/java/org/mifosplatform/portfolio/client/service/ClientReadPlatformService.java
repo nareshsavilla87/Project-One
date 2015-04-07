@@ -11,6 +11,7 @@ import java.util.List;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
+import org.mifosplatform.portfolio.client.data.ClientAdditionalData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 
@@ -47,5 +48,7 @@ public interface ClientReadPlatformService {
 	List<ClientCategoryData> retrievedParentAndChildData(Long parentClientId,Long clientId);
 
 	Boolean countChildClients(Long entityId);
+
+	ClientAdditionalData retrieveClientAdditionalData(Long clientId);
 
 }
