@@ -15,6 +15,7 @@ public class SubscriptionData {
 	private List<DurationTypeData> allowedperiods;
 
 	private final Long units;
+	private Long priceId;
 	
 
 	public SubscriptionData(final Long id, final String subscriptionPeriod,
@@ -29,7 +30,7 @@ public class SubscriptionData {
 		this.Contractdata=null;
 	}
 
-	public SubscriptionData(final Long id,final String data, final String subscriptionType)
+	public SubscriptionData(final Long id,final String data, final String subscriptionType,final Long priceId)
 	{
 		this.Contractdata=data;
 		this.id=id;
@@ -37,6 +38,7 @@ public class SubscriptionData {
 		this.subscriptionType=subscriptionType;
 		this.units=null;
 		this.subscriptiontypeId=null;
+		this.priceId = priceId;
 		
 
 	}
@@ -92,6 +94,10 @@ public class SubscriptionData {
 
 	public String getContractdata() {
 		return Contractdata;
+	}
+
+	public Long getPriceId() {
+		return priceId;
 	}
 
 

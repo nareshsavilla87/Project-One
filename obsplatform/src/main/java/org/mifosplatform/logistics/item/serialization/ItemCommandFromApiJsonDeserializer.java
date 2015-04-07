@@ -58,7 +58,7 @@ public class ItemCommandFromApiJsonDeserializer {
 	        warranty = w.longValue();
 	        }*/
 	        
-	        final BigDecimal unitPrice = fromApiJsonHelper.extractBigDecimalNamed("unitPrice", element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
+	        final BigDecimal defaultPrice = fromApiJsonHelper.extractBigDecimalNamed("unitPrice", element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
 	        
 	        final BigDecimal warranty1 = fromApiJsonHelper.extractBigDecimalNamed("warranty", element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
 	        final Integer warranty = fromApiJsonHelper.extractIntegerNamed("warranty",element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
@@ -69,13 +69,14 @@ public class ItemCommandFromApiJsonDeserializer {
 	        baseDataValidator.reset().parameter("warranty").value(warranty).notNull().notExceedingLengthOf(2);
 			baseDataValidator.reset().parameter("itemClass").value(itemClass).notBlank();
 			baseDataValidator.reset().parameter("units").value(units).notBlank();
-			baseDataValidator.reset().parameter("unitPrice").value(unitPrice).notNull();
+			baseDataValidator.reset().parameter("defaultPrice").value(defaultPrice).notNull();
 			
-			/*final JsonArray itemPricesArray = fromApiJsonHelper.extractJsonArrayNamed("itemPrices", element);
+			final JsonArray itemPricesArray = fromApiJsonHelper.extractJsonArrayNamed("itemPrices", element);
 	        String[] itemPriceRegions = null;
 	        itemPriceRegions = new String[itemPricesArray.size()];
 	        final int itemPricesArraySize = itemPricesArray.size();
-		    baseDataValidator.reset().parameter("itemPrices").value(itemPricesArraySize).integerGreaterThanZero();
+		    //baseDataValidator.reset().parameter("itemPrices").value(itemPricesArraySize).integerGreaterThanZero();
+	        if(itemPricesArraySize > 0){
 		    for(int i = 0; i < itemPricesArray.size(); i++){
 		    	itemPriceRegions[i] = itemPricesArray.get(i).toString();
 		    	
@@ -90,8 +91,8 @@ public class ItemCommandFromApiJsonDeserializer {
 				     final Long regionId = fromApiJsonHelper.extractLongNamed("regionId", attributeElement);
 				     baseDataValidator.reset().parameter("regionId").value(regionId).notBlank().notExceedingLengthOf(30);
 				
-			  }*/
-
+			  }
+	        }
 	        throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	    }
 	    

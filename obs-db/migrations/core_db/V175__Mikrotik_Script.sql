@@ -14,6 +14,6 @@ DELIMITER ;
 call jobParameters();
 Drop procedure IF EXISTS jobParameters;
 SET SQL_SAFE_UPDATES = 0;
-update job_parameters set param_value = '{"ip":"","userName":"","password":"","port":"8728","type":"pppoe"}' where param_name like 'Mikrotik_api%';
+update job_parameters set param_value='{"ip":"","userName":"","password":"","port":"8728","type":"pppoe"}' where param_name 
+like 'Mikrotik_api%';
 
-SET SQL_SAFE_UPDATES = 1;
