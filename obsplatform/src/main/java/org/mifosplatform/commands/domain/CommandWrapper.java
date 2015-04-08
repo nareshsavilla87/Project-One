@@ -1254,8 +1254,18 @@ public class CommandWrapper {
 		public boolean isRadService() {
 			return this.entityName.equalsIgnoreCase("RADSERVICE");
 		}
+<<<<<<< HEAD
+		
+		public boolean isVendorManagement(){
+			return this.entityName.equalsIgnoreCase("VENDORMANAGEMENT");
+		}
+		
+		public boolean isVendorAgreement(){
+			return this.entityName.equalsIgnoreCase("VENDORAGREEMENT");
+=======
 
 		public boolean isPropertyResource() {
 			return this.entityName.equalsIgnoreCase("PROPERTY");
+>>>>>>> upstream/master
 		}
 }
