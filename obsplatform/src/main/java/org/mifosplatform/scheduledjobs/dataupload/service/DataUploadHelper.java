@@ -22,6 +22,9 @@ import org.mifosplatform.finance.payments.data.McodeData;
 import org.mifosplatform.finance.payments.exception.PaymentCodeNotFoundException;
 import org.mifosplatform.finance.payments.service.PaymentReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.scheduledjobs.dataupload.data.MRNErrorData;
 import org.mifosplatform.scheduledjobs.dataupload.domain.DataUpload;
 import org.mifosplatform.scheduledjobs.dataupload.domain.DataUploadRepository;
@@ -37,14 +40,16 @@ public class DataUploadHelper {
 	private final DataUploadRepository dataUploadRepository;
 	private final AdjustmentReadPlatformService adjustmentReadPlatformService;
 	private final PaymentReadPlatformService paymodeReadPlatformService;
+	private final MCodeReadPlatformService mCodeReadPlatformService;
 	
 	@Autowired
 	public DataUploadHelper(final DataUploadRepository dataUploadRepository,final PaymentReadPlatformService paymodeReadPlatformService,
-			final AdjustmentReadPlatformService adjustmentReadPlatformService){
+			final AdjustmentReadPlatformService adjustmentReadPlatformService,final MCodeReadPlatformService mCodeReadPlatformService){
 		
 		this.dataUploadRepository=dataUploadRepository;
 		this.paymodeReadPlatformService=paymodeReadPlatformService;
 		this.adjustmentReadPlatformService=adjustmentReadPlatformService;
+		this.mCodeReadPlatformService=mCodeReadPlatformService;
 	}
 	
 	
@@ -354,6 +359,47 @@ public class DataUploadHelper {
 		}
 		
 		
+	}
+
+	public String buildjsonForPropertyDefinition(String[] currentLineData,ArrayList<MRNErrorData> errorData, int i) {
+	
+		if(currentLineData.length>=10){
+			final HashMap<String, String> map = new HashMap<>();
+			map.put("propertyCode",currentLineData[0]);
+		    final Collection<MCodeData> propertyTypesList = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROPERTY_TYPE);
+			if(!propertyTypesList.isEmpty()){
+				 for(MCodeData mCodeData:propertyTypesList){
+					   if(mCodeData.getmCodeValue().equalsIgnoreCase(currentLineData[1].toString())){ 
+							map.put("propertyType",mCodeData.getId().toString());
+						   break;
+					   }else{
+						   map.put("propertyType", String.valueOf(-1));	
+					   }
+				    }
+				   String propertyType = map.get("propertyType");
+				 /*  if(propertyType!=null && Long.valueOf(propertyType)<=0){
+				    	
+				    	throw new AdjustmentCodeNotFoundException(currentLineData[1].toString());
+				    }*/
+				    map.put("unitCode",currentLineData[2]);
+					map.put("floor",currentLineData[3]);
+					map.put("buildingCode", currentLineData[4]);
+					map.put("parcel",currentLineData[5]);
+					map.put("precinct", currentLineData[6]);
+					map.put("poBox", currentLineData[7]);
+					map.put("street", currentLineData[8]);
+					map.put("state", currentLineData[9]);
+					map.put("country",  currentLineData[10]);
+				return new Gson().toJson(map);	
+			}else{
+				errorData.add(new MRNErrorData((long)i, "Property Type list is empty"));
+				return null;
+			}
+		}else{
+			errorData.add(new MRNErrorData((long)i, "Improper Data in this line"));
+			return null;
+			
+		}
 	}
 
 }

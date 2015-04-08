@@ -42,7 +42,7 @@ public class DataUploadCommand {
 		this.description=description;
 		this.fileName=fileName;
 		this.inputStream=inputStream;
-		this. fileUploadLocation= fileUploadLocation;
+		this.fileUploadLocation= fileUploadLocation;
 		
 	}
 

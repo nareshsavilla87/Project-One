@@ -1,3 +1,4 @@
+
 truncate table job_parameters;
 delete from job;
 ALTER TABLE job AUTO_INCREMENT = 1;
