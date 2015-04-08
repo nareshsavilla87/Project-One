@@ -154,7 +154,7 @@ public class VendorAgreementApiResource {
         
         if(fileDetails != null){
         final String fileUploadLocation = FileUtils.generateXlsFileDirectory();
-        final String fileName=fileDetails.getFileName();
+        final String fileName = fileDetails.getFileName();
         	if (!new File(fileUploadLocation).isDirectory()) {
         		new File(fileUploadLocation).mkdirs();
         	}
