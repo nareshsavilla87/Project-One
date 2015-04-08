@@ -106,7 +106,6 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 			String discountCode="None";
 			BigDecimal discountAmount = BigDecimal.ZERO;
 		    BigDecimal netChargeAmount = billingOrderCommand.getPrice();
-		    
 			DiscountMaster discountMaster = null;
 			if(billingOrderCommand.getDiscountMasterData()!= null){
 				discountMaster = this.discountMasterRepository.findOne(billingOrderCommand.getDiscountMasterData().getId());

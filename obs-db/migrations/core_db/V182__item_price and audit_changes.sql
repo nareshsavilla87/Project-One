@@ -28,6 +28,9 @@ call regionIdToItemAudit();
 Drop procedure IF EXISTS regionIdToItemAudit;
 
 
+ALTER TABLE b_item_audit MODIFY COLUMN region_id VARCHAR(20) DEFAULT NULL;
+
+
 Drop procedure IF EXISTS addInvoiceInDeviceSale; 
 DELIMITER //
 create procedure addInvoiceInDeviceSale() 
