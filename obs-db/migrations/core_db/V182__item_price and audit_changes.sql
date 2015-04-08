@@ -29,3 +29,21 @@ Drop procedure IF EXISTS regionIdToItemAudit;
 
 
 ALTER TABLE b_item_audit MODIFY COLUMN region_id VARCHAR(20) DEFAULT NULL;
+
+
+Drop procedure IF EXISTS addInvoiceInDeviceSale; 
+DELIMITER //
+create procedure addInvoiceInDeviceSale() 
+Begin
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'invoice_id'
+     and TABLE_NAME = 'b_onetime_sale'
+     and TABLE_SCHEMA = DATABASE())THEN
+alter table b_onetime_sale ADD column `invoice_id` bigint(20) DEFAULT NULL after `bill_id`;
+alter table b_onetime_sale ADD INDEX `fk_ots_iid` (`invoice_id`) ;
+END IF;
+END //
+DELIMITER ;
+call addInvoiceInDeviceSale();
+Drop procedure IF EXISTS addInvoiceInDeviceSale; 

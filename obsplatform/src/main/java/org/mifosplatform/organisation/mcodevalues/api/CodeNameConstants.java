@@ -55,6 +55,11 @@ public static final String CODE_PARTNER_TYPE= "Partner Type";
 public static final String CODE_AGREEMENT_TYPE= "Agreement Type";
 public static final String CODE_SOURCE_CATEGORY= "Source Category";
 public static final String CODE_VOUCHER_CANCEL_REASON= "Voucher Cancel Reason";
+public static final String CODE_GENDER = "Gender";
+public static final String CODE_NATIONALITY= "nationality";
+public static final String CODE_PREFER_LANG= "Prefer Language";
+public static final String CODE_PREFER_COMMUNICATION = "prefer Communication";
+public static final String CODE_AGE_GROUP= "Age Group";
 
 
 

@@ -2766,6 +2766,14 @@ public CommandWrapperBuilder updateVendorAgreement(final Long vendorAgreementId)
 	return this;
 }
 
+public CommandWrapperBuilder createProperty() {
+	this.actionName = "CREATE";
+	this.entityName = "PROPERTY";
+	this.entityId = null;
+	this.href = "/property/";
+	return this;
+}
+
 }
 
 

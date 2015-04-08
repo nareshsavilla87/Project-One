@@ -92,9 +92,7 @@ public class ItemCommandFromApiJsonDeserializer {
 				     baseDataValidator.reset().parameter("regionId").value(regionId).notBlank().notExceedingLengthOf(30);
 				
 			  }
-
-			  }
-	        
+	        }
 	        throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	    }
 	    

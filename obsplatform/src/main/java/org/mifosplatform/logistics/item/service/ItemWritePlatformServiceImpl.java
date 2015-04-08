@@ -76,9 +76,11 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
 				
 				ItemPrice itemPrice = new ItemPrice(regionId, price);
 				itemMaster.addItemPrices(itemPrice);
-				
+
+			}	 
+			
 			}		 
-			}
+			
     		this.itemRepository.save(itemMaster);
     		return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(itemMaster.getId()).build();
     
@@ -121,7 +123,7 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
     		 }
     		 final Map<String, Object> changes = itemMaster.update(command);
     		 
-    		/* final JsonArray itemPricesArray = command.arrayOfParameterNamed("itemPrices").getAsJsonArray();
+    		 final JsonArray itemPricesArray = command.arrayOfParameterNamed("itemPrices").getAsJsonArray();
     		 final JsonArray removeItemPricesArray = command.arrayOfParameterNamed("removeItemPrices").getAsJsonArray();
  			 String[] itemPriceRegions = new String[itemPricesArray.size()];
  			 
@@ -179,7 +181,7 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
  	 	 				itemPriceRepository.saveAndFlush(itemPrice);
  	 				}	
  	 			 }	
- 			 }*/
+ 			 }
     		 
  			 itemRepository.save(itemMaster);
     		

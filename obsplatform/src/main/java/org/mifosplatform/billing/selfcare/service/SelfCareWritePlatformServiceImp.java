@@ -145,8 +145,9 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				}
 				}else{
 				throw new PlatformDataIntegrityException("client does not exist", "client not registered","clientId", "client is null ");
+			
+				}
 			}
-		  }	
 		}catch(DataIntegrityViolationException dve){
 			handleDataIntegrityIssues(command, dve);
 			throw new PlatformDataIntegrityException("duplicate.username", "duplicate.username","duplicate.username", "duplicate.username");
@@ -334,7 +335,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			
 			
 			selfCareTemporary =selfCareTemporaryRepository.findOneByGeneratedKey(verificationKey,uniqueReference);
-			
+
 			if(selfCareTemporary == null){				
 				throw new SelfCareTemporaryGeneratedKeyNotFoundException(verificationKey,uniqueReference);				
 			}else{		

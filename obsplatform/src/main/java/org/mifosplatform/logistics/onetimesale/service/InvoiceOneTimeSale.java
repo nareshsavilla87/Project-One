@@ -88,10 +88,11 @@ public class InvoiceOneTimeSale {
 /**
  * @param clientId
  * @param oneTimeSaleData
+ * @param invoice2 
  * @param wallet 
  *  reverse invoice 
  */
-	public CommandProcessingResult reverseInvoiceForOneTimeSale(final Long clientId, final OneTimeSaleData oneTimeSaleData,final boolean isWalletEnable) {
+	public CommandProcessingResult reverseInvoiceForOneTimeSale(final Long clientId, final OneTimeSaleData oneTimeSaleData,final BigDecimal discountAmount,final boolean isWalletEnable) {
 
 		List<BillingOrderCommand> billingOrderCommands = new ArrayList<BillingOrderCommand>();
 
@@ -101,7 +102,7 @@ public class InvoiceOneTimeSale {
 		DiscountMaster discountMaster = this.discountMasterRepository.findOne(oneTimeSaleData.getDiscountId());
 
 		DiscountMasterData discountMasterData = new DiscountMasterData(discountMaster.getId(), discountMaster.getDiscountCode(),discountMaster.getDiscountDescription(),
-				discountMaster.getDiscountType(),discountMaster.getDiscountRate(), null, null);
+				discountMaster.getDiscountType(),discountMaster.getDiscountRate(), null, null,discountAmount);
 
 		BillingOrderCommand billingOrderCommand = this.generateDisconnectionBill.getReverseOneTimeBill(billingOrderData, discountMasterData);
 		

@@ -23,6 +23,7 @@ public class ConfigurationConstants {
 	public static final String CONFIG_DISCONNECT = "disconnection-credit";
 	public static final String CONFIG_CHANGE_PLAN_ALIGN_DATES = "change-plan-align-dates";
 	public static final String CONFIG_IS_SELFCAREUSER = "is-selfcareuser";
+	public static final String CONFIG_CLIENT_ADDITIONAL_DATA = "client-additional-data";
 	public static final String CONFIG_PROPERTY_IS_ACTIVE_VIEWERS = "cuncerrent-sessions";
 	//public static final String CONFIG_PROPERTY_IS_ACTIVE_DEVICES = "active-devices";
 	public static final String CONFIG_PROPERTY_INCLUDE_NETWORK_BROADCAST_IP = "include-network-broadcast-ip";
