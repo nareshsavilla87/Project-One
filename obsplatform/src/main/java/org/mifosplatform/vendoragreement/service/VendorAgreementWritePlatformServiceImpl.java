@@ -167,7 +167,7 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 				
 				VendorAgreementDetail vendordetail =this.vendorDetailRepository.findOne(vendorDetailId);
 				if(changes.containsKey("startDate") || changes.containsKey("endDate") ||
-						(!vendordetail.getContentCode().equalsIgnoreCase(contentCode)&&(!vendordetail.getId().equals(vendorDetailId)))){
+						(!vendordetail.getContentCode().equalsIgnoreCase(contentCode) && (!vendordetail.getId().equals(vendorDetailId)))){
 					validationForStartAndEndDate(vendorCheck, agreementStartDate, contentCode);
 				}
 				vendordetail.setContentCode(contentCode);
