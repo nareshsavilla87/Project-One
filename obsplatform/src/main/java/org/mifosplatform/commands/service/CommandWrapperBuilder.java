@@ -2726,6 +2726,46 @@ public CommandWrapperBuilder deleteRadService(final Long radServiceId) {
 	
 }
 
+public CommandWrapperBuilder createVendorManagement() {
+	this.actionName = "CREATE";
+	this.entityName = "VENDORMANAGEMENT";
+	this.entityId = null;
+	this.href = "/vendormanagement/template";
+	return this;
+}
+
+public CommandWrapperBuilder updateVendorManagement(final Long vendorId) {
+	this.actionName = "UPDATE";
+	this.entityName = "VENDORMANAGEMENT";
+	this.entityId = vendorId;
+	this.href = "/vendormanagement/"+vendorId;
+	return this;
+}
+
+public CommandWrapperBuilder deleteVendorManagement(final Long vendorId) {
+	this.actionName = "DELETE";
+	this.entityName = "VENDORMANAGEMENT";
+	this.entityId = vendorId;
+	this.href = "/vendormanagement/"+vendorId;
+	return this;
+}
+
+public CommandWrapperBuilder createVendorAgreement() {
+	this.actionName = "CREATE";
+	this.entityName = "VENDORAGREEMENT";
+	this.entityId = null;
+	this.href = "/vendoragreement/template";
+	return this;
+}
+
+public CommandWrapperBuilder updateVendorAgreement(final Long vendorAgreementId) {
+	this.actionName = "UPDATE";
+	this.entityName = "VENDORAGREEMENT";
+	this.entityId = vendorAgreementId;
+	this.href = "/vendoragreement/"+vendorAgreementId;
+	return this;
+}
+
 public CommandWrapperBuilder createProperty() {
 	this.actionName = "CREATE";
 	this.entityName = "PROPERTY";

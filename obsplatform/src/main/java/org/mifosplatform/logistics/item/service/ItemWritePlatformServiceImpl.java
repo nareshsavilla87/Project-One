@@ -76,7 +76,7 @@ public class ItemWritePlatformServiceImpl implements ItemWritePlatformService{
 				
 				ItemPrice itemPrice = new ItemPrice(regionId, price);
 				itemMaster.addItemPrices(itemPrice);
-				
+
 			}	 
 			
 			}		 
