@@ -61,6 +61,13 @@ public final class VendorAgreementCommandFromApiJsonDeserializer {
         
         final LocalDate agreementEndDate = fromApiJsonHelper.extractLocalDateNamed("endDate", element);
         baseDataValidator.reset().parameter("agreementEndDate").value(agreementEndDate).notBlank();
+        int resultValue = agreementEndDate.compareTo(agreementStartDate);
+        if(resultValue == -1){
+        	
+        	ApiParameterError error = ApiParameterError.parameterError("error.msg.enddate.greater.than.startdate",
+            		"EndDate should be greater than StartDate","EndDate", resultValue);
+        	dataValidationErrors.add(error);
+        }
          
         final String contentType=fromApiJsonHelper.extractStringNamed("contentType", element);
         baseDataValidator.reset().parameter("contentType").value(contentType).notBlank().notExceedingLengthOf(20);
@@ -97,7 +104,7 @@ public final class VendorAgreementCommandFromApiJsonDeserializer {
 				     baseDataValidator.reset().parameter("contentCost").value(contentCost).notBlank();
 			     }else{
 			    	 final BigDecimal loyaltyShare = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("loyaltyShare", attributeElement);
-				     baseDataValidator.reset().parameter("loyaltyShare").value(loyaltyShare).inMinAndMaxAmountRange(BigDecimal.ZERO, BigDecimal.valueOf(100));
+				     baseDataValidator.reset().parameter("loyaltyShare").value(loyaltyShare).inMinAndMaxAmountRange(BigDecimal.ZERO, BigDecimal.valueOf(100)).notBlank();
 			     }
 			           
 		  }

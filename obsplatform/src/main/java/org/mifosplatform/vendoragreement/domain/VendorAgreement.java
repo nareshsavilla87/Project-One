@@ -108,14 +108,14 @@ public class VendorAgreement extends  AbstractPersistable<Long> {
 			this.agreementStatus = StringUtils.defaultIfEmpty(newValue,null);
 		}
 		
-		final String agreementStartDateParamName = "agreementStartDate";
+		final String agreementStartDateParamName = "startDate";
 		if(command.isChangeInDateParameterNamed(agreementStartDateParamName, this.agreementStartdate)){
 			final LocalDate newValue = command.localDateValueOfParameterNamed(agreementStartDateParamName);
 			actualChanges.put(agreementStartDateParamName,newValue.toDate());
 			this.agreementStartdate = newValue.toDate();
 		}
 		
-		final String agreementEndDateParamName = "agreementEndDate";
+		final String agreementEndDateParamName = "endDate";
 		if(command.isChangeInDateParameterNamed(agreementEndDateParamName, this.agreementEnddate)){
 			final LocalDate newValue = command.localDateValueOfParameterNamed(agreementEndDateParamName);
 			actualChanges.put(agreementEndDateParamName,newValue.toDate());
@@ -141,5 +141,23 @@ public class VendorAgreement extends  AbstractPersistable<Long> {
 		return actualChanges;
 	
 	}
+
+	public Date getAgreementStartdate() {
+		return agreementStartdate;
+	}
+
+	public Date getAgreementEnddate() {
+		return agreementEnddate;
+	}
+
+	public void setAgreementStartdate(Date agreementStartdate) {
+		this.agreementStartdate = agreementStartdate;
+	}
+
+	public void setAgreementEnddate(Date agreementEnddate) {
+		this.agreementEnddate = agreementEnddate;
+	}
+	
+	
 	
 }

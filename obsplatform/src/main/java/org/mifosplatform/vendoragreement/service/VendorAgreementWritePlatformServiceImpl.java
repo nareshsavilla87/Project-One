@@ -3,17 +3,21 @@ package org.mifosplatform.vendoragreement.service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
+import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.data.ApiParameterError;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.service.domain.ServiceMaster;
 import org.mifosplatform.vendoragreement.data.VendorAgreementData;
 import org.mifosplatform.vendoragreement.domain.VendorAgreement;
 import org.mifosplatform.vendoragreement.domain.VendorAgreementDetail;
@@ -66,7 +70,11 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 		 this.context.authenticatedUser();
 		 this.fromApiJsonDeserializer.validateForCreate(command.json());
 		 String fileLocation = command.stringValueOfParameterNamed("fileLocation");
-		
+		 final Long vendorId = command.longValueOfParameterNamed("vendorId");
+		 final LocalDate agreementStartDate = command.localDateValueOfParameterNamed("startDate");
+		 List<VendorAgreement> vendorCheck = this.vendorRepository.findOneByVendorId(vendorId);
+		 
+		 
 		 final VendorAgreement vendor = VendorAgreement.fromJson(command, fileLocation);
 		 
 		 final JsonArray vendorDetailsArray = command.arrayOfParameterNamed("vendorDetails").getAsJsonArray();
@@ -83,6 +91,9 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 				final JsonElement element = fromApiJsonHelper.parse(vendorDetailsData);
 				
 				final String contentCode = fromApiJsonHelper.extractStringNamed("contentCode", element);
+				
+				validationForStartAndEndDate(vendorCheck, agreementStartDate, contentCode);
+				
 				final String loyaltyType = fromApiJsonHelper.extractStringNamed("loyaltyType", element);
 				final BigDecimal loyaltyShare = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("loyaltyShare", element);
 				final Long priceRegion = fromApiJsonHelper.extractLongNamed("priceRegion", element);
@@ -105,18 +116,8 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 			DataIntegrityViolationException dve) {
 
 		final Throwable realCause = dve.getMostSpecificCause();
-		if (realCause.getMessage().contains("uvendor_code_key")) {
-			final String vendorCode = command.stringValueOfParameterNamed("vendorCode");
-			throw new PlatformDataIntegrityException("error.msg.vendor.code.duplicate", "A code with name '" + vendorCode + "' already exists");
-		} else if (realCause.getMessage().contains("uvendor_mobileno_key")) {
-			final String vendormobileNo = command.stringValueOfParameterNamed("vendormobileNo");
-			throw new PlatformDataIntegrityException("error.msg.vendor.mobileno.duplicate", "A code with name '" + vendormobileNo + "' already exists");
-		} else if (realCause.getMessage().contains("uvendor_telephoneno_key")) {
-			final String vendorTelephoneNo = command.stringValueOfParameterNamed("vendorTelephoneNo");
-			throw new PlatformDataIntegrityException("error.msg.vendor.telephoneno.duplicate", "A code with name '" + vendorTelephoneNo + "' already exists");
-		} else if (realCause.getMessage().contains("uvendor_emailid_key")) {
-			final String vendorEmailId = command.stringValueOfParameterNamed("vendorEmailId");
-			throw new PlatformDataIntegrityException("error.msg.vendor.emailid.duplicate", "A code with name '" + vendorEmailId + "' already exists");
+		if (realCause.getMessage().contains("bvad_uq3")) {
+			throw new PlatformDataIntegrityException("error.msg.vendor.contentcode.lshare.duplicate", "Duplicate Loyaltyshare for Same Content Code");
 		}
 
 		LOGGER.error(dve.getMessage(), dve);
@@ -128,13 +129,19 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 	@Override
 	public CommandProcessingResult updateVendorAgreement(Long vendorAgreementId, JsonCommand command) {
 		
+		try{
+			
 		this.context.authenticatedUser();
 		this.fromApiJsonDeserializer.validateForCreate(command.json());
 		String fileLocation = command.stringValueOfParameterNamed("fileLocation");
 		VendorAgreement vendor=retrieveCodeBy(vendorAgreementId);
 		
+		final Long vendorId = command.longValueOfParameterNamed("vendorId");
+		final LocalDate agreementStartDate = command.localDateValueOfParameterNamed("startDate");
+		List<VendorAgreement> vendorCheck = this.vendorRepository.findOneByVendorId(vendorId);
+		
 		final Map<String, Object> changes = vendor.update(command,fileLocation);
-		 
+		
 		 final JsonArray vendorDetailsArray = command.arrayOfParameterNamed("vendorDetails").getAsJsonArray();
 		 final JsonArray removevendorDetailsArray = command.arrayOfParameterNamed("removeVendorDetails").getAsJsonArray();
 		
@@ -150,13 +157,19 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 			
 			final Long vendorDetailId = fromApiJsonHelper.extractLongNamed("id", element);
 			final String contentCode = fromApiJsonHelper.extractStringNamed("contentCode", element);
+			
 			final String loyaltyType = fromApiJsonHelper.extractStringNamed("loyaltyType", element);
 			final Long priceRegion = fromApiJsonHelper.extractLongNamed("priceRegion", element);
 			final BigDecimal loyaltyShare = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("loyaltyShare", element);
 			final BigDecimal contentCost = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("contentCost", element);
 			
 			if(vendorDetailId != null){
+				
 				VendorAgreementDetail vendordetail =this.vendorDetailRepository.findOne(vendorDetailId);
+				if(changes.containsKey("startDate") || changes.containsKey("endDate") ||
+						(!vendordetail.getContentCode().equalsIgnoreCase(contentCode)&&(!vendordetail.getId().equals(vendorDetailId)))){
+					validationForStartAndEndDate(vendorCheck, agreementStartDate, contentCode);
+				}
 				vendordetail.setContentCode(contentCode);
 				vendordetail.setLoyaltyType(loyaltyType);
 				vendordetail.setLoyaltyShare(loyaltyShare);
@@ -170,7 +183,7 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 				this.vendorDetailRepository.saveAndFlush(vendordetail);
  				
 			}else{
-				
+				validationForStartAndEndDate(vendorCheck, agreementStartDate, contentCode);
 				final VendorAgreementDetail vendordetail = new VendorAgreementDetail(contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost);
 				vendor.addVendorDetails(vendordetail);
 			}
@@ -206,6 +219,10 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 	       .withEntityId(vendorAgreementId) //
 	       .with(changes) //
 	       .build();
+		}catch (DataIntegrityViolationException dve) {
+			 handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
 	}
 	
 	private VendorAgreement retrieveCodeBy(final Long vendorId) {
@@ -213,5 +230,20 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
         if (vendor == null) { throw new VendorNotFoundException(vendorId.toString()); }
         return vendor;
     }
+	
+	private void validationForStartAndEndDate(List<VendorAgreement> vendorCheck, LocalDate agreementStartDate, String contentCode){
+		for (VendorAgreement vendorAgmt : vendorCheck) {
+			 final int resultCheck = agreementStartDate.toDate().compareTo(vendorAgmt.getAgreementEnddate());
+			 
+			 if(resultCheck == -1){
+				 List<VendorAgreementDetail> details = vendorDetailRepository.findOneByAgreementId(vendorAgmt);
+				 for(VendorAgreementDetail vendorDetail :details){
+					 if(vendorDetail.getContentCode().equalsIgnoreCase(contentCode)){
+						 throw new PlatformDataIntegrityException("error.msg.vendor.active.agreement.with.this.dates", "Already Active agreement there between this dates");
+					 }
+				 }
+			 }
+		 }
+	}
 
 }
