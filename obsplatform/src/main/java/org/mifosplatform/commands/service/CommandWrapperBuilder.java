@@ -2767,6 +2767,7 @@ public CommandWrapperBuilder updateVendorAgreement(final Long vendorAgreementId)
 }
 
 public CommandWrapperBuilder createProperty() {
+	
 	this.actionName = "CREATE";
 	this.entityName = "PROPERTY";
 	this.entityId = null;

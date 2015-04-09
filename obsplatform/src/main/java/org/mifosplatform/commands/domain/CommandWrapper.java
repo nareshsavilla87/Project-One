@@ -1263,4 +1263,10 @@ public class CommandWrapper {
 			return this.entityName.equalsIgnoreCase("VENDORAGREEMENT");
 
 		}
+
+		public boolean isPropertyResource() {
+			return this.entityName.equalsIgnoreCase("PROPERTY");
+
+
+		}
 }

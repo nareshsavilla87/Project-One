@@ -13,9 +13,11 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.data.AddressData;
 import org.mifosplatform.organisation.address.data.AddressLocationDetails;
+import org.mifosplatform.organisation.address.data.CityDetailsData;
 import org.mifosplatform.organisation.address.data.CountryDetails;
 import org.mifosplatform.organisation.address.domain.AddressEnum;
 import org.mifosplatform.portfolio.order.data.AddressStatusEnumaration;
+import org.mifosplatform.portfolio.plan.data.BillRuleData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -333,7 +335,36 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 				}
 			}
 
+	@Override
+	public List<CityDetailsData> retrieveCitywithCodeDetails() {
 
+		try {
+			context.authenticatedUser();
+			final CityMapper mapper = new CityMapper();
+			final String sql = "select " + mapper.schema();
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	 private static final class CityMapper implements RowMapper<CityDetailsData> {
+		
+		public String schema() {
+			return " city_name as cityName,city_code as cityCode from b_city where is_delete = 'N'";
+
+		}
+
+		@Override
+		public CityDetailsData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
+			final String cityName = rs.getString("cityName");
+			final String cityCode = rs.getString("cityCode");
+			return new CityDetailsData(cityName, cityCode);
+
+		}
+
+	}
 }
 
 
