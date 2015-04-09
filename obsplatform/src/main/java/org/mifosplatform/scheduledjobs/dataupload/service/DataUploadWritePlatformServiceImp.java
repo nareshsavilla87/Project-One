@@ -332,7 +332,7 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 				totalRecordCount++;
 			}
 			//writeToFile(fileLocation,errorData);
-		}else if(uploadProcess.equalsIgnoreCase("Property Master") && new File(fileLocation).getName().contains(".csv")){
+		}else if(uploadProcess.equalsIgnoreCase("Property Master")  && new File(fileLocation).getName().contains(".csv") ){
 	   		while((line = csvFileBufferedReader.readLine()) != null){
 	   			try{
 	   				line=line.replace(";"," ");
@@ -341,9 +341,12 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 	   					return  this.dataUploadHelper.updateFile(uploadStatus,totalRecordCount,processRecordCount,errorData);
 					  }	
 	   				jsonString=this.dataUploadHelper.buildjsonForPropertyDefinition(currentLineData, errorData, i);
+	   				
 	   				if(jsonString !=null){
-	   					final CommandWrapper commandRequest = new CommandWrapperBuilder().createProperty().withJson(jsonString).build();
-					  final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+	   					
+	   				  final CommandWrapper commandRequest = new CommandWrapperBuilder().createProperty().withJson(jsonString).build();
+	   		          final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+					
 					  if(result!=null){
 						  processRecordCount++;
 						  errorData.add(new MRNErrorData((long)i, "Success."));

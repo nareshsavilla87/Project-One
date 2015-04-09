@@ -363,10 +363,11 @@ public class DataUploadHelper {
 
 	public String buildjsonForPropertyDefinition(String[] currentLineData,ArrayList<MRNErrorData> errorData, int i) {
 	
+		
 		if(currentLineData.length>=10){
 			final HashMap<String, String> map = new HashMap<>();
 			map.put("propertyCode",currentLineData[0]);
-		    final Collection<MCodeData> propertyTypesList = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROPERTY_TYPE);
+		    final Collection<MCodeData> propertyTypesList =this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROPERTY_TYPE);
 			if(!propertyTypesList.isEmpty()){
 				 for(MCodeData mCodeData:propertyTypesList){
 					   if(mCodeData.getmCodeValue().equalsIgnoreCase(currentLineData[1].toString())){ 
@@ -376,11 +377,7 @@ public class DataUploadHelper {
 						   map.put("propertyType", String.valueOf(-1));	
 					   }
 				    }
-				   String propertyType = map.get("propertyType");
-				 /*  if(propertyType!=null && Long.valueOf(propertyType)<=0){
-				    	
-				    	throw new AdjustmentCodeNotFoundException(currentLineData[1].toString());
-				    }*/
+				    //String propertyType = map.get("propertyType");
 				    map.put("unitCode",currentLineData[2]);
 					map.put("floor",currentLineData[3]);
 					map.put("buildingCode", currentLineData[4]);
@@ -390,7 +387,7 @@ public class DataUploadHelper {
 					map.put("street", currentLineData[8]);
 					map.put("state", currentLineData[9]);
 					map.put("country",  currentLineData[10]);
-				return new Gson().toJson(map);	
+					return new Gson().toJson(map);	
 			}else{
 				errorData.add(new MRNErrorData((long)i, "Property Type list is empty"));
 				return null;
