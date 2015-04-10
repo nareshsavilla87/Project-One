@@ -1231,18 +1231,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
               	throw new UnsupportedCommandException(wrapper.commandName());
    		   }
              	
-          }else if(wrapper.isPropertyResource()){
-           	if(wrapper.isCreate()){
-        		 handler = applicationContext.getBean("createPropertyCommandHandler",NewCommandSourceHandler.class);
-        	}else if(wrapper.isUpdate()){
-        		 handler = applicationContext.getBean("updateTemplateCommandHandler",NewCommandSourceHandler.class);
-        	}else if(wrapper.isDelete()){
-        		handler = applicationContext.getBean("deleteTemplateCommandHandler",NewCommandSourceHandler.class);
-        	}else {
-         	throw new UnsupportedCommandException(wrapper.commandName());
-		   }
-        	
-     }else if(wrapper.isRadService()){
+          }else if(wrapper.isRadService()){
 	            	if(wrapper.isCreate()) {
 				         handler = applicationContext.getBean("createRadServiceCommandHandler",NewCommandSourceHandler.class);
 				     } else if(wrapper.isUpdate()) {
@@ -1262,7 +1251,18 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 				 }else{
 			           throw new UnsupportedCommandException(wrapper.commandName());
 				}
-	      }else if(wrapper.isVendorAgreement()){
+	      }else if(wrapper.isPropertyResource()){
+	            if(wrapper.isCreate()){
+	                handler = applicationContext.getBean("createPropertyCommandHandler",NewCommandSourceHandler.class);
+	              }else if(wrapper.isUpdate()){
+	                handler = applicationContext.getBean("updatePropertyCommandHandler",NewCommandSourceHandler.class);
+	              }else if(wrapper.isDelete()){
+	               handler = applicationContext.getBean("deletePropertyCommandHandler",NewCommandSourceHandler.class);
+	              }else {
+	               throw new UnsupportedCommandException(wrapper.commandName());
+	          }
+	              
+	          }else if(wrapper.isVendorAgreement()){
           	if(wrapper.isCreate()) {
 			         handler = applicationContext.getBean("createVendorAgreementCommandHandler",NewCommandSourceHandler.class);
 			    }else if(wrapper.isUpdate()) {

@@ -112,7 +112,7 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.externalId, clientData.activationDate, clientData.imageKey, allowedOffices, clientData.groups,
                 categoryDatas,clientData.categoryType,clientData.email,clientData.phone,clientData.homePhoneNumber,clientData.addressNo,clientData.street,
                 clientData.city,clientData.state,clientData.country,clientData.zip,clientData.balanceAmount,allocationDetailsDatas,clientData.hwSerialNumber,
-                clientData.currency, groupDatas,null,balanceCheck,clientData.taxExemption,clientData.entryType,clientData.walletAmount,null,null,null,null);
+                clientData.currency, groupDatas,null,balanceCheck,clientData.taxExemption,clientData.entryType,clientData.walletAmount,null,null,null,clientData.title);
     }
 
     public static ClientData setParentGroups(final ClientData clientData, final Collection<GroupGeneralData> parentGroups) {
@@ -123,7 +123,7 @@ final public class ClientData implements Comparable<ClientData> {
                 clientData.clientCategoryDatas,clientData.categoryType,clientData.email,clientData.phone,clientData.homePhoneNumber,
                 clientData.addressNo,clientData.street,clientData.city,clientData.state,clientData.country,clientData.zip,clientData.balanceAmount,
                 clientData.hardwareDetails,clientData.hwSerialNumber,clientData.currency, clientData.groupNameDatas,null,null,clientData.taxExemption,clientData.entryType,
-                clientData.walletAmount,null,null,null,null);
+                clientData.walletAmount,null,null,null,clientData.title);
 
     }
 

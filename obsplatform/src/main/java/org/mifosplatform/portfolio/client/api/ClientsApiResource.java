@@ -221,6 +221,9 @@ public class ClientsApiResource {
         }else{
         	final List<String> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetails(clientId);
              clientData = ClientData.templateOnTop(clientData, null,null,null,allocationDetailsDatas,balanceCheck);
+             if(clientAdditionalData != null){
+             clientData.setClientAdditionalData(clientAdditionalData);
+             }
 
         }
         

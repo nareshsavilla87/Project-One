@@ -47,6 +47,7 @@ public ServiceMaster()
 
 
 public static ServiceMaster fromJson(final JsonCommand command) {
+	
     final String serviceCode = command.stringValueOfParameterNamed("serviceCode");
     final String serviceDescription = command.stringValueOfParameterNamed("serviceDescription");
     final String serviceType = command.stringValueOfParameterNamed("serviceType");

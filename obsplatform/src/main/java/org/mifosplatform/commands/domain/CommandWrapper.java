@@ -1261,10 +1261,12 @@ public class CommandWrapper {
 		
 		public boolean isVendorAgreement(){
 			return this.entityName.equalsIgnoreCase("VENDORAGREEMENT");
+
 		}
 
 		public boolean isPropertyResource() {
 			return this.entityName.equalsIgnoreCase("PROPERTY");
+
 
 		}
 }

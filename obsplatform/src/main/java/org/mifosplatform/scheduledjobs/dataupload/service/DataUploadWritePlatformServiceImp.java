@@ -406,7 +406,7 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 			errorData.add(new MRNErrorData((long)i, "Error: "+((AbstractPlatformDomainRuleException) dve).getDefaultUserMessage()));
 
 		}else if(dve instanceof PlatformDataIntegrityException){
-			errorData.add(new MRNErrorData((long)i, "Error: "+((PlatformDataIntegrityException) dve).getParameterName()+" : "+((PlatformDataIntegrityException) dve).getDefaultUserMessageArgs()));
+			errorData.add(new MRNErrorData((long)i, "Error: "+((PlatformDataIntegrityException) dve).getParameterName()+" : "+((PlatformDataIntegrityException) dve).getDefaultUserMessage()));
 			
 		}else if(dve instanceof SerialNumberNotFoundException){
 			errorData.add(new MRNErrorData((long)i, "Error: "+((AbstractPlatformDomainRuleException) dve).getDefaultUserMessage()));
