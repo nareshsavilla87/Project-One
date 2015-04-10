@@ -22,7 +22,7 @@ public class PropertyDefinationData {
 	private String state;
 	private String country;
 	private String status;
-	private Long clientId;
+	private String clientId;
 	private Collection<MCodeData> propertyTypes;
 	private List<String> countryData;
 	private List<String> statesData;
@@ -31,7 +31,7 @@ public class PropertyDefinationData {
 
 	public PropertyDefinationData(final Long id, final Long propertyTypeId,final String propertyType, final String propertyCode, final String unitCode,
 			final Long floor, final String buildingCode, final String parcel, final String precinct,final String street, final String poBox, final String state, 
-			final String country,final String status, final Long clientId) {
+			final String country,final String status, final String clientId) {
 		
 		this.id = id;
 		this.propertyTypeId = propertyTypeId;
@@ -202,15 +202,12 @@ public class PropertyDefinationData {
 	}
 
 
-	public Long getClientId() {
+	public String getClientId() {
 		return clientId;
 	}
 
 
-	public void setClientId(Long clientId) {
-		this.clientId = clientId;
-	}
-
+	
 
 	public Collection<MCodeData> getPropertyTypes() {
 		return propertyTypes;

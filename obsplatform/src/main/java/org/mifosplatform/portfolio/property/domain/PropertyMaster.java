@@ -6,6 +6,7 @@ import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -59,7 +60,7 @@ public class PropertyMaster extends AbstractPersistable<Long> {
 	
 	
 	public PropertyMaster(final Long propertyTypeId, final String propertyCode,final String unitCode, final Long floor, final String buildingCode,
-			final String parcel, final String precinct, final String poBox, final String street,final String state, final String country) {
+			final String parcel, final String precinct, final String poBox, final String street,final String state, final String country, String status) {
         
 		this.propertyTypeId = propertyTypeId;
 		this.propertyCode = propertyCode;
@@ -71,6 +72,7 @@ public class PropertyMaster extends AbstractPersistable<Long> {
 	    this.poBox = poBox;
 	    this.street = street;
 	    this.state = state;
+	    this.status = status;
 	    this.country = country;
 	}
 
@@ -89,7 +91,7 @@ public class PropertyMaster extends AbstractPersistable<Long> {
 		final String state = command.stringValueOfParameterNamed("state");
 		final String country = command.stringValueOfParameterNamed("country");
 		
-		return new PropertyMaster(propertyTypeId,propertyCode,unitCode,floor,buildingCode,parcel,precinct,poBox,street,state,country);
+		return new PropertyMaster(propertyTypeId,propertyCode,unitCode,floor,buildingCode,parcel,precinct,poBox,street,state,country,CodeNameConstants.CODE_PROPERTY_VACANT);
 
 	}
 
