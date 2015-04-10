@@ -24,7 +24,4 @@ public interface PaymentGatewayWritePlatformService {
 
 	String globalPayProcessing(String transactionId, String remarks) throws JSONException, IOException;
 	
-	public String paypalRecurringVerification(HttpServletRequest request) 
-			throws UnsupportedEncodingException, IllegalStateException, ClientProtocolException, IOException, JSONException;
-	
 }

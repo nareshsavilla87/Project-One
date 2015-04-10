@@ -37,6 +37,7 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.finance.payments.exception.ReceiptNoDuplicateException;
 import org.mifosplatform.finance.payments.service.PaymentReadPlatformService;
 import org.mifosplatform.finance.payments.service.PaymentWritePlatformService;
+import org.mifosplatform.finance.paymentsgateway.data.RecurringPaymentTransactionTypeConstants;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGateway;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfiguration;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfigurationRepository;
@@ -771,20 +772,25 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				
 			} else if(paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_PENDING)){
 				
-				EventAction eventAction=new EventAction(DateUtils.getDateOfTenant(), "Create Payment", "PAYMENT", EventActionConstants.EVENT_CREATE_PAYMENT,
-						"/payments/"+clientId, id,object.toString(),null,clientId);	
-				eventAction.updateStatus('P');
-				this.eventActionRepository.save(eventAction);
-				     
-				withChanges.put("Result", ConfigurationConstants.PAYMENTGATEWAY_PENDING);
-				withChanges.put("Description", ConfigurationConstants.PAYMENT_PENDING_DESCRIPTION);	
-				withChanges.put("Amount", amount);	
-				withChanges.put("ObsPaymentId", "");	
-				withChanges.put("TransactionId", txnId);
-				withChanges.put("pgId", id);
+				if(!paymentGateway.getSource().equalsIgnoreCase(RecurringPaymentTransactionTypeConstants.PAYPAL)){
+					
+					EventAction eventAction=new EventAction(DateUtils.getDateOfTenant(), "Create Payment", "PAYMENT", EventActionConstants.EVENT_CREATE_PAYMENT,
+							"/payments/"+clientId, id,object.toString(),null,clientId);	
+					eventAction.updateStatus('P');
+					this.eventActionRepository.save(eventAction);
+					     
+					withChanges.put("Result", ConfigurationConstants.PAYMENTGATEWAY_PENDING);
+					withChanges.put("Description", ConfigurationConstants.PAYMENT_PENDING_DESCRIPTION);	
+					withChanges.put("Amount", amount);	
+					withChanges.put("ObsPaymentId", "");	
+					withChanges.put("TransactionId", txnId);
+					withChanges.put("pgId", id);
+				}
+				
 			}
 			
 			this.paymentGatewayRepository.save(paymentGateway);
+			
 			return withChanges.toString();
 			
 		} catch (ReceiptNoDuplicateException e) {
@@ -942,57 +948,5 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			return ConfigurationConstants.PAYMENTGATEWAY_SUCCESS;
 		}
 		
-	}
-
-	@SuppressWarnings("rawtypes")
-	@Override
-	public String paypalRecurringVerification(HttpServletRequest request) throws IllegalStateException, ClientProtocolException, IOException, JSONException {
-
-		PaymentGatewayConfiguration pgConfig = this.paymentGatewayConfigurationRepository.findOneByName(ConfigurationConstants.PAYPAL_PAYMENTGATEWAY);
-		
-		if (null == pgConfig || null == pgConfig.getValue() || !pgConfig.isEnabled()) {
-			throw new PaymentGatewayConfigurationException(ConfigurationConstants.PAYPAL_PAYMENTGATEWAY);
-		}
-		
-		JSONObject pgConfigJsonObj = new JSONObject(pgConfig.getValue());
-		String paypalUrl = pgConfigJsonObj.getString("paypalUrl");
-		//String paypalEmailId = pgConfigJsonObj.getString("paypalEmailId");
-		
-		String[] urlData = paypalUrl.split("\\?");
-		
-		//2. Prepare 'notify-validate' command with exactly the same parameters
-		Enumeration en = request.getParameterNames();
-		StringBuilder cmd = new StringBuilder("cmd=_notify-validate");
-		String paramName;
-		String paramValue;
-		while (en.hasMoreElements()) {
-
-			paramName = (String) en.nextElement();
-			paramValue = request.getParameter(paramName);
-			if ("password".equalsIgnoreCase(paramName) || "username".equalsIgnoreCase(paramName) || "rm".equalsIgnoreCase(paramName)) {
-					//System.out.println(paramName + ":" + paramValue);
-			} else {
-				cmd.append("&").append(paramName).append("=").append(URLEncoder.encode(paramValue, request.getParameter("charset")));
-			}
-		}
-		 
-		//3. Post above command to Paypal IPN URL {@link IpnConfig#ipnUrl}
-		URL u = new URL(urlData[0].trim());
-		HttpsURLConnection uc = (HttpsURLConnection) u.openConnection();
-		uc.setDoOutput(true);
-		uc.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-		uc.setRequestProperty("Host", u.getHost());
-		//uc.setRequestProperty("Host", "www.sandbox.paypal.com");
-		uc.setRequestMethod("POST");
-		PrintWriter pw = new PrintWriter(uc.getOutputStream());
-		pw.println(cmd.toString());
-		pw.close();
-		 
-		//4. Read response from Paypal
-		BufferedReader in = new BufferedReader(new InputStreamReader(uc.getInputStream()));
-		String res = in.readLine();
-		in.close(); 
-		return res;
-
 	}
 }
