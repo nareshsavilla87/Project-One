@@ -334,7 +334,7 @@ public final class Client extends AbstractPersistable<Long> {
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
         
         if (command.isChangeInStringParameterNamed(ClientApiConstants.titleParamName, this.title)) {
-            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.statusParamName);
+            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.titleParamName);
             this.title = StringUtils.defaultIfEmpty(newValue, null);
         }
 

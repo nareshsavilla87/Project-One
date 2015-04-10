@@ -129,7 +129,8 @@ public class ClientAdditionalfields extends AbstractPersistable<Long>{
 		
 		if (command.isChangeInLocalDateParameterNamed(ClientApiConstants.dateOfBirthParamName, dateOfBirthLocalDate())) {
 			 final LocalDate newValue = command.localDateValueOfParameterNamed(ClientApiConstants.dateOfBirthParamName);
-			 this.dateOfBirth = newValue.toDate();
+			 
+			 this.dateOfBirth = newValue !=null?newValue.toDate():null;
         }
 		
 		if (command.isChangeInStringParameterNamed(ClientApiConstants.idNumberParamName, this.idNumber)) {

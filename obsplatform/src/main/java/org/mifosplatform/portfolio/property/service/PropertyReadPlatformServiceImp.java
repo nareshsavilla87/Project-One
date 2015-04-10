@@ -71,7 +71,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 		public String schema() {
 			return  " pd.id as Id,pd.property_type_id as propertyTypeId,c.code_value as propertyType,pd.property_code as propertyCode,unit_code as unitCode,pd.floor as floor," +
 					 " pd.building_code as buildingCode, pd.parcel as parcel,pd.street as street,pd.precinct as precinct,pd.po_box as poBox," +
-					 " pd.state as state, pd.country as country, pd.status as status, pd.client_id as clientId " +
+					 " pd.state as state, pd.country as country, pd.status as status, ifnull(pd.client_id,'VACANT') AS clientId " +
 					 " from b_property_defination pd left join m_code_value c on c.id=pd.property_type_id";
 
 		}
@@ -93,7 +93,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final String state = rs.getString("state");
 			final String country = rs.getString("country");
 			final String status = rs.getString("status");
-			final Long clientId = rs.getLong("clientId");
+			final String clientId = rs.getString("clientId");
 			
 			return new PropertyDefinationData(Id,propertyTypeId,propertyType,propertyCode,unitCode,floor,buildingCode,parcel,
 					precinct,street,poBox,state,country,status,clientId);
