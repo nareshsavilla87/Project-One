@@ -62,15 +62,16 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		try {
 			this.context.authenticatedUser();
 			propertyMaster = this.propertyRetrieveById(entityId);
-			if (!propertyMaster.getStatus().equalsIgnoreCase(CodeNameConstants.CODE_PROPERTY_OCCUPIED)) {
+			if(propertyMaster.getStatus()!=null){
+			  if (propertyMaster.getStatus().equalsIgnoreCase(CodeNameConstants.CODE_PROPERTY_VACANT)) {
 				propertyMaster.delete();
 				this.propertyMasterRepository.save(propertyMaster);
-				return new CommandProcessingResult(entityId);
-			} else {
+			  } else {
 				throw new PropertyMasterNotFoundException(entityId,propertyMaster.getStatus());
-			}
-
-		} catch (final DataIntegrityViolationException dve) {
+			  }
+		   }
+		 return new CommandProcessingResult(entityId);
+	   } catch (final DataIntegrityViolationException dve) {
 			throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue",
 					"Unknown data integrity issue with resource: "+ dve.getMessage());
 		}
