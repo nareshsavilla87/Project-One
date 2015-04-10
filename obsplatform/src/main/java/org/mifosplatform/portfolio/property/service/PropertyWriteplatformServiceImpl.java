@@ -5,8 +5,10 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.portfolio.property.domain.PropertyMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
+import org.mifosplatform.portfolio.property.exceptions.PropertyMasterNotFoundException;
 import org.mifosplatform.portfolio.property.serialization.PropertyCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,44 +18,67 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformService{
-	
+public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformService {
+
 	private final static Logger LOGGER = LoggerFactory.getLogger(PropertyWriteplatformServiceImpl.class);
 	private final PlatformSecurityContext context;
 	private final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final PropertyMasterRepository propertyMasterRepository;
- 
+
 	@Autowired
 	public PropertyWriteplatformServiceImpl(final PlatformSecurityContext context,
 			final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer,
-			 final PropertyMasterRepository propertyMasterRepository){
-		
-		this.context= context;
+			final PropertyMasterRepository propertyMasterRepository) {
+
+		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.propertyMasterRepository = propertyMasterRepository;
 	}
-	
 
 	@Transactional
 	@Override
 	public CommandProcessingResult createProperty(final JsonCommand command) {
 
-		try{
+		try {
 			this.context.authenticatedUser();
 			this.apiJsonDeserializer.validateForCreate(command.json());
 			PropertyMaster propertyMaster = PropertyMaster.fromJson(command);
 			this.propertyMasterRepository.save(propertyMaster);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-					        .withEntityId(propertyMaster.getId()).build();
-			
-		}catch(DataIntegrityViolationException dve){
+					.withEntityId(propertyMaster.getId()).build();
+
+		} catch (DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(1L));
 		}
-		
+
 	}
-	
+
+	@Transactional
+	@Override
+	public CommandProcessingResult deleteProperty(final Long entityId) {
+
+		PropertyMaster propertyMaster = null;
+		try {
+			this.context.authenticatedUser();
+			propertyMaster = this.propertyRetrieveById(entityId);
+			if (!propertyMaster.getStatus().equalsIgnoreCase(CodeNameConstants.CODE_PROPERTY_OCCUPIED)) {
+				propertyMaster.delete();
+				this.propertyMasterRepository.save(propertyMaster);
+				return new CommandProcessingResult(entityId);
+			} else {
+				throw new PropertyMasterNotFoundException(entityId,propertyMaster.getStatus());
+			}
+
+		} catch (final DataIntegrityViolationException dve) {
+			throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue",
+					"Unknown data integrity issue with resource: "+ dve.getMessage());
+		}
+
+	}
+
 	private void handleCodeDataIntegrityIssues(final JsonCommand command,final DataIntegrityViolationException dve) {
+		
 		final Throwable realCause = dve.getMostSpecificCause();
 		if (realCause.getMessage().contains("property_code_constraint")) {
 			final String code = command.stringValueOfParameterNamed("propertyCode");
@@ -67,4 +92,12 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 
 	}
 
+	private PropertyMaster propertyRetrieveById(final Long entityId) {
+
+		PropertyMaster propertyMaster = this.propertyMasterRepository.findOne(entityId);
+		if (propertyMaster == null) {
+			throw new PropertyMasterNotFoundException(entityId);
+		}
+		return propertyMaster;
+	}
 }

@@ -37,6 +37,7 @@ public class ConfigurationConstants {
 	public static final String CONFIG_PROPERTY_PAYMENT_EMAIL_DESC = "payment-email-description";
 
 	public static final String CONFIG_PROPERTY_SMTP= "smtp";
+	public static final String CONFIG_IS_PROPERTY_MASTER = "property-master";
 
 	public static final String ENABLED = "enabled";
 	public static final String VALUE = "value";
@@ -92,6 +93,7 @@ public class ConfigurationConstants {
 	public static final String GLOBALPAY_URL = "https://demo.globalpay.com.ng/GlobalpayWebService_demo/service.asmx";
 	public static final String GLOBALPAY_HOST = "demo.globalpay.com.ng";
 	public static final String GLOBALPAY_CHARSET = "application/soap+xml; charset=utf-8";
+	
 	
 
 }

@@ -53,11 +53,9 @@ public class PropertyDefinationData {
 	}
 
 
-	public PropertyDefinationData(Collection<MCodeData> propertyTypes, List<String> countryData, List<String> statesData, List<CityDetailsData> citiesData) {
+	public PropertyDefinationData(Collection<MCodeData> propertyTypes, List<CityDetailsData> citiesData) {
 	
 		this.propertyTypes = propertyTypes;
-		this.countryData = countryData;
-		this.statesData = statesData;
 		this.citiesData = citiesData;
 	}
 

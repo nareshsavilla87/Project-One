@@ -4,6 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
+import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
@@ -18,6 +21,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 
 	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
+	private final PaginationHelper<PropertyDefinationData> paginationHelper = new PaginationHelper<PropertyDefinationData>();
 
 	@Autowired
 	public PropertyReadPlatformServiceImp(final PlatformSecurityContext context,
@@ -27,13 +31,35 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 	}
 
 	@Override
-	public List<PropertyDefinationData> retrieveAllProperties() {
+	public Page<PropertyDefinationData> retrieveAllProperties(SearchSqlQuery searchPropertyDetails) {
 
 		try {
 			context.authenticatedUser();
-			final PropertyMapper mapper = new PropertyMapper();
-			final String sql = "select " + mapper.schema();
-			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+			final PropertyMapper mapper = new PropertyMapper();	
+			StringBuilder sqlBuilder = new StringBuilder(200);
+			sqlBuilder.append("select ");
+			sqlBuilder.append( mapper.schema() +" where pd.is_deleted='N' ");
+			String sqlSearch = searchPropertyDetails.getSqlSearch();
+			String extraCriteria = "";
+			if(sqlSearch != null) {
+			    	sqlSearch=sqlSearch.trim();
+			    	extraCriteria = " and (pd.property_code like '%"+sqlSearch+"%' OR" 
+			    			+ " pd.precinct like '%"+sqlSearch+"%' OR"
+			    			+ " pd.status like '%"+sqlSearch+"%' )";
+			    }
+			
+			sqlBuilder.append(extraCriteria);
+			
+		   if (searchPropertyDetails.isLimited()) {
+		            sqlBuilder.append(" limit ").append(searchPropertyDetails.getLimit());
+		        }
+
+		   if (searchPropertyDetails.isOffset()) {
+		            sqlBuilder.append(" offset ").append(searchPropertyDetails.getOffset());
+		        }
+
+	    	return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(), new Object[] {}, mapper);
+			    
 		} catch (EmptyResultDataAccessException accessException) {
 			return null;
 		}
@@ -74,5 +100,34 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			
 		}
 
+
 	}
-}
+
+	@Override
+	public List<PropertyDefinationData> retrieveAllPropertiesForSearch(final String propertyCode) {
+		
+            try{
+			context.authenticatedUser();
+			final PropertyMapper mapper = new PropertyMapper();
+			final String sql = "SELECT " + mapper.schema() + " WHERE pd.client_id IS NULL AND pd.status='VACANT' AND (pd.property_code LIKE '%"+propertyCode+"%') ORDER BY pd.id  LIMIT 15" ;
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+            }catch (EmptyResultDataAccessException accessException) {
+    			return null;
+    		}
+            
+	}
+
+	@Override
+	public PropertyDefinationData retrievePropertyDetails(final Long propertyId) {
+		
+			try {
+				context.authenticatedUser();
+				final PropertyMapper mapper = new PropertyMapper();
+				final String sql = "select " + mapper.schema() + " where pd.id = ? and pd.is_deleted='N'";
+				return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] {propertyId});
+			} catch (EmptyResultDataAccessException accessException) {
+				return null;
+			}
+		}
+	}
+

@@ -22,11 +22,15 @@ CREATE TABLE IF NOT EXISTS `b_property_defination` (
 INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'CREATE_PROPERTY', 'PROPERTY', 'CREATE', '0');
 INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'READ_PROPERTY', 'PROPERTY', 'READ', '0');
 INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'UPDATE_PROPERTY', 'PROPERTY', 'UPDATE', '0');
+INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'DELETE_PROPERTY', 'PROPERTY', 'DELETE', '0');
 
 INSERT IGNORE INTO `m_code`(id,code_name,is_system_defined,code_description) VALUES(null,'Property Type',0,'Define Customer Property Type');
 SET @a_lid:=(select id from m_code where code_name='Property Type');
 INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(null,@a_lid,'Tower',0);
 INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(null,@a_lid,'Plot Villa',0);
 INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(null,@a_lid,'Hotel',0);
+
+INSERT IGNORE INTO c_configuration VALUES(null, 'property-master', '1', '');
+
 
 

@@ -53,6 +53,9 @@ public class PropertyMaster extends AbstractPersistable<Long> {
 	@Column(name = "client_id")
 	private Long clientId;
 
+	@Column(name = "is_deleted")
+	private char isDeleted = 'N';
+
 	public PropertyMaster(){
 		
 	}
@@ -221,6 +224,15 @@ public class PropertyMaster extends AbstractPersistable<Long> {
 
 	public void setClientId(Long clientId) {
 		this.clientId = clientId;
+	}
+
+
+	public void delete() {
+		
+		if (this.isDeleted == 'N') {
+			this.isDeleted = 'Y';
+			this.propertyCode = this.propertyCode+"_"+this.getId();
+		}
 	}
 
 	

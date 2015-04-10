@@ -2775,6 +2775,15 @@ public CommandWrapperBuilder createProperty() {
 	return this;
 }
 
+public CommandWrapperBuilder deleteProperty(final Long propertyId) {
+
+	this.actionName = "DELETE";
+	this.entityName = "PROPERTY";
+	this.entityId = propertyId;
+	this.href = "/property/"+propertyId;
+	return this;
+}
+
 }
 
 
