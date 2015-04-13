@@ -10,12 +10,13 @@ import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "b_property_defination", uniqueConstraints = @UniqueConstraint(name = "property_code_constraint", columnNames = { "property_code" }))
-public class PropertyMaster extends AbstractPersistable<Long> {
+public class PropertyMaster  extends AbstractAuditableCustom<AppUser, Long> {
 
 	private static final long serialVersionUID = 1L;
 

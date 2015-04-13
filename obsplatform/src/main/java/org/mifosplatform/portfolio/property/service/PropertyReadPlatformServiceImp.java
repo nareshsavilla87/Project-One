@@ -4,7 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
+import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -129,5 +131,65 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 				return null;
 			}
 		}
+
+	@Override
+	public Page<PropertyDefinationData> retrievePropertyHistory(SearchSqlQuery searchPropertyDetails) {
+		
+		try {
+			context.authenticatedUser();
+			final PropertyHistoryMapper mapper = new PropertyHistoryMapper();	
+			StringBuilder sqlBuilder = new StringBuilder(200);
+			sqlBuilder.append("select ");
+			sqlBuilder.append( mapper.schema());
+			String sqlSearch = searchPropertyDetails.getSqlSearch();
+			String extraCriteria = "";
+			if(sqlSearch != null) {
+			    	sqlSearch=sqlSearch.trim();
+			    	extraCriteria = " and (ph.property_code like '%"+sqlSearch+"%')";
+			    }
+			
+			sqlBuilder.append(extraCriteria);
+			
+		   if (searchPropertyDetails.isLimited()) {
+		            sqlBuilder.append(" limit ").append(searchPropertyDetails.getLimit());
+		        }
+
+		   if (searchPropertyDetails.isOffset()) {
+		            sqlBuilder.append(" offset ").append(searchPropertyDetails.getOffset());
+		        }
+
+	    	return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(), new Object[] {}, mapper);
+			    
+		} catch (EmptyResultDataAccessException accessException) {
+			return null;
+		}
+	}
+	
+	
+	private static final class PropertyHistoryMapper implements RowMapper<PropertyDefinationData> {
+
+		public String schema() {
+			return  " pd.id as Id,ph.ref_id as refId,ph.transaction_date as transactionDate,ph.property_code as propertyCode ,ph.ref_desc as description," +
+                     " ph.client_id as clientId,pd.status as status from b_property_history ph,b_property_defination pd where ph.ref_id =pd.id  ";
+
+		}
+
+		@Override
+		public PropertyDefinationData mapRow(ResultSet rs, int rowNum) throws SQLException {
+			
+			final Long Id =rs.getLong("Id");
+			final Long refId = rs.getLong("refId");
+			final String description = rs.getString("description");
+			final String propertyCode = rs.getString("propertyCode");
+			final String status = rs.getString("status");
+			final String clientId = rs.getString("clientId");
+			final LocalDate transactionDate=JdbcSupport.getLocalDate(rs,"transactionDate");
+			
+			return new PropertyDefinationData(Id,refId,description,propertyCode,status,clientId,transactionDate);
+			
+		}
+
+
+	}
 	}
 

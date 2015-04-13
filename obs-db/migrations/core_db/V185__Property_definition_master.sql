@@ -13,6 +13,11 @@ CREATE TABLE IF NOT EXISTS `b_property_defination` (
   `country` varchar(20) NOT NULL,
   `status` varchar(10) DEFAULT NULL,
   `client_id` bigint(20) DEFAULT NULL,
+  `is_deleted` char(2) Default 'N' ,
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `property_code_constraint` (`property_code`),
   KEY `fk_prop_cid` (`client_id`),
@@ -31,6 +36,22 @@ INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(n
 INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(null,@a_lid,'Hotel',0);
 
 INSERT IGNORE INTO c_configuration VALUES(null, 'property-master', '1', '');
+
+
+
+CREATE TABLE IF NOT EXISTS `b_property_history` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `transaction_date` datetime NOT NULL,
+  `ref_id` bigint(20) NOT NULL,
+  `client_id` bigint(20) DEFAULT NULL,
+  `ref_desc` varchar(45) DEFAULT NULL,
+  `property_code` varchar(100) NOT NULL,
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+  ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 
 

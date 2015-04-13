@@ -249,5 +249,22 @@ public class PropertyApiResource {
 		return this.toApiJsonSerializer.serialize(result);
 
 	}
+	
+	
+	/**
+	 * using this method ,we search property codes for fill client address
+	 */
+	@GET
+	@Path("/history")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrievePropertyHistory(@Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch,
+			@QueryParam("limit") final Integer limit,@QueryParam("offset") final Integer offset) {
+
+		this.context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
+		final SearchSqlQuery searchPropertyDetails = SearchSqlQuery.forSearch(sqlSearch, offset, limit);
+		final Page<PropertyDefinationData> propertyDefinationData = this.propertyReadPlatformService.retrievePropertyHistory(searchPropertyDetails);
+		return this.toApiJsonSerializer.serialize(propertyDefinationData);
+	}
 
 }

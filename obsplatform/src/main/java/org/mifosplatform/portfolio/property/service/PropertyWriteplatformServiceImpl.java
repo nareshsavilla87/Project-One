@@ -7,10 +7,13 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyTransactionHistory;
 import org.mifosplatform.portfolio.property.exceptions.PropertyMasterNotFoundException;
 import org.mifosplatform.portfolio.property.serialization.PropertyCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
@@ -27,15 +30,18 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	private final PlatformSecurityContext context;
 	private final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final PropertyMasterRepository propertyMasterRepository;
+	private final PropertyHistoryRepository propertyHistoryRepository;
 
 	@Autowired
 	public PropertyWriteplatformServiceImpl(final PlatformSecurityContext context,
 			final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer,
-			final PropertyMasterRepository propertyMasterRepository) {
+			final PropertyMasterRepository propertyMasterRepository,
+			final PropertyHistoryRepository propertyHistoryRepository) {
 
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.propertyMasterRepository = propertyMasterRepository;
+		this.propertyHistoryRepository = propertyHistoryRepository;
 	}
 
 	@Transactional
@@ -47,6 +53,9 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			this.apiJsonDeserializer.validateForCreate(command.json());
 			PropertyMaster propertyMaster = PropertyMaster.fromJson(command);
 			this.propertyMasterRepository.save(propertyMaster);
+			//history calling
+			PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),"Property Definition",null,propertyMaster.getPropertyCode());
+			this.propertyHistoryRepository.save(propertyHistory);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 					    .withEntityId(propertyMaster.getId()).build();
 
@@ -69,6 +78,9 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			if (!changes.isEmpty()) {
 				this.propertyMasterRepository.saveAndFlush(propertyMaster);
 			}
+			//history calling
+			PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),"Property Updation",propertyMaster.getClientId(),propertyMaster.getPropertyCode());
+			this.propertyHistoryRepository.save(propertyHistory);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 				       .withEntityId(propertyMaster.getId()).with(changes).build();
 		}catch(DataIntegrityViolationException dve){
@@ -93,7 +105,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 				propertyMaster.delete();
 				this.propertyMasterRepository.save(propertyMaster);
 			  } else {
-				throw new PropertyMasterNotFoundException(entityId,propertyMaster.getStatus());
+				throw new PropertyMasterNotFoundException(propertyMaster.getPropertyCode());
 			  }
 		   }
 		 return new CommandProcessingResult(entityId);

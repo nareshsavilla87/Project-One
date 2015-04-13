@@ -14,4 +14,6 @@ public interface PropertyReadPlatformService {
 
 	PropertyDefinationData retrievePropertyDetails(Long propertyId);
 
+	Page<PropertyDefinationData> retrievePropertyHistory(SearchSqlQuery searchPropertyDetails);
+
 }
