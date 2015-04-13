@@ -111,7 +111,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
             try{
 			context.authenticatedUser();
 			final PropertyMapper mapper = new PropertyMapper();
-			final String sql = "SELECT " + mapper.schema() + " WHERE pd.client_id IS NULL AND pd.status='VACANT' AND (pd.property_code LIKE '%"+propertyCode+"%') ORDER BY pd.id  LIMIT 15" ;
+			final String sql = "SELECT " + mapper.schema() + " WHERE pd.client_id IS NULL AND pd.status='VACANT' AND pd.is_deleted='N' AND (pd.property_code LIKE '%"+propertyCode+"%') ORDER BY pd.id  LIMIT 15" ;
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
             }catch (EmptyResultDataAccessException accessException) {
     			return null;
