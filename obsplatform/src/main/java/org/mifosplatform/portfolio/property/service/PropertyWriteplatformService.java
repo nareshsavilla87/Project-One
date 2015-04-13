@@ -9,4 +9,6 @@ public interface PropertyWriteplatformService {
 
 	CommandProcessingResult deleteProperty(Long entityId);
 
+	CommandProcessingResult updateProperty(Long entityId, JsonCommand command);
+
 }

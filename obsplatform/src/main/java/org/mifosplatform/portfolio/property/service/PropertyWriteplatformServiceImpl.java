@@ -1,5 +1,8 @@
 package org.mifosplatform.portfolio.property.service;
 
+import java.util.Map;
+
+import org.hibernate.exception.ConstraintViolationException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -45,7 +48,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			PropertyMaster propertyMaster = PropertyMaster.fromJson(command);
 			this.propertyMasterRepository.save(propertyMaster);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
-					.withEntityId(propertyMaster.getId()).build();
+					    .withEntityId(propertyMaster.getId()).build();
 
 		} catch (DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(command, dve);
@@ -53,6 +56,29 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		}
 
 	}
+	
+	@Transactional
+	@Override
+	public CommandProcessingResult updateProperty(final Long entityId,final JsonCommand command) {
+		
+		try{
+			this.context.authenticatedUser();
+			this.apiJsonDeserializer.validateForCreate(command.json());
+			PropertyMaster propertyMaster=this.propertyRetrieveById(entityId);
+			final Map<String,Object> changes=propertyMaster.update(command);
+			if (!changes.isEmpty()) {
+				this.propertyMasterRepository.saveAndFlush(propertyMaster);
+			}
+			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
+				       .withEntityId(propertyMaster.getId()).with(changes).build();
+		}catch(DataIntegrityViolationException dve){
+			
+			if (dve.getCause() instanceof ConstraintViolationException) {
+				handleCodeDataIntegrityIssues(command, dve);
+			}
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+	 }
 
 	@Transactional
 	@Override
@@ -101,4 +127,5 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		}
 		return propertyMaster;
 	}
+
 }
