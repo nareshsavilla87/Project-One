@@ -1,17 +1,22 @@
 package org.mifosplatform.portfolio.property.domain;
 
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
+import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
-import org.springframework.data.jpa.domain.AbstractPersistable;
+import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
 @Table(name = "b_property_defination", uniqueConstraints = @UniqueConstraint(name = "property_code_constraint", columnNames = { "property_code" }))
-public class PropertyMaster extends AbstractPersistable<Long> {
+public class PropertyMaster  extends AbstractAuditableCustom<AppUser, Long> {
 
 	private static final long serialVersionUID = 1L;
 
@@ -54,6 +59,9 @@ public class PropertyMaster extends AbstractPersistable<Long> {
 	@Column(name = "client_id")
 	private Long clientId;
 
+	@Column(name = "is_deleted")
+	private char isDeleted = 'N';
+
 	public PropertyMaster(){
 		
 	}
@@ -74,6 +82,7 @@ public class PropertyMaster extends AbstractPersistable<Long> {
 	    this.state = state;
 	    this.status = status;
 	    this.country = country;
+	    this.status = CodeNameConstants.CODE_PROPERTY_VACANT;
 	}
 
 
@@ -93,6 +102,92 @@ public class PropertyMaster extends AbstractPersistable<Long> {
 		
 		return new PropertyMaster(propertyTypeId,propertyCode,unitCode,floor,buildingCode,parcel,precinct,poBox,street,state,country,CodeNameConstants.CODE_PROPERTY_VACANT);
 
+	}
+	
+	
+	
+	public Map<String, Object> update(final JsonCommand command) {
+		
+		final Map<String, Object> actualChanges = new ConcurrentHashMap<String, Object>(1);
+		
+		final String propertyCodeParamName = "propertyCode";
+		if (command.isChangeInStringParameterNamed(propertyCodeParamName,this.propertyCode)) {
+			final String newValue = command.stringValueOfParameterNamed(propertyCodeParamName);
+			actualChanges.put(propertyCodeParamName, newValue);
+			this.propertyCode = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String propertyTypeId = "propertyType";
+		if (command.isChangeInLongParameterNamed(propertyTypeId,this.propertyTypeId)) {
+			final Long newValue = command.longValueOfParameterNamed(propertyTypeId);
+			actualChanges.put(propertyTypeId, newValue);
+			this.propertyTypeId = newValue;
+		}
+		
+		final String unitCodeParamName = "unitCode";
+		if (command.isChangeInStringParameterNamed(unitCodeParamName,this.unitCode)) {
+			final String newValue = command.stringValueOfParameterNamed(unitCodeParamName);
+			actualChanges.put(unitCodeParamName, newValue);
+			this.unitCode = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String floorParamName = "floor";
+		if (command.isChangeInLongParameterNamed(floorParamName,this.floor)) {
+			final Long newValue = command.longValueOfParameterNamed(floorParamName);
+			actualChanges.put(floorParamName, newValue);
+			this.floor =newValue;
+		}
+		
+		final String buildingCodeParamName = "buildingCode";
+		if (command.isChangeInStringParameterNamed(buildingCodeParamName,this.buildingCode)) {
+			final String newValue = command.stringValueOfParameterNamed(buildingCodeParamName);
+			actualChanges.put(buildingCodeParamName, newValue);
+			this.buildingCode = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String parcelParamName = "parcel";
+		if (command.isChangeInStringParameterNamed(parcelParamName,this.parcel)) {
+			final String newValue = command.stringValueOfParameterNamed(parcelParamName);
+			actualChanges.put(parcelParamName, newValue);
+			this.parcel = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String precinctParamName = "precinct";
+		if (command.isChangeInStringParameterNamed(precinctParamName,this.precinct)) {
+			final String newValue = command.stringValueOfParameterNamed(precinctParamName);
+			actualChanges.put(precinctParamName, newValue);
+			this.precinct = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String poBoxParamName = "poBox";
+		if (command.isChangeInStringParameterNamed(poBoxParamName,this.poBox)) {
+			final String newValue = command.stringValueOfParameterNamed(poBoxParamName);
+			actualChanges.put(poBoxParamName, newValue);
+			this.poBox = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String streetParamName = "street";
+		if (command.isChangeInStringParameterNamed(streetParamName,this.street)) {
+			final String newValue = command.stringValueOfParameterNamed(streetParamName);
+			actualChanges.put(streetParamName, newValue);
+			this.street = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String stateParamName = "state";
+		if (command.isChangeInStringParameterNamed(stateParamName,this.state)) {
+			final String newValue = command.stringValueOfParameterNamed(stateParamName);
+			actualChanges.put(stateParamName, newValue);
+			this.state = StringUtils.defaultIfEmpty(newValue, null);
+		}
+		
+		final String countryParamName = "country";
+		if (command.isChangeInStringParameterNamed(propertyCodeParamName,this.country)) {
+			final String newValue = command.stringValueOfParameterNamed(countryParamName);
+			actualChanges.put(countryParamName, newValue);
+			this.country = StringUtils.defaultIfEmpty(newValue, null);
+		}
+	
+		return actualChanges;
 	}
 
 
@@ -225,6 +320,14 @@ public class PropertyMaster extends AbstractPersistable<Long> {
 		this.clientId = clientId;
 	}
 
-	
-	
+
+	public void delete() {
+		
+		if (this.isDeleted == 'N') {
+			this.isDeleted = 'Y';
+			this.propertyCode = this.propertyCode+"_"+this.getId();
+		}
+	}
+
+
 }

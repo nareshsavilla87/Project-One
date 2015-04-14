@@ -13,6 +13,11 @@ CREATE TABLE IF NOT EXISTS `b_property_defination` (
   `country` varchar(20) NOT NULL,
   `status` varchar(10) DEFAULT NULL,
   `client_id` bigint(20) DEFAULT NULL,
+  `is_deleted` char(2) Default 'N' ,
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `property_code_constraint` (`property_code`),
   KEY `fk_prop_cid` (`client_id`),
@@ -22,6 +27,7 @@ CREATE TABLE IF NOT EXISTS `b_property_defination` (
 INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'CREATE_PROPERTY', 'PROPERTY', 'CREATE', '0');
 INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'READ_PROPERTY', 'PROPERTY', 'READ', '0');
 INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'UPDATE_PROPERTY', 'PROPERTY', 'UPDATE', '0');
+INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'DELETE_PROPERTY', 'PROPERTY', 'DELETE', '0');
 
 INSERT IGNORE INTO `m_code`(id,code_name,is_system_defined,code_description) VALUES(null,'Property Type',0,'Define Customer Property Type');
 SET @a_lid:=(select id from m_code where code_name='Property Type');
@@ -30,5 +36,24 @@ INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(n
 INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(null,@a_lid,'Hotel',0);
 insert ignore into m_permission VALUES (null,'client&orders','UPDATE_CLIENTADDITIONALINFO','CLIENTADDITIONALINFO','UPDATE',0);
 insert ignore into m_permission VALUES (null,'client&orders','CREATE_CLIENTADDITIONALINFO','CLIENTADDITIONALINFO','CREATE',0);
+
+INSERT IGNORE INTO c_configuration VALUES(null, 'property-master', '1', '');
+
+
+
+CREATE TABLE IF NOT EXISTS `b_property_history` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `transaction_date` datetime NOT NULL,
+  `ref_id` bigint(20) NOT NULL,
+  `client_id` bigint(20) DEFAULT NULL,
+  `ref_desc` varchar(45) DEFAULT NULL,
+  `property_code` varchar(100) NOT NULL,
+  `createdby_id` bigint(20) DEFAULT NULL,
+  `created_date` datetime DEFAULT NULL,
+  `lastmodified_date` datetime DEFAULT NULL,
+  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+  ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
 
 

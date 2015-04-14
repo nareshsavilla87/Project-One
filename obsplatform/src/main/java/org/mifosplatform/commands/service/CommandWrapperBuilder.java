@@ -2698,82 +2698,100 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-public CommandWrapperBuilder cancelVoucherPin(Long id) {
-	
-	this.actionName = "CANCEL";
-	this.entityName = "VOUCHER";
-	this.entityId = id;
-	this.href = "/vouchers";
-	return this;
-}
+	public CommandWrapperBuilder cancelVoucherPin(Long id) {
 
-public CommandWrapperBuilder updateRadService(final Long radServiceId) {
-	
-	this.actionName = "UPDATE";
-	this.entityName = "RADSERVICE";
-	this.entityId = radServiceId;
-	this.href = "/radservice/"+radServiceId;
-	return this;
-}
+		this.actionName = "CANCEL";
+		this.entityName = "VOUCHER";
+		this.entityId = id;
+		this.href = "/vouchers";
+		return this;
+	}
 
-public CommandWrapperBuilder deleteRadService(final Long radServiceId) {
-	
-	this.actionName = "DELETE";
-	this.entityName = "RADSERVICE";
-	this.entityId = radServiceId;
-	this.href = "/radservice/"+radServiceId;
-	return this;
-	
-}
+	public CommandWrapperBuilder updateRadService(final Long radServiceId) {
 
-public CommandWrapperBuilder createVendorManagement() {
-	this.actionName = "CREATE";
-	this.entityName = "VENDORMANAGEMENT";
-	this.entityId = null;
-	this.href = "/vendormanagement/template";
-	return this;
-}
+		this.actionName = "UPDATE";
+		this.entityName = "RADSERVICE";
+		this.entityId = radServiceId;
+		this.href = "/radservice/" + radServiceId;
+		return this;
+	}
 
-public CommandWrapperBuilder updateVendorManagement(final Long vendorId) {
-	this.actionName = "UPDATE";
-	this.entityName = "VENDORMANAGEMENT";
-	this.entityId = vendorId;
-	this.href = "/vendormanagement/"+vendorId;
-	return this;
-}
+	public CommandWrapperBuilder deleteRadService(final Long radServiceId) {
 
-public CommandWrapperBuilder deleteVendorManagement(final Long vendorId) {
-	this.actionName = "DELETE";
-	this.entityName = "VENDORMANAGEMENT";
-	this.entityId = vendorId;
-	this.href = "/vendormanagement/"+vendorId;
-	return this;
-}
+		this.actionName = "DELETE";
+		this.entityName = "RADSERVICE";
+		this.entityId = radServiceId;
+		this.href = "/radservice/" + radServiceId;
+		return this;
 
-public CommandWrapperBuilder createVendorAgreement() {
-	this.actionName = "CREATE";
-	this.entityName = "VENDORAGREEMENT";
-	this.entityId = null;
-	this.href = "/vendoragreement/template";
-	return this;
-}
+	}
 
-public CommandWrapperBuilder updateVendorAgreement(final Long vendorAgreementId) {
-	this.actionName = "UPDATE";
-	this.entityName = "VENDORAGREEMENT";
-	this.entityId = vendorAgreementId;
-	this.href = "/vendoragreement/"+vendorAgreementId;
-	return this;
-}
+	public CommandWrapperBuilder createVendorManagement() {
+		this.actionName = "CREATE";
+		this.entityName = "VENDORMANAGEMENT";
+		this.entityId = null;
+		this.href = "/vendormanagement/template";
+		return this;
+	}
 
-public CommandWrapperBuilder createProperty() {
-	
-	this.actionName = "CREATE";
-	this.entityName = "PROPERTY";
-	this.entityId = null;
-	this.href = "/property/";
-	return this;
-}
+	public CommandWrapperBuilder updateVendorManagement(final Long vendorId) {
+		this.actionName = "UPDATE";
+		this.entityName = "VENDORMANAGEMENT";
+		this.entityId = vendorId;
+		this.href = "/vendormanagement/" + vendorId;
+		return this;
+	}
+
+	public CommandWrapperBuilder deleteVendorManagement(final Long vendorId) {
+		this.actionName = "DELETE";
+		this.entityName = "VENDORMANAGEMENT";
+		this.entityId = vendorId;
+		this.href = "/vendormanagement/" + vendorId;
+		return this;
+	}
+
+	public CommandWrapperBuilder createVendorAgreement() {
+		this.actionName = "CREATE";
+		this.entityName = "VENDORAGREEMENT";
+		this.entityId = null;
+		this.href = "/vendoragreement/template";
+		return this;
+	}
+
+	public CommandWrapperBuilder updateVendorAgreement(final Long vendorAgreementId) {
+		this.actionName = "UPDATE";
+		this.entityName = "VENDORAGREEMENT";
+		this.entityId = vendorAgreementId;
+		this.href = "/vendoragreement/" + vendorAgreementId;
+		return this;
+	}
+
+	public CommandWrapperBuilder createProperty() {
+
+		this.actionName = "CREATE";
+		this.entityName = "PROPERTY";
+		this.entityId = null;
+		this.href = "/property/";
+		return this;
+	}
+
+	public CommandWrapperBuilder deleteProperty(final Long propertyId) {
+
+		this.actionName = "DELETE";
+		this.entityName = "PROPERTY";
+		this.entityId = propertyId;
+		this.href = "/property/" + propertyId;
+		return this;
+	}
+
+	public CommandWrapperBuilder updateProperty(final Long propertyId) {
+
+		this.actionName = "UPDATE";
+		this.entityName = "PROPERTY";
+		this.entityId = propertyId;
+		this.href = "/property/" + propertyId;
+		return this;
+	}
 
 public CommandWrapperBuilder createClientAdditional(Long clientId) {
 	this.actionName = "CREATE";

@@ -1237,7 +1237,6 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
              	}else {
               	throw new UnsupportedCommandException(wrapper.commandName());
    		   }
-             	
           }else if(wrapper.isRadService()){
 	            	if(wrapper.isCreate()) {
 				         handler = applicationContext.getBean("createRadServiceCommandHandler",NewCommandSourceHandler.class);

@@ -14,12 +14,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class createPropertyCommandHandler implements NewCommandSourceHandler {
+public class CreatePropertyCommandHandler implements NewCommandSourceHandler {
 
     private final PropertyWriteplatformService propertyWriteplatformService;
 
     @Autowired
-    public createPropertyCommandHandler(final PropertyWriteplatformService propertyWriteplatformService) {
+    public CreatePropertyCommandHandler(final PropertyWriteplatformService propertyWriteplatformService) {
 
         this.propertyWriteplatformService = propertyWriteplatformService;
     }

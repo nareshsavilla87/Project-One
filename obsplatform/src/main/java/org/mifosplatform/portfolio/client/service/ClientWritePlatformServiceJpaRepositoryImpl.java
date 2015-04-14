@@ -36,6 +36,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -69,6 +70,10 @@ import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyMaster;
+import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyTransactionHistory;
 import org.mifosplatform.provisioning.preparerequest.service.PrepareRequestReadplatformService;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
@@ -119,6 +124,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final GroupsDetailsRepository groupsDetailsRepository;
     private final ProvisioningActionsRepository provisioningActionsRepository;
     private final ProcessRequestRepository processRequestRepository;
+    private final PropertyMasterRepository propertyMasterRepository;
+    private final PropertyHistoryRepository propertyHistoryRepository;
     
    
 
@@ -133,7 +140,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final PrepareRequestWriteplatformService prepareRequestWriteplatformService,final ClientReadPlatformService clientReadPlatformService,
             final SelfCareRepository selfCareRepository,final PortfolioCommandSourceWritePlatformService  portfolioCommandSourceWritePlatformService,
             final ProvisioningActionsRepository provisioningActionsRepository,final PrepareRequestReadplatformService prepareRequestReadplatformService,
-            final ProcessRequestRepository processRequestRepository,final ClientAdditionalFieldsRepository clientAdditionalFieldsRepository) {
+            final ProcessRequestRepository processRequestRepository,final ClientAdditionalFieldsRepository clientAdditionalFieldsRepository,
+            final PropertyMasterRepository propertyMasterRepository, final PropertyHistoryRepository propertyHistoryRepository) {
     	
         this.context = context;
         this.ProvisioningWritePlatformService=ProvisioningWritePlatformService;
@@ -158,6 +166,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.codeValueRepository=codeValueRepository;
         this.configurationRepository=configurationRepository;
         this.processRequestRepository = processRequestRepository;
+        this.propertyMasterRepository = propertyMasterRepository;
+        this.propertyHistoryRepository = propertyHistoryRepository;
        
     }
 

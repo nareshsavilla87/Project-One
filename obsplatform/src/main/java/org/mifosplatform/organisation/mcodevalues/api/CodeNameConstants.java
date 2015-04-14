@@ -65,5 +65,4 @@ public static final String CODE_PROPERTY_OCCUPIED = "OCCUPIED";
 public static final String CODE_PROPERTY_TYPE = "Property Type";
 
 
-
 }
