@@ -1269,4 +1269,9 @@ public class CommandWrapper {
 
 
 		}
+
+		public boolean isClientAdditionalInfo() {
+			return this.entityName.equalsIgnoreCase("CLIENTADDITIONALINFO");
+
+		}
 }

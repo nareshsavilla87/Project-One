@@ -28,5 +28,7 @@ SET @a_lid:=(select id from m_code where code_name='Property Type');
 INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(null,@a_lid,'Tower',0);
 INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(null,@a_lid,'Plot Villa',0);
 INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(null,@a_lid,'Hotel',0);
+insert ignore into m_permission VALUES (null,'client&orders','UPDATE_CLIENTADDITIONALINFO','CLIENTADDITIONALINFO','UPDATE',0);
+insert ignore into m_permission VALUES (null,'client&orders','CREATE_CLIENTADDITIONALINFO','CLIENTADDITIONALINFO','CREATE',0);
 
 
