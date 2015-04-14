@@ -803,7 +803,14 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 						if(wrapper.isCreate()){
 							handler = applicationContext.getBean("createClientBalanceCommandHandler",NewCommandSourceHandler.class);
 						} 
-			}else if (wrapper.isOwnedHardware()) {
+			}else if (wrapper.isClientAdditionalInfo()) {
+				if(wrapper.isCreate()){
+					handler = applicationContext.getBean("createClientAdditionalInfoCommandHandler",NewCommandSourceHandler.class);
+				}else if(wrapper.isUpdate()){
+					handler = applicationContext.getBean("updateClientAdditionalInfoCommandHandler",NewCommandSourceHandler.class);
+				}
+				
+	       } else if (wrapper.isOwnedHardware()) {
 				    	   if(wrapper.isCreate()){
 				    		   handler = applicationContext.getBean("createOwnedHardwareCommandHandler",NewCommandSourceHandler.class);
 				    	   }

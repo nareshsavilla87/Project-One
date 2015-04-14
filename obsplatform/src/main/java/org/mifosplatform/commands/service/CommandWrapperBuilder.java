@@ -2793,6 +2793,22 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+public CommandWrapperBuilder createClientAdditional(Long clientId) {
+	this.actionName = "CREATE";
+	this.entityName = "CLIENTADDITIONALINFO";
+	this.entityId = clientId;
+	this.href = "/additionalinfo/";
+	return this;
+}
+
+public CommandWrapperBuilder updateClientAdditional(Long clientId) {
+	this.actionName = "UPDATE";
+	this.entityName = "CLIENTADDITIONALINFO";
+	this.entityId = clientId;
+	this.href = "/additionalinfo/";
+	return this;
+}
+
 }
 
 
