@@ -3,6 +3,7 @@ package org.mifosplatform.portfolio.property.data;
 import java.util.Collection;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.address.data.CityDetailsData;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 
@@ -27,6 +28,9 @@ public class PropertyDefinationData {
 	private List<String> countryData;
 	private List<String> statesData;
 	private List<CityDetailsData> citiesData;
+	private Long refId;
+	private String description;
+	private LocalDate transactionDate;
 	
 
 	public PropertyDefinationData(final Long id, final Long propertyTypeId,final String propertyType, final String propertyCode, final String unitCode,
@@ -53,12 +57,23 @@ public class PropertyDefinationData {
 	}
 
 
-	public PropertyDefinationData(Collection<MCodeData> propertyTypes, List<String> countryData, List<String> statesData, List<CityDetailsData> citiesData) {
+	public PropertyDefinationData(Collection<MCodeData> propertyTypes, List<CityDetailsData> citiesData) {
 	
 		this.propertyTypes = propertyTypes;
-		this.countryData = countryData;
-		this.statesData = statesData;
 		this.citiesData = citiesData;
+	}
+
+
+	public PropertyDefinationData(Long id, Long refId, String description,String propertyCode, String status, String clientId,
+			                        LocalDate transactionDate) {
+		this.id=id;
+		this.refId =refId;
+		this.description = description;
+		this.propertyCode = propertyCode;
+		this.status = status;
+		this.clientId = clientId;
+		this.transactionDate = transactionDate;
+		
 	}
 
 
@@ -246,6 +261,41 @@ public class PropertyDefinationData {
 
 	public void setCitiesData(List<CityDetailsData> citiesData) {
 		this.citiesData = citiesData;
+	}
+
+
+	public Long getRefId() {
+		return refId;
+	}
+
+
+	public void setRefId(Long refId) {
+		this.refId = refId;
+	}
+
+
+	public String getDescription() {
+		return description;
+	}
+
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+
+	public LocalDate getTransactionDate() {
+		return transactionDate;
+	}
+
+
+	public void setTransactionDate(LocalDate transactionDate) {
+		this.transactionDate = transactionDate;
+	}
+
+
+	public void setClientId(String clientId) {
+		this.clientId = clientId;
 	}
 	
 	

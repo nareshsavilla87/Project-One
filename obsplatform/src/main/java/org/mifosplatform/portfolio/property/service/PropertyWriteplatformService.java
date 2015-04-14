@@ -7,4 +7,8 @@ public interface PropertyWriteplatformService {
 
 	CommandProcessingResult createProperty(JsonCommand command);
 
+	CommandProcessingResult deleteProperty(Long entityId);
+
+	CommandProcessingResult updateProperty(Long entityId, JsonCommand command);
+
 }

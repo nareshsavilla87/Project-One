@@ -110,6 +110,7 @@ public class ConfigurationApiResource {
 		defaultOne.put("date_format", "dd MMMM yyyy");
 		defaultOne.put("codeDefinitionLength", "10");
 		
+		
 		/*********  Preparing 'defaultOneForClientList' JSONObject ******/
 		defaultOneForClientList.put("userName", "false");
 		defaultOneForClientList.put("group/parentId", "false");
