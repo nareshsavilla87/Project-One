@@ -393,6 +393,9 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 		}else if(dve instanceof NoGrnIdFoundException){
 			errorData.add(new MRNErrorData((long)i, "Error: "+((AbstractPlatformDomainRuleException) dve).getDefaultUserMessage()));
 			
+		}else if(dve instanceof ItemNotFoundException){
+			errorData.add(new MRNErrorData((long)i, "Error: "+((AbstractPlatformDomainRuleException) dve).getDefaultUserMessage()));
+			
 		}else if(dve instanceof PlatformApiDataValidationException){
 			errorData.add(new MRNErrorData((long)i, "Error: "+((PlatformApiDataValidationException) dve).getErrors().get(0).getParameterName()+" : "+((PlatformApiDataValidationException) dve).getErrors().get(0).getDefaultUserMessage()));
 			
