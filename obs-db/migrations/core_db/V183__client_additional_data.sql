@@ -69,4 +69,4 @@ INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(n
 INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(null,@a_lid,'Middlage',0);
 
 
-insert   into `c_configuration`(`id`,`name`,`enabled`,`value`) values (null,'client-additional-data',0,'');
+insert  ignore into `c_configuration`(`id`,`name`,`enabled`,`value`) values (null,'client-additional-data',0,'');
