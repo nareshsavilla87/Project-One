@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.billing.servicetransfer.data.ClientPropertyData;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
@@ -170,7 +171,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 
 		public String schema() {
 			return  " pd.id as Id,ph.ref_id as refId,ph.transaction_date as transactionDate,ph.property_code as propertyCode ,ph.ref_desc as description," +
-                     " ph.client_id as clientId,pd.status as status from b_property_history ph,b_property_defination pd where ph.ref_id =pd.id  ";
+                     " ph.client_id as clientId,if((ph.client_id is null),'VACANT','OCCUPIED') as status from b_property_history ph,b_property_defination pd where ph.ref_id =pd.id  ";
 
 		}
 
@@ -190,6 +191,80 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 		}
 
 
+	}
+
+	@Override
+	public ClientPropertyData retrieveClientPropertyDetails(final Long clientId) {
+		
+		 try{
+				context.authenticatedUser();
+				final ClientPropertyMapper mapper = new ClientPropertyMapper();
+				final String sql = "SELECT " + mapper.schema() + " WHERE pd.client_id = ? " ;
+				return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] {clientId});
+	            }catch (EmptyResultDataAccessException accessException) {
+	    			return null;
+	    		}
+	}
+	
+	private static final class ClientPropertyMapper implements RowMapper<ClientPropertyData> {
+
+		public String schema() {
+			return " pd.id as Id,m.account_no as clientId, pd.property_type_id as propertyTypeId,c.code_value as propertyType, pd.property_code as propertyCode, "+
+				    " unit_code as unitCode, pd.floor as floor, pd.building_code as buildingCode,pd.parcel as parcel, pd.street as street,pd.precinct as precinct, " +
+				    " pd.po_box as zip, pd.state as state,pd.country as country,pd.status as status,m.firstname as firstName,m.lastname as lastName, "+
+				    " m.display_name as displayName,m.email as email, m.phone as phone,ma.address_no as addressNo,address_key as addressKey,mc.code_value as categoryType "+
+			 	    " from b_property_defination pd join m_client m on (pd.client_id = m.id and pd.is_deleted='N') join b_client_address ma " +
+				    " on (ma.client_id = m.id and ma.address_no = pd.property_code and ma.is_deleted='n') left join m_code_value c on (c.id = pd.property_type_id)" +
+				    " left  join  m_code_value mc on  mc.id =m.category_type  ";
+		}
+
+		@Override
+		public ClientPropertyData mapRow(ResultSet rs, int rowNum) throws SQLException {
+			
+			final Long Id =rs.getLong("Id");
+			final Long propertyTypeId = rs.getLong("propertyTypeId");
+			final String propertyType = rs.getString("propertyType");
+			final String propertyCode = rs.getString("propertyCode");
+			final String unitCode = rs.getString("unitCode");
+			final Long floor = rs.getLong("floor");
+			final String buildingCode = rs.getString("buildingCode");
+			final String parcel = rs.getString("parcel");
+			final String precinct = rs.getString("precinct");
+			final String street = rs.getString("street");
+			final String zip = rs.getString("zip");
+			final String state = rs.getString("state");
+			final String country = rs.getString("country");
+			final String status = rs.getString("status");
+			final String clientId = rs.getString("clientId");
+			final String firstName = rs.getString("firstName");
+			final String lastName = rs.getString("lastName");
+			final String displayName = rs.getString("displayName");
+			final String email = rs.getString("email");
+			final String phone = rs.getString("phone");
+			final String addressNo = rs.getString("addressNo");
+			final String addressKey = rs.getString("addressKey");
+			final String categoryType = rs.getString("categoryType");
+			
+			
+			return new ClientPropertyData(Id,propertyTypeId,propertyType,propertyCode,unitCode,floor,buildingCode,parcel,
+					precinct,street,zip,state,country,status,clientId,firstName,lastName,displayName,email,phone,addressNo,addressKey,categoryType);
+			
+		}
+
+
+	}
+
+	@Override
+	public List<PropertyDefinationData> retrieveAllProperties() {
+	
+		 try{
+				context.authenticatedUser();
+				final PropertyMapper mapper = new PropertyMapper();
+				final String sql = "SELECT " + mapper.schema() + " WHERE pd.client_id IS NULL AND pd.status='VACANT' AND pd.is_deleted='N' ORDER BY pd.id " ;
+				return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+	            }catch (EmptyResultDataAccessException accessException) {
+	    			return null;
+	    		}
 	}
 	}
 

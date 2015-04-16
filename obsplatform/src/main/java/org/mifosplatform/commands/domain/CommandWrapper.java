@@ -1274,4 +1274,9 @@ public class CommandWrapper {
 			return this.entityName.equalsIgnoreCase("CLIENTADDITIONALINFO");
 
 		}
+
+		public boolean isServiceTransferResource() {
+	        return this.entityName.equalsIgnoreCase("SERVICETRANSFER");
+		
+		}
 }

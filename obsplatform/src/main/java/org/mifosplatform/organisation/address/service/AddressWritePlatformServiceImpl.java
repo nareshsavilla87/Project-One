@@ -144,7 +144,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	                    			 oldPropertyMaster.setClientId(null);
 	                    			 oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
 	                    			 this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
-	                    			 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),"Property Removed",
+	                    			 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_FREE,
 	                    					 address.getClientId(),oldPropertyMaster.getPropertyCode());
 	                    			 this.propertyHistoryRepository.save(propertyHistory);
 	                    			 }
@@ -155,7 +155,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	                    				 propertyMaster.setClientId(address.getClientId());
 	                    				 propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
 		                    			 this.propertyMasterRepository.saveAndFlush(propertyMaster);
-		                    			 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),"Property Allocated",
+		                    			 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_ALLOCATE,
 		                    					 address.getClientId(),propertyMaster.getPropertyCode());
 		                    			 this.propertyHistoryRepository.save(propertyHistory);
 		                    			 }

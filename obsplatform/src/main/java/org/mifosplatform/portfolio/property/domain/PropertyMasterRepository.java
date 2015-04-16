@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 public interface PropertyMasterRepository extends JpaRepository<PropertyMaster, Long>,
 JpaSpecificationExecutor<PropertyMaster>{
 
-	@Query("from PropertyMaster propertyMaster where propertyMaster.propertyCode =:propertyCode ")
+	@Query("from PropertyMaster propertyMaster where propertyMaster.propertyCode =:propertyCode and propertyMaster.isDeleted ='N'")
 	PropertyMaster findoneByPropertyCode(@Param("propertyCode") String propertyCode);
 
 }
