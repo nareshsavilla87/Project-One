@@ -37,7 +37,7 @@ public class ConfigurationConstants {
 	public static final String CONFIG_PROPERTY_PAYMENT_EMAIL_DESC = "payment-email-description";
 
 	public static final String CONFIG_PROPERTY_SMTP= "smtp";
-	public static final String CONFIG_IS_PROPERTY_MASTER = "property-master";
+	public static final String CONFIG_IS_PROPERTY_MASTER = "is-propertycode-enabled";
 
 	public static final String ENABLED = "enabled";
 	public static final String VALUE = "value";
