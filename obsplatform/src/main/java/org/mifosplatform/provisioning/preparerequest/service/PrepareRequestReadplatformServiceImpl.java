@@ -278,8 +278,8 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
  
 	 }catch(Exception exception){
 	 if(prepareRequest != null){
-		 prepareRequest.setIsProvisioning('F');
-		 prepareRequest.setStatus("Failed");
+		 prepareRequest.setIsProvisioning('N');
+		 prepareRequest.setStatus("Pending");
 		 this.prepareRequsetRepository.save(prepareRequest);
 	 }
 	 exception.printStackTrace();

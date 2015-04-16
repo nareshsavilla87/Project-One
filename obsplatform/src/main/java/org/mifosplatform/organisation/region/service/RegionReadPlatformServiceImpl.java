@@ -47,7 +47,7 @@ public RegionReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSour
 
 			public String schema() {
 				return " s.id as id,s.state_name as stateName FROM b_state s, b_country c WHERE    NOT EXISTS (SELECT * FROM   b_priceregion_detail pd" +
-						"  WHERE  pd.state_id  =s.id and pd.is_deleted='N' ) and s.parent_code=c.id and c.id =?";
+						"  WHERE  pd.state_id  =s.id and pd.is_deleted='N' ) and s.parent_code=c.id and s.is_delete = 'N' and c.id =?";
 
 			}
 
