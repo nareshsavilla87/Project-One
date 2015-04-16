@@ -323,6 +323,20 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 				this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
 			}
 			
+			 //for property code updation with client details
+				configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+				if(configuration != null && configuration.isEnabled()) {		
+					PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(address.getAddressNo());
+					if(propertyMaster !=null){
+						propertyMaster.setClientId(newClient.getId());
+						propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
+					    this.propertyMasterRepository.saveAndFlush(propertyMaster);
+					}
+					
+					PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),"Property Allocated",
+							                                        newClient.getId(),propertyMaster.getPropertyCode());
+					this.propertyHistoryRepository.save(propertyHistory);
+				}
             
             final List<ActionDetaislData> actionDetailsDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_CLIENT);
             if(!actionDetailsDatas.isEmpty()){
