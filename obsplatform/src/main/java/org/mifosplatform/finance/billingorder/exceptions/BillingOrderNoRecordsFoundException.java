@@ -1,12 +1,18 @@
 package org.mifosplatform.finance.billingorder.exceptions;
 
+import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 import org.mifosplatform.portfolio.client.domain.Client;
 
 
 public class BillingOrderNoRecordsFoundException extends AbstractPlatformDomainRuleException {
 
-    public BillingOrderNoRecordsFoundException() {
+    /**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
+	public BillingOrderNoRecordsFoundException() {
         super("error.msg.billing.order.not.found", " Billing order not found ");
     }
     
@@ -26,6 +32,10 @@ public class BillingOrderNoRecordsFoundException extends AbstractPlatformDomainR
 
 	public BillingOrderNoRecordsFoundException(String msg, Client client) {
 		 super("error.msg.no.emailId.is.available", "EmailId is not available",msg);
+	}
+
+	public BillingOrderNoRecordsFoundException(Invoice invoice) {
+		 super("error.msg.no.invoice.is.not.available", "Invoice is not available for this Device",invoice);
 	}
 	
 }

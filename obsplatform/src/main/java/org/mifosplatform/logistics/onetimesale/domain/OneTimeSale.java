@@ -67,6 +67,9 @@ public class OneTimeSale extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name="contract_period")
 	private Long contractPeriod;
 	
+	@Column(name = "invoice_id")
+	private Long invoiceId;
+	
 	
 	public OneTimeSale(){}
 	
@@ -158,8 +161,6 @@ public class OneTimeSale extends AbstractAuditableCustom<AppUser, Long> {
 		
 	}
 	
-	
-	
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
@@ -182,6 +183,15 @@ public class OneTimeSale extends AbstractAuditableCustom<AppUser, Long> {
 
 	public Long getContractPeriod() {
 		return contractPeriod;
+	}
+	
+	public void setInvoiceId(Long invoiceId) {
+		this.invoiceId = invoiceId;
+	
+	}
+
+	public Long getInvoiceId() {
+		return invoiceId;
 	}
 
 	public static OneTimeSale fromJson(final Long clientId, final JsonCommand command, final ItemMaster item) {

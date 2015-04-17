@@ -45,6 +45,7 @@ insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`proc
 
 
 
+
 Drop procedure IF EXISTS CreateIndexclientList; 
 DELIMITER //
 create procedure CreateIndexclientList() 

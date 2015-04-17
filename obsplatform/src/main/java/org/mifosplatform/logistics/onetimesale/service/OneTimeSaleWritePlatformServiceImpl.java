@@ -8,6 +8,9 @@ import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.discountmaster.service.DiscountReadPlatformService;
+import org.mifosplatform.finance.billingorder.domain.BillingOrder;
+import org.mifosplatform.finance.billingorder.domain.Invoice;
+import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -23,6 +26,7 @@ import org.mifosplatform.logistics.itemdetails.service.ItemDetailsWritePlatformS
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSaleRepository;
+import org.mifosplatform.logistics.onetimesale.exception.DeviceSaleNotFoundException;
 import org.mifosplatform.logistics.onetimesale.serialization.OneTimesaleCommandFromApiJsonDeserializer;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.workflow.eventvalidation.service.EventValidationReadPlatformService;
@@ -60,6 +64,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 	private final ItemDetailsWritePlatformService inventoryItemDetailsWritePlatformService;
 	private final EventValidationReadPlatformService eventValidationReadPlatformService;
 	private final ChargeCodeRepository chargeCodeRepository;
+	private final InvoiceRepository invoiceRepository;
 
 	@Autowired
 	public OneTimeSaleWritePlatformServiceImpl(final PlatformSecurityContext context,final OneTimeSaleRepository oneTimeSaleRepository,
@@ -69,7 +74,8 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			final ItemDetailsWritePlatformService inventoryItemDetailsWritePlatformService,
 			final EventValidationReadPlatformService eventValidationReadPlatformService,
 			final DiscountReadPlatformService discountReadPlatformService,
-			final ChargeCodeRepository chargeCodeRepository) {
+			final ChargeCodeRepository chargeCodeRepository,
+			final InvoiceRepository invoiceRepository) {
 
 		
 		this.context = context;
@@ -84,6 +90,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		this.inventoryItemDetailsWritePlatformService = inventoryItemDetailsWritePlatformService;
 		this.eventValidationReadPlatformService = eventValidationReadPlatformService;
 		this.chargeCodeRepository = chargeCodeRepository;
+		this.invoiceRepository = invoiceRepository;
 
 	}
 
@@ -112,8 +119,8 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			final String saleType = command.stringValueOfParameterNamed("saleType");
 			if (saleType.equalsIgnoreCase("NEWSALE")) {
 				for (OneTimeSaleData oneTimeSaleData : oneTimeSaleDatas) {
-					this.invoiceOneTimeSale.invoiceOneTimeSale(clientId,oneTimeSaleData,false);
-					updateOneTimeSale(oneTimeSaleData);
+					CommandProcessingResult invoice=this.invoiceOneTimeSale.invoiceOneTimeSale(clientId,oneTimeSaleData,false);
+					updateOneTimeSale(oneTimeSaleData,invoice);
 				}
 			}
 			/**	Call if Item units is PIECES */
@@ -166,10 +173,11 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 
 	}
 
-	public void updateOneTimeSale(final OneTimeSaleData oneTimeSaleData) {
+	public void updateOneTimeSale(final OneTimeSaleData oneTimeSaleData,final CommandProcessingResult invoice) {
 
 		OneTimeSale oneTimeSale = oneTimeSaleRepository.findOne(oneTimeSaleData.getId());
 		oneTimeSale.setIsInvoiced('Y');
+		oneTimeSale.setInvoiceId(invoice.resourceId());
 		oneTimeSaleRepository.save(oneTimeSale);
 
 	}
@@ -228,17 +236,20 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 
 		OneTimeSale oneTimeSale = null;
 		try {
-			oneTimeSale = oneTimeSaleRepository.findOne(entityId);
-		/*	if(oneTimeSale.getDeviceMode().equalsIgnoreCase("NEWSALE")&&oneTimeSale.getIsInvoiced()=='Y'){
-				
+			oneTimeSale = this.findOneById(entityId);
+		    if(oneTimeSale.getDeviceMode().equalsIgnoreCase("NEWSALE")&&oneTimeSale.getIsInvoiced()=='Y'){
+		    	
 				ChargeCodeMaster chargeCode=this.chargeCodeRepository.findOneByChargeCode(oneTimeSale.getChargeCode());
-				OneTimeSaleData oneTimeSaleData = new OneTimeSaleData(oneTimeSale.getId(),oneTimeSale.getClientId(), oneTimeSale.getUnits(), oneTimeSale.getChargeCode(), 
+				if(oneTimeSale.getInvoiceId()!=null){//check for old onetimesale's
+				   Invoice oldInvoice=this.invoiceRepository.findOne(oneTimeSale.getInvoiceId());
+				   List<BillingOrder> charge=oldInvoice.getCharges();
+				   BigDecimal discountAmount=charge.get(0).getDiscountAmount();
+				   OneTimeSaleData oneTimeSaleData = new OneTimeSaleData(oneTimeSale.getId(),oneTimeSale.getClientId(), oneTimeSale.getUnits(), oneTimeSale.getChargeCode(), 
 						                             chargeCode.getChargeType(),oneTimeSale.getUnitPrice(),oneTimeSale.getQuantity(), oneTimeSale.getTotalPrice(), "Y",
 						                             oneTimeSale.getItemId(),oneTimeSale.getDiscountId(),chargeCode.getTaxInclusive());
-				
-				this.invoiceOneTimeSale.reverseInvoiceForOneTimeSale(oneTimeSale.getClientId(),oneTimeSaleData,false);
-			 }*/
-			
+				   this.invoiceOneTimeSale.reverseInvoiceForOneTimeSale(oneTimeSale.getClientId(),oneTimeSaleData,discountAmount,false);
+				  }
+			 }
 			oneTimeSale.setIsDeleted('Y');
 			this.oneTimeSaleRepository.save(oneTimeSale);
 
@@ -247,5 +258,15 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		}
 		return new CommandProcessingResult(Long.valueOf(oneTimeSale.getId()),
 				oneTimeSale.getClientId());
+	}
+
+	private OneTimeSale findOneById(final Long saleId) {
+	
+		try{
+			OneTimeSale oneTimeSale=this.oneTimeSaleRepository.findOne(saleId);
+			return oneTimeSale;
+		}catch(Exception e){
+			throw new DeviceSaleNotFoundException(saleId.toString());
+		}
 	}
 }

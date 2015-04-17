@@ -66,9 +66,13 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		String message = null;	
 		String provSystem = command.stringValueOfParameterNamed("provSystem");
 		String requestType = command.stringValueOfParameterNamed("requestType");
-		String  agentResourceId = command.stringValueOfParameterNamed("agentResourceId");	
+		String  agentResourceId = null;
 		String zebraSubscriberId = null;
 	try {	
+		
+		if(command.hasParameter("agentResourceId")){
+			agentResourceId = command.stringValueOfParameterNamed("agentResourceId");
+		}
 		
 		if(command.hasParameter("zebraSubscriberId")){
 			zebraSubscriberId = command.stringValueOfParameterNamed("zebraSubscriberId");
@@ -110,7 +114,7 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 			
 				BillingMessage billingMessage = new BillingMessage(header, body, footer, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM, client.getEmail(),
 						subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
-				
+			
 				this.messageDataRepository.save(billingMessage);
 						
 			}else{
@@ -139,10 +143,9 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 				
 				selfcare.setZebraSubscriberId(new Long(zebraSubscriberId));
 				this.selfCareRepository.save(selfcare);
-								
+			  }
+
 			}
-			
-		}
 		
 		if(zebraSubscriberId != null && requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_ACTIVATION) &&
 				(!zebraSubscriberId.isEmpty())){
@@ -242,7 +245,7 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		 this.entitlementRepository.saveAndFlush(processRequest);
 		return new CommandProcessingResult(Long.valueOf(-1L));
 	}
-	}
+}
 	/*private boolean checkProcessDetailsUpdated(List<ProcessRequestDetails> details) {
 		boolean flag = true;
 		if (details.get(0).getReceiveMessage().contains("failure : Exce")) {

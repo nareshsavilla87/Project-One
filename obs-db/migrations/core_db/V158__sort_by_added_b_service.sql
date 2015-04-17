@@ -1,3 +1,4 @@
+SET SQL_SAFE_UPDATES = 0;
 Drop procedure IF EXISTS serviceSortBy; 
 DELIMITER //
 create procedure serviceSortBy() 
