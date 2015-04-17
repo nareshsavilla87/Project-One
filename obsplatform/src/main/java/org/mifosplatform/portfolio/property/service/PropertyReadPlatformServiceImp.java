@@ -146,7 +146,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			String extraCriteria = "";
 			if(sqlSearch != null) {
 			    	sqlSearch=sqlSearch.trim();
-			    	extraCriteria = " where (ph.property_code like '%"+sqlSearch+"%')";
+			    	extraCriteria = " where (ph.property_code like '%"+sqlSearch+"%') order by ph.id desc  ";
 			    }
 			
 			sqlBuilder.append(extraCriteria);
@@ -170,7 +170,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 	private static final class PropertyHistoryMapper implements RowMapper<PropertyDefinationData> {
 
 		public String schema() {
-			return  " pd.id as Id,ph.ref_id as refId,ph.transaction_date as transactionDate,ph.property_code as propertyCode ,ph.ref_desc as description," +
+			return  " ph.id as Id,ph.ref_id as refId,ph.transaction_date as transactionDate,ph.property_code as propertyCode ,ph.ref_desc as description," +
                      " ph.client_id as clientId,if((ph.client_id is null),'VACANT','OCCUPIED') as status, mc.display_name as displayName "+
                      " from b_property_history ph join  b_property_defination pd on ph.ref_id = pd.id left join m_client mc on ph.client_id=mc.id  ";
 
