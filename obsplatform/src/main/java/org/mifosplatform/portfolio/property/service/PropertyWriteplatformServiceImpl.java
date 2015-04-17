@@ -8,8 +8,8 @@ import java.util.Map;
 import org.hibernate.exception.ConstraintViolationException;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
+import org.mifosplatform.billing.chargecode.exception.ChargeCodeNotFoundException;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
-import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
 import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderService;
@@ -182,8 +182,8 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
    			   oldPropertyMaster.setClientId(null);
    			   oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
    			   this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
-   			   PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_FREE,
-   					oldPropertyMaster.getClientId(),oldPropertyMaster.getPropertyCode());
+   			   PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
+   					   CodeNameConstants.CODE_PROPERTY_FREE, null,oldPropertyMaster.getPropertyCode());
    			   this.propertyHistoryRepository.save(propertyHistory);		
    			 }
    			final PropertyMaster newpropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
@@ -208,24 +208,24 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			 }
 		   //call one time invoice	
 			List<BillingOrderCommand> billingOrderCommands = new ArrayList<BillingOrderCommand>();
-			List<InvoiceTaxCommand> listOfTaxes = new ArrayList<InvoiceTaxCommand>();
-			
+			//List<InvoiceTaxCommand> listOfTaxes = new ArrayList<InvoiceTaxCommand>();
 			ChargeCodeMaster chargeCode=this.chargeCodeRepository.findOneByChargeCode("OTC");
-			
-			
-			BillingOrderCommand billingOrderCommand=new BillingOrderCommand(clientAddress.getId(), Long.valueOf(-1L),clientId, DateUtils.getDateOfTenant(),
+			if(chargeCode!=null){
+			   BillingOrderCommand billingOrderCommand=new BillingOrderCommand(clientAddress.getId(), Long.valueOf(-1L),clientId, DateUtils.getDateOfTenant(),
 					DateUtils.getDateOfTenant(), DateUtils.getDateOfTenant(),chargeCode.getBillFrequencyCode(), "OTC", chargeCode.getChargeType(),chargeCode.getChargeDuration(), 
 					"", DateUtils.getDateOfTenant(), shiftChargeAmount, "N", null,  DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),
 					null, chargeCode.getTaxInclusive());
 			
-			billingOrderCommands.add(billingOrderCommand);
+			    billingOrderCommands.add(billingOrderCommand);
+			    // Invoice calling
+			    Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
+			   //Update Client Balance
+			    this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId,false);
 			
-			// Invoice
-			Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
-			//Update Client Balance
-			this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId,false);
-			
-		   return new CommandProcessingResult(invoice.getId());
+		      return new CommandProcessingResult(invoice.getId(), clientId);
+			}else{
+				throw new ChargeCodeNotFoundException("OTC");
+			}
 		
 	}catch (DataIntegrityViolationException dve) {
 		handleCodeDataIntegrityIssues(command, dve);

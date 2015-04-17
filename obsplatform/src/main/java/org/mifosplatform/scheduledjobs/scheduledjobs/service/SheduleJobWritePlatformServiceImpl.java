@@ -1341,11 +1341,11 @@ public void reportStatmentPdf() {
 					}else{
 
                 		fw.append("No of records inserted :" + output.values()+ "\r\n");
-						fw.append("Exporting data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+						fw.append("Exporting data successfully completed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}
 				fw.flush();
 				fw.close();
-				System.out.println("Exporting data successfully done....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+				System.out.println("Exporting data successfully completed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 			}
 		} catch (DataIntegrityViolationException e) {
 			System.out.println(e.getMessage());
@@ -1434,19 +1434,19 @@ public void reportStatmentPdf() {
 				simpleJdbcCall.setProcedureName("proc_distrib");
 				Map<String, Object> output = simpleJdbcCall.execute();
 				if(output.isEmpty()){
-					fw.append("Distribution data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+					fw.append("Aging Distribution data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 				}else{
 					fw.append("No of records inserted :" + output.values() + "\r\n");
-					fw.append("Distribution data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+					fw.append("Aging Distribution data successfully completed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 				}
 				    fw.flush();
 				    fw.close();
-				    System.out.println("Distribution data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+				    System.out.println("Aging Distribution data successfully completed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 				} else{
 					fw.append("Procedure with name 'proc_distrib' not exists....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					fw.flush();
 				    fw.close();
-				    System.out.println("Distribution data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+				    System.out.println("Aging Distribution data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 			}
 		} catch (DataIntegrityViolationException e) {
 			System.out.println(e.getMessage());

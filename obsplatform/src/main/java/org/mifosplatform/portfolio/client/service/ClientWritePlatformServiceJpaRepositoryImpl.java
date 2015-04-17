@@ -331,8 +331,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 						propertyMaster.setClientId(newClient.getId());
 						propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
 					    this.propertyMasterRepository.saveAndFlush(propertyMaster);
-					    PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_ALLOCATE,
-					    		newClient.getId(),propertyMaster.getPropertyCode());
+					    PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),
+					    		CodeNameConstants.CODE_PROPERTY_ALLOCATE,newClient.getId(),propertyMaster.getPropertyCode());
 					    this.propertyHistoryRepository.save(propertyHistory);
 					}
 					
