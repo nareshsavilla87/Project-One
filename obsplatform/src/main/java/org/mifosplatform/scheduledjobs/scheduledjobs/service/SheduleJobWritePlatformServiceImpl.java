@@ -60,6 +60,7 @@ import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.jobs.service.RadiusJobConstants;
+import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundException;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
@@ -1377,17 +1378,30 @@ public void reportStatmentPdf() {
 				//procedure calling
 				 SimpleJdbcCall simpleJdbcCall=new SimpleJdbcCall(this.jdbcTemplate);
 				 MapSqlParameterSource parameterSource = new MapSqlParameterSource();
-				 simpleJdbcCall.setProcedureName("p_int_fa");//p --> procedure int --> integration fa --> financial account s/w {p_todt=2014-12-30}
+				/* simpleJdbcCall.setProcedureName("p_int_fa");//p --> procedure int --> integration fa --> financial account s/w {p_todt=2014-12-30}
 					if (data.isDynamic().equalsIgnoreCase("Y")) {
 					     parameterSource.addValue("p_todt", new LocalDate().toString(), Types.DATE);
 					   } else {
 						   parameterSource.addValue("p_todt", data.getProcessDate().toString(), Types.DATE);		
-					 }
+					 }*/
+				    simpleJdbcCall.setProcedureName("execute_procedure");
+				    String strjson="";
+				    parameterSource.addValue("jsonstr", strjson, Types.VARCHAR);
 					Map<String, Object> output = simpleJdbcCall.execute(parameterSource);
-					if(output.isEmpty()){
+					Integer errCode=0;
+					String errMsg=null;
+					if(output != null){
+						errCode=(Integer)output.get("err_code");
+						errMsg=(String)output.get("err_msg"); 
+					}
+					if(errCode != 0 && errMsg != null){
+						fw.append("Exporting data failed.....:"+errMsg  + ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
+
+					   }
+					/*if(output.isEmpty()){
 						fw.append("Exporting data failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
-					}else{
-						fw.append("No of records inserted :" + output.values()+ "\r\n");
+					}*/else{
+						//fw.append("No of records inserted :" + output.values()+ "\r\n");
 						fw.append("Exporting data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 					}
 				fw.flush();
