@@ -63,6 +63,10 @@ public static final String CODE_AGE_GROUP= "Age Group";
 public static final String CODE_PROPERTY_VACANT = "VACANT";
 public static final String CODE_PROPERTY_OCCUPIED = "OCCUPIED";
 public static final String CODE_PROPERTY_TYPE = "Property Type";
+public static final String CODE_PROPERTY_DEFINE = "Property Definition";
+public static final String CODE_PROPERTY_UPDATE = "Property Updation";
+public static final String CODE_PROPERTY_ALLOCATE = "Property Allocated";
+public static final String CODE_PROPERTY_FREE = "Property Free";
 
 
 }

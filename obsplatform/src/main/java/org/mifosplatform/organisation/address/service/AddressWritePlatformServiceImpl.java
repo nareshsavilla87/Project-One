@@ -6,10 +6,14 @@ import java.util.Map;
 
 import org.hibernate.exception.ConstraintViolationException;
 import org.mifosplatform.infrastructure.codes.exception.CodeNotFoundException;
+import org.mifosplatform.infrastructure.configuration.domain.Configuration;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.data.AddressData;
 import org.mifosplatform.organisation.address.domain.Address;
@@ -24,6 +28,12 @@ import org.mifosplatform.organisation.address.exception.CityNotFoundException;
 import org.mifosplatform.organisation.address.exception.CountryNotFoundException;
 import org.mifosplatform.organisation.address.exception.StateNotFoundException;
 import org.mifosplatform.organisation.address.serialization.LocationValidatorCommandFromApiJsonDeserializer;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyMaster;
+import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyTransactionHistory;
+import org.mifosplatform.portfolio.property.exceptions.PropertyMasterNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +51,9 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	private final CountryRepository countryRepository;
 	private final AddressReadPlatformService addressReadPlatformService;
 	private final LocationValidatorCommandFromApiJsonDeserializer locationValidatorCommandFromApiJsonDeserializer;
+	private final PropertyMasterRepository propertyMasterRepository;
+    private final PropertyHistoryRepository propertyHistoryRepository;
+    private final ConfigurationRepository configurationRepository;
 	public static final String ADDRESSTYPE="addressType";
 	
 	
@@ -51,7 +64,9 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	public AddressWritePlatformServiceImpl(final PlatformSecurityContext context,final CityRepository cityRepository,
 			final AddressReadPlatformService addressReadPlatformService,final StateRepository stateRepository,
 			final CountryRepository countryRepository,final AddressRepository addressRepository,
-			final LocationValidatorCommandFromApiJsonDeserializer locationValidatorCommandFromApiJsonDeserializer) {
+			final LocationValidatorCommandFromApiJsonDeserializer locationValidatorCommandFromApiJsonDeserializer,
+			final PropertyMasterRepository propertyMasterRepository, final PropertyHistoryRepository propertyHistoryRepository,
+		    final ConfigurationRepository configurationRepository) {
 		this.context = context;
 		this.addressRepository = addressRepository;
 		this.cityRepository=cityRepository;
@@ -59,6 +74,9 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		this.countryRepository=countryRepository;
 		this.addressReadPlatformService=addressReadPlatformService;
 		this.locationValidatorCommandFromApiJsonDeserializer = locationValidatorCommandFromApiJsonDeserializer;
+		this.propertyMasterRepository = propertyMasterRepository;
+		this.propertyHistoryRepository = propertyHistoryRepository;
+		this.configurationRepository = configurationRepository;
 		
 		
 
@@ -109,7 +127,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	             if(addressDatas.size()==1 && addressType.equalsIgnoreCase("BILLING")){
 	            	 
 	            	 final Address  newAddress=Address.fromJson(clientId, command);
-               	  this.addressRepository.save(newAddress);
+               	     this.addressRepository.save(newAddress);
 	            	 
 	             }
 	                     for(AddressData addressData:addressDatas){
@@ -117,9 +135,38 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	                    	  if(addressData.getAddressType().equalsIgnoreCase(addressType))
 	                    	  {
 	                    		  final Address address = retrieveAddressBy(addressData.getAddressId());  
-	                    		  changes = address.update(command);
-	                              
-	                                  this.addressRepository.save(address);
+	                    		  //for property code updation with client details
+	                    		  Configuration  configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+	                    		  if(configuration != null && configuration.isEnabled()) {		
+	                    		  final String newPropertyCode=command.stringValueOfParameterNamed("addressNo");
+	                    		  PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
+	                    		  if(propertyMaster!=null){
+	                    		  PropertyMaster oldPropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(address.getAddressNo());
+	                    		  if(!address.getAddressNo().equalsIgnoreCase(newPropertyCode)){
+	                    			 if(oldPropertyMaster!=null&& propertyMaster!=null){
+	                    			 oldPropertyMaster.setClientId(null);
+	                    			 oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
+	                    			 this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
+	                    			 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_FREE,
+	                    					 address.getClientId(),oldPropertyMaster.getPropertyCode());
+	                    			 this.propertyHistoryRepository.save(propertyHistory);
+	                    			 changes = address.update(command);
+		                        	 this.addressRepository.saveAndFlush(address);
+	                    			 propertyMaster.setClientId(address.getClientId());
+	                    			 propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
+		                    		 this.propertyMasterRepository.saveAndFlush(propertyMaster);
+		                    		 PropertyTransactionHistory newpropertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_ALLOCATE,
+		                    					 address.getClientId(),propertyMaster.getPropertyCode());
+		                    		 this.propertyHistoryRepository.save(newpropertyHistory);
+	                    			 } 
+	                            }
+	                            }else{
+	                            	throw new PropertyMasterNotFoundException(Long.valueOf(newPropertyCode));
+	                            }
+	                    		}else{
+	                    		   changes = address.update(command);
+	                        		this.addressRepository.saveAndFlush(address);
+	                    	  }
 	                    	  }
          }
          return new CommandProcessingResultBuilder() 
