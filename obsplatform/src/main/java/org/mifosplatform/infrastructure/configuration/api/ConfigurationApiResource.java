@@ -109,6 +109,7 @@ public class ConfigurationApiResource {
 		defaultOne.put("nationalId", "false");
 		defaultOne.put("date_format", "dd MMMM yyyy");
 		defaultOne.put("codeDefinitionLength", "10");
+		defaultOne.put("FreeRadius_Url", "http://localhost:8080");
 		
 		
 		/*********  Preparing 'defaultOneForClientList' JSONObject ******/
