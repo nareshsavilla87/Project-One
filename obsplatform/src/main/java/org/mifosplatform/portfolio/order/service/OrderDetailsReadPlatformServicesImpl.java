@@ -112,7 +112,7 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 			
 			PriceMapper mapper1 = new PriceMapper();
 			String sql = "select " + mapper1.schema()+" and da.plan_id = '"+planId+"' and (c.billfrequency_code='"+billingFrequency+"'  or c.billfrequency_code='Once')" +
-					" AND ca.client_id = ?  AND da.price_region_id =pd.priceregion_id AND s.state_name = ca.state And s.parent_code=pd.country_id" +
+					" AND ca.client_id = ?  AND da.price_region_id =pd.priceregion_id AND s.state_name = ca.state  AND (pd.country_id =s.parent_code or pd.country_id = 0) " +
 					" AND pd.state_id =0 group by da.id";
 			return this.jdbcTemplate.query(sql, mapper1, new Object[] { clientId });
 		}
