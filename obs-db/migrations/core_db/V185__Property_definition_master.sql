@@ -37,7 +37,7 @@ INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(n
 insert ignore into m_permission VALUES (null,'client&orders','UPDATE_CLIENTADDITIONALINFO','CLIENTADDITIONALINFO','UPDATE',0);
 insert ignore into m_permission VALUES (null,'client&orders','CREATE_CLIENTADDITIONALINFO','CLIENTADDITIONALINFO','CREATE',0);
 
-INSERT IGNORE INTO c_configuration VALUES(null, 'property-master', '1', '');
+INSERT IGNORE INTO c_configuration VALUES(null, 'is-propertycode-enabled', '1', '');
 
 
 
