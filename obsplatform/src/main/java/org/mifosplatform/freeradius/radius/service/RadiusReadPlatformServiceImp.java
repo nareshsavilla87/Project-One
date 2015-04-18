@@ -175,13 +175,15 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 		        	fileForPath.mkdir();
 		        }
 		        File fileForLocation = new File(CONFIGURATION_FILE_LOCATION);
+		        String jsonDataOfNew = "\n"+"client "+objectResponce.getString("nasName")+" {"+"\n"+
+		        		"secret		=  "+objectResponce.getString("secret")+" "+"\n"+
+		        		"shortname	=  "+objectResponce.getString("shortName")+" "+"\n"+
+		        	"}";
 		        if (!fileForLocation.isFile()) {
-		        	writeFileData(CONFIGURATION_FILE_LOCATION, defaultOne);
+		        	writeFileData(CONFIGURATION_FILE_LOCATION, defaultOne+jsonDataOfNew);
+		        	
 		        }else{
-		        	String jsonDataOfNew = "\n"+"client "+objectResponce.getString("nasName")+" {"+"\n"+
-		"secret		=  "+objectResponce.getString("secret")+" "+"\n"+
-		"shortname	=  "+objectResponce.getString("shortName")+" "+"\n"+
-	"}";
+		        	
 		        	readDatas = readFileData(fileForLocation);
 		        	//StringBuilder updatedata = new StringBuilder();
 		        	//updatedata.append(readDatas);
