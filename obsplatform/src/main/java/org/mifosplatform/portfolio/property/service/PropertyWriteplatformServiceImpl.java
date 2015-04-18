@@ -26,6 +26,7 @@ import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyTransactionHistory;
+import org.mifosplatform.portfolio.property.exceptions.PropertyCodeAllocatedException;
 import org.mifosplatform.portfolio.property.exceptions.PropertyMasterNotFoundException;
 import org.mifosplatform.portfolio.property.serialization.PropertyCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
@@ -164,6 +165,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		return propertyMaster;
 	}
 
+	@Transactional
 	@Override
 	public CommandProcessingResult createServiceTransfer(final Long clientId,final JsonCommand command) {
 		
@@ -188,6 +190,9 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
    			 }
    			final PropertyMaster newpropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
   			 if(newpropertyMaster!=null && clientAddress !=null){
+  				 if(newpropertyMaster.getClientId() != null){
+  					throw new PropertyCodeAllocatedException(newpropertyMaster.getPropertyCode()); 
+  				 }
   			     newpropertyMaster.setClientId(clientId);
   			     newpropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
   			     this.propertyMasterRepository.saveAndFlush(newpropertyMaster);
