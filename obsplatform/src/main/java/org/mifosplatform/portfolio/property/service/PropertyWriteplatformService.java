@@ -11,4 +11,6 @@ public interface PropertyWriteplatformService {
 
 	CommandProcessingResult updateProperty(Long entityId, JsonCommand command);
 
+	CommandProcessingResult createServiceTransfer(Long entityId,JsonCommand command);
+
 }

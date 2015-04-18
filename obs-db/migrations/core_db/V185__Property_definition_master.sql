@@ -28,6 +28,8 @@ INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'CREATE_PROPERTY', 
 INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'READ_PROPERTY', 'PROPERTY', 'READ', '0');
 INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'UPDATE_PROPERTY', 'PROPERTY', 'UPDATE', '0');
 INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'DELETE_PROPERTY', 'PROPERTY', 'DELETE', '0');
+INSERT IGNORE INTO m_permission values(null, 'billing', 'CREATE_SERVICETRANSFER', 'SERVICETRANSFER', 'CREATE', '0');
+
 
 INSERT IGNORE INTO `m_code`(id,code_name,is_system_defined,code_description) VALUES(null,'Property Type',0,'Define Customer Property Type');
 SET @a_lid:=(select id from m_code where code_name='Property Type');

@@ -1,6 +1,7 @@
 package org.mifosplatform.portfolio.property.serialization;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -31,6 +32,8 @@ public final class PropertyCommandFromApiJsonDeserializer {
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("propertyCode", "propertyType", "unitCode",
 					"floor", "buildingCode", "parcel", "street", "status","precinct", "poBox", "state", "country"));
+	
+	private final Set<String> supportedParametersForServiceTransfer = new HashSet<String>(Arrays.asList("oldPropertyCode", "newPropertyCode", "shiftChargeAmount","locale","unitCode","clientId"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
@@ -91,6 +94,33 @@ public final class PropertyCommandFromApiJsonDeserializer {
 
 	}
 
+
+	public void validateForServiceTransfer(final String json) {
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+
+		final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+		fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,supportedParametersForServiceTransfer);
+
+		final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("serviceTransfer");
+		
+		final JsonElement element = fromApiJsonHelper.parse(json);
+		
+		final String oldPropertyCode = fromApiJsonHelper.extractStringNamed("oldPropertyCode", element);
+		baseDataValidator.reset().parameter("oldPropertyCode").value(oldPropertyCode).notBlank().notExceedingLengthOf(14);
+		
+		final String newPropertyCode = fromApiJsonHelper.extractStringNamed("newPropertyCode", element);
+		baseDataValidator.reset().parameter("newPropertyCode").value(newPropertyCode).notBlank().notExceedingLengthOf(14);
+		
+		final BigDecimal shiftChargeAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shiftChargeAmount", element);
+		baseDataValidator.reset().parameter("shiftChargeAmount").value(shiftChargeAmount).notBlank().notExceedingLengthOf(10);
+		
+		throwExceptionIfValidationWarningsExist(dataValidationErrors);
+		
+	}
+	
 	private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
 		if (!dataValidationErrors.isEmpty()) {
 			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist","Validation errors exist.", dataValidationErrors);

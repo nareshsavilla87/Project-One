@@ -19,5 +19,11 @@ public class PropertyMasterNotFoundException extends AbstractPlatformResourceNot
     public PropertyMasterNotFoundException(final String propertyCode) {
         super("error.msg.please.free.this.property.from assigned client", "please free this " +propertyCode+ "property from assigned client",propertyCode);
     }
+    
+    public PropertyMasterNotFoundException(final Long clientId,final String propertyCode) {
+    	 super("error.msg.client.address.details.not found.with "+propertyCode, "Client address details  not found", clientId);
+        
+    }
+    
    
 }
