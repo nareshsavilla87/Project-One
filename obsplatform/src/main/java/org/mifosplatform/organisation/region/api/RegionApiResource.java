@@ -148,7 +148,7 @@ public class RegionApiResource {
    	   
    	    regionData.setCountryId(regionDetails.get(0).getCountryId());
    	    
-      if(!statesData.isEmpty()){   	  
+     /* if(!statesData.isEmpty()){   	  
     	  
    	 int size = statesData.size();
 		int selectedsize = regionDetails.size();
@@ -163,7 +163,7 @@ public class RegionApiResource {
 					}
 				}
 			}
-      }
+      }*/
 			 regionData.setRegionDetails(regionDetails);
 	    final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	    return this.toApiJsonSerializer.serialize(settings, regionData, RESPONSE_DATA_PARAMETERS);

@@ -137,7 +137,7 @@ public class RegionWriteplatformServiceImpl implements RegionWriteplatformServic
  			
  		  final Map<String, Object> changes = regionMaster.update(command);
  		  
- 		  if(!changes.isEmpty())
+ 		
              this.regionJpaRepository.save(regionMaster);
              
         return new CommandProcessingResult(regionMaster.getId());    
