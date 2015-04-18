@@ -38,6 +38,8 @@ public interface RadiusReadPlatformService {
    String processRadiusGet(String url, String encodePassword) throws ClientProtocolException, IOException;
    
    String processRadiusPost(String url, String encodePassword, String data) throws  IOException;
+
+   String retrieveAllOnlineUsers(String attribute, String limit, String offset);
    
 
 

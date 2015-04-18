@@ -193,6 +193,16 @@ public class RadiusAPiResource {
 		return radServiceTemplateData;
 	}
 
+	@GET
+	@Path("onlineusers")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveAllOnlineUsers(@Context final UriInfo uriInfo,@QueryParam("custattr") final String custattr,
+			@QueryParam("limit") final String limit,@QueryParam("offset") final String offset) {
 
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final String radServiceData = this.radiusReadPlatformService.retrieveAllOnlineUsers(custattr, limit, offset);
+		return radServiceData;
+	}
 
 }
