@@ -6,7 +6,8 @@ public class ItemNotFoundException extends AbstractPlatformResourceNotFoundExcep
 
 public ItemNotFoundException(String itemId) {
 
-super("error.msg.item.id.not.found", "item id "+itemId+" not found. ",itemId);
+super("error.msg.item.id.not.found","Item is Not Found",itemId);
+
 }
 
 }

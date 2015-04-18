@@ -5,6 +5,7 @@ import java.util.Map;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
@@ -56,5 +57,20 @@ public class LogoutApiResource {
         		//return "successfully logout";
         		return "loginHistoryId"+":"+id.toString();
 	}
-
+	
+	@PUT
+	@Path("/updatesession")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String updateactiveTime(final String apiRequestBodyAsJson,@QueryParam("id") final Long id,@Context HttpServletRequest req) {
+				
+        		LoginHistory loginHistory=this.loginHistoryRepository.findOne(id);
+                if(loginHistory != null){
+            	   loginHistory.updateActiveTime();
+            	     		this.loginHistoryRepository.save(loginHistory);
+                	}
+        		req.getSession().invalidate();
+        		//return "successfully logout";
+        		return "loginHistoryId"+":"+id.toString();
+	}
 }

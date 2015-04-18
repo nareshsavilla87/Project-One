@@ -70,6 +70,7 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 	@Override
 	public CommandProcessingResult processDatauploadFile(final Long fileId) {
 		
+		this.context.authenticatedUser();
 		BufferedReader csvFileBufferedReader = null;
 		String line = null;
 		try{
