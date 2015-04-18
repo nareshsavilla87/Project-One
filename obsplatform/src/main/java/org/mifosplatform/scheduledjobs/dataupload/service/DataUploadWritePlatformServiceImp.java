@@ -31,6 +31,7 @@ import org.mifosplatform.logistics.itemdetails.data.ItemDetailsData;
 import org.mifosplatform.logistics.itemdetails.exception.OrderQuantityExceedsException;
 import org.mifosplatform.logistics.itemdetails.exception.SerialNumberAlreadyExistException;
 import org.mifosplatform.logistics.itemdetails.exception.SerialNumberNotFoundException;
+import org.mifosplatform.logistics.mrn.exception.InvalidMrnIdException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.order.exceptions.NoGrnIdFoundException;
 import org.mifosplatform.scheduledjobs.dataupload.command.DataUploadCommand;
@@ -153,7 +154,7 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
    				}
    				
    			}catch (Exception e) {
-   				errorData.add(new MRNErrorData((long)i, "Error: "+e.getMessage()));
+   				//errorData.add(new MRNErrorData((long)i, "Error: "+e.getMessage()));
    				handleDataIntegrityIssues(i, errorData, e);
    			}
    			totalRecordCount++;
@@ -433,6 +434,9 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 			
 		}else if(dve instanceof ItemNotFoundException){
 			errorData.add(new MRNErrorData((long)i,"Invalid Item id"));
+		
+		}else if(dve instanceof InvalidMrnIdException){
+			errorData.add(new MRNErrorData((long)i,"Invalid Mrn id"));
 		
 		}else if(dve instanceof UnsupportedParameterException){
 			    errorData.add(new MRNErrorData((long)i,"Row Contains Improper data "));
