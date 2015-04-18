@@ -39,7 +39,7 @@ public interface RadiusReadPlatformService {
    
    String processRadiusPost(String url, String encodePassword, String data) throws  IOException;
 
-   String retrieveAllOnlineUsers(String attribute, String limit, String offset);
+   String retrieveAllOnlineUsers(String attribute, String limit, String offset, String checkOnline);
    
 
 

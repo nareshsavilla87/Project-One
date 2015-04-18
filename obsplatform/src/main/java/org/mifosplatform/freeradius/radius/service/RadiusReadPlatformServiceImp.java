@@ -705,7 +705,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	}
 	
 	@Override
-	public String retrieveAllOnlineUsers(final String custattr,final String limit, final String offset) {
+	public String retrieveAllOnlineUsers(final String custattr,final String limit, final String offset, final String checkOnline) {
 		
 		try {
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
@@ -732,6 +732,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 				object.put("custattr", custattr);
 				object.put("limit", limit);
 				object.put("offset", offset);
+				object.put("checkOnline", checkOnline);
 				
 				onlineUsersdata = this.processRadiusPost(url, encodedPassword, object.toString());
 				jsonObj.put("radiusVersion", data.getProvSystem().toLowerCase());
