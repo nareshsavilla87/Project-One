@@ -2,6 +2,7 @@ package org.mifosplatform.freeradius.radius.data;
 
 import java.util.List;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 public class RadiusServiceData {
@@ -16,8 +17,10 @@ public class RadiusServiceData {
 	private boolean limitComb;
 	private boolean limitExpiration;
 	private String radVersion;
-	private List<RadiusServiceData> radServiceTemplateData;
+	private String radServiceTemplateData;
 	private boolean renew;
+	private String listRads;
+	private String nextServiceId;
 
 	public RadiusServiceData(Long id, String serviceName, String downRate,String upRate, Long nextServicId,
 			Long trafficUnitdl,String nextService) {
@@ -46,9 +49,14 @@ public class RadiusServiceData {
 
 	}
 
-	public RadiusServiceData(final String radVersion, JSONObject jsonObject) {
+	public RadiusServiceData(final String radVersion, JSONObject jsonObject) throws JSONException {
 		this.radVersion = radVersion;
 
+	}
+
+	public RadiusServiceData(String listRads) {
+		
+		this.listRads = listRads;
 	}
 
 	public Long getId() {
@@ -103,11 +111,11 @@ public class RadiusServiceData {
 		this.radVersion = radVersion;
 	}
 
-	public List<RadiusServiceData> getRadServiceTemplateData() {
+	public String getRadServiceTemplateData() {
 		return radServiceTemplateData;
 	}
 
-	public void setRadServiceTemplateData(List<RadiusServiceData> radServiceTemplateData) {
+	public void setRadServiceTemplateData(String radServiceTemplateData) {
 		this.radServiceTemplateData = radServiceTemplateData;
 	}
 
