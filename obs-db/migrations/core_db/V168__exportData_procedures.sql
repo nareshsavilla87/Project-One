@@ -190,7 +190,7 @@ cast(`b`.`adjustment_date` as date) AS `adjustment_date`,
 'Adjustment' as `transactionType`
  from (`INT_FA` `i` join `b_adjustments` `b`) where (`b`.`id` between `i`.`From_id` and `i`.`to_id`);
 
-
+/*--
 INSERT IGNORE INTO `stretchy_report` VALUES(null,'List of Customers', 'Table', '', 'Client', 'SELECT id as Id ,transactionType,details as Name FROM int_fa_v where obsTable=''m_clients'' and int_date  between ''${startDate}'' and ''${endDate}''', 'export newly created customers to other financial  systems', '0', '1');
 SET @ID=(SELECT id FROM stretchy_report WHERE report_name='List of Customers');
 INSERT IGNORE INTO `stretchy_report_parameter` VALUES (null, @ID, 1, 'From Date');
@@ -200,7 +200,7 @@ INSERT IGNORE INTO `stretchy_report` VALUES(null,'List of Transactions','Table',
 SET @ID=(SELECT id FROM stretchy_report WHERE report_name='List of Transactions');
 INSERT IGNORE INTO `stretchy_report_parameter` VALUES (null, @ID, 1, 'From Date');
 INSERT IGNORE INTO `stretchy_report_parameter` VALUES (null, @ID, 2, 'To Date');
-
+--!> */
 
 
 
