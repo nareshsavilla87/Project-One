@@ -1,14 +1,26 @@
 package org.mifosplatform.portfolio.property.service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.hibernate.exception.ConstraintViolationException;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
+import org.mifosplatform.billing.chargecode.exception.ChargeCodeNotFoundException;
+import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
+import org.mifosplatform.finance.billingorder.domain.Invoice;
+import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
+import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.address.domain.Address;
+import org.mifosplatform.organisation.address.domain.AddressRepository;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyMaster;
@@ -31,17 +43,29 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	private final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final PropertyMasterRepository propertyMasterRepository;
 	private final PropertyHistoryRepository propertyHistoryRepository;
+	private final AddressRepository addressRepository;
+	private final ChargeCodeRepository chargeCodeRepository;
+	private final GenerateBillingOrderService generateBillingOrderService;
+	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
 
 	@Autowired
 	public PropertyWriteplatformServiceImpl(final PlatformSecurityContext context,
 			final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final PropertyMasterRepository propertyMasterRepository,
-			final PropertyHistoryRepository propertyHistoryRepository) {
+			final PropertyHistoryRepository propertyHistoryRepository,
+			final AddressRepository addressRepository,
+		    final ChargeCodeRepository chargeCodeRepository,
+            final GenerateBillingOrderService generateBillingOrderService,
+            final BillingOrderWritePlatformService billingOrderWritePlatformService) {
 
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.propertyMasterRepository = propertyMasterRepository;
 		this.propertyHistoryRepository = propertyHistoryRepository;
+		this.addressRepository = addressRepository;
+		this.chargeCodeRepository = chargeCodeRepository;
+		this.generateBillingOrderService = generateBillingOrderService;
+		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
 	}
 
 	@Transactional
@@ -54,7 +78,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			PropertyMaster propertyMaster = PropertyMaster.fromJson(command);
 			this.propertyMasterRepository.save(propertyMaster);
 			//history calling
-			PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),"Property Definition",null,propertyMaster.getPropertyCode());
+			PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_DEFINE,null,propertyMaster.getPropertyCode());
 			this.propertyHistoryRepository.save(propertyHistory);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 					    .withEntityId(propertyMaster.getId()).build();
@@ -79,7 +103,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 				this.propertyMasterRepository.saveAndFlush(propertyMaster);
 			}
 			//history calling
-			PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),"Property Updation",propertyMaster.getClientId(),propertyMaster.getPropertyCode());
+			PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_UPDATE,propertyMaster.getClientId(),propertyMaster.getPropertyCode());
 			this.propertyHistoryRepository.save(propertyHistory);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 				       .withEntityId(propertyMaster.getId()).with(changes).build();
@@ -140,4 +164,73 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		return propertyMaster;
 	}
 
+	@Override
+	public CommandProcessingResult createServiceTransfer(final Long clientId,final JsonCommand command) {
+		
+		try {
+			this.context.authenticatedUser();
+			this.apiJsonDeserializer.validateForServiceTransfer(command.json());
+			final String oldPropertyCode=command.stringValueOfParameterNamed("oldPropertyCode");
+			final String newPropertyCode=command.stringValueOfParameterNamed("newPropertyCode");
+			final BigDecimal shiftChargeAmount=command.bigDecimalValueOfParameterNamed("shiftChargeAmount");
+			Address clientAddress = this.addressRepository.findOneByAddressNo(clientId,oldPropertyCode);
+			if(clientAddress !=null){
+			 //check shifting property same or not
+			 if(!oldPropertyCode.equalsIgnoreCase(newPropertyCode)){
+			   final PropertyMaster oldPropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(oldPropertyCode);
+   			   if(oldPropertyMaster!=null){
+   			   oldPropertyMaster.setClientId(null);
+   			   oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
+   			   this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
+   			   PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
+   					   CodeNameConstants.CODE_PROPERTY_FREE, null,oldPropertyMaster.getPropertyCode());
+   			   this.propertyHistoryRepository.save(propertyHistory);		
+   			 }
+   			final PropertyMaster newpropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
+  			 if(newpropertyMaster!=null && clientAddress !=null){
+  			     newpropertyMaster.setClientId(clientId);
+  			     newpropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
+  			     this.propertyMasterRepository.saveAndFlush(newpropertyMaster);
+  			     PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),newpropertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_ALLOCATE,
+  					newpropertyMaster.getClientId(),newpropertyMaster.getPropertyCode());
+  			    this.propertyHistoryRepository.save(propertyHistory);
+  			    clientAddress.setAddressNo(newpropertyMaster.getPropertyCode());
+  			    clientAddress.setStreet(newpropertyMaster.getStreet());
+  			    clientAddress.setCity(newpropertyMaster.getPrecinct());
+  			    clientAddress.setState(newpropertyMaster.getState());
+  			    clientAddress.setCountry(newpropertyMaster.getCountry());
+  			    clientAddress.setZip(newpropertyMaster.getPoBox());
+  			    this.addressRepository.save(clientAddress);
+  			 }
+	       }
+		 }else{
+				 throw new PropertyMasterNotFoundException(clientId,oldPropertyCode);
+			 }
+		   //call one time invoice	
+			List<BillingOrderCommand> billingOrderCommands = new ArrayList<BillingOrderCommand>();
+			//List<InvoiceTaxCommand> listOfTaxes = new ArrayList<InvoiceTaxCommand>();
+			ChargeCodeMaster chargeCode=this.chargeCodeRepository.findOneByChargeCode("OTC");
+			if(chargeCode!=null){
+			   BillingOrderCommand billingOrderCommand=new BillingOrderCommand(clientAddress.getId(), Long.valueOf(-1L),clientId, DateUtils.getDateOfTenant(),
+					DateUtils.getDateOfTenant(), DateUtils.getDateOfTenant(),chargeCode.getBillFrequencyCode(), "OTC", chargeCode.getChargeType(),chargeCode.getChargeDuration(), 
+					"", DateUtils.getDateOfTenant(), shiftChargeAmount, "N", null,  DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),
+					null, chargeCode.getTaxInclusive());
+			
+			    billingOrderCommands.add(billingOrderCommand);
+			    // Invoice calling
+			    Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
+			   //Update Client Balance
+			    this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId,false);
+			
+		      return new CommandProcessingResult(invoice.getId(), clientId);
+			}else{
+				throw new ChargeCodeNotFoundException("OTC");
+			}
+		
+	}catch (DataIntegrityViolationException dve) {
+		handleCodeDataIntegrityIssues(command, dve);
+		return new CommandProcessingResult(Long.valueOf(1L));
+	}
+	
+	}
 }

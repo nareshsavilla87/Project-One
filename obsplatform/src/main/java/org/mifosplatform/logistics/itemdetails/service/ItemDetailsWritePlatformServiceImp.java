@@ -16,6 +16,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
 import org.mifosplatform.logistics.item.domain.ItemRepository;
+import org.mifosplatform.logistics.item.exception.ItemNotFoundException;
 import org.mifosplatform.logistics.itemdetails.data.AllocationHardwareData;
 import org.mifosplatform.logistics.itemdetails.domain.InventoryGrn;
 import org.mifosplatform.logistics.itemdetails.domain.InventoryGrnRepository;
@@ -133,6 +134,9 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			inventoryItemCommandFromApiJsonDeserializer.validateForCreate(command);
 			inventoryItemDetails = ItemDetails.fromJson(command,fromJsonHelper);
 			ItemMaster itemMaster=this.itemRepository.findOne(command.longValueOfParameterNamed("itemMasterId"));
+			if(itemMaster == null){
+				throw new ItemNotFoundException(command.longValueOfParameterNamed("itemMasterId").toString());
+			}
 			if(itemMaster != null) {
 				if(itemMaster.getWarranty() != null){
 					LocalDate warrantyEndDate = new LocalDate().plusMonths(itemMaster.getWarranty().intValue()).minusDays(1);

@@ -94,7 +94,7 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 		while((line = csvFileBufferedReader.readLine()) != null){
 			try{
 				final String[] currentLineData = line.split(splitLineRegX);
-				if(currentLineData!=null && currentLineData[0].equalsIgnoreCase("EOF")){
+				if(currentLineData!=null && currentLineData[0].contains("EOF")){
 					return  this.dataUploadHelper.updateFile(uploadStatus,totalRecordCount,processRecordCount,errorData);
 				}
 				jsonString=this.dataUploadHelper.buildJsonForHardwareItems(currentLineData,errorData,i);
@@ -391,6 +391,9 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 			errorData.add(new MRNErrorData((long)i, "Error: "+((AbstractPlatformDomainRuleException) dve).getDefaultUserMessage()));
 			
 		}else if(dve instanceof NoGrnIdFoundException){
+			errorData.add(new MRNErrorData((long)i, "Error: "+((AbstractPlatformDomainRuleException) dve).getDefaultUserMessage()));
+			
+		}else if(dve instanceof ItemNotFoundException){
 			errorData.add(new MRNErrorData((long)i, "Error: "+((AbstractPlatformDomainRuleException) dve).getDefaultUserMessage()));
 			
 		}else if(dve instanceof PlatformApiDataValidationException){

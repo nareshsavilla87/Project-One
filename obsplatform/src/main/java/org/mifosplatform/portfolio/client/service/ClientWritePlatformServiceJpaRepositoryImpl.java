@@ -59,6 +59,7 @@ import org.mifosplatform.portfolio.client.domain.ClientAdditionalFieldsRepositor
 import org.mifosplatform.portfolio.client.domain.ClientAdditionalfields;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
+import org.mifosplatform.portfolio.client.exception.ClientAdditionalDataNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.InvalidClientStateTransitionException;
 import org.mifosplatform.portfolio.group.domain.Group;
@@ -322,46 +323,20 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 				this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
 			}
 			
-			configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_CLIENT_ADDITIONAL_DATA);
-			if(configuration != null && configuration.isEnabled()){
-				
-			final Long genderId = command.longValueOfParameterNamed(ClientApiConstants.genderParamName);
-			final CodeValue gender = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_GENDER, genderId);
-				
-			final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityParamName);
-			final CodeValue nationality = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_NATIONALITY, nationalityId);
-				
-			final Long customerTypeId = command.longValueOfParameterNamed(ClientApiConstants.idTypeParamName);
-			final CodeValue customerIdentifier = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_CUSTOMER_IDENTIFIER, customerTypeId);
-			
-			final Long prefLangId = command.longValueOfParameterNamed(ClientApiConstants.preferredLangParamName);
-			final CodeValue preferLang = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_LANG, prefLangId);
-				
-			final Long prefCommId = command.longValueOfParameterNamed(ClientApiConstants.preferredCommunicationParamName);
-			final CodeValue preferCommunication = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_COMMUNICATION, prefCommId);
-				
-			final Long ageGroupId = command.longValueOfParameterNamed(ClientApiConstants.ageGroupParamName);
-			final CodeValue ageGroup = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_AGE_GROUP, ageGroupId);
-			
-			ClientAdditionalfields clientAdditionalData = ClientAdditionalfields.fromJson(newClient.getId(),gender,nationality,customerIdentifier,preferLang,preferCommunication,ageGroup,command);
-			this.clientAdditionalFieldsRepository.save(clientAdditionalData);
-			
-			}
-			
-			//for property code updation with client details
-			configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
-			if(configuration != null && configuration.isEnabled()) {		
-				PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(address.getAddressNo());
-				if(propertyMaster !=null){
-					propertyMaster.setClientId(newClient.getId());
-					propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
-				    this.propertyMasterRepository.saveAndFlush(propertyMaster);
+			 //for property code updation with client details
+				configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+				if(configuration != null && configuration.isEnabled()) {		
+					PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(address.getAddressNo());
+					if(propertyMaster !=null){
+						propertyMaster.setClientId(newClient.getId());
+						propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
+					    this.propertyMasterRepository.saveAndFlush(propertyMaster);
+					    PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),
+					    		CodeNameConstants.CODE_PROPERTY_ALLOCATE,newClient.getId(),propertyMaster.getPropertyCode());
+					    this.propertyHistoryRepository.save(propertyHistory);
+					}
+					
 				}
-				
-				PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),"Property Allocated",
-						                                        newClient.getId(),propertyMaster.getPropertyCode());
-				this.propertyHistoryRepository.save(propertyHistory);
-			}
             
             final List<ActionDetaislData> actionDetailsDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_CLIENT);
             if(!actionDetailsDatas.isEmpty()){
@@ -410,33 +385,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (clientOffice == null) { throw new OfficeNotFoundException(officeId); }
             final Map<String, Object> changes = clientForUpdate.update(command);
             clientForUpdate.setOffice(clientOffice);
-            
-            Configuration configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_CLIENT_ADDITIONAL_DATA);
-			
-            if(configuration != null && configuration.isEnabled()){
-				ClientAdditionalfields additionalfields=this.clientAdditionalFieldsRepository.findOneByClientId(clientId);
-			final Long genderId = command.longValueOfParameterNamed(ClientApiConstants.genderParamName);
-			final CodeValue gender = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_GENDER, genderId);
-				
-			final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityParamName);
-			final CodeValue nationality = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_NATIONALITY, nationalityId);
-				
-			final Long customerTypeId = command.longValueOfParameterNamed(ClientApiConstants.idTypeParamName);
-			final CodeValue customerIdentifier = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_CUSTOMER_IDENTIFIER, customerTypeId);
-			
-			final Long prefLangId = command.longValueOfParameterNamed(ClientApiConstants.preferredLangParamName);
-			final CodeValue preferLang = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_LANG, prefLangId);
-				
-			final Long prefCommId = command.longValueOfParameterNamed(ClientApiConstants.preferredCommunicationParamName);
-			final CodeValue preferCommunication = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_COMMUNICATION, prefCommId);
-				
-			final Long ageGroupId = command.longValueOfParameterNamed(ClientApiConstants.ageGroupParamName);
-			final CodeValue ageGroup = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_AGE_GROUP, ageGroupId);
-			
-			additionalfields.upadate(gender,nationality,customerIdentifier,preferLang,preferCommunication,ageGroup,command);
-			this.clientAdditionalFieldsRepository.save(additionalfields);
-			
-			}
             
             this.clientRepository.saveAndFlush(clientForUpdate);
             
@@ -743,6 +691,76 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			this.clientRepository.saveAndFlush(childClient);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(parentId).build();
 	
+		}catch(DataIntegrityViolationException dve){
+			handleDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+		
+	}
+
+	@Override
+	public CommandProcessingResult createClientAdditionalInfo(JsonCommand command, Long entityId) {
+            try{
+                 this.context.authenticatedUser();
+     				
+     			final Long genderId = command.longValueOfParameterNamed(ClientApiConstants.genderParamName);
+     			final CodeValue gender = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_GENDER, genderId);
+     				
+     			final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityParamName);
+     			final CodeValue nationality = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_NATIONALITY, nationalityId);
+     				
+     			final Long customerTypeId = command.longValueOfParameterNamed(ClientApiConstants.idTypeParamName);
+     			final CodeValue customerIdentifier = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_CUSTOMER_IDENTIFIER, customerTypeId);
+     			
+     			final Long prefLangId = command.longValueOfParameterNamed(ClientApiConstants.preferredLangParamName);
+     			final CodeValue preferLang = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_LANG, prefLangId);
+     				
+     			final Long prefCommId = command.longValueOfParameterNamed(ClientApiConstants.preferredCommunicationParamName);
+     			final CodeValue preferCommunication = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_COMMUNICATION, prefCommId);
+     				
+     			final Long ageGroupId = command.longValueOfParameterNamed(ClientApiConstants.ageGroupParamName);
+     			final CodeValue ageGroup = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_AGE_GROUP, ageGroupId);
+     			
+     			ClientAdditionalfields clientAdditionalData = ClientAdditionalfields.fromJson(entityId,gender,nationality,customerIdentifier,preferLang,preferCommunication,ageGroup,command);
+     			this.clientAdditionalFieldsRepository.save(clientAdditionalData);
+     			
+                 return new CommandProcessingResult(Long.valueOf(entityId));
+            }catch(DataIntegrityViolationException dve){
+            	handleDataIntegrityIssues(command, dve);
+    			return new CommandProcessingResult(Long.valueOf(-1));
+            }
+	}
+
+	@Override
+	public CommandProcessingResult updateClientAdditionalInfo(JsonCommand command) {
+		try{
+				
+			   ClientAdditionalfields additionalfields=this.clientAdditionalFieldsRepository.findOneByClientId(command.entityId());
+			   if(additionalfields == null){
+				   throw new ClientAdditionalDataNotFoundException(command.entityId());
+			   }
+				final Long genderId = command.longValueOfParameterNamed(ClientApiConstants.genderParamName);
+				final CodeValue gender = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_GENDER, genderId);
+					
+				final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityParamName);
+				final CodeValue nationality = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_NATIONALITY, nationalityId);
+					
+				final Long customerTypeId = command.longValueOfParameterNamed(ClientApiConstants.idTypeParamName);
+				final CodeValue customerIdentifier = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_CUSTOMER_IDENTIFIER, customerTypeId);
+				
+				final Long prefLangId = command.longValueOfParameterNamed(ClientApiConstants.preferredLangParamName);
+				final CodeValue preferLang = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_LANG, prefLangId);
+					
+				final Long prefCommId = command.longValueOfParameterNamed(ClientApiConstants.preferredCommunicationParamName);
+				final CodeValue preferCommunication = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_COMMUNICATION, prefCommId);
+					
+				final Long ageGroupId = command.longValueOfParameterNamed(ClientApiConstants.ageGroupParamName);
+				final CodeValue ageGroup = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_AGE_GROUP, ageGroupId);
+				
+				additionalfields.upadate(gender,nationality,customerIdentifier,preferLang,preferCommunication,ageGroup,command);
+				this.clientAdditionalFieldsRepository.save(additionalfields);
+				
+			return new CommandProcessingResult(command.entityId());
 		}catch(DataIntegrityViolationException dve){
 			handleDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));

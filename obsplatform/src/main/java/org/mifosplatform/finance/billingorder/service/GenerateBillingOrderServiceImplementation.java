@@ -176,6 +176,8 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 
 			// client TaxExemption
 			if (tax.getTaxExemption().equalsIgnoreCase("N")) {
+				
+				if(invoiceTaxCommands !=null){
 
 				for (InvoiceTaxCommand invoiceTaxCommand : invoiceTaxCommands) {
 
@@ -186,6 +188,7 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 								invoiceTaxCommand.getTaxValue(),invoiceTaxCommand.getTaxPercentage(),invoiceTaxCommand.getTaxAmount());
 						charge.addChargeTaxes(invoiceTax);
 					}
+				  }
 				}
 
 				if (billingOrderCommand.getTaxInclusive() != null) {
