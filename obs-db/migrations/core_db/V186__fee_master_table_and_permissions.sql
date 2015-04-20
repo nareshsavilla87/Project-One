@@ -1,4 +1,4 @@
-CREATE  TABLE IF NOT EXISTS `obs_beenius`.`b_fee_master` (
+CREATE  TABLE IF NOT EXISTS `b_fee_master` (
   `id` INT NOT NULL AUTO_INCREMENT ,
   `fee_code` VARCHAR(10) NULL ,
   `fee_description` VARCHAR(100) NULL DEFAULT NULL ,
@@ -9,7 +9,7 @@ CREATE  TABLE IF NOT EXISTS `obs_beenius`.`b_fee_master` (
   PRIMARY KEY (`id`) ,
   UNIQUE KEY `fee_code` (`fee_code`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS `obs_beenius`.`b_fee_detail` (
+CREATE TABLE IF NOT EXISTS `b_fee_detail` (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT ,
   `fee_id` INT NOT NULL ,
   `region_id` VARCHAR(50) NOT NULL ,
