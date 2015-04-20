@@ -191,8 +191,8 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
   			     newpropertyMaster.setClientId(clientId);
   			     newpropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
   			     this.propertyMasterRepository.saveAndFlush(newpropertyMaster);
-  			     PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),newpropertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_ALLOCATE,
-  					newpropertyMaster.getClientId(),newpropertyMaster.getPropertyCode());
+  			     PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),newpropertyMaster.getId(),
+  			    		 CodeNameConstants.CODE_PROPERTY_SERVICE_TRANSFER,newpropertyMaster.getClientId(),newpropertyMaster.getPropertyCode());
   			    this.propertyHistoryRepository.save(propertyHistory);
   			    clientAddress.setAddressNo(newpropertyMaster.getPropertyCode());
   			    clientAddress.setStreet(newpropertyMaster.getStreet());
@@ -229,7 +229,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		
 	}catch (DataIntegrityViolationException dve) {
 		handleCodeDataIntegrityIssues(command, dve);
-		return new CommandProcessingResult(Long.valueOf(1L));
+		return new CommandProcessingResult(Long.valueOf(-1L),clientId);
 	}
 	
 	}

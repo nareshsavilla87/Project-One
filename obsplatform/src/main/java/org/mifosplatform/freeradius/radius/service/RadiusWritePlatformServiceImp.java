@@ -8,6 +8,8 @@ import org.apache.commons.codec.binary.Base64;
 import org.json.JSONObject;
 import org.mifosplatform.billing.discountmaster.service.DiscountWritePlatformServiceImpl;
 import org.mifosplatform.freeradius.radius.exception.RadiusDetailsNotFoundException;
+import org.mifosplatform.infrastructure.configuration.domain.Configuration;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -43,18 +45,20 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 	private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
 
 	private final RadiusReadPlatformService radiusReadPlatformService;
+	private final ConfigurationRepository repository;
 
 	@Autowired
 	public RadiusWritePlatformServiceImp(final PlatformSecurityContext context,final RadServuceTempRepository radServiceRepository,
 			final ProvisioningActionsRepository provisioningActionsRepository,final ProcessRequestRepository processRequestRepository,
-			final SheduleJobReadPlatformService sheduleJobReadPlatformService,final RadiusReadPlatformService radiusReadPlatformService) {
+			final SheduleJobReadPlatformService sheduleJobReadPlatformService,final RadiusReadPlatformService radiusReadPlatformService,
+			final ConfigurationRepository repository) {
 		this.context = context;
 		this.radServiceRepository = radServiceRepository;
 		this.provisioningActionsRepository = provisioningActionsRepository;
 		this.processRequestRepository =  processRequestRepository;
 		this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
 		this.radiusReadPlatformService = radiusReadPlatformService;
-
+		this.repository = repository;
 	}
 
 	@Transactional
@@ -95,6 +99,7 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 		
      try {
 		  JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
+		  
 		  if(data == null){
 			throw new RadiusDetailsNotFoundException();
 		   }
@@ -106,9 +111,19 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 			  String radServiceData = this.radiusReadPlatformService.processRadiusDelete(url, encodedPassword);
 			  return new CommandProcessingResult(radServiceData);
 		 }else{
-		      RadServiceTemp radService=this.radServiceRetrieveById(radServiceId);
-		      this.radServiceRepository.delete(radService.getserviceId());
-		      ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_REMOVE_RADSERVICE);
+			  final Configuration property = this.repository.findOneByName("freeradius_rest");
+			  if(property == null){
+					throw new RadiusDetailsNotFoundException();
+			  }
+			  String url = property.getValue() + "radservice/"+radServiceId;
+		      String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+		      byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+		      String encodedPassword = new String(encoded);
+			  String radServiceData = this.radiusReadPlatformService.processRadiusDelete(url, encodedPassword);
+			  
+		      /*RadServiceTemp radService=this.radServiceRetrieveById(radServiceId);
+		      this.radServiceRepository.delete(radService.getserviceId());*/
+		      /*ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_REMOVE_RADSERVICE);
 				if(provisionActions.getIsEnable() == 'Y'){
 					 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), Long.valueOf(0), Long.valueOf(0),provisionActions.getProvisioningSystem(),
 							 provisionActions.getAction(), 'N', 'N');
@@ -116,8 +131,8 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 							 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
 					 processRequest.add(processRequestDetails);
 					 this.processRequestRepository.save(processRequest);
-			        }
-		      return new CommandProcessingResult(radService.getserviceId());
+			        }*/
+		      return new CommandProcessingResult(radServiceId);
 		}
        }catch (IOException e) {
     	   
