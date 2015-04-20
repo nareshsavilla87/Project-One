@@ -301,7 +301,7 @@ public class RadServiceTemp  {
 			long downrate = jsonObject.getLong("downrate");
 			long uprate = jsonObject.getLong("uprate");
 			long trafficunitdl = jsonObject.getLong("trafficunitdl");
-			boolean islimitcomb = jsonObject.getBoolean("islimitcomb");
+			boolean islimitcomb = jsonObject.getBoolean("limitcomb");
 			boolean limitexpiration = jsonObject.getBoolean("limitexpiration");
 			boolean renew = jsonObject.getBoolean("renew");
 			String srvname = jsonObject.getString("srvname");
