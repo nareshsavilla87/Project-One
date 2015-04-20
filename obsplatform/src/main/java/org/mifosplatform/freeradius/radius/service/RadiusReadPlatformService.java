@@ -33,11 +33,13 @@ public interface RadiusReadPlatformService {
 	String processRadiusDelete(String url, String encodePassword)
 			throws ClientProtocolException, IOException;
 
-   List<RadiusServiceData> retrieveRadServiceTemplateData(Long radServiceId);
+   String retrieveRadServiceTemplateData(Long radServiceId);
 	
    String processRadiusGet(String url, String encodePassword) throws ClientProtocolException, IOException;
    
    String processRadiusPost(String url, String encodePassword, String data) throws  IOException;
+
+   String retrieveAllOnlineUsers(String attribute, String limit, String offset, String checkOnline, String userName);
    
 
 

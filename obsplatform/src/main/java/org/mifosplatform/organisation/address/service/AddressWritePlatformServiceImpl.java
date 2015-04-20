@@ -146,9 +146,8 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	                  					throw new PropertyCodeAllocatedException(propertyMaster.getPropertyCode());
 	                  				}
 	                    		  PropertyMaster oldPropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(address.getAddressNo());
-	                    		  if(!address.getAddressNo().equalsIgnoreCase(newPropertyCode)){
-	                    			 if(oldPropertyMaster!=null&& propertyMaster!=null){
-	                    			 oldPropertyMaster.setClientId(null);
+	                    		  if(!address.getAddressNo().equalsIgnoreCase(newPropertyCode)&&oldPropertyMaster!=null){
+                                 	 oldPropertyMaster.setClientId(null);
 	                    			 oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
 	                    			 this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
 	                    			 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_FREE,
@@ -162,10 +161,18 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		                    		 PropertyTransactionHistory newpropertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_ALLOCATE,
 		                    					 address.getClientId(),propertyMaster.getPropertyCode());
 		                    		 this.propertyHistoryRepository.save(newpropertyHistory);
-	                    			 } 
-	                            }
+	                    			 } else{
+	                    				 changes = address.update(command);
+			                        	 this.addressRepository.saveAndFlush(address);
+			                        	 propertyMaster.setClientId(address.getClientId());
+		                    			 propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
+			                    		 this.propertyMasterRepository.saveAndFlush(propertyMaster);
+			                    		 PropertyTransactionHistory newpropertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_ALLOCATE,
+			                    					 address.getClientId(),propertyMaster.getPropertyCode());
+			                    		 this.propertyHistoryRepository.save(newpropertyHistory);
+	                    			 }
 	                            }else{
-	                            	throw new PropertyMasterNotFoundException(Long.valueOf(newPropertyCode));
+	                            	throw new PropertyMasterNotFoundException(clientId);
 	                            }
 	                    		}else{
 	                    		   changes = address.update(command);
