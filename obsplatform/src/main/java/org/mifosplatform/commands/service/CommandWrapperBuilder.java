@@ -2818,6 +2818,30 @@ public class CommandWrapperBuilder {
 	return this;
 }
 
+	public CommandWrapperBuilder createFeeMaster() {
+		this.actionName = "CREATE";
+		this.entityName = "FEEMASTER";
+		this.entityId = null;
+		this.href = "/feemaster";
+		return this;
+	}
+
+	public CommandWrapperBuilder updateFeeMaster(Long id) {
+		this.actionName = "UPDATE";
+		this.entityName = "FEEMASTER";
+		this.entityId = id;
+		this.href = "/feemaster/"+id;
+		return this;
+	}
+
+	public CommandWrapperBuilder deleteFeeMaster(Long id) {
+		this.actionName = "DELETE";
+		this.entityName = "FEEMASTER";
+		this.entityId = id;
+		this.href = "/feemaster/"+id;
+		return this;
+	}
+
 }
 
 

@@ -21,7 +21,7 @@ public class PropertyMasterNotFoundException extends AbstractPlatformDomainRuleE
     }
     
     public PropertyMasterNotFoundException(final Long clientId,final String propertyCode) {
-    	 super("error.msg.client.address.details.not found.with "+propertyCode, "Client address details  not found", clientId);
+    	 super("error.msg.client.address.details.not found.with given property "+propertyCode, "Client address details  not found", clientId);
         
     }
     
