@@ -79,14 +79,14 @@ public class ServiceTransferApiResource {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final ClientPropertyData clientPropertyData = this.propertyReadPlatformService.retrieveClientPropertyDetails(clientId);
-		//final List<PropertyDefinationData> propertyCodesData = this.propertyReadPlatformService.retrieveAllProperties();
-		final FeeMasterData feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId, feeId, true); // If you pass clientId you can set to 'true' else 'false'
-		if(feeMasterData == null){
-	    	throw new NoFeeMasterRegionalPriceFound();
-	    }
 		if(clientPropertyData !=null){
-			//clientPropertyData.setPropertyCodes(propertyCodesData);
-			clientPropertyData.setFeeMasterData(feeMasterData);
+			final List<PropertyDefinationData> propertyCodesData = this.propertyReadPlatformService.retrieveAllProperties();
+			final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId, feeId, true); // If you pass clientId you can set to 'true' else 'false'
+			if(feeMasterData == null){
+		    	throw new NoFeeMasterRegionalPriceFound();
+		    }
+			clientPropertyData.setPropertyCodes(propertyCodesData);
+			clientPropertyData.setFeeMasterData(feeMasterData.get(0));
 
 		}
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());

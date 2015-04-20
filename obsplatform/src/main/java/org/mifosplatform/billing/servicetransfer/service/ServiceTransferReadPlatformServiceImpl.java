@@ -3,10 +3,10 @@ package org.mifosplatform.billing.servicetransfer.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -29,7 +29,7 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 	
 	
 	@Override
-	public FeeMasterData retrieveSingleFeeDetails(Long clientId, Long feeId,boolean isWithClientId) {
+	public List<FeeMasterData> retrieveSingleFeeDetails(Long clientId, Long feeId,boolean isWithClientId) {
 		try {
 			context.authenticatedUser();
 			FeeMasterDataMapper mapper = new FeeMasterDataMapper();
@@ -38,7 +38,7 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 				sql = "select " + mapper.schemaWithClientId(clientId)+" where fm.id = ? and  fm.is_deleted='N'  group by fm.id"; 
 			}
 		
-			return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { feeId });
+			return this.jdbcTemplate.query(sql, mapper, new Object[] { feeId });
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
