@@ -87,6 +87,7 @@ public class ServiceTransferApiResource {
 		    }
 			clientPropertyData.setPropertyCodes(propertyCodesData);
 			clientPropertyData.setFeeMasterData(feeMasterData.get(0));
+
 		}
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, clientPropertyData,RESPONSE_DATA_PARAMETERS);
