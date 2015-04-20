@@ -9,7 +9,7 @@ CREATE  TABLE IF NOT EXISTS `obs_beenius`.`b_fee_master` (
   PRIMARY KEY (`id`) ,
   UNIQUE KEY `fee_code` (`fee_code`)) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
-CREATE  IF NOT EXISTS TABLE `obs_beenius`.`b_fee_detail` (
+CREATE TABLE IF NOT EXISTS `obs_beenius`.`b_fee_detail` (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT ,
   `fee_id` INT NOT NULL ,
   `region_id` VARCHAR(50) NOT NULL ,
