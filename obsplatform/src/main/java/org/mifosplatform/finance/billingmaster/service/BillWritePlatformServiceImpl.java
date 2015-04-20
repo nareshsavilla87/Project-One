@@ -85,6 +85,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		BigDecimal dueAmount = BigDecimal.ZERO;
 		BigDecimal taxAmount = BigDecimal.ZERO;
 		BigDecimal oneTimeSaleAmount = BigDecimal.ZERO;
+		BigDecimal serviceTransferAmount =BigDecimal.ZERO;
 		
 		for (final BillDetail billDetail : billDetails) {
 			if ("SERVICE_CHARGES".equalsIgnoreCase(billDetail.getTransactionType())) {
@@ -107,12 +108,16 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				if (billDetail.getAmount() != null)
 					oneTimeSaleAmount = oneTimeSaleAmount.add(billDetail.getAmount());
 
+			}else if (billDetail.getTransactionType().contains("SERVICE_TRANSFER")) {
+				if (billDetail.getAmount() != null)
+					serviceTransferAmount = serviceTransferAmount.add(billDetail.getAmount());
 			}
 			
 		}
 	  dueAmount = chargeAmount.add(taxAmount).add(oneTimeSaleAmount).add(clientBalance)
-			      .add(adjustmentAmount).subtract(paymentAmount);
-	  billMaster.setChargeAmount(chargeAmount);
+			      .add(adjustmentAmount).add(serviceTransferAmount).subtract(paymentAmount);
+	  
+	  billMaster.setChargeAmount(chargeAmount.add(serviceTransferAmount));
 	  billMaster.setAdjustmentAmount(adjustmentAmount);
 	  billMaster.setTaxAmount(taxAmount);
 	  billMaster.setPaidAmount(paymentAmount);
