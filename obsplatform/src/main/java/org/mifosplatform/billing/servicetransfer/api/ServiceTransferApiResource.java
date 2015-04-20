@@ -73,9 +73,11 @@ public class ServiceTransferApiResource {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final ClientPropertyData clientPropertyData = this.propertyReadPlatformService.retrieveClientPropertyDetails(clientId);
-		final List<PropertyDefinationData> propertyCodesData = this.propertyReadPlatformService.retrieveAllProperties();
+		//final List<PropertyDefinationData> propertyCodesData = this.propertyReadPlatformService.retrieveAllProperties();
+		
 		if(clientPropertyData !=null){
-			clientPropertyData.setPropertyCodes(propertyCodesData);
+		//	clientPropertyData.setPropertyCodes(propertyCodesData);
+			
 		}
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, clientPropertyData,RESPONSE_DATA_PARAMETERS);
