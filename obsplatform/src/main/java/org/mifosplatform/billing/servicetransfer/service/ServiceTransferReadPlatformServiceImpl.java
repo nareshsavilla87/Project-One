@@ -29,16 +29,14 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 	
 	
 	@Override
-	public List<FeeMasterData> retrieveSingleFeeDetails(Long clientId, Long feeId,boolean isWithClientId) {
+	public List<FeeMasterData> retrieveSingleFeeDetails(Long clientId) {
 		try {
 			context.authenticatedUser();
 			FeeMasterDataMapper mapper = new FeeMasterDataMapper();
-			String sql = "";
-			if(isWithClientId){
-				sql = "select " + mapper.schemaWithClientId(clientId)+" where fm.id = ? and  fm.is_deleted='N'  group by fm.id"; 
-			}
+			String sql ;
+				sql = "select " + mapper.schemaWithClientId(clientId)+" where  fm.is_deleted='N'  group by fm.id"; 
 		
-			return this.jdbcTemplate.query(sql, mapper, new Object[] { feeId });
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
