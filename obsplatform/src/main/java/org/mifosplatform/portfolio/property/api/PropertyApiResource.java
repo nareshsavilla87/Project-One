@@ -48,6 +48,7 @@ import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
+import org.mifosplatform.portfolio.property.exceptions.PropertyCodeAllocatedException;
 import org.mifosplatform.portfolio.property.service.PropertyReadPlatformService;
 import org.mifosplatform.scheduledjobs.dataupload.command.DataUploadCommand;
 import org.mifosplatform.scheduledjobs.dataupload.service.DataUploadWritePlatformService;
@@ -193,6 +194,9 @@ public class PropertyApiResource {
 
 		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 		final List<PropertyDefinationData> propertyCodesData = this.propertyReadPlatformService.retrieveAllPropertiesForSearch(propertyCode);
+		if(propertyCode.isEmpty()){
+			throw new PropertyCodeAllocatedException();
+		}
 		return this.toApiJsonSerializer.serialize(propertyCodesData);
 	}
 

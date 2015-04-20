@@ -174,7 +174,7 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 	private static final class PlanDetailsMapper implements RowMapper<PlanData> {
 
 		public String schema() {
-			return "  SELECT da.id AS id,da.plan_code AS planCode,da.plan_description  AS planDescription" +
+			return "   da.id AS id,da.plan_code AS planCode,da.plan_description  AS planDescription" +
 					" FROM  b_plan_master da where  da.id not in (SELECT vgd.content_code FROM b_vendor_agmt_detail vgd, b_vendor_agreement vg " +
 					" where vgd.content_code = da.id  and vg.id = vgd.vendor_agmt_id and vg.content_type ='Package' and vg.id !=?) and da.is_deleted = 'N'";
 
