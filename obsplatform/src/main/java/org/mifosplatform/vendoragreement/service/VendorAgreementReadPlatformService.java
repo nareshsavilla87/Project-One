@@ -7,6 +7,9 @@ package org.mifosplatform.vendoragreement.service;
 
 import java.util.List;
 
+import org.mifosplatform.portfolio.plan.data.PlanCodeData;
+import org.mifosplatform.portfolio.plan.data.PlanData;
+import org.mifosplatform.portfolio.plan.data.ServiceData;
 import org.mifosplatform.vendoragreement.data.VendorAgreementData;
 
 public interface VendorAgreementReadPlatformService {
@@ -18,5 +21,10 @@ public interface VendorAgreementReadPlatformService {
 	List<VendorAgreementData> retrieveVendorAgreementDetails(Long vendorAgreementId);
 
 	List<VendorAgreementData> retrieveRespectiveAgreementData(Long vendorId);
+
+
+	List<PlanData> retrievePlans(Long agId);
+
+	List<ServiceData> retrieveServices(Long agId);
 
 }

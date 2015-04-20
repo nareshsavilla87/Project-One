@@ -16,6 +16,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.priceregion.data.PriceRegionData;
 import org.mifosplatform.portfolio.plan.data.PlanCodeData;
+import org.mifosplatform.portfolio.plan.data.PlanData;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
 
 /**
@@ -40,7 +41,7 @@ public class VendorAgreementData {
     private Date agreementEndDate;
     private String contentType;
     
-    private Long contentCode;
+    private String contentCode;
     private String loyaltyType;
     private BigDecimal loyaltyShare;
     private Long priceRegion;
@@ -48,7 +49,7 @@ public class VendorAgreementData {
     private List<PriceRegionData> priceRegionData;
     private List<EnumOptionData> statusData;
     private List<ServiceData> servicesData;
-    private List<PlanCodeData> planDatas;
+    private List<PlanData> planDatas;
     private Long vendorId;
     private List<VendorAgreementData> vendorAgreementDetailsData;
     private Collection<MCodeData> agreementTypes;
@@ -59,11 +60,13 @@ public class VendorAgreementData {
     private LocalDate localdate;
     private String documentLocation;
     private Long vendorAgreementId;
+	private Long contentCodeId;
+	private String regionName;
     
     
 	public VendorAgreementData(List<PriceRegionData> priceRegionData,
 			Collection<MCodeData> agreementTypes, List<ServiceData> servicesData,
-			List<PlanCodeData> planDatas) {
+			List<PlanData> planDatas) {
 		
 		this.priceRegionData = priceRegionData;
 		this.agreementTypes = agreementTypes;
@@ -119,13 +122,15 @@ public class VendorAgreementData {
 	}
 
 	public VendorAgreementData(Long id, Long vendorAgreementId,
-			Long contentCode, String loyaltyType, BigDecimal loyaltyShare,
-			Long priceRegion, BigDecimal contentCost) {
+			Long contentCodeId, String loyaltyType, BigDecimal loyaltyShare,
+			Long priceRegion, BigDecimal contentCost, String contentCode, String regionName) {
 		
 		this.id = id;
 		this.vendorAgreementId = vendorAgreementId;
 		this.contentCode = contentCode;
 		this.loyaltyType = loyaltyType;
+		this.contentCodeId = contentCodeId;
+		this.regionName = regionName;
 		this.loyaltyShare = loyaltyShare;
 		this.priceRegion = priceRegion;
 		this.contentCost = contentCost;
@@ -205,11 +210,11 @@ public class VendorAgreementData {
 		this.agreementTypes = agreementTypes;
 	}
 
-	public List<PlanCodeData> getPlanDatas() {
+	public List<PlanData> getPlanDatas() {
 		return planDatas;
 	}
 
-	public void setPlanDatas(List<PlanCodeData> planDatas) {
+	public void setPlanDatas(List<PlanData> planDatas) {
 		this.planDatas = planDatas;
 	}
 
