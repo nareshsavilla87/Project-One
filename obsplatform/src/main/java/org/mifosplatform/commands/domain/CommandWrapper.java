@@ -1279,4 +1279,8 @@ public class CommandWrapper {
 	        return this.entityName.equalsIgnoreCase("SERVICETRANSFER");
 		
 		}
+
+		public boolean isFeeMasterResource() {
+			 return this.entityName.equalsIgnoreCase("FEEMASTER");
+		}
 }
