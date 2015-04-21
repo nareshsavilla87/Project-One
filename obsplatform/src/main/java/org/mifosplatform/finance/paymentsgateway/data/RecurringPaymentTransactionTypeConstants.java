@@ -13,7 +13,7 @@ public class RecurringPaymentTransactionTypeConstants {
 	public static final String RECURRING_PAYMENT_FAILED 			= "recurring_payment_failed";
 	public static final String RECURRING_PAYMENT_SKIPPED	 		= "recurring_payment_skipped";
 	public static final String RECURRING_PAYMENT_SUSPENDED		= "recurring_payment_suspended";
-	public static final String RECURRING_PAYMENT_SUSPENDED_DUR_TO_MAX_FAILED_PAYMENT = "recurring_payment_suspended_due_to_max_failed_payment";
+	public static final String RECURRING_PAYMENT_SUSPENDED_DUE_TO_MAX_FAILED_PAYMENT = "recurring_payment_suspended_due_to_max_failed_payment";
 
 	public static final String SUBSCR_SIGNUP						= "subscr_signup";
 	public static final String SUBSCR_PAYMENT						= "subscr_payment";
@@ -39,6 +39,8 @@ public class RecurringPaymentTransactionTypeConstants {
 	public static final String PLANID 				= "planId";
 	public static final String PAYMENTCODE 			= "paytermCode";
 	public static final String CONTRACTPERIOD 		= "contractPeriod";
+	public static final String PLANCODE 				= "planCode";
+	
 	
 	//Paypal Constant Variable Names
 	public static final String PAYMENTSTATUS 			= "payment_status";

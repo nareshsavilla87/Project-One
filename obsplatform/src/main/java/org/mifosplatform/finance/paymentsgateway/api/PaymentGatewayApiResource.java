@@ -64,6 +64,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+import urn.ebay.apis.eBLBaseComponents.SetExpressCheckoutRequestDetailsType;
+
 import com.google.gson.JsonObject;
 
 @Path("/paymentgateways")
@@ -746,14 +748,13 @@ public class PaymentGatewayApiResource {
 
 				String txnType = request.getParameter(RecurringPaymentTransactionTypeConstants.RECURRING_TXNTYPE);
 				
-				System.out.println(txnType);
-				
 				switch (txnType) {
 
 				case RecurringPaymentTransactionTypeConstants.SUBSCR_SIGNUP:
 				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_PROFILE_CREATED:
 					
 					this.paymentGatewayRecurringWritePlatformService.recurringSubscriberSignUp(request);
+			
 					break;
 					
 				case RecurringPaymentTransactionTypeConstants.SUBSCR_PAYMENT:
@@ -778,15 +779,19 @@ public class PaymentGatewayApiResource {
 				case RecurringPaymentTransactionTypeConstants.SUBSCR_EOT:
 				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_EXPIRED:
 					
+					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(request);
+				
 					break;
 					
 				case RecurringPaymentTransactionTypeConstants.SUBSCR_FAILED:
 				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILED:
 					
+					
 					break;
 	
 				case RecurringPaymentTransactionTypeConstants.SUBSCR_CANCELLED:
 					
+					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(request);
 					break;
 					
 				case RecurringPaymentTransactionTypeConstants.SUBSCR_MODIFY:
@@ -801,7 +806,7 @@ public class PaymentGatewayApiResource {
 					
 					break;
 				
-				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUSPENDED_DUR_TO_MAX_FAILED_PAYMENT:
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUSPENDED_DUE_TO_MAX_FAILED_PAYMENT:
 					
 					break;
 

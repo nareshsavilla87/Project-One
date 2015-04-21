@@ -22,6 +22,9 @@ public class PaypalRecurringBilling extends AbstractPersistable<Long> {
     @Column(name = "subscriber_id", nullable = false)
     private String subscriberId;
     
+    @Column(name = "order_id", nullable = true)
+    private Long orderId;
+    
     public PaypalRecurringBilling(){
     	
     }
@@ -46,7 +49,17 @@ public class PaypalRecurringBilling extends AbstractPersistable<Long> {
 	public Long getClientId() {
 		return clientId;
 	}
-    
-    
+
+	public void setClientId(Long clientId) {
+		this.clientId = clientId;
+	}
+
+	public Long getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
     
 }
