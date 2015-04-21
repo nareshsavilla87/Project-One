@@ -6,3 +6,6 @@ CREATE TABLE `b_recurring` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `code` (`subscriber_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8 COMMENT='utf8_general_ci'
+
+
+INSERT ignore into c_configuration values(null,'sms-configuration',0,'{"URL":"http://smscountry.com/SMSCwebservice_Bulk.aspx"}');
