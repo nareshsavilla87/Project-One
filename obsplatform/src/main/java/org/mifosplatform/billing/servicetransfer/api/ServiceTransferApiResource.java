@@ -70,21 +70,19 @@ public class ServiceTransferApiResource {
 	 * @return retrieved client property details
 	 */
 	@GET
-	@Path("{clientId}/{feeId}")
+	@Path("{clientId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveClientPropertyData(@PathParam("clientId") final Long clientId,@PathParam("feeId") final Long feeId,@Context final UriInfo uriInfo) {
+	public String retrieveClientPropertyData(@PathParam("clientId") final Long clientId,@Context final UriInfo uriInfo) {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final ClientPropertyData clientPropertyData = this.propertyReadPlatformService.retrieveClientPropertyDetails(clientId);
-		//final List<PropertyDefinationData> propertyCodesData = this.propertyReadPlatformService.retrieveAllProperties();
-		final FeeMasterData feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId, feeId, true); // If you pass clientId you can set to 'true' else 'false'
-		if(feeMasterData == null){
-	    	throw new NoFeeMasterRegionalPriceFound();
-	    }
 		if(clientPropertyData !=null){
-			//clientPropertyData.setPropertyCodes(propertyCodesData);
-			clientPropertyData.setFeeMasterData(feeMasterData);
+			final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId);
+			if(feeMasterData == null){
+		    	throw new NoFeeMasterRegionalPriceFound();
+		    }
+			clientPropertyData.setFeeMasterData(feeMasterData.get(0));
 
 		}
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
