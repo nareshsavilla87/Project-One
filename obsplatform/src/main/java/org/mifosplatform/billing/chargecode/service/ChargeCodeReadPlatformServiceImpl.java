@@ -1,5 +1,6 @@
 package org.mifosplatform.billing.chargecode.service;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 
 import java.sql.SQLException;
@@ -174,6 +175,51 @@ public class ChargeCodeReadPlatformServiceImpl implements
 
 			return jdbcTemplate.queryForObject(sql, mapper,
 					new Object[] { chargeCodeId });
+		} catch (EmptyResultDataAccessException accessException) {
+			return null;
+		}
+	}
+
+	private static final class ChargeCodeRecurringMapper implements RowMapper<ChargeCodeData> {
+
+		public String schema() {
+			return " cc.id as id, cc.charge_code AS chargeCode, pp.price AS price, cc.duration_type AS durationType," +
+					" cc.charge_duration AS chargeDuration, cc.billfrequency_code AS billFrequencyCode " +
+					" FROM (b_plan_pricing pp JOIN b_plan_master pm ON pm.id = pp.plan_id) " +
+					" JOIN b_charge_codes cc ON pp.charge_code = cc.charge_code WHERE pm.is_deleted = 'n' " +
+					" AND pp.plan_id = ?  and cc.billfrequency_code = ? group by cc.id";
+		}
+
+		@Override
+		public ChargeCodeData mapRow(final ResultSet rs, final int rowNum)
+				throws SQLException {
+
+			final Long id = rs.getLong("id");
+			final String chargeCode = rs.getString("chargeCode");
+			final BigDecimal price = rs.getBigDecimal("price");
+			final String durationType = rs.getString("durationType");
+			final Integer chargeDuration = rs.getInt("chargeDuration");
+			final String billFrequencyCode = rs.getString("billFrequencyCode");
+
+			ChargeCodeData chargeCodeData = new ChargeCodeData(id, chargeCode, null, null, chargeDuration, durationType, null, billFrequencyCode);
+			chargeCodeData.setPrice(price);
+			
+			return chargeCodeData;	
+		}
+	}
+	
+	@Override
+	public ChargeCodeData retrieveChargeCodeForRecurring(Long planId,
+			String billingFrequency) {
+		try {
+
+			final ChargeCodeRecurringMapper mapper = new ChargeCodeRecurringMapper();
+
+			final String sql = "select " + mapper.schema();
+
+			return jdbcTemplate.queryForObject(sql, mapper, new Object[] {
+					planId, billingFrequency });
+		
 		} catch (EmptyResultDataAccessException accessException) {
 			return null;
 		}

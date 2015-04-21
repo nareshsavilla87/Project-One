@@ -41,7 +41,6 @@ public class RadiusWritePlatformServiceImp implements RadiusWritePlatformService
 	private final ProvisioningActionsRepository provisioningActionsRepository;
 	private final ProcessRequestRepository processRequestRepository;
 	private final SheduleJobReadPlatformService sheduleJobReadPlatformService;
-
 	private final RadiusReadPlatformService radiusReadPlatformService;
 
 	@Autowired

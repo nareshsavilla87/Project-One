@@ -69,7 +69,7 @@ public class EntitlementsData {
 
 	}
 	
-	//Beenius
+	/*//Beenius
 	public EntitlementsData(Long id, Long prdetailsId,String provisioingSystem, Long serviceId, String product,String hardwareId, 
 			String requestType, String itemCode,String itemDescription, Long clientId, String accountNo,String firstName, String lastName,
 			String officeUId, String branch,String regionCode, String regionName, String deviceId,String ipAddress) {
@@ -95,7 +95,7 @@ public class EntitlementsData {
 		this.deviceId = deviceId;
 		this.ipAddress = ipAddress;
 
-	}
+	}*/
 
 	//ZeebraOTT
 	public EntitlementsData(Long id, Long clientId, String accountNo,String firstName, String lastName, String email, String phone,
@@ -189,6 +189,38 @@ public class EntitlementsData {
 		this.selfcareUsername = selfcareUsername;
 		this.selfcarePassword = selfcarePassword;
 		
+	}
+
+	public EntitlementsData(Long id, Long prdetailsId,
+			String provisioingSystem, String product, String macId,
+			String requestType, String itemCode, String itemDescription,
+			Long clientId, String accountNo, String firstName,
+			String lastName, String officeUID, String branch,
+			String regionCode, String regionName, String deviceId,
+			String ipAddress, String username, String password,
+			String subscriberId) {
+		
+		this.id = id;
+		this.clientId = clientId;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.provisioingSystem = provisioingSystem;
+		this.prdetailsId = prdetailsId;
+		this.product = product;
+		this.macId = macId;
+		this.deviceId = deviceId;
+		this.requestType = requestType;
+		this.zebraSubscriberId = new Long(subscriberId);;
+		this.regionCode = regionCode;
+		this.regionName = regionName;
+		this.selfcareUsername = username;
+		this.selfcarePassword = password;
+		this.itemCode = itemCode;
+		this.itemDescription = itemDescription;
+		this.accountNo = accountNo;
+		this.officeUId = officeUID;
+		this.branch = branch;
+		this.ipAddress = ipAddress;
 	}
 
 	public Long getId() {
