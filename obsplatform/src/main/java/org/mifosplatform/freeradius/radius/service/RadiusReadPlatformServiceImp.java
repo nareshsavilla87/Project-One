@@ -192,8 +192,12 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 		        }
 			}
 			
-			
-			ProvisionActions provisionActions = this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_NAS);
+			/**
+			 * @Deprecated
+			 * 
+			 ** /
+			 *
+			/*ProvisionActions provisionActions = this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_NAS);
 			
 			if(provisionActions.getIsEnable() == 'Y'){
 				
@@ -207,7 +211,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 				 processRequest.add(processRequestDetails);
 				 this.processRequestRepository.save(processRequest);
 				
-			}
+			}*/
 			return nasData;
 			
 		} catch (ClientProtocolException e) {
@@ -397,7 +401,12 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 					jsonObject.put("limitdl", radServiceTemp.isLimitdl());
 					resultId=radServiceTemp.getserviceId();*/
 					
-					ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_RADSERVICE);
+					/**
+					 * @Deprecated
+					 * 
+					 * */
+					
+					/*ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_RADSERVICE);
 					if(provisionActions.getIsEnable() == 'Y'){
 						
 						jsonObject.put("srvid", 0);
@@ -413,7 +422,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 						 processRequest.add(processRequestDetails);
 						 this.processRequestRepository.save(processRequest);
-					}
+					}*/
 					
 					
 			}
