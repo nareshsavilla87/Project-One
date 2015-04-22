@@ -31,7 +31,7 @@ insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`proc
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Ticket','Send Email','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Client','Send Mail','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Live Event','Active Live Event','workflow_events','Y','N');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Payment','Create Payment','workflow_events','Y','N');
+insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Payment','RENEWAL','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Live Event','Active Live Event','workflow_events','Y','Y');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Payment','Create Payment','workflow_events','Y','N');
 

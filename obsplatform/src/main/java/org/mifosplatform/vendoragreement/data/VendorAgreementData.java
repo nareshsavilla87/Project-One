@@ -218,6 +218,106 @@ public class VendorAgreementData {
 		this.planDatas = planDatas;
 	}
 
+	public Long getId() {
+		return id;
+	}
+
+	public String getVendorCode() {
+		return vendorCode;
+	}
+
+	public String getVendorDescription() {
+		return vendorDescription;
+	}
+
+	public String getVendorEmailId() {
+		return vendorEmailId;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public String getVendormobileNo() {
+		return vendormobileNo;
+	}
+
+	public String getVendorTelephoneNo() {
+		return vendorTelephoneNo;
+	}
+
+	public String getVendorAddress() {
+		return vendorAddress;
+	}
+
+	public String getAgreementStatus() {
+		return agreementStatus;
+	}
+
+	public String getVendorCountry() {
+		return vendorCountry;
+	}
+
+	public String getVendorCurrency() {
+		return vendorCurrency;
+	}
+
+	public Date getAgreementStartDate() {
+		return agreementStartDate;
+	}
+
+	public Date getAgreementEndDate() {
+		return agreementEndDate;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public String getContentCode() {
+		return contentCode;
+	}
+
+	public String getLoyaltyType() {
+		return loyaltyType;
+	}
+
+	public BigDecimal getLoyaltyShare() {
+		return loyaltyShare;
+	}
+
+	public Long getPriceRegion() {
+		return priceRegion;
+	}
+
+	public BigDecimal getContentCost() {
+		return contentCost;
+	}
+
+	public List<EnumOptionData> getStatusData() {
+		return statusData;
+	}
+
+	public Long getVendorId() {
+		return vendorId;
+	}
+
+	public String getDocumentLocation() {
+		return documentLocation;
+	}
+
+	public Long getVendorAgreementId() {
+		return vendorAgreementId;
+	}
+
+	public Long getContentCodeId() {
+		return contentCodeId;
+	}
+
+	public String getRegionName() {
+		return regionName;
+	}
+
 	
 	
 }

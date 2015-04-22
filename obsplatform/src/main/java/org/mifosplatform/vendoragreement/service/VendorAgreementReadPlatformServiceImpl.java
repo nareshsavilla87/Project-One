@@ -154,7 +154,7 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 		public String schema() {
 			return " da.id AS id,da.service_code AS service_code,da.service_description AS service_description" +
 				   " FROM b_service da where  da.id not in (SELECT vgd.content_code FROM b_vendor_agmt_detail vgd, b_vendor_agreement vg " +
-				   " where vgd.content_code = da.id  and vg.id = vgd.vendor_agmt_id and vg.content_type ='Service'  and vg.id !=? )and da.is_deleted = 'N'";
+				   " where vgd.content_code = da.id  and vg.id = vgd.vendor_agmt_id and vg.content_type ='Service'  and vg.vendor_id !=? )and da.is_deleted = 'N'";
 
 		}
 
@@ -176,7 +176,7 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 		public String schema() {
 			return "   da.id AS id,da.plan_code AS planCode,da.plan_description  AS planDescription" +
 					" FROM  b_plan_master da where  da.id not in (SELECT vgd.content_code FROM b_vendor_agmt_detail vgd, b_vendor_agreement vg " +
-					" where vgd.content_code = da.id  and vg.id = vgd.vendor_agmt_id and vg.content_type ='Package' and vg.id !=?) and da.is_deleted = 'N'";
+					" where vgd.content_code = da.id  and vg.id = vgd.vendor_agmt_id and vg.content_type ='Package' and vg.vendor_id !=?) and da.is_deleted = 'N'";
 
 		}
 

@@ -25,6 +25,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -117,21 +118,21 @@ public class VendorAgreementApiResource {
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String vendorAgreementTemplateDetails(@Context final UriInfo uriInfo) {
+    public String vendorAgreementTemplateDetails(@QueryParam("vendorId") final Long vendorId,@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
-        VendorAgreementData vendor=handleTemplateData();
+        VendorAgreementData vendor=handleTemplateData(vendorId);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, vendor, RESPONSE_DATA_PARAMETERS);
     }
     
-    private VendorAgreementData handleTemplateData() {
+    private VendorAgreementData handleTemplateData(Long vendorId) {
 		
     	final List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
         //final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
     	final Collection<MCodeData> agreementTypes = this.mCodeReadPlatformService.getCodeValue("Agreement Type");
-        final List<ServiceData> servicesData = this.vendorAgreementReadPlatformService.retrieveServices(Long.valueOf(0));
-        final List<PlanData> planDatas = this.vendorAgreementReadPlatformService.retrievePlans(Long.valueOf(0));
+        final List<ServiceData> servicesData = this.vendorAgreementReadPlatformService.retrieveServices(vendorId);
+        final List<PlanData> planDatas = this.vendorAgreementReadPlatformService.retrievePlans(vendorId);
 		 
 		return new VendorAgreementData(priceRegionData, agreementTypes, servicesData,
 					planDatas);
@@ -221,8 +222,8 @@ public class VendorAgreementApiResource {
         if (settings.isTemplate()) {
         	final List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
         	final Collection<MCodeData> agreementTypes = this.mCodeReadPlatformService.getCodeValue("Agreement Type");
-            final List<ServiceData> servicesData = this.vendorAgreementReadPlatformService.retrieveServices(vendorAgreementId);
-            final List<PlanData> planDatas = this.vendorAgreementReadPlatformService.retrievePlans(vendorAgreementId);
+            final List<ServiceData> servicesData = this.vendorAgreementReadPlatformService.retrieveServices(vendorAgreeData.getVendorId());
+            final List<PlanData> planDatas = this.vendorAgreementReadPlatformService.retrievePlans(vendorAgreeData.getVendorId());
             vendorAgreeData.setPriceRegionData(priceRegionData);
             vendorAgreeData.setPlanDatas(planDatas);
             vendorAgreeData.setAgreementTypes(agreementTypes);
