@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.data.AddressData;
 import org.mifosplatform.organisation.address.data.AddressLocationDetails;
+import org.mifosplatform.organisation.address.data.CityDetailsData;
 import org.mifosplatform.organisation.address.exception.AddressNoRecordsFoundException;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -221,5 +222,17 @@ public class ClientAddressApiResource {
 		final List<String> countryData = this.addressReadPlatformService.retrieveCountryDetails();
 		 return this.toApiJsonSerializer.serialize(countryData);
 	}
+	
+	@GET
+	@Path("/city")
+	@Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveAddressDetailsWithcityName(@Context final UriInfo uriInfo,@QueryParam("query") final String cityName){
+		
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final List<CityDetailsData> cityDetails = this.addressReadPlatformService.retrieveAddressDetailsByCityName(cityName);
+		 return this.toApiJsonSerializer.serialize(cityDetails);
+	}
+	
 	
 }

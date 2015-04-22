@@ -365,6 +365,39 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 		}
 
 	}
+
+	@Override
+	public List<CityDetailsData> retrieveAddressDetailsByCityName(final String cityName) {
+
+		try {
+			context.authenticatedUser();
+			final CityDetailMapper mapper = new CityDetailMapper();
+			final String sql = "select "+ mapper.schema()+ " where cc.is_delete ='N' and bc.is_active='Y' and cc.city_name like '%"+cityName+"%' order by bc.id LIMIT 15";
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	private static final class CityDetailMapper implements RowMapper<CityDetailsData> {
+
+		public String schema() {
+			return " bc.country_name as countryName, bs.state_name as stateName,city_name as cityName,cc.city_code as cityCode "
+					+ " from b_city cc join b_state bs on (cc.parent_code = bs.id) join b_country bc on (bc.id = bs.parent_code) ";
+
+		}
+
+		@Override
+		public CityDetailsData mapRow(final ResultSet rs, final int rowNum)throws SQLException {
+
+			final String cityName = rs.getString("cityName");
+			final String cityCode = rs.getString("cityCode");
+			final String state = rs.getString("stateName");
+			final String country = rs.getString("countryName");
+			return new CityDetailsData(cityName, cityCode, state, country);
+
+		}
+	}
 }
 
 

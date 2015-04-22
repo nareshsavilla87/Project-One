@@ -69,7 +69,7 @@ public final class PropertyCommandFromApiJsonDeserializer {
 		final String unitCode = fromApiJsonHelper.extractStringNamed("unitCode", element);
 		baseDataValidator.reset().parameter("unitCode").value(unitCode).notBlank();
 		
-		final Long floor = fromApiJsonHelper.extractLongNamed("floor", element);
+		final String floor = fromApiJsonHelper.extractStringNamed("floor", element);
 		baseDataValidator.reset().parameter("floor").value(floor).notBlank();
 
 		final String  buildingCode = fromApiJsonHelper.extractStringNamed("buildingCode", element);

@@ -87,7 +87,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final String propertyType = rs.getString("propertyType");
 			final String propertyCode = rs.getString("propertyCode");
 			final String unitCode = rs.getString("unitCode");
-			final Long floor = rs.getLong("floor");
+			final String floor = rs.getString("floor");
 			final String buildingCode = rs.getString("buildingCode");
 			final String parcel = rs.getString("parcel");
 			final String precinct = rs.getString("precinct");
@@ -228,7 +228,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final String propertyType = rs.getString("propertyType");
 			final String propertyCode = rs.getString("propertyCode");
 			final String unitCode = rs.getString("unitCode");
-			final Long floor = rs.getLong("floor");
+			final String floor = rs.getString("floor");
 			final String buildingCode = rs.getString("buildingCode");
 			final String parcel = rs.getString("parcel");
 			final String precinct = rs.getString("precinct");
