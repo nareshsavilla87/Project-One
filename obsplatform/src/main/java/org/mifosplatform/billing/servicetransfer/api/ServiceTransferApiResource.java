@@ -16,6 +16,8 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.billing.servicetransfer.data.ClientPropertyData;
+import org.mifosplatform.billing.servicetransfer.exception.NoFeeMasterRegionalPriceFound;
+import org.mifosplatform.billing.servicetransfer.service.ServiceTransferReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -24,6 +26,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
 import org.mifosplatform.portfolio.property.service.PropertyReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,18 +49,21 @@ public class ServiceTransferApiResource {
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService;
 	private final PropertyReadPlatformService propertyReadPlatformService;
+	private final ServiceTransferReadPlatformService serviceTransferReadPlatformService;
 
 	@Autowired
 	public ServiceTransferApiResource(final PlatformSecurityContext context,
 			final DefaultToApiJsonSerializer<ClientPropertyData> toApiJsonSerializer,
 			final ApiRequestParameterHelper apiRequestParameterHelper,
 			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
-			final PropertyReadPlatformService propertyReadPlatformService) {
+			final PropertyReadPlatformService propertyReadPlatformService,
+			final ServiceTransferReadPlatformService serviceTransferReadPlatformService) {
 		this.context = context;
 		this.toApiJsonSerializer = toApiJsonSerializer;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.commandSourceWritePlatformService = commandSourceWritePlatformService;
 		this.propertyReadPlatformService = propertyReadPlatformService;
+		this.serviceTransferReadPlatformService = serviceTransferReadPlatformService;
 
 	}
 
@@ -73,9 +79,13 @@ public class ServiceTransferApiResource {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final ClientPropertyData clientPropertyData = this.propertyReadPlatformService.retrieveClientPropertyDetails(clientId);
-		final List<PropertyDefinationData> propertyCodesData = this.propertyReadPlatformService.retrieveAllProperties();
 		if(clientPropertyData !=null){
-			clientPropertyData.setPropertyCodes(propertyCodesData);
+			final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId);
+			if(feeMasterData == null){
+		    	throw new NoFeeMasterRegionalPriceFound();
+		    }
+			clientPropertyData.setFeeMasterData(feeMasterData.get(0));
+
 		}
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, clientPropertyData,RESPONSE_DATA_PARAMETERS);

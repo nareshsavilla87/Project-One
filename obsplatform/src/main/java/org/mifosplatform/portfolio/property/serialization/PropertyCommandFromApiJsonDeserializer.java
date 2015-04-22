@@ -33,7 +33,8 @@ public final class PropertyCommandFromApiJsonDeserializer {
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("propertyCode", "propertyType", "unitCode",
 					"floor", "buildingCode", "parcel", "street", "status","precinct", "poBox", "state", "country"));
 	
-	private final Set<String> supportedParametersForServiceTransfer = new HashSet<String>(Arrays.asList("oldPropertyCode", "newPropertyCode", "shiftChargeAmount","locale","unitCode","clientId"));
+	private final Set<String> supportedParametersForServiceTransfer = new HashSet<String>(Arrays.asList("oldPropertyCode", "newPropertyCode", "shiftChargeAmount","locale","unitCode",
+			           "clientId","chargeCode"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
@@ -116,6 +117,9 @@ public final class PropertyCommandFromApiJsonDeserializer {
 		
 		final BigDecimal shiftChargeAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("shiftChargeAmount", element);
 		baseDataValidator.reset().parameter("shiftChargeAmount").value(shiftChargeAmount).notBlank().notExceedingLengthOf(10);
+		
+		final String chargeCode = fromApiJsonHelper.extractStringNamed("chargeCode", element);
+		baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notBlank();
 		
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 		

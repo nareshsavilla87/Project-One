@@ -67,6 +67,8 @@ public static final String CODE_PROPERTY_DEFINE = "Property Definition";
 public static final String CODE_PROPERTY_UPDATE = "Property Updation";
 public static final String CODE_PROPERTY_ALLOCATE = "Property Allocated";
 public static final String CODE_PROPERTY_FREE = "Property Free";
+public static final String TRANSACTION_TYPE = "Transaction Type";
+public static final String CODE_PROPERTY_SERVICE_TRANSFER = "Service Transfer";
 
 
 }

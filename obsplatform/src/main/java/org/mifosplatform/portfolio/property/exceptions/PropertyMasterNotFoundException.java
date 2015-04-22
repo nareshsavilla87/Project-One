@@ -1,18 +1,18 @@
 package org.mifosplatform.portfolio.property.exceptions;
 
-import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
  * A {@link RuntimeException} thrown when a code is not found.
  */
 @SuppressWarnings("serial")
-public class PropertyMasterNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class PropertyMasterNotFoundException extends AbstractPlatformDomainRuleException {
 
     /**
      * @param propertyId
      */
     public PropertyMasterNotFoundException(final Long propertyId) {
-        super("error.msg.property.not.found", "Property Code with this id"+propertyId+"not exist",propertyId);
+        super("error.msg.invalid.property.code", "Property Code with this id"+propertyId+"not exist",propertyId);
         
     }
     
@@ -21,7 +21,7 @@ public class PropertyMasterNotFoundException extends AbstractPlatformResourceNot
     }
     
     public PropertyMasterNotFoundException(final Long clientId,final String propertyCode) {
-    	 super("error.msg.client.address.details.not found.with "+propertyCode, "Client address details  not found", clientId);
+    	 super("error.msg.client.address.details.not found.with given property "+propertyCode, "Client address details  not found", clientId);
         
     }
     
