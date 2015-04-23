@@ -134,12 +134,12 @@ public class RedemptionWritePlatformServiceImpl implements
 				result=this.adjustmentWritePlatformService.createAdjustment(commd);
 				 resourceId=result.resourceId();
 
-				  JournalVoucher journalVoucher=new JournalVoucher(voucher.getOfficeId(),DateUtils.getDateOfTenant(),"Redemption",null,
+				/*  JournalVoucher journalVoucher=new JournalVoucher(voucher.getOfficeId(),DateUtils.getDateOfTenant(),"Redemption",null,
 						  pinValue.doubleValue(),Long.valueOf(0));
 					this.journalvoucherRepository.save(journalVoucher);
 					
 					journalVoucher=new JournalVoucher(resourceId,DateUtils.getDateOfTenant(),"Redemption",pinValue.doubleValue(),null,clientId);
-						this.journalvoucherRepository.save(journalVoucher);
+						this.journalvoucherRepository.save(journalVoucher);*/
 			}
 			 
 			if(pinType.equalsIgnoreCase(PRODUCE_PINTYPE) && pinTypeValue != null){
