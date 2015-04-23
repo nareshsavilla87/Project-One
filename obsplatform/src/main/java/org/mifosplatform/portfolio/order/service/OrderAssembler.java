@@ -75,7 +75,8 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			endDate = calculateEndDate(startDate,contractData.getSubscriptionType(),contractData.getUnits());
 			
 			order=new Order(order.getClientId(),order.getPlanId(),orderStatus,null,order.getBillingFrequency(),startDate, endDate,
-					order.getContarctPeriod(), serviceDetails, orderprice,order.getbillAlign(),UserActionStatusTypeEnum.ACTIVATION.toString());
+					 order.getContarctPeriod(), serviceDetails, orderprice,order.getbillAlign(),
+					 UserActionStatusTypeEnum.ACTIVATION.toString(),plan.isPrepaid());
 			
 			BigDecimal priceforHistory=BigDecimal.ZERO;
 

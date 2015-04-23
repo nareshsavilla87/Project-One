@@ -7,7 +7,6 @@ import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -24,6 +23,11 @@ import org.mifosplatform.useradministration.domain.AppUser;
 @Entity
 @Table(name = "b_orders")
 public class Order extends AbstractAuditableCustom<AppUser, Long> {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Column(name = "client_id")
 	private Long clientId;
@@ -94,8 +98,9 @@ public class Order extends AbstractAuditableCustom<AppUser, Long> {
  
 	
 	public Order(Long client_id, Long plan_id, Long status, Long duration_type,String billingFreq,
-			LocalDate startDate, LocalDate endDate, Long contract,
-			List<OrderLine> serviceDetails, List<OrderPrice> orderprice,char billalign,String userAction) {
+			LocalDate startDate, LocalDate endDate, Long contract,List<OrderLine> serviceDetails, 
+			List<OrderPrice> orderprice,char billalign,String userAction,char isPrepaid) {
+		
 		this.clientId = client_id;
 		this.planId = plan_id;
 		this.status = status;
@@ -104,15 +109,14 @@ public class Order extends AbstractAuditableCustom<AppUser, Long> {
 		this.startDate = startDate.toDate();
 		if (endDate != null)
 			this.endDate = endDate.toDate();
-		 this.billingAlign = this.endDate == null?'Y':'N';
 		this.services = serviceDetails;
 		this.price = orderprice;
 		this.contarctPeriod = contract;
-		//this.billingAlign=billalign;
-		this.isDeleted='n';
+    	this.isDeleted='n';
 		this.userAction=userAction;
 		this.orderNo="";
 		this.activeDate=startDate.toDate();
+		this.billingAlign = isPrepaid == 'N' ? 'Y':'N';
 	}
 
 public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode, char billAlign,LocalDate startdate) {

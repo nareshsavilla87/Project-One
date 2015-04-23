@@ -28,6 +28,7 @@ IF NOT EXISTS(Select * from INFORMATION_SCHEMA.TABLES where  TABLE_SCHEMA = DATA
   SET @ddl = CONCAT('RENAME table b_event_pricediscount to b_mod_pricediscount');
   PREPARE STMT FROM @ddl;
   EXECUTE STMT;
+END IF;
 END IF; 
 END IF;
 IF EXISTS(Select * from INFORMATION_SCHEMA.TABLES where  TABLE_SCHEMA = DATABASE() and TABLE_NAME ='b_eventorder') then

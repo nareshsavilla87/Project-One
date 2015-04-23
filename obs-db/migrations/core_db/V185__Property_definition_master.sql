@@ -31,6 +31,7 @@ INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'DELETE_PROPERTY', 
 INSERT IGNORE INTO m_permission values(null, 'billing', 'CREATE_SERVICETRANSFER', 'SERVICETRANSFER', 'CREATE', '0');
 
 
+
 INSERT IGNORE INTO `m_code`(id,code_name,is_system_defined,code_description) VALUES(null,'Property Type',0,'Define Customer Property Type');
 SET @a_lid:=(select id from m_code where code_name='Property Type');
 INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(null,@a_lid,'Tower',0);
@@ -40,6 +41,7 @@ insert ignore into m_permission VALUES (null,'client&orders','UPDATE_CLIENTADDIT
 insert ignore into m_permission VALUES (null,'client&orders','CREATE_CLIENTADDITIONALINFO','CLIENTADDITIONALINFO','CREATE',0);
 
 INSERT IGNORE INTO c_configuration VALUES(null, 'is-propertycode-enabled', '1', '');
+
 
 
 
@@ -57,6 +59,7 @@ CREATE TABLE IF NOT EXISTS `b_property_history` (
   PRIMARY KEY (`id`)
   ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
+
 Drop procedure IF EXISTS propertyDefination; 
 DELIMITER //
 create procedure propertyDefination() 
@@ -72,7 +75,6 @@ END //
 DELIMITER ;
 call propertyDefination();
 Drop procedure IF EXISTS propertyDefination;
-
 
 
 
