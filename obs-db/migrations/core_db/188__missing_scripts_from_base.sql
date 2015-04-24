@@ -201,6 +201,35 @@ DELIMITER ;
 call modifyb_ticketmasterconstraint();
 Drop procedure IF EXISTS modifyb_ticketmasterconstraint;
 
+DELIMITER //
+create procedure addsubnettoippool() 
+Begin
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'subnet'
+     and TABLE_NAME = 'b_ippool_details'
+     and TABLE_SCHEMA = DATABASE())THEN
+Alter table b_ippool_details add column subnet bigint(10) DEFAULT NULL;
+END IF;
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'notes'
+     and TABLE_NAME = 'b_ippool_details'
+     and TABLE_SCHEMA = DATABASE())THEN
+Alter table b_ippool_details add column notes varchar(60) DEFAULT NULL;
+END IF;
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'type'
+     and TABLE_NAME = 'b_ippool_details'
+     and TABLE_SCHEMA = DATABASE())THEN
+Alter table b_ippool_details add column type bigint(20) DEFAULT NULL;
+END IF;
+END //
+DELIMITER ;
+call addsubnettoippool();
+Drop procedure IF EXISTS addsubnettoippool;
+
 /* Depricated Tables
 1.b_plan_qualifier
 2.b_partner_settlement
@@ -328,7 +357,11 @@ BEGIN
 	END;
 
 
+	
 -- data
+
+insert into m_permission values(null,'Organisation','CREATE_IPPOOLMANAGEMENT','IPPOOLMANAGEMENT','CREAT',0);
+
 insert ignore into c_paymentgateway_conf values(null,'is-paypal',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
 insert ignore into c_paymentgateway_conf values(null,'is-paypal-for-ios',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
 

@@ -2,7 +2,6 @@ package org.mifosplatform.logistics.mrn.exception;
 
 import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
-
 public class InvalidMrnIdException extends AbstractPlatformDomainRuleException {
 
  

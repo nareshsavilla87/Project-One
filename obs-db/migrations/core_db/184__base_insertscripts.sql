@@ -73,6 +73,15 @@ insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`prov
 insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`provisioning_system`,`is_enable`,`is_delete`) values (null,'Update RadSevice','UPDATE RADSERVICE','Radius','N','N');
 insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`provisioning_system`,`is_enable`,`is_delete`) values (null,'Remove RadSevice','REMOVE RADSERVICE','Radius','N','N');
 
+
+-- Price Region 
+insert into b_priceregion_master (id,priceregion_code,priceregion_name,createdby_id,created_date,is_deleted) 
+ VALUES (null,'Default','Default Region',null,null,'N');
+
+ 
+ insert into b_priceregion_detail (priceregion_id,country_id,state_id,is_deleted)
+select prm.id,0,0,'N' from b_priceregion_master prm where prm.priceregion_code ='Default';
+
 -- Views
 -----------
   
