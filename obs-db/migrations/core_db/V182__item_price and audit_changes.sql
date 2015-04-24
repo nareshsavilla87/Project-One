@@ -28,6 +28,21 @@ call regionIdToItemAudit();
 Drop procedure IF EXISTS regionIdToItemAudit;
 
 
+DELIMITER //
+create procedure addsessionupdatecolumn() 
+Begin
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'session_lastupdate'
+     and TABLE_NAME = 'b_login_history'
+     and TABLE_SCHEMA = DATABASE())THEN
+Alter  table b_login_history add column session_lastupdate datetime DEFAULT NULL;
+END IF;
+END //
+DELIMITER ;
+call addsessionupdatecolumn();
+Drop procedure IF EXISTS addsessionupdatecolumn; 
+
 Drop procedure IF EXISTS addInvoiceInDeviceSale; 
 DELIMITER //
 create procedure addInvoiceInDeviceSale() 
@@ -44,3 +59,4 @@ END //
 DELIMITER ;
 call addInvoiceInDeviceSale();
 Drop procedure IF EXISTS addInvoiceInDeviceSale; 
+

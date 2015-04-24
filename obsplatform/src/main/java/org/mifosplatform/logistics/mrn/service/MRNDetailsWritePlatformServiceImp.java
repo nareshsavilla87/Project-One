@@ -20,6 +20,7 @@ import org.mifosplatform.logistics.mrn.domain.InventoryTransactionHistory;
 import org.mifosplatform.logistics.mrn.domain.InventoryTransactionHistoryJpaRepository;
 import org.mifosplatform.logistics.mrn.domain.MRNDetails;
 import org.mifosplatform.logistics.mrn.domain.MRNDetailsJpaRepository;
+import org.mifosplatform.logistics.mrn.exception.InvalidMrnIdException;
 import org.mifosplatform.logistics.mrn.serialization.MRNDetailsCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -86,6 +87,9 @@ public class MRNDetailsWritePlatformServiceImp implements MRNDetailsWritePlatfor
 			final Long mrnId = command.longValueOfParameterNamed("mrnId");
 			final String serialNumber=command.stringValueOfParameterNamed("serialNumber");
 			final MRNDetails mrnDetails = mrnDetailsJpaRepository.findOne(mrnId);
+			if(mrnDetails == null){
+				throw new InvalidMrnIdException(mrnId.toString());
+			}
 			final List<String> serialNumbers = mrnDetailsReadPlatformService.retriveSerialNumbers(mrnId);
 			if(!serialNumbers.contains(serialNumber)){
 				throw new PlatformDataIntegrityException("invalid.serialnumber.allocation", "invalid.serialnumber.allocation", "serialNumber","");

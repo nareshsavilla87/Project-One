@@ -31,6 +31,7 @@ import org.mifosplatform.logistics.itemdetails.data.ItemDetailsData;
 import org.mifosplatform.logistics.itemdetails.exception.OrderQuantityExceedsException;
 import org.mifosplatform.logistics.itemdetails.exception.SerialNumberAlreadyExistException;
 import org.mifosplatform.logistics.itemdetails.exception.SerialNumberNotFoundException;
+import org.mifosplatform.logistics.mrn.exception.InvalidMrnIdException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.order.exceptions.NoGrnIdFoundException;
 import org.mifosplatform.scheduledjobs.dataupload.command.DataUploadCommand;
@@ -70,6 +71,7 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 	@Override
 	public CommandProcessingResult processDatauploadFile(final Long fileId) {
 		
+		this.context.authenticatedUser();
 		BufferedReader csvFileBufferedReader = null;
 		String line = null;
 		try{
@@ -94,7 +96,7 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 		while((line = csvFileBufferedReader.readLine()) != null){
 			try{
 				final String[] currentLineData = line.split(splitLineRegX);
-				if(currentLineData!=null && currentLineData[0].equalsIgnoreCase("EOF")){
+				if(currentLineData!=null && currentLineData[0].contains("EOF")){
 					return  this.dataUploadHelper.updateFile(uploadStatus,totalRecordCount,processRecordCount,errorData);
 				}
 				jsonString=this.dataUploadHelper.buildJsonForHardwareItems(currentLineData,errorData,i);
@@ -363,6 +365,9 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 		}else if(dve instanceof NoGrnIdFoundException){
 			errorData.add(new MRNErrorData((long)i, "Error: "+((AbstractPlatformDomainRuleException) dve).getDefaultUserMessage()));
 			
+		}else if(dve instanceof ItemNotFoundException){
+			errorData.add(new MRNErrorData((long)i, "Error: "+((AbstractPlatformDomainRuleException) dve).getDefaultUserMessage()));
+			
 		}else if(dve instanceof PlatformApiDataValidationException){
 			errorData.add(new MRNErrorData((long)i, "Error: "+((PlatformApiDataValidationException) dve).getErrors().get(0).getParameterName()+" : "+((PlatformApiDataValidationException) dve).getErrors().get(0).getDefaultUserMessage()));
 			
@@ -399,6 +404,9 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 			
 		}else if(dve instanceof ItemNotFoundException){
 			errorData.add(new MRNErrorData((long)i,"Invalid Item id"));
+		
+		}else if(dve instanceof InvalidMrnIdException){
+			errorData.add(new MRNErrorData((long)i,"Invalid Mrn id"));
 		
 		}else if(dve instanceof UnsupportedParameterException){
 			    errorData.add(new MRNErrorData((long)i,"Row Contains Improper data "));

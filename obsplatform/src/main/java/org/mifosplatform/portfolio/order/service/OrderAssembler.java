@@ -53,9 +53,9 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
         Order order=Order.fromJson(clientId, command);
 			List<ServiceData> details =this.orderDetailsReadPlatformServices.retrieveAllServices(order.getPlanId());
 			datas=this.orderDetailsReadPlatformServices.retrieveAllPrices(order.getPlanId(),order.getBillingFrequency(),clientId);
-			if(datas.isEmpty()){
+			/*if(datas.isEmpty()){
 				datas=this.orderDetailsReadPlatformServices.retrieveDefaultPrices(order.getPlanId(),order.getBillingFrequency(),clientId);
-			}
+			}*/
 			if(datas.isEmpty()){
 				throw new NoRegionalPriceFound();
 			}

@@ -228,8 +228,8 @@ public class ItemData {
 	}
 
 	public void setUnitPrice(BigDecimal itemprice) {
+	    this.unitPrice = itemprice;
 
-		this.unitPrice = itemprice;
 	}
 
 	

@@ -4,8 +4,8 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceN
 
 public class ItemNotFoundException extends AbstractPlatformResourceNotFoundException {
 
-public ItemNotFoundException(String string) {
-super("error.msg.item.id.not.found","Item is Not Found");
+public ItemNotFoundException(String itemId) {
+super("error.msg.item.id.not.found","Item is Not Found",itemId);
 }
 
 }

@@ -30,6 +30,7 @@ IF NOT EXISTS(Select * from INFORMATION_SCHEMA.TABLES where  TABLE_SCHEMA = DATA
   EXECUTE STMT;
 END IF;
 END IF; 
+END IF;
 IF EXISTS(Select * from INFORMATION_SCHEMA.TABLES where  TABLE_SCHEMA = DATABASE() and TABLE_NAME ='b_eventorder') then
 IF NOT EXISTS(Select * from INFORMATION_SCHEMA.TABLES where  TABLE_SCHEMA = DATABASE() and TABLE_NAME ='b_modorder') then
   SET @ddl = CONCAT('RENAME table b_eventorder to b_modorder');
