@@ -2,7 +2,7 @@
  CREATE TABLE if not exists `b_provisioning_actions` (
   `id` bigint(10) NOT NULL AUTO_INCREMENT,
   `provision_type` varchar(15) NOT NULL,
-  `action` varchar(15) NOT NULL,
+  `action` varchar(50) NOT NULL,
   `provisioning_system` varchar(20) DEFAULT NULL,
   `is_enable` char(1) DEFAULT 'N',
   `is_delete` char(1) DEFAULT 'N',
