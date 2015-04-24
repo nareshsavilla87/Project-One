@@ -11,6 +11,6 @@ public interface LicenseUpdateService {
 	
 	boolean checkIfKeyIsValid(String licenseKey, MifosPlatformTenant tenant);
 
-	LicenseData getLicenseDetails(MifosPlatformTenant tenant);
+	LicenseData getLicenseDetails(String licenseKey);
 
 }
