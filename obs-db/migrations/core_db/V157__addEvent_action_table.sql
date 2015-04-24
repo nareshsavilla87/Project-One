@@ -46,7 +46,7 @@ insert ignore into b_provisioning_actions values (null,'Release Device','RELEASE
 
 -- DELETE FROM b_eventaction_mapping  WHERE  event_name='Event Order';
 
-DELETE FROM b_eventaction_mapping  WHERE  event_name='Event Order';
+-- DELETE FROM b_eventaction_mapping  WHERE  event_name='Event Order';
 
 insert ignore into b_eventaction_mapping  VALUES (null,'Create Live Event','Active Live Event','workflow_events','N','Y');
 insert ignore into m_permission values(null,'billing','ACTIVE_PROVISIONACTIONS','PROVISIONACTIONS','ACTIVE',0);
