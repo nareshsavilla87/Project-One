@@ -63,6 +63,7 @@ public class EntitlementsData {
 	private Long countryId;
 	private String macId;
 	private Long regionId;
+	private Long officeId;
 	
 	
 	public EntitlementsData(){
@@ -140,7 +141,7 @@ public class EntitlementsData {
 			Long clientId, Long planId, String orderNo, Long orderId,
 			LocalDate startDate, LocalDate endDate, String servicetype,
 			String displayName, String login, String password, String userName, 
-			String userPassword, String firstName, String lastName, String email) {
+			String userPassword, String firstName, String lastName, String email, Long officeId) {
 		
 		this.id = id;
 		this.prdetailsId = prdetailsId;
@@ -163,6 +164,7 @@ public class EntitlementsData {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+		this.officeId = officeId;
 	}
 
 	//cubiware

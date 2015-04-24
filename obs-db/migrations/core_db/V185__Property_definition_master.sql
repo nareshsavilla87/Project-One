@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS `b_property_defination` (
   `property_type_id` int(20) NOT NULL,
   `property_code` varchar(50) NOT NULL,
   `unit_code` varchar(20) NOT NULL,
-  `floor` int(20) NOT NULL,
+  `floor` VARCHAR(20) NOT NULL,
   `building_code` varchar(20) NOT NULL,
   `parcel` varchar(50) NOT NULL,
   `street` varchar(50) DEFAULT NULL,
@@ -31,6 +31,7 @@ INSERT IGNORE INTO m_permission VALUES(null, 'organisation', 'DELETE_PROPERTY', 
 INSERT IGNORE INTO m_permission values(null, 'billing', 'CREATE_SERVICETRANSFER', 'SERVICETRANSFER', 'CREATE', '0');
 
 
+
 INSERT IGNORE INTO `m_code`(id,code_name,is_system_defined,code_description) VALUES(null,'Property Type',0,'Define Customer Property Type');
 SET @a_lid:=(select id from m_code where code_name='Property Type');
 INSERT IGNORE INTO `m_code_value`(id,code_id,code_value,order_position) VALUES(null,@a_lid,'Tower',0);
@@ -40,6 +41,7 @@ insert ignore into m_permission VALUES (null,'client&orders','UPDATE_CLIENTADDIT
 insert ignore into m_permission VALUES (null,'client&orders','CREATE_CLIENTADDITIONALINFO','CLIENTADDITIONALINFO','CREATE',0);
 
 INSERT IGNORE INTO c_configuration VALUES(null, 'is-propertycode-enabled', '1', '');
+
 
 
 
@@ -56,6 +58,24 @@ CREATE TABLE IF NOT EXISTS `b_property_history` (
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
   PRIMARY KEY (`id`)
   ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+
+Drop procedure IF EXISTS propertyDefination; 
+DELIMITER //
+create procedure propertyDefination() 
+Begin
+  IF EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'floor'
+     and TABLE_NAME = 'b_property_defination'
+     and TABLE_SCHEMA = DATABASE())THEN
+ALTER TABLE `b_property_defination` CHANGE COLUMN `floor` `floor` VARCHAR(20) NOT NULL;
+END IF;
+END //
+DELIMITER ;
+call propertyDefination();
+Drop procedure IF EXISTS propertyDefination;
+
 
 
 

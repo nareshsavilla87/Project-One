@@ -60,26 +60,26 @@ public final class PropertyCommandFromApiJsonDeserializer {
 
 		final JsonElement element = fromApiJsonHelper.parse(json);
 		
+		final String precinct = fromApiJsonHelper.extractStringNamed("precinct", element);
+		baseDataValidator.reset().parameter("precinct").value(precinct).notBlank();
+		
+		final String parcel = fromApiJsonHelper.extractStringNamed("parcel", element);
+		baseDataValidator.reset().parameter("parcel").value(parcel).notBlank();
+		
 		final Long propertyType = fromApiJsonHelper.extractLongNamed("propertyType", element);
 		baseDataValidator.reset().parameter("propertyType").value(propertyType).notBlank();
-
-		final String propertyCode = fromApiJsonHelper.extractStringNamed("propertyCode", element);
-		baseDataValidator.reset().parameter("propertyCode").value(propertyCode).notBlank().notExceedingLengthOf(14);
+		
+		final String  buildingCode = fromApiJsonHelper.extractStringNamed("buildingCode", element);
+		baseDataValidator.reset().parameter("buildingCode").value(buildingCode).notBlank();
+		
+		final String floor = fromApiJsonHelper.extractStringNamed("floor", element);
+		baseDataValidator.reset().parameter("floor").value(floor).notBlank();
 		
 		final String unitCode = fromApiJsonHelper.extractStringNamed("unitCode", element);
 		baseDataValidator.reset().parameter("unitCode").value(unitCode).notBlank();
-		
-		final Long floor = fromApiJsonHelper.extractLongNamed("floor", element);
-		baseDataValidator.reset().parameter("floor").value(floor).notBlank();
 
-		final String  buildingCode = fromApiJsonHelper.extractStringNamed("buildingCode", element);
-		baseDataValidator.reset().parameter("buildingCode").value(buildingCode).notBlank();
-
-		final String parcel = fromApiJsonHelper.extractStringNamed("parcel", element);
-		baseDataValidator.reset().parameter("parcel").value(parcel).notBlank();
-
-		final String precinct = fromApiJsonHelper.extractStringNamed("precinct", element);
-		baseDataValidator.reset().parameter("precinct").value(precinct).notBlank();
+		final String propertyCode = fromApiJsonHelper.extractStringNamed("propertyCode", element);
+		baseDataValidator.reset().parameter("propertyCode").value(propertyCode).notBlank().notExceedingLengthOf(14);
 
 		/*final Long poBox = fromApiJsonHelper.extractLongNamed("poBox", element);
 		baseDataValidator.reset().parameter("poBox").value(poBox).notBlank();*/

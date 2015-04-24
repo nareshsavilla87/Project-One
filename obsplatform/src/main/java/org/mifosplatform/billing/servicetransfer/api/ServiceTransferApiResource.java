@@ -27,7 +27,6 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
-import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
 import org.mifosplatform.portfolio.property.service.PropertyReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;

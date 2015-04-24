@@ -17,7 +17,11 @@ import com.google.gson.JsonElement;
 @Table(name="b_orders_addons")
 public class OrderAddons extends AbstractAuditableCustom<AppUser,Long>{
 	
-	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Column(name = "order_id")
 	private Long orderId;
 

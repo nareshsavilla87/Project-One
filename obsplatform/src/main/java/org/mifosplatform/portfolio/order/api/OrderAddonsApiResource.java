@@ -24,7 +24,6 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.addons.data.AddonsData;
 import org.mifosplatform.portfolio.addons.data.AddonsPriceData;
 import org.mifosplatform.portfolio.addons.service.AddonServiceReadPlatformService;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;

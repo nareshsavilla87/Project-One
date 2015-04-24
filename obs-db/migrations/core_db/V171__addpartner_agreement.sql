@@ -65,6 +65,8 @@ DELIMITER ;
 call officeAddress();
 Drop procedure if exists officeAddress;
 
+set foreign_key_checks=0;
+
 insert ignore into `stretchy_report`(`id`,`report_name`,`report_type`,`report_subtype`,`report_category`,`report_sql`,`description`,`core_report`,`use_report`) 
 values (null,'Agent Commission Report','Table',null,'Client' ,'select * from v_agent_commission where `invoice_date`  between ''${startDate}'' and ''${endDate}''','Agent Commission Report',1,1);
 

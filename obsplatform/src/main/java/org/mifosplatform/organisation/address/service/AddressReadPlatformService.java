@@ -38,6 +38,8 @@ public interface AddressReadPlatformService {
 	Page<AddressLocationDetails> retrieveAllAddressLocations(SearchSqlQuery searchAddresses);
 
 	List<CityDetailsData> retrieveCitywithCodeDetails();
+
+	List<CityDetailsData> retrieveAddressDetailsByCityName(String cityName);
 	
 
 }

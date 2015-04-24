@@ -25,7 +25,7 @@ public class ClientPropertyData {
 	private String propertyType;
 	private String propertyCode;
 	private String unitCode;
-	private Long floor;
+	private String floor;
 	private String buildingCode;
 	private String parcel;
 	private String precinct;
@@ -37,7 +37,7 @@ public class ClientPropertyData {
 
 	public ClientPropertyData(final Long id, final Long propertyTypeId,
 			final String propertyType, final String propertyCode,
-			final String unitCode, final Long floor, final String buildingCode,
+			final String unitCode, final String floor, final String buildingCode,
 			final String parcel, final String precinct, final String street,
 			final String zip, final String state, final String country,
 			final String status, final String clientId, final String firstName,
@@ -139,7 +139,7 @@ public class ClientPropertyData {
 		return unitCode;
 	}
 
-	public Long getFloor() {
+	public String getFloor() {
 		return floor;
 	}
 
