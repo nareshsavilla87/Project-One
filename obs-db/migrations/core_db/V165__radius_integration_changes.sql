@@ -38,7 +38,7 @@ delete from c_configuration where name='online-paymode';
 
 update c_configuration set name='balance-check' WHERE name='forcible-balance-check';
 update c_configuration set name='cuncerrent-sessions' WHERE name='active-viewers';
-update c_configuration set name='systemadmin-emailId' WHERE name='media-crash-email';
+--update c_configuration set name='systemadmin-emailId' WHERE name='media-crash-email';
 
 
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Live Event','Active Live Event','workflow_events','N','Y');
