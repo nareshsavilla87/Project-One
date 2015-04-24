@@ -88,11 +88,12 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 	    Order order=this.orderRepository.findOne(orderId);
 	    Contract contract=this.contractRepository.findOne(contractId);
 	    
-	    final LocalDate endDate = this.orderAssembler.calculateEndDate(new LocalDate(startDate),
+	    LocalDate endDate = this.orderAssembler.calculateEndDate(new LocalDate(startDate),
                 contract.getSubscriptionType(), contract.getUnits());
 	    
 	    if(order.getEndDate() != null && endDate.isAfter(new LocalDate(order.getEndDate()))){
-            throw new AddonEndDateValidationException(orderId);
+          //  throw new AddonEndDateValidationException(orderId);
+	    	endDate = new LocalDate(order.getEndDate());
 	    }
 	    
 	    HardwareAssociation association=this.hardwareAssociationRepository.findOneByOrderId(orderId);
