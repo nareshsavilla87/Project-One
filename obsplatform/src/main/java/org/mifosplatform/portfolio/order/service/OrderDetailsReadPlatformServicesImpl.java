@@ -78,7 +78,8 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 					" b_client_address d" +
 					" WHERE     b.priceregion_id = a.price_region_id AND b.state_id = c.id AND d.state = c.state_name AND d.address_key = 'PRIMARY' AND d.client_id = ?),0)" +
 					" AND pd.country_id = ifnull( (SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_country c, b_client_address d " +
-					" WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY' AND d.client_id = ?),0))";
+					" WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY' AND d.client_id = ?),0))" +
+					" group by da.id";
 			
 			return this.jdbcTemplate.query(sql, mapper, new Object[] { planId,billingFreq,clientId,clientId,clientId });
 
