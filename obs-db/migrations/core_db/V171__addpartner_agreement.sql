@@ -89,11 +89,11 @@ CREATE TABLE IF NOT EXISTS `b_office_commission` (
   `created_dt` datetime NOT NULL DEFAULT '0000-00-00 00:00:00',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
-
+/*
 INSERT IGNORE INTO job VALUES(null, 'RESELLERCOMMISSION', 'Reseller Commission', '0 0 12 1/1 * ? *', 'Daily once at Midnight', '2015-01-26 15:59:45', '5', NULL, '2015-01-26 15:59:45', NULL, 'RESELLERCOMMISSIONJobDetaildefault _ DEFAULT', NULL, '0', '0', '1', '0', '0', '1');
 
 SET @id=(select id from job where name='RESELLERCOMMISSION');
 
 INSERT IGNORE INTO job_parameters VALUES(null ,@id, 'processDate', 'DATE', 'NOW()', '26 January 2015', 'Y', NULL);
 INSERT IGNORE INTO job_parameters VALUES(null, @id, 'reportName', 'COMBO', NULL, 'Reseller Commission', 'Y', NULL);
-
+*/

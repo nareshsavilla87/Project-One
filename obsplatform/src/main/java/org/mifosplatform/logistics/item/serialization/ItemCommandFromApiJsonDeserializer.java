@@ -90,7 +90,7 @@ public class ItemCommandFromApiJsonDeserializer {
 				 
 				     final Long regionId = fromApiJsonHelper.extractLongNamed("regionId", attributeElement);
 				     baseDataValidator.reset().parameter("regionId").value(regionId).notBlank().notExceedingLengthOf(30);
-				
+
 			  }
 	        }
 	        throwExceptionIfValidationWarningsExist(dataValidationErrors);

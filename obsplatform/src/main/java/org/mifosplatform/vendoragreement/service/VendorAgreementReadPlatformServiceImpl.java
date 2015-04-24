@@ -13,6 +13,9 @@ import java.util.List;
 
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.plan.data.PlanCodeData;
+import org.mifosplatform.portfolio.plan.data.PlanData;
+import org.mifosplatform.portfolio.plan.data.ServiceData;
 import org.mifosplatform.vendoragreement.data.VendorAgreementData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -91,7 +94,7 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 			context.authenticatedUser();
 			String sql;
 			RetrieveVendorDetailMapper mapper = new RetrieveVendorDetailMapper();
-			sql = "SELECT  " + mapper.schema() +" where bvad.vendor_agmt_id = "+vendorAgreementId+" and bvad.is_deleted = 'N'";
+			sql = "SELECT  " + mapper.schema() +" and bvad.vendor_agmt_id = "+vendorAgreementId+" and bvad.is_deleted = 'N'";
 
 			return this.jdbcTemplate.query(sql, mapper, new Object[] { });
 		} catch (EmptyResultDataAccessException e) {
@@ -102,9 +105,14 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 	private static final class RetrieveVendorDetailMapper implements RowMapper<VendorAgreementData> {
 
 		public String schema() {
-			return " bvad.id as id, bvad.vendor_agmt_id as vendorAgreementId, bvad.content_code as contentCode,"+
-					"bvad.loyalty_type as loyaltyType, bvad.loyalty_share as loyaltyShare, bvad.price_region as priceRegion, "+
-					"bvad.content_cost as contentCost from b_vendor_agmt_detail bvad ";
+			return " bvad.id AS id,bvad.vendor_agmt_id AS vendorAgreementId,if(va.content_type = 'Package',pm.plan_code,s.service_code) as contentCode," +
+				   " bvad.content_code AS contentCodeId,bvad.loyalty_type AS loyaltyType,bvad.loyalty_share AS loyaltyShare, bvad.price_region AS priceRegionId," +
+				   " rm.priceregion_name as regionName,bvad.content_cost AS contentCost" +
+				   " FROM  b_vendor_agreement va, b_vendor_agmt_detail bvad" +
+				   " left join b_plan_master pm on pm.id = bvad.content_code " +
+				   " left join b_service s on s.id = bvad.content_code" +
+				   " left join  b_priceregion_master rm on rm.id = bvad.price_region " +
+				   " WHERE bvad.vendor_agmt_id = va.id";
 
 		}
 
@@ -114,13 +122,15 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 			
 			Long id = rs.getLong("id");
 			Long vendorAgreementId = rs.getLong("vendorAgreementId");
-			Long contentCode = rs.getLong("contentCode");
+			Long contentCodeId = rs.getLong("contentCodeId");
+			String contentCode = rs.getString("contentCode");
 			String loyaltyType = rs.getString("loyaltyType");
 			BigDecimal loyaltyShare = rs.getBigDecimal("loyaltyShare");
-			Long priceRegion = rs.getLong("priceRegion");
+			Long priceRegionId = rs.getLong("priceRegionId");
+			String regionName = rs.getString("regionName");
 			BigDecimal contentCost = rs.getBigDecimal("contentCost");
 			
-			return new VendorAgreementData(id, vendorAgreementId, contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost);
+			return new VendorAgreementData(id, vendorAgreementId, contentCodeId, loyaltyType, loyaltyShare, priceRegionId, contentCost,contentCode,regionName);
 			
 		}
 	}
@@ -137,6 +147,78 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
+	}
+
+	private static final class ServiceDetailsMapper implements RowMapper<ServiceData> {
+
+		public String schema() {
+			return " da.id AS id,da.service_code AS service_code,da.service_description AS service_description" +
+				   " FROM b_service da where  da.id not in (SELECT vgd.content_code FROM b_vendor_agmt_detail vgd, b_vendor_agreement vg " +
+				   " where vgd.content_code = da.id  and vg.id = vgd.vendor_agmt_id and vg.content_type ='Service'  and vg.vendor_id !=? )and da.is_deleted = 'N'";
+
+		}
+
+		@Override
+		public ServiceData mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+
+			Long id = rs.getLong("id");
+			String serviceCode = rs.getString("service_code");
+			String serviceDescription = rs.getString("service_description");
+			return new ServiceData(id,null,null,null,serviceCode, serviceDescription,null,null,null,null);
+
+		}
+	}
+	
+	private static final class PlanDetailsMapper implements RowMapper<PlanData> {
+
+		public String schema() {
+			return "   da.id AS id,da.plan_code AS planCode,da.plan_description  AS planDescription" +
+					" FROM  b_plan_master da where  da.id not in (SELECT vgd.content_code FROM b_vendor_agmt_detail vgd, b_vendor_agreement vg " +
+					" where vgd.content_code = da.id  and vg.id = vgd.vendor_agmt_id and vg.content_type ='Package' and vg.vendor_id !=?) and da.is_deleted = 'N'";
+
+		}
+
+		@Override
+		public PlanData mapRow(final ResultSet rs,
+				@SuppressWarnings("unused") final int rowNum)
+				throws SQLException {
+
+			Long id = rs.getLong("id");
+			String planCode = rs.getString("planCode");
+			String planDescription = rs.getString("planDescription");
+			return new PlanData(id,planCode,planDescription);
+
+		}
+	}
+
+	@Override
+	public List<ServiceData> retrieveServices(Long agId) {
+		try{
+		
+		final ServiceDetailsMapper mapper = new ServiceDetailsMapper();
+		final String sql = "select " + mapper.schema();
+
+		return this.jdbcTemplate.query(sql, mapper, new Object[] {agId});
+		}catch(EmptyResultDataAccessException exception){
+			return null;
+		}
+
+	}
+
+	@Override
+	public List<PlanData> retrievePlans(Long agId) {
+		try{
+		final PlanDetailsMapper mapper = new PlanDetailsMapper();
+		final String sql = "select " + mapper.schema();
+		return this.jdbcTemplate.query(sql, mapper, new Object[] {agId});
+		}catch(EmptyResultDataAccessException exception){
+			return null; 
+		}
+
+		
+
 	}
 	
 

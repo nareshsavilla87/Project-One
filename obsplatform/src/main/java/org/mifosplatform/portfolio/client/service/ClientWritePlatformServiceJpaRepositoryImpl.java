@@ -74,6 +74,7 @@ import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyTransactionHistory;
+import org.mifosplatform.portfolio.property.exceptions.PropertyCodeAllocatedException;
 import org.mifosplatform.provisioning.preparerequest.service.PrepareRequestReadplatformService;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
@@ -294,6 +295,14 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Long groupId = command.longValueOfParameterNamed(ClientApiConstants.groupIdParamName);
             final Group clientParentGroup = null;
+            PropertyMaster propertyMaster=null;
+           Configuration propertyConfiguration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+			if(propertyConfiguration != null && propertyConfiguration.isEnabled()) {		
+				 propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(command.stringValueOfParameterNamed("addressNo"));
+				if(propertyMaster != null && propertyMaster.getClientId() != null ){
+					throw new PropertyCodeAllocatedException(propertyMaster.getPropertyCode());
+				}
+			}
 
             final Client newClient = Client.createNew(clientOffice, clientParentGroup, command);
             this.clientRepository.save(newClient);
@@ -324,9 +333,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			}
 			
 			 //for property code updation with client details
-				configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
-				if(configuration != null && configuration.isEnabled()) {		
-					PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(address.getAddressNo());
+				//configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+				if(propertyConfiguration != null && propertyConfiguration.isEnabled()) {		
+				//	PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(address.getAddressNo());
 					if(propertyMaster !=null){
 						propertyMaster.setClientId(newClient.getId());
 						propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);

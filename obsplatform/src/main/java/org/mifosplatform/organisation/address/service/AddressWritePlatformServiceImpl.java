@@ -33,6 +33,7 @@ import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyTransactionHistory;
+import org.mifosplatform.portfolio.property.exceptions.PropertyCodeAllocatedException;
 import org.mifosplatform.portfolio.property.exceptions.PropertyMasterNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -141,6 +142,9 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	                    		  final String newPropertyCode=command.stringValueOfParameterNamed("addressNo");
 	                    		  PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
 	                    		  if(propertyMaster!=null){
+	                    			  if(propertyMaster.getClientId() != null ){
+	                  					throw new PropertyCodeAllocatedException(propertyMaster.getPropertyCode());
+	                  				}
 	                    		  PropertyMaster oldPropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(address.getAddressNo());
 	                    		  if(!address.getAddressNo().equalsIgnoreCase(newPropertyCode)&&oldPropertyMaster!=null){
                                  	 oldPropertyMaster.setClientId(null);

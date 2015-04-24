@@ -49,10 +49,18 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 		  String sql = null;
             if(clientId != null){
             	sql =" SELECT s.id AS id, s.plan_code AS planCode, s.is_prepaid AS isPrepaid" +
+/*
             		 "  FROM b_plan_master s, b_plan_pricing p,  b_priceregion_detail pd, b_client_address cd,b_state bs" +
             		 "  WHERE s.plan_status = 1 AND s.is_deleted = 'n' AND s.id != ? and p.price_region_id = pd.priceregion_id" +
-            		 "  and cd.state = bs.state_name and (pd.state_id =bs.id or (pd.state_id =0 and pd.country_id = bs.parent_code )) and s.id=p.plan_id" +
-            		 "  and cd.client_id ="+clientId+" group by s.id;";
+            		 "  and cd.state = bs.state_name and (pd.state_id =bs.id or (pd.state_id =0 and pd.country_id = bs.parent_code)) and s.id=p.plan_id" +
+            		 "  and cd.client_id ="+clientId+" group by s.id";
+
+*/
+            		 "  FROM b_plan_master s, b_plan_pricing p,b_priceregion_master prd,  b_priceregion_detail pd, b_client_address cd,b_state bs" +
+            		 "  WHERE s.plan_status = 1 AND s.is_deleted = 'n' AND s.id != ?  AND  prd.id = pd.priceregion_id and  p.price_region_id = pd.priceregion_id" +
+            		 "  /* and cd.state = bs.state_name */ and (pd.state_id =bs.id or (pd.state_id =0 and (pd.country_id = bs.parent_code or (pd.country_id = 0 and prd.priceregion_code ='Default'))))" +
+            		 "  and s.id=p.plan_id" +
+            		 "  and cd.client_id ="+clientId+" group by s.id";
             }else{
             	sql =  "  select s.id as id,s.plan_code as planCode,s.is_prepaid as isPrepaid " +
             		   "  from b_plan_master s " +

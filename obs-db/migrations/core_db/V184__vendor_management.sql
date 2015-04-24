@@ -40,7 +40,7 @@ CREATE TABLE `b_vendor_agmt_detail` (
   `content_cost` decimal(10,2) DEFAULT NULL,
   `is_deleted` char(1) DEFAULT 'N',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `bvad_uq3` (`vendor_agmt_id`,`content_code`,`loyalty_share`),
+  UNIQUE KEY `bvad_uq3` (`vendor_agmt_id`,`content_code`,`loyalty_type`),
   KEY `FK_Ven_agmt_Master` (`vendor_agmt_id`),
   CONSTRAINT `FK_Ven_agmt_Master` FOREIGN KEY (`vendor_agmt_id`) REFERENCES `b_vendor_agreement` (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8;

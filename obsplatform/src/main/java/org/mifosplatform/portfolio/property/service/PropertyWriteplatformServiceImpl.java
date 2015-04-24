@@ -30,6 +30,7 @@ import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyTransactionHistory;
+import org.mifosplatform.portfolio.property.exceptions.PropertyCodeAllocatedException;
 import org.mifosplatform.portfolio.property.exceptions.PropertyMasterNotFoundException;
 import org.mifosplatform.portfolio.property.serialization.PropertyCommandFromApiJsonDeserializer;
 import org.slf4j.Logger;
@@ -174,6 +175,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		return propertyMaster;
 	}
 
+	@Transactional
 	@Override
 	public CommandProcessingResult createServiceTransfer(final Long clientId,final JsonCommand command) {
 		
@@ -189,6 +191,11 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			if(clientAddress !=null){
 			final PropertyMaster oldPropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(oldPropertyCode);
 			final PropertyMaster newpropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
+			 if(newpropertyMaster != null && newpropertyMaster.getClientId() != null ){
+				 if(newpropertyMaster.getClientId() != clientId){
+					throw new PropertyCodeAllocatedException(newpropertyMaster.getPropertyCode());
+				 }
+				 }
 			 //check shifting property same or not
 			 if(!oldPropertyCode.equalsIgnoreCase(newPropertyCode) && oldPropertyMaster!=null && newpropertyMaster!=null){
    			    oldPropertyMaster.setClientId(null);
@@ -196,6 +203,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
    			    this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
    			   PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
    					   CodeNameConstants.CODE_PROPERTY_FREE, null,oldPropertyMaster.getPropertyCode());
+
    			     this.propertyHistoryRepository.save(propertyHistory);	
    			     
   			     newpropertyMaster.setClientId(clientId);

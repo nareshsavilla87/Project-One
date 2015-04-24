@@ -157,6 +157,30 @@ public class VendorAgreement extends  AbstractPersistable<Long> {
 	public void setAgreementEnddate(Date agreementEnddate) {
 		this.agreementEnddate = agreementEnddate;
 	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	public Long getVendorId() {
+		return vendorId;
+	}
+
+	public String getAgreementStatus() {
+		return agreementStatus;
+	}
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public String getVendorAgmtDocument() {
+		return vendorAgmtDocument;
+	}
+
+	public List<VendorAgreementDetail> getVendorDetails() {
+		return vendorDetails;
+	}
 	
 	
 	

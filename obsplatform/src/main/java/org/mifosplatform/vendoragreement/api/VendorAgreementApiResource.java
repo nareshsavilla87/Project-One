@@ -8,6 +8,7 @@ package org.mifosplatform.vendoragreement.api;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -24,9 +25,12 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
@@ -46,15 +50,21 @@ import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
+import org.mifosplatform.organisation.partneragreement.domain.AgreementRepository;
 import org.mifosplatform.organisation.priceregion.data.PriceRegionData;
 import org.mifosplatform.organisation.priceregion.service.RegionalPriceReadplatformService;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.plan.data.PlanCodeData;
+import org.mifosplatform.portfolio.plan.data.PlanData;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
 import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
 import org.mifosplatform.portfolio.service.service.ServiceMasterReadPlatformService;
+import org.mifosplatform.scheduledjobs.dataupload.domain.DataUpload;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.vendoragreement.data.VendorAgreementData;
+import org.mifosplatform.vendoragreement.domain.VendorAgreement;
+import org.mifosplatform.vendoragreement.domain.VendorAgreementRepository;
+import org.mifosplatform.vendoragreement.exception.AgreementfileNotFoundException;
 import org.mifosplatform.vendoragreement.exception.VendorNotFoundException;
 import org.mifosplatform.vendoragreement.service.VendorAgreementReadPlatformService;
 import org.mifosplatform.vendoragreement.service.VendorAgreementWritePlatformService;
@@ -79,58 +89,50 @@ public class VendorAgreementApiResource {
 
     private static final String RESOURCENAMEFORPERMISSIONS = "VENDORAGREEMENT";
     private final PlatformSecurityContext context;
-    private final VendorAgreementReadPlatformService readPlatformService;
+    private final VendorAgreementReadPlatformService vendorAgreementReadPlatformService;
     private final RegionalPriceReadplatformService regionalPriceReadplatformService;
     private final DefaultToApiJsonSerializer<VendorAgreementData> toApiJsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-    private final PlanReadPlatformService planReadPlatformService;
-    private final ServiceMasterReadPlatformService serviceMasterReadPlatformService;
-    private final OrderReadPlatformService orderReadPlatformService;
+    private final VendorAgreementRepository vendorAgreementRepository;
     private final MCodeReadPlatformService mCodeReadPlatformService;
     public InputStream inputStreamObject;
-    private final VendorAgreementWritePlatformService vendorAgreementWritePlatformService;
     
     @Autowired
     public VendorAgreementApiResource(final PlatformSecurityContext context, final VendorAgreementReadPlatformService readPlatformService,
     		final RegionalPriceReadplatformService regionalPriceReadplatformService, final DefaultToApiJsonSerializer<VendorAgreementData> toApiJsonSerializer,
-            final ApiRequestParameterHelper apiRequestParameterHelper,
-            final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final PlanReadPlatformService planReadPlatformService, final ServiceMasterReadPlatformService serviceMasterReadPlatformService,
-            final OrderReadPlatformService orderReadPlatformService,
-            final MCodeReadPlatformService mCodeReadPlatformService,final VendorAgreementWritePlatformService vendorAgreementWritePlatformService) {
-        this.context = context;
-        this.readPlatformService = readPlatformService;
+            final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+             final VendorAgreementRepository vendorAgreementRepository,final MCodeReadPlatformService mCodeReadPlatformService) {
+
+    	this.context = context;
+        this.vendorAgreementReadPlatformService = readPlatformService;
         this.regionalPriceReadplatformService = regionalPriceReadplatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
         this.apiRequestParameterHelper = apiRequestParameterHelper;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-        this.planReadPlatformService = planReadPlatformService;
-        this.serviceMasterReadPlatformService = serviceMasterReadPlatformService;
-        this.orderReadPlatformService = orderReadPlatformService;
+        this.vendorAgreementRepository = vendorAgreementRepository;
         this.mCodeReadPlatformService = mCodeReadPlatformService;
-        this.vendorAgreementWritePlatformService = vendorAgreementWritePlatformService;
     }
 
     @GET
     @Path("template")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String vendorAgreementTemplateDetails(@Context final UriInfo uriInfo) {
+    public String vendorAgreementTemplateDetails(@QueryParam("vendorId") final Long vendorId,@Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
-        VendorAgreementData vendor=handleTemplateData();
+        VendorAgreementData vendor=handleTemplateData(vendorId);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, vendor, RESPONSE_DATA_PARAMETERS);
     }
     
-    private VendorAgreementData handleTemplateData() {
+    private VendorAgreementData handleTemplateData(Long vendorId) {
 		
     	final List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
         //final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
     	final Collection<MCodeData> agreementTypes = this.mCodeReadPlatformService.getCodeValue("Agreement Type");
-        final List<ServiceData> servicesData = this.serviceMasterReadPlatformService.retrieveAllServices("N");
-        final List<PlanCodeData> planDatas = this.orderReadPlatformService.retrieveAllPlatformData((long)0, null);
+        final List<ServiceData> servicesData = this.vendorAgreementReadPlatformService.retrieveServices(vendorId);
+        final List<PlanData> planDatas = this.vendorAgreementReadPlatformService.retrievePlans(vendorId);
 		 
 		return new VendorAgreementData(priceRegionData, agreementTypes, servicesData,
 					planDatas);
@@ -182,7 +184,7 @@ public class VendorAgreementApiResource {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 
-        final List<VendorAgreementData> vendor = this.readPlatformService.retrieveAllVendorAgreements();
+        final List<VendorAgreementData> vendor = this.vendorAgreementReadPlatformService.retrieveAllVendorAgreements();
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, vendor, RESPONSE_DATA_PARAMETERS);
@@ -195,7 +197,7 @@ public class VendorAgreementApiResource {
 	public String retrieveVendorAgreementData(	@PathParam("vendorId") final Long vendorId,@Context final UriInfo uriInfo) {
 
 		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
-		List<VendorAgreementData> agreementData = this.readPlatformService.retrieveRespectiveAgreementData(vendorId);
+		List<VendorAgreementData> agreementData = this.vendorAgreementReadPlatformService.retrieveRespectiveAgreementData(vendorId);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, agreementData,RESPONSE_DATA_PARAMETERS);
 	}
@@ -210,18 +212,18 @@ public class VendorAgreementApiResource {
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 
-        VendorAgreementData vendorAgreeData = this.readPlatformService.retrieveVendorAgreement(vendorAgreementId);
+        VendorAgreementData vendorAgreeData = this.vendorAgreementReadPlatformService.retrieveVendorAgreement(vendorAgreementId);
         if(vendorAgreeData == null){
         	throw new VendorNotFoundException(vendorAgreementId.toString());
         }
-        List<VendorAgreementData> vendorAgreementDetailsData = this.readPlatformService.retrieveVendorAgreementDetails(vendorAgreementId);
+        List<VendorAgreementData> vendorAgreementDetailsData = this.vendorAgreementReadPlatformService.retrieveVendorAgreementDetails(vendorAgreementId);
         vendorAgreeData.setVendorAgreementDetailsData(vendorAgreementDetailsData);
         
         if (settings.isTemplate()) {
         	final List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
         	final Collection<MCodeData> agreementTypes = this.mCodeReadPlatformService.getCodeValue("Agreement Type");
-            final List<ServiceData> servicesData = this.serviceMasterReadPlatformService.retrieveAllServices("N");
-            final List<PlanCodeData> planDatas = this.orderReadPlatformService.retrieveAllPlatformData((long)0, null);
+            final List<ServiceData> servicesData = this.vendorAgreementReadPlatformService.retrieveServices(vendorAgreeData.getVendorId());
+            final List<PlanData> planDatas = this.vendorAgreementReadPlatformService.retrievePlans(vendorAgreeData.getVendorId());
             vendorAgreeData.setPriceRegionData(priceRegionData);
             vendorAgreeData.setPlanDatas(planDatas);
             vendorAgreeData.setAgreementTypes(agreementTypes);
@@ -268,5 +270,23 @@ public class VendorAgreementApiResource {
 
         return this.toApiJsonSerializer.serialize(result);
  }
+    
+    @GET
+	@Path("/download/{agreementId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public Response downloadAgreementFile(@PathParam("agreementId") final Long agreementId) {
+		final VendorAgreement vendorAgreement = this.vendorAgreementRepository.findOne(agreementId);
+		if(vendorAgreement == null){
+			throw new AgreementfileNotFoundException(agreementId);
+		}
+		final String fileName = vendorAgreement.getVendorAgmtDocument();
+		 final File file = new File(fileName);
+		ResponseBuilder response = Response.ok(file);
+		response.header("Content-Disposition", "attachment; filename=\""+ fileName+ "\"");
+       		response.header("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+		return response.build();
+		
+	}
 
 }
