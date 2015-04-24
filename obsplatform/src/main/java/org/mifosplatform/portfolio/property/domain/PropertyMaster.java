@@ -30,7 +30,7 @@ public class PropertyMaster  extends AbstractAuditableCustom<AppUser, Long> {
 	private String unitCode;
 
 	@Column(name = "floor")
-	private Long floor;
+	private String floor;
 
 	@Column(name = "building_code")
 	private String buildingCode;
@@ -67,7 +67,7 @@ public class PropertyMaster  extends AbstractAuditableCustom<AppUser, Long> {
 	}
 	
 	
-	public PropertyMaster(final Long propertyTypeId, final String propertyCode,final String unitCode, final Long floor, final String buildingCode,
+	public PropertyMaster(final Long propertyTypeId, final String propertyCode,final String unitCode, final String floor, final String buildingCode,
 			final String parcel, final String precinct, final String poBox, final String street,final String state, final String country, String status) {
         
 		this.propertyTypeId = propertyTypeId;
@@ -91,7 +91,7 @@ public class PropertyMaster  extends AbstractAuditableCustom<AppUser, Long> {
 		final String propertyCode = command.stringValueOfParameterNamed("propertyCode");
 		final Long propertyTypeId = command.longValueOfParameterNamed("propertyType");
 		final String unitCode = command.stringValueOfParameterNamed("unitCode");
-		final Long floor = command.longValueOfParameterNamed("floor");
+		final String floor = command.stringValueOfParameterNamed("floor");
 		final String buildingCode = command.stringValueOfParameterNamed("buildingCode");
 		final String parcel = command.stringValueOfParameterNamed("parcel");
 		final String precinct = command.stringValueOfParameterNamed("precinct");
@@ -132,10 +132,10 @@ public class PropertyMaster  extends AbstractAuditableCustom<AppUser, Long> {
 		}
 		
 		final String floorParamName = "floor";
-		if (command.isChangeInLongParameterNamed(floorParamName,this.floor)) {
-			final Long newValue = command.longValueOfParameterNamed(floorParamName);
+		if (command.isChangeInStringParameterNamed(floorParamName,this.floor)) {
+			final String newValue = command.stringValueOfParameterNamed(floorParamName);
 			actualChanges.put(floorParamName, newValue);
-			this.floor =newValue;
+			this.floor =StringUtils.defaultIfEmpty(newValue, null);
 		}
 		
 		final String buildingCodeParamName = "buildingCode";
@@ -221,12 +221,12 @@ public class PropertyMaster  extends AbstractAuditableCustom<AppUser, Long> {
 	}
 
 
-	public Long getFloor() {
+	public String getFloor() {
 		return floor;
 	}
 
 
-	public void setFloor(Long floor) {
+	public void setFloor(String floor) {
 		this.floor = floor;
 	}
 

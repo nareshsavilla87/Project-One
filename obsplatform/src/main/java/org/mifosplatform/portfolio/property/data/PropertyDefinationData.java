@@ -14,7 +14,7 @@ public class PropertyDefinationData {
 	private String propertyType;
 	private String propertyCode;
 	private String unitCode;
-	private Long floor;
+	private String floor;
 	private String buildingCode;
 	private String parcel;
 	private String precinct;
@@ -34,7 +34,7 @@ public class PropertyDefinationData {
 	private String clientName;
 
 	public PropertyDefinationData(final Long id, final Long propertyTypeId,final String propertyType, final String propertyCode,
-			final String unitCode, final Long floor, final String buildingCode,final String parcel, final String precinct, 
+			final String unitCode, final String floor, final String buildingCode,final String parcel, final String precinct, 
 			final String street,final String poBox, final String state, final String country,final String status, final String clientId) {
 
 		this.id = id;
@@ -111,11 +111,11 @@ public class PropertyDefinationData {
 		this.unitCode = unitCode;
 	}
 
-	public Long getFloor() {
+	public String getFloor() {
 		return floor;
 	}
 
-	public void setFloor(Long floor) {
+	public void setFloor(String floor) {
 		this.floor = floor;
 	}
 
