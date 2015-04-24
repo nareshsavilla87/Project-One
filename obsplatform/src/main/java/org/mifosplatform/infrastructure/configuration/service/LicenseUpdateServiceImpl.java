@@ -55,7 +55,7 @@ public boolean checkIfKeyIsValid(String licenseKey, MifosPlatformTenant tenant) 
 	
 	 boolean isValid=false;
 	try {
-		LicenseData licenseData=this.getLicenseDetails(tenant);
+		LicenseData licenseData=this.getLicenseDetails(licenseKey);
          if(licenseData.getKeyDate().after(new Date()) && tenant.getName().equalsIgnoreCase(licenseData.getClientName())){
         	 isValid = true;
          }
@@ -67,7 +67,7 @@ public boolean checkIfKeyIsValid(String licenseKey, MifosPlatformTenant tenant) 
 }
 
 @Override
-public LicenseData getLicenseDetails(MifosPlatformTenant tenant) {
+public LicenseData getLicenseDetails(String licensekey) {
 
 	final  String algorithm = "AES";
 	final byte[] keyValue=new String("hugoadminhugoadm").getBytes();
@@ -76,7 +76,7 @@ public LicenseData getLicenseDetails(MifosPlatformTenant tenant) {
 		Key key = new SecretKeySpec(keyValue, algorithm);
 		Cipher chiper = Cipher.getInstance(algorithm);
 		chiper.init(Cipher.DECRYPT_MODE, key);
-		byte[] decordedValue = Base64.decodeBase64(tenant.getLicensekey());
+		byte[] decordedValue = Base64.decodeBase64(licensekey);
 		byte[] decValue = chiper.doFinal(decordedValue);
 		String decryptedValue = new String(decValue);
 		String[] decryptedValues =decryptedValue.split("=");
