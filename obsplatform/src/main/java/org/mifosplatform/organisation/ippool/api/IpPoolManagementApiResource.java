@@ -221,6 +221,17 @@ public class IpPoolManagementApiResource {
         return this.toApiJsonSerializer.serialize(result);
     } 
 	
+	@PUT
+	@Path("staticip")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String updateStaticIp(final String requestData) {
+		
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateStaticIpAddress().withJson(requestData).build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    }
+	
 	@GET
 	@Path("id/{poolId}")
 	@Consumes({ MediaType.APPLICATION_JSON })

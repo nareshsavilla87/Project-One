@@ -1293,7 +1293,14 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 	    		  throw new UnsupportedCommandException(wrapper.commandName());
 	    	  }
 	              
-	          }
+	      }else if(wrapper.isStaticIp()){
+			     
+				if(wrapper.isUpdateOperation()) {
+			         handler = applicationContext.getBean("updateStaticIpCommandHandler",NewCommandSourceHandler.class);
+			     }else {
+			           throw new UnsupportedCommandException(wrapper.commandName());
+			     }
+	      }
 	       return handler;
 	}
 }
