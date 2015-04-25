@@ -1,8 +1,8 @@
 
  CREATE TABLE if not exists `b_provisioning_actions` (
   `id` bigint(10) NOT NULL AUTO_INCREMENT,
-  `provision_type` varchar(15) NOT NULL,
-  `action` varchar(15) NOT NULL,
+  `provision_type` varchar(50) NOT NULL,
+  `action` varchar(50) NOT NULL,
   `provisioning_system` varchar(20) DEFAULT NULL,
   `is_enable` char(1) DEFAULT 'N',
   `is_delete` char(1) DEFAULT 'N',
@@ -46,7 +46,7 @@ insert ignore into b_provisioning_actions values (null,'Release Device','RELEASE
 
 -- DELETE FROM b_eventaction_mapping  WHERE  event_name='Event Order';
 
-DELETE FROM b_eventaction_mapping  WHERE  event_name='Event Order';
+-- DELETE FROM b_eventaction_mapping  WHERE  event_name='Event Order';
 
 insert ignore into b_eventaction_mapping  VALUES (null,'Create Live Event','Active Live Event','workflow_events','N','Y');
 insert ignore into m_permission values(null,'billing','ACTIVE_PROVISIONACTIONS','PROVISIONACTIONS','ACTIVE',0);
