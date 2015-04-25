@@ -80,7 +80,7 @@ public class AuthenticationApiResource {
         MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         System.out.println(tenant.getLicensekey());
         String notificationMessage=null;
-        LicenseData licenseData= this.licenseUpdateService.getLicenseDetails(tenant);
+        LicenseData licenseData= this.licenseUpdateService.getLicenseDetails(tenant.getLicensekey());
         int days = Days.daysBetween( new LocalDate(), new LocalDate(licenseData.getKeyDate())).getDays();
        
         if(days < 7){
