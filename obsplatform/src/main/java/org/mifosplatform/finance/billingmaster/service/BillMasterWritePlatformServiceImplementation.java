@@ -26,6 +26,8 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
+import org.mifosplatform.logistics.onetimesale.domain.OneTimeSaleRepository;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.slf4j.Logger;
@@ -51,6 +53,7 @@ public class BillMasterWritePlatformServiceImplementation implements
 		private final InvoiceRepository invoiceRepository;
 		private final PaymentRepository paymentRepository;
 		private final AdjustmentRepository adjustmentRepository;
+		private final OneTimeSaleRepository oneTimeSaleRepository;
 		 
 	@Autowired
 	 public BillMasterWritePlatformServiceImplementation(final PlatformSecurityContext context,final BillMasterRepository billMasterRepository,
@@ -58,7 +61,7 @@ public class BillMasterWritePlatformServiceImplementation implements
 				final BillMasterCommandFromApiJsonDeserializer apiJsonDeserializer,final ClientRepository clientRepository,
 				final BillingOrderRepository billingOrderRepository, final InvoiceTaxRepository invoiceTaxRepository,
 		        final InvoiceRepository invoiceRepository, final PaymentRepository paymentRepository,
-		        final AdjustmentRepository adjustmentRepository){
+		        final AdjustmentRepository adjustmentRepository,final OneTimeSaleRepository oneTimeSaleRepository){
 		
 		    this.context = context;
 			this.billMasterRepository = billMasterRepository;
@@ -71,6 +74,7 @@ public class BillMasterWritePlatformServiceImplementation implements
 			this.invoiceTaxRepository = invoiceTaxRepository;
 			this.adjustmentRepository = adjustmentRepository;
 			this.paymentRepository = paymentRepository;
+			this.oneTimeSaleRepository = oneTimeSaleRepository;
 			
 	}
 	
@@ -176,12 +180,16 @@ public class BillMasterWritePlatformServiceImplementation implements
 					Invoice invoice = this.invoiceRepository.findOne(billingOrder.getInvoice().getId());
 					invoice.updateBillId(billId);
 					this.invoiceRepository.save(invoice);
+					OneTimeSale oneTimeSale=this.oneTimeSaleRepository.findOne(billingOrder.getOrderId());
+					oneTimeSale.updateBillId(billId);
+					this.oneTimeSaleRepository.save(oneTimeSale);
 				
 				}
 
 			}
-		}catch(Exception exception){
-		
+		}catch(Exception ex){
+			 LOGGER.error(ex.getLocalizedMessage());
+			// handleCodeDataIntegrityIssues(command, ex);
 		}
 	}
 
@@ -205,7 +213,7 @@ public class BillMasterWritePlatformServiceImplementation implements
 					Invoice invoice = this.invoiceRepository.findOne(billingOrder.getInvoice().getId());
 					invoice.updateBillId(null);
 					this.invoiceRepository.save(invoice);
-				} else if("Taxes".equalsIgnoreCase(billDetail.getTransactionType())){
+				} else if("TAXES".equalsIgnoreCase(billDetail.getTransactionType())){
 					InvoiceTax tax = this.invoiceTaxRepository.findOne(billDetail.getTransactionId());
 					tax.updateBillId(null);
 					this.invoiceTaxRepository.save(tax);

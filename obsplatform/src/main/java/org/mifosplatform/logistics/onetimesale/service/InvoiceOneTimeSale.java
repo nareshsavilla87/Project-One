@@ -178,7 +178,7 @@ public class InvoiceOneTimeSale {
 		if(isDiscountFlat(discountMasterData)){
 			
 			BigDecimal netFlatAmount=this.calculateDiscountFlat(discountMasterData.getDiscountRate(), chargePrice);
-			netFlatAmount=this.chargePriceNotLessThanZero(chargePrice, discountAmount);
+			netFlatAmount=this.chargePriceNotLessThanZero(chargePrice, discountMasterData.getDiscountRate());
 			discountMasterData.setDiscountedChargeAmount(netFlatAmount);
 			discountAmount = chargePrice.subtract(netFlatAmount);
 			discountMasterData.setDiscountAmount(discountAmount);

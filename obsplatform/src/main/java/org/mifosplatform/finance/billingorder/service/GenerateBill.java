@@ -473,12 +473,12 @@ public class GenerateBill {
 				taxMappingRateDatas = billingOrderReadPlatformService.retrieveDefaultTaxMappingData(billingOrderData.getClientId(),billingOrderData.getChargeCode());
 		}
 		
-		List<InvoiceTaxCommand> invoiceTaxCommand = generateInvoiceTax(taxMappingRateDatas, billPrice, billingOrderData.getClientId());
+		List<InvoiceTaxCommand> invoiceTaxCommand = generateInvoiceTax(taxMappingRateDatas, billPrice,billingOrderData.getClientId(),billingOrderData.getTaxInclusive());
 		return invoiceTaxCommand;
 	}
 
 	// Generate Invoice Tax
-	public List<InvoiceTaxCommand> generateInvoiceTax(List<TaxMappingRateData> taxMappingRateDatas, BigDecimal price,Long clientId) {
+	public List<InvoiceTaxCommand> generateInvoiceTax(List<TaxMappingRateData> taxMappingRateDatas, BigDecimal price,Long clientId,Integer isTaxInclusive) {
 
 		BigDecimal taxRate = null;
 		BigDecimal taxAmount = null;
@@ -509,7 +509,7 @@ public class GenerateBill {
 					}
 				}
 
-				invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, null, taxRate, taxAmount);
+				invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, isTaxInclusive, taxRate, taxAmount);
 				invoiceTaxCommands.add(invoiceTaxCommand);
 			}
 
