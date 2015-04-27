@@ -38,6 +38,7 @@ alter table b_payments modify `is_sub_payment` char(2) default 'N';
 alter table b_process_request_detail modify `hardware_id` varchar(50) default NULL;
 alter table b_process_request_detail modify `sent_message` text default NULL;
 alter table b_provisioning_actions modify `action` varchar(25) NOT NULL;
+alter table b_charge_tax modify `tax_value` BIGINT(10) NOT NULL;
 
 
 

@@ -55,6 +55,7 @@ public static final String CODE_PARTNER_TYPE= "Partner Type";
 public static final String CODE_AGREEMENT_TYPE= "Agreement Type";
 public static final String CODE_SOURCE_CATEGORY= "Source Category";
 public static final String CODE_VOUCHER_CANCEL_REASON= "Voucher Cancel Reason";
+public static final String CODE_CANCEL_SALE= "CANCEL SALE";
 
 
 
