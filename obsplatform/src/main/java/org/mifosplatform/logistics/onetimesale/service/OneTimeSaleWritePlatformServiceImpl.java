@@ -29,6 +29,7 @@ import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSaleRepository;
 import org.mifosplatform.logistics.onetimesale.exception.DeviceSaleNotFoundException;
 import org.mifosplatform.logistics.onetimesale.serialization.OneTimesaleCommandFromApiJsonDeserializer;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.workflow.eventvalidation.service.EventValidationReadPlatformService;
 import org.slf4j.Logger;
@@ -247,7 +248,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 				   BigDecimal discountAmount=charge.get(0).getDiscountAmount();
 				   //cancel sale calling 
 				   OneTimeSale cancelDeviceSale= new OneTimeSale(oneTimeSale.getClientId(), oneTimeSale.getItemId(), oneTimeSale.getUnits(),oneTimeSale.getQuantity(),oneTimeSale.getChargeCode(), oneTimeSale.getUnitPrice(), oneTimeSale.getTotalPrice(), 
-			        		                           DateUtils.getLocalDateOfTenant(),oneTimeSale.getDiscountId(),oneTimeSale.getOfficeId(),"CANCELSALE",null);
+			        		                           DateUtils.getLocalDateOfTenant(),oneTimeSale.getDiscountId(),oneTimeSale.getOfficeId(),CodeNameConstants.CODE_CANCEL_SALE,null);
 				   this.oneTimeSaleRepository.saveAndFlush(cancelDeviceSale);
 				   OneTimeSaleData oneTimeSaleData = new OneTimeSaleData(cancelDeviceSale.getId(),oneTimeSale.getClientId(), oneTimeSale.getUnits(), oneTimeSale.getChargeCode(), 
 						                             chargeCode.getChargeType(),oneTimeSale.getUnitPrice(),oneTimeSale.getQuantity(), oneTimeSale.getTotalPrice(), "Y",

@@ -138,7 +138,7 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 				
 				  if(isTaxInclusive(billingOrderCommand.getTaxInclusive())){
 					netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
-					charge.setNetChargeAmount(netChargeAmount.negate());
+					//charge.setNetChargeAmount(netChargeAmount.negate());
 				}
 			}
 
@@ -156,7 +156,7 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 				   invoiceAmount = totalChargeAmount.add(netTaxAmount);
 			   }
 			   }
-		//invoiceAmount = totalChargeAmount.add(netTaxAmount);
+		
 		invoice.setNetChargeAmount(totalChargeAmount.negate());
 		invoice.setTaxAmount(netTaxAmount.negate());
 		invoice.setInvoiceAmount(invoiceAmount.negate());
