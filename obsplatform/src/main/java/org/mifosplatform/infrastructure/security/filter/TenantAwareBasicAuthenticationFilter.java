@@ -156,7 +156,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                
           }else if(path.contains("/api/v1/keyinfo")){
         	  final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");    
-        	  LicenseData licenseData=this.licenseUpdateService.getLicenseDetails(tenant);
+        	  LicenseData licenseData=this.licenseUpdateService.getLicenseDetails(tenant.getLicensekey());
         	  PrintWriter printWriter = res.getWriter();
         	  printWriter.print(new LocalDate(licenseData.getKeyDate()));
         	  

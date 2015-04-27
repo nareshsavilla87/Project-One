@@ -119,8 +119,8 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 			List<InvoiceTaxCommand> invoiceTaxCommands = billingOrderCommand.getListOfTax();
 
 			BillingOrder charge = new BillingOrder(billingOrderCommand.getClientId(), billingOrderCommand.getClientOrderId(), billingOrderCommand.getOrderPriceId(),
-					billingOrderCommand.getChargeCode(),billingOrderCommand.getChargeType(),discountCode, billingOrderCommand.getPrice(), discountAmount,
-					netChargeAmount, billingOrderCommand.getStartDate(), billingOrderCommand.getEndDate());
+					billingOrderCommand.getChargeCode(),billingOrderCommand.getChargeType(),discountCode, billingOrderCommand.getPrice().negate(), discountAmount.negate(),
+					netChargeAmount.negate(), billingOrderCommand.getStartDate(), billingOrderCommand.getEndDate());
 			//client taxExemption
 			if(tax.getTaxExemption().equalsIgnoreCase("N")){
 			
@@ -129,7 +129,7 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 				     netChargeTaxAmount = netChargeTaxAmount.add(invoiceTaxCommand.getTaxAmount());
 				
 				     InvoiceTax invoiceTax = new InvoiceTax(invoice, charge, invoiceTaxCommand.getTaxCode(),invoiceTaxCommand.getTaxValue(), 
-						                  invoiceTaxCommand.getTaxPercentage(), invoiceTaxCommand.getTaxAmount());
+						                  invoiceTaxCommand.getTaxPercentage(), invoiceTaxCommand.getTaxAmount().negate());
 				      charge.addChargeTaxes(invoiceTax);
 			     }
 			
@@ -137,7 +137,7 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 				
 				  if(isTaxInclusive(billingOrderCommand.getTaxInclusive())){
 					netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
-					charge.setNetChargeAmount(netChargeAmount);
+					//charge.setNetChargeAmount(netChargeAmount.negate());
 				}
 			}
 
@@ -155,7 +155,7 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 				   invoiceAmount = totalChargeAmount.add(netTaxAmount);
 			   }
 			   }
-		//invoiceAmount = totalChargeAmount.add(netTaxAmount);
+		
 		invoice.setNetChargeAmount(totalChargeAmount.negate());
 		invoice.setTaxAmount(netTaxAmount.negate());
 		invoice.setInvoiceAmount(invoiceAmount.negate());

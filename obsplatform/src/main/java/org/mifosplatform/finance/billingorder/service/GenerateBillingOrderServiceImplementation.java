@@ -194,7 +194,7 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 
 					if (isTaxInclusive(billingOrderCommand.getTaxInclusive())) {
 						netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
-						charge.setNetChargeAmount(netChargeAmount);
+						//charge.setNetChargeAmount(netChargeAmount);
 						// charge.setChargeAmount(netChargeAmount);
 					}
 				}
