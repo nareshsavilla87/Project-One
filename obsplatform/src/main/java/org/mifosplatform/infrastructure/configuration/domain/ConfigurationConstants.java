@@ -91,6 +91,7 @@ public class ConfigurationConstants {
 	public static final String GLOBALPAY_URL = "https://demo.globalpay.com.ng/GlobalpayWebService_demo/service.asmx";
 	public static final String GLOBALPAY_HOST = "demo.globalpay.com.ng";
 	public static final String GLOBALPAY_CHARSET = "application/soap+xml; charset=utf-8";
+	public static final String CONFIG_ALIGN_BIILING_CYCLE = "align-biiling-cycle";
 	
 
 }

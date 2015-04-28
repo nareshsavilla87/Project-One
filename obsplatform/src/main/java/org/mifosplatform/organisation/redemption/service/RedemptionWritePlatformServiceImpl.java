@@ -121,7 +121,7 @@ public class RedemptionWritePlatformServiceImpl implements
 			
 			if(pinType.equalsIgnoreCase(VALUE_PINTYPE) && pinTypeValue != null){
 				  pinValue = new BigDecimal(pinTypeValue);
-				final JsonObject json = new JsonObject();
+				/*final JsonObject json = new JsonObject();
 				json.addProperty("adjustment_type", "CREDIT");json.addProperty("adjustment_code", 123);
 				json.addProperty("amount_paid",pinValue);
 				json.addProperty("Remarks", "Adjustment Post By Redemption");
@@ -133,13 +133,17 @@ public class RedemptionWritePlatformServiceImpl implements
 				
 				result=this.adjustmentWritePlatformService.createAdjustment(commd);
 				 resourceId=result.resourceId();
-
+*/
 				/*  JournalVoucher journalVoucher=new JournalVoucher(voucher.getOfficeId(),DateUtils.getDateOfTenant(),"Redemption",null,
 						  pinValue.doubleValue(),Long.valueOf(0));
 					this.journalvoucherRepository.save(journalVoucher);
 					
 					journalVoucher=new JournalVoucher(resourceId,DateUtils.getDateOfTenant(),"Redemption",pinValue.doubleValue(),null,clientId);
 						this.journalvoucherRepository.save(journalVoucher);*/
+				  
+				  this.billingOrderWritePlatformService.updateClientBalance(pinValue, clientId, true);
+				  resourceId = clientId;
+				  
 			}
 			 
 			if(pinType.equalsIgnoreCase(PRODUCE_PINTYPE) && pinTypeValue != null){
@@ -190,10 +194,10 @@ public class RedemptionWritePlatformServiceImpl implements
 				this.billingOrderWritePlatformService.updateClientVoucherBalance(pinValue.negate(), clientId, false);
 			}
 			
-			  JournalVoucher journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",null,pinValue.doubleValue(),Long.valueOf(0));
+			  /*JournalVoucher journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",null,pinValue.doubleValue(),Long.valueOf(0));
 				this.journalvoucherRepository.save(journalVoucher);
-				
-				journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",pinValue.doubleValue(),null,clientId);
+*/				
+			JournalVoucher journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",pinValue.doubleValue(),null,clientId);
 					this.journalvoucherRepository.save(journalVoucher);
 			  
 			voucherDetails.setClientId(clientId);
