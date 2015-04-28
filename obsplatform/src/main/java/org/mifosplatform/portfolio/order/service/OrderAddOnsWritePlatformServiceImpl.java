@@ -143,8 +143,11 @@ private OrderAddons assembleOrderAddons(JsonElement jsonElement,FromJsonHelper f
 	if(!"None".equalsIgnoreCase(serviceMapping.get(0).getProvisionSystem())){
 		status=StatusTypeEnum.PENDING.toString();
 	}
-	
-	orderAddons.setEndDate(endDate.toDate());
+	if(endDate !=null){
+	   orderAddons.setEndDate(endDate.toDate());
+	}else{
+	  orderAddons.setEndDate(null);
+	}
 	orderAddons.setProvisionSystem(serviceMapping.get(0).getProvisionSystem());
 	orderAddons.setStatus(status);
 	

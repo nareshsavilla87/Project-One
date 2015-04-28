@@ -1,6 +1,8 @@
 package org.mifosplatform.organisation.ippool.service;
 
 import java.net.InetAddress;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +21,12 @@ import org.mifosplatform.organisation.ippool.domain.IpPoolManagementDetail;
 import org.mifosplatform.organisation.ippool.domain.IpPoolManagementJpaRepository;
 import org.mifosplatform.organisation.ippool.exception.IpAddresNotAvailableException;
 import org.mifosplatform.organisation.ippool.serialization.IpPoolManagementCommandFromApiJsonDeserializer;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -38,6 +46,8 @@ public class IpPoolManagementWritePlatformServiceImpl implements
 	private final IpPoolManagementJpaRepository ipPoolManagementJpaRepository;
 	private final IpPoolManagementReadPlatformService ipPoolManagementReadPlatformService;
 	private final ConfigurationRepository globalConfigurationRepository;
+	private final MCodeReadPlatformService codeReadPlatformService;
+	private final ProcessRequestRepository processRequestRepository;
 
 	@Autowired
 	public IpPoolManagementWritePlatformServiceImpl(
@@ -45,14 +55,17 @@ public class IpPoolManagementWritePlatformServiceImpl implements
 			final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,
 			final IpPoolManagementCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final IpPoolManagementReadPlatformService ipPoolManagementReadPlatformService,
-			final ConfigurationRepository globalConfigurationRepository) {
+			final ConfigurationRepository globalConfigurationRepository,
+			final MCodeReadPlatformService codeReadPlatformService,
+			final ProcessRequestRepository processRequestRepository) {
 
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.ipPoolManagementJpaRepository = ipPoolManagementJpaRepository;
 		this.ipPoolManagementReadPlatformService = ipPoolManagementReadPlatformService;
 		this.globalConfigurationRepository = globalConfigurationRepository;
-
+		this.codeReadPlatformService = codeReadPlatformService;
+		this.processRequestRepository = processRequestRepository;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -261,6 +274,73 @@ public class IpPoolManagementWritePlatformServiceImpl implements
 			exception.printStackTrace();
 			return null;
 		}
+	}
+
+	@Override
+	public CommandProcessingResult updateStaticIpStatus(JsonCommand command) {
+		
+		try {
+
+			final String ipAddress = command.stringValueOfParameterNamed("ipAddress");
+			final String status = command.stringValueOfParameterNamed("status");
+			final Long clientId = command.longValueOfParameterNamed("clientId");
+			final String staticIpType = command.stringValueOfParameterNamed("staticIpType");
+			final String poolName = command.stringValueOfParameterNamed("poolName");
+			
+			IpPoolManagementDetail ipPoolBasedOnclientId = this.ipPoolManagementJpaRepository.findByClientId(clientId);
+			
+			if(ipPoolBasedOnclientId != null && staticIpType.equalsIgnoreCase("remove")){
+				
+				ipPoolBasedOnclientId.setStatus(status.trim().charAt(0));
+				ipPoolBasedOnclientId.setClientId(null);
+				this.ipPoolManagementJpaRepository.save(ipPoolBasedOnclientId);
+				processRequestData(command, clientId);
+				
+			}else if(ipPoolBasedOnclientId != null && staticIpType.equalsIgnoreCase("create")){
+				
+				throw new IpAddresNotAvailableException(clientId);
+			}else if(!staticIpType.equalsIgnoreCase("remove") && staticIpType.equalsIgnoreCase("create")){
+				
+				IpPoolManagementDetail ipPoolManagementDetail = this.ipPoolManagementJpaRepository.findIpAddressData(ipAddress);
+				if (ipPoolManagementDetail != null) {
+					ipPoolManagementDetail.setStatus(status.trim().charAt(0));
+					ipPoolManagementDetail.setClientId(clientId);
+					this.ipPoolManagementJpaRepository.save(ipPoolManagementDetail);
+					processRequestData(command, clientId);
+				}else if(ipPoolManagementDetail == null && poolName.equalsIgnoreCase("Adhoc")){
+					throw new IpAddresNotAvailableException("");
+				}else if(ipPoolManagementDetail == null && !poolName.equalsIgnoreCase("Adhoc")){
+					Collection<MCodeData> codeValueDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_IP_TYPE);
+					Long type = null;
+					if(codeValueDatas.iterator().next().getmCodeValue().equalsIgnoreCase("Public")){
+						type = codeValueDatas.iterator().next().getId();
+					}
+					IpPoolManagementDetail ipPoolCreate = new IpPoolManagementDetail(ipAddress, status.trim().charAt(0), type, null, null);
+					ipPoolCreate.setClientId(clientId);
+					this.ipPoolManagementJpaRepository.save(ipPoolCreate);
+					processRequestData(command, clientId);
+				}
+			}else{
+				throw new IpAddresNotAvailableException();
+			}
+			
+			return new CommandProcessingResult(1l);
+		} catch (DataIntegrityViolationException exception) {
+			exception.printStackTrace();
+			return null;
+		}
+	}
+	
+	public void processRequestData(JsonCommand command, Long clientId){
+		
+		final ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0), clientId, Long.valueOf(0), 
+				"Radius", "STATIC_IP", 'N', 'N');
+		final ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0), Long.valueOf(0),
+				command.json(), "Recieved", "", new Date(), null, 
+				null,null, 'N',"STATIC_IP","");
+
+  		processRequest.add(processRequestDetails);
+  		this.processRequestRepository.save(processRequest);
 	}
 
 }

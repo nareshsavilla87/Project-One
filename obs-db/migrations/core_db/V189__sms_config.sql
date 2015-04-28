@@ -16,3 +16,6 @@ END
 $$
 
 insert into c_configuration (id,name,enabled,value) VALUES (null,'align-biiling-cycle',0,0);
+
+insert IGNORE into m_permission values(null, 'billing', 'UPDATE_STATICIP', 'STATICIP', 'UPDATE', '0');
+

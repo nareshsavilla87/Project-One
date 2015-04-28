@@ -66,23 +66,23 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 					" AND pd.state_id = s.id group by da.id";*/
 			
 			String sql ="SELECT da.id AS id,if(da.service_code = 'None', 0, se.id) AS serviceId,da.service_code AS service_code,da.charge_code AS charge_code," +
-					" da.charging_variant AS charging_variant,c.charge_type AS charge_type,c.charge_duration AS charge_duration,c.duration_type AS duration_type," +
-					" da.discount_id AS discountId,c.tax_inclusive AS taxInclusive,da.price AS price,da.price_region_id,s.id AS stateId,s.parent_code AS countryId," +
-					" pd.state_id AS regionState,con.country_name,pd.country_id AS regionCountryId" +
-					" FROM b_plan_pricing da LEFT JOIN b_charge_codes c ON c.charge_code = da.charge_code " +
-					" LEFT JOIN b_service se ON (da.service_code = se.service_code OR da.service_code = 'None')" +
-					" LEFT JOIN b_priceregion_detail pd ON pd.priceregion_id = da.price_region_id" +
-					" JOIN b_client_address ca LEFT JOIN b_state s ON ca.state = s.state_name LEFT JOIN b_country con ON ca.country = con.country_name" +
-					" WHERE     da.is_deleted = 'n' AND ca.address_key = 'PRIMARY' AND da.plan_id = ? AND c.billfrequency_code =? " +
-					" AND ca.client_id = ? AND (pd.state_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_state c," +
-					" b_client_address d" +
-					" WHERE     b.priceregion_id = a.price_region_id AND b.state_id = c.id AND d.state = c.state_name AND d.address_key = 'PRIMARY' AND d.client_id = ? and a.plan_id =?),0)" +
-					" AND pd.country_id = ifnull( (SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_country c, b_client_address d " +
-					" WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY' AND d.client_id = ? and a.plan_id =? ),0))" +
-					" group by da.id";
-			
-			return this.jdbcTemplate.query(sql, mapper, new Object[] { planId,billingFreq,clientId,clientId,planId,clientId,planId });
-
+				     " da.charging_variant AS charging_variant,c.charge_type AS charge_type,c.charge_duration AS charge_duration,c.duration_type AS duration_type," +
+				     " da.discount_id AS discountId,c.tax_inclusive AS taxInclusive,da.price AS price,da.price_region_id,s.id AS stateId,s.parent_code AS countryId," +
+				     " pd.state_id AS regionState,con.country_name,pd.country_id AS regionCountryId" +
+				     " FROM b_plan_pricing da LEFT JOIN b_charge_codes c ON c.charge_code = da.charge_code " +
+				     " LEFT JOIN b_service se ON (da.service_code = se.service_code OR da.service_code = 'None')" +
+				     " LEFT JOIN b_priceregion_detail pd ON pd.priceregion_id = da.price_region_id" +
+				     " JOIN b_client_address ca LEFT JOIN b_state s ON ca.state = s.state_name LEFT JOIN b_country con ON ca.country = con.country_name" +
+				     " WHERE da.is_deleted = 'n' AND ca.address_key = 'PRIMARY' AND da.plan_id = ? AND c.billfrequency_code =? " +
+				     " AND ca.client_id = ? AND (pd.state_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_state c," +
+				     " b_client_address d" +
+				     " WHERE b.priceregion_id = a.price_region_id AND b.state_id = c.id   AND a.price_region_id = b.priceregion_id " +
+				     " AND d.state = c.state_name AND d.address_key = 'PRIMARY' AND d.client_id = ? and a.plan_id=?),0)" +
+				     " AND pd.country_id = ifnull( (SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_country c, b_client_address d " +
+				     " WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND a.price_region_id = b.priceregion_id " +
+				     " AND c.country_name = d.country AND d.address_key = 'PRIMARY' AND d.client_id = ? AND a.plan_id = ? ),0))" +
+				     " GROUP BY da.id";
+			return this.jdbcTemplate.query(sql, mapper, new Object[] { planId,billingFreq,clientId,clientId,planId,clientId,planId});
 		} 
 
 		private static final class PriceMapper implements RowMapper<PriceData> {

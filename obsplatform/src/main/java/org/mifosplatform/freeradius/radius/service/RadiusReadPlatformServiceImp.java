@@ -715,7 +715,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	
 	@Override
 	public String retrieveAllOnlineUsers(final String custattr,final String limit, final String offset, final String checkOnline,
-			final String userName) {
+			final String userName, final Long partner) {
 		
 		try {
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
@@ -744,6 +744,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 				object.put("offset", offset);
 				object.put("checkOnline", checkOnline);
 				object.put("userName", userName);
+				object.put("partner", partner);
 				
 				onlineUsersdata = this.processRadiusPost(url, encodedPassword, object.toString());
 				jsonObj.put("radiusVersion", data.getProvSystem().toLowerCase());
@@ -764,6 +765,27 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			return e.getMessage();
 		}
 
+	}
+
+
+	@Override
+	public String createReloadNases(String jsonData) {
+		
+		final Configuration property = this.repository.findOneByName("freeradius_rest");
+
+		if(property == null){
+			throw new RadiusDetailsNotFoundException();
+		}
+		String url = property.getValue() + "nas/reload";
+		String reloadData = null;
+		String encodedPassword = new String("");
+		try {
+			
+			reloadData = this.processRadiusPost(url, encodedPassword, jsonData);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return reloadData;
 	}
 
 }

@@ -262,7 +262,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		if (taxMappingRateDatas.isEmpty()) {
 			taxMappingRateDatas = this.billingOrderReadPlatformService.retrieveDefaultTaxMappingData(clientId,chargeCodeMaster.getChargeCode());
 		}
-		List<InvoiceTaxCommand> invoiceTaxCommand = this.generateBill.generateInvoiceTax(taxMappingRateDatas, billPrice, clientId);
+		List<InvoiceTaxCommand> invoiceTaxCommand = this.generateBill.generateInvoiceTax(taxMappingRateDatas, billPrice, clientId,chargeCodeMaster.getTaxInclusive());
 		return invoiceTaxCommand;
 	}
 }

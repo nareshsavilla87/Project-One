@@ -14,6 +14,8 @@ public interface IpPoolManagementWritePlatformService {
 	CommandProcessingResult updateIpDescription(JsonCommand command);
 
 	CommandProcessingResult updateIpAddressStatus(JsonCommand command);
+
+	CommandProcessingResult updateStaticIpStatus(JsonCommand command);
 	
 
 }

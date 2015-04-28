@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * @author hugo
@@ -199,11 +200,23 @@ public class RadiusAPiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveAllOnlineUsers(@Context final UriInfo uriInfo,@QueryParam("custattr") final String custattr,
 			@QueryParam("limit") final String limit,@QueryParam("offset") final String offset,
-			@QueryParam("checkOnline") final String checkOnline, @QueryParam("userName") final String userName) {
+			@QueryParam("checkOnline") final String checkOnline, @QueryParam("userName") final String userName,
+			@QueryParam("partner") final Long partner) {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		final String radServiceData = this.radiusReadPlatformService.retrieveAllOnlineUsers(custattr, limit, offset, checkOnline, userName);
+		final String radServiceData = this.radiusReadPlatformService.retrieveAllOnlineUsers(custattr, limit, offset, checkOnline, userName, partner);
 		return radServiceData;
+	}
+	
+	@POST
+	@Path("nas/reload")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String createReloadNases(final String apiRequestBodyAsJson) {
+
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final String nasData = this.radiusReadPlatformService.createReloadNases(apiRequestBodyAsJson);
+		return nasData;
 	}
 
 }

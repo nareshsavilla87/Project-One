@@ -1287,4 +1287,7 @@ public class CommandWrapper {
 		public boolean isPlanQualifier() {
 			 return this.entityName.equalsIgnoreCase("PLANQUALIFIER");
 		}
+		public boolean isStaticIp() {
+			return  this.entityName.equalsIgnoreCase("STATICIP");
+		}
 }
