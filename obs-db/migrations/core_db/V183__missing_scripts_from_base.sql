@@ -38,6 +38,7 @@ alter table b_payments modify `is_sub_payment` char(2) default 'N';
 alter table b_process_request_detail modify `hardware_id` varchar(50) default NULL;
 alter table b_process_request_detail modify `sent_message` text default NULL;
 alter table b_provisioning_actions modify `action` varchar(25) NOT NULL;
+alter table b_charge_tax modify `tax_value` BIGINT(10) NOT NULL;
 
 
 
@@ -190,9 +191,9 @@ SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE
 AND `TABLE_NAME` = 'b_ticket_master' AND CONSTRAINT_NAME='fk_tm_assgn')THEN
 ALTER TABLE b_ticket_master DROP FOREIGN KEY `fk_tm_assgn`;
 ALTER TABLE b_ticket_master DROP FOREIGN KEY `fk_tm_usr`;
-ALTER TABLE `obs-base`.`b_ticket_master` ADD CONSTRAINT `fk_tm_assgn`
+ALTER TABLE `b_ticket_master` ADD CONSTRAINT `fk_tm_assgn`
  FOREIGN KEY ( `assigned_to` ) REFERENCES `m_appuser` ( `id` ) ON DELETE NO ACTION ON UPDATE NO ACTION;
- ALTER TABLE `obs-base`.`b_ticket_master` ADD CONSTRAINT `fk_tm_usr`
+ ALTER TABLE `b_ticket_master` ADD CONSTRAINT `fk_tm_usr`
  FOREIGN KEY ( `createdby_id` ) REFERENCES `m_appuser` ( `id` ) ON DELETE NO ACTION ON UPDATE NO ACTION;
 END IF;
 
@@ -201,6 +202,35 @@ DELIMITER ;
 call modifyb_ticketmasterconstraint();
 Drop procedure IF EXISTS modifyb_ticketmasterconstraint;
 
+DELIMITER //
+create procedure addsubnettoippool() 
+Begin
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'subnet'
+     and TABLE_NAME = 'b_ippool_details'
+     and TABLE_SCHEMA = DATABASE())THEN
+Alter table b_ippool_details add column subnet bigint(10) DEFAULT NULL;
+END IF;
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'notes'
+     and TABLE_NAME = 'b_ippool_details'
+     and TABLE_SCHEMA = DATABASE())THEN
+Alter table b_ippool_details add column notes varchar(60) DEFAULT NULL;
+END IF;
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'type'
+     and TABLE_NAME = 'b_ippool_details'
+     and TABLE_SCHEMA = DATABASE())THEN
+Alter table b_ippool_details add column type bigint(20) DEFAULT NULL;
+END IF;
+END //
+DELIMITER ;
+call addsubnettoippool();
+Drop procedure IF EXISTS addsubnettoippool;
+
 /* Depricated Tables
 1.b_plan_qualifier
 2.b_partner_settlement
@@ -208,10 +238,10 @@ Drop procedure IF EXISTS modifyb_ticketmasterconstraint;
 
 
 -- Procedures
-
-DROP PROCEDURE IF EXISTS `obs-base`.custom_validation;
-CREATE PROCEDURE `obs-base`.`custom_validation`(p_userid INT,p_clientid INT,
-jsonstr VARCHAR(1000),event_name VARCHAR(200), out err_code INT,out err_msg VARCHAR(4000) )
+DROP PROCEDURE IF EXISTS  custom_validation;
+DELIMITER //
+CREATE PROCEDURE  `custom_validation`(p_userid INT,p_clientid INT,
+jsonstr VARCHAR(1000),event_name VARCHAR(200), out err_code INT,out err_msg VARCHAR(4000))
 SWL_return:
 BEGIN
 If event_name='Event Order' then
@@ -295,11 +325,14 @@ else
         SET err_msg = '';
 end if;
  
-END;
+END//
+DELIMITER ;
+
 -- ------
 
-DROP PROCEDURE IF EXISTS `obs-base`.workflow_events;
-CREATE PROCEDURE `obs-base`.`workflow_events`(IN  clientid     INT,
+DROP PROCEDURE IF EXISTS  workflow_events;
+DELIMITER //
+CREATE PROCEDURE  `workflow_events`(IN  clientid     INT,
 										IN  eventname    varchar(60),
 										IN  actionname   varchar(60),
 										IN  resourceid   varchar(20),
@@ -325,14 +358,14 @@ BEGIN
         SET result = 'true';
 		SET strjson ='';
 	End if;	  
-	END;
-
+	END //
+DELIMITER ;
 
 	
 -- data
 
-insert into m_permission values(null,'Organisation','CREATE_IPPOOLMANAGEMENT','IPPOOLMANAGEMENT','CREAT',0);
+insert ignore into m_permission values(null,'Organisation','CREATE_IPPOOLMANAGEMENT','IPPOOLMANAGEMENT','CREAT',0);
 
-insert ignore into c_paymentgateway_conf values(null,'is-paypal',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
-insert ignore into c_paymentgateway_conf values(null,'is-paypal-for-ios',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
+-- insert ignore into c_paymentgateway_conf values(null,'is-paypal',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
+-- insert ignore into c_paymentgateway_conf values(null,'is-paypal-for-ios',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
 
