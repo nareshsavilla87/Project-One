@@ -366,7 +366,7 @@ public class GenerateDisconnectionBill {
 					int numberOfDays = 0;
 					if(numberOfMonths !=0){
 						LocalDate tempDate = new LocalDate(billingOrderData.getInvoiceTillDate()).minusMonths(numberOfMonths);
-						numberOfDays = Days.daysBetween(new LocalDate(), tempDate).getDays();	
+						numberOfDays = Days.daysBetween(disconnectionDate, tempDate).getDays();	
 					}else{
 						numberOfDays = Days.daysBetween(disconnectionDate,new LocalDate(billingOrderData.getInvoiceTillDate())).getDays();
 					}
@@ -402,7 +402,7 @@ public class GenerateDisconnectionBill {
 				}
 			
 				invoiceTaxCommand = new InvoiceTaxCommand(billingOrderData.getClientId(), null, null,
-						                  taxCode, null, taxRate, taxAmount);
+						                  taxCode, billingOrderData.getTaxInclusive(), taxRate, taxAmount);
 				invoiceTaxCommands.add(invoiceTaxCommand);
 			}
 
