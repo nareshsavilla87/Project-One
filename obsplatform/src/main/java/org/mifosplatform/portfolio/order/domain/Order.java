@@ -170,6 +170,12 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 		return price;
 	}
 
+	
+	public void setBillingAlign(char billingAlign) {
+		this.billingAlign = billingAlign;
+	}
+
+
 	public void addServiceDeatils(OrderLine orderDetail) {
 		orderDetail.update(this);
 		this.services.add(orderDetail);
@@ -340,4 +346,7 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 		this.orderDiscount.add(orderDiscount);
 		
 	}
+
+
+	
 }

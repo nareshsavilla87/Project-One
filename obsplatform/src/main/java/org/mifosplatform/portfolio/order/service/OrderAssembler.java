@@ -9,6 +9,9 @@ import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.mifosplatform.billing.discountmaster.exception.DiscountMasterNotFoundException;
 import org.mifosplatform.billing.planprice.data.PriceData;
+import org.mifosplatform.infrastructure.configuration.domain.Configuration;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
@@ -31,15 +34,17 @@ public class OrderAssembler {
 private final OrderDetailsReadPlatformServices orderDetailsReadPlatformServices;
 private final ContractRepository contractRepository;
 private final DiscountMasterRepository discountMasterRepository;
+private final ConfigurationRepository  configurationRepository;
 
 
 @Autowired
 public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPlatformServices,final ContractRepository contractRepository,
-		   final DiscountMasterRepository discountMasterRepository){
+		   final DiscountMasterRepository discountMasterRepository,final ConfigurationRepository configurationRepository){
 	
 	this.orderDetailsReadPlatformServices=orderDetailsReadPlatformServices;
 	this.contractRepository=contractRepository;
 	this.discountMasterRepository=discountMasterRepository;
+	this.configurationRepository = configurationRepository;
 	
 }
 
@@ -78,6 +83,15 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 					 order.getContarctPeriod(), serviceDetails, orderprice,order.getbillAlign(),
 					 UserActionStatusTypeEnum.ACTIVATION.toString(),plan.isPrepaid());
 			
+			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
+			
+			if(configuration != null ){
+				order.setBillingAlign(configuration.isEnabled()?'Y':'N');
+				if(configuration.isEnabled()){
+				order.setEndDate(endDate.dayOfMonth().withMaximumValue());
+				}
+			}
+			
 			BigDecimal priceforHistory=BigDecimal.ZERO;
 
 			for (PriceData data : datas) {
@@ -86,7 +100,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 
 				//end date is null for rc
 				if (data.getChagreType().equalsIgnoreCase("RC")	&& endDate != null) {
-					billEndDate = endDate;
+					billEndDate = new LocalDate(order.getEndDate());
 				} else if(data.getChagreType().equalsIgnoreCase("NRC")) {
 					billEndDate = billstartDate;
 				}
