@@ -1283,4 +1283,8 @@ public class CommandWrapper {
 		public boolean isFeeMasterResource() {
 			 return this.entityName.equalsIgnoreCase("FEEMASTER");
 		}
+		
+		public boolean isStaticIp() {
+			return  this.entityName.equalsIgnoreCase("STATICIP");
+		}
 }

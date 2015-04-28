@@ -14,3 +14,5 @@ select message_to,body into @smsto,@smstext from b_message_data where id=message
   RETURN @postdata;
 END
 $$
+
+insert IGNORE into m_permission values(null, 'billing', 'UPDATE_STATICIP', 'STATICIP', 'UPDATE', '0');

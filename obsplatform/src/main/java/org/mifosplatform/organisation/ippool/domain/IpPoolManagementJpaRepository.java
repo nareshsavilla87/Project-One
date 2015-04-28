@@ -26,7 +26,10 @@ public interface IpPoolManagementJpaRepository extends JpaRepository<IpPoolManag
 
 	 @Query("from IpPoolManagementDetail ip where ip.status is 'I' and ip.ipAddress between ?1 and ?2 ")
 	 List<IpPoolManagementDetail> findBetweenIpAddresses(String ipAddress ,String maxRangeIp);
-
+	 
+	 @Query("from IpPoolManagementDetail ipPoolManagementDetail where ipPoolManagementDetail.clientId =:clientId")
+	 IpPoolManagementDetail findByClientId(@Param("clientId") Long clientId);
+	 
 
 }
 

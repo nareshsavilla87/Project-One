@@ -2841,6 +2841,13 @@ public class CommandWrapperBuilder {
 		this.href = "/feemaster/"+id;
 		return this;
 	}
+	
+	public CommandWrapperBuilder updateStaticIpAddress() {
+		this.actionName = "UPDATE";
+		this.entityName = "STATICIP";
+		this.href = "ippooling/staticip";
+		return this;
+	}
 
 }
 
