@@ -1,3 +1,4 @@
+DROP FUNCTION IF EXISTS sms_conf;
 DELIMITER $$
 CREATE  FUNCTION sms_conf(message_id int)
   RETURNS TEXT
@@ -15,7 +16,7 @@ select message_to,body into @smsto,@smstext from b_message_data where id=message
 END
 $$
 
-insert into c_configuration (id,name,enabled,value) VALUES (null,'align-biiling-cycle',0,0);
+insert IGNORE into c_configuration (id,name,enabled,value) VALUES (null,'align-biiling-cycle',0,0);
 
 insert IGNORE into m_permission values(null, 'billing', 'UPDATE_STATICIP', 'STATICIP', 'UPDATE', '0');
 
