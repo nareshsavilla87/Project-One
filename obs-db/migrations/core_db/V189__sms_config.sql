@@ -14,3 +14,5 @@ select message_to,body into @smsto,@smstext from b_message_data where id=message
   RETURN @postdata;
 END
 $$
+
+insert into c_configuration (id,name,enabled,value) VALUES (null,'align-biiling-cycle',0,0);

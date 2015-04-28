@@ -13,14 +13,14 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanDetails;
+import org.mifosplatform.portfolio.plan.domain.PlanQualifier;
+import org.mifosplatform.portfolio.plan.domain.PlanQualifierRepository;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.mifosplatform.portfolio.plan.domain.VolumeDetails;
 import org.mifosplatform.portfolio.plan.domain.VolumeDetailsRepository;
 import org.mifosplatform.portfolio.plan.serialization.PlanCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.service.domain.ServiceMaster;
 import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
-import org.mifosplatform.workflow.eventaction.data.VolumeDetailsData;
-import org.mifosplatform.workflow.eventaction.service.EventActionReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +28,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.ObjectUtils;
+
+import com.google.gson.JsonArray;
 
 
 /**
@@ -42,19 +44,18 @@ public class PlanWritePlatformServiceImpl implements PlanWritePlatformService {
 	private final ServiceMasterRepository serviceMasterRepository;
 	private final PlanCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final VolumeDetailsRepository volumeDetailsRepository;
-	private final EventActionReadPlatformService eventActionReadPlatformService;
+	
 	
 	@Autowired
 	public PlanWritePlatformServiceImpl(final PlatformSecurityContext context,final PlanRepository planRepository,
 			final ServiceMasterRepository serviceMasterRepository,final VolumeDetailsRepository volumeDetailsRepository,
-			final PlanCommandFromApiJsonDeserializer fromApiJsonDeserializer,final EventActionReadPlatformService eventActionReadPlatformService) {
+			final PlanCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
 		
 		this.context = context;
 		this.planRepository = planRepository;
 		this.serviceMasterRepository =serviceMasterRepository;
 		this.fromApiJsonDeserializer=fromApiJsonDeserializer;
 		this.volumeDetailsRepository=volumeDetailsRepository;
-		this.eventActionReadPlatformService=eventActionReadPlatformService;
 
 	}
   
@@ -185,6 +186,38 @@ public class PlanWritePlatformServiceImpl implements PlanWritePlatformService {
 		 plan.delete();
 		 this.planRepository.save(plan);
 		 return new CommandProcessingResultBuilder().withEntityId(planId).build();
+	}
+
+	@Override
+	public CommandProcessingResult updatePlanQualifierData(Long entityId,JsonCommand command) {
+		try{
+			
+			 this.context.authenticatedUser();
+			 Plan plan = this.planRepository.findOne(entityId);
+			/* if(!plan.getPlanQualifiers().isEmpty()){
+				 plan.getPlanQualifiers().clear();
+			 }*/
+			 final JsonArray array=command.arrayOfParameterNamed("partners").getAsJsonArray();
+			 String[] partners =null;
+			 partners=new String[array.size()];
+			 for(int i=0; i<array.size();i++){
+				 partners[i] =array.get(i).getAsString();
+			 }
+			 
+			 for (String partnerId : partners) {
+				 
+				 final Long id = Long.valueOf(partnerId);
+				 PlanQualifier planQualifier=new PlanQualifier(id);
+				// plan.addPlanQualifierDetails(planQualifier);
+			 }
+		 
+			 this.planRepository.save(plan);
+			return new CommandProcessingResult(entityId);
+		}catch(DataIntegrityViolationException dve){
+			handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+		
 	}
 
 }

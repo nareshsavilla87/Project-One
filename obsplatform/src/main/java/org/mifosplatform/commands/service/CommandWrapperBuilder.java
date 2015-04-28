@@ -2842,6 +2842,14 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+	public CommandWrapperBuilder updatePlanQualifier(Long planId) {
+		this.actionName = "UPDATE";
+		this.entityName = "PLANQUALIFIER";
+		this.entityId = planId;
+		this.href = "/planqualifier/"+planId;
+		return this;
+	}
+
 }
 
 

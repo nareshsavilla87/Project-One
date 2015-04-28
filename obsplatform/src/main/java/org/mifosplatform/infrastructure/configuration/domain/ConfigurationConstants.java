@@ -38,6 +38,8 @@ public class ConfigurationConstants {
 
 	public static final String CONFIG_PROPERTY_SMTP= "smtp";
 	public static final String CONFIG_IS_PROPERTY_MASTER = "is-propertycode-enabled";
+	public static final String CONFIG_ALIGN_BIILING_CYCLE = "align-biiling-cycle";
+	
 
 	public static final String ENABLED = "enabled";
 	public static final String VALUE = "value";

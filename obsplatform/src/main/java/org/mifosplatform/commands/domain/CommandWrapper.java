@@ -1283,4 +1283,8 @@ public class CommandWrapper {
 		public boolean isFeeMasterResource() {
 			 return this.entityName.equalsIgnoreCase("FEEMASTER");
 		}
+
+		public boolean isPlanQualifier() {
+			 return this.entityName.equalsIgnoreCase("PLANQUALIFIER");
+		}
 }

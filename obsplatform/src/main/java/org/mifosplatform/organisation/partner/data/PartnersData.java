@@ -89,8 +89,9 @@ public class PartnersData {
 
 	}
 
-	public PartnersData(final String imageKey) {
-
+	public PartnersData(Long id,final String partnerName, final String imageKey) {
+		this.id = id;
+		this.partnerName = partnerName;
 		this.imageKey = imageKey;
 	}
 
