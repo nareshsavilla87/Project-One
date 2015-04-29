@@ -89,7 +89,7 @@ public class PaymentGatewayRecurringApiResource {
 	@Produces({ MediaType.TEXT_HTML })
 	public String paypalChangeRecurringStatus(final String apiRequestBodyAsJson) {
 
-			final CommandWrapper commandRequest = new CommandWrapperBuilder().updateChangePaypalStatus().withJson(apiRequestBodyAsJson).build();
+			final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePaypalProfileStatus().withJson(apiRequestBodyAsJson).build();
 			final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 			return this.toApiJsonSerializer.serialize(result);
 	} 
@@ -104,7 +104,7 @@ public class PaymentGatewayRecurringApiResource {
 	@Produces({ MediaType.TEXT_HTML })
 	public String paypalUpdateRecurringProfile(final String apiRequestBodyAsJson) {
 
-			final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePaypalRecurring().withJson(apiRequestBodyAsJson).build();
+			final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePaypalProfileRecurring().withJson(apiRequestBodyAsJson).build();
 			final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 			return this.toApiJsonSerializer.serialize(result);
 	} 

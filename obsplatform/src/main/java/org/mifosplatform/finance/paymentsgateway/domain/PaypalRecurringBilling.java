@@ -25,6 +25,9 @@ public class PaypalRecurringBilling extends AbstractPersistable<Long> {
     @Column(name = "order_id", nullable = true)
     private Long orderId;
     
+    @Column(name = "is_deleted", nullable = false)
+	private char deleted='N';
+    
     public PaypalRecurringBilling(){
     	
     }
@@ -61,5 +64,15 @@ public class PaypalRecurringBilling extends AbstractPersistable<Long> {
 	public void setOrderId(Long orderId) {
 		this.orderId = orderId;
 	}
+
+	public char getDeleted() {
+		return deleted;
+	}
+
+	public void updateStatus() {
+		this.deleted = 'Y';
+	}
+	
+	
     
 }

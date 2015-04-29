@@ -60,6 +60,9 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundException;
+import org.mifosplatform.portfolio.order.domain.Order;
+import org.mifosplatform.portfolio.order.domain.OrderRepository;
+import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -105,13 +108,14 @@ public class PaymentGatewayApiResource {
 	private final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService;
 	private final PaymentGatewayRepository paymentGatewayRepository;
 	private final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService;
+	private final OrderRepository orderRepository;
 
 	@Autowired
 	public PaymentGatewayApiResource(final PlatformSecurityContext context,final PaymentGatewayReadPlatformService readPlatformService,
 			final DefaultToApiJsonSerializer<PaymentGatewayData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
 			final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
     		final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService,
-    		final PaymentGatewayRepository paymentGatewayRepository,
+    		final PaymentGatewayRepository paymentGatewayRepository, final OrderRepository orderRepository,
     		final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService) {
 
 		this.toApiJsonSerializer = toApiJsonSerializer;
@@ -122,6 +126,8 @@ public class PaymentGatewayApiResource {
     	this.paymentGatewayWritePlatformService = paymentGatewayWritePlatformService;
     	this.paymentGatewayRepository = paymentGatewayRepository;
     	this.paymentGatewayRecurringWritePlatformService = paymentGatewayRecurringWritePlatformService;
+    	this.orderRepository = orderRepository;
+    	
 	}
 
 	/**
@@ -770,28 +776,33 @@ public class PaymentGatewayApiResource {
 					
 					if(Result.equalsIgnoreCase(RecurringPaymentTransactionTypeConstants.SUCCESS)){
 						
-						this.paymentGatewayRecurringWritePlatformService.recurringEventUpdate(request);
-						
+						this.paymentGatewayRecurringWritePlatformService.recurringEventUpdate(request);				
 					}
 					
 					break;
 					
 				case RecurringPaymentTransactionTypeConstants.SUBSCR_EOT:
 				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_EXPIRED:
+				case RecurringPaymentTransactionTypeConstants.SUBSCR_CANCELLED:
 					
 					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(request);
+					
+					Long orderId = this.paymentGatewayRecurringWritePlatformService.getOrderId(request);
+					
+					String status = this.paymentGatewayRecurringWritePlatformService.getOrderStatus(orderId);
+					
+					if (status.equalsIgnoreCase(StatusTypeEnum.ACTIVE.toString())) {
+						
+						final CommandWrapper commandRequest = new CommandWrapperBuilder().terminateOrder(orderId).build();
+						this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+					}
 				
 					break;
 					
 				case RecurringPaymentTransactionTypeConstants.SUBSCR_FAILED:
 				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILED:
 					
-					
-					break;
-	
-				case RecurringPaymentTransactionTypeConstants.SUBSCR_CANCELLED:
-					
-					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(request);
+			
 					break;
 					
 				case RecurringPaymentTransactionTypeConstants.SUBSCR_MODIFY:
@@ -804,9 +815,13 @@ public class PaymentGatewayApiResource {
 				
 				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUSPENDED:
 					
+					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(request);
+					
 					break;
 				
 				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUSPENDED_DUE_TO_MAX_FAILED_PAYMENT:
+					
+					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(request);
 					
 					break;
 

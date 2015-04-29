@@ -17,6 +17,8 @@ public class EventActionConstants {
 	public static final String EVENT_EVENT_ORDER="Event Order";
 	public static final String EVENT_SCHEDULE_ORDER_SUSPEND="Schedule Order Suspend";
 	public static final String EVENT_SCHEDULE_ORDER_DISCONNECT="Schedule Order Disconnect";
+	public static final String EVENT_PAYPAL_RECURRING_DISCONNECT_ORDER="Recurring DisConnect Order";
+	public static final String EVENT_PAYPAL_RECURRING_RECONNECTION_ORDER="Recurring ReConnection Order";
 	
 	//Actions
 	public static final String ACTION_SEND_MAIL="Send Mail";
@@ -35,6 +37,9 @@ public class EventActionConstants {
 	public static final String ACTION_ACTIVE_LIVE_EVENT = "Active Live Event";
 	public static final String ACTION_INACTIVE_LIVE_EVENT = "InActive Live Event";
 	public static final String ACTION_CREATE_PAYMENT="Create Payment";
+	public static final String ACTION_RECURRING_DISCONNECT="RecurringDisconnect";
+	public static final String ACTION_RECURRING_RECONNECTION="RecurringReconnection";
+	
 }
 
 
