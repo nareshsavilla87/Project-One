@@ -238,10 +238,10 @@ Drop procedure IF EXISTS addsubnettoippool;
 
 
 -- Procedures
-DROP PROCEDURE IF EXISTS  custom_validation;
+DROP PROCEDURE IF EXISTS custom_validation;
 DELIMITER //
-CREATE PROCEDURE  `custom_validation`(p_userid INT,p_clientid INT,
-jsonstr VARCHAR(1000),event_name VARCHAR(200), out err_code INT,out err_msg VARCHAR(4000))
+CREATE PROCEDURE `custom_validation`(p_userid INT,p_clientid INT,
+jsonstr VARCHAR(1000),event_name VARCHAR(200), out err_code INT,out err_msg VARCHAR(4000) )
 SWL_return:
 BEGIN
 If event_name='Event Order' then
@@ -325,8 +325,8 @@ else
         SET err_msg = '';
 end if;
  
-END//
-DELIMITER ;
+END //
+DELIMITER;
 
 -- ------
 
@@ -365,6 +365,8 @@ DELIMITER ;
 -- data
 
 insert ignore into m_permission values(null,'Organisation','CREATE_IPPOOLMANAGEMENT','IPPOOLMANAGEMENT','CREAT',0);
+ALTER TABLE b_ippool_details MODIFY COLUMN pool_name VARCHAR(30) DEFAULT NULL;
+INSERT IGNORE INTO m_permission VALUES (null,'organisation', 'UPDATE_IPPOOLMANAGEMENT', 'IPPOOLMANAGEMENT', 'UPDATE', 1);
 
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal-for-ios',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
