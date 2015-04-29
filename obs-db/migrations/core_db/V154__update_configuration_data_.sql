@@ -1,5 +1,5 @@
 SET SQL_SAFE_UPDATES = 0;
-/*update c_configuration set name='rounding' where name='Rounding';
+update c_configuration set name='rounding' where name='Rounding';
 update c_configuration set name='implicit-association' where name='Implicit Association';
 update c_configuration set name='date-format' where name='DateFormat';
 update c_configuration set name='login' where name='Login';
@@ -20,7 +20,7 @@ update c_configuration set name='active-viewers' where name='Active Viewers';
 update c_configuration set name='change-plan-align-dates' where name='CHANGE_PLAN_ALIGN_DATES';
 update c_configuration set name='osd-provisioningSystem' where name='OSD_ProvisioningSystem';
 update c_configuration set name='is-paypal-for-ios' where name='Is_Paypal_For_Ios';
-update c_configuration set name='is-cache-enabled' where name='Is Cache Enabled';*/
+update c_configuration set name='is-cache-enabled' where name='Is Cache Enabled';
 
 Drop procedure IF EXISTS alteruploadTablename; 
 DELIMITER //
