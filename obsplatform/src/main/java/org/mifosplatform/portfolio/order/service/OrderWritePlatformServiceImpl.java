@@ -422,12 +422,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  if(orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
 		  newStartdate=new LocalDate(orderDetails.getEndDate()).plusDays(1);
 		  requstStatus=UserActionStatusEnumaration.OrderStatusType(UserActionStatusTypeEnum.RENEWAL_BEFORE_AUTOEXIPIRY).getValue();
-		  
-		  //Prepare Provisioning Req
-		  CodeValue codeValue=this.codeValueRepository.findOneByCodeValue(plan.getProvisionSystem());
-		  if(codeValue.position() == 1){
-			  requestStatusForProv="RENEWAL_BE";
-		  }
+		 
 					
 	  } else if(orderDetails.getStatus().equals(StatusTypeEnum.DISCONNECTED.getValue().longValue())){
 		  newStartdate = DateUtils.getLocalDateOfTenant(); 
@@ -477,14 +472,19 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	//  Set<PlanDetails> planDetails=plan.getDetails();
 	 // ServiceMaster serviceMaster=this.serviceMasterRepository.findOneByServiceCode(planDetails.iterator().next().getServiceCode());
 	  Long resourceId=Long.valueOf(0);
-	  	if(!plan.getProvisionSystem().equalsIgnoreCase("None") && requestStatusForProv != null){
-		    	// if(serviceMaster.isAuto() == 'Y' && requestStatusForProv != null){
-		    	 	//this.prepareRequestWriteplatformService.prepareNewRequest(orderDetails,plan,requestStatusForProv);
-		    	// }else{
-		    		 CommandProcessingResult commandProcessingResult=this.provisioningWritePlatformService.postOrderDetailsForProvisioning(orderDetails,plan.getPlanCode(),requestStatusForProv,
-		    				 Long.valueOf(0),null,null,orderDetails.getId(),plan.getProvisionSystem(),null);
-		    		 resourceId=commandProcessingResult.resourceId();
-		    	// }
+	  	if(!plan.getProvisionSystem().equalsIgnoreCase("None")){ 
+		    	
+			  //Prepare Provisioning Req
+			  CodeValue codeValue=this.codeValueRepository.findOneByCodeValue(plan.getProvisionSystem());
+			  if(codeValue.position() == 1){
+				  requestStatusForProv="RENEWAL_BE";
+			  
+			  }
+			  if(requestStatusForProv != null){
+			  CommandProcessingResult commandProcessingResult=this.provisioningWritePlatformService.postOrderDetailsForProvisioning(orderDetails,plan.getPlanCode(),requestStatusForProv,
+					  Long.valueOf(0),null,null,orderDetails.getId(),plan.getProvisionSystem(),null);
+		      resourceId=commandProcessingResult.resourceId();
+		    	 }
 		     }
 
 		     //For Order History
