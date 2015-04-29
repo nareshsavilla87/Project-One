@@ -32,6 +32,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
+import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.allocation.service.AllocationReadPlatformService;
 import org.mifosplatform.portfolio.association.data.AssociationData;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
@@ -49,7 +50,6 @@ import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.UserActionStatusEnumaration;
-import org.mifosplatform.portfolio.order.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderDiscount;
 import org.mifosplatform.portfolio.order.domain.OrderDiscountRepository;
@@ -425,11 +425,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		  newStartdate=new LocalDate(orderDetails.getEndDate()).plusDays(1);
 		  requstStatus=UserActionStatusEnumaration.OrderStatusType(UserActionStatusTypeEnum.RENEWAL_BEFORE_AUTOEXIPIRY).getValue();
 		  
-		  //Prepare Provisioning Req
-		  CodeValue codeValue=this.codeValueRepository.findOneByCodeValue(plan.getProvisionSystem());
-		  if(codeValue.position() == 1){
-			  requestStatusForProv="RENEWAL_BE";
-		  }
+		
 					
 	  } else if(orderDetails.getStatus().equals(StatusTypeEnum.DISCONNECTED.getValue().longValue())){
 		  newStartdate = DateUtils.getLocalDateOfTenant(); 
@@ -479,14 +475,18 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	//  Set<PlanDetails> planDetails=plan.getDetails();
 	 // ServiceMaster serviceMaster=this.serviceMasterRepository.findOneByServiceCode(planDetails.iterator().next().getServiceCode());
 	  Long resourceId=Long.valueOf(0);
-	  	if(!plan.getProvisionSystem().equalsIgnoreCase("None") && requestStatusForProv != null){
-		    	// if(serviceMaster.isAuto() == 'Y' && requestStatusForProv != null){
-		    	 	//this.prepareRequestWriteplatformService.prepareNewRequest(orderDetails,plan,requestStatusForProv);
-		    	// }else{
+	  	if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
+		    
+    	  	  //Prepare Provisioning Req
+			  CodeValue codeValue=this.codeValueRepository.findOneByCodeValue(plan.getProvisionSystem());
+			  if(codeValue.position() == 1){
+				  requestStatusForProv="RENEWAL_BE";
+			  }
+			  if(requestStatusForProv != null){
 		    		 CommandProcessingResult commandProcessingResult=this.provisioningWritePlatformService.postOrderDetailsForProvisioning(orderDetails,plan.getPlanCode(),requestStatusForProv,
 		    				 Long.valueOf(0),null,null,orderDetails.getId(),plan.getProvisionSystem(),null);
 		    		 resourceId=commandProcessingResult.resourceId();
-		    	// }
+			  	}
 		     }
 
 		     //For Order History
