@@ -399,4 +399,35 @@ public class DataUploadHelper {
 		}
 	}
 
+
+
+
+
+	public String buildjsonForPropertyCodeMaster(String[] currentLineData, ArrayList<MRNErrorData> errorData, int i) {
+		
+		if(currentLineData.length>=3){
+			final HashMap<String, String> map = new HashMap<>();
+		    final Collection<MCodeData> propertyCodeTypesList =this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.PROPERTY_CODE_TYPE);
+			if(!propertyCodeTypesList.isEmpty()){
+				 for(MCodeData mCodeData:propertyCodeTypesList){
+					   if(mCodeData.getmCodeValue().equalsIgnoreCase(currentLineData[0].toString())){ 
+							map.put("propertyCodeType",mCodeData.getmCodeValue());
+						   break;
+					   }
+				    }
+				    map.put("code",currentLineData[1]);
+					map.put("description",currentLineData[2]);
+					map.put("referenceValue", currentLineData[3]);
+					return new Gson().toJson(map);	
+			}else{
+				errorData.add(new MRNErrorData((long)i, "Property Code Type list is empty"));
+				return null;
+			}
+		}else{
+			errorData.add(new MRNErrorData((long)i, "Improper Data in this line"));
+			return null;
+			
+		}
+	}
+
 }
