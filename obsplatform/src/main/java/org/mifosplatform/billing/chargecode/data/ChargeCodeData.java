@@ -1,5 +1,6 @@
 package org.mifosplatform.billing.chargecode.data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -18,6 +19,8 @@ public class ChargeCodeData {
 	private List<ChargeTypeData> chargeTypeData;
 	private List<DurationTypeData> durationTypeData;
 	private List<BillFrequencyCodeData> billFrequencyCodeData;
+	
+	private BigDecimal price;
 
 
 	public ChargeCodeData() {
@@ -196,5 +199,15 @@ public class ChargeCodeData {
 	public void setBillFrequencyCodeData(final List<BillFrequencyCodeData> billFrequencyCodeData) {
 		this.billFrequencyCodeData = billFrequencyCodeData;
 	}
+
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+	
+	
 
 }
