@@ -70,6 +70,7 @@ public static final String CODE_PROPERTY_FREE = "Property Free";
 public static final String TRANSACTION_TYPE = "Transaction Type";
 public static final String CODE_PROPERTY_SERVICE_TRANSFER = "Service Transfer";
 public static final String CODE_CANCEL_SALE= "CANCEL SALE";
+public static final String PROPERTY_CODE_TYPE= "Property Code Type";
 
 
 

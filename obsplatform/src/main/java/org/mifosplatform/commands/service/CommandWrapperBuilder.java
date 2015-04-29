@@ -2857,6 +2857,14 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+	public CommandWrapperBuilder createPropertyCodeMaster() {
+		this.actionName = "CREATE";
+		this.entityName = "PROPERTYCODEMASTER";
+		this.entityId = null;
+		this.href = "/propertycodemaster";
+		return this;
+	}
+
 }
 
 

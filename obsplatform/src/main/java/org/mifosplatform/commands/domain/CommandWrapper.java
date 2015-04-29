@@ -1290,4 +1290,8 @@ public class CommandWrapper {
 		public boolean isStaticIp() {
 			return  this.entityName.equalsIgnoreCase("STATICIP");
 		}
+
+		public boolean isPropertyCodeMasterResource() {
+			return  this.entityName.equalsIgnoreCase("PROPERTYCODEMASTER");
+		}
 }

@@ -37,7 +37,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 	public Page<PropertyDefinationData> retrieveAllProperties(SearchSqlQuery searchPropertyDetails) {
 
 		try {
-			context.authenticatedUser();
+			this.context.authenticatedUser();
 			final PropertyMapper mapper = new PropertyMapper();	
 			StringBuilder sqlBuilder = new StringBuilder(200);
 			sqlBuilder.append("select ");
