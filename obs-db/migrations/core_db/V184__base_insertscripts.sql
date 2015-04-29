@@ -76,9 +76,13 @@ insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`prov
 -- Price Region 
 insert ignore into b_priceregion_master (id,priceregion_code,priceregion_name,createdby_id,created_date,is_deleted) 
  VALUES (null,'Default','Default Region',null,null,'N');
+ 
+ -- config
+ delete from c_configuration where name='Forcible Balance Check';
+insert ignore into c_configuration VALUES (null,'balance-check',0,null);
 
  
- insert ignore into b_priceregion_detail (priceregion_id,country_id,state_id,is_deleted)
+ insert ignore	 into b_priceregion_detail (priceregion_id,country_id,state_id,is_deleted)
 select prm.id,0,0,'N' from b_priceregion_master prm where prm.priceregion_code ='Default';
 
 -- Views

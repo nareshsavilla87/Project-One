@@ -59,6 +59,9 @@ public final class TaxMapCommandFromApiJsonDeserializer {
 		final String taxCode = command.stringValueOfParameterNamed("taxCode");
 		baseDataValidator.reset().parameter("taxCode").value(taxCode).notBlank().notExceedingLengthOf(10);
 		
+		final Long taxRegion=command.longValueOfParameterNamed("taxRegion");
+		baseDataValidator.reset().parameter("taxRegion").value(taxRegion).notBlank();
+		
 		final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
 		baseDataValidator.reset().parameter("startDate").value(startDate).notBlank();
 		

@@ -61,14 +61,11 @@ public class TaxMapApiResource {
 	private final MCodeReadPlatformService mCodeReadPlatformService;
 
 	@Autowired
-	public TaxMapApiResource(
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PlatformSecurityContext context,
-			final DefaultToApiJsonSerializer<TaxMapData> apiJsonSerializer,
-			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
-			final TaxMapReadPlatformService taxMapReadPlatformService,
-			final RegionalPriceReadplatformService regionalPriceReadplatformService,
+	public TaxMapApiResource(final ApiRequestParameterHelper apiRequestParameterHelper,final PlatformSecurityContext context,
+			final DefaultToApiJsonSerializer<TaxMapData> apiJsonSerializer,final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
+			final TaxMapReadPlatformService taxMapReadPlatformService,final RegionalPriceReadplatformService regionalPriceReadplatformService,
 			final MCodeReadPlatformService mCodeReadPlatformService) {
+		
 		this.context = context;
 		this.apiJsonSerializer = apiJsonSerializer;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
