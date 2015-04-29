@@ -132,5 +132,15 @@ public class EventActionReadPlatformServiceImpl implements EventActionReadPlatfo
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {paymentGatewayId});
 	}
+	
+	@Override
+	public List<EventActionData> retrievePendingRecurringRequest(Long clientId) {
+		
+		EventActionMapper mapper = new EventActionMapper();
+		
+		String sql = "select " + mapper.schema() + " where a.is_processed='R' and a.client_id = ?";
+
+		return this.jdbcTemplate.query(sql, mapper, new Object[] {clientId});
+	}
 
 }

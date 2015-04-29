@@ -2603,6 +2603,23 @@ public CommandWrapperBuilder deleteRadService(final Long radServiceId) {
 	
 }
 
+public CommandWrapperBuilder updatePaypalRecurring() {
+	this.actionName = "UPDATEPAYPALRECURRING";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+
+public CommandWrapperBuilder updateChangePaypalStatus() {
+	this.actionName = "UPDATECHANGEPAYPALSTATUS";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+
+
 }
 
 

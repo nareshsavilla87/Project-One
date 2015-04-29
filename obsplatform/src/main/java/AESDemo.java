@@ -54,6 +54,7 @@ private static byte[] keyValue=new String("hugoadminhugoadm").getBytes();
     {
 
             String plainText = "Default Demo Tenant=01-04-2015";
+
             String encryptedText = AESDemo.encrypt(plainText);
             System.out.println(encryptedText);
            // String decordedValue1 = String.format("%040x", encryptedText.getBytes());//new String(Base64.decodeBase64(encryptedText));
