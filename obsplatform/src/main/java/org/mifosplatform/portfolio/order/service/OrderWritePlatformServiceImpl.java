@@ -110,7 +110,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final OrderAssembler  orderAssembler;
 	private final ClientRepository clientRepository;
 	private final EventValidationReadPlatformService eventValidationReadPlatformService;
-	private final ServiceMappingRepository provisionServiceDetailsRepository;
 	private final PrepareRequestReadplatformService prepareRequestReadplatformService;
 	private final ActiondetailsWritePlatformService actiondetailsWritePlatformService;
 	private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
@@ -147,7 +146,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			final PrepareRequestWriteplatformService prepareRequestWriteplatformService,final OrderHistoryRepository orderHistoryRepository,
 			final  ConfigurationRepository configurationRepository,final AllocationReadPlatformService allocationReadPlatformService,
 			final HardwareAssociationWriteplatformService associationWriteplatformService,final PrepareRequestReadplatformService prepareRequestReadplatformService,
-			final ServiceMappingRepository provisionServiceDetailsRepository,final OrderReadPlatformService orderReadPlatformService,
+			final OrderReadPlatformService orderReadPlatformService,
 		    final ProcessRequestRepository processRequestRepository,final HardwareAssociationReadplatformService hardwareAssociationReadplatformService,
 		    final PrepareRequsetRepository prepareRequsetRepository,final PromotionCodeRepository promotionCodeRepository,
 		    final OrderDiscountRepository orderDiscountRepository, final OrderAssembler orderAssembler,
@@ -173,7 +172,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.orderAssembler=orderAssembler;
 		this.eventValidationReadPlatformService=eventValidationReadPlatformService;
 		this.priceRepository=priceRepository;
-		this.provisionServiceDetailsRepository=provisionServiceDetailsRepository;
 		this.planRepository = planRepository;
 		this.orderRepository = orderRepository;
 		this.clientRepository=clientRepository;
