@@ -4,15 +4,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
@@ -31,6 +37,7 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.finance.payments.exception.ReceiptNoDuplicateException;
 import org.mifosplatform.finance.payments.service.PaymentReadPlatformService;
 import org.mifosplatform.finance.payments.service.PaymentWritePlatformService;
+import org.mifosplatform.finance.paymentsgateway.data.RecurringPaymentTransactionTypeConstants;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGateway;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfiguration;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfigurationRepository;
@@ -765,20 +772,25 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				
 			} else if(paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_PENDING)){
 				
-				EventAction eventAction=new EventAction(DateUtils.getDateOfTenant(), "Create Payment", "PAYMENT", EventActionConstants.EVENT_CREATE_PAYMENT,
-						"/payments/"+clientId, id,object.toString(),null,clientId);	
-				eventAction.updateStatus('P');
-				this.eventActionRepository.save(eventAction);
-				     
-				withChanges.put("Result", ConfigurationConstants.PAYMENTGATEWAY_PENDING);
-				withChanges.put("Description", ConfigurationConstants.PAYMENT_PENDING_DESCRIPTION);	
-				withChanges.put("Amount", amount);	
-				withChanges.put("ObsPaymentId", "");	
-				withChanges.put("TransactionId", txnId);
-				withChanges.put("pgId", id);
+				if(!paymentGateway.getSource().equalsIgnoreCase(RecurringPaymentTransactionTypeConstants.PAYPAL)){
+					
+					EventAction eventAction=new EventAction(DateUtils.getDateOfTenant(), "Create Payment", "PAYMENT", EventActionConstants.EVENT_CREATE_PAYMENT,
+							"/payments/"+clientId, id,object.toString(),null,clientId);	
+					eventAction.updateStatus('P');
+					this.eventActionRepository.save(eventAction);
+					     
+					withChanges.put("Result", ConfigurationConstants.PAYMENTGATEWAY_PENDING);
+					withChanges.put("Description", ConfigurationConstants.PAYMENT_PENDING_DESCRIPTION);	
+					withChanges.put("Amount", amount);	
+					withChanges.put("ObsPaymentId", "");	
+					withChanges.put("TransactionId", txnId);
+					withChanges.put("pgId", id);
+				}
+				
 			}
 			
 			this.paymentGatewayRepository.save(paymentGateway);
+			
 			return withChanges.toString();
 			
 		} catch (ReceiptNoDuplicateException e) {
