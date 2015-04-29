@@ -219,7 +219,6 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 	}
 
 	public char getbillAlign() {
-		// TODO Auto-generated method stub
 		return billingAlign;
 	}
 
@@ -347,6 +346,4 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 		
 	}
 
-
-	
 }

@@ -33,8 +33,8 @@ public class OrderAssembler {
 	
 private final OrderDetailsReadPlatformServices orderDetailsReadPlatformServices;
 private final ContractRepository contractRepository;
+private final ConfigurationRepository configurationRepository;
 private final DiscountMasterRepository discountMasterRepository;
-private final ConfigurationRepository  configurationRepository;
 
 
 @Autowired
@@ -84,6 +84,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 					 UserActionStatusTypeEnum.ACTIVATION.toString(),plan.isPrepaid());
 			
 			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
+
 			
 			if(configuration != null ){
 				order.setBillingAlign(configuration.isEnabled()?'Y':'N');

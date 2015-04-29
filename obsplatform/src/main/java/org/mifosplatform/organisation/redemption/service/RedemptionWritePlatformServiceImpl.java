@@ -13,7 +13,6 @@ import org.mifosplatform.billing.planprice.domain.Price;
 import org.mifosplatform.billing.planprice.domain.PriceRepository;
 import org.mifosplatform.cms.journalvoucher.domain.JournalVoucher;
 import org.mifosplatform.cms.journalvoucher.domain.JournalvoucherRepository;
-import org.mifosplatform.finance.adjustment.service.AdjustmentWritePlatformService;
 import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -53,7 +52,6 @@ public class RedemptionWritePlatformServiceImpl implements
 	private final FromJsonHelper fromJsonHelper;
 	private final VoucherDetailsRepository voucherDetailsRepository;
 	private final ClientRepository clientRepository;
-	private final AdjustmentWritePlatformService adjustmentWritePlatformService;
 	private final OrderWritePlatformService orderWritePlatformService;
 	private final RedemptionReadPlatformService redemptionReadPlatformService;
 	private final RedemptionCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -71,7 +69,7 @@ public class RedemptionWritePlatformServiceImpl implements
 	
 	@Autowired
 	public RedemptionWritePlatformServiceImpl(final PlatformSecurityContext context,final VoucherDetailsRepository voucherDetailsRepository,
-		final ClientRepository clientRepository,final AdjustmentWritePlatformService adjustmentWritePlatformService,final FromJsonHelper fromJsonHelper,
+		final ClientRepository clientRepository,final FromJsonHelper fromJsonHelper,
 		final OrderWritePlatformService orderWritePlatformService,final RedemptionReadPlatformService redemptionReadPlatformService,final OrderRepository orderRepository,
 		final RedemptionCommandFromApiJsonDeserializer apiJsonDeserializer,final JournalvoucherRepository journalvoucherRepository,
 		final PriceRepository priceRepository,final ContractRepository contractRepository,final ChargeCodeRepository chargeCodeRepository,
@@ -86,7 +84,6 @@ public class RedemptionWritePlatformServiceImpl implements
 		this.chargeCodeRepository=chargeCodeRepository;
 		this.redemptionReadPlatformService=redemptionReadPlatformService;
 		this.billingOrderWritePlatformService=billingOrderWritePlatformService;
-		this.adjustmentWritePlatformService = adjustmentWritePlatformService;
 		this.voucherDetailsRepository = voucherDetailsRepository;
 		this.journalvoucherRepository=journalvoucherRepository;
 		this.priceRepository = priceRepository;
@@ -122,32 +119,9 @@ public class RedemptionWritePlatformServiceImpl implements
 			if(pinType.equalsIgnoreCase(VALUE_PINTYPE) && pinTypeValue != null){
 				
 				  pinValue = new BigDecimal(pinTypeValue);
-				  /*
-				  final JsonObject json = new JsonObject();
-				json.addProperty("adjustment_type", "CREDIT");json.addProperty("adjustment_code", 123);
-				json.addProperty("amount_paid",pinValue);
-				json.addProperty("Remarks", "Adjustment Post By Redemption");
-				json.addProperty("locale", "en");
-				json.addProperty("dateFormat","dd MMMM yyyy");
-				json.addProperty("adjustment_date",simpleDateFormat);
-				json.addProperty("isWalletPayment",true);
-				final JsonCommand commd = new JsonCommand(null, json.toString(), json, fromJsonHelper, null, clientId, null, null, clientId, null, null, null, null, null, null,null);
-				
-				result=this.adjustmentWritePlatformService.createAdjustment(commd);
-				 resourceId=result.resourceId();
-
-				  JournalVoucher journalVoucher=new JournalVoucher(voucher.getOfficeId(),DateUtils.getDateOfTenant(),"Redemption",null,
-						  pinValue.doubleValue(),Long.valueOf(0));
-					this.journalvoucherRepository.save(journalVoucher);
-					
-					journalVoucher=new JournalVoucher(resourceId,DateUtils.getDateOfTenant(),"Redemption",pinValue.doubleValue(),null,clientId);
-						this.journalvoucherRepository.save(journalVoucher);
-			*/
-				  
 				  this.billingOrderWritePlatformService.updateClientBalance(pinValue, clientId, true);
-				  
 				  resourceId = clientId;
-				
+				  
 			}
 			 
 			if(pinType.equalsIgnoreCase(PRODUCE_PINTYPE) && pinTypeValue != null){
@@ -201,6 +175,7 @@ public class RedemptionWritePlatformServiceImpl implements
 			/*  JournalVoucher journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",null,pinValue.doubleValue(),Long.valueOf(0));
 				this.journalvoucherRepository.save(journalVoucher);*/
 				
+
 			JournalVoucher journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",pinValue.doubleValue(),null,clientId);
 					this.journalvoucherRepository.save(journalVoucher);
 			  
