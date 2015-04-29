@@ -2865,6 +2865,23 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+public CommandWrapperBuilder updatePaypalProfileRecurring() {
+	this.actionName = "UPDATEPAYPALRECURRING";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+
+public CommandWrapperBuilder updatePaypalProfileStatus() {
+	this.actionName = "UPDATEPAYPALPROFILESTATUS";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+
+
 }
 
 

@@ -122,8 +122,10 @@ public class RedemptionWritePlatformServiceImpl implements
 			if(pinType.equalsIgnoreCase(VALUE_PINTYPE) && pinTypeValue != null){
 				
 				  pinValue = new BigDecimal(pinTypeValue);
+
 				  /*
-				  final JsonObject json = new JsonObject();
+				 final JsonObject json = new JsonObject();
+
 				json.addProperty("adjustment_type", "CREDIT");json.addProperty("adjustment_code", 123);
 				json.addProperty("amount_paid",pinValue);
 				json.addProperty("Remarks", "Adjustment Post By Redemption");
@@ -137,6 +139,7 @@ public class RedemptionWritePlatformServiceImpl implements
 				 resourceId=result.resourceId();
 
 				  JournalVoucher journalVoucher=new JournalVoucher(voucher.getOfficeId(),DateUtils.getDateOfTenant(),"Redemption",null,
+
 						  pinValue.doubleValue(),Long.valueOf(0));
 					this.journalvoucherRepository.save(journalVoucher);
 					
@@ -147,7 +150,7 @@ public class RedemptionWritePlatformServiceImpl implements
 				  this.billingOrderWritePlatformService.updateClientBalance(pinValue, clientId, true);
 				  
 				  resourceId = clientId;
-				
+
 			}
 			 
 			if(pinType.equalsIgnoreCase(PRODUCE_PINTYPE) && pinTypeValue != null){
