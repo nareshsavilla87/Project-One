@@ -163,5 +163,24 @@ public class ChargeCodeApiResource {
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}
+	
+	/**
+	 * @param uriInfo
+	 * @return retrieved template data for creating charge codes
+	 */
+	@GET
+	@Path("{planId}/{billingFrequency}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveChargeCodeTemplateData(@PathParam("planId") final Long planId, 
+			@PathParam("billingFrequency") final String billingFrequency, @Context final UriInfo uriInfo) {
+
+	   
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final ChargeCodeData chargeCodeData = this.chargeCodeReadPlatformService.retrieveChargeCodeForRecurring(planId, billingFrequency);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializer.serialize(settings, chargeCodeData, RESPONSE_PARAMETERS);
+
+	}
 
 }
