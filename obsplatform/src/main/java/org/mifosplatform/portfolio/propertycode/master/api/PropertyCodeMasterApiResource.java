@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -15,7 +16,6 @@ import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -33,7 +33,6 @@ import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.api.ApiConstants;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
@@ -42,8 +41,6 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
-import org.mifosplatform.portfolio.contract.data.SubscriptionData;
-import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
 import org.mifosplatform.portfolio.propertycode.master.data.PropertyCodeMasterData;
 import org.mifosplatform.portfolio.propertycode.master.service.PropertyCodeMasterReadPlatformService;
 import org.mifosplatform.scheduledjobs.dataupload.command.DataUploadCommand;
@@ -56,7 +53,7 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
 
-@Path("/propertycodemaster")
+@Path("/propertymaster")
 @Component
 @Scope("singleton")
 public class PropertyCodeMasterApiResource {
@@ -66,7 +63,7 @@ public class PropertyCodeMasterApiResource {
 	public InputStream inputStreamObject;
 	private final static String RESOURCENAMEFORPERMISSIONS = "PROPERTYCODEMASTER";
 	private final PlatformSecurityContext context;
-	private final DefaultToApiJsonSerializer<MCodeData> toApiJsonSerializer;
+	private final DefaultToApiJsonSerializer<PropertyCodeMasterData> toApiJsonSerializer;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService;
 	private final MCodeReadPlatformService mCodeReadPlatformService;
@@ -74,7 +71,7 @@ public class PropertyCodeMasterApiResource {
 	private final PropertyCodeMasterReadPlatformService propertyCodeMasterReadPlatformService;
 
 	@Autowired
-	public PropertyCodeMasterApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<MCodeData> toApiJsonSerializer,
+	public PropertyCodeMasterApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<PropertyCodeMasterData> toApiJsonSerializer,
 			final ApiRequestParameterHelper apiRequestParameterHelper,
 			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
 			final MCodeReadPlatformService mCodeReadPlatformService,
@@ -103,8 +100,8 @@ public class PropertyCodeMasterApiResource {
 		 context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 			
 			final Collection<MCodeData> propertyTypes = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.PROPERTY_CODE_TYPE);
-			final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters()); 
-	         return this.toApiJsonSerializer.serialize(settings, propertyTypes, RESPONSE_DATA_PARAMETERS);
+			//final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters()); 
+	         return this.toApiJsonSerializer.serialize(propertyTypes);
 	}
 	 
 	 /**
@@ -113,7 +110,7 @@ public class PropertyCodeMasterApiResource {
 		@GET
 		@Consumes({MediaType.APPLICATION_JSON})
 		@Produces({MediaType.APPLICATION_JSON})
-		public String retrieveAllPropertyCodeMasterDetails( @Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch,
+		public String retrieveAllPropertyMasterDetails( @Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch,
 				@QueryParam("limit") final Integer limit,@QueryParam("offset") final Integer offset) {
 			this.context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 			final SearchSqlQuery searchPropertyDetails = SearchSqlQuery.forSearch(sqlSearch, offset, limit);
@@ -127,7 +124,7 @@ public class PropertyCodeMasterApiResource {
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String createNewPropertyCodeMaster(final String apiRequestBodyAsJson) {
+	public String createNewPropertyMaster(final String apiRequestBodyAsJson) {
 
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().createPropertyCodeMaster().withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
@@ -141,7 +138,7 @@ public class PropertyCodeMasterApiResource {
 	@Path("/documents")
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response createNewPropertyCdoeMasterUpload(@HeaderParam("Content-Length") final Long fileSize,@FormDataParam("file") final InputStream inputStream,
+	public Response createNewPropertyMasterUpload(@HeaderParam("Content-Length") final Long fileSize,@FormDataParam("file") final InputStream inputStream,
 			@FormDataParam("file") final FormDataContentDisposition fileDetails,@FormDataParam("file") final FormDataBodyPart bodyPart) {
 
 		String name = "Property Code Master";
@@ -165,6 +162,17 @@ public class PropertyCodeMasterApiResource {
 
 	}
 
+	
+	@GET
+	@Path("/type")
+	@Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveAddressDetailsWithcityName(@Context final UriInfo uriInfo,@QueryParam("query") final String propertyType){
+		
+		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
+		final List<PropertyCodeMasterData> typeDetails = this.propertyCodeMasterReadPlatformService.retrievPropertyType(propertyType);
+		 return this.toApiJsonSerializer.serialize(typeDetails);
+	}
 	
 
 

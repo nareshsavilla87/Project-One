@@ -9,7 +9,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "b_property_master",uniqueConstraints = { @UniqueConstraint(columnNames = { "property_code_type", "code"}, name = "property_code_type_with_its_code") })
+@Table(name = "b_property_master",uniqueConstraints = { @UniqueConstraint(name = "property_code_type_with_its_code",columnNames = { "property_code_type", "code"}) })
 public class PropertyCodeMaster extends AbstractPersistable<Long> {
 
 	/**

@@ -2,6 +2,7 @@ package org.mifosplatform.portfolio.propertycode.master.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.service.Page;
@@ -80,11 +81,21 @@ public class PropertyCodeMasterReadPlatformServiceImpl implements PropertyCodeMa
 			final String description = rs.getString("description");
 			final String referenceValue = rs.getString("referenceValue");
 
-
-
-
 			return new PropertyCodeMasterData(id,propertyCodeType,code,description,referenceValue);
 		}
 	}
 
+
+	@Override
+	public List<PropertyCodeMasterData> retrievPropertyType(final String propertyType) {
+		
+		try {
+			context.authenticatedUser();
+			final PropertyCodeMasterMapper mapper = new PropertyCodeMasterMapper();
+			final String sql = "select "+ mapper.schema()+ " where pm.property_code_type like '%"+propertyType+"%' order by pm.id LIMIT 15";
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
 }

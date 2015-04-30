@@ -399,10 +399,6 @@ public class DataUploadHelper {
 		}
 	}
 
-
-
-
-
 	public String buildjsonForPropertyCodeMaster(String[] currentLineData, ArrayList<MRNErrorData> errorData, int i) {
 		
 		if(currentLineData.length>=3){
@@ -417,7 +413,9 @@ public class DataUploadHelper {
 				    }
 				    map.put("code",currentLineData[1]);
 					map.put("description",currentLineData[2]);
-					map.put("referenceValue", currentLineData[3]);
+					if(currentLineData[3]!=null){
+					 map.put("referenceValue", currentLineData[3]);
+					}
 					return new Gson().toJson(map);	
 			}else{
 				errorData.add(new MRNErrorData((long)i, "Property Code Type list is empty"));
