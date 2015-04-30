@@ -80,6 +80,8 @@ public class ConfigurationConstants {
 	public static final String NETELLER_ACCESS_TOKEN = "oauth2/token?grant_type=client_credentials";
 	public static final String NETELLER_BASIC = "Basic";
 	public static final String NETELLER_PAYMENT = "transferIn";
+	public static final String PAYPAL_RECURRING_PAYMENT_DETAILS = "paypal-recurring-payment-details";
+	
 	
 	//Globalpay Output 
 	public static final String GLOBALPAY_SUCCESS = "successful";
@@ -96,7 +98,7 @@ public class ConfigurationConstants {
 	public static final String GLOBALPAY_HOST = "demo.globalpay.com.ng";
 	public static final String GLOBALPAY_CHARSET = "application/soap+xml; charset=utf-8";
 	
-	
+	public static final String CONFIG_PROPERTY_SMS= "sms-configuration";
 
 }
 

@@ -144,8 +144,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 					throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_CREATE_SELFCARE);
 				}
 				}else{
-				throw new PlatformDataIntegrityException("client does not exist", "client not registered","clientId", "client is null ");
-			
+					throw new PlatformDataIntegrityException("client does not exist", "client not registered","clientId", "client is null ");		
 				}
 			}
 		}catch(DataIntegrityViolationException dve){

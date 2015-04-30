@@ -26,6 +26,13 @@ INSERT IGNORE INTO m_permission VALUES(null,'organisation','CREATE_FEEMASTER','F
 INSERT IGNORE INTO m_permission VALUES(null,'organisation','UPDATE_FEEMASTER','FEEMASTER','UPDATE',0);
 INSERT IGNORE INTO m_permission VALUES(null,'organisation','DELETE_FEEMASTER','FEEMASTER','DELETE',0);
 
+INSERT IGNORE INTO m_code VALUES (null,'Transaction Type',0,'Define Customer Transaction Type');
+SET @id = (select id from m_code where code_name='Transaction Type');
+
+INSERT IGNORE INTO m_code_value VALUES (null,@id,'Service Transfer',0);
+INSERT IGNORE INTO m_code_value VALUES (null,@id,'Reconnection',1);
+INSERT IGNORE INTO m_code_value VALUES (null,@id,'Late Payment',2);
+
 
 
 

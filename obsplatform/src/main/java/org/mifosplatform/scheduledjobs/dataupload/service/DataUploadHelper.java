@@ -413,8 +413,8 @@ public class DataUploadHelper {
 				    }
 				    map.put("code",currentLineData[1]);
 					map.put("description",currentLineData[2]);
-					if(currentLineData[3]!=null){
-					 map.put("referenceValue", currentLineData[3]);
+					if(currentLineData.length==4){
+						map.put("referenceValue", currentLineData[3]);
 					}
 					return new Gson().toJson(map);	
 			}else{

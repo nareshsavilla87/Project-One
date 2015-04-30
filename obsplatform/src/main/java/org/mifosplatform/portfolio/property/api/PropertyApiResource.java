@@ -162,7 +162,7 @@ public class PropertyApiResource {
 	public Response createNewPropertyUpload(@HeaderParam("Content-Length") final Long fileSize,@FormDataParam("file") final InputStream inputStream,
 			@FormDataParam("file") final FormDataContentDisposition fileDetails,@FormDataParam("file") final FormDataBodyPart bodyPart) {
 
-		String name = "Property Master";
+		String name = "Property Data";
 		FileUtils.validateFileSizeWithinPermissibleRange(fileSize, name,ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 		inputStreamObject = inputStream;
 		DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
