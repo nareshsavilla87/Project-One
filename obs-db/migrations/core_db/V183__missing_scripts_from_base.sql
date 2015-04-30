@@ -81,6 +81,24 @@ call addb_itemsalecoloumns();
 Drop procedure IF EXISTS addb_itemsalecoloumns;
 
 
+
+Drop procedure IF EXISTS addb_invoicecolumnonetimesale;
+DELIMITER //
+create procedure addb_invoicecolumnonetimesale() 
+Begin
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'invoice_id'
+     and TABLE_NAME = 'b_onetime_sale'
+     and TABLE_SCHEMA = DATABASE())THEN
+alter  table b_onetime_sale add column `invoice_id` bigint(20) DEFAULT NULL;
+END IF;
+END //
+DELIMITER ;
+call addb_invoicecolumnonetimesale();
+Drop procedure IF EXISTS addb_invoicecolumnonetimesale;
+
+
 Drop procedure IF EXISTS addb_loginhistorycolumn;
 DELIMITER //
 create procedure addb_loginhistorycolumn() 
@@ -201,7 +219,7 @@ END //
 DELIMITER ;
 call modifyb_ticketmasterconstraint();
 Drop procedure IF EXISTS modifyb_ticketmasterconstraint;
-
+Drop procedure IF EXISTS addsubnettoippool;
 DELIMITER //
 create procedure addsubnettoippool() 
 Begin

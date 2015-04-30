@@ -1,5 +1,5 @@
 DROP FUNCTION IF EXISTS sms_conf;
-DELIMITER $$
+DELIMITER //
 CREATE  FUNCTION sms_conf(message_id int)
   RETURNS TEXT
   LANGUAGE SQL
@@ -13,11 +13,11 @@ BEGIN
 select message_to,body into @smsto,@smstext from b_message_data where id=message_id;
   SET @postdata = CONCAT('User=venkat&passwd=venkat@123&mobilenumber=',@smsto,'&message=',@smstext,'&sid=xxxxxxxx&mtype=N&DR=Y');
   RETURN @postdata;
-END
-$$
+END //
+DELIMITER;
 
 insert IGNORE into c_configuration (id,name,enabled,value) VALUES (null,'align-biiling-cycle',0,0);
-
+alter table b_charge_tax modify `tax_value` BIGINT(10) NOT NULL;
 insert IGNORE into m_permission values(null, 'billing', 'UPDATE_STATICIP', 'STATICIP', 'UPDATE', '0');
 
 -- Statement generation --
@@ -123,5 +123,6 @@ where
     ((a.invoice_id = b.id) and (a.order_id = ph.id) 
 and isnull(a.bill_id) and (b.invoice_date <= now()) and (a.priceline_id = -1)) ;
 
-alter table b_charge_tax modify `tax_value` BIGINT(10) NOT NULL;
+
+
 

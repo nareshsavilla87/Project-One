@@ -2857,6 +2857,31 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+	public CommandWrapperBuilder createPropertyCodeMaster() {
+		this.actionName = "CREATE";
+		this.entityName = "PROPERTYCODEMASTER";
+		this.entityId = null;
+		this.href = "/propertycodemaster";
+		return this;
+	}
+
+public CommandWrapperBuilder updatePaypalProfileRecurring() {
+	this.actionName = "UPDATEPAYPALRECURRING";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+
+public CommandWrapperBuilder updatePaypalProfileStatus() {
+	this.actionName = "UPDATEPAYPALPROFILESTATUS";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+
+
 }
 
 

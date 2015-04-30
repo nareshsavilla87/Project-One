@@ -1217,6 +1217,7 @@ public class CommandWrapper {
 		public boolean isActive() {
 			return this.entityName.equalsIgnoreCase("PROVISIONACTIONS") && this.actionName.equalsIgnoreCase("ACTIVE");
 		}
+		
 		public boolean isPaymentGatewayConfigResource() {
 			return this.entityName.equalsIgnoreCase("PAYMENTGATEWAYCONFIG");
 		}
@@ -1289,5 +1290,17 @@ public class CommandWrapper {
 		}
 		public boolean isStaticIp() {
 			return  this.entityName.equalsIgnoreCase("STATICIP");
+		}
+
+		public boolean isPropertyCodeMasterResource() {
+			return  this.entityName.equalsIgnoreCase("PROPERTYCODEMASTER");
+		}
+
+		public boolean isUpdatePaypalProfile() {
+			return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILE");
+		}
+
+		public boolean isUpdatePaypalProfileStatus() {
+			return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILESTATUS");
 		}
 }

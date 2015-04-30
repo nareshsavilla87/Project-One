@@ -18,6 +18,8 @@ import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeRepository;
 import org.mifosplatform.billing.promotioncodes.exception.PromotionCodeNotFoundException;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
 import org.mifosplatform.finance.billingorder.service.ReverseInvoice;
+import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
+import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBillingRepository;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
 import org.mifosplatform.infrastructure.configuration.domain.Configuration;
@@ -134,7 +136,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final EventActionRepository eventActionRepository;
 	private final OrderHistoryRepository orderHistoryRepository;
 	private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
-    
+	private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
    
     
 
@@ -153,9 +155,10 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		    final ClientRepository clientRepository,final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
 		    final ActiondetailsWritePlatformService actiondetailsWritePlatformService,final EventValidationReadPlatformService eventValidationReadPlatformService,
 		    final EventActionRepository eventActionRepository,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,
-		   final HardwareAssociationRepository associationRepository,final ProvisioningWritePlatformService provisioningWritePlatformService,
-		   final PaymentFollowupRepository paymentFollowupRepository,final PriceRepository priceRepository,final ChargeCodeRepository chargeCodeRepository,
-		   final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory) {
+		    final HardwareAssociationRepository associationRepository,final ProvisioningWritePlatformService provisioningWritePlatformService,
+		    final PaymentFollowupRepository paymentFollowupRepository,final PriceRepository priceRepository,final ChargeCodeRepository chargeCodeRepository,
+		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
+		    final PaypalRecurringBillingRepository paypalRecurringBillingRepository) {
 
 		this.context = context;
 		this.reverseInvoice=reverseInvoice;
@@ -191,7 +194,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.associationWriteplatformService=associationWriteplatformService;
 		this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
 		this.accountIdentifierGeneratorFactory=accountIdentifierGeneratorFactory;
-
+		this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
 		
 
 	}
@@ -386,9 +389,20 @@ try{
 						processingResultId, null, null, order.getId(),plan.getProvisionSystem(),null);
 				processingResultId = processingResult.commandId();
 				
-			}
-				
+			}		
 	
+			// checking for Paypal Recurring DisConnection
+			PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneByOrderId(orderId);
+			
+			if(null != billing && null != billing.getSubscriberId()){
+				
+				List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_PAYPAL_RECURRING_DISCONNECT_ORDER);
+				
+				if(actionDetaislDatas.size() != 0){
+					this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,billing.getClientId(), orderId.toString(),null);
+				}
+			}
+			
 		//For Order History
 		final OrderHistory orderHistory = new OrderHistory(order.getId(), DateUtils.getLocalDateOfTenant(), DateUtils.getLocalDateOfTenant(), processingResultId, requstStatus, getUserId(), null);
 		this.orderHistoryRepository.save(orderHistory);
@@ -487,6 +501,18 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		    	 }
 		     }
 
+	  		// checking for Paypal Recurring DisConnection			
+	 		PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneByOrderId(orderId);
+	 							
+	 		if(null != billing && null != billing.getSubscriberId()){
+	 									
+	 			List<ActionDetaislData> actionDetaislDatas = this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_PAYPAL_RECURRING_RECONNECTION_ORDER);
+	 									
+	 			if(actionDetaislDatas.size() != 0){
+	 				this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,billing.getClientId(), orderId.toString(),null);			
+	 			}		
+	 		}
+	 		
 		     //For Order History
    			OrderHistory orderHistory=new OrderHistory(orderDetails.getId(),DateUtils.getLocalDateOfTenant(),newStartdate,resourceId,requstStatus,userId,description);
    			this.orderHistoryRepository.save(orderHistory);
@@ -564,6 +590,18 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		}
 		order.setuserAction(UserActionStatusTypeEnum.RECONNECTION.toString());
 		this.orderRepository.save(order);
+		
+		// checking for Paypal Recurring DisConnection			
+		PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneByOrderId(orderId);
+							
+		if(null != billing && null != billing.getSubscriberId()){
+									
+			List<ActionDetaislData> actionDetaislDatas = this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_PAYPAL_RECURRING_RECONNECTION_ORDER);
+									
+			if(actionDetaislDatas.size() != 0){
+				this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,billing.getClientId(), orderId.toString(),null);			
+			}		
+		}
 		
 		//For Order History
 		OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),processingResultId,requstStatus,getUserId(),null);

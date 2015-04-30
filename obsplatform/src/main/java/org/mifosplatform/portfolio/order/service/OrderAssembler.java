@@ -84,15 +84,12 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 					 UserActionStatusTypeEnum.ACTIVATION.toString(),plan.isPrepaid());
 			
 			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
-
-			
 			if(configuration != null ){
 				order.setBillingAlign(configuration.isEnabled()?'Y':'N');
 				if(configuration.isEnabled()){
 				order.setEndDate(endDate.dayOfMonth().withMaximumValue());
 				}
 			}
-			
 			BigDecimal priceforHistory=BigDecimal.ZERO;
 
 			for (PriceData data : datas) {
