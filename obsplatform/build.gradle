@@ -189,7 +189,7 @@ dependencies {
                 [group: 'com.paypal.sdk', name: 'rest-api-sdk', version: '0.9.0'],
                 [group: 'org.flywaydb', name: 'flyway-core', version: '3.0'],
                 [group: 'me.legrange',name: 'mikrotik', version: '2.0.2'],
-                [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12']
+                [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12'],
                 [group: 'com.paypal.sdk',name: 'merchantsdk', version: '2.5.106']       
  	        )
 
