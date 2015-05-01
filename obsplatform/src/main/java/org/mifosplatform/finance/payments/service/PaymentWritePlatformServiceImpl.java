@@ -197,18 +197,19 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			if(payment == null){
 				throw new PaymentDetailsNotFoundException(paymentId.toString());
 			}
-	
-			final Payment cancelPay=new Payment(payment.getClientId(), null, null, payment.getAmountPaid(), null, DateUtils.getLocalDateOfTenant(),payment.getRemarks(), 
+           final Payment cancelPay=new Payment(payment.getClientId(), null, null, payment.getAmountPaid(), null, DateUtils.getLocalDateOfTenant(),payment.getRemarks(), 
 					   payment.getPaymodeId(),null,payment.getReceiptNo(),null,payment.isWalletPayment(),payment.getIsSubscriptionPayment(), payment.getId());
 			cancelPay.cancelPayment(command);
 			this.paymentRepository.save(cancelPay);
+			payment.cancelPayment(command);
+			this.paymentRepository.save(payment);
 			payment.cancelPayment(command);
 			this.paymentRepository.save(payment);
 			final ClientBalance clientBalance = clientBalanceRepository.findByClientId(payment.getClientId());
 			clientBalance.setBalanceAmount(payment.getAmountPaid(),payment.isWalletPayment());
 			this.clientBalanceRepository.save(clientBalance);
 			
-			return new CommandProcessingResult(paymentId,payment.getClientId());
+			return new CommandProcessingResult(cancelPay.getId(),payment.getClientId());
 			
 			
 		}catch(DataIntegrityViolationException exception){

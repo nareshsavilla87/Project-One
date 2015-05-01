@@ -55,7 +55,7 @@ public class Payment extends AbstractAuditableCustom<AppUser, Long> {
 	
 	@Column(name = "is_sub_payment", nullable=false)
 	private char isSubscriptionPayment;
-
+	
 	@Column(name = "ref_id", nullable = true)
 	private Long refernceId;
 	
@@ -81,25 +81,25 @@ public class Payment extends AbstractAuditableCustom<AppUser, Long> {
 		this.isSubscriptionPayment=isSubscriptionPayment?'Y':'N';
 
 	}
+	
+	
+	public Payment(final Long clientId, final Long paymentId,final Long externalId, final BigDecimal amountPaid,final Long statmentId,
+			final LocalDate paymentDate,final String remark, final int paymodeId, final String transId,final String receiptNo, 
+			final Long invoiceId, char isWalletPayment,char isSubscriptionPayment, final Long referenceId) {
 
-	public Payment(final Long clientId,final Long paymentId,final Long externalId, final BigDecimal amountPaid,final Long statmentId,
-			        final LocalDate paymentDate,final String remark, final int paymodeId, final String transId,final String receiptNo, 
-			         final Long invoiceId, char isWalletPayment, char isSubscriptionPayment, Long referenceId) {
-		
 		this.clientId = clientId;
 		this.statementId = statmentId;
-		this.amountPaid = amountPaid;
+		this.amountPaid = amountPaid.negate();
 		this.paymentDate = paymentDate.toDate();
 		this.remarks = remark;
 		this.paymodeId = paymodeId;
-		this.transactionId=transId;
-		this.receiptNo=receiptNo+"_CP";
-		this.invoiceId=invoiceId;
+		this.transactionId = transId;
+		this.receiptNo = receiptNo+"_CP";
+		this.invoiceId = invoiceId;
 		this.isWalletPayment = isWalletPayment;
 		this.isSubscriptionPayment = isSubscriptionPayment;
-		this.refernceId=referenceId;
-		
-		
+		this.refernceId = referenceId;
+
 	}
 
 	public static Payment fromJson(final JsonCommand command, final Long clientid) {
@@ -117,10 +117,6 @@ public class Payment extends AbstractAuditableCustom<AppUser, Long> {
 		return new Payment(clientid, null, null, amountPaid, null, paymentDate,remarks, paymentCode,txtid,receiptNo,invoiceId,isWalletPayment,isSubscriptionPayment);
 
 
-	}
-
-	public char getIsSubscriptionPayment() {
-		return isSubscriptionPayment;
 	}
 
 	public Long getClientId() {
@@ -192,8 +188,13 @@ public class Payment extends AbstractAuditableCustom<AppUser, Long> {
 		this.invoiceId = invoiceId;
 	}
 
+	public char getIsSubscriptionPayment() {
+		return isSubscriptionPayment;
+	}
+
 	public Long getRefernceId() {
 		return refernceId;
 	}
+
 }
 
