@@ -1905,12 +1905,12 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder cancelPayment(Long paymentId) {
+	public CommandWrapperBuilder cancelPayment(final Long paymentId) {
 
 		this.actionName = "CANCEL";
 		this.entityName = "PAYMENT";
 		this.entityId = paymentId;
-		this.href = "/payments/cancelpayment" + this.entityId;
+		this.href = "/payments/cancelpayment/" + this.entityId;
 		return this;
 
 	}
@@ -2734,6 +2734,23 @@ public CommandWrapperBuilder disconnectOrder(Long orderId) {
 	this.href = "/orderdisconnect/"+orderId;
 	return this;
 }
+
+public CommandWrapperBuilder updatePaypalProfileRecurring() {
+	this.actionName = "UPDATEPAYPALRECURRING";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+
+public CommandWrapperBuilder updatePaypalProfileStatus() {
+	this.actionName = "UPDATEPAYPALPROFILESTATUS";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+
 
 }
 

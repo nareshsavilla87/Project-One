@@ -220,7 +220,7 @@ public class EntitlementReadPlatformServiceImpl implements
 			Long id = rs.getLong("id");
 			Long prdetailsId = rs.getLong("prdetailsId");
 			String provisioingSystem = rs.getString("provisioingSystem");
-			
+		
 			String product = rs.getString("sentMessage");
 			String macId = rs.getString("macId");
 			String deviceId = rs.getString("deviceId");
@@ -239,6 +239,7 @@ public class EntitlementReadPlatformServiceImpl implements
 			String regionCode = rs.getString("regionCode");
 			String regionName = rs.getString("regionName");
 			String ipAddress = rs.getString("ipAddress");
+
 			String userName = rs.getString("userName");
 			String password = rs.getString("userPassword");
 			Long subscriberId = rs.getLong("subscriberId");

@@ -115,13 +115,17 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 				 if(billingOrderCommand.getChargeType().equalsIgnoreCase("NRC")){
 				  netChargeAmount = billingOrderCommand.getPrice().subtract(discountAmount);
 				 }
+
+		
 			}
 			
 			List<InvoiceTaxCommand> invoiceTaxCommands = billingOrderCommand.getListOfTax();
 
 			BillingOrder charge = new BillingOrder(billingOrderCommand.getClientId(), billingOrderCommand.getClientOrderId(), billingOrderCommand.getOrderPriceId(),
+
 					billingOrderCommand.getChargeCode(),billingOrderCommand.getChargeType(),discountCode, billingOrderCommand.getPrice().negate(), discountAmount.negate(),
 					netChargeAmount.negate(), billingOrderCommand.getStartDate(), billingOrderCommand.getEndDate());
+
 			//client taxExemption
 			if(tax.getTaxExemption().equalsIgnoreCase("N")){
 			
