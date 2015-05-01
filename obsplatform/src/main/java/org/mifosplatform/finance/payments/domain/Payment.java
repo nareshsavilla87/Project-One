@@ -6,14 +6,12 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
+import javax.persistence.UniqueConstraint;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.useradministration.domain.AppUser;
-import javax.persistence.UniqueConstraint;
 @SuppressWarnings("serial")
 @Entity
 @Table(name = "b_payments",uniqueConstraints = {@UniqueConstraint(name = "receipt_no", columnNames = { "receipt_no" })})
@@ -31,7 +29,6 @@ public class Payment extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "is_deleted", nullable = false)
 	private boolean deleted = false;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "payment_date")
 	private Date paymentDate;
 
@@ -58,6 +55,10 @@ public class Payment extends AbstractAuditableCustom<AppUser, Long> {
 	
 	@Column(name = "is_sub_payment", nullable=false)
 	private char isSubscriptionPayment;
+	
+	@Column(name = "ref_id", nullable = true)
+	private Long refernceId;
+	
 
 	public Payment() {
 	}
@@ -78,6 +79,26 @@ public class Payment extends AbstractAuditableCustom<AppUser, Long> {
 		this.invoiceId=invoiceId;
 		this.isWalletPayment=isWalletPayment?'Y':'N';
 		this.isSubscriptionPayment=isSubscriptionPayment?'Y':'N';
+
+	}
+	
+	
+	public Payment(final Long clientId, final Long paymentId,final Long externalId, final BigDecimal amountPaid,final Long statmentId,
+			final LocalDate paymentDate,final String remark, final int paymodeId, final String transId,final String receiptNo, 
+			final Long invoiceId, char isWalletPayment,char isSubscriptionPayment, final Long referenceId) {
+
+		this.clientId = clientId;
+		this.statementId = statmentId;
+		this.amountPaid = amountPaid.negate();
+		this.paymentDate = paymentDate.toDate();
+		this.remarks = remark;
+		this.paymodeId = paymodeId;
+		this.transactionId = transId;
+		this.receiptNo = receiptNo+"_CP";
+		this.invoiceId = invoiceId;
+		this.isWalletPayment = isWalletPayment;
+		this.isSubscriptionPayment = isSubscriptionPayment;
+		this.refernceId = referenceId;
 
 	}
 
@@ -113,8 +134,6 @@ public class Payment extends AbstractAuditableCustom<AppUser, Long> {
 	public boolean isDeleted() {
 		return deleted;
 	}
-	
-	
 
 	public Long getInvoiceId() {
 		return invoiceId;
@@ -132,43 +151,49 @@ public class Payment extends AbstractAuditableCustom<AppUser, Long> {
 		return paymodeId;
 	}
 
-		public void updateBillId(final Long billId) {
-		this.statementId=billId;
+	public void updateBillId(final Long billId) {
+		this.statementId = billId;
 
 	}
 
-		public void cancelPayment(final JsonCommand command) {
-			
-			final String cancelRemarks=command.stringValueOfParameterNamed("cancelRemark");
-			this.cancelRemark=cancelRemarks;
-			this.deleted=true;
-			
-		}
+	public void cancelPayment(final JsonCommand command) {
 
-		public String getReceiptNo() {
-			return receiptNo;
-		}
+		final String cancelRemarks = command.stringValueOfParameterNamed("cancelRemark");
+		this.cancelRemark = cancelRemarks;
+		this.deleted = true;
 
-		public int getPaymodeId() {
-			return paymodeId;
-		}
+	}
 
-		public String getTransactionId() {
-			return transactionId;
-		}
+	public String getReceiptNo() {
+		return receiptNo;
+	}
 
-		public String getCancelRemark() {
-			return cancelRemark;
-		}
-		
-		
-		
+	public int getPaymodeId() {
+		return paymodeId;
+	}
+
+	public String getTransactionId() {
+		return transactionId;
+	}
+
+	public String getCancelRemark() {
+		return cancelRemark;
+	}
+
 	public char isWalletPayment() {
-			return isWalletPayment;
-		}
+		return isWalletPayment;
+	}
 
-	public void setInvoiceId(final Long invoiceId){
-		this.invoiceId=invoiceId;
+	public void setInvoiceId(final Long invoiceId) {
+		this.invoiceId = invoiceId;
+	}
+
+	public char getIsSubscriptionPayment() {
+		return isSubscriptionPayment;
+	}
+
+	public Long getRefernceId() {
+		return refernceId;
 	}
 
 }
