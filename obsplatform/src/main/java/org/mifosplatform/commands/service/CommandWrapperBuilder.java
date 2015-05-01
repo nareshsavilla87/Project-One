@@ -1905,12 +1905,12 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder cancelPayment(Long paymentId) {
+	public CommandWrapperBuilder cancelPayment(final Long paymentId) {
 
 		this.actionName = "CANCEL";
 		this.entityName = "PAYMENT";
 		this.entityId = paymentId;
-		this.href = "/payments/cancelpayment" + this.entityId;
+		this.href = "/payments/cancelpayment/" + this.entityId;
 		return this;
 
 	}
