@@ -50,7 +50,7 @@ public class PropertyCodeMasterWritePlatformServiceImpl implements PropertyCodeM
 			final DataIntegrityViolationException dve) {
 
 	        final Throwable realCause = dve.getMostSpecificCause();
-	        if (realCause.getMessage().contains("propertyCode_type_with_its_code")) {
+	        if (dve.getMostSpecificCause().getMessage().contains("property_code_type_with_its_code")) {
 	            final String name = command.stringValueOfParameterNamed("propertyCodeType");
 	            throw new PlatformDataIntegrityException("error.msg.propertycode.master.propertyCodeType.duplicate.name", "A Property Code Type with name '" + name + "' already exists",name);
 	        }
