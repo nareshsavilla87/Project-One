@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.propertycode.master.data;
+package org.mifosplatform.portfolio.property.data;
 
 
 public class PropertyCodeMasterData {

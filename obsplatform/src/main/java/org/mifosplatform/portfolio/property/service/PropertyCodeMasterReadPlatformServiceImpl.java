@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.propertycode.master.service;
+package org.mifosplatform.portfolio.property.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,7 +9,7 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.propertycode.master.data.PropertyCodeMasterData;
+import org.mifosplatform.portfolio.property.data.PropertyCodeMasterData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

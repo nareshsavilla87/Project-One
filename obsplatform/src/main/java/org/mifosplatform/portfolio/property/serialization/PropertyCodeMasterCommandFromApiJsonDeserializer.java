@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.propertycode.master.serialization;
+package org.mifosplatform.portfolio.property.serialization;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;

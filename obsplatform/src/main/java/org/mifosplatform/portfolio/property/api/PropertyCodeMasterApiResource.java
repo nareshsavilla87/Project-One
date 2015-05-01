@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.propertycode.master.api;
+package org.mifosplatform.portfolio.property.api;
 
 import java.io.File;
 import java.io.InputStream;
@@ -41,8 +41,8 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
-import org.mifosplatform.portfolio.propertycode.master.data.PropertyCodeMasterData;
-import org.mifosplatform.portfolio.propertycode.master.service.PropertyCodeMasterReadPlatformService;
+import org.mifosplatform.portfolio.property.data.PropertyCodeMasterData;
+import org.mifosplatform.portfolio.property.service.PropertyCodeMasterReadPlatformService;
 import org.mifosplatform.scheduledjobs.dataupload.command.DataUploadCommand;
 import org.mifosplatform.scheduledjobs.dataupload.service.DataUploadWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;

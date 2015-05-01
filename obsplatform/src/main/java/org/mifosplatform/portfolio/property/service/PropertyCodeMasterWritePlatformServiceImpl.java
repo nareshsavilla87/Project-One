@@ -1,12 +1,12 @@
-package org.mifosplatform.portfolio.propertycode.master.service;
+package org.mifosplatform.portfolio.property.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.portfolio.propertycode.master.domain.PropertyCodeMaster;
-import org.mifosplatform.portfolio.propertycode.master.domain.PropertyCodeMasterRepository;
-import org.mifosplatform.portfolio.propertycode.master.serialization.PropertyCodeMasterCommandFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.property.domain.PropertyCodeMaster;
+import org.mifosplatform.portfolio.property.domain.PropertyCodeMasterRepository;
+import org.mifosplatform.portfolio.property.serialization.PropertyCodeMasterCommandFromApiJsonDeserializer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;

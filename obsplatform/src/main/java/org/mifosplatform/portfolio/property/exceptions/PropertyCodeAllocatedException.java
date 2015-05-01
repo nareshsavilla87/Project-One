@@ -5,7 +5,10 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
 
 public class PropertyCodeAllocatedException extends AbstractPlatformDomainRuleException {
 
-    public PropertyCodeAllocatedException(String msg) {
+ 
+	private static final long serialVersionUID = 1L;
+
+	public PropertyCodeAllocatedException(String msg) {
         super("error.msg.property.code.already.allocated", " property Code is already allocated to client", msg);
     }
     

@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.propertycode.master.domain;
+package org.mifosplatform.portfolio.property.domain;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
