@@ -35,6 +35,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
@@ -196,7 +197,11 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			if(payment == null){
 				throw new PaymentDetailsNotFoundException(paymentId.toString());
 			}
-			
+	
+			final Payment cancelPay=new Payment(payment.getClientId(), null, null, payment.getAmountPaid(), null, DateUtils.getLocalDateOfTenant(),payment.getRemarks(), 
+					   payment.getPaymodeId(),null,payment.getReceiptNo(),null,payment.isWalletPayment(),payment.getIsSubscriptionPayment(), payment.getId());
+			cancelPay.cancelPayment(command);
+			this.paymentRepository.save(cancelPay);
 			payment.cancelPayment(command);
 			this.paymentRepository.save(payment);
 			final ClientBalance clientBalance = clientBalanceRepository.findByClientId(payment.getClientId());

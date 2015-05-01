@@ -37,7 +37,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * @author hugo this api class used to transfer property details of client
+ * @author ranjith
+ * this api class used to service transfer with property's 
+ * Date: 14/04/2015
  */
 @Path("/servicetransfer")
 @Component
