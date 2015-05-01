@@ -192,7 +192,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			final PropertyMaster oldPropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(oldPropertyCode);
 			final PropertyMaster newpropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
 			 if(newpropertyMaster != null && newpropertyMaster.getClientId() != null ){
-				 if(newpropertyMaster.getClientId() != clientId){
+				 if(!newpropertyMaster.getClientId().equals(clientId)){
 					throw new PropertyCodeAllocatedException(newpropertyMaster.getPropertyCode());
 				 }
 				 }

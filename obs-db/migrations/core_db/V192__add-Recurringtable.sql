@@ -9,11 +9,14 @@ CREATE TABLE IF NOT EXISTS `b_recurring` (
 ) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 COMMENT='utf8_general_ci';
 
 
+
 INSERT IGNORE  into c_configuration values(null,'sms-configuration',0,'{"URL":"http://smscountry.com/SMSCwebservice_Bulk.aspx"}');
 
-INSERT IGNORE INTO m_permission values(null,'billing&finance','UPDATECHANGEPAYPALSTATUS_PAYMENTGATEWAY','PAYMENTGATEWAY','UPDATECHANGEPAYPALSTATUS',0);
+INSERT IGNORE INTO c_configuration VALUES(null,'sms-configuration',0,'{}');
 
-INSERT IGNORE INTO m_permission values(null,'billing&finance','UPDATEPAYPALPROFILESTATUS_PAYMENTGATEWAY','PAYMENTGATEWAY','UPDATEPAYPALPROFILESTATUS',0);
+INSERT IGNORE INTO m_permission VALUES(null,'billing&finance','UPDATECHANGEPAYPALSTATUS_PAYMENTGATEWAY','PAYMENTGATEWAY','UPDATECHANGEPAYPALSTATUS',0);
+
+INSERT IGNORE INTO m_permission VALUES(null,'billing&finance','UPDATEPAYPALPROFILESTATUS_PAYMENTGATEWAY','PAYMENTGATEWAY','UPDATEPAYPALPROFILESTATUS',0);
 
 INSERT IGNORE INTO b_eventaction_mapping VALUES(null, 'Recurring DisConnect Order', 'RecurringDisconnect', 'workflow_events', 'N', 'N');
 
