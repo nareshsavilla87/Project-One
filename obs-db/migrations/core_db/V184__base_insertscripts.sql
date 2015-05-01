@@ -1,4 +1,5 @@
 SET SQL_SAFE_UPDATES = 0;
+SET foreign_key_checks = 0;
 -- Charge Codes
 insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`charge_type`,`charge_duration`,`duration_type`,`tax_inclusive`,`billfrequency_code`) values (null,'MSC','Monthly Subscription','RC',1,'Month(s)',0,'Monthly');
 insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`charge_type`,`charge_duration`,`duration_type`,`tax_inclusive`,`billfrequency_code`) values (null,'QSC','Quaterly Subscription','RC',3,'Month(s)',0,'Quaterly');
@@ -23,7 +24,7 @@ insert ignore into `b_billing_rules`(`id`,`billing_rule`) values (null,'Full Mon
 insert ignore into `b_discount_master`(`id`,`discount_code`,`discount_description`,`discount_type`,`discount_rate`,`start_date`,`discount_status`,`is_delete`) values (null,'None','None','Flat',0,'2015-04-16 00:00:00','ACTIVE','N');
 
 -- Event Action Mapping
-
+truncate table b_eventaction_mapping;
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Client','Send Mail','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Client','SEND SMS','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Order activation','Invoice','workflow_events','Y','N');
@@ -37,26 +38,26 @@ insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`proc
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Payment','Create Payment','workflow_events','Y','N');
 
 -- Message Templates
-
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (1,'TICKET_TEMPLATE','TICKET','TICKET','create ticket','Thank You','E',1,null,1,'2015-04-16 12:10:37','N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (2,'Bill_Email','TAX INVOICE from Obs','Bill','Please find the attached TAX INVOCIE from Spicenet','Thanks','E',1,'2014-07-30 12:33:42',1,'2014-07-30 12:33:42','N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (5,'CREATE SELFCARE','OBS Selfcare','Dear <PARAM1>','Your Selfcare User Account has been successfully created,Following are the User login Details. <br/> userName : <PARAM2> , <br/> password : <PARAM3> .','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (6,'SELFCARE REGISTRATION','Register Confirmation','Hai','Your Registration has been successfully completed.To approve this Registration please click on this link: <br/> URL : <PARAM1>.','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (7,'NEW SELFCARE PASSWORD','Reset Password','Dear <PARAM1>','The password for your SelfCare User Portal Account- <PARAM2>  was reset. . <br/> Password : <PARAM3>.','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (8,'PROVISION CREDENTIALS','OBS Provision Credentials','Dear <PARAM1>','Your OBS Subscriber Account has been successfully created And Following are the Account Details.  <br/> subscriberUid : <PARAM2> , <br/>  Authpin : <PARAM3> .','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (9,'CREATE USER','OBS User Creation','Dear <PARAM1>','OBS User Account has been successfully created .You can login using the following credentials. 
+delete from b_message_template where template_description ='SELFCARE REGISTRATIO';
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'TICKET_TEMPLATE','TICKET','TICKET','create ticket','Thank You','E',1,null,1,'2015-04-16 12:10:37','N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'Bill_Email','TAX INVOICE from Obs','Bill','Please find the attached TAX INVOCIE from Spicenet','Thanks','E',1,'2014-07-30 12:33:42',1,'2014-07-30 12:33:42','N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'CREATE SELFCARE','OBS Selfcare','Dear <PARAM1>','Your Selfcare User Account has been successfully created,Following are the User login Details. <br/> userName : <PARAM2> , <br/> password : <PARAM3> .','Thankyou','E',null,null,null,null,'N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'SELFCARE REGISTRATION','Register Confirmation','Hai','Your Registration has been successfully completed.To approve this Registration please click on this link: <br/> URL : <PARAM1>.','Thankyou','E',null,null,null,null,'N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'NEW SELFCARE PASSWORD','Reset Password','Dear <PARAM1>','The password for your SelfCare User Portal Account- <PARAM2>  was reset. . <br/> Password : <PARAM3>.','Thankyou','E',null,null,null,null,'N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'PROVISION CREDENTIALS','OBS Provision Credentials','Dear <PARAM1>','Your OBS Subscriber Account has been successfully created And Following are the Account Details.  <br/> subscriberUid : <PARAM2> , <br/>  Authpin : <PARAM3> .','Thankyou','E',null,null,null,null,'N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'CREATE USER','OBS User Creation','Dear <PARAM1>','OBS User Account has been successfully created .You can login using the following credentials. 
  userName : <PARAM2> , 
  password : <PARAM3> .','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (10,'PAYMENT_RECEIPT','Payment Confirmation','Dear <PARAM1><br/><br/>','Thank you for making your purchase for OBS.<br/><br/>
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'PAYMENT_RECEIPT','Payment Confirmation','Dear <PARAM1><br/><br/>','Thank you for making your purchase for OBS.<br/><br/>
  This is a confirmation of your payment.<br/><br/> Result : <PARAM2>,<br/> Description : <PARAM3>,<br/>Amount : <PARAM4>,<br/>
  ReceiptNo : <PARAM5>.<br/>','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (11,'Reminder For Expiry','service expiry','Dear <Param1>','Your service with <Param2> is going to expired on <Param3>.
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'Reminder For Expiry','service expiry','Dear <Param1>','Your service with <Param2> is going to expired on <Param3>.
 Please renew or top-up to avoid service disconnection. Please call us or do the renew through your selfcare portal <Param4>','Thanks <br/> <Param5> <br/> <Param6>','E',1,'2015-04-14 18:23:13',1,'2015-04-14 18:25:24','N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (12,'Newly_Activated_Customers','New_customers','Dear <Param1>','Thanks for subscribing to our services. 
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'Newly_Activated_Customers','New_customers','Dear <Param1>','Thanks for subscribing to our services. 
 Your service with <Param2> is activated on <Param3>.','Thanks <br/> <Param4> <br/> <Param5>','E',1,'2015-04-14 18:54:51',1,'2015-04-14 18:54:51','N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (13,'Disconnected_Customers','Disconnected Customers','Dear <Param1>','Your service with <Param2> is disconnected on <Param3>.
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'Disconnected_Customers','Disconnected Customers','Dear <Param1>','Your service with <Param2> is disconnected on <Param3>.
 Please call us or do the renew or Top-up through your selfcare portal <Param4>','Thanks <br/> <Param5> <br/> <Param6>','E',1,'2015-04-14 18:56:51',1,'2015-04-14 18:56:51','N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (14,'Renew_or_Top-up_Customer','Renew or Top-up Customer','Dear <Param1>','Thanks for subscribing to our services. 
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'Renew_or_Top-up_Customer','Renew or Top-up Customer','Dear <Param1>','Thanks for subscribing to our services. 
 Your service with <Param2> is activated on <Param3>.','Thanks <br/> <Param4> <br/> <Param5>','E',1,'2015-04-14 18:59:11',1,'2015-04-14 18:59:11','N');
 
 -- Provisioning Actions
@@ -73,6 +74,7 @@ insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`prov
 insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`provisioning_system`,`is_enable`,`is_delete`) values (null,'Remove RadService','REMOVE RADSERVICE','Radius','N','N');
 insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`provisioning_system`,`is_enable`,`is_delete`) values (null,'Update RadSevice','UPDATE RADSERVICE','Radius','N','N');
 insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`provisioning_system`,`is_enable`,`is_delete`) values (null,'Remove RadSevice','REMOVE RADSERVICE','Radius','N','N');
+
 
 -- Price Region 
 insert ignore into b_priceregion_master (id,priceregion_code,priceregion_name,createdby_id,created_date,is_deleted) 
@@ -112,15 +114,9 @@ CREATE OR REPLACE VIEW  `mvPromotion_vw` AS select `ed`.`event_id` AS `event_id`
 -- Watched movies
 CREATE OR REPLACE VIEW  `mvWatched_vw` AS select `m`.`id` AS `mediaId`,`m`.`title` AS `title`,`m`.`image` AS `image`,`m`.`rating` AS `rating`,'W' AS `assetTag`,`m`.`release_date` AS `release_date`,`ed`.`event_id` AS `eventId`,count(`eo`.`id`) AS `COUNT(eo.id)` from (( `b_media_asset` `m` join  `b_mod_detail` `ed` on((`m`.`id` = `ed`.`media_id`))) join  `b_modorder` `eo` on((`eo`.`event_id` = `ed`.`event_id`))) order by 6 desc;
 
+
 SET SQL_SAFE_UPDATES = 1;
-
-
-
-
-
-
-
-
+SET foreign_key_checks = 1;
 
 
 

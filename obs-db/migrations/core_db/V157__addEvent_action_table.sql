@@ -43,10 +43,7 @@ insert ignore into b_provisioning_actions values (null,'Close Client','TERMINATE
 insert ignore into b_provisioning_actions values (null,'Event Order','PROVISION IT','Beenius','Y','N');
 insert ignore into b_provisioning_actions values (null,'Release Device','RELEASE DEVICE','Beenius','Y','N');
 
-DELETE FROM b_eventaction_mapping  WHERE  event_name='Event Order';
-
-insert ignore into b_eventaction_mapping  VALUES (null,'Create Live Event','Active Live Event','workflow_events','N','Y');
+-- insert ignore into b_eventaction_mapping  VALUES (null,'Create Live Event','Active Live Event','workflow_events','N','Y');
 insert ignore into m_permission values(null,'billing','ACTIVE_PROVISIONACTIONS','PROVISIONACTIONS','ACTIVE',0);
-SET SQL_SAFE_UPDATES = 0;
-DELETE FROM b_eventaction_mapping  WHERE  event_name='Event Order';
+
 

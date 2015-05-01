@@ -1,3 +1,4 @@
+
 insert ignore into m_code_value values(null,13,'Radius',7);
 SET SQL_SAFE_UPDATES = 0;
 update job set name='RADIUS', display_name='Radius Integration',job_key='1RADIUSJobDetaildefault _ DEFAULT' where name="MIDDLEWARE";
@@ -83,4 +84,3 @@ call CreateIndexclientList();
 Drop procedure IF EXISTS CreateIndexclientList;
 
 SET SQL_SAFE_UPDATES = 1;
-
