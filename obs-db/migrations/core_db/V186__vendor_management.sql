@@ -1,4 +1,4 @@
-CREATE TABLE `b_vendor_management` (
+CREATE TABLE if not existS  `b_vendor_management` (
   `id` int(20) NOT NULL AUTO_INCREMENT,
   `vendor_code` varchar(20) NOT NULL,
   `vendor_name` varchar(100) DEFAULT NULL,
@@ -15,9 +15,9 @@ CREATE TABLE `b_vendor_management` (
   UNIQUE KEY `uvendor_mobileno_key` (`vendor_mobile`),
   UNIQUE KEY `uvendor_emailid_key` (`vendor_emailid`),
   UNIQUE KEY `uvendor_landlineno_key` (`vendor_landline`)
-) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
-CREATE TABLE `b_vendor_agreement` (
+CREATE TABLE  if not existS  `b_vendor_agreement` (
   `id` int(20) NOT NULL AUTO_INCREMENT,
   `vendor_id` int(20) NOT NULL,
   `vendor_agmt_status` varchar(20) DEFAULT NULL,
@@ -26,11 +26,11 @@ CREATE TABLE `b_vendor_agreement` (
   `content_type` varchar(20) NOT NULL,
   `vendor_agmt_document` varchar(500) DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1;
 
 
 
-CREATE TABLE `b_vendor_agmt_detail` (
+CREATE TABLE if not existS  `b_vendor_agmt_detail` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `vendor_agmt_id` int(20) NOT NULL,
   `content_code` varchar(10) NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE `b_vendor_agmt_detail` (
   UNIQUE KEY `bvad_uq3` (`vendor_agmt_id`,`content_code`,`loyalty_type`),
   KEY `FK_Ven_agmt_Master` (`vendor_agmt_id`),
   CONSTRAINT `FK_Ven_agmt_Master` FOREIGN KEY (`vendor_agmt_id`) REFERENCES `b_vendor_agreement` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
 INSERT IGNORE INTO  m_permission VALUES(null,'vendormanagement', 'CREATE_VENDORMANAGEMENT', 'VENDORMANAGEMENT', 'CREATE', '0');
 INSERT IGNORE INTO  m_permission VALUES(null,'vendormanagement', 'UPDATE_VENDORMANAGEMENT', 'VENDORMANAGEMENT', 'UPDATE', '0');
