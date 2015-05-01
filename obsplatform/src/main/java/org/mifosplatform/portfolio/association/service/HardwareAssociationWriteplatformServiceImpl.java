@@ -1,6 +1,5 @@
 package org.mifosplatform.portfolio.association.service;
 
-import java.util.Date;
 import java.util.Map;
 
 import net.sf.json.JSONObject;
@@ -12,10 +11,10 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetails;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetailsRepository;
+import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
 import org.mifosplatform.portfolio.association.exception.HardwareDetailsNotFoundException;
 import org.mifosplatform.portfolio.hardwareswapping.exception.WarrantyEndDateExpireException;
-import org.mifosplatform.portfolio.order.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.useradministration.domain.AppUser;

@@ -34,6 +34,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
+import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.allocation.service.AllocationReadPlatformService;
 import org.mifosplatform.portfolio.association.data.AssociationData;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
@@ -51,7 +52,6 @@ import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.UserActionStatusEnumaration;
-import org.mifosplatform.portfolio.order.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderDiscount;
 import org.mifosplatform.portfolio.order.domain.OrderDiscountRepository;
@@ -436,7 +436,6 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  if(orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
 		  newStartdate=new LocalDate(orderDetails.getEndDate()).plusDays(1);
 		  requstStatus=UserActionStatusEnumaration.OrderStatusType(UserActionStatusTypeEnum.RENEWAL_BEFORE_AUTOEXIPIRY).getValue();
-		 
 					
 	  } else if(orderDetails.getStatus().equals(StatusTypeEnum.DISCONNECTED.getValue().longValue())){
 		  newStartdate = DateUtils.getLocalDateOfTenant(); 
@@ -499,6 +498,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 					  Long.valueOf(0),null,null,orderDetails.getId(),plan.getProvisionSystem(),null);
 		      resourceId=commandProcessingResult.resourceId();
 		    	 }
+
 		     }
 
 	  		// checking for Paypal Recurring DisConnection			

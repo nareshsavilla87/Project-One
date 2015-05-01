@@ -16,13 +16,12 @@ import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundExcepti
 import org.mifosplatform.logistics.itemdetails.service.ItemDetailsReadPlatformService;
 import org.mifosplatform.logistics.ownedhardware.data.OwnedHardware;
 import org.mifosplatform.logistics.ownedhardware.domain.OwnedHardwareJpaRepository;
-import org.mifosplatform.logistics.ownedhardware.exception.ActiveDeviceExceedException;
 import org.mifosplatform.logistics.ownedhardware.serialization.OwnedHardwareFromApiJsonDeserializer;
+import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationWriteplatformService;
-import org.mifosplatform.portfolio.order.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.provisioning.provisioning.service.ProvisioningWritePlatformService;
 import org.slf4j.Logger;

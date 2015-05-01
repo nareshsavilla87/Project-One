@@ -46,7 +46,6 @@ END IF;
 END IF;
 END //
 DELIMITER ;
-call changevodtablenames();
 
 Drop procedure if exists changevodtablenames;
 

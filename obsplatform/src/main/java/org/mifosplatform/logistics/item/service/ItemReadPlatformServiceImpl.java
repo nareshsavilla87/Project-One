@@ -113,9 +113,9 @@ private static final class SalesDataMapper implements
                 "From b_item_detail group by item_master_id ) b on a.id=b.item_master_id ";
 		
 	}
-	public String schemaWithClientId(final Long clientId) {
+	public String schemaWithClientId(final Long clientId, Long itemId) {
 		
-		return " a.id AS id,a.item_code AS itemCode,a.item_description AS itemDescription,a.item_class AS itemClass,a.units AS units, "+
+		/*return " a.id AS id,a.item_code AS itemCode,a.item_description AS itemDescription,a.item_class AS itemClass,a.units AS units, "+
 				"a.charge_code AS chargeCode,ifnull(round(p.price , 2),a.unit_price ) as price,a.warranty AS warranty,b.Used AS used,b.Available AS available,a.reorder_level as reorderLevel, "+
 				"b.Total_items AS totalItems FROM b_item_master a "+
 				"LEFT JOIN(SELECT item_master_id,Sum(CASE WHEN Client_id IS NULL THEN 1 ELSE 0 END) Available, "+
@@ -126,7 +126,22 @@ private static final class SalesDataMapper implements
                 "left join b_state s on s.state_name = ca.state "+
                 "left join b_priceregion_detail pd on (pd.state_id = s.id or (pd.state_id = 0 and pd.country_id = s.parent_code ) ) "+
                 "left join b_priceregion_master prm ON prm.id = pd.priceregion_id "+
-                "left join b_item_price p on (p.item_id = a.id and p.region_id = prm.id and p.is_deleted='N' ) ";
+                "left join b_item_price p on (p.item_id = a.id and p.region_id = prm.id and p.is_deleted='N' ) ";*/
+		return " a.id AS id,a.item_code AS itemCode,a.item_description AS itemDescription,a.item_class AS itemClass,a.units AS units," +
+				" a.charge_code AS chargeCode,round(p.price , 2) as price,a.warranty AS warranty,b.Used AS used,b.Available AS available,a.reorder_level as reorderLevel," +
+				" b.Total_items AS totalItems FROM b_item_master a" +
+				" LEFT JOIN(SELECT item_master_id,Sum(CASE WHEN Client_id IS NULL THEN 1 ELSE 0 END) Available, Sum(CASE WHEN Client_id IS NOT NULL THEN 1 ELSE 0 END) Used," +
+				" Count(1) Total_items FROM b_item_detail GROUP BY item_master_id) b ON a.id = b.item_master_id" +
+				" left join b_client_address ca on ca.client_id = "+clientId+" left join b_state s on s.state_name = ca.state" +
+				" left join b_priceregion_detail pd on (pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_item_price a, b_priceregion_detail b, b_state c," +
+				" b_client_address d " +
+				" WHERE b.priceregion_id = a.region_id AND b.state_id = c.id   AND a.region_id  = b.priceregion_id" +
+				" AND d.state = c.state_name AND d.address_key = 'PRIMARY' AND d.client_id = "+clientId+" and a.item_id  ="+itemId+"),0) and pd.country_id = ifnull((SELECT DISTINCT c.id" +
+				" FROM b_item_price a,b_priceregion_detail b,b_country c, b_state s,b_client_address d " +
+				" WHERE b.priceregion_id = a.region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
+				" AND d.client_id ="+clientId+" and a.item_id  = "+itemId+" and  d.state = s.state_name and (s.id =b.state_id or(b.state_id = 0 and b.country_id = c.id ))), 0)) " +
+				" left join b_priceregion_master prm ON prm.id = pd.priceregion_id " +
+				" left join b_item_price p on (p.item_id = a.id and p.region_id = prm.id and p.is_deleted='N') ";
 	}
 
 	@Override
@@ -159,7 +174,7 @@ public ItemData retrieveSingleItemDetails(final Long clientId, final Long itemId
 		SalesDataMapper mapper = new SalesDataMapper();
 		String sql;
 		if(isWithClientId){
-			sql = "select " + mapper.schemaWithClientId(clientId)+" where a.id = ? and  a.is_deleted='n'  group by a.id"; 
+			sql = "select " + mapper.schemaWithClientId(clientId,itemId)+" where a.id = ? and  a.is_deleted='n'  group by a.id"; 
 		}else{
 			sql = "select " + mapper.schema()+" where a.id=? and  a.is_deleted='n'"; 
 		}
