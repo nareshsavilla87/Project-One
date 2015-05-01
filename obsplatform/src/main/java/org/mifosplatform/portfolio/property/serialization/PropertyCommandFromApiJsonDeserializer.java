@@ -35,7 +35,10 @@ public final class PropertyCommandFromApiJsonDeserializer {
 	
 	private final Set<String> supportedParametersForServiceTransfer = new HashSet<String>(Arrays.asList("oldPropertyCode", "newPropertyCode", "shiftChargeAmount","locale","unitCode",
 			           "clientId","chargeCode"));
-	private final FromJsonHelper fromApiJsonHelper;
+	
+    private final Set<String> supportedParametersForMaster = new HashSet<String>(Arrays.asList("propertyCodeType","code","description","referenceValue"));
+	
+   private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
 	public PropertyCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
@@ -131,4 +134,30 @@ public final class PropertyCommandFromApiJsonDeserializer {
 		}
 	}
 
-}
+	public void validateForCreatePropertyMaster(final String json) {
+		
+	        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+
+	        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+	        fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParametersForMaster);
+
+	        final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+	        final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("propertycodemaster");
+
+	        final JsonElement element = fromApiJsonHelper.parse(json);
+
+	        final String propertyCodeType = fromApiJsonHelper.extractStringNamed("propertyCodeType", element);
+	        baseDataValidator.reset().parameter("propertyCodeType").value(propertyCodeType).notBlank().notExceedingLengthOf(40);
+	        
+	        final String code = fromApiJsonHelper.extractStringNamed("code", element);
+	        baseDataValidator.reset().parameter("code").value(code).notBlank().notExceedingLengthOf(5);
+	        
+	        final String description = fromApiJsonHelper.extractStringNamed("description", element);
+	        baseDataValidator.reset().parameter("description").value(description).notBlank().notExceedingLengthOf(200);
+
+	        throwExceptionIfValidationWarningsExist(dataValidationErrors);
+	    }
+		
+	}
+
+

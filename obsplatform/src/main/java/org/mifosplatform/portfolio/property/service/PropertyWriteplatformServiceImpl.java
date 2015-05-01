@@ -26,6 +26,8 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.address.domain.Address;
 import org.mifosplatform.organisation.address.domain.AddressRepository;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.portfolio.property.domain.PropertyCodeMaster;
+import org.mifosplatform.portfolio.property.domain.PropertyCodeMasterRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
@@ -48,6 +50,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	private final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final PropertyMasterRepository propertyMasterRepository;
 	private final PropertyHistoryRepository propertyHistoryRepository;
+	private final PropertyCodeMasterRepository propertyCodeMasterRepository;
 	private final AddressRepository addressRepository;
 	private final ChargeCodeRepository chargeCodeRepository;
 	private final GenerateBillingOrderService generateBillingOrderService;
@@ -60,6 +63,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final PropertyMasterRepository propertyMasterRepository,
 			final PropertyHistoryRepository propertyHistoryRepository,
+			final PropertyCodeMasterRepository propertyCodeMasterRepository,
 			final AddressRepository addressRepository,
 		    final ChargeCodeRepository chargeCodeRepository,
             final GenerateBillingOrderService generateBillingOrderService,
@@ -71,6 +75,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.propertyMasterRepository = propertyMasterRepository;
 		this.propertyHistoryRepository = propertyHistoryRepository;
+		this.propertyCodeMasterRepository = propertyCodeMasterRepository;
 		this.addressRepository = addressRepository;
 		this.chargeCodeRepository = chargeCodeRepository;
 		this.generateBillingOrderService = generateBillingOrderService;
@@ -154,11 +159,15 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	private void handleCodeDataIntegrityIssues(final JsonCommand command,final DataIntegrityViolationException dve) {
 		
 		final Throwable realCause = dve.getMostSpecificCause();
+		
 		if (realCause.getMessage().contains("property_code_constraint")) {
 			final String code = command.stringValueOfParameterNamed("propertyCode");
 			throw new PlatformDataIntegrityException("error.msg.property.duplicate.code",
 					"A property with Code'" + code + "'already exists","propertyCode", code);
-		}
+		}else if (dve.getMostSpecificCause().getMessage().contains("property_code_type_with_its_code")) {
+            final String name = command.stringValueOfParameterNamed("propertyCodeType");
+            throw new PlatformDataIntegrityException("error.msg.propertycode.master.propertyCodeType.duplicate.name", "A Property Code Type with name '" + name + "' already exists",name);
+        }
 
 		LOGGER.error(dve.getMessage(), dve);
 		throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue",
@@ -264,5 +273,23 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		}
 		List<InvoiceTaxCommand> invoiceTaxCommand = this.generateBill.generateInvoiceTax(taxMappingRateDatas, billPrice, clientId,chargeCodeMaster.getTaxInclusive());
 		return invoiceTaxCommand;
+	}
+
+
+	@Override
+	public CommandProcessingResult createPropertyMasters(JsonCommand command) {
+	
+		try
+		{
+			context.authenticatedUser();
+			this.apiJsonDeserializer.validateForCreatePropertyMaster(command.json());
+			final PropertyCodeMaster propertyCodeMaster = PropertyCodeMaster.fromJson(command);
+			this.propertyCodeMasterRepository.save(propertyCodeMaster);
+				return new CommandProcessingResult(propertyCodeMaster.getId());
+
+		} catch (DataIntegrityViolationException dve) {
+			 handleCodeDataIntegrityIssues(command, dve);
+			return  CommandProcessingResult.empty();
+		}
 	}
 }

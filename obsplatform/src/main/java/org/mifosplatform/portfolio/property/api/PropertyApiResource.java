@@ -33,6 +33,7 @@ import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
+import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiConstants;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -60,11 +61,19 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
 
+/**
+ * @author ranjith
+ * this api class used to create,update and delete different property's 
+ * Date: 12/04/2015
+ */
 @Path("/property")
 @Component
 @Scope("singleton")
 public class PropertyApiResource {
 
+	/**
+	 * The set of parameters that are supported in response for {@link CodeData}
+	 */
 	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "propertycode", "propertyTypeId", "unitCode",
 					"floor", "buildingCode", "parcel", "street", "status","precinct", "poBox"));
 
