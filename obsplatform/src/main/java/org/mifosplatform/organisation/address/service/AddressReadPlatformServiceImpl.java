@@ -17,7 +17,6 @@ import org.mifosplatform.organisation.address.data.CityDetailsData;
 import org.mifosplatform.organisation.address.data.CountryDetails;
 import org.mifosplatform.organisation.address.domain.AddressEnum;
 import org.mifosplatform.portfolio.order.data.AddressStatusEnumaration;
-import org.mifosplatform.portfolio.plan.data.BillRuleData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;

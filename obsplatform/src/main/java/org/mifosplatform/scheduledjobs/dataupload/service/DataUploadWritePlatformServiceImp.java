@@ -334,7 +334,7 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 				totalRecordCount++;
 			}
 			//writeToFile(fileLocation,errorData);
-		}else if(uploadProcess.equalsIgnoreCase("Property Master")  && new File(fileLocation).getName().contains(".csv") ){
+		}else if(uploadProcess.equalsIgnoreCase("Property Data")  && new File(fileLocation).getName().contains(".csv") ){
 	   		while((line = csvFileBufferedReader.readLine()) != null){
 	   			try{
 	   				line=line.replace(";"," ");
@@ -363,7 +363,7 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 	   		}
 		   	//writeToFile(fileLocation,errorData);
 		   	
-	   }else if(uploadProcess.equalsIgnoreCase("Property Code Master")  && new File(fileLocation).getName().contains(".csv") ){
+	   }else if(uploadProcess.equalsIgnoreCase("Property Master")  && new File(fileLocation).getName().contains(".csv") ){
 	   		while((line = csvFileBufferedReader.readLine()) != null){
 	   			try{
 	   				line=line.replace(";"," ");

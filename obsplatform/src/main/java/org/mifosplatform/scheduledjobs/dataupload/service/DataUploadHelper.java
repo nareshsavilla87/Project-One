@@ -399,10 +399,6 @@ public class DataUploadHelper {
 		}
 	}
 
-
-
-
-
 	public String buildjsonForPropertyCodeMaster(String[] currentLineData, ArrayList<MRNErrorData> errorData, int i) {
 		
 		if(currentLineData.length>=3){
