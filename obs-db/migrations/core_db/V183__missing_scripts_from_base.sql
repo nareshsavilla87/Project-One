@@ -438,6 +438,16 @@ DELIMITER ;
 insert ignore into m_permission values(null,'Organisation','CREATE_IPPOOLMANAGEMENT','IPPOOLMANAGEMENT','CREAT',0);
 insert ignore into m_permission values(null,'client&orders','DISCONNECT_ORDER','ORDER','DISCONNECT',0);
 
+
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',1,'Active','Active');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',2,'Cancelled','Cancelled');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',3,'Disconnected','Disconnected');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',4,'PENDING','PENDING');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',5,'TERMINATED','TERMINATED');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',6,'SUSPENDED','SUSPENDED');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',7,'REACTIVE','REACTIVE');
+
+
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal-for-ios',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
 

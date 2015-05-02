@@ -1063,7 +1063,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 							StatusTypeEnum.ACTIVE.toString(),StatusTypeEnum.SUSPENDED.toString());
 					this.paymentFollowupRepository.save(paymentFollowup);
 					this.orderRepository.save(order);
-					final OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resourceId,UserActionStatusTypeEnum.TERMINATION.toString(),
+					final OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resourceId,UserActionStatusTypeEnum.SUSPENTATION.toString(),
 							appUser.getId(),null);
                      this.orderHistoryRepository.save(orderHistory);	
 				    
