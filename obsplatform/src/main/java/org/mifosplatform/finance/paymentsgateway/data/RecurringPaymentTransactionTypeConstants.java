@@ -40,6 +40,8 @@ public class RecurringPaymentTransactionTypeConstants {
 	public static final String PAYMENTCODE 			= "paytermCode";
 	public static final String CONTRACTPERIOD 		= "contractPeriod";
 	public static final String PLANCODE 				= "planCode";
+	public static final String ORDERID 				= "orderId";
+	
 	
 	
 	//Paypal Constant Variable Names

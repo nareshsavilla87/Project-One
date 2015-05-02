@@ -2742,6 +2742,14 @@ public CommandWrapperBuilder updatePaypalProfileStatus() {
 	return this;
 }
 
+public CommandWrapperBuilder deleteRecurringBilling() {
+	this.actionName = "DELETERECURRINGBILLING";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+
 
 }
 

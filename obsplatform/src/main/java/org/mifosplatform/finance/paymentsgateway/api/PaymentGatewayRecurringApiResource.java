@@ -1,22 +1,22 @@
 package org.mifosplatform.finance.paymentsgateway.api;
 
-import java.util.Map;
-
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
-import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayData;
-import org.mifosplatform.finance.paymentsgateway.data.RecurringPaymentTransactionTypeConstants;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayRepository;
+import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBillingRepository;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayReadPlatformService;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayRecurringWritePlatformService;
@@ -29,6 +29,9 @@ import org.mifosplatform.workflow.eventaction.service.EventActionReadPlatformSer
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 
 @Path("/recurringpayments")
 @Component
@@ -85,8 +88,8 @@ public class PaymentGatewayRecurringApiResource {
 	 */
 	@POST
 	@Path("changestatus")
-	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-	@Produces({ MediaType.TEXT_HTML })
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public String paypalChangeRecurringStatus(final String apiRequestBodyAsJson) {
 
 			final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePaypalProfileStatus().withJson(apiRequestBodyAsJson).build();
@@ -100,13 +103,40 @@ public class PaymentGatewayRecurringApiResource {
 	 */
 	@PUT
 	@Path("updaterecurring")
-	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-	@Produces({ MediaType.TEXT_HTML })
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public String paypalUpdateRecurringProfile(final String apiRequestBodyAsJson) {
 
 			final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePaypalProfileRecurring().withJson(apiRequestBodyAsJson).build();
 			final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 			return this.toApiJsonSerializer.serialize(result);
 	} 
+	
+	@DELETE
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deleteRecurringSubscriber(final String apiRequestBodyAsJson) {
+
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteRecurringBilling().withJson(apiRequestBodyAsJson).build();
+		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+
+	} 
+	
+	@GET
+	@Path("{subscriberId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String getRecurringProfileSubscriberId(@PathParam("subscriberId") final String subscriberId, @Context final UriInfo uriInfo) {
+
+		this.context.authenticatedUser();
+		
+		PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneBySubscriberId(subscriberId);
+		
+		Gson gson = new Gson();
+		String billingJson = gson.toJson(billing);
+		
+		return this.toApiJsonSerializer.serialize(billingJson);
+} 
 	
 }

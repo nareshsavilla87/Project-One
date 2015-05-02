@@ -28,10 +28,14 @@ public interface PaymentGatewayRecurringWritePlatformService {
 
 	public CommandProcessingResult updatePaypalProfileStatus(JsonCommand command);
 
-	public void disConnectOrder(HttpServletRequest request);
+	public void disConnectOrder(String profileId);
 
-	public Long getOrderId(HttpServletRequest request);
+	public PaypalRecurringBilling getRecurringBillingObject(String profileId);
 
 	public String getOrderStatus(Long orderId);
+
+	public void updatePaypalRecurringBilling(String profileId);
+
+	public CommandProcessingResult deleteRecurringBilling(JsonCommand command);
 	
 }
