@@ -1,3 +1,37 @@
+
+DROP PROCEDURE IF EXISTS cancelPayment;
+DELIMITER //
+CREATE PROCEDURE cancelPayment()
+BEGIN
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME ='ref_id'  
+      and TABLE_NAME = 'b_payments'
+     and TABLE_SCHEMA = DATABASE())THEN
+alter table b_payments add column ref_id bigint(20) default null;
+END IF;
+END //
+DELIMITER ;
+call cancelPayment();
+DROP PROCEDURE IF EXISTS cancelPayment;
+
+Drop procedure IF EXISTS addb_autorenewcolumnorders;
+DELIMITER //
+create procedure addb_autorenewcolumnorders() 
+Begin
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'auto_renew'
+     and TABLE_NAME = 'b_orders'
+     and TABLE_SCHEMA = DATABASE())THEN
+alter  table b_orders  add column `auto_renew` char(1) DEFAULT 'N';
+END IF;
+END //
+DELIMITER ;
+call addb_autorenewcolumnorders();
+Drop procedure IF EXISTS addb_autorenewcolumnorders;
+
+
 CREATE OR REPLACE  VIEW  fin_trans_vw AS 
 select distinct
     b_invoice.id AS transId,
@@ -120,19 +154,4 @@ from
     join m_appuser ma ON (((bjt.createdby_id = ma.id) and (bjt.jv_date <= now()))))
 order by 1 , 2;
 
-DROP PROCEDURE IF EXISTS cancelPayment;
-DELIMITER //
-CREATE PROCEDURE cancelPayment()
-BEGIN
-IF NOT EXISTS (
-     SELECT * FROM information_schema.COLUMNS
-     WHERE COLUMN_NAME ='ref_id'  
-      and TABLE_NAME = 'b_payments'
-     and TABLE_SCHEMA = DATABASE())THEN
-alter table b_payments add column ref_id bigint(20) default null;
-END IF;
-END //
-DELIMITER ;
-call cancelPayment();
-DROP PROCEDURE IF EXISTS cancelPayment;
 
