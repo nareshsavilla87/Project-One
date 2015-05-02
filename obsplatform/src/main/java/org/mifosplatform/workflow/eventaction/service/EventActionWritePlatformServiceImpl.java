@@ -349,6 +349,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						
 			        	break;
 			        	
+			        	
 				    case EventActionConstants.ACTION_RECURRING_RECONNECTION : 
 				    	
 				    	JsonObject JsonString = new JsonObject();

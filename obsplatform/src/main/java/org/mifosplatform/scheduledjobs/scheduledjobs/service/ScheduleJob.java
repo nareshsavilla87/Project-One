@@ -105,7 +105,10 @@ public boolean checkClientBalanceForOrderrenewal(OrderData orderData,Long client
           }
 
 return isAmountSufficient;
+<<<<<<< HEAD
 */}
+
+
 
 	public void ProcessAutoExipiryDetails(OrderData orderData, FileWriter fw, LocalDate exipirydate, JobParameterData data, Long clientId) {
 		  
@@ -122,7 +125,7 @@ return isAmountSufficient;
 		                            List<OrderPrice> orderPrice=order.getPrice();
 		                            if(order.isAutoRenewal() == 'Y'){
 		                            	boolean isSufficientAmountForRenewal=this.checkClientBalanceForOrderrenewal(orderData,clientId,orderPrice);   	
-                                             
+
 		                          if(isSufficientAmountForRenewal){
 		                           
 		                             List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyContractType("Month(s)",1);
@@ -151,6 +154,7 @@ return isAmountSufficient;
 		                          }
 		                     }
 		                     }else if (orderData.getEndDate().equals(exipirydate) || exipirydate.isAfter(orderData.getEndDate())){
+
 
 		                            SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
 		                            jsonobject.put("disconnectReason","Date Expired");
