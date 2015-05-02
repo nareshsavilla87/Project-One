@@ -28,14 +28,13 @@ truncate table b_eventaction_mapping;
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Client','Send Mail','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Client','SEND SMS','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Order activation','Invoice','workflow_events','Y','N');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Order booking','INVOICE','workflow_events','Y','Y');
+insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Order Booking','Invoice','workflow_events','Y','Y');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Close Client','SEND PROVISION','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Ticket','Send Email','workflow_events','Y','N');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Client','Send Mail','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Live Event','Active Live Event','workflow_events','Y','N');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Payment','RENEWAL','workflow_events','Y','N');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Live Event','Active Live Event','workflow_events','Y','Y');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Payment','Create Payment','workflow_events','Y','N');
+insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Payment','Renewal','workflow_events','Y','N');
+
+
 
 -- Message Templates
 delete from b_message_template where template_description ='SELFCARE REGISTRATIO';
@@ -113,7 +112,10 @@ CREATE OR REPLACE VIEW  `mvPromotion_vw` AS select `ed`.`event_id` AS `event_id`
 
 -- Watched movies
 CREATE OR REPLACE VIEW  `mvWatched_vw` AS select `m`.`id` AS `mediaId`,`m`.`title` AS `title`,`m`.`image` AS `image`,`m`.`rating` AS `rating`,'W' AS `assetTag`,`m`.`release_date` AS `release_date`,`ed`.`event_id` AS `eventId`,count(`eo`.`id`) AS `COUNT(eo.id)` from (( `b_media_asset` `m` join  `b_mod_detail` `ed` on((`m`.`id` = `ed`.`media_id`))) join  `b_modorder` `eo` on((`eo`.`event_id` = `ed`.`event_id`))) order by 6 desc;
-
+ -- Event ORder View 
+CREATE OR REPLACE VIEW `event_orders_vw` AS SELECT `ma`.`content_provider` AS `CONTENT PROVIDER`, `ma`.`type` AS `TYPE`, `ma`.`title` AS `TITLE`, `ml`.`language_id` AS `LANGUAGE ID`, `ml`.`format_type` AS `FORMAT TYPE`, `ml`.`location` AS `LOCATION`,`em`.`event_name` AS `EVENT NAME`,`em`.`status` AS `STATUS`,cast(`em`.`event_validity` AS date) AS `EVENT VALIDITY`,cast(`eo`.`event_bookeddate` AS date) AS `EVENT BOOKED DATE`  FROM ((((`b_mediaasset_location` `ml` JOIN `b_media_asset` `ma` ON ((`ml`.`media_id` = `ma`.`id`))) JOIN `b_mod_detail` `ed` ON ((`ed`.`media_id` = `ma`.`id`))) JOIN `b_mod_master` `em` ON ((`ed`.`event_id` = `em`.`id`))) JOIN `b_modorder` `eo` ON ((`eo`.`event_id` = `em`.`id`)));
+-- top movies view
+CREATE OR REPLACE VIEW `top_movies_vw` AS SELECT `ma`.`title` AS `TITLE`, `ma`.`id` AS `ID`, `ma`.`type` AS `TYPE`, cast(`ma`.`release_date` AS date) AS `RELEASE DATE`,`ma`.`content_provider` AS `CONTENT PROVIDER`,`ma`.`rating` AS `RATING`,`ma`.`rating_count` AS `RATING COUNT`,count(`eo`.`id`) AS `ORDER CNT`  FROM (((`b_media_asset` `ma` JOIN `b_mod_detail` `ed` ON ((`ma`.`id` = `ed`.`media_id`))) JOIN `b_mod_master` `em` ON ((`em`.`id` = `ed`.`event_id`))) JOIN `b_modorder` `eo` ON ((`ed`.`event_id` = `eo`.`event_id`))) ORDER BY 8 DESC;
 
 SET SQL_SAFE_UPDATES = 1;
 SET foreign_key_checks = 1;

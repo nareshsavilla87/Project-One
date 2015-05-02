@@ -401,7 +401,7 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS  workflow_events;
 DELIMITER //
-CREATE PROCEDURE  `workflow_events`(IN  clientid     INT,
+CREATE PROCEDURE `workflow_events`(IN  clientid     INT,
 										IN  eventname    varchar(60),
 										IN  actionname   varchar(60),
 										IN  resourceid   varchar(20),
@@ -425,10 +425,12 @@ BEGIN
 		SET strjson = Concat("Email_Id:",emailid);
     else
         SET result = 'true';
-		SET strjson ='';
-	End if;	  
+		SET strjson =Concat("result:",true);
+	End if;	
+    
 	END //
 DELIMITER ;
+
 
 	
 -- data
