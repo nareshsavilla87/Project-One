@@ -456,7 +456,17 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		  orderDetails.setNextBillableDay(null);
 	  }
 	  LocalDate renewalEndDate=this.orderAssembler.calculateEndDate(newStartdate,contractDetails.getSubscriptionType(),contractDetails.getUnits());
-	  orderDetails.setEndDate(renewalEndDate);
+	  
+		
+     Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
+		
+		if(configuration != null && plan.isPrepaid() == 'N'){
+			orderDetails.setBillingAlign(configuration.isEnabled()?'Y':'N');
+			if(configuration.isEnabled()){
+				orderDetails.setEndDate(renewalEndDate.dayOfMonth().withMaximumValue());
+			}
+		}
+	  //orderDetails.setEndDate(renewalEndDate);
 
 	  for(OrderPrice orderprice:orderPrices){
 		  if(plan.isPrepaid() == 'Y'){
@@ -476,7 +486,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 					throw new PriceNotFoundException(priceId);
 				}
 		  	}
-		  orderprice.setDatesOnOrderStatus(newStartdate,renewalEndDate,orderDetails.getUserAction());//setBillEndDate(renewalEndDate);
+		  orderprice.setDatesOnOrderStatus(newStartdate,new LocalDate(orderDetails.getEndDate()),orderDetails.getUserAction());//setBillEndDate(renewalEndDate);
 		  //this.OrderPriceRepository.save(orderprice);
 		  orderDetails.setNextBillableDay(null);
 	  }

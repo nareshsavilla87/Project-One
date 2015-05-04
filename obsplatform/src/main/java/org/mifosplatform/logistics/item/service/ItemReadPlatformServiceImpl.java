@@ -100,7 +100,8 @@ private static final class SalesDataMapper implements
 
 	public String schema() {
 		return " a.id as id,a.item_code as itemCode,a.item_description as itemDescription,a.item_class as itemClass,a.units as units,a.charge_code as chargeCode,round(a.unit_price,2) price,a.warranty as warranty,a.reorder_level as reorderLevel,"+
-				"b.Used as used,b.Available as available,b.Total_items as totalItems from b_item_master a "+
+				"b.Used as used,b.Available as available, (SELECT 1 FROM b_grn WHERE item_master_id=11  LIMIT 1) as isActive," +
+				" b.Total_items as totalItems from b_item_master a "+
 				"left join ( Select item_master_id,Sum(Case When Client_id IS NULL "+
                 "        Then 1 "+
                 "        Else 0 "+
@@ -128,7 +129,8 @@ private static final class SalesDataMapper implements
                 "left join b_priceregion_master prm ON prm.id = pd.priceregion_id "+
                 "left join b_item_price p on (p.item_id = a.id and p.region_id = prm.id and p.is_deleted='N' ) ";*/
 		return " a.id AS id,a.item_code AS itemCode,a.item_description AS itemDescription,a.item_class AS itemClass,a.units AS units," +
-				" a.charge_code AS chargeCode,round(p.price , 2) as price,a.warranty AS warranty,b.Used AS used,b.Available AS available,a.reorder_level as reorderLevel," +
+				" a.charge_code AS chargeCode,round(p.price , 2) as price,(SELECT 1 FROM b_grn WHERE item_master_id=11  LIMIT 1) as isActive, " +
+				"a.warranty AS warranty,b.Used AS used,b.Available AS available,a.reorder_level as reorderLevel," +
 				" b.Total_items AS totalItems FROM b_item_master a" +
 				" LEFT JOIN(SELECT item_master_id,Sum(CASE WHEN Client_id IS NULL THEN 1 ELSE 0 END) Available, Sum(CASE WHEN Client_id IS NOT NULL THEN 1 ELSE 0 END) Used," +
 				" Count(1) Total_items FROM b_item_detail GROUP BY item_master_id) b ON a.id = b.item_master_id" +
@@ -157,10 +159,11 @@ private static final class SalesDataMapper implements
 		final BigDecimal unitPrice = rs.getBigDecimal("price");
 		final int warranty = rs.getInt("warranty");
 		final Long used = rs.getLong("used");
+		final Long isActive = rs.getLong("isActive");
 		final Long available = rs.getLong("available");
 		final Long totalItems = rs.getLong("totalItems");
 		final Long reorderLevel = rs.getLong("reorderLevel");
-		return new ItemData(id,itemCode,itemDescription,itemClass,units,chargeCode,warranty,unitPrice,used,available,totalItems, reorderLevel);
+		return new ItemData(id,itemCode,itemDescription,itemClass,units,chargeCode,warranty,unitPrice,used,available,totalItems, reorderLevel,isActive);
 
 
 	}
