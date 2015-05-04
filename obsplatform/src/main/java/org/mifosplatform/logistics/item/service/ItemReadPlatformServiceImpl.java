@@ -100,7 +100,7 @@ private static final class SalesDataMapper implements
 
 	public String schema() {
 		return " a.id as id,a.item_code as itemCode,a.item_description as itemDescription,a.item_class as itemClass,a.units as units,a.charge_code as chargeCode,round(a.unit_price,2) price,a.warranty as warranty,a.reorder_level as reorderLevel,"+
-				"b.Used as used,b.Available as available, (SELECT 1 FROM b_grn WHERE item_master_id=11  LIMIT 1) as isActive," +
+				"b.Used as used,b.Available as available," +
 				" b.Total_items as totalItems from b_item_master a "+
 				"left join ( Select item_master_id,Sum(Case When Client_id IS NULL "+
                 "        Then 1 "+
@@ -159,11 +159,10 @@ private static final class SalesDataMapper implements
 		final BigDecimal unitPrice = rs.getBigDecimal("price");
 		final int warranty = rs.getInt("warranty");
 		final Long used = rs.getLong("used");
-		final Long isActive = rs.getLong("isActive");
 		final Long available = rs.getLong("available");
 		final Long totalItems = rs.getLong("totalItems");
 		final Long reorderLevel = rs.getLong("reorderLevel");
-		return new ItemData(id,itemCode,itemDescription,itemClass,units,chargeCode,warranty,unitPrice,used,available,totalItems, reorderLevel,isActive);
+		return new ItemData(id,itemCode,itemDescription,itemClass,units,chargeCode,warranty,unitPrice,used,available,totalItems, reorderLevel);
 
 
 	}
