@@ -34,7 +34,7 @@ public interface PaymentGatewayRecurringWritePlatformService {
 
 	public String getOrderStatus(Long orderId);
 
-	public void updatePaypalRecurringBilling(String profileId);
+	public Long updatePaypalRecurringBilling(String profileId);
 
 	public CommandProcessingResult deleteRecurringBilling(JsonCommand command);
 	

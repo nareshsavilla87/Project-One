@@ -463,114 +463,6 @@ public class PaymentGatewayApiResource {
 	 */
 	 @POST
 	 @Path("paypal")
-	 @Consumes({ MediaType.APPLICATION_JSON })
-	 @Produces({ MediaType.APPLICATION_JSON })
-	 public String paypalOnlinePayment(){
-		 
-		 /*@FormParam("txn_id") final String txnId,@FormParam("payment_date") final Date paymentDate,
-		 @FormParam("mc_gross") final BigDecimal amount,
-		 @FormParam("address_name") final String name,@FormParam("payer_email") final String payerEmail,
-		 @FormParam("custom") final String customData, @FormParam("mc_currency") final String currency,
-		 @FormParam("receiver_email") final String receiverEmail, @FormParam("payer_status") final String payerStatus,
-		 @FormParam("payment_status") final String paymentStatus, @FormParam("pending_reason") final String pendingReason*/
-		 
-		String returnUrl = null;
-		
-		try {
-			 //in customData you should get the Parameters are clientId,locale,plancode,paytermcode,contractPeriod,returnUrl.
-			
-			final JSONObject jsonCustomData = new JSONObject(customData);
-			
-			final String dateFormat = "dd MMMM yyyy";
-
-			final SimpleDateFormat daformat = new SimpleDateFormat(dateFormat);
-
-			final String date = daformat.format(paymentDate);
-			
-			returnUrl = jsonCustomData.getString("returnUrl");
-			
-			final Long clientId = jsonCustomData.getLong("clientId");
-
-			JsonObject jsonObj = new JsonObject();
-			jsonObj.addProperty("paymentDate", date);
-			jsonObj.addProperty("payerEmail", payerEmail);
-			jsonObj.addProperty("address_name", name);
-			jsonObj.addProperty("receiverEmail", receiverEmail);
-			jsonObj.addProperty("payerStatus", payerStatus);
-			jsonObj.addProperty("currency", currency);
-			jsonObj.addProperty("paymentStatus", paymentStatus);
-			jsonObj.addProperty("pendingReason", pendingReason);
-
-			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("source", RecurringPaymentTransactionTypeConstants.PAYPAL);
-			jsonObject.put("transactionId", txnId);
-			jsonObject.put("currency", currency);
-			jsonObject.put("clientId", clientId);
-			jsonObject.put("total_amount", amount);
-			jsonObject.put("locale", "en");
-			jsonObject.put("dateFormat", dateFormat);
-			jsonObject.put("otherData", jsonObj.toString());
-			jsonObject.put("status", paymentStatus);
-			
-			String data = OnlinePaymentMethod(jsonObject.toString());
-			
-			JSONObject resultJsonObject = new JSONObject(data);
-			
-			String Result = resultJsonObject.getString("Result");
-			String Description = resultJsonObject.getString("Description");
-			
-			
-			String paymentStatus1 = null;
-			
-			if(Result.equalsIgnoreCase("SUCCESS")){
-				
-				 jsonCustomData.remove("clientId");
-				 jsonCustomData.remove("returnUrl");
-				 String pgId = resultJsonObject.getString("pgId");
-				 try{
-					 paymentStatus1 = orderBooking(customData, date, clientId);
-				 } catch (Exception e){
-					 PaymentGateway  paymentGateway= this.paymentGatewayRepository.findOne(new Long(pgId));
-					
-					 if(e.getCause() !=null && e.getCause().getMessage() != null){
-						 paymentGateway.setRemarks(e.getCause().getMessage());
-					 } else if (e.getMessage() !=null) {
-						 paymentGateway.setRemarks(e.getMessage());
-					 } else{
-						 StringWriter errors = new StringWriter();
-						 e.printStackTrace(new PrintWriter(errors));
-						 paymentGateway.setRemarks(errors.toString());	 	
-					 }
-					 this.paymentGatewayRepository.save(paymentGateway);
-					 paymentStatus1 = "Payment Failed, Please Contact to Your Service Provider.  ";	
-				 }
-				 
-				
-			} else {
-				paymentStatus1 = " Payment Failed, Please Contact to Your Service Provider, Reason="+Description;
-			}
-			
-			String htmlData = "<a href=\""+returnUrl+"\"> Click On Me. </a>" + "<strong>"+ paymentStatus1 + "</Strong>";
-			
-			return htmlData;
-
-		} 
-	   catch(Exception e){
-		   String paymentStatus1 = "Payment Failed, Please Contact to Your Service Provider.  ";
-		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus1 + "</Strong>";
-		   return htmlData;   
-	   }
-	 }
-	
-	
-	
-	
-	
-	
-	
-	/*
-	 @POST
-	 @Path("paypal")
 	 @Consumes("application/x-www-form-urlencoded")
 	 @Produces("text/html")
 	 public String paypalOnlinePayment(@FormParam("txn_id") final String txnId,@FormParam("payment_date") final Date paymentDate,
@@ -666,7 +558,7 @@ public class PaymentGatewayApiResource {
 		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus1 + "</Strong>";
 		   return htmlData;   
 	   }
-	 }*/
+	 }
 
 	public String orderBooking(String jsonObject, String date, Long clientId) {
 		

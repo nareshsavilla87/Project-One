@@ -37,10 +37,13 @@ public class RecurringPaymentTransactionTypeConstants {
 	public static final String CLIENTID 				= "clientId";
 	public static final String SUBSCRID				= "subscr_id";
 	public static final String PLANID 				= "planId";
-	public static final String PAYMENTCODE 			= "paytermCode";
+	public static final String PAYTERMCODE 			= "paytermCode";
 	public static final String CONTRACTPERIOD 		= "contractPeriod";
 	public static final String PLANCODE 				= "planCode";
 	public static final String ORDERID 				= "orderId";
+	public static final String RENEWALPERIOD			= "renewalPeriod";
+	public static final String PRICEID 				= "priceId";
+	
 	
 	
 	

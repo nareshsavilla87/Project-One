@@ -308,20 +308,20 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 		
 		for(EventActionData eventActionData:eventActionDatas){
 			
-			System.out.println("EventAction Id:"+eventActionData.getId()+", PaymentGatewayId:"+eventActionData.getResourceId());
+			System.out.println("EventAction Id:"+eventActionData.getId()+", clientId:"+clientId + ", actionName:"+ eventActionData.getActionName());
 		
 			EventAction eventAction = this.eventActionRepository.findOne(eventActionData.getId());
 			
 			if (eventAction.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_NEW)) {
 				
 				Long planId   = obj.getLong(RecurringPaymentTransactionTypeConstants.PLANID);
-				String paytermCode = obj.getString(RecurringPaymentTransactionTypeConstants.PAYMENTCODE);
+				String paytermCode = obj.getString(RecurringPaymentTransactionTypeConstants.PAYTERMCODE);
 				Long contractPeriod = obj.getLong(RecurringPaymentTransactionTypeConstants.CONTRACTPERIOD);
 				
 				JSONObject createOrder = new JSONObject(eventAction.getCommandAsJson());
 				
 				Long ePlanCode   = createOrder.getLong(RecurringPaymentTransactionTypeConstants.PLANCODE);
-				String ePaytermCode = createOrder.getString(RecurringPaymentTransactionTypeConstants.PAYMENTCODE);
+				String ePaytermCode = createOrder.getString(RecurringPaymentTransactionTypeConstants.PAYTERMCODE);
 				Long eContractPeriod = createOrder.getLong(RecurringPaymentTransactionTypeConstants.CONTRACTPERIOD);
 				
 				if(planId == ePlanCode && paytermCode.equalsIgnoreCase(ePaytermCode) && contractPeriod == eContractPeriod){
@@ -356,15 +356,15 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 				//Do the Change Order Functionality Here
 				
 				Long planId   = obj.getLong(RecurringPaymentTransactionTypeConstants.PLANID);
-				String paytermCode = obj.getString(RecurringPaymentTransactionTypeConstants.PAYMENTCODE);
+				String paytermCode = obj.getString(RecurringPaymentTransactionTypeConstants.PAYTERMCODE);
 				Long contractPeriod = obj.getLong(RecurringPaymentTransactionTypeConstants.CONTRACTPERIOD);
 				Long orderId   = obj.getLong(RecurringPaymentTransactionTypeConstants.ORDERID);
 				
-				JSONObject createOrder = new JSONObject(eventAction.getCommandAsJson());
+				JSONObject changeOrder = new JSONObject(eventAction.getCommandAsJson());
 				
-				Long ePlanCode   = createOrder.getLong(RecurringPaymentTransactionTypeConstants.PLANCODE);
-				String ePaytermCode = createOrder.getString(RecurringPaymentTransactionTypeConstants.PAYMENTCODE);
-				Long eContractPeriod = createOrder.getLong(RecurringPaymentTransactionTypeConstants.CONTRACTPERIOD);
+				Long ePlanCode   = changeOrder.getLong(RecurringPaymentTransactionTypeConstants.PLANCODE);
+				String ePaytermCode = changeOrder.getString(RecurringPaymentTransactionTypeConstants.PAYTERMCODE);
+				Long eContractPeriod = changeOrder.getLong(RecurringPaymentTransactionTypeConstants.CONTRACTPERIOD);
 				
 				if(planId == ePlanCode && paytermCode.equalsIgnoreCase(ePaytermCode) && contractPeriod == eContractPeriod){
 					
@@ -373,7 +373,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 					/*CommandWrapper commandRequest = new CommandWrapperBuilder().createOrder(clientId).withJson(createOrder.toString()).build();
 					CommandProcessingResult resultOrder = this.writePlatformService.logCommandSource(commandRequest);*/
 					
-					CommandWrapper commandRequest = new CommandWrapperBuilder().changePlan(orderId).withJson(createOrder.toString()).build();
+					CommandWrapper commandRequest = new CommandWrapperBuilder().changePlan(orderId).withJson(changeOrder.toString()).build();
 					CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
 
 					if (null == result) {
@@ -381,11 +381,16 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 					}
 					
 					if(null != paypalRecurringBilling){
-						createOrder.remove("start_date");
+						
+						if(changeOrder.has("start_date")){
+							changeOrder.remove("start_date");
+							changeOrder.put("start_date", DateUtils.getLocalDateOfTenant().toDate());
+						}
+						
 						eventAction.updateStatus('Y');
 						eventAction.setTransDate(DateUtils.getLocalDateOfTenant().toDate());
-						createOrder.put("start_date", DateUtils.getLocalDateOfTenant().toDate());
-						eventAction.setCommandAsJson(createOrder.toString());
+						
+						eventAction.setCommandAsJson(changeOrder.toString());
 						this.eventActionRepository.save(eventAction);
 						
 						paypalRecurringBilling.setOrderId(orderId);
@@ -394,6 +399,48 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 					}
 					
 					
+				}
+				
+			} else if (eventAction.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_RENEWAL)) {
+				
+				//Do the renewal Order Functionality Here
+				//{"renewalPeriod":2,"priceId":0,"description":"renewal"}
+				
+				Long renewalPeriod = obj.getLong(RecurringPaymentTransactionTypeConstants.RENEWALPERIOD);
+				Long priceId = obj.getLong(RecurringPaymentTransactionTypeConstants.PRICEID);
+				Long orderId   = obj.getLong(RecurringPaymentTransactionTypeConstants.ORDERID);
+				
+				JSONObject renewalOrder = new JSONObject(eventAction.getCommandAsJson());
+				
+				Long eRenewalPeriod   = renewalOrder.getLong(RecurringPaymentTransactionTypeConstants.RENEWALPERIOD);
+				Long ePriceId = renewalOrder.getLong(RecurringPaymentTransactionTypeConstants.PRICEID);
+				Long eOrderId = renewalOrder.getLong(RecurringPaymentTransactionTypeConstants.ORDERID);
+				
+				if(renewalOrder.has(RecurringPaymentTransactionTypeConstants.CLIENTID)){
+					renewalOrder.remove(RecurringPaymentTransactionTypeConstants.ORDERID);
+					renewalOrder.remove(RecurringPaymentTransactionTypeConstants.CLIENTID);
+				}
+				
+				if(renewalPeriod == eRenewalPeriod && priceId == ePriceId && orderId == eOrderId){
+					
+					// creating order and assign Recurring Details.
+					
+					final CommandWrapper commandRequest = new CommandWrapperBuilder().renewalOrder(orderId).withJson(renewalOrder.toString()).build();
+					final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
+
+					if (null == result) {
+						System.out.println("Change Order Failed.");
+					}
+					
+					if(null != paypalRecurringBilling){
+						eventAction.updateStatus('Y');
+						eventAction.setTransDate(DateUtils.getLocalDateOfTenant().toDate());
+						this.eventActionRepository.save(eventAction);
+						
+						paypalRecurringBilling.setOrderId(orderId);
+						
+						this.paypalRecurringBillingRepository.save(paypalRecurringBilling);
+					}
 				}
 				
 			} else{
@@ -413,6 +460,8 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 		try {
 			String ProfileId = request.getParameter(RecurringPaymentTransactionTypeConstants.SUBSCRID);
 			String jsonObj = request.getParameter(RecurringPaymentTransactionTypeConstants.CUSTOM);
+			
+			
 
 			PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneBySubscriberId(ProfileId);
 			
@@ -831,18 +880,19 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 	}
 
 	@Override
-	public void updatePaypalRecurringBilling(String profileId) {
+	public Long updatePaypalRecurringBilling(String profileId) {
 		
 
 		PaypalRecurringBilling billing = getRecurringBillingObject(profileId);
 		
 		if(null == billing){		
 			System.out.println("orderId Not found with this SubscriberId:"+profileId);	
-			return;
+			return null;
 		}
-		billing.updateStatus();
 		
+		billing.updateStatus();
 		this.paypalRecurringBillingRepository.save(billing);
+		return billing.getOrderId();
 	}
 
 	@Override
@@ -850,9 +900,26 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 		
 		String subscriptionId = command.stringValueOfParameterNamed(RecurringPaymentTransactionTypeConstants.SUBSCRID);
 		
-		updatePaypalRecurringBilling(subscriptionId);
+		CommandProcessingResult result = updatePaypalProfileStatus(command);
 		
-		return new CommandProcessingResult(0L);
+		if(null != result){
+			Map<String, Object> resultmap = result.getChanges();
+			
+			String outputRes = resultmap.get("result").toString();
+			
+			if(outputRes.equalsIgnoreCase(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUCCESS)){
+				
+				Long orderId = updatePaypalRecurringBilling(subscriptionId);
+				
+				return new CommandProcessingResult(orderId);
+			} else {
+				return new CommandProcessingResult(0L);
+			}
+			
+		} else{
+			return new CommandProcessingResult(new Long(-1));
+		}
+		
 	}
 
 

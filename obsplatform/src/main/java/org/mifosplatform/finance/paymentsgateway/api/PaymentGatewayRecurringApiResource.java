@@ -15,6 +15,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.finance.paymentsgateway.data.RecurringData;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayRepository;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBillingRepository;
@@ -50,7 +51,7 @@ public class PaymentGatewayRecurringApiResource {
 	private final PlatformSecurityContext context;
 	private final PaymentGatewayReadPlatformService readPlatformService;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
-	private final DefaultToApiJsonSerializer<String> toApiJsonSerializer;
+	private final DefaultToApiJsonSerializer<RecurringData> toApiJsonSerializer;
 	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	private final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService;
 	private final PaymentGatewayRepository paymentGatewayRepository;
@@ -61,7 +62,7 @@ public class PaymentGatewayRecurringApiResource {
 	
 	@Autowired
 	public PaymentGatewayRecurringApiResource(final PlatformSecurityContext context,final PaymentGatewayReadPlatformService readPlatformService,
-			final DefaultToApiJsonSerializer<String> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
+			final DefaultToApiJsonSerializer<RecurringData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
 			final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
     		final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService,
     		final PaymentGatewayRepository paymentGatewayRepository, 
@@ -124,19 +125,22 @@ public class PaymentGatewayRecurringApiResource {
 	} 
 	
 	@GET
-	@Path("{subscriberId}")
+	@Path("{orderId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String getRecurringProfileSubscriberId(@PathParam("subscriberId") final String subscriberId, @Context final UriInfo uriInfo) {
+	public String getRecurringProfileSubscriberId(@PathParam("orderId") final Long orderId, @Context final UriInfo uriInfo) {
 
 		this.context.authenticatedUser();
 		
-		PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneBySubscriberId(subscriberId);
+		PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneByOrderId(orderId);
 		
-		Gson gson = new Gson();
-		String billingJson = gson.toJson(billing);
+		if(null == billing){
+			return null;
+		}
 		
-		return this.toApiJsonSerializer.serialize(billingJson);
+		RecurringData data = new RecurringData(billing.getId(), billing.getClientId(), billing.getOrderId(), billing.getSubscriberId());
+	
+		return this.toApiJsonSerializer.serialize(data);
 } 
 	
 }
