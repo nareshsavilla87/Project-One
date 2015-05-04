@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<data-definition xmlns="http://reporting.pentaho.org/namespaces/engine/classic/bundle/data/1.0">
+  <parameter-definition>
+    <list-parameter name="Office" allow-multi-selection="false" strict-values="true" mandatory="true" type="java.lang.String" query="officeparameter" key-column="name" value-column="name">
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="role">user</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="parameter-render-type">dropdown</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="re-evaluate-on-failed-values">false</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="autofill-selection">false</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="label">Office</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="hidden">false</attribute>
+    </list-parameter>
+    <plain-parameter name="FromDate" mandatory="false" type="java.util.Date">
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="role">user</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="parameter-render-type">datepicker</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="label">FromDate</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="hidden">false</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="data-format">dd/MM/yyyy</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="timezone">IST</attribute>
+    </plain-parameter>
+    <plain-parameter name="EndDate" mandatory="false" type="java.util.Date">
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="role">user</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="parameter-render-type">datepicker</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="label">EndDate</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="hidden">false</attribute>
+      <attribute namespace="http://reporting.pentaho.org/namespaces/engine/parameter-attributes/core" name="data-format">dd/MM/yyyy</attribute>
+    </plain-parameter>
+  </parameter-definition>
+  <data-source report-query="Invoice_Date_wise_detail" limit="-1" timout="0" ref="datasources/compound-ds.xml"/>
+</data-definition>

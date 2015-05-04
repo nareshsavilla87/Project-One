@@ -2857,29 +2857,46 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder createPropertyCodeMaster() {
+	public CommandWrapperBuilder createPropertyMaster() {
 		this.actionName = "CREATE";
-		this.entityName = "PROPERTYCODEMASTER";
+		this.entityName = "PROPERTYMASTER";
 		this.entityId = null;
 		this.href = "/propertycodemaster";
 		return this;
 	}
 
-public CommandWrapperBuilder updatePaypalProfileRecurring() {
-	this.actionName = "UPDATEPAYPALRECURRING";
-	this.entityName = "PAYMENTGATEWAY";
-	this.entityId = null;
-	this.href = "";
-	return this;
-}
+	public CommandWrapperBuilder updatePropertyMaster(final Long codeId) {
+		this.actionName = "UPDATE";
+		this.entityName = "PROPERTYMASTER";
+		this.entityId = codeId;
+		this.href = "/propertycodemaster/"+codeId;
+		return this;
+	}
 
-public CommandWrapperBuilder updatePaypalProfileStatus() {
-	this.actionName = "UPDATEPAYPALPROFILESTATUS";
-	this.entityName = "PAYMENTGATEWAY";
-	this.entityId = null;
-	this.href = "";
-	return this;
-}
+	public CommandWrapperBuilder deletePropertyMaster(final Long codeId) {
+		this.actionName = "DELETE";
+		this.entityName = "PROPERTYMASTER";
+		this.entityId = codeId;
+		this.href = "/propertycodemaster/" +codeId;
+		return this;
+	}
+
+	public CommandWrapperBuilder updatePaypalProfileRecurring() {
+		this.actionName = "UPDATEPAYPALRECURRING";
+		this.entityName = "PAYMENTGATEWAY";
+		this.entityId = null;
+		this.href = "";
+		return this;
+	}
+
+	public CommandWrapperBuilder updatePaypalProfileStatus() {
+		this.actionName = "UPDATEPAYPALPROFILESTATUS";
+		this.entityName = "PAYMENTGATEWAY";
+		this.entityId = null;
+		this.href = "";
+		return this;
+	}
+
 
 
 }

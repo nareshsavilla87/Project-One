@@ -25,4 +25,8 @@ public interface PropertyReadPlatformService {
 
 	List<PropertyDefinationData> retrievPropertyType(String propertyType);
 
+	PropertyDefinationData retrieveSinglePropertyMaster(Long codeId);
+
+	Boolean retrievePropertyMasterCount(String code, String propertyCodeType);
+
 }

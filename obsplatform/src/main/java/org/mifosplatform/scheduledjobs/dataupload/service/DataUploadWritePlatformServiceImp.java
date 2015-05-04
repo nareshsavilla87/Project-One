@@ -375,7 +375,7 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 	   				
 	   				if(jsonString !=null){
 	   					
-	   				  final CommandWrapper commandRequest = new CommandWrapperBuilder().createPropertyCodeMaster().withJson(jsonString).build();
+	   				  final CommandWrapper commandRequest = new CommandWrapperBuilder().createPropertyMaster().withJson(jsonString).build();
 	   		          final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 					
 					  if(result!=null){

@@ -12,6 +12,7 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -27,8 +28,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 	private final PaginationHelper<PropertyDefinationData> paginationHelper = new PaginationHelper<PropertyDefinationData>();
 
 	@Autowired
-	public PropertyReadPlatformServiceImp(final PlatformSecurityContext context,
-			final TenantAwareRoutingDataSource dataSource) {
+	public PropertyReadPlatformServiceImp(final PlatformSecurityContext context,final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
@@ -278,7 +278,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			String extraCriteria = "";
 			if(sqlSearch != null) {
 			    	sqlSearch=sqlSearch.trim();
-			    	extraCriteria = " where (pm.property_code_type like '%"+sqlSearch+"%' OR" 
+			    	extraCriteria = "  and (pm.property_code_type like '%"+sqlSearch+"%' OR" 
 			    			+ " pm.code like '%"+sqlSearch+"%' )";
 			    }
 			
@@ -294,7 +294,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 
 	    	return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(), new Object[] {}, mapper);
 			    
-		} catch (EmptyResultDataAccessException accessException) {
+		  } catch (EmptyResultDataAccessException accessException) {
 			return null;
 		}
 	}
@@ -303,7 +303,8 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 	private static final class PropertyMasterMapper implements RowMapper<PropertyDefinationData>{
 
 		public String schema(){
-			return " pm.id as id,pm.property_code_type as  propertyCodeType,pm.code as code,pm.description as description,pm.reference_value as referenceValue from b_property_master pm ";
+			return " pm.id as id,pm.property_code_type as  propertyCodeType,pm.code as code,pm.description as description,pm.reference_value as referenceValue " +
+					" from b_property_master pm  where  pm.is_deleted='N' ";
 
 		}
 
@@ -327,12 +328,49 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 		try {
 			context.authenticatedUser();
 			final PropertyMasterMapper mapper = new PropertyMasterMapper();
-			final String sql = "select "+ mapper.schema()+ " where pm.property_code_type like '%"+propertyType+"%' order by pm.id LIMIT 15";
+			final String sql = "select "+ mapper.schema()+ "  and pm.property_code_type like '%"+propertyType+"%' order by pm.id LIMIT 15";
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
-		} catch (final EmptyResultDataAccessException e) {
+		    } catch (final EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
-	
+
+	@Override
+	public PropertyDefinationData retrieveSinglePropertyMaster(final Long codeId) {
+		
+		try {
+			context.authenticatedUser();
+			final PropertyMasterMapper mapper = new PropertyMasterMapper();
+			final String sql = "select "+ mapper.schema()+ "  and pm.id=?";
+			return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] {codeId});
+		  } catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+     }
+
+	@Override
+	public Boolean retrievePropertyMasterCount(final String codeValue,final String propertyCodeType) {
+		
+		 this.context.authenticatedUser();
+		 boolean result = false;
+		 StringBuilder sql=new StringBuilder();
+		 sql.append("select count(id) from b_property_defination pd where pd.is_deleted='N' and ");
+		 if(propertyCodeType.equalsIgnoreCase(CodeNameConstants.CODE_PROPERTY_PARCEL)){
+		      sql.append(" pd.parcel= ? ");
+		 }else if(propertyCodeType.equalsIgnoreCase(CodeNameConstants.CODE_PROPERTY_FLOOR)){
+			 sql.append(" pd.floor= ? ");
+		 }else if(propertyCodeType.equalsIgnoreCase(CodeNameConstants.CODE_PROPERTY_UNIT)){
+			 sql.append(" pd.unit_code= ? ");
+		 }else{
+			 sql.append(" pd.building_code= ? ");
+		 }
+		 final int count=	this.jdbcTemplate.queryForObject(sql.toString(), Integer.class,new Object[]{codeValue});
+		 if(count > 0){
+			 result = true;
+		 }
+		 return result;
 	}
+	
+	
+}
 

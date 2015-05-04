@@ -206,10 +206,6 @@ public class PropertyDefinationData {
 		return propertyTypes;
 	}
 
-	public void setPropertyTypes(Collection<MCodeData> propertyTypes) {
-		this.propertyTypes = propertyTypes;
-	}
-
 	public List<String> getCountryData() {
 		return countryData;
 	}
@@ -290,4 +286,7 @@ public class PropertyDefinationData {
 		this.referenceValue = referenceValue;
 	}
 
+	public void setPropertyTypes(Collection<MCodeData> propertyTypes) {
+		this.propertyTypes = propertyTypes;
+	}
 }

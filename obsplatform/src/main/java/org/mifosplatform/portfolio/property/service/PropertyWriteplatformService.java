@@ -15,4 +15,8 @@ public interface PropertyWriteplatformService {
 
 	CommandProcessingResult createPropertyMasters(JsonCommand command);
 
+	CommandProcessingResult updatePropertyMaster(Long entityId,JsonCommand command);
+
+	CommandProcessingResult deletePropertyMaster(Long entityId);
+
 }

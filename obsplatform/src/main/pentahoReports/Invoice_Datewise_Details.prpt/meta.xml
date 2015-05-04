@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<office:document-meta xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <office:meta>
+    <meta:creation-date>2015-05-02T03:45:19 IST</meta:creation-date>
+    <meta:generator>Pentaho Reporting Engine Classic 5.0.1-stable.-1</meta:generator>
+    <dc:date>2015-05-02T06:49:32 IST</dc:date>
+    <autoGenNs:visible xmlns:autoGenNs="http://reporting.pentaho.org/namespaces/engine/classic/metadata/1.0">true</autoGenNs:visible>
+    <autoGenNs:prpt-spec.version.major xmlns:autoGenNs="http://reporting.pentaho.org/namespaces/engine/classic/metadata/1.0">5</autoGenNs:prpt-spec.version.major>
+    <autoGenNs:prpt-spec.version.minor xmlns:autoGenNs="http://reporting.pentaho.org/namespaces/engine/classic/metadata/1.0">0</autoGenNs:prpt-spec.version.minor>
+    <autoGenNs:prpt-spec.version.patch xmlns:autoGenNs="http://reporting.pentaho.org/namespaces/engine/classic/metadata/1.0">1</autoGenNs:prpt-spec.version.patch>
+  </office:meta>
+</office:document-meta>
