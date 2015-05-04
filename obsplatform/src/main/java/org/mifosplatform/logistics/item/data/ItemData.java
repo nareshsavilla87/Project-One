@@ -42,9 +42,10 @@ public class ItemData {
 	private String price;
 	private List<ItemData> itemPricesDatas;
 	private Long reorderLevel;
+	private Long isActive;
 	
 	public ItemData(Long id, String itemCode, String itemDesc,String itemClass,String units,   String chargeCode, int warranty, BigDecimal unitPrice,
-			Long usedItems,Long availableItems,Long totalItems, Long reorderLevel) {
+			Long usedItems,Long availableItems,Long totalItems, Long reorderLevel, Long isActive) {
 		
 		this.id=id;
 		this.itemCode=itemCode;
@@ -58,6 +59,7 @@ public class ItemData {
 		this.availableItems=availableItems;
 		this.totalItems=totalItems;
 		this.reorderLevel = reorderLevel;
+		this.isActive= isActive;
 	}
 
 	public ItemData(List<ItemData> itemCodeData, ItemData itemData, BigDecimal totalPrice,String quantity, List<DiscountMasterData> discountdata,

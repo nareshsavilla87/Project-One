@@ -83,8 +83,10 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 					 order.getContarctPeriod(), serviceDetails, orderprice,order.getbillAlign(),
 					 UserActionStatusTypeEnum.ACTIVATION.toString(),plan.isPrepaid());
 			
-			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
-			if(configuration != null ){
+
+	Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
+			
+			if(configuration != null && plan.isPrepaid() == 'N'){
 				order.setBillingAlign(configuration.isEnabled()?'Y':'N');
 				if(configuration.isEnabled()){
 				order.setEndDate(endDate.dayOfMonth().withMaximumValue());
