@@ -1,3 +1,19 @@
+DROP PROCEDURE IF EXISTS cancelPayment;
+DELIMITER //
+CREATE PROCEDURE cancelPayment()
+BEGIN
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME ='ref_id'  
+      and TABLE_NAME = 'b_payments'
+     and TABLE_SCHEMA = DATABASE())THEN
+alter table b_payments add column ref_id bigint(20) default null;
+END IF;
+END //
+DELIMITER ;
+call cancelPayment();
+DROP PROCEDURE IF EXISTS cancelPayment;
+
 CREATE OR REPLACE  VIEW  fin_trans_vw AS 
 select distinct
     b_invoice.id AS transId,
@@ -119,20 +135,4 @@ from
     (b_jv_transactions bjt
     join m_appuser ma ON (((bjt.createdby_id = ma.id) and (bjt.jv_date <= now()))))
 order by 1 , 2;
-
-DROP PROCEDURE IF EXISTS cancelPayment;
-DELIMITER //
-CREATE PROCEDURE cancelPayment()
-BEGIN
-IF NOT EXISTS (
-     SELECT * FROM information_schema.COLUMNS
-     WHERE COLUMN_NAME ='ref_id'  
-      and TABLE_NAME = 'b_payments'
-     and TABLE_SCHEMA = DATABASE())THEN
-alter table b_payments add column ref_id bigint(20) default null;
-END IF;
-END //
-DELIMITER ;
-call cancelPayment();
-DROP PROCEDURE IF EXISTS cancelPayment;
 
