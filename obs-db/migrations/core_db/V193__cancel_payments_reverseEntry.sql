@@ -31,7 +31,6 @@ DELIMITER ;
 call addb_autorenewcolumnorders();
 Drop procedure IF EXISTS addb_autorenewcolumnorders;
 
-
 CREATE OR REPLACE  VIEW  fin_trans_vw AS 
 select distinct
     b_invoice.id AS transId,
@@ -153,5 +152,4 @@ from
     (b_jv_transactions bjt
     join m_appuser ma ON (((bjt.createdby_id = ma.id) and (bjt.jv_date <= now()))))
 order by 1 , 2;
-
 

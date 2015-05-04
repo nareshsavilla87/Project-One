@@ -15,6 +15,7 @@ SET @id = (select id from m_code where code_name='Property Code Type');
 
 INSERT IGNORE INTO m_code_value VALUES (null,@id,'Parcel',0);
 INSERT IGNORE INTO m_code_value VALUES (null,@id,'Level/Floor',1);
-INSERT IGNORE INTO m_code_value VALUES (null,@id,'Building Type',2);
+INSERT IGNORE INTO m_code_value VALUES (null,@id,'Building Codes',2);
+INSERT IGNORE INTO m_code_value values (null, @id,'Unit Codes', '3');
 
  

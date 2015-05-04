@@ -247,12 +247,9 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final String addressKey = rs.getString("addressKey");
 			final String categoryType = rs.getString("categoryType");
 			
-			
 			return new ClientPropertyData(Id,propertyTypeId,propertyType,propertyCode,unitCode,floor,buildingCode,parcel,
 					precinct,street,zip,state,country,status,clientId,firstName,lastName,displayName,email,phone,addressNo,addressKey,categoryType);
-			
 		}
-
 
 	}
 
@@ -268,5 +265,74 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 	    			return null;
 	    		}
 	}
+	
+	@Override
+	public Page<PropertyDefinationData> retrieveAllPropertyMasterData(SearchSqlQuery searchPropertyDetails) {
+		try {
+			context.authenticatedUser();
+			final PropertyMasterMapper mapper = new PropertyMasterMapper();	
+			StringBuilder sqlBuilder = new StringBuilder(200);
+			sqlBuilder.append("select ");
+			sqlBuilder.append( mapper.schema());
+			String sqlSearch = searchPropertyDetails.getSqlSearch();
+			String extraCriteria = "";
+			if(sqlSearch != null) {
+			    	sqlSearch=sqlSearch.trim();
+			    	extraCriteria = " where (pm.property_code_type like '%"+sqlSearch+"%' OR" 
+			    			+ " pm.code like '%"+sqlSearch+"%' )";
+			    }
+			
+			sqlBuilder.append(extraCriteria);
+			
+		   if (searchPropertyDetails.isLimited()) {
+		            sqlBuilder.append(" limit ").append(searchPropertyDetails.getLimit());
+		        }
+
+		   if (searchPropertyDetails.isOffset()) {
+		            sqlBuilder.append(" offset ").append(searchPropertyDetails.getOffset());
+		        }
+
+	    	return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(), new Object[] {}, mapper);
+			    
+		} catch (EmptyResultDataAccessException accessException) {
+			return null;
+		}
+	}
+	
+
+	private static final class PropertyMasterMapper implements RowMapper<PropertyDefinationData>{
+
+		public String schema(){
+			return " pm.id as id,pm.property_code_type as  propertyCodeType,pm.code as code,pm.description as description,pm.reference_value as referenceValue from b_property_master pm ";
+
+		}
+
+		@Override
+		public PropertyDefinationData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
+			final Long id = rs.getLong("id");
+			final String propertyCodeType = rs.getString("propertyCodeType");
+			final String code = rs.getString("code");
+			final String description = rs.getString("description");
+			final String referenceValue = rs.getString("referenceValue");
+
+			return new PropertyDefinationData(id,propertyCodeType,code,description,referenceValue);
+		}
+	}
+
+
+	@Override
+	public List<PropertyDefinationData> retrievPropertyType(final String propertyType) {
+		
+		try {
+			context.authenticatedUser();
+			final PropertyMasterMapper mapper = new PropertyMasterMapper();
+			final String sql = "select "+ mapper.schema()+ " where pm.property_code_type like '%"+propertyType+"%' order by pm.id LIMIT 15";
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+	
 	}
 
