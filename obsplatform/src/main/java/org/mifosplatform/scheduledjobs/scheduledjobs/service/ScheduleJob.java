@@ -128,8 +128,8 @@ return isAmountSufficient;
 
 		                          if(isSufficientAmountForRenewal){
 		                           
-		                             List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyContractType("Month(s)",1);
-		                             jsonobject.put("renewalPeriod",subscriptionDatas.get(0).getId()); 
+		                             //List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyContractType("Month(s)",1);
+		                             jsonobject.put("renewalPeriod",order.getContarctPeriod()); 
 		                             jsonobject.put("description","Order Renewal By Scheduler");
 		                             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonobject.toString());
 		                             final JsonCommand command = JsonCommand.from(jsonobject.toString(),parsedCommand,this.fromApiJsonHelper,"RENEWAL",order.getClientId(), null,

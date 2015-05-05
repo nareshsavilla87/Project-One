@@ -81,7 +81,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			
 			order=new Order(order.getClientId(),order.getPlanId(),orderStatus,null,order.getBillingFrequency(),startDate, endDate,
 					 order.getContarctPeriod(), serviceDetails, orderprice,order.getbillAlign(),
-					 UserActionStatusTypeEnum.ACTIVATION.toString(),plan.isPrepaid());
+					 UserActionStatusTypeEnum.ACTIVATION.toString(),plan.isPrepaid(),order.isAutoRenewal());
 			
 
 	Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);

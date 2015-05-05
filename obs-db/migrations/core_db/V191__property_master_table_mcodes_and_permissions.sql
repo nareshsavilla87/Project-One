@@ -22,36 +22,6 @@ INSERT IGNORE INTO m_code_value VALUES (null,@id,'Level/Floor',1);
 INSERT IGNORE INTO m_code_value VALUES (null,@id,'Building Codes',2);
 INSERT IGNORE INTO m_code_value values (null, @id,'Unit Codes', '3');
 
-DROP PROCEDURE IF EXISTS property;
-DELIMITER //
-CREATE PROCEDURE property()
-BEGIN
-IF NOT EXISTS (
-     SELECT * FROM information_schema.COLUMNS
-     WHERE COLUMN_NAME ='is_deleted'  
-      and TABLE_NAME = 'b_property_master'
-     and TABLE_SCHEMA = DATABASE())THEN
-alter table b_property_master add column is_deleted char(2) default 'N';
-END IF;
-END //
-DELIMITER ;
-call property();
-DROP PROCEDURE IF EXISTS property;
 
-DROP PROCEDURE IF EXISTS property1;
-DELIMITER //
-CREATE PROCEDURE property1()
-BEGIN
-IF  EXISTS (
-     SELECT * FROM information_schema.COLUMNS
-     WHERE COLUMN_NAME ='code'  
-      and TABLE_NAME = 'b_property_master'
-     and TABLE_SCHEMA = DATABASE())THEN
-alter table b_property_master MODIFY column `code` VARCHAR(20) NOT NULL;
-END IF;
-END //
-DELIMITER ;
-call property1();
-DROP PROCEDURE IF EXISTS property1;
 
  

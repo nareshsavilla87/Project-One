@@ -72,6 +72,32 @@ Update stretchy_report set report_sql = 'select mcv.code_value PayMode ,round(su
 -- Cumulative Customer Chart--
 Update stretchy_report set report_sql = 'select ev.enum_value status ,count(distinct o.client_id ) clients ,count(distinct o.id ) orders from b_orders o,r_enum_value ev, m_client c, m_office of  where o.order_status=ev.enum_id and o.client_id=c.id  and c.office_id=of.id and ev.enum_name=''order_status'' and  ((of.id = ''${officeId}'') or (-1 = ''${officeId}'')) group by order_status' where report_name='CumulativeCustomersChart';
 
+CREATE OR REPLACE VIEW  `city_order_plan_vw` AS select `ca`.`country` AS `COUNTRY`,`ca`.`city` AS `CITY`,c.office_id,`of`.`name` AS `Branch`,`c`.`display_name` AS `CLIENT NAME`,`pm`.`plan_description` AS `PlanName` , o.id OrderId,ev.enum_value OrderStatus ,`bcp`.`contract_period` AS `CONTRACT PERIOD`,cast(`o`.`start_date` as date) AS `START DATE`,cast(`o`.`end_date` as date) AS `END DATE`,`o`.`billing_frequency` AS `BILLING FREQUENCY`,bop.price  from  `b_orders` `o` left join r_enum_value ev on ( o.order_status=ev.enum_id and ev.enum_name='order_status') left join b_order_price bop on (o.id = bop.order_id ) left join b_contract_period bcp on (o.contract_period = bcp.id) left join  `m_client` `c` on((`o`.`client_id` = `c`.`id`)) left join  `b_plan_master` `pm` on((`o`.`plan_id` = `pm`.`id`))  left join  `m_office` `of` on((`c`.`office_id` = `of`.`id`)) left join  `b_client_address` `ca` on(((`ca`.`client_id` = `c`.`id`) and (`ca`.`address_key` = 'PRIMARY'))) where (`o`.`is_deleted` = 'n');
+
+Update stretchy_report set report_sql = 'select a.* from city_order_plan_vw a,m_office o where a.branch=o.name and `START DATE`  between ''${startDate}'' and ''${endDate}'' and  (o.id = ''${officeId}'' or -1 = ''${officeId}'') ' where  report_name  = 'City Wise Orders';
+
+Update stretchy_report set report_sql = 'select ev.enum_value status ,count(distinct o.client_id ) clients ,count(distinct o.id ) orders from b_orders o,r_enum_value ev, m_client c, m_office of where o.order_status=ev.enum_id and o.client_id=c.id and c.office_id=of.id and ev.enum_name=''order_status'' and  ((of.id = ''${officeId}'') or (-1 = ''${officeId}'')) group by order_status' where report_name  ='CumulativeCustomersChart';
+
+Update stretchy_report set report_sql ='SELECT o.name Branch ,a.account_no `AccountNo`,CASE when status_enum=100 then ''New'' when status_enum=300 then "Active" when status_enum=600 then "Deactive" else status_enum END as Status, a.display_name `ClientName`, im.item_description `Device` ,date_format(b.sale_date,''%Y-%m-%d'') SaleDate, b.total_price SalePrice  FROM m_client a, b_onetime_sale b , m_office o , b_item_master im  WHERE a.id = b.client_id  and a.office_id = o.id and b.item_id = im.id AND b.sale_date between ''${startDate}'' and ''${endDate}''  order by b.sale_date ' where report_name = 'List of Device Sales';
+
+CREATE or replace  VIEW  `discon_vw` AS select distinct `c`.`office_id` AS `OFFICEID`,`mo`.`name` AS `BRANCH`,`c`.`account_no` AS `ACCOUNT NO`,`c`.`display_name` AS `CLIENT NAME`,`c`.`phone` AS `PHONE NO`,`pm`.`plan_description` AS `PLAN`, `bcp`.`contract_period` AS `CONTRACT PERIOD`,`o`.`billing_frequency` AS `BILL FRQUENCY`,cast(`c`.`activation_date` as date) AS `ACTIVATION DATE`,cast(`oh`.`actual_date` as date) AS `DISCONNECTION DATE`,(to_days(`oh`.`actual_date`) - to_days(`c`.`activation_date`)) AS `NO OF DAYS`,`op`.`price` AS `PRICE` ,o.disconnect_reason,(select max(`x`.`hw_serial_no`) from  `b_association` `x` where ((`c`.`id` = `x`.`client_id`) and (`x`.`is_deleted` = 'N'))) AS `DEVICE` from (((((( `m_client` `c` join  `m_office` `mo` on((`c`.`office_id` = `mo`.`id`))) join  `b_client_address` `ca` on((`c`.`id` = `ca`.`client_id`))) join  `b_orders` `o` on((`c`.`id` = `o`.`client_id`))) left join b_contract_period bcp on (o.contract_period = bcp.id) join  `b_orders_history` `oh` on((`o`.`id` = `oh`.`order_id`))) left join  `b_plan_master` `pm` on((`o`.`plan_id` = `pm`.`id`)))  left join  `b_order_price` `op` on((`o`.`id` = `op`.`order_id`)))  where ((`o`.`id` = (select max(`o2`.`id`) from  `b_orders` `o2` where (`o2`.`client_id` = `o`.`client_id`)  and o2.user_action = 'DISCONNECTION' )) and (`oh`.`id` = (select max(`oh2`.`id`) from  `b_orders_history` `oh2` where ((`oh2`.`transaction_type` = 'DISCONNECTION') and (`oh2`.`order_id` = `oh`.`order_id`)))));
+
+SET @offId=(SELECT id FROM stretchy_parameter where parameter_label='Office');
+
+SET @id = (select id from stretchy_report where report_name='PaymodeCollection Chart');
+
+insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@id,@offId,'OfficeId');
+
+Update stretchy_report set report_sql ='select mcv.code_value PayMode ,round(sum(p.amount_paid),2) Collection from b_payments p, m_code_value mcv ,m_client c, m_office of where p.paymode_id=mcv.id and mcv.code_id=11 AND date_format(`payment_date`,''%Y-%m'')=date_format(now(),''%Y-%m'') and p.client_id=c.id and c.office_id=of.id and  ((of.id = ''${officeId}'') or (-1 = ''${officeId}'')) group by mcv.code_value ' where id= 'PaymodeCollection Chart' ;
+
+---- Plan wise order chart
+
+CREATE OR REPLACE VIEW `plan_orders_vw` AS select `pm`.`plan_code` AS `PLAN_CODE`,`pm`.`plan_description` AS `PLAN DESCRIPTION`,`pd`.`service_code` AS `SERVICE CODE`,`o`.`transaction_type` AS `TRANSACTION TYPE`,`o`.`billing_frequency` AS `BILLING FREQUENCY`,count(`o`.`client_id`) AS `CLIENT COUNT`,`o`.`order_status` AS `ORDER STATUS`,`o`.`contract_period` AS `CONTRACT PERIOD`,count(`ol`.`order_id`) AS `ORDER COUNT` from ((((`b_order_line` `ol` join `b_service` `s` ON ((`ol`.`service_id` = `s`.`id`))) join `b_plan_detail` `pd` ON ((`pd`.`service_code` = `s`.`service_code`))) join `b_plan_master` `pm` ON ((`pd`.`plan_id` = `pm`.`id`))) join `b_orders` `o` ON (((`o`.`plan_id` = `pm`.`id` and o.order_status=1) and (`ol`.`order_id` = `o`.`id`)))) where (`o`.`is_deleted` = 'n') group by `pm`.`plan_code` , `pm`.`plan_description` ,  `o`.`transaction_type` , `pd`.`service_code` , `o`.`transaction_type` , `o`.`billing_frequency` , `ol`.`service_status`;
+
+Update stretchy_report set report_sql = 'select `PLAN DESCRIPTION`,(`ORDER COUNT`) `ORDER COUNT` from plan_orders_vw  GROUP BY `PLAN DESCRIPTION` ' where report_name='Plan-wise Orders Chart';
+
+
+
 
 
 

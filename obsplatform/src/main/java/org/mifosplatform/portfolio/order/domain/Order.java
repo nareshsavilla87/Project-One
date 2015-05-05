@@ -104,7 +104,7 @@ public class Order extends AbstractAuditableCustom<AppUser, Long> {
 	
 	public Order(Long client_id, Long plan_id, Long status, Long duration_type,String billingFreq,
 			LocalDate startDate, LocalDate endDate, Long contract,List<OrderLine> serviceDetails, 
-			List<OrderPrice> orderprice,char billalign,String userAction,char isPrepaid) {
+			List<OrderPrice> orderprice,char billalign,String userAction,char isPrepaid, char autoRenew) {
 		
 		this.clientId = client_id;
 		this.planId = plan_id;
@@ -122,6 +122,7 @@ public class Order extends AbstractAuditableCustom<AppUser, Long> {
 		this.orderNo="";
 		this.activeDate=startDate.toDate();
 		this.billingAlign = isPrepaid == 'N' ? 'Y':'N';
+		this.autoRenew=autoRenew;
 	}
 
 public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode, char billAlign,LocalDate startdate, char autoRenew) {
