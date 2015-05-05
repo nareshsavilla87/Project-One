@@ -35,7 +35,7 @@ public class EventActionApiResource {
 
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("eventaction", "entityName", "actionName", "json",
             "resourceId", "clientId"));
-    private final String resourceNameForPermissions = "PERMISSION";
+    private final String resourceNameForPermissions = "EVENTACTIONS";
 
     private final PlatformSecurityContext context;
     private final EventActionReadPlatformService eventActionReadPlatformService;

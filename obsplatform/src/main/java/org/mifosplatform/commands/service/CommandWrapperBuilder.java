@@ -1368,7 +1368,7 @@ public class CommandWrapperBuilder {
 		this.actionName = "UPDATE";
 		this.entityName = "ORDER";
 		this.entityId = orderId;
-		this.href = "order/template";
+		this.href = "order/disconnect";
 		return this;
 	}
 
@@ -2865,6 +2865,22 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+public CommandWrapperBuilder disconnectOrder(Long orderId) {
+
+	this.actionName = "DISCONNECT";
+	this.entityName = "ORDER";
+	this.entityId = orderId;
+	this.href = "/orderdisconnect/"+orderId;
+	return this;
+}
+
+public CommandWrapperBuilder updatePaypalProfileRecurring() {
+	this.actionName = "UPDATEPAYPALRECURRING";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
 	public CommandWrapperBuilder updatePropertyMaster(final Long codeId) {
 		this.actionName = "UPDATE";
 		this.entityName = "PROPERTYMASTER";
@@ -2881,13 +2897,7 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder updatePaypalProfileRecurring() {
-		this.actionName = "UPDATEPAYPALRECURRING";
-		this.entityName = "PAYMENTGATEWAY";
-		this.entityId = null;
-		this.href = "";
-		return this;
-	}
+	
 
 	public CommandWrapperBuilder updatePaypalProfileStatus() {
 		this.actionName = "UPDATEPAYPALPROFILESTATUS";
@@ -2896,9 +2906,6 @@ public class CommandWrapperBuilder {
 		this.href = "";
 		return this;
 	}
-
-
-
 }
 
 

@@ -5,7 +5,6 @@ import java.util.List;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.organisation.partner.data.PartnersData;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
-import org.mifosplatform.portfolio.plan.data.BillRuleData;
 import org.mifosplatform.portfolio.plan.data.PlanData;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
 
