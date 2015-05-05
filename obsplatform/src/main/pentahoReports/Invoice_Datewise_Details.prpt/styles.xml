@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<style xmlns="http://reporting.pentaho.org/namespaces/engine/classic/bundle/style/1.0" xmlns:layout="http://reporting.pentaho.org/namespaces/engine/classic/bundle/layout/1.0" xmlns:core="http://reporting.pentaho.org/namespaces/engine/attributes/core" xmlns:html="http://reporting.pentaho.org/namespaces/engine/attributes/html" xmlns:swing="http://reporting.pentaho.org/namespaces/engine/attributes/swing" xmlns:pdf="http://reporting.pentaho.org/namespaces/engine/attributes/pdf" xmlns:designtime="http://reporting.pentaho.org/namespaces/report-designer/2.0" xmlns:crosstab="http://reporting.pentaho.org/namespaces/engine/attributes/crosstab" xmlns:pentaho="http://reporting.pentaho.org/namespaces/engine/attributes/pentaho" xmlns:table="http://reporting.pentaho.org/namespaces/engine/attributes/table" xmlns:page="http://jfreereport.sourceforge.net/namespaces/reports/legacy/ext">
+  <page-definition horizontal-span="1" vertical-span="1" pageformat="A4" orientation="landscape" margin-top="72" margin-left="72" margin-bottom="72" margin-right="72"/>
+  <layout:watermark designtime:hideInLayoutGUI="true">
+    <element-style>
+    </element-style>
+  </layout:watermark>
+  <layout:page-header designtime:visual-height="69.0">
+    <element-style>
+    </element-style>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="0" y="55" min-width="45" min-height="12"/>
+        <text-styles font-face="Arial" bold="true" font-size="8"/>
+      </element-style>
+      <core:value>Invoice No</core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="49" y="55" min-width="54" min-height="12"/>
+        <text-styles font-face="Arial" bold="true" font-size="8"/>
+      </element-style>
+      <core:value>Invoice Date</core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="110" y="55" min-width="53" min-height="12"/>
+        <text-styles font-face="Arial" bold="true" font-size="8"/>
+      </element-style>
+      <core:value>Office Name</core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="188" y="55" min-width="52" min-height="12"/>
+        <text-styles font-face="Arial" bold="true" font-size="8"/>
+      </element-style>
+      <core:value>Client Name</core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="252" y="55" min-width="58" min-height="12"/>
+        <text-styles font-face="Arial" bold="true" font-size="8"/>
+      </element-style>
+      <core:value>Charge Type</core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="310" y="55" min-width="73" min-height="12"/>
+        <text-styles font-face="Arial" bold="true" font-size="8"/>
+      </element-style>
+      <core:value>Charge Start Date</core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="389" y="55" min-width="67" min-height="12"/>
+        <text-styles font-face="Arial" bold="true" font-size="8"/>
+      </element-style>
+      <core:value>Charge End Date</core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="460" y="55" min-width="67" min-height="12"/>
+        <text-styles font-face="Arial" bold="true" font-size="8"/>
+      </element-style>
+      <core:value>Charge Amount</core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="532" y="55" min-width="42" min-height="12"/>
+        <text-styles font-face="Arial" bold="true" font-size="8"/>
+      </element-style>
+      <core:value>Discount</core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="625" y="55" min-width="63" min-height="12"/>
+        <text-styles font-face="Arial" bold="true" font-size="8"/>
+      </element-style>
+      <core:value>Invoice Amount</core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="580" y="55" min-width="39" min-height="12"/>
+        <text-styles font-face="Arial" bold="true" font-size="8"/>
+      </element-style>
+      <core:value>Tax Amt</core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="151" y="0" min-width="175" min-height="20"/>
+        <text-styles font-face="Arial" bold="true" font-size="10"/>
+      </element-style>
+      <core:value>Invoice Date wise Detail report from </core:value>
+    </layout:label>
+    <layout:label>
+      <element-style>
+        <spatial-styles x="403" y="0" min-width="20" min-height="20"/>
+        <text-styles font-face="Arial" bold="true" font-size="10"/>
+      </element-style>
+      <core:value>To</core:value>
+    </layout:label>
+    <layout:date-field core:field="FromDate" core:format-string="dd/MM/yyyy">
+      <element-style>
+        <spatial-styles x="332" y="0" min-width="65" min-height="20"/>
+        <text-styles font-face="Arial" bold="true" font-size="10"/>
+      </element-style>
+    </layout:date-field>
+    <layout:date-field core:field="EndDate" core:format-string="dd/MM/yyyy">
+      <element-style>
+        <spatial-styles x="423" y="0" min-width="129" min-height="20"/>
+        <text-styles font-face="Arial" bold="true" font-size="10"/>
+      </element-style>
+    </layout:date-field>
+  </layout:page-header>
+  <layout:page-footer designtime:visual-height="0.0">
+    <element-style>
+    </element-style>
+  </layout:page-footer>
+</style>

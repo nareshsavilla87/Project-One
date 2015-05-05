@@ -12,10 +12,13 @@ import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
@@ -54,10 +57,15 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataBodyPart;
 import com.sun.jersey.multipart.FormDataParam;
 
+/**
+ * @author ranjith
+ * * this api class used to create,update and delete different property master code's 
+ * Date 25/04/2015
+ */
 @Path("/propertymaster")
 @Component
 @Scope("singleton")
-public class PropertyCodeMasterApiResource {
+public class PropertyMasterApiResource {
 
 	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("propertyTypes", "codes"));
 
@@ -72,7 +80,7 @@ public class PropertyCodeMasterApiResource {
 	private final PropertyReadPlatformService propertyReadPlatformService;
 
 	@Autowired
-	public PropertyCodeMasterApiResource(final PlatformSecurityContext context,
+	public PropertyMasterApiResource(final PlatformSecurityContext context,
 			final DefaultToApiJsonSerializer<PropertyDefinationData> toApiJsonSerializer,
 			final ApiRequestParameterHelper apiRequestParameterHelper,
 			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
@@ -101,7 +109,7 @@ public class PropertyCodeMasterApiResource {
 
 		context.authenticatedUser().validateHasReadPermission(	RESOURCENAMEFORPERMISSIONS);
 		final Collection<MCodeData> propertyTypes = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.PROPERTY_CODE_TYPE);
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		//final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(propertyTypes);
 	}
 
@@ -128,7 +136,7 @@ public class PropertyCodeMasterApiResource {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String createNewPropertyMaster(final String apiRequestBodyAsJson) {
 
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().createPropertyCodeMaster().withJson(apiRequestBodyAsJson).build();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().createPropertyMaster().withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}
@@ -176,5 +184,59 @@ public class PropertyCodeMasterApiResource {
 		final List<PropertyDefinationData> typeDetails = this.propertyReadPlatformService.retrievPropertyType(propertyType);
 		return this.toApiJsonSerializer.serialize(typeDetails);
 	}
+	
+	
+	/**
+	 * using this method get single property master  details
+	 */
+	@GET
+	@Path("{codeId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveOnePropertyMaster(@PathParam("codeId") final Long codeId,@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
+		final PropertyDefinationData propertyMaster = this.propertyReadPlatformService.retrieveSinglePropertyMaster(codeId);
+		final ApiRequestJsonSerializationSettings settings =this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		if (settings.isTemplate()) {
+			final Collection<MCodeData> propertyTypes = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.PROPERTY_CODE_TYPE);
+			propertyMaster.setPropertyTypes(propertyTypes);
+		}
+		return this.toApiJsonSerializer.serialize(settings, propertyMaster,RESPONSE_DATA_PARAMETERS);
+	}
+	
+	/**
+	 * @param propertyId
+	 * @param apiRequestBodyAsJson
+	 * @return single property master data will be  update here
+	 */
+	@PUT
+	@Path("{codeId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String updatePropertyMaster(@PathParam("codeId") final Long codeId,final String apiRequestBodyAsJson) {
+
+		context.authenticatedUser();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePropertyMaster(codeId).withJson(apiRequestBodyAsJson).build();
+		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+	}
+
+	/**
+	 * using this method we can remove single property master details
+	 */
+	@DELETE
+	@Path("{codeId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deletePropertyMaster(@PathParam("codeId") final Long codeId) {
+
+		this.context.authenticatedUser();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().deletePropertyMaster(codeId).build();
+		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+
+	}
+	
 
 }

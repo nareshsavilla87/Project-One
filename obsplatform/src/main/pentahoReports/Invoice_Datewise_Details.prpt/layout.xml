@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<layout xmlns="http://reporting.pentaho.org/namespaces/engine/classic/bundle/layout/1.0" xmlns:style="http://reporting.pentaho.org/namespaces/engine/classic/bundle/style/1.0" xmlns:core="http://reporting.pentaho.org/namespaces/engine/attributes/core" xmlns:html="http://reporting.pentaho.org/namespaces/engine/attributes/html" xmlns:swing="http://reporting.pentaho.org/namespaces/engine/attributes/swing" xmlns:pdf="http://reporting.pentaho.org/namespaces/engine/attributes/pdf" xmlns:wizard="http://reporting.pentaho.org/namespaces/engine/attributes/wizard" xmlns:designtime="http://reporting.pentaho.org/namespaces/report-designer/2.0" xmlns:crosstab="http://reporting.pentaho.org/namespaces/engine/attributes/crosstab" xmlns:pentaho="http://reporting.pentaho.org/namespaces/engine/attributes/pentaho" xmlns:table="http://reporting.pentaho.org/namespaces/engine/attributes/table" designtime:HorizontalGuideLines="(true,493.0)" designtime:preview-dialog-bounds="333.0,14.0,700.0,700.0">
+  <style:element-style>
+  </style:element-style>
+  <report-header>
+    <root-level-content designtime:visual-height="0.0" designtime:hideInLayoutGUI="false">
+      <style:element-style>
+        <style:band-styles layout="canvas"/>
+      </style:element-style>
+    </root-level-content>
+  </report-header>
+  <group>
+    <style:element-style>
+    </style:element-style>
+    <fields>
+    </fields>
+    <group-header>
+      <root-level-content designtime:hideInLayoutGUI="true">
+        <style:element-style>
+        </style:element-style>
+      </root-level-content>
+    </group-header>
+    <data-body>
+      <style:element-style>
+      </style:element-style>
+      <details-header designtime:hideInLayoutGUI="true">
+        <style:element-style>
+          <style:common-styles avoid-page-break="true"/>
+        </style:element-style>
+      </details-header>
+      <details>
+        <root-level-content designtime:visual-height="33.0">
+          <style:element-style>
+          </style:element-style>
+          <text-field core:field="Office_Name">
+            <style:element-style>
+              <style:spatial-styles x="110" y="6" min-width="57" min-height="15"/>
+              <style:text-styles font-face="Arial" font-size="8"/>
+            </style:element-style>
+          </text-field>
+          <text-field core:field="TaxAmount">
+            <style:element-style>
+              <style:spatial-styles x="580" y="6" min-width="45" min-height="15"/>
+              <style:text-styles font-face="Arial" font-size="8"/>
+            </style:element-style>
+          </text-field>
+          <number-field core:field="Invoice_No">
+            <style:element-style>
+              <style:spatial-styles x="7" y="6" min-width="42" min-height="15"/>
+              <style:text-styles font-face="Arial" font-size="8"/>
+            </style:element-style>
+          </number-field>
+          <text-field core:field="Client_Name">
+            <style:element-style>
+              <style:spatial-styles x="188" y="6" min-width="57" min-height="15"/>
+              <style:text-styles font-face="Arial" font-size="8"/>
+            </style:element-style>
+          </text-field>
+          <text-field core:field="chargetype">
+            <style:element-style>
+              <style:spatial-styles x="252" y="6" min-width="57" min-height="15"/>
+              <style:text-styles font-face="Arial" font-size="8"/>
+            </style:element-style>
+          </text-field>
+          <text-field core:field="Charge_Amount">
+            <style:element-style>
+              <style:spatial-styles x="460" y="6" min-width="57" min-height="15"/>
+              <style:text-styles font-face="Arial" font-size="8"/>
+            </style:element-style>
+          </text-field>
+          <text-field core:field="Discount">
+            <style:element-style>
+              <style:spatial-styles x="532" y="6" min-width="41" min-height="15"/>
+              <style:text-styles font-face="Arial" font-size="8"/>
+            </style:element-style>
+          </text-field>
+          <text-field core:field="Invoice_Amount">
+            <style:element-style>
+              <style:spatial-styles x="625" y="6" min-width="57" min-height="15"/>
+              <style:text-styles font-face="Arial" font-size="8"/>
+            </style:element-style>
+          </text-field>
+          <text-field core:field="Invoice_Date">
+            <style:element-style>
+              <style:spatial-styles x="49" y="6" min-width="57" min-height="15"/>
+              <style:text-styles font-face="Arial" font-size="8"/>
+            </style:element-style>
+          </text-field>
+          <text-field core:field="Charge_start_date">
+            <style:element-style>
+              <style:spatial-styles x="310" y="6" min-width="57" min-height="15"/>
+              <style:text-styles font-face="Arial" font-size="8"/>
+            </style:element-style>
+          </text-field>
+          <text-field core:field="Charge_end_date">
+            <style:element-style>
+              <style:spatial-styles x="389" y="6" min-width="57" min-height="15"/>
+              <style:text-styles font-face="Arial" font-size="8"/>
+            </style:element-style>
+          </text-field>
+        </root-level-content>
+      </details>
+      <no-data>
+        <root-level-content designtime:hideInLayoutGUI="true">
+          <style:element-style>
+          </style:element-style>
+        </root-level-content>
+      </no-data>
+      <details-footer designtime:hideInLayoutGUI="true">
+        <style:element-style>
+          <style:common-styles avoid-page-break="true"/>
+        </style:element-style>
+      </details-footer>
+    </data-body>
+    <group-footer>
+      <root-level-content designtime:hideInLayoutGUI="true">
+        <style:element-style>
+        </style:element-style>
+      </root-level-content>
+    </group-footer>
+  </group>
+  <report-footer>
+    <root-level-content designtime:visual-height="0.0">
+      <style:element-style>
+      </style:element-style>
+    </root-level-content>
+  </report-footer>
+</layout>
