@@ -731,9 +731,9 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		 List<OrderPrice> orderPrices=newOrder.getPrice();
 		 for(OrderPrice orderPrice:orderPrices){
 			 if(billEndDate == null){
-				 orderPrice.setBillEndDate(null);	
+			//	 orderPrice.setBillEndDate(null);	
 			 }else{
-				 orderPrice.setBillEndDate(new LocalDate(billEndDate));
+				// orderPrice.setBillEndDate(new LocalDate(billEndDate));
 			 }
 			 orderPrice.setInvoiceTillDate(invoicetillDate);
 			 	orderPrice.setNextBillableDay(order.getPrice().get(0).getNextBillableDay());
