@@ -88,7 +88,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			
 			if(configuration != null && plan.isPrepaid() == 'N'){
 				order.setBillingAlign(configuration.isEnabled()?'Y':'N');
-				if(configuration.isEnabled()){
+				if(configuration.isEnabled() && endDate != null){
 				order.setEndDate(endDate.dayOfMonth().withMaximumValue());
 				}
 			}

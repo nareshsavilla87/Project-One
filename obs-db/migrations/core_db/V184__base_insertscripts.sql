@@ -9,6 +9,7 @@ insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`cha
 insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`charge_type`,`charge_duration`,`duration_type`,`tax_inclusive`,`billfrequency_code`) values (null,'OTC','One Time','NRC',1,'Month(s)',0,'Once');
 
 -- Contract Periods
+insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'Perpetual',0,'None','N');
 insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'1 Month',1,'Month(s)','N');
 insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'3 Months',3,'Month(s)','N');
 insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'6 Months',6,'Month(s)','N');
