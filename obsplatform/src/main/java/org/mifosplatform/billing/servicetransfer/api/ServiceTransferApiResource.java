@@ -90,12 +90,12 @@ public class ServiceTransferApiResource {
 		if(clientPropertyData !=null){
 			final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId);
 			final Collection<MCodeData> propertyTypes = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROPERTY_TYPE);
-			if(feeMasterData == null){
-		    	throw new NoFeeMasterRegionalPriceFound();
-		    }
-			clientPropertyData.setFeeMasterData(feeMasterData.get(0));
-			clientPropertyData.setPropertyTypes(propertyTypes);
-
+			if(!feeMasterData.isEmpty()){
+		    	clientPropertyData.setFeeMasterData(feeMasterData.get(0));
+			    clientPropertyData.setPropertyTypes(propertyTypes);
+			 }else{
+				throw new NoFeeMasterRegionalPriceFound();
+			}
 		}
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, clientPropertyData,RESPONSE_DATA_PARAMETERS);
