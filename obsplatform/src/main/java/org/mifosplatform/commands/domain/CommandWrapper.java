@@ -1292,8 +1292,8 @@ public class CommandWrapper {
 			return  this.entityName.equalsIgnoreCase("STATICIP");
 		}
 
-		public boolean isPropertyCodeMasterResource() {
-			return  this.entityName.equalsIgnoreCase("PROPERTYCODEMASTER");
+		public boolean isPropertyMasterResource() {
+			return  this.entityName.equalsIgnoreCase("PROPERTYMASTER");
 		}
 
 		public boolean isUpdatePaypalProfile() {
