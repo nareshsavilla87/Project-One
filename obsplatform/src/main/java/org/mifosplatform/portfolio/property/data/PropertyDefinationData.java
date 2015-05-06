@@ -35,10 +35,13 @@ public class PropertyDefinationData {
 	private String propertyCodeType;
 	private String code;
 	private String referenceValue;
+	private String floorDesc;
+	private String parcelDesc;
 	
 	public PropertyDefinationData(final Long id, final Long propertyTypeId,final String propertyType, final String propertyCode,
 			final String unitCode, final String floor, final String buildingCode,final String parcel, final String precinct, 
-			final String street,final String poBox, final String state, final String country,final String status, final String clientId) {
+			final String street,final String poBox, final String state, final String country,final String status, final String clientId,
+			final String floorDesc,final String parcelDesc) {
 
 		this.id = id;
 		this.propertyTypeId = propertyTypeId;
@@ -55,8 +58,11 @@ public class PropertyDefinationData {
 		this.country = country;
 		this.status = status;
 		this.clientId = clientId;
+		this.floorDesc= floorDesc;
+		this.parcelDesc = parcelDesc;
 
 	}
+
 
 	public PropertyDefinationData(Collection<MCodeData> propertyTypes,List<CityDetailsData> citiesData) {
 
@@ -288,5 +294,13 @@ public class PropertyDefinationData {
 
 	public void setPropertyTypes(Collection<MCodeData> propertyTypes) {
 		this.propertyTypes = propertyTypes;
+	}
+	
+	public String getFloorDesc() {
+		return floorDesc;
+	}
+
+	public String getParcelDesc() {
+		return parcelDesc;
 	}
 }

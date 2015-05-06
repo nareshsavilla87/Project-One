@@ -178,10 +178,10 @@ public class PropertyMasterApiResource {
 	@Path("/type")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAddressDetailsWithcityName(@Context final UriInfo uriInfo,@QueryParam("query") final String propertyType) {
+	public String retrieveAddressDetailsWithcityName(@Context final UriInfo uriInfo,@QueryParam("query") final String propertyType,@QueryParam("queryParam") final String propertyCode) {
 
 		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
-		final List<PropertyDefinationData> typeDetails = this.propertyReadPlatformService.retrievPropertyType(propertyType);
+		final List<PropertyDefinationData> typeDetails = this.propertyReadPlatformService.retrievPropertyType(propertyType,propertyCode);
 		return this.toApiJsonSerializer.serialize(typeDetails);
 	}
 	
