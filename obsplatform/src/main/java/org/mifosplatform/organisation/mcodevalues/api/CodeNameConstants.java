@@ -74,6 +74,7 @@ public static final String PROPERTY_CODE_TYPE= "Property Code Type";
 public static final String CODE_PROPERTY_PARCEL = "Parcel";
 public static final String CODE_PROPERTY_FLOOR = "Level/Floor";
 public static final String CODE_PROPERTY_UNIT = "Unit Codes";
+public static final String CODE_PROPERTY_BUILDING = "Building Codes";
 
 
 
