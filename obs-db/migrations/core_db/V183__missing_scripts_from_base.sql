@@ -447,6 +447,9 @@ insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,
 insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',6,'SUSPENDED','SUSPENDED');
 insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',7,'REACTIVE','REACTIVE');
 
+ insert ignore into b_office_bank values(null, 'Open Billing System', '2044860011', '2044860008', 'Hyderabad', 'KVB(karur vysya bank)', 'Kondapur', 'KVBL0004801 ');
+insert ignore into b_office_address values(null, 'OBS', 'OPen Billing System', 'Kondapur', 'Hyderabad', 'Andhra Pradesh', 'India', '30214', '858 935 8804', NULL, 'info@openbillingsystem.com', 'companyLogo.jpg', NULL, NULL, '1');
+
 
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal-for-ios',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
