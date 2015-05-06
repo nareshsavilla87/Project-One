@@ -462,9 +462,13 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		
 		if(configuration != null && plan.isPrepaid() == 'N'){
 			orderDetails.setBillingAlign(configuration.isEnabled()?'Y':'N');
-			if(configuration.isEnabled()){
+			if(configuration.isEnabled() && renewalEndDate != null){
 				orderDetails.setEndDate(renewalEndDate.dayOfMonth().withMaximumValue());
+			}else{
+				orderDetails.setEndDate(renewalEndDate);
 			}
+		}else{
+			orderDetails.setEndDate(renewalEndDate);
 		}
 	  //orderDetails.setEndDate(renewalEndDate);
 
