@@ -73,9 +73,10 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 
 		public String schema() {
 			return  " pd.id as Id,pd.property_type_id as propertyTypeId,c.code_value as propertyType,pd.property_code as propertyCode,unit_code as unitCode,pd.floor as floor," +
-					 " pd.building_code as buildingCode, pd.parcel as parcel,pd.street as street,pd.precinct as precinct,pd.po_box as poBox," +
-					 " pd.state as state, pd.country as country, pd.status as status, ifnull(pd.client_id,'VACANT') AS clientId " +
-					 " from b_property_defination pd left join m_code_value c on c.id=pd.property_type_id";
+					 " pd.building_code as buildingCode, pd.parcel as parcel,pd.street as street,pd.precinct as precinct,pd.po_box as poBox, pd.state as state, "+
+					 " pd.country as country, pd.status as status, ifnull(pd.client_id,'VACANT') AS clientId,pm.description  as floorDesc,pp.description  as parcelDesc" +
+					 " from b_property_defination pd left join  b_property_master pm on (pm.code=pd.floor) left join b_property_master pp on (pp.code=pd.parcel)" +
+					 " left join m_code_value c on c.id=pd.property_type_id";
 
 		}
 
@@ -97,9 +98,11 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final String country = rs.getString("country");
 			final String status = rs.getString("status");
 			final String clientId = rs.getString("clientId");
+			final String floorDesc = rs.getString("floorDesc");
+			final String parcelDesc = rs.getString("parcelDesc");
 			
 			return new PropertyDefinationData(Id,propertyTypeId,propertyType,propertyCode,unitCode,floor,buildingCode,parcel,
-					precinct,street,poBox,state,country,status,clientId);
+					precinct,street,poBox,state,country,status,clientId,floorDesc,parcelDesc);
 			
 		}
 
@@ -212,11 +215,12 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 
 		public String schema() {
 			return " pd.id as Id,m.account_no as clientId, pd.property_type_id as propertyTypeId,c.code_value as propertyType, pd.property_code as propertyCode, "+
-				    " unit_code as unitCode, pd.floor as floor, pd.building_code as buildingCode,pd.parcel as parcel, pd.street as street,pd.precinct as precinct, " +
+				    " unit_code as unitCode, pd.floor as floor,pp.description as floorDesc, pd.building_code as buildingCode,pd.parcel as parcel,pm.description as parcelDesc, pd.street as street,pd.precinct as precinct, " +
 				    " pd.po_box as zip, pd.state as state,pd.country as country,pd.status as status,m.firstname as firstName,m.lastname as lastName, "+
-				    " m.display_name as displayName,m.email as email, m.phone as phone,ma.address_no as addressNo,address_key as addressKey,mc.code_value as categoryType "+
+				    " m.display_name as displayName,m.email as email,ma.address_no as addressNo,address_key as addressKey,mc.code_value as categoryType "+
 			 	    " from b_property_defination pd join m_client m on (pd.client_id = m.id and pd.is_deleted='N') join b_client_address ma " +
 				    " on (ma.client_id = m.id and ma.address_no = pd.property_code and ma.is_deleted='n') left join m_code_value c on (c.id = pd.property_type_id)" +
+				    " left join b_property_master pm on (pd.parcel=pm.code and pm.is_deleted='N') left join b_property_master pp on (pd.floor=pp.code and pp.is_deleted='N') "+
 				    " left  join  m_code_value mc on  mc.id =m.category_type  ";
 		}
 
@@ -229,8 +233,10 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final String propertyCode = rs.getString("propertyCode");
 			final String unitCode = rs.getString("unitCode");
 			final String floor = rs.getString("floor");
+			final String floorDesc = rs.getString("floorDesc");
 			final String buildingCode = rs.getString("buildingCode");
 			final String parcel = rs.getString("parcel");
+			final String parcelDesc = rs.getString("parcelDesc");
 			final String precinct = rs.getString("precinct");
 			final String street = rs.getString("street");
 			final String zip = rs.getString("zip");
@@ -242,13 +248,12 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final String lastName = rs.getString("lastName");
 			final String displayName = rs.getString("displayName");
 			final String email = rs.getString("email");
-			final String phone = rs.getString("phone");
 			final String addressNo = rs.getString("addressNo");
 			final String addressKey = rs.getString("addressKey");
 			final String categoryType = rs.getString("categoryType");
 			
-			return new ClientPropertyData(Id,propertyTypeId,propertyType,propertyCode,unitCode,floor,buildingCode,parcel,
-					precinct,street,zip,state,country,status,clientId,firstName,lastName,displayName,email,phone,addressNo,addressKey,categoryType);
+			return new ClientPropertyData(Id,propertyTypeId,propertyType,propertyCode,unitCode,floor,floorDesc,buildingCode,parcel,parcelDesc,
+					precinct,street,zip,state,country,status,clientId,firstName,lastName,displayName,email,addressNo,addressKey,categoryType);
 		}
 
 	}
@@ -323,12 +328,12 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 
 
 	@Override
-	public List<PropertyDefinationData> retrievPropertyType(final String propertyType) {
+	public List<PropertyDefinationData> retrievPropertyType(final String propertyType,final String code) {
 		
 		try {
 			context.authenticatedUser();
 			final PropertyMasterMapper mapper = new PropertyMasterMapper();
-			final String sql = "select "+ mapper.schema()+ "  and pm.property_code_type like '%"+propertyType+"%' order by pm.id LIMIT 15";
+			final String sql = "select "+ mapper.schema()+ "  and pm.property_code_type like '%"+propertyType+"%' AND pm.code like '%"+code+"%'  order by pm.id LIMIT 20";
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 		    } catch (final EmptyResultDataAccessException e) {
 			return null;
