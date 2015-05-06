@@ -66,6 +66,7 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 					" AND pd.state_id = s.id group by da.id";*/
 			
 			String sql ="SELECT da.id AS id,if(da.service_code = 'None', 0, se.id) AS serviceId,da.service_code AS service_code,da.charge_code AS charge_code," +
+
 				     " da.charging_variant AS charging_variant,c.charge_type AS charge_type,c.charge_duration AS charge_duration,c.duration_type AS duration_type," +
 				     " da.discount_id AS discountId,c.tax_inclusive AS taxInclusive,da.price AS price,da.price_region_id,s.id AS stateId,s.parent_code AS countryId," +
 				     " pd.state_id AS regionState,con.country_name,pd.country_id AS regionCountryId" +
@@ -83,8 +84,6 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 				     " AND c.country_name = d.country AND d.address_key = 'PRIMARY' AND d.client_id = ? AND a.plan_id = ? ),0))" +
 				     " GROUP BY da.id";
 			return this.jdbcTemplate.query(sql, mapper, new Object[] { planId,billingFreq,clientId,clientId,planId,clientId,planId});
-
-
 		} 
 
 		private static final class PriceMapper implements RowMapper<PriceData> {

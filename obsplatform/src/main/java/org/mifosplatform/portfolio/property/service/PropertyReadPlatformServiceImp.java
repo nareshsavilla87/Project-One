@@ -12,6 +12,7 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -27,8 +28,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 	private final PaginationHelper<PropertyDefinationData> paginationHelper = new PaginationHelper<PropertyDefinationData>();
 
 	@Autowired
-	public PropertyReadPlatformServiceImp(final PlatformSecurityContext context,
-			final TenantAwareRoutingDataSource dataSource) {
+	public PropertyReadPlatformServiceImp(final PlatformSecurityContext context,final TenantAwareRoutingDataSource dataSource) {
 		this.context = context;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
@@ -37,7 +37,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 	public Page<PropertyDefinationData> retrieveAllProperties(SearchSqlQuery searchPropertyDetails) {
 
 		try {
-			context.authenticatedUser();
+			this.context.authenticatedUser();
 			final PropertyMapper mapper = new PropertyMapper();	
 			StringBuilder sqlBuilder = new StringBuilder(200);
 			sqlBuilder.append("select ");
@@ -247,12 +247,9 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final String addressKey = rs.getString("addressKey");
 			final String categoryType = rs.getString("categoryType");
 			
-			
 			return new ClientPropertyData(Id,propertyTypeId,propertyType,propertyCode,unitCode,floor,buildingCode,parcel,
 					precinct,street,zip,state,country,status,clientId,firstName,lastName,displayName,email,phone,addressNo,addressKey,categoryType);
-			
 		}
-
 
 	}
 
@@ -268,5 +265,112 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 	    			return null;
 	    		}
 	}
+	
+	@Override
+	public Page<PropertyDefinationData> retrieveAllPropertyMasterData(SearchSqlQuery searchPropertyDetails) {
+		try {
+			context.authenticatedUser();
+			final PropertyMasterMapper mapper = new PropertyMasterMapper();	
+			StringBuilder sqlBuilder = new StringBuilder(200);
+			sqlBuilder.append("select ");
+			sqlBuilder.append( mapper.schema());
+			String sqlSearch = searchPropertyDetails.getSqlSearch();
+			String extraCriteria = "";
+			if(sqlSearch != null) {
+			    	sqlSearch=sqlSearch.trim();
+			    	extraCriteria = "  and (pm.property_code_type like '%"+sqlSearch+"%' OR" 
+			    			+ " pm.code like '%"+sqlSearch+"%' )";
+			    }
+			
+			sqlBuilder.append(extraCriteria);
+			
+		   if (searchPropertyDetails.isLimited()) {
+		            sqlBuilder.append(" limit ").append(searchPropertyDetails.getLimit());
+		        }
+
+		   if (searchPropertyDetails.isOffset()) {
+		            sqlBuilder.append(" offset ").append(searchPropertyDetails.getOffset());
+		        }
+
+	    	return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(), new Object[] {}, mapper);
+			    
+		  } catch (EmptyResultDataAccessException accessException) {
+			return null;
+		}
 	}
+	
+
+	private static final class PropertyMasterMapper implements RowMapper<PropertyDefinationData>{
+
+		public String schema(){
+			return " pm.id as id,pm.property_code_type as  propertyCodeType,pm.code as code,pm.description as description,pm.reference_value as referenceValue " +
+					" from b_property_master pm  where  pm.is_deleted='N' ";
+
+		}
+
+		@Override
+		public PropertyDefinationData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
+			final Long id = rs.getLong("id");
+			final String propertyCodeType = rs.getString("propertyCodeType");
+			final String code = rs.getString("code");
+			final String description = rs.getString("description");
+			final String referenceValue = rs.getString("referenceValue");
+
+			return new PropertyDefinationData(id,propertyCodeType,code,description,referenceValue);
+		}
+	}
+
+
+	@Override
+	public List<PropertyDefinationData> retrievPropertyType(final String propertyType) {
+		
+		try {
+			context.authenticatedUser();
+			final PropertyMasterMapper mapper = new PropertyMasterMapper();
+			final String sql = "select "+ mapper.schema()+ "  and pm.property_code_type like '%"+propertyType+"%' order by pm.id LIMIT 15";
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+		    } catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Override
+	public PropertyDefinationData retrieveSinglePropertyMaster(final Long codeId) {
+		
+		try {
+			context.authenticatedUser();
+			final PropertyMasterMapper mapper = new PropertyMasterMapper();
+			final String sql = "select "+ mapper.schema()+ "  and pm.id=?";
+			return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] {codeId});
+		  } catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+     }
+
+	@Override
+	public Boolean retrievePropertyMasterCount(final String codeValue,final String propertyCodeType) {
+		
+		 this.context.authenticatedUser();
+		 boolean result = false;
+		 StringBuilder sql=new StringBuilder();
+		 sql.append("select count(id) from b_property_defination pd where pd.is_deleted='N' and ");
+		 if(propertyCodeType.equalsIgnoreCase(CodeNameConstants.CODE_PROPERTY_PARCEL)){
+		      sql.append(" pd.parcel= ? ");
+		 }else if(propertyCodeType.equalsIgnoreCase(CodeNameConstants.CODE_PROPERTY_FLOOR)){
+			 sql.append(" pd.floor= ? ");
+		 }else if(propertyCodeType.equalsIgnoreCase(CodeNameConstants.CODE_PROPERTY_UNIT)){
+			 sql.append(" pd.unit_code= ? ");
+		 }else{
+			 sql.append(" pd.building_code= ? ");
+		 }
+		 final int count=	this.jdbcTemplate.queryForObject(sql.toString(), Integer.class,new Object[]{codeValue});
+		 if(count > 0){
+			 result = true;
+		 }
+		 return result;
+	}
+	
+	
+}
 

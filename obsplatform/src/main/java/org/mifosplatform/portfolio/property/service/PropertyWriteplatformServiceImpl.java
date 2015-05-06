@@ -26,6 +26,8 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.address.domain.Address;
 import org.mifosplatform.organisation.address.domain.AddressRepository;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.portfolio.property.domain.PropertyCodesMaster;
+import org.mifosplatform.portfolio.property.domain.PropertyCodesMasterRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
@@ -48,35 +50,41 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	private final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final PropertyMasterRepository propertyMasterRepository;
 	private final PropertyHistoryRepository propertyHistoryRepository;
+	private final PropertyCodesMasterRepository propertyCodesMasterRepository;
 	private final AddressRepository addressRepository;
 	private final ChargeCodeRepository chargeCodeRepository;
 	private final GenerateBillingOrderService generateBillingOrderService;
 	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final GenerateBill generateBill;
+	private final PropertyReadPlatformService propertyReadPlatformService;
 
 	@Autowired
 	public PropertyWriteplatformServiceImpl(final PlatformSecurityContext context,
 			final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final PropertyMasterRepository propertyMasterRepository,
 			final PropertyHistoryRepository propertyHistoryRepository,
+			final PropertyCodesMasterRepository propertyCodesMasterRepository,
 			final AddressRepository addressRepository,
 		    final ChargeCodeRepository chargeCodeRepository,
             final GenerateBillingOrderService generateBillingOrderService,
             final BillingOrderWritePlatformService billingOrderWritePlatformService,
             final BillingOrderReadPlatformService billingOrderReadPlatformService,
-            final GenerateBill generateBill) {
+            final GenerateBill generateBill,
+            final PropertyReadPlatformService propertyReadPlatformService) {
 
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.propertyMasterRepository = propertyMasterRepository;
 		this.propertyHistoryRepository = propertyHistoryRepository;
+		this.propertyCodesMasterRepository = propertyCodesMasterRepository;
 		this.addressRepository = addressRepository;
 		this.chargeCodeRepository = chargeCodeRepository;
 		this.generateBillingOrderService = generateBillingOrderService;
 		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.generateBill = generateBill;
+		this.propertyReadPlatformService = propertyReadPlatformService;
 	}
 
 	@Transactional
@@ -154,11 +162,17 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	private void handleCodeDataIntegrityIssues(final JsonCommand command,final DataIntegrityViolationException dve) {
 		
 		final Throwable realCause = dve.getMostSpecificCause();
+		
 		if (realCause.getMessage().contains("property_code_constraint")) {
 			final String code = command.stringValueOfParameterNamed("propertyCode");
 			throw new PlatformDataIntegrityException("error.msg.property.duplicate.code",
 					"A property with Code'" + code + "'already exists","propertyCode", code);
 		}
+		else if (realCause.getMessage().contains("property_code_type_with_its_code")) {
+            final String name = command.stringValueOfParameterNamed("propertyCodeType");
+            throw new PlatformDataIntegrityException("error.msg.propertycode.master.propertyCodeType.duplicate.name", 
+            		"A Property Code Type with name '" + name + "' already exists","code");
+        }
 
 		LOGGER.error(dve.getMessage(), dve);
 		throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue",
@@ -166,14 +180,6 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 
 	}
 
-	private PropertyMaster propertyRetrieveById(final Long entityId) {
-
-		PropertyMaster propertyMaster = this.propertyMasterRepository.findOne(entityId);
-		if (propertyMaster == null) {
-			throw new PropertyMasterNotFoundException(entityId);
-		}
-		return propertyMaster;
-	}
 
 	@Transactional
 	@Override
@@ -192,7 +198,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			final PropertyMaster oldPropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(oldPropertyCode);
 			final PropertyMaster newpropertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
 			 if(newpropertyMaster != null && newpropertyMaster.getClientId() != null ){
-				 if(newpropertyMaster.getClientId() != clientId){
+				 if(!newpropertyMaster.getClientId().equals(clientId)){
 					throw new PropertyCodeAllocatedException(newpropertyMaster.getPropertyCode());
 				 }
 				 }
@@ -262,7 +268,94 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		if (taxMappingRateDatas.isEmpty()) {
 			taxMappingRateDatas = this.billingOrderReadPlatformService.retrieveDefaultTaxMappingData(clientId,chargeCodeMaster.getChargeCode());
 		}
-		List<InvoiceTaxCommand> invoiceTaxCommand = this.generateBill.generateInvoiceTax(taxMappingRateDatas, billPrice, clientId, chargeCodeMaster.getTaxInclusive());
+		List<InvoiceTaxCommand> invoiceTaxCommand = this.generateBill.generateInvoiceTax(taxMappingRateDatas, billPrice, clientId,chargeCodeMaster.getTaxInclusive());
 		return invoiceTaxCommand;
 	}
+
+	@Transactional
+	@Override
+	public CommandProcessingResult createPropertyMasters(final JsonCommand command) {
+	
+		try
+		{
+			context.authenticatedUser();
+			this.apiJsonDeserializer.validateForCreatePropertyMaster(command.json());
+			final PropertyCodesMaster propertyCodeMaster = PropertyCodesMaster.fromJson(command);
+			this.propertyCodesMasterRepository.save(propertyCodeMaster);
+				return new CommandProcessingResult(propertyCodeMaster.getId());
+
+		} catch (DataIntegrityViolationException dve) {
+			 handleCodeDataIntegrityIssues(command, dve);
+			return  CommandProcessingResult.empty();
+		}
+	}
+
+	@Transactional
+	@Override
+	public CommandProcessingResult updatePropertyMaster(final Long entityId,final JsonCommand command) {
+		
+		try
+		{
+			context.authenticatedUser();
+			this.apiJsonDeserializer.validateForCreatePropertyMaster(command.json());
+			PropertyCodesMaster propertyCodesMaster=this.propertyCodesMasterRetrieveById(entityId);
+			final Map<String,Object> changes=propertyCodesMaster.update(command);
+			if (!changes.isEmpty()) {
+				this.propertyCodesMasterRepository.saveAndFlush(propertyCodesMaster);
+			}
+			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
+				       .withEntityId(propertyCodesMaster.getId()).with(changes).build();
+			
+		}catch(DataIntegrityViolationException dve){
+			
+			if (dve.getCause() instanceof ConstraintViolationException) {
+				handleCodeDataIntegrityIssues(command, dve);
+			}
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+	
+	}
+	
+	@Transactional
+	@Override
+	public CommandProcessingResult deletePropertyMaster(final Long entityId) {
+	
+		PropertyCodesMaster propertyCodesMaster = null;
+		try {
+			this.context.authenticatedUser();
+			propertyCodesMaster = this.propertyCodesMasterRetrieveById(entityId);
+			if(propertyCodesMaster.getCode() !=null && propertyCodesMaster.getPropertyCodeType() !=null){	
+		      Boolean checkPropertyMaster=this.propertyReadPlatformService.retrievePropertyMasterCount(propertyCodesMaster.getCode(),propertyCodesMaster.getPropertyCodeType());
+		       if(!checkPropertyMaster){
+		    	   propertyCodesMaster.deleted();
+		    	   this.propertyCodesMasterRepository.save(propertyCodesMaster);
+		       }else{
+				throw new PropertyCodeAllocatedException();
+			}
+		  }	
+		 return new CommandProcessingResult(entityId);
+		}catch (final DataIntegrityViolationException dve) {
+			throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue",
+					"Unknown data integrity issue with resource: "+ dve.getMessage());
+		 }
+	}
+	
+	private PropertyMaster propertyRetrieveById(final Long entityId) {
+
+		PropertyMaster propertyMaster = this.propertyMasterRepository.findOne(entityId);
+		if (propertyMaster == null) {
+			throw new PropertyMasterNotFoundException(entityId);
+		}
+		return propertyMaster;
+	}
+	
+	private PropertyCodesMaster propertyCodesMasterRetrieveById(final Long entityId) {
+
+		PropertyCodesMaster propertyCodesMaster = this.propertyCodesMasterRepository.findOne(entityId);
+		if (propertyCodesMaster == null) {
+			throw new PropertyMasterNotFoundException(entityId);
+		}
+		return propertyCodesMaster;
+	}
+	
 }

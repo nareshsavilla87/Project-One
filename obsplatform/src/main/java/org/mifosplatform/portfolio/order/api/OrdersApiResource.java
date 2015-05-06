@@ -194,7 +194,7 @@ public class OrdersApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String updateOrder(@PathParam("orderId") final Long orderId, final String apiRequestBodyAsJson) {
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateOrder(orderId).withJson(apiRequestBodyAsJson).build();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().disconnectOrder(orderId).withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}

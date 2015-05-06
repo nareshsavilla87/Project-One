@@ -1,4 +1,7 @@
+SET SQL_SAFE_UPDATES = 0;
+SET foreign_key_checks = 0;
 -- Charge Codes
+delete from b_charge_codes where charge_code='NONE';
 insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`charge_type`,`charge_duration`,`duration_type`,`tax_inclusive`,`billfrequency_code`) values (null,'MSC','Monthly Subscription','RC',1,'Month(s)',0,'Monthly');
 insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`charge_type`,`charge_duration`,`duration_type`,`tax_inclusive`,`billfrequency_code`) values (null,'QSC','Quaterly Subscription','RC',3,'Month(s)',0,'Quaterly');
 insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`charge_type`,`charge_duration`,`duration_type`,`tax_inclusive`,`billfrequency_code`) values (null,'HSC','Half Yearly Subscription','RC',6,'Month(s)',0,'Halfyearly');
@@ -6,6 +9,7 @@ insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`cha
 insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`charge_type`,`charge_duration`,`duration_type`,`tax_inclusive`,`billfrequency_code`) values (null,'OTC','One Time','NRC',1,'Month(s)',0,'Once');
 
 -- Contract Periods
+insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'Perpetual',0,'None','N');
 insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'1 Month',1,'Month(s)','N');
 insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'3 Months',3,'Month(s)','N');
 insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'6 Months',6,'Month(s)','N');
@@ -22,40 +26,39 @@ insert ignore into `b_billing_rules`(`id`,`billing_rule`) values (null,'Full Mon
 insert ignore into `b_discount_master`(`id`,`discount_code`,`discount_description`,`discount_type`,`discount_rate`,`start_date`,`discount_status`,`is_delete`) values (null,'None','None','Flat',0,'2015-04-16 00:00:00','ACTIVE','N');
 
 -- Event Action Mapping
-
+truncate table b_eventaction_mapping;
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Client','Send Mail','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Client','SEND SMS','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Order activation','Invoice','workflow_events','Y','N');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Order booking','INVOICE','workflow_events','Y','Y');
+insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Order Booking','Invoice','workflow_events','Y','Y');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Close Client','SEND PROVISION','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Ticket','Send Email','workflow_events','Y','N');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Client','Send Mail','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Live Event','Active Live Event','workflow_events','Y','N');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Payment','RENEWAL','workflow_events','Y','N');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Live Event','Active Live Event','workflow_events','Y','Y');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Payment','Create Payment','workflow_events','Y','N');
+insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Payment','Renewal','workflow_events','Y','N');
+
+
 
 -- Message Templates
-
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (1,'TICKET_TEMPLATE','TICKET','TICKET','create ticket','Thank You','E',1,null,1,'2015-04-16 12:10:37','N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (2,'Bill_Email','TAX INVOICE from Obs','Bill','Please find the attached TAX INVOCIE from Spicenet','Thanks','E',1,'2014-07-30 12:33:42',1,'2014-07-30 12:33:42','N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (5,'CREATE SELFCARE','OBS Selfcare','Dear <PARAM1>','Your Selfcare User Account has been successfully created,Following are the User login Details. <br/> userName : <PARAM2> , <br/> password : <PARAM3> .','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (6,'SELFCARE REGISTRATION','Register Confirmation','Hai','Your Registration has been successfully completed.To approve this Registration please click on this link: <br/> URL : <PARAM1>.','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (7,'NEW SELFCARE PASSWORD','Reset Password','Dear <PARAM1>','The password for your SelfCare User Portal Account- <PARAM2>  was reset. . <br/> Password : <PARAM3>.','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (8,'PROVISION CREDENTIALS','OBS Provision Credentials','Dear <PARAM1>','Your OBS Subscriber Account has been successfully created And Following are the Account Details.  <br/> subscriberUid : <PARAM2> , <br/>  Authpin : <PARAM3> .','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (9,'CREATE USER','OBS User Creation','Dear <PARAM1>','OBS User Account has been successfully created .You can login using the following credentials. 
+delete from b_message_template where template_description ='SELFCARE REGISTRATIO';
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'TICKET_TEMPLATE','TICKET','TICKET','create ticket','Thank You','E',1,null,1,'2015-04-16 12:10:37','N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'Bill_Email','TAX INVOICE from Obs','Bill','Please find the attached TAX INVOCIE from Spicenet','Thanks','E',1,'2014-07-30 12:33:42',1,'2014-07-30 12:33:42','N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'CREATE SELFCARE','OBS Selfcare','Dear <PARAM1>','Your Selfcare User Account has been successfully created,Following are the User login Details. <br/> userName : <PARAM2> , <br/> password : <PARAM3> .','Thankyou','E',null,null,null,null,'N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'SELFCARE REGISTRATION','Register Confirmation','Hai','Your Registration has been successfully completed.To approve this Registration please click on this link: <br/> URL : <PARAM1>.','Thankyou','E',null,null,null,null,'N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'NEW SELFCARE PASSWORD','Reset Password','Dear <PARAM1>','The password for your SelfCare User Portal Account- <PARAM2>  was reset. . <br/> Password : <PARAM3>.','Thankyou','E',null,null,null,null,'N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'PROVISION CREDENTIALS','OBS Provision Credentials','Dear <PARAM1>','Your OBS Subscriber Account has been successfully created And Following are the Account Details.  <br/> subscriberUid : <PARAM2> , <br/>  Authpin : <PARAM3> .','Thankyou','E',null,null,null,null,'N');
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'CREATE USER','OBS User Creation','Dear <PARAM1>','OBS User Account has been successfully created .You can login using the following credentials. 
  userName : <PARAM2> , 
  password : <PARAM3> .','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (10,'PAYMENT_RECEIPT','Payment Confirmation','Dear <PARAM1><br/><br/>','Thank you for making your purchase for OBS.<br/><br/>
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'PAYMENT_RECEIPT','Payment Confirmation','Dear <PARAM1><br/><br/>','Thank you for making your purchase for OBS.<br/><br/>
  This is a confirmation of your payment.<br/><br/> Result : <PARAM2>,<br/> Description : <PARAM3>,<br/>Amount : <PARAM4>,<br/>
  ReceiptNo : <PARAM5>.<br/>','Thankyou','E',null,null,null,null,'N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (11,'Reminder For Expiry','service expiry','Dear <Param1>','Your service with <Param2> is going to expired on <Param3>.
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'Reminder For Expiry','service expiry','Dear <Param1>','Your service with <Param2> is going to expired on <Param3>.
 Please renew or top-up to avoid service disconnection. Please call us or do the renew through your selfcare portal <Param4>','Thanks <br/> <Param5> <br/> <Param6>','E',1,'2015-04-14 18:23:13',1,'2015-04-14 18:25:24','N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (12,'Newly_Activated_Customers','New_customers','Dear <Param1>','Thanks for subscribing to our services. 
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'Newly_Activated_Customers','New_customers','Dear <Param1>','Thanks for subscribing to our services. 
 Your service with <Param2> is activated on <Param3>.','Thanks <br/> <Param4> <br/> <Param5>','E',1,'2015-04-14 18:54:51',1,'2015-04-14 18:54:51','N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (13,'Disconnected_Customers','Disconnected Customers','Dear <Param1>','Your service with <Param2> is disconnected on <Param3>.
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'Disconnected_Customers','Disconnected Customers','Dear <Param1>','Your service with <Param2> is disconnected on <Param3>.
 Please call us or do the renew or Top-up through your selfcare portal <Param4>','Thanks <br/> <Param5> <br/> <Param6>','E',1,'2015-04-14 18:56:51',1,'2015-04-14 18:56:51','N');
-insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (14,'Renew_or_Top-up_Customer','Renew or Top-up Customer','Dear <Param1>','Thanks for subscribing to our services. 
+insert ignore into `b_message_template`(`id`,`template_description`,`subject`,`header`,`body`,`footer`,`message_type`,`createdby_id`,`created_date`,`lastmodifiedby_id`,`lastmodified_date`,`is_deleted`) values (null,'Renew_or_Top-up_Customer','Renew or Top-up Customer','Dear <Param1>','Thanks for subscribing to our services. 
 Your service with <Param2> is activated on <Param3>.','Thanks <br/> <Param4> <br/> <Param5>','E',1,'2015-04-14 18:59:11',1,'2015-04-14 18:59:11','N');
 
 -- Provisioning Actions
@@ -75,11 +78,15 @@ insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`prov
 
 
 -- Price Region 
-insert into b_priceregion_master (id,priceregion_code,priceregion_name,createdby_id,created_date,is_deleted) 
+insert ignore into b_priceregion_master (id,priceregion_code,priceregion_name,createdby_id,created_date,is_deleted) 
  VALUES (null,'Default','Default Region',null,null,'N');
+ 
+ -- config
+ delete from c_configuration where name='Forcible Balance Check';
+insert ignore into c_configuration VALUES (null,'balance-check',0,null);
 
  
- insert into b_priceregion_detail (priceregion_id,country_id,state_id,is_deleted)
+ insert ignore	 into b_priceregion_detail (priceregion_id,country_id,state_id,is_deleted)
 select prm.id,0,0,'N' from b_priceregion_master prm where prm.priceregion_code ='Default';
 
 -- Views
@@ -107,117 +114,13 @@ CREATE OR REPLACE VIEW  `mvPromotion_vw` AS select `ed`.`event_id` AS `event_id`
 
 -- Watched movies
 CREATE OR REPLACE VIEW  `mvWatched_vw` AS select `m`.`id` AS `mediaId`,`m`.`title` AS `title`,`m`.`image` AS `image`,`m`.`rating` AS `rating`,'W' AS `assetTag`,`m`.`release_date` AS `release_date`,`ed`.`event_id` AS `eventId`,count(`eo`.`id`) AS `COUNT(eo.id)` from (( `b_media_asset` `m` join  `b_mod_detail` `ed` on((`m`.`id` = `ed`.`media_id`))) join  `b_modorder` `eo` on((`eo`.`event_id` = `ed`.`event_id`))) order by 6 desc;
+ -- Event ORder View 
+CREATE OR REPLACE VIEW `event_orders_vw` AS SELECT `ma`.`content_provider` AS `CONTENT PROVIDER`, `ma`.`type` AS `TYPE`, `ma`.`title` AS `TITLE`, `ml`.`language_id` AS `LANGUAGE ID`, `ml`.`format_type` AS `FORMAT TYPE`, `ml`.`location` AS `LOCATION`,`em`.`event_name` AS `EVENT NAME`,`em`.`status` AS `STATUS`,cast(`em`.`event_validity` AS date) AS `EVENT VALIDITY`,cast(`eo`.`event_bookeddate` AS date) AS `EVENT BOOKED DATE`  FROM ((((`b_mediaasset_location` `ml` JOIN `b_media_asset` `ma` ON ((`ml`.`media_id` = `ma`.`id`))) JOIN `b_mod_detail` `ed` ON ((`ed`.`media_id` = `ma`.`id`))) JOIN `b_mod_master` `em` ON ((`ed`.`event_id` = `em`.`id`))) JOIN `b_modorder` `eo` ON ((`eo`.`event_id` = `em`.`id`)));
+-- top movies view
+CREATE OR REPLACE VIEW `top_movies_vw` AS SELECT `ma`.`title` AS `TITLE`, `ma`.`id` AS `ID`, `ma`.`type` AS `TYPE`, cast(`ma`.`release_date` AS date) AS `RELEASE DATE`,`ma`.`content_provider` AS `CONTENT PROVIDER`,`ma`.`rating` AS `RATING`,`ma`.`rating_count` AS `RATING COUNT`,count(`eo`.`id`) AS `ORDER CNT`  FROM (((`b_media_asset` `ma` JOIN `b_mod_detail` `ed` ON ((`ma`.`id` = `ed`.`media_id`))) JOIN `b_mod_master` `em` ON ((`em`.`id` = `ed`.`event_id`))) JOIN `b_modorder` `eo` ON ((`ed`.`event_id` = `eo`.`event_id`))) ORDER BY 8 DESC;
 
-
--- Statement generation --
-
-CREATE OR REPLACE VIEW `billdetails_v` AS 
-select 
-    b.client_id AS client_id,
-    a.id AS transId,
-    b.invoice_date AS transDate,
-    'SERVICE_CHARGES' AS transType,
-   -- if((a.charge_type = 'DC'),
-     --   (0 - a.netcharge_amount),
-        a.netcharge_amount AS amount,
-    concat(date_format(a.charge_start_date, '%Y-%m-%d'),
-            ' to ',
-            date_format(a.charge_end_date, '%Y-%m-%d')) AS description,
-    c.plan_id AS plan_code,
-    a.charge_type AS service_code
-from
-    ((b_charge a
-    join b_invoice b)
-    join b_orders c)
-where
-    ((a.invoice_id = b.id) and (a.order_id = c.id) and isnull(a.bill_id) and (b.invoice_date <= now()) and (a.priceline_id <> 0)) 
-union all select 
-    b.client_id AS client_id,
-    a.id AS transId,
-    date_format(b.invoice_date, '%Y-%m-%d') AS transDate,
-    'TAXES' AS transType,
-   -- if(((c.charge_type = 'DC') or (a.tax_value = 1)),
-    --    (0 - a.tax_amount),
-        a.tax_amount AS amount,
-    a.tax_code AS description,
-    NULL AS plan_code,
-    c.charge_type AS service_code
-from
-    ((b_charge_tax a
-    join b_invoice b)
-    join b_charge c)
-where
-    ((a.invoice_id = b.id) and (a.charge_id = c.id) and isnull(a.bill_id) and (b.invoice_date <= now())) 
-union all select 
-    b_adjustments.client_id AS client_id,
-    b_adjustments.id AS transId,
-    date_format(b_adjustments.adjustment_date,
-            '%Y-%m-%d') AS transDate,
-    'ADJUSTMENT' AS transType,
-    (case b_adjustments.adjustment_type
-        when 'DEBIT' then b_adjustments.adjustment_amount
-        when 'CREDIT' then -(b_adjustments.adjustment_amount)
-    end) AS amount,
-    b_adjustments.remarks AS remarks,
-    b_adjustments.adjustment_type AS adjustment_type,
-    NULL AS service_code
-from
-    b_adjustments
-where
-    (isnull(b_adjustments.bill_id) and (b_adjustments.adjustment_date <= now())) 
-union all select 
-    pa.client_id AS client_id,
-    pa.id AS transId,
-    date_format(pa.payment_date, '%Y-%m-%d') AS transDate,
-    concat('PAYMENT', ' - ', p.code_value) AS transType,
-    pa.amount_paid AS invoiceAmount,
-    pa.Remarks AS remarks,
-    p.code_value AS code_value,
-    NULL AS service_code
-from
-    (b_payments pa
-    join m_code_value p)
-where
-    (isnull(pa.bill_id) and (pa.payment_date <= now()) and (pa.paymode_id = p.id)) 
-union all select 
-    b.client_id AS client_id,
-    a.id AS transId,
-    date_format(c.sale_date, '%Y-%m-%d') AS transDate,
-    'ONETIME_CHARGES' AS transType,
-    a.netcharge_amount AS amount,
-    c.charge_code AS charge_code,
-    c.item_id AS item_id,
-    a.charge_type AS service_code
-from
-    ((b_charge a
-    join b_invoice b)
-    join b_onetime_sale c)
-where
-    ((a.invoice_id = b.id) and (a.order_id = c.id) and isnull(a.bill_id) and (c.sale_date <= now()) and (c.invoice_id = b.id) and (a.priceline_id = 0))
-union all select 
-    b.client_id AS client_id,
-    a.id AS transId,
-    b.invoice_date AS transDate,
-    'SERVICE_TRANSFER' AS transType,
-     a.netcharge_amount AS amount,
-    concat(date_format(a.charge_start_date, '%Y-%m-%d'),
-            ' to ',
-            date_format(a.charge_end_date, '%Y-%m-%d')) AS description,
-    ph.property_code AS plan_code,
-    a.charge_type AS service_code
-from
-    ((b_charge a
-    join b_invoice b)
-    join b_property_history ph)
-where
-    ((a.invoice_id = b.id) and (a.order_id = ph.id) 
-and isnull(a.bill_id) and (b.invoice_date <= now()) and (a.priceline_id = -1)) ;
-
-
-
-
-
-
+SET SQL_SAFE_UPDATES = 1;
+SET foreign_key_checks = 1;
 
 
 

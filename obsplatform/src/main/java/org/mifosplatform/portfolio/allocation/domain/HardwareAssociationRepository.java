@@ -1,4 +1,4 @@
-package org.mifosplatform.portfolio.order.domain;
+package org.mifosplatform.portfolio.allocation.domain;
 
 import java.util.List;
 

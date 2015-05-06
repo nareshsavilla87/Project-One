@@ -1368,7 +1368,7 @@ public class CommandWrapperBuilder {
 		this.actionName = "UPDATE";
 		this.entityName = "ORDER";
 		this.entityId = orderId;
-		this.href = "order/template";
+		this.href = "order/disconnect";
 		return this;
 	}
 
@@ -1905,12 +1905,12 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder cancelPayment(Long paymentId) {
+	public CommandWrapperBuilder cancelPayment(final Long paymentId) {
 
 		this.actionName = "CANCEL";
 		this.entityName = "PAYMENT";
 		this.entityId = paymentId;
-		this.href = "/payments/cancelpayment" + this.entityId;
+		this.href = "/payments/cancelpayment/" + this.entityId;
 		return this;
 
 	}
@@ -2849,6 +2849,63 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+	public CommandWrapperBuilder updatePlanQualifier(Long planId) {
+		this.actionName = "UPDATE";
+		this.entityName = "PLANQUALIFIER";
+		this.entityId = planId;
+		this.href = "/planqualifier/"+planId;
+		return this;
+	}
+
+	public CommandWrapperBuilder createPropertyMaster() {
+		this.actionName = "CREATE";
+		this.entityName = "PROPERTYMASTER";
+		this.entityId = null;
+		this.href = "/propertycodemaster";
+		return this;
+	}
+
+public CommandWrapperBuilder disconnectOrder(Long orderId) {
+
+	this.actionName = "DISCONNECT";
+	this.entityName = "ORDER";
+	this.entityId = orderId;
+	this.href = "/orderdisconnect/"+orderId;
+	return this;
+}
+
+public CommandWrapperBuilder updatePaypalProfileRecurring() {
+	this.actionName = "UPDATEPAYPALRECURRING";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+	public CommandWrapperBuilder updatePropertyMaster(final Long codeId) {
+		this.actionName = "UPDATE";
+		this.entityName = "PROPERTYMASTER";
+		this.entityId = codeId;
+		this.href = "/propertycodemaster/"+codeId;
+		return this;
+	}
+
+	public CommandWrapperBuilder deletePropertyMaster(final Long codeId) {
+		this.actionName = "DELETE";
+		this.entityName = "PROPERTYMASTER";
+		this.entityId = codeId;
+		this.href = "/propertycodemaster/" +codeId;
+		return this;
+	}
+
+	
+
+	public CommandWrapperBuilder updatePaypalProfileStatus() {
+		this.actionName = "UPDATEPAYPALPROFILESTATUS";
+		this.entityName = "PAYMENTGATEWAY";
+		this.entityId = null;
+		this.href = "";
+		return this;
+	}
 }
 
 

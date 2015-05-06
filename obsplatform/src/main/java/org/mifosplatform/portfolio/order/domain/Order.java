@@ -76,6 +76,9 @@ public class Order extends AbstractAuditableCustom<AppUser, Long> {
 	
 	@Column(name ="order_no")
 	private String orderNo;
+	
+	@Column(name = "auto_renew")
+	private char autoRenew;
 
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "orders", orphanRemoval = true)
@@ -91,6 +94,8 @@ public class Order extends AbstractAuditableCustom<AppUser, Long> {
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "order", orphanRemoval = true)
 	private List<OrderDiscount> orderDiscount = new ArrayList<OrderDiscount>();
 
+	
+
 	 public Order() {
 		// TODO Auto-generated constructor stub
 			
@@ -99,7 +104,7 @@ public class Order extends AbstractAuditableCustom<AppUser, Long> {
 	
 	public Order(Long client_id, Long plan_id, Long status, Long duration_type,String billingFreq,
 			LocalDate startDate, LocalDate endDate, Long contract,List<OrderLine> serviceDetails, 
-			List<OrderPrice> orderprice,char billalign,String userAction,char isPrepaid) {
+			List<OrderPrice> orderprice,char billalign,String userAction,char isPrepaid, char autoRenew) {
 		
 		this.clientId = client_id;
 		this.planId = plan_id;
@@ -117,9 +122,10 @@ public class Order extends AbstractAuditableCustom<AppUser, Long> {
 		this.orderNo="";
 		this.activeDate=startDate.toDate();
 		this.billingAlign = isPrepaid == 'N' ? 'Y':'N';
+		this.autoRenew=autoRenew;
 	}
 
-public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode, char billAlign,LocalDate startdate) {
+public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode, char billAlign,LocalDate startdate, char autoRenew) {
 	    this.clientId=clientId;
 	    this.planId=planId;
 	    this.contarctPeriod=contractPeriod;
@@ -127,6 +133,7 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 	    this.billingAlign=billAlign;
 	    this.startDate=startdate.toDate();
 	    this.activeDate=startdate.toDate();
+	    this.autoRenew=autoRenew;
 	}
 
 	public Long getClientId() {
@@ -170,6 +177,12 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 		return price;
 	}
 
+	
+	public void setBillingAlign(char billingAlign) {
+		this.billingAlign = billingAlign;
+	}
+
+
 	public void addServiceDeatils(OrderLine orderDetail) {
 		orderDetail.update(this);
 		this.services.add(orderDetail);
@@ -208,12 +221,13 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 		    final Long contractPeriod = command.longValueOfParameterNamed("contractPeriod");
 		    final String paytermCode = command.stringValueOfParameterNamed("paytermCode");
 		    final boolean billAlign=command.booleanPrimitiveValueOfParameterNamed("billAlign");
+		    final boolean isAutoRenew=command.booleanPrimitiveValueOfParameterNamed("autoRenew");
 		    char align=billAlign?'y':'n';
-		    return new Order(clientId,planId,contractPeriod,paytermCode,align,startDate);
+		    char autoRenew=isAutoRenew?'Y':'N';
+		    return new Order(clientId,planId,contractPeriod,paytermCode,align,startDate,autoRenew);
 	}
 
 	public char getbillAlign() {
-		// TODO Auto-generated method stub
 		return billingAlign;
 	}
 
@@ -289,6 +303,10 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 	public char getBillingAlign() {
 		return billingAlign;
 	}
+	
+	public char isAutoRenewal() {
+		return autoRenew;
+	}
 
 
 	public String getDisconnectReason() {
@@ -340,4 +358,5 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 		this.orderDiscount.add(orderDiscount);
 		
 	}
+
 }

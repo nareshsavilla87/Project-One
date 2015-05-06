@@ -32,7 +32,10 @@ public class PropertyDefinationData {
 	private String description;
 	private LocalDate transactionDate;
 	private String clientName;
-
+	private String propertyCodeType;
+	private String code;
+	private String referenceValue;
+	
 	public PropertyDefinationData(final Long id, final Long propertyTypeId,final String propertyType, final String propertyCode,
 			final String unitCode, final String floor, final String buildingCode,final String parcel, final String precinct, 
 			final String street,final String poBox, final String state, final String country,final String status, final String clientId) {
@@ -72,6 +75,18 @@ public class PropertyDefinationData {
 		this.clientId = clientId;
 		this.transactionDate = transactionDate;
 		this.clientName = clientName;
+
+	}
+	
+
+	public PropertyDefinationData(final Long id, final String propertyCodeType,final String code,
+			                     final String description,final String referenceValue) {
+
+		this.id = id;
+		this.propertyCodeType = propertyCodeType;
+		this.code = code;
+		this.description = description;
+		this.referenceValue = referenceValue;
 
 	}
 
@@ -191,10 +206,6 @@ public class PropertyDefinationData {
 		return propertyTypes;
 	}
 
-	public void setPropertyTypes(Collection<MCodeData> propertyTypes) {
-		this.propertyTypes = propertyTypes;
-	}
-
 	public List<String> getCountryData() {
 		return countryData;
 	}
@@ -251,4 +262,31 @@ public class PropertyDefinationData {
 		return clientName;
 	}
 
+	public String getPropertyCodeType() {
+		return propertyCodeType;
+	}
+
+	public void setPropertyCodeType(String propertyCodeType) {
+		this.propertyCodeType = propertyCodeType;
+	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getReferenceValue() {
+		return referenceValue;
+	}
+
+	public void setReferenceValue(String referenceValue) {
+		this.referenceValue = referenceValue;
+	}
+
+	public void setPropertyTypes(Collection<MCodeData> propertyTypes) {
+		this.propertyTypes = propertyTypes;
+	}
 }

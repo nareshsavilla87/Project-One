@@ -103,7 +103,20 @@ public class Role extends AbstractPersistable<Long> {
         return this.permissions;
     }
 
-    public boolean hasPermissionTo(final String permissionCode) {
+    
+    public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public boolean hasPermissionTo(final String permissionCode) {
         boolean match = false;
         for (final Permission permission : this.permissions) {
             if (permission.hasCode(permissionCode)) {

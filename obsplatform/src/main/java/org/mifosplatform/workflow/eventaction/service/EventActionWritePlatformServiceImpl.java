@@ -1,7 +1,9 @@
 package org.mifosplatform.workflow.eventaction.service;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import net.java.dev.obs.beesmart.AddExternalBeesmartMethod;
 
@@ -11,11 +13,16 @@ import org.mifosplatform.cms.eventmaster.domain.EventMasterRepository;
 import org.mifosplatform.cms.eventorder.domain.EventOrder;
 import org.mifosplatform.cms.eventorder.domain.EventOrderRepository;
 import org.mifosplatform.cms.eventorder.domain.EventOrderdetials;
+import org.mifosplatform.commands.domain.CommandWrapper;
+import org.mifosplatform.commands.service.CommandWrapperBuilder;
+import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.crm.ticketmaster.data.TicketMasterData;
 import org.mifosplatform.crm.ticketmaster.domain.TicketMaster;
 import org.mifosplatform.crm.ticketmaster.domain.TicketMasterRepository;
 import org.mifosplatform.crm.ticketmaster.service.TicketMasterReadPlatformService;
 import org.mifosplatform.finance.billingorder.api.BillingOrderApiResourse;
+import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayRecurringWritePlatformService;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.message.domain.BillingMessage;
 import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
@@ -46,6 +53,10 @@ import org.mifosplatform.workflow.eventaction.domain.EventActionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import urn.ebay.apis.eBLBaseComponents.StatusChangeActionType;
+
+import com.google.gson.JsonObject;
+
 @Service
 public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePlatformService{
 	
@@ -66,6 +77,8 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
     private final ActionDetailsReadPlatformService actionDetailsReadPlatformService;	
     private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
     private final HardwareAssociationReadplatformService hardwareAssociationReadplatformService;
+    private final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService;
+    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 
 
 	@Autowired
@@ -74,7 +87,8 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			final OrderRepository orderRepository,final TicketMasterRepository repository,final ProcessRequestRepository processRequestRepository,
 			final BillingOrderApiResourse billingOrderApiResourse,final BillingMessageRepository messageDataRepository,final ClientRepository clientRepository,
 			final BillingMessageTemplateRepository messageTemplateRepository,final EventMasterRepository eventMasterRepository,final EventOrderRepository eventOrderRepository,
-			final TicketMasterReadPlatformService ticketMasterReadPlatformService,final AppUserReadPlatformService readPlatformService)
+			final TicketMasterReadPlatformService ticketMasterReadPlatformService,final AppUserReadPlatformService readPlatformService,
+			final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService, final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService)
 	{
 		this.repository=repository;
 		this.orderRepository=orderRepository;
@@ -91,6 +105,8 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
         this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
         this.contractPeriodReadPlatformService=contractPeriodReadPlatformService;
         this.hardwareAssociationReadplatformService=hardwareAssociationReadplatformService;
+        this.paymentGatewayRecurringWritePlatformService = paymentGatewayRecurringWritePlatformService;
+        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
 	}
 	
 	
@@ -104,11 +120,12 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 	   EventAction eventAction=null;
 			
 	   	for(ActionDetaislData detailsData:actionDetaislDatas){
+	   		 
 		      EventActionProcedureData actionProcedureData=this.actionDetailsReadPlatformService.checkCustomeValidationForEvents(clientId, detailsData.getEventName(),detailsData.getActionName(),resourceId);
 			  JSONObject jsonObject=new JSONObject();
-
+			  SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
 			  	if(actionProcedureData.isCheck()){
-				    SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+				   
 				    List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyContractType("Month(s)",1);
 				   
 				    switch(detailsData.getActionName()){
@@ -231,25 +248,6 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 
 			        	   break; 
 			        	   
-				    case EventActionConstants.ACTION_INVOICE : 
-				    	  
-			        	  jsonObject.put("dateFormat","dd MMMM yyyy");
-			        	  jsonObject.put("locale","en");
-			        	  	if(detailsData.IsSynchronous().equalsIgnoreCase("N")){
-			        	  		eventAction=new EventAction(DateUtils.getDateOfTenant(), "CREATE",EventActionConstants.EVENT_ACTIVE_ORDER.toString(),
-			        	  		EventActionConstants.ACTION_INVOICE.toString(),"/billingorder/"+clientId,Long.parseLong(resourceId),
-			        	  		jsonObject.toString(),Long.parseLong(resourceId),clientId);
-					        	this.eventActionRepository.save(eventAction);
-			        	  	
-			        	  	}else{
-			            	 
-			        	  		Order order=this.orderRepository.findOne(new Long(resourceId));
-			        	  		jsonObject.put("dateFormat","dd MMMM yyyy");
-			        	  		jsonObject.put("locale","en");
-			        	  		jsonObject.put("systemDate",dateFormat.format(order.getStartDate()));
-			        	  		this.billingOrderApiResourse.retrieveBillingProducts(order.getClientId(),jsonObject.toString());
-			        	  	}
-			        	  break;
 			        	  
 					default:
 						break;
@@ -304,11 +302,84 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    			 "/eventmaster",Long.parseLong(resourceId),jsonObject.toString(),Long.valueOf(0),Long.valueOf(0));
 				    	 this.eventActionRepository.saveAndFlush(eventAction);
 			      
-				    	break; 	   	
+				    	break; 	
+				    	
+				    case EventActionConstants.ACTION_INVOICE : 
+				    	  
+			        	  jsonObject.put("dateFormat","dd MMMM yyyy");
+			        	  jsonObject.put("locale","en");
+			        	  	if(detailsData.IsSynchronous().equalsIgnoreCase("N")){
+			        	  		eventAction=new EventAction(DateUtils.getDateOfTenant(), "CREATE",EventActionConstants.EVENT_ACTIVE_ORDER.toString(),
+			        	  		EventActionConstants.ACTION_INVOICE.toString(),"/billingorder/"+clientId,Long.parseLong(resourceId),
+			        	  		jsonObject.toString(),Long.parseLong(resourceId),clientId);
+					        	this.eventActionRepository.save(eventAction);
+			        	  	
+			        	  	}else{
+			            	 
+			        	  		Order order=this.orderRepository.findOne(new Long(resourceId));
+			        	  		jsonObject.put("dateFormat","dd MMMM yyyy");
+			        	  		jsonObject.put("locale","en");
+			        	  		jsonObject.put("systemDate",dateFormat.format(order.getStartDate()));
+			        	  		this.billingOrderApiResourse.retrieveBillingProducts(order.getClientId(),jsonObject.toString());
+			        	  	}
+			        	  break;
+				    	
+				    case EventActionConstants.ACTION_RECURRING_DISCONNECT : 
+				    	
+				    	JsonObject apiRequestBodyAsJson = new JsonObject();
+				    	apiRequestBodyAsJson.addProperty("orderId", Long.parseLong(resourceId));
+				    	apiRequestBodyAsJson.addProperty("recurringStatus", "SUSPEND");
+				    	
+				    	final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePaypalProfileStatus().withJson(apiRequestBodyAsJson.toString()).build();
+						final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+					
+						Map<String,Object> resultMap = result.getChanges();
+						
+						JsonObject resultJson = new JsonObject();
+						resultJson.addProperty("result", resultMap.get("result").toString());
+						resultJson.addProperty("acknoledgement", resultMap.get("acknoledgement").toString());
+						resultJson.addProperty("error", resultMap.get("error").toString());
+						
+						
+						EventAction eventAction1=new EventAction(new Date(),"Recurring Disconnect","Recurring Disconnect",EventActionConstants.ACTION_RECURRING_DISCONNECT.toString(),
+				    			 "/eventmaster",Long.parseLong(resourceId),resultJson.toString(),Long.valueOf(0),Long.valueOf(0));
+						
+						eventAction1.updateStatus('Y');
+						this.eventActionRepository.saveAndFlush(eventAction1);
+						
+			        	break;
+			        	
+			        	
+				    case EventActionConstants.ACTION_RECURRING_RECONNECTION : 
+				    	
+				    	JsonObject JsonString = new JsonObject();
+				    	JsonString.addProperty("orderId", Long.parseLong(resourceId));
+				    	JsonString.addProperty("recurringStatus", "REACTIVATE");
+				    	
+				    	final CommandWrapper commandRequestForReconn = new CommandWrapperBuilder().updatePaypalProfileStatus().withJson(JsonString.toString()).build();
+						final CommandProcessingResult commandResult = this.commandsSourceWritePlatformService.logCommandSource(commandRequestForReconn);
+					
+						Map<String,Object> resultMapObj = commandResult.getChanges();
+						
+						JsonObject resultJsonObj = new JsonObject();
+						resultJsonObj.addProperty("result", resultMapObj.get("result").toString());
+						resultJsonObj.addProperty("acknoledgement", resultMapObj.get("acknoledgement").toString());
+						resultJsonObj.addProperty("error", resultMapObj.get("error").toString());
+						
+						
+						EventAction eventActionObj=new EventAction(new Date(),"Recurring Reconnection","Recurring Reconnection",EventActionConstants.ACTION_RECURRING_RECONNECTION.toString(),
+				    			 "/eventmaster",Long.parseLong(resourceId),resultJsonObj.toString(),Long.valueOf(0),Long.valueOf(0));
+						
+						eventActionObj.updateStatus('Y');
+						this.eventActionRepository.saveAndFlush(eventActionObj);
+				  	
+			        	break;
 			      
 			       
 				    	
 				    }
+				    
+				    
 				    	 	
 				      /* if(detailsData.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_SEND_EMAIL)){
 				    	   

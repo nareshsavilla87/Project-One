@@ -1,9 +1,11 @@
 package org.mifosplatform.billing.servicetransfer.data;
 
+import java.util.Collection;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
 
 public class ClientPropertyData {
@@ -34,6 +36,7 @@ public class ClientPropertyData {
 	private String addressKey;
 	private List<PropertyDefinationData> propertyCodesData;
 	private FeeMasterData feeMasterData;
+	private Collection<MCodeData> propertyTypes;
 
 	public ClientPropertyData(final Long id, final Long propertyTypeId,
 			final String propertyType, final String propertyCode,
@@ -168,9 +171,9 @@ public class ClientPropertyData {
 	}
 
 	public void setPropertyCodes(List<PropertyDefinationData> propertyCodesData) {
-		
+
 		this.propertyCodesData = propertyCodesData;
-		
+
 	}
 
 	public List<PropertyDefinationData> getPropertyCodesData() {
@@ -184,7 +187,15 @@ public class ClientPropertyData {
 	public void setFeeMasterData(FeeMasterData feeMasterData) {
 		this.feeMasterData = feeMasterData;
 	}
-	
+
+	public void setPropertyTypes(Collection<MCodeData> propertyTypes) {
+
+		this.propertyTypes = propertyTypes;
+	}
+
+	public Collection<MCodeData> getPropertyTypes() {
+		return propertyTypes;
+	}
 	
 
 }
