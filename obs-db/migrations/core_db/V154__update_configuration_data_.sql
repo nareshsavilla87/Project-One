@@ -12,7 +12,7 @@ update c_configuration set name='active-devices' where name='Active Devices';
 update c_configuration set name='register-plan' where name='Register_plan';
 update c_configuration set name='disconnection-credit' where name='Disconnection Credit';
 update c_configuration set name='registration-requires-device' where name='Registration_requires_device';
-update c_configuration set name='change-plan-align-dates' where name='CHANGE_PLAN_ALIGN_DATES';
+update c_configuration set name='change-plan-align-dates', enabled=0  where name='CHANGE_PLAN_ALIGN_DATES';
 delete from  c_configuration where name='is_selfcareuser';
 update c_configuration set name='selfcare-requires-email' where name='Selfcare_requires_email';
 update c_configuration set name='smtp' where name='SMTP';

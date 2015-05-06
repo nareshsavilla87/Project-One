@@ -460,10 +460,14 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 			orderDetails.setBillingAlign(configuration.isEnabled()?'Y':'N');
 			if(configuration.isEnabled() && renewalEndDate != null){
 				orderDetails.setEndDate(renewalEndDate.dayOfMonth().withMaximumValue());
+			}else{
+				orderDetails.setEndDate(renewalEndDate);
 			}
+		}else{
+			orderDetails.setEndDate(renewalEndDate);
 		}
 	  //orderDetails.setEndDate(renewalEndDate);
-
+		 orderDetails.setuserAction(requstStatus);
 	  for(OrderPrice orderprice:orderPrices){
 		  if(plan.isPrepaid() == 'Y'){
 			  final Long priceId = command.longValueOfParameterNamed("priceId");
@@ -488,7 +492,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  }
 	
 	  orderDetails.setContractPeriod(contractDetails.getId());
-	  orderDetails.setuserAction(requstStatus);
+	 
 	  orderDetails.setRenewalDate(newStartdate.toDate());
 	  this.orderRepository.save(orderDetails);
 
@@ -729,9 +733,9 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		 List<OrderPrice> orderPrices=newOrder.getPrice();
 		 for(OrderPrice orderPrice:orderPrices){
 			 if(billEndDate == null){
-				 orderPrice.setBillEndDate(null);	
+				// orderPrice.setBillEndDate(null);	
 			 }else{
-				 orderPrice.setBillEndDate(new LocalDate(billEndDate));
+				// orderPrice.setBillEndDate(new LocalDate(billEndDate));
 			 }
 			 orderPrice.setInvoiceTillDate(invoicetillDate);
 			 	orderPrice.setNextBillableDay(order.getPrice().get(0).getNextBillableDay());
