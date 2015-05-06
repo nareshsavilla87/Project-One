@@ -748,7 +748,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 				
 				onlineUsersdata = this.processRadiusPost(url, encodedPassword, object.toString());
 				jsonObj.put("radiusVersion", data.getProvSystem().toLowerCase());
-				jsonObj.put("onlineUsersdata", new JSONArray(onlineUsersdata));
+				jsonObj.put("pageItems", new JSONArray(onlineUsersdata));
 				onlineUsersdata = jsonObj.toString();
 			
 			}
