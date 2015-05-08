@@ -51,7 +51,7 @@ private static byte[] keyValue=new String("hugoadminhugoadm").getBytes();
     public static void main(String[] args) throws Exception 
     {
 
-            String plainText = "Default Demo Tenant=12-05-2015";
+            String plainText = "Sapphire Networks=31-07-2015";
 
             String encryptedText = AESDemo.encrypt(plainText);
             System.out.println(encryptedText);

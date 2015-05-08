@@ -139,6 +139,7 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 		}
 		
 		public String schemaForPrepaidPlans() {
+			
 			/*return "  sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType" +
 					" FROM b_contract_period sb, b_orders o, b_plan_pricing p WHERE sb.is_deleted = 'N' and sb.contract_period=p.duration " +
 					" and o.plan_id = p.plan_id  ";*/
@@ -164,6 +165,33 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 			   " JOIN b_plan_pricing p ON p.plan_id = o.plan_id AND p.price_region_id = prm.id WHERE     sb.is_deleted = 'N' AND sb.contract_period = p.duration" +
 			   " AND o.plan_id = p.plan_id ";	
 
+			/*return " sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType," +
+				   " p.id as  priceId,prm.priceregion_code as priceRegionCode, p.plan_id as planId,p.service_code as serviceCode " +
+				   " FROM b_contract_period sb,b_orders o LEFT JOIN b_client_address ca ON ca.client_id = o.client_id LEFT JOIN b_state s" +
+				   " ON s.state_name = ca.state LEFT JOIN b_priceregion_detail pd on (pd.state_id = ifnull((SELECT DISTINCT c.id FROM  " +
+				   " b_plan_pricing a, b_priceregion_detail b, b_state c, b_client_address d WHERE b.priceregion_id = a.price_region_id AND b.state_id = c.id" +
+				   " AND d.state = c.state_name AND d.address_key = 'PRIMARY' AND d.client_id =o.client_id  and a.plan_id = o.plan_id),0) and pd.country_id = ifnull((SELECT DISTINCT c.id" +
+				   " FROM b_plan_pricing a,b_priceregion_detail b,b_country c, b_state s,b_client_address d " +
+				   " WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
+				   " AND d.client_id =o.client_id and a.plan_id = o.plan_id and  d.state = s.state_name " +
+				   " and (s.id =b.state_id or(b.state_id = 0 and b.country_id = c.id ))), 0)) LEFT JOIN b_priceregion_master prm ON prm.id = pd.priceregion_id " +
+				   " JOIN b_plan_pricing p ON p.plan_id = o.plan_id AND p.price_region_id = prm.id WHERE  sb.is_deleted = 'N' AND sb.contract_period = p.duration" +
+				   " AND o.plan_id = p.plan_id AND o.id = ?" +
+				   " union all" +
+				   " select sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType," +
+				   " p.id as  priceId,prm.priceregion_code as priceRegionCode, p.plan_id as planId,p.service_code as serviceCode " +
+				   " FROM b_contract_period sb, b_orders o left join b_client_address ca on ca.client_id = o.client_id left join b_state s on s.state_name = ca.state left join b_priceregion_detail pd" +
+				   " on (pd.state_id = s.id or (pd.state_id = 0 and pd.country_id =0)) left join b_priceregion_master prm ON prm.id = pd.priceregion_id " +
+				   " join b_plan_pricing p on p.plan_id = o.plan_id and p.price_region_id = prm.id " +
+				   " WHERE  sb.is_deleted = 'N' AND sb.contract_period = p.duration AND o.plan_id = p.plan_id and sb.contract_period not in (SELECT sb.contract_period AS contractPeriod" +
+				   " FROM b_contract_period sb,b_orders o LEFT JOIN b_client_address ca ON ca.client_id = o.client_id LEFT JOIN b_state s ON s.state_name = ca.state" +
+				   " LEFT JOIN b_priceregion_detail pd on (pd.state_id = ifnull((SELECT DISTINCT c.id FROM  b_plan_pricing a, b_priceregion_detail b, b_state c," +
+				   " b_client_address d WHERE b.priceregion_id = a.price_region_id AND b.state_id = c.id " +
+				   " AND d.state = c.state_name AND d.address_key = 'PRIMARY' AND d.client_id =o.client_id  and a.plan_id = o.plan_id),0) and pd.country_id = ifnull((SELECT DISTINCT c.id" +
+				   " FROM b_plan_pricing a,b_priceregion_detail b,b_country c, b_state s,b_client_address d WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
+				   " AND d.client_id =o.client_id and a.plan_id = o.plan_id and  d.state = s.state_name and (s.id =b.state_id or(b.state_id = 0 and b.country_id = c.id ))), 0))" +
+				   " LEFT JOIN b_priceregion_master prm ON prm.id = pd.priceregion_id JOIN b_plan_pricing p ON p.plan_id = o.plan_id AND p.price_region_id = prm.id " +
+				   " WHERE     sb.is_deleted = 'N' AND sb.contract_period = p.duration AND o.plan_id = p.plan_id AND o.id = ?)";       */
 		}
 
 		@Override

@@ -159,9 +159,11 @@ public class RedemptionWritePlatformServiceImpl implements
 					 
 						if(order.getStatus() == RECONNECT_ORDER_STATUS){					
 							this.orderWritePlatformService.reconnectOrder(orderId);
+						
 						} else if(order.getStatus() == RENEWAL_ORDER_STATUS){
 							
 							json.addProperty("renewalPeriod", contractId);
+							json.addProperty("priceId",priceId);
 							json.addProperty("description", "Order Renewal By Redemption");
 							final JsonCommand commd = new JsonCommand(null, json.toString(), json, fromJsonHelper, null, clientId, null, null, clientId, null, null, null, null, null, null,null);
 							result=this.orderWritePlatformService.renewalClientOrder(commd, orderId);
