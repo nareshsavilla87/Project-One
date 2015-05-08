@@ -58,12 +58,9 @@ public class ServiceTransferApiResource {
 	private final MCodeReadPlatformService mCodeReadPlatformService;
 
 	@Autowired
-	public ServiceTransferApiResource(final PlatformSecurityContext context,
-			final DefaultToApiJsonSerializer<ClientPropertyData> toApiJsonSerializer,
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
-			final PropertyReadPlatformService propertyReadPlatformService,
-			final ServiceTransferReadPlatformService serviceTransferReadPlatformService,
+	public ServiceTransferApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<ClientPropertyData> toApiJsonSerializer,
+			final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
+			final PropertyReadPlatformService propertyReadPlatformService,final ServiceTransferReadPlatformService serviceTransferReadPlatformService,
 			final MCodeReadPlatformService mCodeReadPlatformService) {
 		this.context = context;
 		this.toApiJsonSerializer = toApiJsonSerializer;

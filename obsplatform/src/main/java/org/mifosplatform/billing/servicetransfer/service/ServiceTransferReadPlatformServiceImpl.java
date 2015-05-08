@@ -46,13 +46,27 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 		
 		public String schemaWithClientId(final Long clientId) {
 			
-			return "fm.id AS id,fm.fee_code AS feeCode,fm.fee_description AS feeDescription, fm.transaction_type AS transactionType,"
+			/*return "fm.id AS id,fm.fee_code AS feeCode,fm.fee_description AS feeDescription, fm.transaction_type AS transactionType,"
 				+"fm.charge_code AS chargeCode,ifnull(round(fd.amount , 2),fm.default_fee_amount ) as amount FROM b_fee_master fm "
 				+"left join b_client_address ca on ca.client_id = "+clientId+" "
                 +"left join b_state s on s.state_name = ca.state " 
                 +"left join b_priceregion_detail pd on (pd.state_id = s.id or (pd.state_id = 0 and pd.country_id = s.parent_code ) ) " 
                 +"left join b_priceregion_master prm ON prm.id = pd.priceregion_id "
-                +"left join b_fee_detail fd on (fd.fee_id = fm.id and fd.region_id = prm.id and fd.is_deleted='N' ) ";
+                +"left join b_fee_detail fd on (fd.fee_id = fm.id and fd.region_id = prm.id and fd.is_deleted='N' ) ";*/
+			
+			return "  fm.id AS id,fm.fee_code AS feeCode,fm.fee_description AS feeDescription,fm.transaction_type AS transactionType," +
+					" fm.charge_code AS chargeCode,ifnull(round(fd.amount, 2), fm.default_fee_amount) AS amount" +
+					" FROM b_fee_master fm" +
+					" LEFT JOIN b_client_address ca ON ca.client_id = "+clientId+" " +
+					" LEFT JOIN b_state s ON s.state_name = ca.state LEFT JOIN b_priceregion_detail pd  " +
+					" ON (pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_fee_detail a, b_priceregion_detail b, b_state c, b_client_address d" +
+					" WHERE b.priceregion_id = a.region_id AND b.state_id = c.id AND a.region_id = b.priceregion_id AND d.state = c.state_name " +
+					" AND d.address_key = 'PRIMARY' AND d.client_id = "+clientId+" AND a.fee_id = fm.id),0) " +
+					" AND pd.country_id =ifnull((SELECT DISTINCT c.id FROM b_fee_detail a, b_priceregion_detail b, b_country c, b_state s, b_client_address d" +
+					" WHERE b.priceregion_id = a.region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY' " +
+					" AND d.client_id = "+clientId+" AND a.fee_id = fm.id AND (s.id = b.state_id OR (b.state_id = 0 AND b.country_id = c.id))),0))" +
+					" LEFT JOIN b_priceregion_master prm ON prm.id = pd.priceregion_id LEFT JOIN b_fee_detail fd ON (fd.fee_id = fm.id AND fd.region_id = prm.id" +
+					" AND fd.is_deleted = 'N')";
 		}
 
 		@Override

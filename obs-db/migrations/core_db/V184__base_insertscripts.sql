@@ -21,6 +21,8 @@ insert ignore into `b_billing_rules`(`id`,`billing_rule`) values (null,'Prorata 
 insert ignore into `b_billing_rules`(`id`,`billing_rule`) values (null,'Prorata & NODC');
 insert ignore into `b_billing_rules`(`id`,`billing_rule`) values (null,'Full Month & NODC');
 
+insert into `b_service`(`id`,`service_code`,`service_description`,`service_type`,`status`,`is_deleted`,`service_unittype`,`is_optional`,`is_auto`) values (0,'None','None','TV','ACtive','Y',null,'N','Y');
+
 -- Discount Codes
 
 insert ignore into `b_discount_master`(`id`,`discount_code`,`discount_description`,`discount_type`,`discount_rate`,`start_date`,`discount_status`,`is_delete`) values (null,'None','None','Flat',0,'2015-04-16 00:00:00','ACTIVE','N');
@@ -111,6 +113,7 @@ CREATE OR REPLACE VIEW  `mvNewRelease_vw` AS select `m`.`id` AS `mediaId`,`m`.`t
 
 -- Promotion movies
 CREATE OR REPLACE VIEW  `mvPromotion_vw` AS select `ed`.`event_id` AS `event_id`,`ma`.`id` AS `mediaId`,`ma`.`title` AS `title`,`ma`.`image` AS `image`,`ed`.`event_id` AS `eventId`,`ma`.`rating` AS `rating` from ( `b_media_asset` `ma` join  `b_mod_detail` `ed` on((`ed`.`media_id` = `ma`.`id`))) where `ed`.`event_id` in (select `ed`.`event_id` from ( `b_mod_master` `em` join  `b_mod_detail` `ed` on((`em`.`id` = `ed`.`event_id`))) group by `ed`.`event_id` having (count(`ed`.`event_id`) > 1));
+
 
 -- Watched movies
 CREATE OR REPLACE VIEW  `mvWatched_vw` AS select `m`.`id` AS `mediaId`,`m`.`title` AS `title`,`m`.`image` AS `image`,`m`.`rating` AS `rating`,'W' AS `assetTag`,`m`.`release_date` AS `release_date`,`ed`.`event_id` AS `eventId`,count(`eo`.`id`) AS `COUNT(eo.id)` from (( `b_media_asset` `m` join  `b_mod_detail` `ed` on((`m`.`id` = `ed`.`media_id`))) join  `b_modorder` `eo` on((`eo`.`event_id` = `ed`.`event_id`))) order by 6 desc;
