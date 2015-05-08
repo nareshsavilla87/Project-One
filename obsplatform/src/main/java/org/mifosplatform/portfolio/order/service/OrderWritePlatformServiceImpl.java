@@ -34,6 +34,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
+import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.allocation.service.AllocationReadPlatformService;
 import org.mifosplatform.portfolio.association.data.AssociationData;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
@@ -51,7 +52,6 @@ import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.UserActionStatusEnumaration;
-import org.mifosplatform.portfolio.order.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderDiscount;
 import org.mifosplatform.portfolio.order.domain.OrderDiscountRepository;
@@ -439,11 +439,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		  newStartdate=new LocalDate(orderDetails.getEndDate()).plusDays(1);
 		  requstStatus=UserActionStatusEnumaration.OrderStatusType(UserActionStatusTypeEnum.RENEWAL_BEFORE_AUTOEXIPIRY).getValue();
 		  
-		  //Prepare Provisioning Req
-		  CodeValue codeValue=this.codeValueRepository.findOneByCodeValue(plan.getProvisionSystem());
-		  if(codeValue.position() == 1){
-			  requestStatusForProv="RENEWAL_BE";
-		  }
+		
 					
 	  } else if(orderDetails.getStatus().equals(StatusTypeEnum.DISCONNECTED.getValue().longValue())){
 		  newStartdate = DateUtils.getLocalDateOfTenant(); 
@@ -460,7 +456,21 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		  orderDetails.setNextBillableDay(null);
 	  }
 	  LocalDate renewalEndDate=this.orderAssembler.calculateEndDate(newStartdate,contractDetails.getSubscriptionType(),contractDetails.getUnits());
-	  orderDetails.setEndDate(renewalEndDate);
+	  
+		
+     Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
+		
+		if(configuration != null && plan.isPrepaid() == 'N'){
+			orderDetails.setBillingAlign(configuration.isEnabled()?'Y':'N');
+			if(configuration.isEnabled() && renewalEndDate != null){
+				orderDetails.setEndDate(renewalEndDate.dayOfMonth().withMaximumValue());
+			}else{
+				orderDetails.setEndDate(renewalEndDate);
+			}
+		}else{
+			orderDetails.setEndDate(renewalEndDate);
+		}
+	  //orderDetails.setEndDate(renewalEndDate);
 
 	  for(OrderPrice orderprice:orderPrices){
 		  if(plan.isPrepaid() == 'Y'){
@@ -480,7 +490,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 					throw new PriceNotFoundException(priceId);
 				}
 		  	}
-		  orderprice.setDatesOnOrderStatus(newStartdate,renewalEndDate,orderDetails.getUserAction());//setBillEndDate(renewalEndDate);
+		  orderprice.setDatesOnOrderStatus(newStartdate,new LocalDate(orderDetails.getEndDate()),orderDetails.getUserAction());//setBillEndDate(renewalEndDate);
 		  //this.OrderPriceRepository.save(orderprice);
 		  orderDetails.setNextBillableDay(null);
 	  }
@@ -493,14 +503,18 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	//  Set<PlanDetails> planDetails=plan.getDetails();
 	 // ServiceMaster serviceMaster=this.serviceMasterRepository.findOneByServiceCode(planDetails.iterator().next().getServiceCode());
 	  Long resourceId=Long.valueOf(0);
-	  	if(!plan.getProvisionSystem().equalsIgnoreCase("None") && requestStatusForProv != null){
-		    	// if(serviceMaster.isAuto() == 'Y' && requestStatusForProv != null){
-		    	 	//this.prepareRequestWriteplatformService.prepareNewRequest(orderDetails,plan,requestStatusForProv);
-		    	// }else{
+	  	if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
+		    
+    	  	  //Prepare Provisioning Req
+			  CodeValue codeValue=this.codeValueRepository.findOneByCodeValue(plan.getProvisionSystem());
+			  if(codeValue.position() == 1){
+				  requestStatusForProv="RENEWAL_BE";
+			  }
+			  if(requestStatusForProv != null){
 		    		 CommandProcessingResult commandProcessingResult=this.provisioningWritePlatformService.postOrderDetailsForProvisioning(orderDetails,plan.getPlanCode(),requestStatusForProv,
 		    				 Long.valueOf(0),null,null,orderDetails.getId(),plan.getProvisionSystem(),null);
 		    		 resourceId=commandProcessingResult.resourceId();
-		    	// }
+			  	}
 		     }
 
 	  		// checking for Paypal Recurring DisConnection			
@@ -721,9 +735,9 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		 List<OrderPrice> orderPrices=newOrder.getPrice();
 		 for(OrderPrice orderPrice:orderPrices){
 			 if(billEndDate == null){
-				 orderPrice.setBillEndDate(null);	
+			//	 orderPrice.setBillEndDate(null);	
 			 }else{
-				 orderPrice.setBillEndDate(new LocalDate(billEndDate));
+				// orderPrice.setBillEndDate(new LocalDate(billEndDate));
 			 }
 			 orderPrice.setInvoiceTillDate(invoicetillDate);
 			 	orderPrice.setNextBillableDay(order.getPrice().get(0).getNextBillableDay());
@@ -1063,7 +1077,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 							StatusTypeEnum.ACTIVE.toString(),StatusTypeEnum.SUSPENDED.toString());
 					this.paymentFollowupRepository.save(paymentFollowup);
 					this.orderRepository.save(order);
-					final OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resourceId,UserActionStatusTypeEnum.TERMINATION.toString(),
+					final OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resourceId,UserActionStatusTypeEnum.SUSPENTATION.toString(),
 							appUser.getId(),null);
                      this.orderHistoryRepository.save(orderHistory);	
 				    

@@ -85,7 +85,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			
 	Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
 			
-			if(configuration != null ){
+			if(configuration != null && plan.isPrepaid() == 'N'){
 				order.setBillingAlign(configuration.isEnabled()?'Y':'N');
 				if(configuration.isEnabled()){
 				order.setEndDate(endDate.dayOfMonth().withMaximumValue());

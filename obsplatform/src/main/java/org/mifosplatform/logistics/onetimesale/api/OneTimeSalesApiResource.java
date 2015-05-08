@@ -75,19 +75,12 @@ public class OneTimeSalesApiResource {
 	private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
 
 	@Autowired
-	public OneTimeSalesApiResource(final PlatformSecurityContext context,
-			final DefaultToApiJsonSerializer<OneTimeSaleData> toApiJsonSerializer,
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
-			final OneTimeSaleWritePlatformService oneTimeSaleWritePlatformService,
-			final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService,
-			final ItemReadPlatformService itemReadPlatformService,
-			final DiscountReadPlatformService discountReadPlatformService,
-			
-			final OfficeReadPlatformService officeReadPlatformService,
-			final DefaultToApiJsonSerializer<ItemData> defaultToApiJsonSerializer,
-			final FromJsonHelper fromJsonHelper,
-			final ContractPeriodReadPlatformService contractPeriodReadPlatformService) {
+	public OneTimeSalesApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<OneTimeSaleData> toApiJsonSerializer,
+			final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
+			final OneTimeSaleWritePlatformService oneTimeSaleWritePlatformService,final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService,
+			final ItemReadPlatformService itemReadPlatformService,final DiscountReadPlatformService discountReadPlatformService,
+			final OfficeReadPlatformService officeReadPlatformService,final DefaultToApiJsonSerializer<ItemData> defaultToApiJsonSerializer,
+			final FromJsonHelper fromJsonHelper,final ContractPeriodReadPlatformService contractPeriodReadPlatformService) {
 
 		this.context = context;
 		this.fromJsonHelper = fromJsonHelper;
