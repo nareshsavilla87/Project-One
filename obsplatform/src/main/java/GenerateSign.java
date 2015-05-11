@@ -1,35 +1,52 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
-import java.math.BigDecimal;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.joda.time.LocalDate;
-import org.json.JSONException;
-import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Scanner;
 
 
 public class GenerateSign {
-	
-	public static void main(String []arg) {
-		
-		BigDecimal bal=new BigDecimal(-1);
-		System.out.println(bal.compareTo(BigDecimal.ZERO));
-	}
-	
-}
+    
+    public static void main(String[] args)
+    {
+        // TODO Auto-generated method stub
+        
+        System.out.println(" Please enter the input string :" );
+        Scanner in = new Scanner (System.in);
+        String s=in.nextLine();
+        char c=firstNonRepeatedCharacter(s);
+        System.out.println("The first non repeated character is :  " + c);
+    }
+    
+    public static Character firstNonRepeatedCharacter(String str)
+    {
+        HashMap<Character,Integer>  characterhashtable= 
 
+                     new HashMap<Character ,Integer>();
+        int i,length ;
+        Character c ;
+        length= str.length();  // Scan string and build hash table
+        for (i=0;i < length;i++)
+        {
+            c=str.charAt(i);
+            if(characterhashtable.containsKey(c))
+            {
+                // increment count corresponding to c
+                characterhashtable.put(  c ,  characterhashtable.get(c) +1 );
+            }
+            else
+            {
+                characterhashtable.put( c , 1 ) ;
+            }
+        }
+        // Search characterhashtable in in order of string str
+        
+        for (i =0 ; i < length ; i++ )
+        {
+            c= str.charAt(i);
+            if( characterhashtable.get(c)  == 1 )
+            return c;
+        }
+        return null ;
+    }
+} 
 
