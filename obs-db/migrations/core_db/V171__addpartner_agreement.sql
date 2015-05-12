@@ -95,3 +95,32 @@ SET @id=(select id from job where name='RESELLERCOMMISSION');
 INSERT IGNORE INTO job_parameters VALUES(null ,@id, 'processDate', 'DATE', 'NOW()', '26 January 2015', 'Y', NULL);
 INSERT IGNORE INTO job_parameters VALUES(null, @id, 'reportName', 'COMBO', NULL, 'Reseller Commission', 'Y', NULL);
 
+DROP PROCEDURE IF EXISTS proc_office_commission;
+DELIMITER //
+CREATE PROCEDURE proc_office_commission()
+BEGIN
+insert into b_office_commission
+select null id,bc.id charge_id,
+mc.office_id,bi.invoice_date,-- bc.charge_type,
+oad.source,oad.share_amount,oad.share_type ,mcv.code_value comm_source,
+case 
+when oad.share_type='Flat' and bc.charge_type='NRC' then round(oad.share_amount,2)
+when oad.share_type='Percentage' and bc.charge_type='NRC' then round(bc.netcharge_amount * oad.share_amount / 100,2) 
+when oad.share_type='Percentage' and bc.charge_type <>'NRC' then round(bc.netcharge_amount * oad.share_amount / 100,2) 
+else round(oad.share_amount,2) end amt ,now() created_dt
+from b_charge bc
+join b_invoice bi on (bc.invoice_id=bi.id)
+join m_client mc on (bc.client_id=mc.id)
+join m_office_agreement oa on (oa.office_id = mc.office_id)
+join m_office_agreement_detail oad on (oad.agreement_id = oa.id and oad.is_deleted='N'
+ and oad.source = 
+ case when bc.charge_type ='NRC' then (select id from m_code_value cv where cv.code_value='Hardware') 
+ when bc.charge_type ='RC' then (select id from m_code_value cv where cv.code_value='Subscriptions')  else (select id from m_code_value cv where cv.code_value='On-demand') end)
+join m_code_value mcv on (mcv.id = oad.source and mcv.code_id=(select id from m_code mc where mc.code_name='Source Category'))
+where 
+bc.id not in 
+ (select charge_id from b_office_commission)
+and bc.id >= 
+ ifnull( (select max(charge_id) from b_office_commission),0);
+END //
+
