@@ -84,6 +84,7 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 				     " AND c.country_name = d.country AND d.address_key = 'PRIMARY' AND d.client_id = ? AND a.plan_id = ? AND cc.billfrequency_code =  ?),0))" +
 				     " GROUP BY da.id";
 			return this.jdbcTemplate.query(sql, mapper, new Object[] { planId,billingFreq,clientId,clientId,planId,billingFreq,clientId,planId,billingFreq});
+
 		} 
 
 		private static final class PriceMapper implements RowMapper<PriceData> {

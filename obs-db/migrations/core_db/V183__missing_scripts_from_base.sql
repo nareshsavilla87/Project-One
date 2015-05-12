@@ -1,3 +1,4 @@
+SET SQL_SAFE_UPDATES = 0;
 -- Create Tables
 CREATE TABLE IF NOT EXISTS `b_billing_rules` (
   `id` int(20) NOT NULL AUTO_INCREMENT,
@@ -453,4 +454,4 @@ insert ignore into b_office_address values(null, 'OBS', 'OPen Billing System', '
 
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal-for-ios',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
-
+SET SQL_SAFE_UPDATES = 1;
