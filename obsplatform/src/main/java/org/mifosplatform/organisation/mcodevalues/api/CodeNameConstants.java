@@ -71,6 +71,10 @@ public static final String TRANSACTION_TYPE = "Transaction Type";
 public static final String CODE_PROPERTY_SERVICE_TRANSFER = "Service Transfer";
 public static final String CODE_CANCEL_SALE= "CANCEL SALE";
 public static final String PROPERTY_CODE_TYPE= "Property Code Type";
+public static final String CODE_PROPERTY_PARCEL = "Parcel";
+public static final String CODE_PROPERTY_FLOOR = "Level/Floor";
+public static final String CODE_PROPERTY_UNIT = "Unit Codes";
+public static final String CODE_PROPERTY_BUILDING = "Building Codes";
 
 
 

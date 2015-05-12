@@ -541,7 +541,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 				handler = applicationContext.getBean("createOrderCommandHandler",NewCommandSourceHandler.class);
 			} else if (wrapper.isUpdate()) {
 				handler = applicationContext.getBean("updateOrderCommandHandler",NewCommandSourceHandler.class);
-			} else if (wrapper.isDelete()) {
+			}else if (wrapper.isDisconnect()) {
+				handler = applicationContext.getBean("disconnectOrderCommandHandler",NewCommandSourceHandler.class);
+			}else if (wrapper.isDelete()) {
 				handler = applicationContext.getBean("deleteOrderCommandHandler",NewCommandSourceHandler.class);
 			} else if (wrapper.isUpdatePrice()) {
 				handler = applicationContext.getBean("updateOrderCommandHandler",NewCommandSourceHandler.class);
@@ -1309,13 +1311,16 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 			     }else {
 			           throw new UnsupportedCommandException(wrapper.commandName());
 			     }
-	      }else if(wrapper.isPropertyCodeMasterResource()){
+	      }else if(wrapper.isPropertyMasterResource()){
 	    	  if(wrapper.isCreate()){
-	    		  handler = applicationContext.getBean("createPropertyCodeMasterCommandHandler",NewCommandSourceHandler.class);
+	    		  handler = applicationContext.getBean("createPropertyMasterCommandHandler",NewCommandSourceHandler.class);
+	    	  }else if(wrapper.isUpdate()){
+	    		  handler = applicationContext.getBean("updatePropertyMasterCommandHandler",NewCommandSourceHandler.class);
+	    	  }else if(wrapper.isDelete()){
+	    		  handler = applicationContext.getBean("deletePropertyMasterCommandHandler",NewCommandSourceHandler.class);
 	    	  }else {
 	    		  throw new UnsupportedCommandException(wrapper.commandName());
 	    	  }
-	              
 	      }
 	       return handler;
 	}

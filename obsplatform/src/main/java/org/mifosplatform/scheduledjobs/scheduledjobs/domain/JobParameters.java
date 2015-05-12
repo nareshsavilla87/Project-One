@@ -154,11 +154,11 @@ public class JobParameters extends AbstractPersistable<Long>{
 		    if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.jobisAutoRenewal)){
 		    	if(isAutoRenewal){
 		    	this.isDynamic="Y";
-		    //	this.paramValue="Y";
-		    	}else
+		    	this.paramValue="Y";
+		    	}else{
 		    		this.isDynamic="N";
-		    	//this.paramValue="N";
-		     
+		    	this.paramValue="N";
+		    	}
 		    }
 	    final String messageParamName = "promotionalMessage";
 	    final String promotionalMessage= command.stringValueOfParameterNamed(messageParamName);

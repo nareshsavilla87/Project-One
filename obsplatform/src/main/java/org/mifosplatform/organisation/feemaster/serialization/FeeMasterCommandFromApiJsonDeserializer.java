@@ -65,13 +65,14 @@ public class FeeMasterCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("feeDescription").value(feeDescription).notBlank();
         baseDataValidator.reset().parameter("transactionType").value(transactionType).notBlank();
         baseDataValidator.reset().parameter("chargeCode").value(chargeCode).notNull().notExceedingLengthOf(10);
-		baseDataValidator.reset().parameter("defaultFeeAmount").value(defaultFeeAmount).notNull();
+		//baseDataValidator.reset().parameter("defaultFeeAmount").value(defaultFeeAmount).notNull();
 		
 		final JsonArray regionPricesArray = fromApiJsonHelper.extractJsonArrayNamed("regionPrices", element);
         String[] feemasterPriceRegions = null;
         feemasterPriceRegions = new String[regionPricesArray.size()];
-        final int itemPricesArraySize = regionPricesArray.size();
-        if(itemPricesArraySize > 0){
+        final int feemasterPricesArraySize = regionPricesArray.size();
+        baseDataValidator.reset().parameter("regionPrices").value(feemasterPricesArraySize).integerGreaterThanZero();
+        if(feemasterPricesArraySize > 0){
 	    for(int i = 0; i < regionPricesArray.size(); i++){
 	    	feemasterPriceRegions[i] = regionPricesArray.get(i).toString();
 	    	

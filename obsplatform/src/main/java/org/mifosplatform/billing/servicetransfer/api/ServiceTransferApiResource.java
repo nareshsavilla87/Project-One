@@ -37,7 +37,9 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 /**
- * @author hugo this api class used to transfer property details of client
+ * @author ranjith
+ * this api class used to service transfer with property's 
+ * Date: 14/04/2015
  */
 @Path("/servicetransfer")
 @Component
@@ -56,12 +58,9 @@ public class ServiceTransferApiResource {
 	private final MCodeReadPlatformService mCodeReadPlatformService;
 
 	@Autowired
-	public ServiceTransferApiResource(final PlatformSecurityContext context,
-			final DefaultToApiJsonSerializer<ClientPropertyData> toApiJsonSerializer,
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
-			final PropertyReadPlatformService propertyReadPlatformService,
-			final ServiceTransferReadPlatformService serviceTransferReadPlatformService,
+	public ServiceTransferApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<ClientPropertyData> toApiJsonSerializer,
+			final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
+			final PropertyReadPlatformService propertyReadPlatformService,final ServiceTransferReadPlatformService serviceTransferReadPlatformService,
 			final MCodeReadPlatformService mCodeReadPlatformService) {
 		this.context = context;
 		this.toApiJsonSerializer = toApiJsonSerializer;
@@ -88,12 +87,12 @@ public class ServiceTransferApiResource {
 		if(clientPropertyData !=null){
 			final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId);
 			final Collection<MCodeData> propertyTypes = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROPERTY_TYPE);
-			if(feeMasterData == null){
-		    	throw new NoFeeMasterRegionalPriceFound();
-		    }
-			clientPropertyData.setFeeMasterData(feeMasterData.get(0));
-			clientPropertyData.setPropertyTypes(propertyTypes);
-
+			if(!feeMasterData.isEmpty()){
+		    	clientPropertyData.setFeeMasterData(feeMasterData.get(0));
+			    clientPropertyData.setPropertyTypes(propertyTypes);
+			 }else{
+				throw new NoFeeMasterRegionalPriceFound();
+			}
 		}
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, clientPropertyData,RESPONSE_DATA_PARAMETERS);

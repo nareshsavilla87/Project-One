@@ -85,7 +85,6 @@ public class ConfigurationApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveAllConfigurations(@Context final UriInfo uriInfo) throws JSONException {
 
-      //  context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 
         final ConfigurationData configurationData = this.readPlatformService.retrieveGlobalConfiguration();
         

@@ -37,16 +37,14 @@ public class ClientPropertyData {
 	private List<PropertyDefinationData> propertyCodesData;
 	private FeeMasterData feeMasterData;
 	private Collection<MCodeData> propertyTypes;
+	private String floorDesc;
+	private String parcelDesc;
 
-	public ClientPropertyData(final Long id, final Long propertyTypeId,
-			final String propertyType, final String propertyCode,
-			final String unitCode, final String floor, final String buildingCode,
-			final String parcel, final String precinct, final String street,
-			final String zip, final String state, final String country,
-			final String status, final String clientId, final String firstName,
-			final String lastName, String displayName, final String email,
-			final String phone, final String addressNo,
-			final String addressKey, final String categoryType) {
+	public ClientPropertyData(final Long id, final Long propertyTypeId,final String propertyType, final String propertyCode,
+			final String unitCode, final String floor, final String floorDesc,final String buildingCode,final String parcel,
+            final String parcelDesc,final String precinct, final String street,final String zip, final String state, final String country,
+	        final String status, final String clientId, final String firstName,final String lastName, String displayName, 
+	        final String email, final String addressNo,final String addressKey, final String categoryType) {
 
 		this.id = id;
 		this.propertyTypeId = propertyTypeId;
@@ -54,8 +52,10 @@ public class ClientPropertyData {
 		this.propertyCode = propertyCode;
 		this.unitCode = unitCode;
 		this.floor = floor;
+		this.floorDesc =floorDesc;
 		this.buildingCode = buildingCode;
 		this.parcel = parcel;
+		this.parcelDesc = parcelDesc;
 		this.precinct = precinct;
 		this.street = street;
 		this.zip = zip;
@@ -67,7 +67,6 @@ public class ClientPropertyData {
 		this.lastname = StringUtils.defaultIfEmpty(lastName, null);
 		this.displayName = StringUtils.defaultIfEmpty(displayName, null);
 		this.email = email;
-		this.phone = phone;
 		this.addressNo = addressNo;
 		this.addressKey = addressKey;
 		this.categoryType = categoryType;
@@ -168,6 +167,14 @@ public class ClientPropertyData {
 
 	public String getAddressKey() {
 		return addressKey;
+	}
+	
+	public String getFloorDesc() {
+		return floorDesc;
+	}
+
+	public String getParcelDesc() {
+		return parcelDesc;
 	}
 
 	public void setPropertyCodes(List<PropertyDefinationData> propertyCodesData) {

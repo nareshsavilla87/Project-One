@@ -69,13 +69,13 @@ public class ItemCommandFromApiJsonDeserializer {
 	        baseDataValidator.reset().parameter("warranty").value(warranty).notNull().notExceedingLengthOf(2);
 			baseDataValidator.reset().parameter("itemClass").value(itemClass).notBlank();
 			baseDataValidator.reset().parameter("units").value(units).notBlank();
-			baseDataValidator.reset().parameter("defaultPrice").value(defaultPrice).notNull();
+			//baseDataValidator.reset().parameter("defaultPrice").value(defaultPrice).notNull();
 			
 			final JsonArray itemPricesArray = fromApiJsonHelper.extractJsonArrayNamed("itemPrices", element);
 	        String[] itemPriceRegions = null;
 	        itemPriceRegions = new String[itemPricesArray.size()];
 	        final int itemPricesArraySize = itemPricesArray.size();
-		    //baseDataValidator.reset().parameter("itemPrices").value(itemPricesArraySize).integerGreaterThanZero();
+		    baseDataValidator.reset().parameter("itemPrices").value(itemPricesArraySize).integerGreaterThanZero();
 	        if(itemPricesArraySize > 0){
 		    for(int i = 0; i < itemPricesArray.size(); i++){
 		    	itemPriceRegions[i] = itemPricesArray.get(i).toString();

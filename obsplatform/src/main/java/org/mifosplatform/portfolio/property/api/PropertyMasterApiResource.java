@@ -33,7 +33,6 @@ import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
-import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiConstants;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -43,13 +42,10 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.organisation.address.data.CityDetailsData;
-import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
-import org.mifosplatform.portfolio.property.exceptions.PropertyCodeAllocatedException;
 import org.mifosplatform.portfolio.property.service.PropertyReadPlatformService;
 import org.mifosplatform.scheduledjobs.dataupload.command.DataUploadCommand;
 import org.mifosplatform.scheduledjobs.dataupload.service.DataUploadWritePlatformService;
@@ -63,115 +59,100 @@ import com.sun.jersey.multipart.FormDataParam;
 
 /**
  * @author ranjith
- * this api class used to create,update and delete different property's 
- * Date: 12/04/2015
+ * * this api class used to create,update and delete different property master code's 
+ * Date 25/04/2015
  */
-@Path("/property")
+@Path("/propertymaster")
 @Component
 @Scope("singleton")
-public class PropertyApiResource {
+public class PropertyMasterApiResource {
 
-	/**
-	 * The set of parameters that are supported in response for {@link CodeData}
-	 */
-	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "propertycode", "propertyTypeId", "unitCode",
-					"floor", "buildingCode", "parcel", "street", "status","precinct", "poBox"));
+	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("propertyTypes", "codes"));
 
 	public InputStream inputStreamObject;
-	private final static String RESOURCENAMEFORPERMISSIONS = "PROPERTY";
+	private final static String RESOURCENAMEFORPERMISSIONS = "PROPERTYCODEMASTER";
 	private final PlatformSecurityContext context;
 	private final DefaultToApiJsonSerializer<PropertyDefinationData> toApiJsonSerializer;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService;
-	private final PropertyReadPlatformService propertyReadPlatformService;
 	private final MCodeReadPlatformService mCodeReadPlatformService;
-	private final AddressReadPlatformService addressReadPlatformService;
 	private final DataUploadWritePlatformService dataUploadWritePlatformService;
+	private final PropertyReadPlatformService propertyReadPlatformService;
 
 	@Autowired
-	public PropertyApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<PropertyDefinationData> toApiJsonSerializer,
+	public PropertyMasterApiResource(final PlatformSecurityContext context,
+			final DefaultToApiJsonSerializer<PropertyDefinationData> toApiJsonSerializer,
 			final ApiRequestParameterHelper apiRequestParameterHelper,
 			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
-			final PropertyReadPlatformService propertyReadPlatformService,
 			final MCodeReadPlatformService mCodeReadPlatformService,
-			final AddressReadPlatformService addressReadPlatformService,
-			final DataUploadWritePlatformService dataUploadWritePlatformService) {
+			final DataUploadWritePlatformService dataUploadWritePlatformService,
+			final PropertyReadPlatformService propertyReadPlatformService) {
 
 		this.context = context;
 		this.toApiJsonSerializer = toApiJsonSerializer;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.commandSourceWritePlatformService = commandSourceWritePlatformService;
-		this.propertyReadPlatformService = propertyReadPlatformService;
 		this.mCodeReadPlatformService = mCodeReadPlatformService;
-		this.addressReadPlatformService = addressReadPlatformService;
 		this.dataUploadWritePlatformService = dataUploadWritePlatformService;
+		this.propertyReadPlatformService = propertyReadPlatformService;
 
 	}
 
 	/**
-	 * @param uriInfo
-	 * @return retrieved drop down data for creating properties
+	 * template for creating property code master details
 	 */
 	@GET
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrievePropertyTemplate(@Context final UriInfo uriInfo) {
+	public String retrievePropertyCodeMasterMcodeData(	@Context final UriInfo uriInfo) {
 
-		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
-		final PropertyDefinationData propertyTypeData = hadleTemplateData();
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, propertyTypeData,RESPONSE_DATA_PARAMETERS);
-
-	}
-
-	private PropertyDefinationData hadleTemplateData() {
-
-		final Collection<MCodeData> propertyTypes = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROPERTY_TYPE);
-		final List<CityDetailsData> citiesData = this.addressReadPlatformService.retrieveCitywithCodeDetails();
-		return new PropertyDefinationData(propertyTypes, citiesData);
+		context.authenticatedUser().validateHasReadPermission(	RESOURCENAMEFORPERMISSIONS);
+		final Collection<MCodeData> propertyTypes = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.PROPERTY_CODE_TYPE);
+		//final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializer.serialize(propertyTypes);
 	}
 
 	/**
-	 * @param uriInfo
-	 * @return retrieved all property details
+	 * Using this method getting all property code master details
 	 */
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAllPropertiesDetails(@Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch,
+	public String retrieveAllPropertyMasterDetails(@Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch,
 			@QueryParam("limit") final Integer limit,@QueryParam("offset") final Integer offset) {
-
+		
 		this.context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 		final SearchSqlQuery searchPropertyDetails = SearchSqlQuery.forSearch(sqlSearch, offset, limit);
-		final Page<PropertyDefinationData> propertyDefinationData = this.propertyReadPlatformService.retrieveAllProperties(searchPropertyDetails);
-		return this.toApiJsonSerializer.serialize(propertyDefinationData);
+		final Page<PropertyDefinationData> propertyCodeMasterData = this.propertyReadPlatformService.retrieveAllPropertyMasterData(searchPropertyDetails);
+		return this.toApiJsonSerializer.serialize(propertyCodeMasterData);
 	}
 
 	/**
-	 * using this method posting property data
+	 * using this method posting property code master data
 	 */
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String createNewProperty(final String apiRequestBodyAsJson) {
+	public String createNewPropertyMaster(final String apiRequestBodyAsJson) {
 
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().createProperty().withJson(apiRequestBodyAsJson).build();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().createPropertyMaster().withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}
 
 	/**
-	 * using this method posting property data from uploaded file
+	 * using this method posting property code master data from uploaded file
 	 */
 	@POST
 	@Path("/documents")
 	@Consumes({ MediaType.MULTIPART_FORM_DATA })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response createNewPropertyUpload(@HeaderParam("Content-Length") final Long fileSize,@FormDataParam("file") final InputStream inputStream,
-			@FormDataParam("file") final FormDataContentDisposition fileDetails,@FormDataParam("file") final FormDataBodyPart bodyPart) {
+	public Response createNewPropertyMasterUpload(@HeaderParam("Content-Length") final Long fileSize,
+			@FormDataParam("file") final InputStream inputStream,@FormDataParam("file") final FormDataContentDisposition fileDetails,
+			@FormDataParam("file") final FormDataBodyPart bodyPart) {
 
-		String name = "Property Data";
+		String name = "Property Master";
 		FileUtils.validateFileSizeWithinPermissibleRange(fileSize, name,ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
 		inputStreamObject = inputStream;
 		DateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
@@ -183,7 +164,8 @@ public class PropertyApiResource {
 		if (!new File(fileUploadLocation).isDirectory()) {
 			new File(fileUploadLocation).mkdirs();
 		}
-		final DataUploadCommand uploadStatusCommand = new DataUploadCommand(name, null, localdate, "", null, null, null, "", fileName,inputStream, fileUploadLocation);
+		final DataUploadCommand uploadStatusCommand = new DataUploadCommand(name, null, localdate, "", null, null, null, "", fileName,
+				inputStream, fileUploadLocation);
 		CommandProcessingResult result = this.dataUploadWritePlatformService.addItem(uploadStatusCommand);
 		if (result != null) {
 			this.dataUploadWritePlatformService.processDatauploadFile(result.resourceId());
@@ -192,92 +174,69 @@ public class PropertyApiResource {
 
 	}
 
-	/**
-	 * using this method ,we search property codes for fill client address
-	 */
 	@GET
-	@Path("/propertycode")
+	@Path("/type")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveAllPropertiesForSearch(@Context final UriInfo uriInfo,@QueryParam("query") final String propertyCode) {
+	public String retrieveAddressDetailsWithcityName(@Context final UriInfo uriInfo,@QueryParam("query") final String propertyType,@QueryParam("queryParam") final String propertyCode) {
 
 		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
-		final List<PropertyDefinationData> propertyCodesData = this.propertyReadPlatformService.retrieveAllPropertiesForSearch(propertyCode);
-		if(propertyCode.isEmpty()){
-			throw new PropertyCodeAllocatedException();
-		}
-		return this.toApiJsonSerializer.serialize(propertyCodesData);
+		final List<PropertyDefinationData> typeDetails = this.propertyReadPlatformService.retrievPropertyType(propertyType,propertyCode);
+		return this.toApiJsonSerializer.serialize(typeDetails);
 	}
-
+	
+	
 	/**
-	 * using this method get single property code details
+	 * using this method get single property master  details
 	 */
 	@GET
-	@Path("{propertyId}")
+	@Path("{codeId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveOneProperty(@PathParam("propertyId") final Long propertyId,@Context final UriInfo uriInfo) {
+	public String retrieveOnePropertyMaster(@PathParam("codeId") final Long codeId,@Context final UriInfo uriInfo) {
 
 		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
-		final PropertyDefinationData propertyCodeData = this.propertyReadPlatformService.retrievePropertyDetails(propertyId);
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		final PropertyDefinationData propertyMaster = this.propertyReadPlatformService.retrieveSinglePropertyMaster(codeId);
+		final ApiRequestJsonSerializationSettings settings =this.apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		if (settings.isTemplate()) {
-			final Collection<MCodeData> propertyTypes = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROPERTY_TYPE);
-			final List<CityDetailsData> citiesData = this.addressReadPlatformService.retrieveCitywithCodeDetails();
-			propertyCodeData.setPropertyTypes(propertyTypes);
-			propertyCodeData.setCitiesData(citiesData);
+			final Collection<MCodeData> propertyTypes = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.PROPERTY_CODE_TYPE);
+			propertyMaster.setPropertyTypes(propertyTypes);
 		}
-		return this.toApiJsonSerializer.serialize(settings, propertyCodeData,RESPONSE_DATA_PARAMETERS);
+		return this.toApiJsonSerializer.serialize(settings, propertyMaster,RESPONSE_DATA_PARAMETERS);
 	}
 	
 	/**
 	 * @param propertyId
 	 * @param apiRequestBodyAsJson
-	 * @return single property details are update here
+	 * @return single property master data will be  update here
 	 */
 	@PUT
-	@Path("{propertyId}")
+	@Path("{codeId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String updateProperty(@PathParam("propertyId") final Long propertyId,final String apiRequestBodyAsJson) {
+	public String updatePropertyMaster(@PathParam("codeId") final Long codeId,final String apiRequestBodyAsJson) {
 
 		context.authenticatedUser();
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateProperty(propertyId).withJson(apiRequestBodyAsJson).build();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePropertyMaster(codeId).withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}
 
 	/**
-	 * using this method we can remove single property code details
+	 * using this method we can remove single property master details
 	 */
 	@DELETE
-	@Path("{propertyId}")
+	@Path("{codeId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String deleteProperty(@PathParam("propertyId") final Long propertyId) {
+	public String deletePropertyMaster(@PathParam("codeId") final Long codeId) {
 
 		this.context.authenticatedUser();
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteProperty(propertyId).build();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().deletePropertyMaster(codeId).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 
 	}
 	
-	
-	/**
-	 * using this method ,we search property codes for fill client address
-	 */
-	@GET
-	@Path("/history")
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrievePropertyHistory(@Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch,
-			@QueryParam("limit") final Integer limit,@QueryParam("offset") final Integer offset) {
-
-		this.context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
-		final SearchSqlQuery searchPropertyDetails = SearchSqlQuery.forSearch(sqlSearch, offset, limit);
-		final Page<PropertyDefinationData> propertyDefinationData = this.propertyReadPlatformService.retrievePropertyHistory(searchPropertyDetails);
-		return this.toApiJsonSerializer.serialize(propertyDefinationData);
-	}
 
 }

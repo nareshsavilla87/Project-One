@@ -521,6 +521,10 @@ public class CommandWrapper {
 	public boolean isUpdatePrice() {
 		 return this.actionName.equalsIgnoreCase("UPDATE");
 	}
+	
+	public boolean isDisconnect() {
+		 return this.actionName.equalsIgnoreCase("DISCONNECT");
+	}
 
 	public boolean isAddressResource() {
 		return this.entityName.equalsIgnoreCase("address");
@@ -1292,8 +1296,8 @@ public class CommandWrapper {
 			return  this.entityName.equalsIgnoreCase("STATICIP");
 		}
 
-		public boolean isPropertyCodeMasterResource() {
-			return  this.entityName.equalsIgnoreCase("PROPERTYCODEMASTER");
+		public boolean isPropertyMasterResource() {
+			return  this.entityName.equalsIgnoreCase("PROPERTYMASTER");
 		}
 
 		public boolean isUpdatePaypalProfile() {

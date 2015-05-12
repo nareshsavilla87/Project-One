@@ -123,9 +123,9 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 	   		 
 		      EventActionProcedureData actionProcedureData=this.actionDetailsReadPlatformService.checkCustomeValidationForEvents(clientId, detailsData.getEventName(),detailsData.getActionName(),resourceId);
 			  JSONObject jsonObject=new JSONObject();
-
+			  SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
 			  	if(actionProcedureData.isCheck()){
-				    SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+				   
 				    List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyContractType("Month(s)",1);
 				   
 				    switch(detailsData.getActionName()){
@@ -248,25 +248,6 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 
 			        	   break; 
 			        	   
-				    case EventActionConstants.ACTION_INVOICE : 
-				    	  
-			        	  jsonObject.put("dateFormat","dd MMMM yyyy");
-			        	  jsonObject.put("locale","en");
-			        	  	if(detailsData.IsSynchronous().equalsIgnoreCase("N")){
-			        	  		eventAction=new EventAction(DateUtils.getDateOfTenant(), "CREATE",EventActionConstants.EVENT_ACTIVE_ORDER.toString(),
-			        	  		EventActionConstants.ACTION_INVOICE.toString(),"/billingorder/"+clientId,Long.parseLong(resourceId),
-			        	  		jsonObject.toString(),Long.parseLong(resourceId),clientId);
-					        	this.eventActionRepository.save(eventAction);
-			        	  	
-			        	  	}else{
-			            	 
-			        	  		Order order=this.orderRepository.findOne(new Long(resourceId));
-			        	  		jsonObject.put("dateFormat","dd MMMM yyyy");
-			        	  		jsonObject.put("locale","en");
-			        	  		jsonObject.put("systemDate",dateFormat.format(order.getStartDate()));
-			        	  		this.billingOrderApiResourse.retrieveBillingProducts(order.getClientId(),jsonObject.toString());
-			        	  	}
-			        	  break;
 			        	  
 					default:
 						break;
@@ -323,6 +304,26 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			      
 				    	break; 	
 				    	
+				    case EventActionConstants.ACTION_INVOICE : 
+				    	  
+			        	  jsonObject.put("dateFormat","dd MMMM yyyy");
+			        	  jsonObject.put("locale","en");
+			        	  	if(detailsData.IsSynchronous().equalsIgnoreCase("N")){
+			        	  		eventAction=new EventAction(DateUtils.getDateOfTenant(), "CREATE",EventActionConstants.EVENT_ACTIVE_ORDER.toString(),
+			        	  		EventActionConstants.ACTION_INVOICE.toString(),"/billingorder/"+clientId,Long.parseLong(resourceId),
+			        	  		jsonObject.toString(),Long.parseLong(resourceId),clientId);
+					        	this.eventActionRepository.save(eventAction);
+			        	  	
+			        	  	}else{
+			            	 
+			        	  		Order order=this.orderRepository.findOne(new Long(resourceId));
+			        	  		jsonObject.put("dateFormat","dd MMMM yyyy");
+			        	  		jsonObject.put("locale","en");
+			        	  		jsonObject.put("systemDate",dateFormat.format(order.getStartDate()));
+			        	  		this.billingOrderApiResourse.retrieveBillingProducts(order.getClientId(),jsonObject.toString());
+			        	  	}
+			        	  break;
+				    	
 				    case EventActionConstants.ACTION_RECURRING_DISCONNECT : 
 				    	
 				    	JsonObject apiRequestBodyAsJson = new JsonObject();
@@ -347,6 +348,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						this.eventActionRepository.saveAndFlush(eventAction1);
 						
 			        	break;
+			        	
 			        	
 				    case EventActionConstants.ACTION_RECURRING_RECONNECTION : 
 				    	

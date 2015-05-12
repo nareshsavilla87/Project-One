@@ -81,6 +81,24 @@ call addb_itemsalecoloumns();
 Drop procedure IF EXISTS addb_itemsalecoloumns;
 
 
+
+Drop procedure IF EXISTS addb_invoicecolumnonetimesale;
+DELIMITER //
+create procedure addb_invoicecolumnonetimesale() 
+Begin
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'invoice_id'
+     and TABLE_NAME = 'b_onetime_sale'
+     and TABLE_SCHEMA = DATABASE())THEN
+alter  table b_onetime_sale add column `invoice_id` bigint(20) DEFAULT NULL;
+END IF;
+END //
+DELIMITER ;
+call addb_invoicecolumnonetimesale();
+Drop procedure IF EXISTS addb_invoicecolumnonetimesale;
+
+
 Drop procedure IF EXISTS addb_loginhistorycolumn;
 DELIMITER //
 create procedure addb_loginhistorycolumn() 
@@ -201,7 +219,7 @@ END //
 DELIMITER ;
 call modifyb_ticketmasterconstraint();
 Drop procedure IF EXISTS modifyb_ticketmasterconstraint;
-
+Drop procedure IF EXISTS addsubnettoippool;
 DELIMITER //
 create procedure addsubnettoippool() 
 Begin
@@ -230,6 +248,57 @@ END //
 DELIMITER ;
 call addsubnettoippool();
 Drop procedure IF EXISTS addsubnettoippool;
+
+Drop procedure if exists changedatauploadtablename;
+DELIMITER //
+CREATE PROCEDURE changedatauploadtablename()
+BEGIN
+IF EXISTS(Select * from INFORMATION_SCHEMA.TABLES where  TABLE_SCHEMA = DATABASE() and TABLE_NAME ='uploads_status') then
+IF NOT EXISTS(Select * from INFORMATION_SCHEMA.TABLES where  TABLE_SCHEMA = DATABASE() and TABLE_NAME ='b_data_uploads') then
+  SET @ddl = CONCAT('RENAME table uploads_status to b_data_uploads');
+  PREPARE STMT FROM @ddl;
+  EXECUTE STMT;
+END IF; 
+END IF;
+END //
+DELIMITER ;
+call changedatauploadtablename();
+truncate table b_eventaction_mapping;
+Drop procedure if exists changedatauploadtablename;
+Drop procedure IF EXISTS eventactionmappingunique; 
+DELIMITER //
+create procedure eventactionmappingunique() 
+Begin
+IF NOT EXISTS (SELECT * FROM information_schema.TABLE_CONSTRAINTS
+     WHERE 
+      TABLE_NAME = 'b_eventaction_mapping'   AND CONSTRAINT_NAME='event_action_name_code'
+     and TABLE_SCHEMA = DATABASE())THEN
+ALTER TABLE `b_eventaction_mapping` ADD CONSTRAINT `event_action_name_code` UNIQUE (`event_name`,`action_name`);
+END IF;
+END //
+DELIMITER ;
+call eventactionmappingunique();
+Drop procedure IF EXISTS eventactionmappingunique;
+
+
+
+Drop procedure IF EXISTS configurationalter; 
+DELIMITER //
+create procedure configurationalter() 
+Begin
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'name' and COLUMN_KEY = 'UNI' and IS_NULLABLE ='NO'
+     and TABLE_NAME = 'c_configuration'
+     and TABLE_SCHEMA = DATABASE())THEN
+ALTER TABLE `c_configuration` MODIFY name varchar(50) NOT NULL;
+ALTER TABLE `c_configuration` ADD CONSTRAINT `name_config` UNIQUE (`name`);
+END IF;
+END //
+DELIMITER ;
+call configurationalter();
+Drop procedure IF EXISTS configurationalter;
+
 
 /* Depricated Tables
 1.b_plan_qualifier
@@ -332,7 +401,7 @@ DELIMITER ;
 
 DROP PROCEDURE IF EXISTS  workflow_events;
 DELIMITER //
-CREATE PROCEDURE  `workflow_events`(IN  clientid     INT,
+CREATE PROCEDURE `workflow_events`(IN  clientid     INT,
 										IN  eventname    varchar(60),
 										IN  actionname   varchar(60),
 										IN  resourceid   varchar(20),
@@ -356,15 +425,31 @@ BEGIN
 		SET strjson = Concat("Email_Id:",emailid);
     else
         SET result = 'true';
-		SET strjson ='';
-	End if;	  
+		SET strjson =Concat("result:",true);
+	End if;	
+    
 	END //
 DELIMITER ;
+
 
 	
 -- data
 
 insert ignore into m_permission values(null,'Organisation','CREATE_IPPOOLMANAGEMENT','IPPOOLMANAGEMENT','CREAT',0);
+insert ignore into m_permission values(null,'client&orders','DISCONNECT_ORDER','ORDER','DISCONNECT',0);
+
+
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',1,'Active','Active');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',2,'Cancelled','Cancelled');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',3,'Disconnected','Disconnected');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',4,'PENDING','PENDING');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',5,'TERMINATED','TERMINATED');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',6,'SUSPENDED','SUSPENDED');
+insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',7,'REACTIVE','REACTIVE');
+
+ insert ignore into b_office_bank values(null, 'Open Billing System', '2044860011', '2044860008', 'Hyderabad', 'KVB(karur vysya bank)', 'Kondapur', 'KVBL0004801 ');
+insert ignore into b_office_address values(null, 'OBS', 'OPen Billing System', 'Kondapur', 'Hyderabad', 'Andhra Pradesh', 'India', '30214', '858 935 8804', NULL, 'info@openbillingsystem.com', 'companyLogo.jpg', NULL, NULL, '1');
+
 
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal-for-ios',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');

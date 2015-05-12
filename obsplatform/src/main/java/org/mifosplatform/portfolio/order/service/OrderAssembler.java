@@ -44,7 +44,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 	this.orderDetailsReadPlatformServices=orderDetailsReadPlatformServices;
 	this.contractRepository=contractRepository;
 	this.discountMasterRepository=discountMasterRepository;
-	this.configurationRepository =configurationRepository;
+	this.configurationRepository = configurationRepository;
 	
 }
 
@@ -81,17 +81,17 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			
 			order=new Order(order.getClientId(),order.getPlanId(),orderStatus,null,order.getBillingFrequency(),startDate, endDate,
 					 order.getContarctPeriod(), serviceDetails, orderprice,order.getbillAlign(),
-					 UserActionStatusTypeEnum.ACTIVATION.toString(),plan.isPrepaid());
+					 UserActionStatusTypeEnum.ACTIVATION.toString(),plan.isPrepaid(),order.isAutoRenewal());
 			
-			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
 
-			if(configuration != null ){
+	Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
+			
+			if(configuration != null && plan.isPrepaid() == 'N'){
 				order.setBillingAlign(configuration.isEnabled()?'Y':'N');
-				if(configuration.isEnabled()){
+				if(configuration.isEnabled() && endDate != null){
 				order.setEndDate(endDate.dayOfMonth().withMaximumValue());
 				}
 			}
-
 			BigDecimal priceforHistory=BigDecimal.ZERO;
 
 			for (PriceData data : datas) {
