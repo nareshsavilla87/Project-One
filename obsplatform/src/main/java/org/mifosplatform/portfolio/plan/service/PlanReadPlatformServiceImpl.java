@@ -15,7 +15,6 @@ import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.VolumeTypeEnumaration;
 import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
-import org.mifosplatform.portfolio.plan.data.BillRuleData;
 import org.mifosplatform.portfolio.plan.data.PlanData;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
 import org.mifosplatform.portfolio.plan.domain.VolumeTypeEnum;
