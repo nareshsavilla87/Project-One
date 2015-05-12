@@ -22,6 +22,8 @@ import org.mifosplatform.finance.payments.data.McodeData;
 import org.mifosplatform.finance.payments.exception.PaymentCodeNotFoundException;
 import org.mifosplatform.finance.payments.service.PaymentReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.organisation.address.data.CityDetailsData;
+import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
@@ -44,16 +46,19 @@ public class DataUploadHelper {
 	private final PaymentReadPlatformService paymodeReadPlatformService;
 	private final MCodeReadPlatformService mCodeReadPlatformService;
 	private final PropertyReadPlatformService propertyReadPlatformService;
+	private final AddressReadPlatformService addressReadPlatformService;
 	
 	@Autowired
 	public DataUploadHelper(final DataUploadRepository dataUploadRepository,final PaymentReadPlatformService paymodeReadPlatformService,
 			final AdjustmentReadPlatformService adjustmentReadPlatformService,final MCodeReadPlatformService mCodeReadPlatformService,
-		final PropertyReadPlatformService propertyReadPlatformService) {
+		final PropertyReadPlatformService propertyReadPlatformService,final AddressReadPlatformService addressReadPlatformService) {
 		this.dataUploadRepository=dataUploadRepository;
 		this.paymodeReadPlatformService=paymodeReadPlatformService;
 		this.adjustmentReadPlatformService=adjustmentReadPlatformService;
 		this.mCodeReadPlatformService=mCodeReadPlatformService;
 		this.propertyReadPlatformService=propertyReadPlatformService;
+		this.addressReadPlatformService=addressReadPlatformService;
+		
 	}
 	
 	
@@ -414,12 +419,23 @@ public class DataUploadHelper {
 										break;
 									}
 								}
-								map.put("precinct", currentLineData[6].trim());
+					         final List<CityDetailsData> cityDetailsList = this.addressReadPlatformService.retrieveAddressDetailsByCityName(currentLineData[6].trim());
+					         if (!cityDetailsList.isEmpty()) {
+									for (CityDetailsData cityDetail : cityDetailsList) {
+										if (cityDetail.getCityName().equalsIgnoreCase(currentLineData[6].toString().trim())) {
+											map.put("precinct", currentLineData[6].trim());
+											break;
+										}
+									}
 								map.put("poBox", currentLineData[7]);
 								map.put("street", currentLineData[8]);
 								map.put("state", currentLineData[9]);
 								map.put("country", currentLineData[10]);
 								return new Gson().toJson(map);
+							  } else {
+								errorData.add(new MRNErrorData((long) i,"Precinct list is empty"));
+								return null;
+							  }
 							} else {
 								errorData.add(new MRNErrorData((long) i,"Parcel list is empty"));
 								return null;
