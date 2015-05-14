@@ -461,8 +461,6 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 			String ProfileId = request.getParameter(RecurringPaymentTransactionTypeConstants.SUBSCRID);
 			String jsonObj = request.getParameter(RecurringPaymentTransactionTypeConstants.CUSTOM);
 			
-			
-
 			PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneBySubscriberId(ProfileId);
 			
 			if (null == billing) {
@@ -472,6 +470,8 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 				 
 				 billing = new PaypalRecurringBilling(clientId, ProfileId);
 				 this.paypalRecurringBillingRepository.save(billing);
+				 
+				 updateRecurring(ProfileId, 0, null);
 			}
 
 			return billing;
@@ -538,10 +538,9 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 		
 	}
 
-	@Override
-	public CommandProcessingResult updatePaypalRecurring(JsonCommand command) {
-		// TODO Auto-generated method stub
+	private Map<String,Object> updateRecurring(String subscriberId, int billingCycles, String totalAmount){
 		
+
 		Map<String,Object> mapDetails = new HashMap<String,Object>();
 		
 		try {
@@ -555,52 +554,35 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 			JSONObject object = new JSONObject(pgConfigDetails);
 			
 			String currencyCode = object.getString("currency_code");
+			
+			int maxFailedPayments = 5;
+			
+			if(object.has("maxFailedPayments")){
+				maxFailedPayments = object.getInt("maxFailedPayments");
+			}
+			
 
 			UpdateRecurringPaymentsProfileRequestDetailsType updateRecurringPaymentsProfileRequestDetails = new UpdateRecurringPaymentsProfileRequestDetailsType();
-
-			Long orderId = command.longValueOfParameterNamed("orderId");
 			
-			PaypalRecurringBilling paypalRecurringBilling = this.paypalRecurringBillingRepository.findOneByOrderId(orderId);
+			updateRecurringPaymentsProfileRequestDetails.setProfileID(subscriberId);
 			
-			if(null == paypalRecurringBilling){
-				throw new OrderNotFoundException(orderId);
-			}
-			
-			updateRecurringPaymentsProfileRequestDetails.setProfileID(paypalRecurringBilling.getSubscriberId());
-			
-			if(command.hasParameter("billingCycles")){
-				updateRecurringPaymentsProfileRequestDetails.setAdditionalBillingCycles(command.integerValueOfParameterNamed("billingCycles"));
+			if(billingCycles>0){
+				
+				updateRecurringPaymentsProfileRequestDetails.setAdditionalBillingCycles(billingCycles);
 			}
 
-			if(command.hasParameter("totalAmount")){
+			if(null != totalAmount){
 				
 				BasicAmountType amount = new BasicAmountType();
 
 				amount.setCurrencyID(CurrencyCodeType.valueOf(currencyCode));
 
-				amount.setValue(command.stringValueOfParameterNamed("totalAmount"));
+				amount.setValue(totalAmount);
 
 				updateRecurringPaymentsProfileRequestDetails.setAmount(amount);
 			}
-			
-			/* 2013-08-24T05:38:48Z */
 
-			/*final String pattern = "yyyy-MM-dd'T'hh:mm:ssZ";
-
-			SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
-
-			Calendar calendar = new GregorianCalendar();
-			
-			TimeZone timeZone = calendar.getTimeZone();
-
-			calendar.setTimeZone(timeZone);
-
-			String date = dateFormat.format(calendar.getTime());
-
-			updateRecurringPaymentsProfileRequestDetails.setBillingStartDate(date);*/
-			
-
-			updateRecurringPaymentsProfileRequestDetails.setMaxFailedPayments(5);
+			updateRecurringPaymentsProfileRequestDetails.setMaxFailedPayments(maxFailedPayments);
 
 			UpdateRecurringPaymentsProfileRequestType updateRecurringPaymentsProfileRequest = new UpdateRecurringPaymentsProfileRequestType();
 
@@ -619,12 +601,12 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 					|| (manageProfileStatusResponse.getErrors() != null && manageProfileStatusResponse.getErrors().size() > 0)) {
 		
 				String error = manageProfileStatusResponse.getErrors().get(0).getLongMessage();
-				
+				System.out.println("Paypal Profile Update Failed due to Reason:"+ error);
 				mapDetails.put("result", RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
 				mapDetails.put("error", error);
 				
 			} else {
-				
+				System.out.println("Paypal Profile Update Successfully Completed.");
 				mapDetails.put("result", RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUCCESS);
 				mapDetails.put("error", "");
 			}	
@@ -667,6 +649,46 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 			mapDetails.put("result", RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
 			mapDetails.put("error", stackTraceToString(e));
 		} catch (Exception e) {
+			mapDetails.put("result", RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
+			mapDetails.put("error", stackTraceToString(e));
+		}
+		
+		return mapDetails;
+		
+	}
+
+	@Override
+	public CommandProcessingResult updatePaypalRecurring(JsonCommand command) {
+		// TODO Auto-generated method stub
+		
+		Map<String,Object> mapDetails;
+		
+		try {
+
+			Long orderId = command.longValueOfParameterNamed("orderId");
+			int billingCycles = 0;
+			String totalAmount = null;
+			
+			PaypalRecurringBilling paypalRecurringBilling = this.paypalRecurringBillingRepository.findOneByOrderId(orderId);
+			
+			if(null == paypalRecurringBilling){
+				throw new OrderNotFoundException(orderId);
+			}
+			
+			if(command.hasParameter("billingCycles")){
+				billingCycles = command.integerValueOfParameterNamed("billingCycles");
+			}
+			
+			if(command.hasParameter("totalAmount")){	
+				totalAmount = command.stringValueOfParameterNamed("totalAmount");
+			}
+			
+			mapDetails = updateRecurring(paypalRecurringBilling.getSubscriberId(), billingCycles, totalAmount);
+			
+		} catch (Exception e) {
+			
+			mapDetails = new HashMap<>();
+			
 			mapDetails.put("result", RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
 			mapDetails.put("error", stackTraceToString(e));
 		}
