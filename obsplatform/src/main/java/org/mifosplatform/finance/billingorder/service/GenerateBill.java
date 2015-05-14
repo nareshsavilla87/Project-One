@@ -114,8 +114,8 @@ public class GenerateBill {
 			// plan with No prorata and not start day of month
 			if (plan.getBillRule() == 300 && startDate.compareTo(monthStartDate) > 0 && plan.isPrepaid() == 'N') {
 				price = BigDecimal.ZERO;
-			} else if(plan.getBillRule() == 200 && plan.isPrepaid() == 'N') {
-				price = billingOrderData.getPrice();
+			} else if(plan.getBillRule() == 200 && plan.isPrepaid() == 'N'){
+				price =billingOrderData.getPrice();
 			}
 
 		} else if (endDate.toDate().after(billingOrderData.getBillEndDate())) {
