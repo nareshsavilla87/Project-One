@@ -28,6 +28,7 @@ public interface ItemDetailsReadPlatformService {
 	
 	public ItemDetailsData retriveSingleItemDetail(Long itemId);
 
-	public ItemData retriveItemDetailsDataBySerialNum(String query);
+
+	public ItemData retriveItemDetailsDataBySerialNum(String query, Long clientId);
 	
 }

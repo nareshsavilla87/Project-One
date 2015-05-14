@@ -60,6 +60,7 @@ Insert ignore into del_partner values ('UPDATE_ONETIMESALE');
 Insert ignore into del_partner values ('CREATE_TICKET');
 Insert ignore into del_partner values ('UPDATE_TICKET');
 Insert ignore into del_partner values ('CLOSE_TICKET');
+Insert ignore into del_partner values ('READ_INVENTORY');
 Insert ignore into del_partner values ('CREATE_INVENTORY');
 Insert ignore into del_partner values ('UPDATE_INVENTORY');
 Insert ignore into del_partner values ('DELETE_INVENTORY');
@@ -82,7 +83,6 @@ Insert ignore into del_partner values ('CREATE_DOCUMENT');
 Insert ignore into del_partner values ('READ_OWNEDHARDWARE');
 Insert ignore into del_partner values ('UPDATE_DOCUMENT');
 Insert ignore into del_partner values ('DELETE_DOCUMENT');
-Insert ignore into del_partner values ('READ_INVENTORY');
 Insert ignore into del_partner values ('READ_ALLOCATION');
 Insert ignore into del_partner values ('CREATE_SELFCARE');
 Insert ignore into del_partner values ('CREATEPAYPAL_PAYMENT');
@@ -146,6 +146,7 @@ Insert ignore into del_partner values ('CREATEENQUIREY_PAYMENT');
 Insert ignore into del_partner values ('CREATE_SELFCAREUDP');
 Insert ignore into del_partner values ('UPDATE_CLIENTTAXEXEMPTION');
 Insert ignore into del_partner values ('UPDATE_CLIENTBILLMODE');
+Insert ignore into del_partner values ('READ_ITEM');
 Insert ignore into del_partner values ('UPDATESTATUS_CLIENT');
 Insert ignore into del_partner values ('TERMINATE_ORDER');
 Insert ignore into del_partner values ('UPDATE_GRN');
@@ -165,14 +166,17 @@ Insert ignore into del_partner values ('CONVERT_PROSPECT');
 Insert ignore into del_partner values ('READ_PROSPECT');
 Insert ignore into del_partner values ('CREATE_NEWSALE');
 Insert ignore into del_partner values ('CREATE_SECONDSALE');
+Insert ignore into del_partner values ('READ_ONETIMESALE');
 Insert ignore into del_partner values ('CREATE_DEVICERENTAL');
 Insert ignore into del_partner values ('CREATE_ORDERADDONS');
 Insert ignore into del_partner values ('READ_PLANSERVICE');
 Insert ignore into del_partner values ('READ_PARTNER');
+Insert ignore into del_partner values ('READ_TRANSACTIONHISTORY');
+Insert ignore into del_partner values ('READ_EVENTACTIONS');
 Insert ignore into del_partner values ('READ_PARTNERDISBURSEMENT');
 Insert ignore into del_partner values ('READ_PROVISIONINGSYSTEM');
 Insert ignore into m_role_permission 
-Select (Select id from m_role where name='Partner') as rid,b.id from del_temp a,m_permission b where a.permission_name=b.code;
+Select (Select id from m_role where name='Partner') as rid,b.id from del_partner a,m_permission b where a.permission_name=b.code;
 drop table if exists del_partner;
 
 
@@ -200,6 +204,7 @@ INSERT IGNORE INTO  m_permission VALUES (null,'organization', 'CREATE_PARTNERAGR
 INSERT IGNORE INTO  m_permission VALUES (null,'organization', 'UPDATE_PARTNERAGREEMENT', 'PARTNERAGREEMENT', 'UPDATE', 0);
 INSERT IGNORE INTO  m_permission VALUES(null, 'organisation', 'DELETE_PARTNERAGREEMENT', 'PARTNERAGREEMENT', 'DELETE', 0);
 INSERT IGNORE INTO  m_permission VALUES(null, 'organisation', 'READ_PARTNERDISBURSEMENT', 'PARTNERDISBURSEMENT', 'READ', 0);
+INSERT IGNORE INTO  m_permission VALUES(null, 'Client&orders', 'READ_EVENTACTIONS', 'EVENTACTIONS', 'READ', 0);
 
 
 CREATE TABLE IF NOT EXISTS `m_office_additional_info` (

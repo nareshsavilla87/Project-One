@@ -11,7 +11,7 @@ insert into `job`(`id`,`name`,`display_name`,`cron_expression`,`cron_description
 select @a_lid:=last_insert_id();
 insert into `job_parameters`(`id`,`job_id`,`param_name`,`param_type`,`param_default_value`,`param_value`,`is_dynamic`,`query_values`) values (null,@a_lid,'messageTemplate','String',null,'Disconnected','N',null);
 insert into `job_parameters`(`id`,`job_id`,`param_name`,`param_type`,`param_default_value`,`param_value`,`is_dynamic`,`query_values`) values (null,@a_lid,'reportName','COMBO',null,'AutoExpiry','N',null);
-insert into `job`(`id`,`name`,`display_name`,`cron_expression`,`cron_description`,`create_time`,`task_priority`,`group_name`,`previous_run_start_time`,`next_run_time`,`job_key`,`initializing_errorlog`,`is_active`,`currently_running`,`updates_allowed`,`scheduler_group`,`is_misfired`,`user_id`) values (null,'AUTO_EXPIRY','Auto Exipiry','0 30 23 1/1 * ? *','Once a Day','2013-09-26 15:09:47',5,null,'2014-06-20 19:12:20',null,'Auto ExipiryJobDetaildefault _ DEFAULT',null,0,0,1,0,0,1);
+insert into `job`(`id`,`name`,`display_name`,`cron_expression`,`cron_description`,`create_time`,`task_priority`,`group_name`,`previous_run_start_time`,`next_run_time`,`job_key`,`initializing_errorlog`,`is_active`,`currently_running`,`updates_allowed`,`scheduler_group`,`is_misfired`,`user_id`) values (null,'AUTO_EXPIRY','Auto Exipiry','0 30 23 1/1 * ? *','Once a Day','2013-09-26 15:09:47',5,null,'2014-06-20 19:12:20',null,'AUTO_EXPIRYJobDetaildefault _ DEFAULT',null,0,0,1,0,0,1);
 select @a_lid:=last_insert_id();
 
 insert into `job_parameters`(`id`,`job_id`,`param_name`,`param_type`,`param_default_value`,`param_value`,`is_dynamic`,`query_values`) values (null,@a_lid,'exipirydate','DATE','NOW()','03 March 2014','Y',null);

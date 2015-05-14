@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.codehaus.jettison.json.JSONArray;
+import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -14,6 +15,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConsta
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
@@ -21,6 +23,7 @@ import org.mifosplatform.logistics.item.domain.ItemRepository;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetails;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetailsAllocation;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetailsRepository;
+import org.mifosplatform.logistics.itemdetails.exception.SerialNumberNotFoundException;
 import org.mifosplatform.logistics.itemdetails.service.ItemDetailsWritePlatformService;
 import org.mifosplatform.logistics.ownedhardware.data.OwnedHardware;
 import org.mifosplatform.logistics.ownedhardware.domain.OwnedHardwareJpaRepository;
@@ -121,6 +124,9 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 	    
 	    //geting new serial number itemdetails data 
 	    ItemDetails newSerailNoItemData = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(provisionNum);
+	    if(newSerailNoItemData == null){
+	    	throw new SerialNumberNotFoundException(provisionNum);
+	    }
 	    LocalDate newWarrantyDate = new LocalDate(newSerailNoItemData.getWarrantyDate());
 	    
         final Order order=this.orderRepository.findOne(orderId);
@@ -207,20 +213,25 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 				OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),resouceId,"DEVICE SWAP",userId,null);
 		
 				this.orderHistoryRepository.save(orderHistory);
-		return new CommandProcessingResult(entityId,order.getClientId());		
+		return new CommandProcessingResult(entityId,order.getClientId());	
+		
 	   }catch(final WarrantyEndDateExpireException e){
 		   Object[] obj = e.getDefaultUserMessageArgs();
 		   throw new WarrantyEndDateExpireException(obj[0].toString());
-	  }catch(final Exception dve){
-		   if(dve.getCause() instanceof DataIntegrityViolationException){
-		   handleDataIntegrityIssues(command,dve);
-		   }
+	  }catch(final SerialNumberNotFoundException e){
+		   	throw new SerialNumberNotFoundException(command.stringValueOfParameterNamed("provisionNum"));
+	  
+	  }catch(final JSONException e){
+		   	e.printStackTrace();
+		   	return new CommandProcessingResult(Long.valueOf(-1));
+	  }catch(final DataIntegrityViolationException e){
+		  handleDataIntegrityIssues(command,e);
 		return new CommandProcessingResult(Long.valueOf(-1));
 	  }
 	
 	}
 
-  private void handleDataIntegrityIssues(final JsonCommand command,final Exception dve) {
+  private void handleDataIntegrityIssues(final JsonCommand command,final DataIntegrityViolationException dve) {
 	  
 	  LOGGER.error(dve.getMessage(), dve);
 		final Throwable realCause=dve.getCause();
