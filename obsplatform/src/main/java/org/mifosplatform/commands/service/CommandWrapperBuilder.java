@@ -1368,7 +1368,7 @@ public class CommandWrapperBuilder {
 		this.actionName = "UPDATE";
 		this.entityName = "ORDER";
 		this.entityId = orderId;
-		this.href = "order/template";
+		this.href = "order/disconnect";
 		return this;
 	}
 
@@ -2726,6 +2726,15 @@ public CommandWrapperBuilder deleteRadService(final Long radServiceId) {
 	
 }
 
+public CommandWrapperBuilder disconnectOrder(Long orderId) {
+
+	this.actionName = "DISCONNECT";
+	this.entityName = "ORDER";
+	this.entityId = orderId;
+	this.href = "/orderdisconnect/"+orderId;
+	return this;
+}
+
 public CommandWrapperBuilder updatePaypalProfileRecurring() {
 	this.actionName = "UPDATEPAYPALRECURRING";
 	this.entityName = "PAYMENTGATEWAY";
@@ -2736,6 +2745,14 @@ public CommandWrapperBuilder updatePaypalProfileRecurring() {
 
 public CommandWrapperBuilder updatePaypalProfileStatus() {
 	this.actionName = "UPDATEPAYPALPROFILESTATUS";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+
+public CommandWrapperBuilder deleteRecurringBilling() {
+	this.actionName = "DELETERECURRINGBILLING";
 	this.entityName = "PAYMENTGATEWAY";
 	this.entityId = null;
 	this.href = "";

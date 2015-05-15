@@ -34,6 +34,7 @@ import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityExce
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
+import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.allocation.service.AllocationReadPlatformService;
 import org.mifosplatform.portfolio.association.data.AssociationData;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
@@ -51,7 +52,6 @@ import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.UserActionStatusEnumaration;
-import org.mifosplatform.portfolio.order.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderDiscount;
 import org.mifosplatform.portfolio.order.domain.OrderDiscountRepository;
@@ -393,17 +393,9 @@ try{
 				
 			}		
 	
-			// checking for Paypal Recurring DisConnection
-			PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneByOrderId(orderId);
-			
-			if(null != billing && null != billing.getSubscriberId()){
-				
-				List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_PAYPAL_RECURRING_DISCONNECT_ORDER);
-				
-				if(actionDetaislDatas.size() != 0){
-					this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,billing.getClientId(), orderId.toString(),null);
-				}
-			}
+			/*// checking for Paypal Recurring DisConnection
+			processPaypalRecurringActions(orderId, EventActionConstants.EVENT_PAYPAL_RECURRING_DISCONNECT_ORDER);*/
+			processPaypalRecurringActions(orderId, EventActionConstants.EVENT_PAYPAL_RECURRING_TERMINATE_ORDER);
 			
 		//For Order History
 		final OrderHistory orderHistory = new OrderHistory(order.getId(), DateUtils.getLocalDateOfTenant(), DateUtils.getLocalDateOfTenant(), processingResultId, requstStatus, getUserId(), null);
@@ -439,11 +431,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		  newStartdate=new LocalDate(orderDetails.getEndDate()).plusDays(1);
 		  requstStatus=UserActionStatusEnumaration.OrderStatusType(UserActionStatusTypeEnum.RENEWAL_BEFORE_AUTOEXIPIRY).getValue();
 		  
-		  //Prepare Provisioning Req
-		  CodeValue codeValue=this.codeValueRepository.findOneByCodeValue(plan.getProvisionSystem());
-		  if(codeValue.position() == 1){
-			  requestStatusForProv="RENEWAL_BE";
-		  }
+		
 					
 	  } else if(orderDetails.getStatus().equals(StatusTypeEnum.DISCONNECTED.getValue().longValue())){
 		  newStartdate = DateUtils.getLocalDateOfTenant(); 
@@ -460,7 +448,21 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		  orderDetails.setNextBillableDay(null);
 	  }
 	  LocalDate renewalEndDate=this.orderAssembler.calculateEndDate(newStartdate,contractDetails.getSubscriptionType(),contractDetails.getUnits());
-	  orderDetails.setEndDate(renewalEndDate);
+	  
+		
+     Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
+		
+		if(configuration != null && plan.isPrepaid() == 'N'){
+			orderDetails.setBillingAlign(configuration.isEnabled()?'Y':'N');
+			if(configuration.isEnabled() && renewalEndDate != null){
+				orderDetails.setEndDate(renewalEndDate.dayOfMonth().withMaximumValue());
+			}else{
+				orderDetails.setEndDate(renewalEndDate);
+			}
+		}else{
+			orderDetails.setEndDate(renewalEndDate);
+		}
+	  //orderDetails.setEndDate(renewalEndDate);
 
 	  for(OrderPrice orderprice:orderPrices){
 		  if(plan.isPrepaid() == 'Y'){
@@ -480,7 +482,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 					throw new PriceNotFoundException(priceId);
 				}
 		  	}
-		  orderprice.setDatesOnOrderStatus(newStartdate,renewalEndDate,orderDetails.getUserAction());//setBillEndDate(renewalEndDate);
+		  orderprice.setDatesOnOrderStatus(newStartdate,new LocalDate(orderDetails.getEndDate()),orderDetails.getUserAction());//setBillEndDate(renewalEndDate);
 		  //this.OrderPriceRepository.save(orderprice);
 		  orderDetails.setNextBillableDay(null);
 	  }
@@ -493,27 +495,22 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	//  Set<PlanDetails> planDetails=plan.getDetails();
 	 // ServiceMaster serviceMaster=this.serviceMasterRepository.findOneByServiceCode(planDetails.iterator().next().getServiceCode());
 	  Long resourceId=Long.valueOf(0);
-	  	if(!plan.getProvisionSystem().equalsIgnoreCase("None") && requestStatusForProv != null){
-		    	// if(serviceMaster.isAuto() == 'Y' && requestStatusForProv != null){
-		    	 	//this.prepareRequestWriteplatformService.prepareNewRequest(orderDetails,plan,requestStatusForProv);
-		    	// }else{
+	  	if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
+		    
+    	  	  //Prepare Provisioning Req
+			  CodeValue codeValue=this.codeValueRepository.findOneByCodeValue(plan.getProvisionSystem());
+			  if(codeValue.position() == 1){
+				  requestStatusForProv="RENEWAL_BE";
+			  }
+			  if(requestStatusForProv != null){
 		    		 CommandProcessingResult commandProcessingResult=this.provisioningWritePlatformService.postOrderDetailsForProvisioning(orderDetails,plan.getPlanCode(),requestStatusForProv,
 		    				 Long.valueOf(0),null,null,orderDetails.getId(),plan.getProvisionSystem(),null);
 		    		 resourceId=commandProcessingResult.resourceId();
-		    	// }
+			  	}
 		     }
 
-	  		// checking for Paypal Recurring DisConnection			
-	 		PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneByOrderId(orderId);
-	 							
-	 		if(null != billing && null != billing.getSubscriberId()){
-	 									
-	 			List<ActionDetaislData> actionDetaislDatas = this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_PAYPAL_RECURRING_RECONNECTION_ORDER);
-	 									
-	 			if(actionDetaislDatas.size() != 0){
-	 				this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,billing.getClientId(), orderId.toString(),null);			
-	 			}		
-	 		}
+	 		// checking for Paypal Recurring Reconnection 				
+	 		//processPaypalRecurringActions(orderId, EventActionConstants.EVENT_PAYPAL_RECURRING_RECONNECTION_ORDER);
 	 		
 		     //For Order History
    			OrderHistory orderHistory=new OrderHistory(orderDetails.getId(),DateUtils.getLocalDateOfTenant(),newStartdate,resourceId,requstStatus,userId,description);
@@ -593,17 +590,8 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		order.setuserAction(UserActionStatusTypeEnum.RECONNECTION.toString());
 		this.orderRepository.save(order);
 		
-		// checking for Paypal Recurring DisConnection			
-		PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneByOrderId(orderId);
-							
-		if(null != billing && null != billing.getSubscriberId()){
-									
-			List<ActionDetaislData> actionDetaislDatas = this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_PAYPAL_RECURRING_RECONNECTION_ORDER);
-									
-			if(actionDetaislDatas.size() != 0){
-				this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,billing.getClientId(), orderId.toString(),null);			
-			}		
-		}
+		// checking for Paypal Recurring Reconnection 				
+ 		//processPaypalRecurringActions(orderId, EventActionConstants.EVENT_PAYPAL_RECURRING_RECONNECTION_ORDER);
 		
 		//For Order History
 		OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),processingResultId,requstStatus,getUserId(),null);
@@ -721,9 +709,9 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		 List<OrderPrice> orderPrices=newOrder.getPrice();
 		 for(OrderPrice orderPrice:orderPrices){
 			 if(billEndDate == null){
-				 orderPrice.setBillEndDate(null);	
+			//	 orderPrice.setBillEndDate(null);	
 			 }else{
-				 orderPrice.setBillEndDate(new LocalDate(billEndDate));
+				// orderPrice.setBillEndDate(new LocalDate(billEndDate));
 			 }
 			 orderPrice.setInvoiceTillDate(invoicetillDate);
 			 	orderPrice.setNextBillableDay(order.getPrice().get(0).getNextBillableDay());
@@ -1014,8 +1002,12 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			order.setuserAction(UserActionStatusTypeEnum.TERMINATION.toString());
 			this.orderRepository.saveAndFlush(order);
 			
+			
 			OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resourceId,
 					UserActionStatusTypeEnum.TERMINATION.toString(),appUser.getId(),null);
+			
+			// checking for Paypal Recurring DisConnection
+			processPaypalRecurringActions(orderId, EventActionConstants.EVENT_PAYPAL_RECURRING_TERMINATE_ORDER);
 			
 			this.orderHistoryRepository.save(orderHistory);	
 		    return new CommandProcessingResult(orderId,order.getClientId());
@@ -1063,6 +1055,10 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 							StatusTypeEnum.ACTIVE.toString(),StatusTypeEnum.SUSPENDED.toString());
 					this.paymentFollowupRepository.save(paymentFollowup);
 					this.orderRepository.save(order);
+					
+					// checking for Paypal Recurring DisConnection
+					processPaypalRecurringActions(entityId, EventActionConstants.EVENT_PAYPAL_RECURRING_DISCONNECT_ORDER);
+					
 					final OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resourceId,UserActionStatusTypeEnum.TERMINATION.toString(),
 							appUser.getId(),null);
                      this.orderHistoryRepository.save(orderHistory);	
@@ -1110,6 +1106,10 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		 }	
 			
 		 this.orderRepository.save(order);
+		 
+		// checking for Paypal Recurring Reconnection 				
+		 processPaypalRecurringActions(entityId, EventActionConstants.EVENT_PAYPAL_RECURRING_RECONNECTION_ORDER);
+	 		
 		 final OrderHistory orderHistory = new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resourceId,UserActionStatusTypeEnum.REACTIVATION.toString(),
 				 appUser.getId(),null);
             this.orderHistoryRepository.save(orderHistory);	
@@ -1121,5 +1121,20 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
 	}
+  
+  private void processPaypalRecurringActions(Long orderId, String eventActionName){
+	  
+	// checking for Paypal Recurring DisConnection			
+			PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneByOrderId(orderId);
+								
+			if(null != billing && null != billing.getSubscriberId()){
+							
+				List<ActionDetaislData> actionDetaislDatas = this.actionDetailsReadPlatformService.retrieveActionDetails(eventActionName);
+										
+				if(actionDetaislDatas.size() != 0){
+					this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,billing.getClientId(), orderId.toString(),null);			
+				}		
+			}  
+  }
 
  }

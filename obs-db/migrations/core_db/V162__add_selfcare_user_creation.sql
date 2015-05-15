@@ -28,8 +28,9 @@ Insert ignore into del_temp values ('RENEWAL_ORDER');
 Insert ignore into del_temp values ('SELFREGISTRATION_ACTIVATE');
 Insert ignore into del_temp values ('UPDATE_ORDER');
 Insert ignore into del_temp values ('UPDATE_SELFCARE');
+Insert ignore into del_temp values ('READ_CLIENTIDENTIFIER');
 Insert ignore into m_role_permission 
 Select (Select id from m_role where name='selfcare') as rid,b.id from del_temp a,m_permission b where a.permission_name=b.code;
-insert ignore into m_appuser values (0,0,1,Null,'selfcare','selfcare', 'only','c82109b2c879cc8106b518dd47521fedf04a2be41299feb31bbec033c1da922a','selfcare@obs.com',0,1,1,1,1);
+insert ignore into m_appuser values (0,0,1,Null,'selfcare','selfcare', 'only','550add1dc52df6c0e8269ffebff9536e343642979c692df6833a243023be6edc','selfcare@obs.com',0,1,1,1,1);
 Insert ignore into m_appuser_role values ((Select id from m_appuser where username='selfcare'),(Select id from m_role where name='selfcare'));
 

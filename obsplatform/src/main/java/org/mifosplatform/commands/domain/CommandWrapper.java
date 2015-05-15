@@ -521,6 +521,10 @@ public class CommandWrapper {
 	public boolean isUpdatePrice() {
 		 return this.actionName.equalsIgnoreCase("UPDATE");
 	}
+	
+	public boolean isDisconnect() {
+		 return this.actionName.equalsIgnoreCase("DISCONNECT");
+	}
 
 	public boolean isAddressResource() {
 		return this.entityName.equalsIgnoreCase("address");
@@ -1262,5 +1266,9 @@ public class CommandWrapper {
 
 		public boolean isUpdatePaypalProfileStatus() {
 			return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILESTATUS");
+		}
+
+		public boolean isdeleteRecurringBilling() {
+			return this.actionName.equalsIgnoreCase("DELETERECURRINGBILLING");
 		}
 }

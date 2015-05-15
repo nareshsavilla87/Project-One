@@ -536,7 +536,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 				handler = applicationContext.getBean("createOrderCommandHandler",NewCommandSourceHandler.class);
 			} else if (wrapper.isUpdate()) {
 				handler = applicationContext.getBean("updateOrderCommandHandler",NewCommandSourceHandler.class);
-			} else if (wrapper.isDelete()) {
+			}else if (wrapper.isDisconnect()) {
+				handler = applicationContext.getBean("disconnectOrderCommandHandler",NewCommandSourceHandler.class);
+			}else if (wrapper.isDelete()) {
 				handler = applicationContext.getBean("deleteOrderCommandHandler",NewCommandSourceHandler.class);
 			} else if (wrapper.isUpdatePrice()) {
 				handler = applicationContext.getBean("updateOrderCommandHandler",NewCommandSourceHandler.class);
@@ -990,7 +992,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 	        	             handler = this.applicationContext.getBean("updatePaypalProfileRecurringCommandhandler", NewCommandSourceHandler.class);
 					     } else if (wrapper.isUpdatePaypalProfileStatus()) {
 	        	             handler = this.applicationContext.getBean("updatePaypalProfileStatusCommandhandler", NewCommandSourceHandler.class);
-					     }  
+					     } else if (wrapper.isdeleteRecurringBilling()) {
+	        	             handler = this.applicationContext.getBean("deleteRecurringBillingCommandhandler", NewCommandSourceHandler.class);
+					     } 
 					     
 				}else if(wrapper.isHardwareSwapping()){
 					     if(wrapper.isDoSwapping()) {
