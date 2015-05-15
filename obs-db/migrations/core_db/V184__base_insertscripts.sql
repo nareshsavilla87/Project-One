@@ -7,6 +7,12 @@ insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`cha
 insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`charge_type`,`charge_duration`,`duration_type`,`tax_inclusive`,`billfrequency_code`) values (null,'YSC','Yearly Subscription','RC',12,'Month(s)',0,'yearly');
 insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`charge_type`,`charge_duration`,`duration_type`,`tax_inclusive`,`billfrequency_code`) values (null,'OTC','One Time','NRC',1,'Month(s)',0,'Once');
 
+
+
+
+insert ignore into m_permission values(null,'client&order','SUSPEND_ORDER','ORDER','SUSPEND',0);
+insert ignore into m_permission values(null,'organisation','MOVEITEM_MRN','MRN','MOVEITEM',0);
+
 -- Contract Periods
 insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'1 Month',1,'Month(s)','N');
 insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'3 Months',3,'Month(s)','N');
@@ -22,6 +28,8 @@ insert ignore into `b_billing_rules`(`id`,`billing_rule`) values (null,'Full Mon
 -- Discount Codes
 
 insert ignore into `b_discount_master`(`id`,`discount_code`,`discount_description`,`discount_type`,`discount_rate`,`start_date`,`discount_status`,`is_delete`) values (null,'None','None','Flat',0,'2015-04-16 00:00:00','ACTIVE','N');
+
+insert ignore  into `b_service`(`id`,`service_code`,`service_description`,`service_type`,`status`,`is_deleted`,`service_unittype`,`is_optional`,`is_auto`) values (0,'None','None','TV','ACtive','Y',null,'N','Y');
 
 -- Event Action Mapping
 truncate table b_eventaction_mapping;
