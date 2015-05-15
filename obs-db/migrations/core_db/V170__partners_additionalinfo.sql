@@ -1,4 +1,13 @@
 -- INSERT IGNORE INTO c_paymentgateway_conf VALUES(null,'neteller',1,'');
+
+insert ignore into m_code VALUES (null,'Office Type',0,'Office are created and mapped to type');
+ 
+ set @id=(select id from m_code where code_name='Office Type');
+insert ignore into m_code_value VALUES (null,@id,'Office',0);
+insert ignore into m_code_value VALUES (null,@id,'Agent',0);
+ set @codeid=(select id from m_code_value where code_id=@id and code_value='Office');
+ update m_office set office_type= @codeid; 
+ 
 INSERT IGNORE INTO m_code VALUES(null,'Partner Type',0,'Partner are created and mapped to type');
 SET @id=(select id from m_code where code_name='Partner Type');
 
