@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.joda.time.LocalDate;
+import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
@@ -17,7 +17,6 @@ import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.billingorder.domain.InvoiceTax;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
-import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -184,10 +183,10 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 
 				if (billingOrderCommand.getTaxInclusive() != null) {
 
-					if (isTaxInclusive(billingOrderCommand.getTaxInclusive())) {
+					if (isTaxInclusive(billingOrderCommand.getTaxInclusive())&&invoiceTaxCommands.get(0).getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
 						netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
 						charge.setNetChargeAmount(netChargeAmount);
-						// charge.setChargeAmount(netChargeAmount);
+						 charge.setChargeAmount(netChargeAmount);
 					}
 				}
 			}
@@ -197,13 +196,15 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 
 		}
 
-		if (billingOrderCommands.get(0).getTaxInclusive() != null) {
+	/*	if (billingOrderCommands.get(0).getTaxInclusive() != null) {
 			if (isTaxInclusive(billingOrderCommands.get(0).getTaxInclusive())) {
-				invoiceAmount = totalChargeAmount;
+				invoiceAmount = totalChargeAmount.add(netTaxAmount);//
 			} else {
 				invoiceAmount = totalChargeAmount.add(netTaxAmount);
 			}
-		}
+			
+		}*/
+		invoiceAmount = totalChargeAmount.add(netTaxAmount);
 		invoice.setNetChargeAmount(totalChargeAmount);
 		invoice.setTaxAmount(netTaxAmount);
 		invoice.setInvoiceAmount(invoiceAmount);
