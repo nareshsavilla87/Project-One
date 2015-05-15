@@ -232,6 +232,9 @@ public class BillMasterWritePlatformServiceImplementation implements
 					Invoice invoice = this.invoiceRepository.findOne(billingOrder.getInvoice().getId());
 					invoice.updateBillId(null);
 					this.invoiceRepository.save(invoice);
+					OneTimeSale oneTimeSale=this.oneTimeSaleRepository.findOne(billingOrder.getOrderId());
+					oneTimeSale.updateBillId(null);
+					this.oneTimeSaleRepository.save(oneTimeSale);
 				}
 			
 			}
