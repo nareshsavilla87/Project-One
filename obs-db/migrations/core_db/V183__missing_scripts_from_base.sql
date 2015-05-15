@@ -1,4 +1,5 @@
 -- Create Tables
+SET SQL_SAFE_UPDATES = 0;
 CREATE TABLE IF NOT EXISTS `b_billing_rules` (
   `id` int(20) NOT NULL AUTO_INCREMENT,
   `billing_rule` varchar(30) NOT NULL,
