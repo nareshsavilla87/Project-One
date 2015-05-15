@@ -53,8 +53,6 @@ import org.mifosplatform.workflow.eventaction.domain.EventActionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import urn.ebay.apis.eBLBaseComponents.StatusChangeActionType;
-
 import com.google.gson.JsonObject;
 
 @Service
