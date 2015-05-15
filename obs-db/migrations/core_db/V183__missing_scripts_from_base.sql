@@ -81,6 +81,21 @@ DELIMITER ;
 call addb_itemsalecoloumns();
 Drop procedure IF EXISTS addb_itemsalecoloumns;
 
+Drop procedure IF EXISTS plancodekeyDrop; 
+DELIMITER //
+create procedure plancodekeyDrop() 
+Begin
+  IF  EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE
+`CONSTRAINT_CATALOG` = 'def' AND `TABLE_SCHEMA` = DATABASE() 
+AND `TABLE_NAME` = 'b_bill_details' AND CONSTRAINT_NAME='fk_bdtl_pc')THEN 
+ALTER TABLE b_bill_details DROP FOREIGN KEY `fk_bdtl_pc`;
+ALTER TABLE b_bill_details DROP FOREIGN KEY `fk_bdtl_sc`;
+END IF;
+END //
+DELIMITER ;
+call plancodekeyDrop();
+Drop procedure IF EXISTS plancodekeyDrop;
+
 
 
 Drop procedure IF EXISTS addb_invoicecolumnonetimesale;
