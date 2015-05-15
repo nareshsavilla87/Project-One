@@ -7,11 +7,14 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifosplatform.finance.billingorder.service.BillingOrderReadPlatformService;
 import org.mifosplatform.finance.billingorder.service.GenerateBill;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
+import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
+import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBillingRepository;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -40,11 +43,13 @@ private final OrderRepository orderRepository;
 private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
 private final FromJsonHelper fromApiJsonHelper;
 private final OrderWritePlatformService orderWritePlatformService;
+private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
 
 @Autowired
 public ScheduleJob(final ClientBalanceRepository clientBalanceRepository,final BillingOrderReadPlatformService billingOrderReadPlatformService,
 final GenerateBill generateBill,final OrderRepository orderRepository,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,
-final FromJsonHelper fromApiJsonHelper,final OrderWritePlatformService orderWritePlatformService){
+final FromJsonHelper fromApiJsonHelper,final OrderWritePlatformService orderWritePlatformService,
+final PaypalRecurringBillingRepository paypalRecurringBillingRepository){
 
 this.clientBalanceRepository=clientBalanceRepository;
 this.billingOrderReadPlatformService=billingOrderReadPlatformService;
@@ -53,6 +58,7 @@ this.orderRepository=orderRepository;
 this.contractPeriodReadPlatformService=contractPeriodReadPlatformService;
 this.fromApiJsonHelper=fromApiJsonHelper;
 this.orderWritePlatformService=orderWritePlatformService;
+this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
 
 }
 
@@ -88,10 +94,8 @@ public boolean checkClientBalanceForOrderrenewal(OrderData orderData,Long client
 return isAmountSufficient;
 }
 
-
-
 public void ProcessAutoExipiryDetails(OrderData orderData, FileWriter fw, LocalDate exipirydate, JobParameterData data, Long clientId) {
-  
+	  
 	try{
 
       if(!(orderData.getStatus().equalsIgnoreCase(StatusTypeEnum.DISCONNECTED.toString()) || orderData.getStatus().equalsIgnoreCase(StatusTypeEnum.PENDING.toString()))){

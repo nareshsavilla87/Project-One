@@ -16,4 +16,6 @@ public interface EventActionReadPlatformService {
 	
 	List<EventActionData> retrievePendingActionRequest(Long paymentgatewayId);
 
+	List<EventActionData> retrievePendingRecurringRequest(Long clientId);
+
 }
