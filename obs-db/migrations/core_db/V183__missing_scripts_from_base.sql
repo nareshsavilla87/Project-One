@@ -435,7 +435,10 @@ DELIMITER ;
 
 	
 -- data
-
+Update m_permission set grouping='client&orders' where grouping like '%Client&orders%';
+Update m_permission set grouping='inventory' where grouping like '%Inventory%';
+Update m_permission set grouping='client&orders' where grouping like '%Ordering%';
+Update m_permission set grouping='organisation' where grouping like '%Organization%';
 insert ignore into m_permission values(null,'Organisation','CREATE_IPPOOLMANAGEMENT','IPPOOLMANAGEMENT','CREAT',0);
 insert ignore into m_permission values(null,'client&orders','DISCONNECT_ORDER','ORDER','DISCONNECT',0);
 
