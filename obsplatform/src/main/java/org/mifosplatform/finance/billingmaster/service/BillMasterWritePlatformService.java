@@ -8,6 +8,6 @@ public interface BillMasterWritePlatformService {
 
 	CommandProcessingResult createBillMaster(JsonCommand command, Long entityId);
 
-	CommandProcessingResult cancelBill(Long entityId);
+	CommandProcessingResult cancelBillMaster(Long entityId);
 
 }
