@@ -393,7 +393,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 						eventAction.setCommandAsJson(changeOrder.toString());
 						this.eventActionRepository.save(eventAction);
 						
-						paypalRecurringBilling.setOrderId(orderId);
+						paypalRecurringBilling.setOrderId(result.resourceId());
 						
 						this.paypalRecurringBillingRepository.save(paypalRecurringBilling);
 					}
