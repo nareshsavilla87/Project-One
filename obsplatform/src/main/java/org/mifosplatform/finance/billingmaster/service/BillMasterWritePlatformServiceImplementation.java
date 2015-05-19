@@ -25,6 +25,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSaleRepository;
@@ -38,8 +39,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-public class BillMasterWritePlatformServiceImplementation implements
-		BillMasterWritePlatformService {
+public class BillMasterWritePlatformServiceImplementation implements BillMasterWritePlatformService {
 	
 	 private final static Logger LOGGER = LoggerFactory.getLogger(BillMasterWritePlatformServiceImplementation.class);
 		private final PlatformSecurityContext context;
@@ -99,7 +99,7 @@ public class BillMasterWritePlatformServiceImplementation implements
 		
 		final BigDecimal previousBal = this.billMasterReadPlatformService.retrieveClientBalance(clientId);
 		
-		final LocalDate billDate = new LocalDate();
+		final LocalDate billDate = DateUtils.getLocalDateOfTenant();
 		final BigDecimal previousBalance = BigDecimal.ZERO;
 		final BigDecimal chargeAmount = BigDecimal.ZERO;
 		final BigDecimal adjustmentAmount = BigDecimal.ZERO;
@@ -108,19 +108,16 @@ public class BillMasterWritePlatformServiceImplementation implements
 		final BigDecimal dueAmount = BigDecimal.ZERO;
 		final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
 		final String message = command.stringValueOfParameterNamed("message");
-		BillMaster  billMaster = new BillMaster(clientId, clientId,billDate.toDate(), null, null, dueDate.toDate(),
-									previousBalance, chargeAmount, adjustmentAmount, taxAmount, paidAmount, dueAmount, 
-									null, message, parentId);
+		BillMaster  billMaster = new BillMaster(clientId, clientId,billDate.toDate(), null, null, dueDate.toDate(),previousBalance, 
+				                    chargeAmount, adjustmentAmount, taxAmount, paidAmount, dueAmount,null, message, parentId);
 		
 		List<BillDetail> listOfBillingDetail = new ArrayList<BillDetail>();
 		
 		for (final FinancialTransactionsData financialTransactionsData : financialTransactionsDatas) {
 			
-			final BillDetail billDetail = new BillDetail(null, financialTransactionsData.getTransactionId(),
-					financialTransactionsData.getTransDate().toDate(), financialTransactionsData.getTransactionType(),
-					financialTransactionsData.getDebitAmount(), financialTransactionsData.getPlanCode(), 
-					financialTransactionsData.getDescription());
-		
+			final BillDetail billDetail = new BillDetail(null, financialTransactionsData.getTransactionId(),financialTransactionsData.getTransDate().toDate(),
+					financialTransactionsData.getTransactionType(),financialTransactionsData.getDebitAmount(),financialTransactionsData.getPlanCode(),financialTransactionsData.getDescription());
+			
 			listOfBillingDetail.add(billDetail);
 		    billMaster.addBillDetails(billDetail);
 		
@@ -197,12 +194,11 @@ public class BillMasterWritePlatformServiceImplementation implements
 			}
 		}catch(Exception ex){
 			 LOGGER.error(ex.getLocalizedMessage());
-			// handleCodeDataIntegrityIssues(command, ex);
 		}
 	}
 
 	@Override
-	public CommandProcessingResult cancelBill(final Long billId) {
+	public CommandProcessingResult cancelBillMaster(final Long billId) {
 		try{
 			context.authenticatedUser();
 			List<BillDetail> billingDetails = new ArrayList<BillDetail>();
@@ -221,19 +217,23 @@ public class BillMasterWritePlatformServiceImplementation implements
 					Invoice invoice = this.invoiceRepository.findOne(billingOrder.getInvoice().getId());
 					invoice.updateBillId(null);
 					this.invoiceRepository.save(invoice);
-				} else if("TAXES".equalsIgnoreCase(billDetail.getTransactionType())){
+				} 
+				else if("TAXES".equalsIgnoreCase(billDetail.getTransactionType())){
 					InvoiceTax tax = this.invoiceTaxRepository.findOne(billDetail.getTransactionId());
 					tax.updateBillId(null);
 					this.invoiceTaxRepository.save(tax);
-				}else if("ADJUSTMENT".equalsIgnoreCase(billDetail.getTransactionType())){
+				}
+				else if("ADJUSTMENT".equalsIgnoreCase(billDetail.getTransactionType())){
 					Adjustment adjustment = this.adjustmentRepository.findOne(billDetail.getTransactionId());
 					adjustment.updateBillId(null);
 					this.adjustmentRepository.save(adjustment);
-				}else if(billDetail.getTransactionType().contains("PAYMENT")) {
+				}
+				else if(billDetail.getTransactionType().contains("PAYMENT")) {
 					Payment payment = this.paymentRepository.findOne(billDetail.getTransactionId());
 					payment.updateBillId(null);
 					this.paymentRepository.save(payment);
-				}else if ("ONETIME_CHARGES".equalsIgnoreCase(billDetail.getTransactionType())) {
+				}
+				else if ("ONETIME_CHARGES".equalsIgnoreCase(billDetail.getTransactionType())) {
 					BillingOrder billingOrder = this.billingOrderRepository.findOne(billDetail.getTransactionId());
 					billingOrder.updateBillId(null);
 					this.billingOrderRepository.save(billingOrder);
@@ -243,13 +243,15 @@ public class BillMasterWritePlatformServiceImplementation implements
 					OneTimeSale oneTimeSale=this.oneTimeSaleRepository.findOne(billingOrder.getOrderId());
 					oneTimeSale.updateBillId(null);
 					this.oneTimeSaleRepository.save(oneTimeSale);
-				}else if ("SERVICE_TRANSFER".equalsIgnoreCase(billDetail.getTransactionType())) {
+				}
+				else if ("SERVICE_TRANSFER".equalsIgnoreCase(billDetail.getTransactionType())) {
 					BillingOrder billingOrder = this.billingOrderRepository.findOne(billDetail.getTransactionId());
 					billingOrder.updateBillId(null);
 					this.billingOrderRepository.save(billingOrder);
 					Invoice invoice = this.invoiceRepository.findOne(billingOrder.getInvoice().getId());
 					invoice.updateBillId(null);
 					this.invoiceRepository.save(invoice);
+
 				}
 				
 				

@@ -2528,7 +2528,7 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder cancelBill(Long billId) {
+	public CommandWrapperBuilder cancelBillStatement(Long billId) {
 
 		this.actionName = "DELETE";
 		this.entityName = "BILLMASTER";
@@ -2865,22 +2865,22 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-public CommandWrapperBuilder disconnectOrder(Long orderId) {
+	public CommandWrapperBuilder disconnectOrder(Long orderId) {
 
-	this.actionName = "DISCONNECT";
-	this.entityName = "ORDER";
-	this.entityId = orderId;
-	this.href = "/orderdisconnect/"+orderId;
-	return this;
-}
+		this.actionName = "DISCONNECT";
+		this.entityName = "ORDER";
+		this.entityId = orderId;
+		this.href = "/orderdisconnect/" + orderId;
+		return this;
+	}
 
-public CommandWrapperBuilder updatePaypalProfileRecurring() {
-	this.actionName = "UPDATEPAYPALRECURRING";
-	this.entityName = "PAYMENTGATEWAY";
-	this.entityId = null;
-	this.href = "";
-	return this;
-}
+	public CommandWrapperBuilder updatePaypalProfileRecurring() {
+		this.actionName = "UPDATEPAYPALRECURRING";
+		this.entityName = "PAYMENTGATEWAY";
+		this.entityId = null;
+		this.href = "";
+		return this;
+	}
 	public CommandWrapperBuilder updatePropertyMaster(final Long codeId) {
 		this.actionName = "UPDATE";
 		this.entityName = "PROPERTYMASTER";
@@ -2897,7 +2897,13 @@ public CommandWrapperBuilder updatePaypalProfileRecurring() {
 		return this;
 	}
 
-	
+	public CommandWrapperBuilder deleteRecurringBilling() {
+		this.actionName = "DELETERECURRINGBILLING";
+		this.entityName = "PAYMENTGATEWAY";
+		this.entityId = null;
+		this.href = "";
+		return this;
+	}
 
 	public CommandWrapperBuilder updatePaypalProfileStatus() {
 		this.actionName = "UPDATEPAYPALPROFILESTATUS";

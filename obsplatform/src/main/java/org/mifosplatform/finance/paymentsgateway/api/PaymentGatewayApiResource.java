@@ -46,6 +46,7 @@ import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayDownloadData
 import org.mifosplatform.finance.paymentsgateway.data.RecurringPaymentTransactionTypeConstants;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGateway;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayRepository;
+import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayReadPlatformService;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayRecurringWritePlatformService;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayWritePlatformService;
@@ -749,6 +750,7 @@ public class PaymentGatewayApiResource {
 			if (RecurringPaymentTransactionTypeConstants.RECURRING_VERIFIED.equals(verifiyMessage)) {
 
 				String txnType = request.getParameter(RecurringPaymentTransactionTypeConstants.RECURRING_TXNTYPE);
+				String profileId = request.getParameter(RecurringPaymentTransactionTypeConstants.SUBSCRID);
 				
 				switch (txnType) {
 
@@ -781,18 +783,24 @@ public class PaymentGatewayApiResource {
 				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_EXPIRED:
 				case RecurringPaymentTransactionTypeConstants.SUBSCR_CANCELLED:
 					
-					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(request);
+					PaypalRecurringBilling billing = this.paymentGatewayRecurringWritePlatformService.getRecurringBillingObject(profileId);
 					
-					Long orderId = this.paymentGatewayRecurringWritePlatformService.getOrderId(request);
-					
-					String status = this.paymentGatewayRecurringWritePlatformService.getOrderStatus(orderId);
-					
-					if (status.equalsIgnoreCase(StatusTypeEnum.ACTIVE.toString())) {
+					if(null == billing || null == billing.getOrderId()){
 						
-						final CommandWrapper commandRequest = new CommandWrapperBuilder().terminateOrder(orderId).build();
-						this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+						System.out.println("OrderId Not Found with this SubscriberId:" + profileId);
+					
+					} else{
+						
+						String status = this.paymentGatewayRecurringWritePlatformService.getOrderStatus(billing.getOrderId());
+						
+						this.paymentGatewayRecurringWritePlatformService.updatePaypalRecurringBilling(profileId);
+						
+						if (null != status && status.equalsIgnoreCase(StatusTypeEnum.ACTIVE.toString())) {		
+							final CommandWrapper commandRequest = new CommandWrapperBuilder().terminateOrder(billing.getOrderId()).build();
+							this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+						}
 					}
-				
+					
 					break;
 					
 				case RecurringPaymentTransactionTypeConstants.SUBSCR_FAILED:
@@ -811,13 +819,13 @@ public class PaymentGatewayApiResource {
 				
 				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUSPENDED:
 					
-					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(request);
+					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(profileId);
 					
 					break;
 				
 				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUSPENDED_DUE_TO_MAX_FAILED_PAYMENT:
 					
-					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(request);
+					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(profileId);
 					
 					break;
 
