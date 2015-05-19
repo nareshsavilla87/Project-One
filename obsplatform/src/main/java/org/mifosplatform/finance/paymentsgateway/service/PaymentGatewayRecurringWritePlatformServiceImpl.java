@@ -324,7 +324,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 				String ePaytermCode = createOrder.getString(RecurringPaymentTransactionTypeConstants.PAYTERMCODE);
 				Long eContractPeriod = createOrder.getLong(RecurringPaymentTransactionTypeConstants.CONTRACTPERIOD);
 				
-				if(planId == ePlanCode && paytermCode.equalsIgnoreCase(ePaytermCode) && contractPeriod == eContractPeriod){
+				if(planId.equals(ePlanCode) && paytermCode.equalsIgnoreCase(ePaytermCode) && contractPeriod.equals(eContractPeriod)) {
 					
 					// creating order and assign Recurring Details.
 					
@@ -347,14 +347,11 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 						
 						this.paypalRecurringBillingRepository.save(paypalRecurringBilling);
 					}
-					
-					
 				}
 				
 			} else if (eventAction.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_CHNAGE_PLAN)) {
 				
 				//Do the Change Order Functionality Here
-				
 				Long planId   = obj.getLong(RecurringPaymentTransactionTypeConstants.PLANID);
 				String paytermCode = obj.getString(RecurringPaymentTransactionTypeConstants.PAYTERMCODE);
 				Long contractPeriod = obj.getLong(RecurringPaymentTransactionTypeConstants.CONTRACTPERIOD);
@@ -366,12 +363,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 				String ePaytermCode = changeOrder.getString(RecurringPaymentTransactionTypeConstants.PAYTERMCODE);
 				Long eContractPeriod = changeOrder.getLong(RecurringPaymentTransactionTypeConstants.CONTRACTPERIOD);
 				
-				if(planId == ePlanCode && paytermCode.equalsIgnoreCase(ePaytermCode) && contractPeriod == eContractPeriod){
-					
-					// creating order and assign Recurring Details.
-					
-					/*CommandWrapper commandRequest = new CommandWrapperBuilder().createOrder(clientId).withJson(createOrder.toString()).build();
-					CommandProcessingResult resultOrder = this.writePlatformService.logCommandSource(commandRequest);*/
+				if(planId.equals(ePlanCode) && paytermCode.equalsIgnoreCase(ePaytermCode) && contractPeriod.equals(eContractPeriod)){
 					
 					CommandWrapper commandRequest = new CommandWrapperBuilder().changePlan(orderId).withJson(changeOrder.toString()).build();
 					CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
@@ -393,12 +385,10 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 						eventAction.setCommandAsJson(changeOrder.toString());
 						this.eventActionRepository.save(eventAction);
 						
-						paypalRecurringBilling.setOrderId(orderId);
+						paypalRecurringBilling.setOrderId(result.resourceId());
 						
 						this.paypalRecurringBillingRepository.save(paypalRecurringBilling);
 					}
-					
-					
 				}
 				
 			} else if (eventAction.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_RENEWAL)) {
@@ -417,19 +407,21 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 				Long eOrderId = renewalOrder.getLong(RecurringPaymentTransactionTypeConstants.ORDERID);
 				
 				if(renewalOrder.has(RecurringPaymentTransactionTypeConstants.CLIENTID)){
-					renewalOrder.remove(RecurringPaymentTransactionTypeConstants.ORDERID);
 					renewalOrder.remove(RecurringPaymentTransactionTypeConstants.CLIENTID);
 				}
 				
-				if(renewalPeriod == eRenewalPeriod && priceId == ePriceId && orderId == eOrderId){
+				if(renewalOrder.has(RecurringPaymentTransactionTypeConstants.ORDERID)){
+					renewalOrder.remove(RecurringPaymentTransactionTypeConstants.ORDERID);
+				}
+				
+				if(renewalPeriod.equals(eRenewalPeriod) && priceId.equals(ePriceId) && orderId.equals(eOrderId)){
 					
 					// creating order and assign Recurring Details.
-					
 					final CommandWrapper commandRequest = new CommandWrapperBuilder().renewalOrder(orderId).withJson(renewalOrder.toString()).build();
 					final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
 
 					if (null == result) {
-						System.out.println("Change Order Failed.");
+						System.out.println("Renewal Order Failed.");
 					}
 					
 					if(null != paypalRecurringBilling){
