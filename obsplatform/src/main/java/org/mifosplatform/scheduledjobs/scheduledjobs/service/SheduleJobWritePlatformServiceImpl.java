@@ -579,7 +579,7 @@ public void processNotify() {
 	  				fw.append("b_message_data processing id="+emailDetail.getId()+"-- and Result :"+Result+" ... \r\n");
 	  			}else if(emailDetail.getMessageType()=='M'){		
 	  				String message = this.sheduleJobReadPlatformService.retrieveMessageData(emailDetail.getId());
-	  				String Result=this.messagePlatformEmailService.sendToUserMobile(message,emailDetail.getId());	
+	  				String Result=this.messagePlatformEmailService.sendToUserMobile(message,emailDetail.getId(),emailDetail.getMessageTo(),emailDetail.getBody());	
 	  				fw.append("b_message_data processing id="+emailDetail.getId()+"-- and Result:"+Result+" ... \r\n");	
 	  			}else{
 	  				fw.append("Message Type Unknown ..\r\n");
