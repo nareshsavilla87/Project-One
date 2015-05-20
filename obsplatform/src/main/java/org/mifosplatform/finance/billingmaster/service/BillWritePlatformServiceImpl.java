@@ -1,7 +1,6 @@
 package org.mifosplatform.finance.billingmaster.service;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -10,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRRuntimeException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
@@ -17,9 +17,7 @@ import net.sf.jasperreports.engine.JasperPrint;
 import org.mifosplatform.finance.billingmaster.domain.BillDetail;
 import org.mifosplatform.finance.billingmaster.domain.BillMaster;
 import org.mifosplatform.finance.billingmaster.domain.BillMasterRepository;
-import org.mifosplatform.finance.billingorder.data.BillDetailsData;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
-import org.mifosplatform.finance.financialtransaction.data.FinancialTransactionsData;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -36,24 +34,14 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.lowagie.text.Document;
-import com.lowagie.text.Element;
-import com.lowagie.text.Font;
-import com.lowagie.text.FontFactory;
-import com.lowagie.text.Image;
-import com.lowagie.text.Paragraph;
-import com.lowagie.text.pdf.CMYKColor;
-import com.lowagie.text.pdf.PdfContentByte;
-import com.lowagie.text.pdf.PdfPCell;
-import com.lowagie.text.pdf.PdfPTable;
-import com.lowagie.text.pdf.PdfWriter;
 
 /**
- * @author hugo
+ * @author ranjith
  *
  */
 @Service
 public class BillWritePlatformServiceImpl implements BillWritePlatformService {
+	
 	private final static Logger LOGGER = LoggerFactory.getLogger(BillWritePlatformServiceImpl.class);
 	private final BillMasterRepository billMasterRepository;
 	private final TenantAwareRoutingDataSource dataSource;
@@ -116,8 +104,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		}
 	  dueAmount = chargeAmount.add(taxAmount).add(oneTimeSaleAmount).add(clientBalance)
 			      .add(adjustmentAmount).add(serviceTransferAmount).subtract(paymentAmount);
-	  
-	  billMaster.setChargeAmount(chargeAmount.add(serviceTransferAmount));
+	  billMaster.setChargeAmount(chargeAmount.add(oneTimeSaleAmount).add(serviceTransferAmount));
 	  billMaster.setAdjustmentAmount(adjustmentAmount);
 	  billMaster.setTaxAmount(taxAmount);
 	  billMaster.setPaidAmount(paymentAmount);
@@ -126,7 +113,8 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	  this.billMasterRepository.save(billMaster);
 	  return new CommandProcessingResult(billMaster.getId(),billMaster.getClientId());
 	}catch(DataIntegrityViolationException dve){
-			return null;
+		LOGGER.error("unable to retrieve data" + dve.getLocalizedMessage());
+		return CommandProcessingResult.empty();
 	}
 }
 
@@ -150,15 +138,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			final String jpath = fileLocation+File.separator+"jasper"; 
 			final String jfilepath =jpath+File.separator+"Bill_Mainreport.jasper";
 			final Connection connection = this.dataSource.getConnection();
-			/*Long billNum = null;
-			final Client client = this.clientRepository.findOne(billMaster.getClientId());
-			
-				if(client.getGroupName() != null){
-					billNum = client.getGroupName();
-				}else{
-					billNum = billMaster.getId();
-				}
-				*/
+		
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			final Integer id = Integer.valueOf(billMaster.getId().toString());
 			parameters.put("param1", id);
@@ -170,14 +150,18 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			connection.close();
 			System.out.println("Filling report successfully...");
 			
-		} catch (final DataIntegrityViolationException exception) {
-			exception.printStackTrace();
-		} catch (final JRException e) {
+		} catch (final DataIntegrityViolationException ex) {
+			 LOGGER.error("Filling report failed..." + ex.getLocalizedMessage());
+			 System.out.println("Filling report failed...");
+			 ex.printStackTrace();
+		} catch (final JRException  | JRRuntimeException e) {
+			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
-			LOGGER.error("unable to generate pdf" + e.getLocalizedMessage());
 			e.printStackTrace();
-		} catch (final SQLException e) {
-			LOGGER.error("unable to retrieve data" + e.getLocalizedMessage());
+		} catch (final Exception e) {
+			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
+			System.out.println("Filling report failed...");
+			e.printStackTrace();
 		}
 	}
 
@@ -196,6 +180,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		}
 		final String printInvoiceLocation = InvoiceDetailsLocation +File.separator + "Invoice_" + invoiceId + ".pdf";
 		try {
+			
 			final String jpath = fileLocation+File.separator+"jasper"; 
 			final String jasperfilepath =jpath+File.separator+"Invoicereport.jasper";
 			final Integer id = Integer.valueOf(invoiceId.toString());
@@ -206,17 +191,22 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		   JasperExportManager.exportReportToPdfFile(jasperPrint,printInvoiceLocation);
 	       connection.close();
 	       System.out.println("Filling report successfully...");
-		} catch (final DataIntegrityViolationException exception) {
-			exception.printStackTrace();
-		} catch (final JRException e) {
+	       
+		   }catch (final DataIntegrityViolationException ex) {
+			 LOGGER.error("Filling report failed..." + ex.getLocalizedMessage());
+			 System.out.println("Filling report failed...");
+			 ex.printStackTrace();
+		   } catch (final JRException  | JRRuntimeException e) {
+			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
-			LOGGER.error("unable to generate pdf" + e.getLocalizedMessage());
+		 	e.printStackTrace();
+		  } catch (final Exception e) {
+			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
+			System.out.println("Filling report failed...");
 			e.printStackTrace();
-		} catch (final SQLException e) {
-			LOGGER.error("unable to retrieve data" + e.getLocalizedMessage());
 		}
 		return printInvoiceLocation;	
-}
+   }
 	@Transactional
 	@Override
 	public void sendInvoiceToEmail(final String printFileName, final Long clientId) {
@@ -235,7 +225,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				              
 				  billingMessage = new BillingMessage(msgTemplate.getHeader(), msgTemplate.getBody(), msgTemplate.getFooter(), clientEmail, clientEmail, 
 				    		                    msgTemplate.getSubject(), "N", msgTemplate, msgTemplate.getMessageType(), printFileName);
-				    this.messageDataRepository.save(billingMessage);
+				  this.messageDataRepository.save(billingMessage);
 	   }
 	}
  }
@@ -267,14 +257,13 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	return billMaster.getId();
 	}
 	
-	@Override
-	public String generatePdf(final BillDetailsData billDetails,
-			final List<FinancialTransactionsData> datas) {
+/*	@Override
+	public String generatePdf(final BillDetailsData billDetails,final List<FinancialTransactionsData> datas) {
 
 		final String fileLocation = FileUtils.MIFOSX_BASE_DIR + File.separator
 				+ "Print_invoice_Details";
 		
-		/** Recursively create the directory if it does not exist **/
+		*//** Recursively create the directory if it does not exist **//*
 		if (!new File(fileLocation).isDirectory()) {
 			new File(fileLocation).mkdirs();
 		}
@@ -557,16 +546,16 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 
 			// This option is to open the PDF on Server. Instead we have given
 			// Financial Statement Download Option
-			/*
+			
 			 * Runtime.getRuntime().exec(
 			 * "rundll32 url.dll,FileProtocolHandler "
 			 * +printInvoicedetailsLocation);
-			 */
+			 
 
 		} catch (Exception e) {
 		}
 		return printInvoicedetailsLocation;
 
-	}	
+	}*/	
 	
 }

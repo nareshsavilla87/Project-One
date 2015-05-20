@@ -2528,7 +2528,7 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder cancelBill(Long billId) {
+	public CommandWrapperBuilder cancelBillStatement(Long billId) {
 
 		this.actionName = "DELETE";
 		this.entityName = "BILLMASTER";
@@ -2897,7 +2897,14 @@ public CommandWrapperBuilder updatePaypalProfileRecurring() {
 		return this;
 	}
 
-	
+public CommandWrapperBuilder deleteRecurringBilling() {
+	this.actionName = "DELETERECURRINGBILLING";
+	this.entityName = "PAYMENTGATEWAY";
+	this.entityId = null;
+	this.href = "";
+	return this;
+}
+
 
 	public CommandWrapperBuilder updatePaypalProfileStatus() {
 		this.actionName = "UPDATEPAYPALPROFILESTATUS";

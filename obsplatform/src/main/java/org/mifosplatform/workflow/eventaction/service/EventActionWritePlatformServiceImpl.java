@@ -21,6 +21,8 @@ import org.mifosplatform.crm.ticketmaster.domain.TicketMaster;
 import org.mifosplatform.crm.ticketmaster.domain.TicketMasterRepository;
 import org.mifosplatform.crm.ticketmaster.service.TicketMasterReadPlatformService;
 import org.mifosplatform.finance.billingorder.api.BillingOrderApiResourse;
+import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
+import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBillingRepository;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayRecurringWritePlatformService;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
@@ -79,6 +81,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
     private final HardwareAssociationReadplatformService hardwareAssociationReadplatformService;
     private final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
 
 
 	@Autowired
@@ -88,7 +91,8 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			final BillingOrderApiResourse billingOrderApiResourse,final BillingMessageRepository messageDataRepository,final ClientRepository clientRepository,
 			final BillingMessageTemplateRepository messageTemplateRepository,final EventMasterRepository eventMasterRepository,final EventOrderRepository eventOrderRepository,
 			final TicketMasterReadPlatformService ticketMasterReadPlatformService,final AppUserReadPlatformService readPlatformService,
-			final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService, final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService)
+			final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService, final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+			final PaypalRecurringBillingRepository paypalRecurringBillingRepository)
 	{
 		this.repository=repository;
 		this.orderRepository=orderRepository;
@@ -107,6 +111,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
         this.hardwareAssociationReadplatformService=hardwareAssociationReadplatformService;
         this.paymentGatewayRecurringWritePlatformService = paymentGatewayRecurringWritePlatformService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+        this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
 	}
 	
 	
@@ -305,9 +310,10 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	break; 	
 				    	
 				    case EventActionConstants.ACTION_INVOICE : 
-				    	  
+				    	Order order=this.orderRepository.findOne(new Long(resourceId));
 			        	  jsonObject.put("dateFormat","dd MMMM yyyy");
 			        	  jsonObject.put("locale","en");
+			        	  jsonObject.put("systemDate",dateFormat.format(order.getStartDate()));
 			        	  	if(detailsData.IsSynchronous().equalsIgnoreCase("N")){
 			        	  		eventAction=new EventAction(DateUtils.getDateOfTenant(), "CREATE",EventActionConstants.EVENT_ACTIVE_ORDER.toString(),
 			        	  		EventActionConstants.ACTION_INVOICE.toString(),"/billingorder/"+clientId,Long.parseLong(resourceId),
@@ -316,7 +322,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			        	  	
 			        	  	}else{
 			            	 
-			        	  		Order order=this.orderRepository.findOne(new Long(resourceId));
+			        	  		
 			        	  		jsonObject.put("dateFormat","dd MMMM yyyy");
 			        	  		jsonObject.put("locale","en");
 			        	  		jsonObject.put("systemDate",dateFormat.format(order.getStartDate()));
@@ -373,6 +379,37 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						eventActionObj.updateStatus('Y');
 						this.eventActionRepository.saveAndFlush(eventActionObj);
 				  	
+			        	break;
+			        	
+				    case EventActionConstants.ACTION_RECURRING_TERMINATION : 
+				    	
+				    	Long orderId = Long.parseLong(resourceId);
+				    	
+				    	PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneByOrderId(orderId);
+				    	
+				    	if(billing.getDeleted() == 'N'){
+				    		JsonObject terminationObj = new JsonObject();
+					    	terminationObj.addProperty("orderId", orderId);
+					    	terminationObj.addProperty("recurringStatus", "CANCEL");
+					    	
+					    	final CommandWrapper terminateCommandRequest = new CommandWrapperBuilder().updatePaypalProfileStatus().withJson(terminationObj.toString()).build();
+							final CommandProcessingResult terminateResult = this.commandsSourceWritePlatformService.logCommandSource(terminateCommandRequest);
+						
+							Map<String,Object> resultMapForTerminate = terminateResult.getChanges();
+							
+							JsonObject resultJsonObject = new JsonObject();
+							resultJsonObject.addProperty("result", resultMapForTerminate.get("result").toString());
+							resultJsonObject.addProperty("acknoledgement", resultMapForTerminate.get("acknoledgement").toString());
+							resultJsonObject.addProperty("error", resultMapForTerminate.get("error").toString());
+							
+							
+							EventAction eventActionTermination=new EventAction(new Date(),"Cancel Recurring","Cancel Recurring Profile",EventActionConstants.ACTION_RECURRING_TERMINATION.toString(),
+					    			 "/eventmaster",Long.parseLong(resourceId),resultJsonObject.toString(),Long.valueOf(0),Long.valueOf(0));
+							
+							eventActionTermination.updateStatus('Y');
+							this.eventActionRepository.saveAndFlush(eventActionTermination);
+				    	}	
+						
 			        	break;
 			      
 			       

@@ -113,7 +113,8 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 // ignore to allow 'preflight' requests from AJAX applications
                 // in different origin (domain name)
             	super.doFilter(req, res, chain); //ashok changed please comment when delete the else if statement
-            } else if(path.contains("/api/v1/paymentgateways") && request.getMethod().equalsIgnoreCase("POST")){
+            } else if((path.contains("/api/v1/paymentgateways") && request.getMethod().equalsIgnoreCase("POST")) || 
+            		(path.contains("/api/v1/entitlements/getuser") && request.getMethod().equalsIgnoreCase("GET"))){
             
            	    String username= request.getParameter("username");
                 String password= request.getParameter("password");
