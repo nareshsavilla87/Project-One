@@ -136,15 +136,16 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 						                  invoiceTaxCommand.getTaxPercentage(), invoiceTaxCommand.getTaxAmount().negate());
 				      charge.addChargeTaxes(invoiceTax);
 			     }
-			
-			   if(billingOrderCommand.getTaxInclusive()!=null && invoiceTaxCommands!=null && !invoiceTaxCommands.isEmpty()){
-				
-				  if(isTaxInclusive(billingOrderCommand.getTaxInclusive())){
-					netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
-					charge.setNetChargeAmount(netChargeAmount.negate());
-					charge.setChargeAmount(netChargeAmount.negate());
-				    }
-			      }
+
+			     if (billingOrderCommand.getTaxInclusive() != null && (invoiceTaxCommands !=null && !invoiceTaxCommands.isEmpty())) {
+						
+						if (isTaxInclusive(billingOrderCommand.getTaxInclusive())&&invoiceTaxCommands.get(0).getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
+							netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
+							charge.setNetChargeAmount(netChargeAmount.negate());
+							charge.setChargeAmount(netChargeAmount.negate());
+						}
+					}
+
 			}
 			netTaxAmount = netTaxAmount.add(netChargeTaxAmount);
 			totalChargeAmount = totalChargeAmount.add(netChargeAmount);
