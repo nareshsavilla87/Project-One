@@ -345,8 +345,11 @@ public class GenerateDisconnectionBill {
 					
 					taxRate = taxMappingRateData.getRate();
 					taxCode = taxMappingRateData.getTaxCode();
-					taxAmount = price.multiply(taxRate.divide(new BigDecimal(100))).setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
-					
+					if(billingOrderData.getTaxInclusive().compareTo(Integer.valueOf(1))==0){ /* (2990 * 11) / (100 + 11)*/
+						taxAmount = price.multiply(taxRate).divide(new BigDecimal(100).add(taxRate),Integer.parseInt(roundingDecimal()), RoundingMode.HALF_UP);
+					}else{
+					     taxAmount = price.multiply(taxRate.divide(new BigDecimal(100))).setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
+					}
 				} else if(taxMappingRateData.getTaxType().equalsIgnoreCase("Flat")) {
 					
 					taxRate = taxMappingRateData.getRate();
