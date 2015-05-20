@@ -1,5 +1,6 @@
 -- INSERT IGNORE INTO c_paymentgateway_conf VALUES(null,'neteller',1,'');
-
+SET SQL_SAFE_UPDATES = 0;
+SET foreign_key_checks = 0;
 insert ignore into m_code VALUES (null,'Office Type',0,'Office are created and mapped to type');
  
  set @id=(select id from m_code where code_name='Office Type');
@@ -251,8 +252,6 @@ CREATE TABLE IF NOT EXISTS `m_office_balance` (
   PRIMARY KEY (`id`)
   ) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
 
-SET SQL_SAFE_UPDATES=0;
-SET FOREIGN_KEY_CHECKS=0;
 
 Drop procedure if exists officeAddress;
 DELIMITER //
