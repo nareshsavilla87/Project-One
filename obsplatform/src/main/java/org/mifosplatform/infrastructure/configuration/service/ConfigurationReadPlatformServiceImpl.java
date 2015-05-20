@@ -39,7 +39,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         context.authenticatedUser();
 
-        final String sql = "SELECT c.id as id, c.name, c.enabled, c.value FROM c_configuration c order by c.id";
+        final String sql = "SELECT c.id as id, c.name, c.enabled, c.value, c.module, c.description FROM c_configuration c order by c.id";
         final List<ConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, rowMap , new Object[] {});
 
         return new ConfigurationData(globalConfiguration);
@@ -54,8 +54,10 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
             final boolean enabled = rs.getBoolean("enabled");
             final String value = rs.getString("value");
             final Long id = rs.getLong("id");
+            final String module=rs.getString("module");
+            final String description=rs.getString("description");
 
-            return new ConfigurationPropertyData(id,name, enabled,value);
+            return new ConfigurationPropertyData(id,name, enabled,value,module,description);
         }
     }
 
@@ -65,7 +67,7 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         this.context.authenticatedUser();
         
-        final String sql = "SELECT c.id as id,c.id, c.name, c.enabled, c.value FROM c_configuration c where c.id=? order by c.id";
+        final String sql = "SELECT c.id as id,c.id, c.name, c.enabled, c.value, c.module, c.description FROM c_configuration c where c.id=? order by c.id";
         final ConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rowMap , new Object[] {configId});
 
         return globalConfiguration;

@@ -23,6 +23,6 @@ public class DeleteBillMasterCommandHandler implements NewCommandSourceHandler {
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.writePlatformService.cancelBill(command.entityId());
+        return this.writePlatformService.cancelBillMaster(command.entityId());
     }
 }
