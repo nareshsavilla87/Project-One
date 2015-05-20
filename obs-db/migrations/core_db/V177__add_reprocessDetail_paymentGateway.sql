@@ -14,7 +14,7 @@ DELIMITER ;
 call paymentGateWay();
 Drop procedure IF EXISTS paymentGateWay;
 
-insert ignore into  c_configuration values (null,'reProcess-interval',1,'360');
+-- insert ignore into  c_configuration values (null,'reProcess-interval',1,'360');
 insert ignore into  c_configuration values (null,'reProcess-interval',1,'6');
 
 

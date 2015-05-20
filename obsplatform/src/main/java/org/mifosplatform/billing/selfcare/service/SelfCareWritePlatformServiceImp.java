@@ -1,5 +1,8 @@
 package org.mifosplatform.billing.selfcare.service;
 
+import java.sql.Timestamp;
+import java.util.Date;
+
 import org.apache.commons.lang.RandomStringUtils;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistory;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistoryRepository;
@@ -34,6 +37,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+
+
 
 
 @Service
@@ -123,6 +128,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				if(mailnotification){
 				//platformEmailService.sendToUserAccount(new EmailDetail("OBS Self Care Organisation ", "SelfCare",email, selfCare.getUserName()), unencodedPassword); 
 				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_CREATE_SELFCARE);
+				System.out.println(new Date());
 				if(messageDetails !=null){
 				String subject=messageDetails.getSubject();
 				String body=messageDetails.getBody();
@@ -130,6 +136,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				String header=messageDetails.getHeader().replace("<PARAM1>", selfCare.getUserName() +",");
 				body=body.replace("<PARAM2>", selfCare.getUniqueReference());
 				body=body.replace("<PARAM3>", selfCare.getPassword());
+				
 				/*StringBuilder prepareEmail =new StringBuilder();
 				prepareEmail.append(header);
 				prepareEmail.append("\t").append(body);

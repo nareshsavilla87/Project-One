@@ -21,3 +21,6 @@ INSERT IGNORE INTO m_permission VALUES(null,'billing&finance','UPDATEPAYPALPROFI
 INSERT IGNORE INTO b_eventaction_mapping VALUES(null, 'Recurring DisConnect Order', 'RecurringDisconnect', 'workflow_events', 'N', 'N');
 
 INSERT IGNORE INTO b_eventaction_mapping VALUES(null, 'Recurring ReConnection Order', 'RecurringReconnection', 'workflow_events', 'N', 'N');
+
+INSERT IGNORE INTO m_permission VALUES(null,'billing&finance','DELETERECURRINGBILLING_PAYMENTGATEWAY','PAYMENTGATEWAY','DELETERECURRINGBILLING',0);
+

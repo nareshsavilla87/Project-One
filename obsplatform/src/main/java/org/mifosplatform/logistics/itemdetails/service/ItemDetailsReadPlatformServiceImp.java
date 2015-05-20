@@ -317,7 +317,7 @@ private final class SerialNumberForValidation implements RowMapper<String>{
 					" WHERE     b.priceregion_id = a.region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY' " +
 					" AND d.client_id = ? and a.item_id = itd.item_master_id  and (s.id =b.state_id or(b.state_id = 0 and b.country_id = c.id ))), 0))) left join b_priceregion_master prm ON prm.id = pd.priceregion_id" +
 					" left join b_item_price p on (p.item_id = m.id and p.region_id = prm.id and p.is_deleted='N' ) " +
-					"WHERE itd.serial_no = ? AND itd.client_id IS NULL and m.id=itd.item_master_id" +
+					"WHERE itd.serial_no = ? AND itd.client_id IS NULL and m.id=itd.item_master_id and p.item_id = m.id " +
 					" group by m.id";
 	
 			return this.jdbcTemplate.queryForObject(sql,rowMapper,new Object[]{clientId,query});

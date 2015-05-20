@@ -1,3 +1,4 @@
+SET SQL_SAFE_UPDATES = 0;
 -- Create Tables
 SET SQL_SAFE_UPDATES = 0;
 CREATE TABLE IF NOT EXISTS `b_billing_rules` (
@@ -39,7 +40,7 @@ alter table b_payments modify `is_sub_payment` char(2) default 'N';
 alter table b_process_request_detail modify `hardware_id` varchar(50) default NULL;
 alter table b_process_request_detail modify `sent_message` text default NULL;
 alter table b_provisioning_actions modify `action` varchar(25) NOT NULL;
-alter table b_charge_tax modify `tax_value` BIGINT(10) NOT NULL;
+alter table b_charge_tax modify `tax_value` BIGINT(20) default NULL;
 
 
 
@@ -81,8 +82,37 @@ DELIMITER ;
 call addb_itemsalecoloumns();
 Drop procedure IF EXISTS addb_itemsalecoloumns;
 
+Drop procedure IF EXISTS plancodekeyDrop; 
+DELIMITER //
+create procedure plancodekeyDrop() 
+Begin
+  IF  EXISTS (SELECT * FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE
+`CONSTRAINT_CATALOG` = 'def' AND `TABLE_SCHEMA` = DATABASE() 
+AND `TABLE_NAME` = 'b_bill_details' AND CONSTRAINT_NAME='fk_bdtl_pc')THEN 
+ALTER TABLE b_bill_details DROP FOREIGN KEY `fk_bdtl_pc`;
+ALTER TABLE b_bill_details DROP FOREIGN KEY `fk_bdtl_sc`;
+END IF;
+END //
+DELIMITER ;
+call plancodekeyDrop();
+Drop procedure IF EXISTS plancodekeyDrop;
 
-
+Drop procedure IF EXISTS contractDurationCode; 
+DELIMITER //
+create procedure contractDurationCode() 
+Begin
+IF NOT EXISTS (
+     SELECT * FROM information_schema.TABLE_CONSTRAINTS
+     WHERE  CONSTRAINT_NAME = 'dur_uni_code' and TABLE_NAME = 'b_contract_period'
+     and TABLE_SCHEMA = DATABASE())THEN
+     alter table b_contract_period modify `contract_type` varchar(50) NOT NULL;
+ALTER TABLE `b_contract_period` ADD CONSTRAINT UNIQUE KEY `dur_uni_code` (`contract_type`,`contract_duration`);
+END IF;
+END //
+DELIMITER ;
+call contractDurationCode();
+Drop procedure IF EXISTS contractDurationCode;
+  
 Drop procedure IF EXISTS addb_invoicecolumnonetimesale;
 DELIMITER //
 create procedure addb_invoicecolumnonetimesale() 
@@ -435,7 +465,10 @@ DELIMITER ;
 
 	
 -- data
-
+Update m_permission set grouping='client&orders' where grouping like '%Client&orders%';
+Update m_permission set grouping='inventory' where grouping like '%Inventory%';
+Update m_permission set grouping='client&orders' where grouping like '%Ordering%';
+Update m_permission set grouping='organisation' where grouping like '%Organization%';
 insert ignore into m_permission values(null,'Organisation','CREATE_IPPOOLMANAGEMENT','IPPOOLMANAGEMENT','CREAT',0);
 insert ignore into m_permission values(null,'client&orders','DISCONNECT_ORDER','ORDER','DISCONNECT',0);
 
@@ -448,10 +481,14 @@ insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,
 insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',6,'SUSPENDED','SUSPENDED');
 insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',7,'REACTIVE','REACTIVE');
 
+
  insert ignore into b_office_bank values(null, 'Open Billing System', '2044860011', '2044860008', 'Hyderabad', 'KVB(karur vysya bank)', 'Kondapur', 'KVBL0004801 ');
 insert ignore into b_office_address values(null, 'OBS', 'OPen Billing System', 'Kondapur', 'Hyderabad', 'Andhra Pradesh', 'India', '30214', '858 935 8804', NULL, 'info@openbillingsystem.com', 'companyLogo.jpg', NULL, NULL, '1');
+
+insert ignore into r_enum_value VALUES ('device_swap',1,'Replacement','Replacement');
+
 
 
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
 -- insert ignore into c_paymentgateway_conf values(null,'is-paypal-for-ios',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
-
+SET SQL_SAFE_UPDATES = 1;

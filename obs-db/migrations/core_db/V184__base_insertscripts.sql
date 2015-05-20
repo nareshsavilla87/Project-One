@@ -8,6 +8,12 @@ insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`cha
 insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`charge_type`,`charge_duration`,`duration_type`,`tax_inclusive`,`billfrequency_code`) values (null,'YSC','Yearly Subscription','RC',12,'Month(s)',0,'yearly');
 insert ignore into `b_charge_codes`(`id`,`charge_code`,`charge_description`,`charge_type`,`charge_duration`,`duration_type`,`tax_inclusive`,`billfrequency_code`) values (null,'OTC','One Time','NRC',1,'Month(s)',0,'Once');
 
+
+
+
+insert ignore into m_permission values(null,'client&order','SUSPEND_ORDER','ORDER','SUSPEND',0);
+insert ignore into m_permission values(null,'organisation','MOVEITEM_MRN','MRN','MOVEITEM',0);
+
 -- Contract Periods
 insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'Perpetual',0,'None','N');
 insert ignore into `b_contract_period`(`id`,`contract_period`,`contract_duration`,`contract_type`,`is_deleted`) values (null,'1 Month',1,'Month(s)','N');
@@ -26,6 +32,8 @@ insert into `b_service`(`id`,`service_code`,`service_description`,`service_type`
 -- Discount Codes
 
 insert ignore into `b_discount_master`(`id`,`discount_code`,`discount_description`,`discount_type`,`discount_rate`,`start_date`,`discount_status`,`is_delete`) values (null,'None','None','Flat',0,'2015-04-16 00:00:00','ACTIVE','N');
+
+insert ignore  into `b_service`(`id`,`service_code`,`service_description`,`service_type`,`status`,`is_deleted`,`service_unittype`,`is_optional`,`is_auto`) values (0,'None','None','TV','ACtive','Y',null,'N','Y');
 
 -- Event Action Mapping
 truncate table b_eventaction_mapping;
@@ -79,18 +87,19 @@ insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`prov
 insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`provisioning_system`,`is_enable`,`is_delete`) values (null,'Remove RadSevice','REMOVE RADSERVICE','Radius','N','N');
 
 
--- Price Region 
-insert ignore into b_priceregion_master (id,priceregion_code,priceregion_name,createdby_id,created_date,is_deleted) 
- VALUES (null,'Default','Default Region',null,null,'N');
+
  
  -- config
  delete from c_configuration where name='Forcible Balance Check';
 insert ignore into c_configuration VALUES (null,'balance-check',0,null);
 
+-- Price Region 
+/*insert ignore into b_priceregion_master (id,priceregion_code,priceregion_name,createdby_id,created_date,is_deleted) 
+ VALUES (null,'Default','Default Region',null,null,'N');
  
  insert ignore	 into b_priceregion_detail (priceregion_id,country_id,state_id,is_deleted)
 select prm.id,0,0,'N' from b_priceregion_master prm where prm.priceregion_code ='Default';
-
+*/
 -- Views
 -----------
   
@@ -121,6 +130,9 @@ CREATE OR REPLACE VIEW  `mvWatched_vw` AS select `m`.`id` AS `mediaId`,`m`.`titl
 CREATE OR REPLACE VIEW `event_orders_vw` AS SELECT `ma`.`content_provider` AS `CONTENT PROVIDER`, `ma`.`type` AS `TYPE`, `ma`.`title` AS `TITLE`, `ml`.`language_id` AS `LANGUAGE ID`, `ml`.`format_type` AS `FORMAT TYPE`, `ml`.`location` AS `LOCATION`,`em`.`event_name` AS `EVENT NAME`,`em`.`status` AS `STATUS`,cast(`em`.`event_validity` AS date) AS `EVENT VALIDITY`,cast(`eo`.`event_bookeddate` AS date) AS `EVENT BOOKED DATE`  FROM ((((`b_mediaasset_location` `ml` JOIN `b_media_asset` `ma` ON ((`ml`.`media_id` = `ma`.`id`))) JOIN `b_mod_detail` `ed` ON ((`ed`.`media_id` = `ma`.`id`))) JOIN `b_mod_master` `em` ON ((`ed`.`event_id` = `em`.`id`))) JOIN `b_modorder` `eo` ON ((`eo`.`event_id` = `em`.`id`)));
 -- top movies view
 CREATE OR REPLACE VIEW `top_movies_vw` AS SELECT `ma`.`title` AS `TITLE`, `ma`.`id` AS `ID`, `ma`.`type` AS `TYPE`, cast(`ma`.`release_date` AS date) AS `RELEASE DATE`,`ma`.`content_provider` AS `CONTENT PROVIDER`,`ma`.`rating` AS `RATING`,`ma`.`rating_count` AS `RATING COUNT`,count(`eo`.`id`) AS `ORDER CNT`  FROM (((`b_media_asset` `ma` JOIN `b_mod_detail` `ed` ON ((`ma`.`id` = `ed`.`media_id`))) JOIN `b_mod_master` `em` ON ((`em`.`id` = `ed`.`event_id`))) JOIN `b_modorder` `eo` ON ((`ed`.`event_id` = `eo`.`event_id`))) ORDER BY 8 DESC;
+
+-- Office financial Transaction View
+CREATE OR REPLACE VIEW `office_fin_trans_vw` AS select `m_appuser`.`username` AS `username`,`b_itemsale`.`purchase_by` AS `office_id`,`m_invoice`.`id` AS `transId`,'Once' AS `tran_type`,cast(`m_invoice`.`invoice_date` as date) AS `transDate`,'INVOICE' AS `transType`,if((`m_invoice`.`invoice_amount` > 0),`m_invoice`.`invoice_amount`,0) AS `dr_amt`,if((`m_invoice`.`invoice_amount` < 0),abs(`m_invoice`.`invoice_amount`),0) AS `cr_amt`,1 AS `flag` from ((`m_invoice` join `m_appuser`) join `b_itemsale`) where ((`m_invoice`.`createdby_id` = `m_appuser`.`id`) and (`m_invoice`.`sale_id` = `b_itemsale`.`id`) and (`m_invoice`.`invoice_date` <= now())) union all select `m_appuser`.`username` AS `username`,`m_adjustments`.`office_id` AS `office_id`,`m_adjustments`.`id` AS `transId`,(select `m_code_value`.`code_value` from `m_code_value` where ((`m_code_value`.`code_id` = 12) and (`m_adjustments`.`adjustment_code` = `m_code_value`.`id`))) AS `tran_type`,cast(`m_adjustments`.`adjustment_date` as date) AS `transdate`,'ADJUSTMENT' AS `transType`,(case `m_adjustments`.`adjustment_type` when 'DEBIT' then `m_adjustments`.`adjustment_amount` end) AS `dr_amount`,0 AS `cr_amt`,1 AS `flag` from (`m_adjustments` join `m_appuser`) where ((`m_adjustments`.`adjustment_date` <= now()) and (`m_adjustments`.`adjustment_type` = 'DEBIT') and (`m_adjustments`.`createdby_id` = `m_appuser`.`id`)) union all select `m_appuser`.`username` AS `username`,`m_adjustments`.`office_id` AS `office_id`,`m_adjustments`.`id` AS `transId`,(select `m_code_value`.`code_value` from `m_code_value` where ((`m_code_value`.`code_id` = 12) and (`m_adjustments`.`adjustment_code` = `m_code_value`.`id`))) AS `tran_type`,cast(`m_adjustments`.`adjustment_date` as date) AS `transdate`,'ADJUSTMENT' AS `transType`,0 AS `dr_amt`,(case `m_adjustments`.`adjustment_type` when 'CREDIT' then `m_adjustments`.`adjustment_amount` end) AS `cr_amount`,1 AS `flag` from (`m_adjustments` join `m_appuser`) where ((`m_adjustments`.`adjustment_date` <= now()) and (`m_adjustments`.`adjustment_type` = 'CREDIT') and (`m_adjustments`.`createdby_id` = `m_appuser`.`id`)) union all select `m_appuser`.`username` AS `username`,`m_payments`.`office_id` AS `office_id`,`m_payments`.`id` AS `transId`,(select `m_code_value`.`code_value` from `m_code_value` where ((`m_code_value`.`code_id` = 11) and (`m_payments`.`paymode_id` = `m_code_value`.`id`))) AS `tran_type`,cast(`m_payments`.`payment_date` as date) AS `transDate`,'PAYMENT' AS `transType`,0 AS `dr_amt`,`m_payments`.`amount_paid` AS `cr_amount`,`m_payments`.`is_deleted` AS `flag` from (`m_payments` join `m_appuser`) where ((`m_payments`.`createdby_id` = `m_appuser`.`id`) and (`m_payments`.`payment_date` <= now())) order by 1,2;
 
 SET SQL_SAFE_UPDATES = 1;
 SET foreign_key_checks = 1;
