@@ -161,7 +161,7 @@ public class RedemptionWritePlatformServiceImpl implements
 							this.orderWritePlatformService.reconnectOrder(orderId);
 						
 						} else if(order.getStatus() == RENEWAL_ORDER_STATUS){
-							
+							json.addProperty("priceId", priceId);
 							json.addProperty("renewalPeriod", contractId);
 							json.addProperty("priceId",priceId);
 							json.addProperty("description", "Order Renewal By Redemption");

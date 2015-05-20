@@ -99,6 +99,8 @@ public class ConfigurationApiResource {
         JSONObject defaultOne = new JSONObject();
 		JSONObject defaultOneForClientList = new JSONObject();
 		JSONObject registrationList = new JSONObject();
+		JSONObject orderActionsList = new JSONObject();
+		
 		/*********  Preparing 'defaultOne' JSONObject ******/
         defaultOne.put("payment", "false");
 		defaultOne.put("IPTV", "false");
@@ -119,6 +121,19 @@ public class ConfigurationApiResource {
 		defaultOneForClientList.put("externalId", "false");
 		defaultOneForClientList.put("customerCategory", "false");
 		
+		/*********  Preparing 'orderActionsList' JSONObject ******/
+		orderActionsList.put("disconnect", "true");
+		orderActionsList.put("topup/renewal", "true");
+		orderActionsList.put("addons", "true");
+		orderActionsList.put("deviceswap", "true");
+		orderActionsList.put("applypromo", "true");
+		orderActionsList.put("changeplan", "true");
+		orderActionsList.put("suspend", "true");
+		orderActionsList.put("pairing", "true");
+		orderActionsList.put("commandcenter", "true");
+		orderActionsList.put("ipchange", "true");
+		orderActionsList.put("terminate", "true");
+		
 		/*********  Adding 'defaultOneForClientList' to 'defaultOne' JSONObject ******/
 		defaultOne.put("clientListing", defaultOneForClientList);
 		
@@ -127,6 +142,9 @@ public class ConfigurationApiResource {
 		
 		/*********  Adding 'registrationClientList' to 'defaultOne' JSONObject ******/
 		defaultOne.put("registrationListing", registrationList);
+		
+		/*********  Adding 'orderActionsClientList' to 'defaultOne' JSONObject ******/
+		defaultOne.put("orderActions", orderActionsList);
 		
         String readDatas;  /****** Reding data from file ******/
         File fileForPath = new File(CONFIGURATION_PATH_LOCATION);
@@ -150,10 +168,12 @@ public class ConfigurationApiResource {
     		JSONObject prepareOne = new JSONObject();
     		JSONObject prepareOneForClientList = new JSONObject();
     		JSONObject prepareOneForRegisterList = new JSONObject();
+    		JSONObject prepareOneForOrderActions = new JSONObject();
     		
         	for(int i=0;i<defaultOne.length();i++){
         		LinkedList<String> listForDefaultOne = iteratorOperation(defaultOne);
-    			if((listForDefaultOne.get(i).equalsIgnoreCase("clientListing")||listForDefaultOne.get(i).equalsIgnoreCase("registrationListing")) && readOne.has(listForDefaultOne.get(i))){
+    			if((listForDefaultOne.get(i).equalsIgnoreCase("clientListing")||(listForDefaultOne.get(i).equalsIgnoreCase("orderActions"))||
+    					listForDefaultOne.get(i).equalsIgnoreCase("registrationListing")) && readOne.has(listForDefaultOne.get(i))){
     				
     				JSONObject insidedefaultOneObj = new JSONObject(defaultOne.getString(listForDefaultOne.get(i)));
     				JSONObject insidereadobj = new JSONObject(readOne.getString(listForDefaultOne.get(i)));
@@ -169,6 +189,10 @@ public class ConfigurationApiResource {
     						}else if(listForDefaultOne.get(i).equalsIgnoreCase("registrationListing")){
     							prepareOneForRegisterList.put(listForDefaultOneClientList.get(j), insidereadobj.getString(listForDefaultOneClientList.get(j)));
         						prepareOne.put(listForDefaultOne.get(i), prepareOneForRegisterList);
+    						}else if(listForDefaultOne.get(i).equalsIgnoreCase("orderActions")){
+    							prepareOneForOrderActions.put(listForDefaultOneClientList.get(j), insidereadobj.getString(listForDefaultOneClientList.get(j)));
+        						prepareOne.put(listForDefaultOne.get(i), prepareOneForOrderActions);
+
     						}
     					}else{
     						if(listForDefaultOne.get(i).equalsIgnoreCase("clientListing")){
@@ -177,11 +201,15 @@ public class ConfigurationApiResource {
     						}else if(listForDefaultOne.get(i).equalsIgnoreCase("registrationListing")){
     							prepareOneForRegisterList.put(listForDefaultOneClientList.get(j), insidedefaultOneObj.getString(listForDefaultOneClientList.get(j)));
         						prepareOne.put(listForDefaultOne.get(i), prepareOneForRegisterList);
-    						}
+    						}else if(listForDefaultOne.get(i).equalsIgnoreCase("orderActions")){
+    							prepareOneForOrderActions.put(listForDefaultOneClientList.get(j), insidedefaultOneObj.getString(listForDefaultOneClientList.get(j)));
+    							prepareOne.put(listForDefaultOne.get(i), prepareOneForOrderActions);
+        					}
     					}
     				}
     				
-    			}else if((listForDefaultOne.get(i).equalsIgnoreCase("clientListing")||listForDefaultOne.get(i).equalsIgnoreCase("registrationListing")) && !readOne.has(listForDefaultOne.get(i))){
+    			}else if((listForDefaultOne.get(i).equalsIgnoreCase("clientListing")||(listForDefaultOne.get(i).equalsIgnoreCase("orderActions"))||
+    					listForDefaultOne.get(i).equalsIgnoreCase("registrationListing")) && !readOne.has(listForDefaultOne.get(i))){
     				
     				JSONObject insidedefaultOneObj1 = new JSONObject(defaultOne.getString(listForDefaultOne.get(i)));
     				LinkedList<String> listForDefaultOneClientList1 = iteratorOperation(insidedefaultOneObj1);
@@ -192,6 +220,9 @@ public class ConfigurationApiResource {
     					}else if(listForDefaultOne.get(i).equalsIgnoreCase("registrationListing")){
     						prepareOneForRegisterList.put(listForDefaultOneClientList1.get(k), insidedefaultOneObj1.getString(listForDefaultOneClientList1.get(k)));
         					prepareOne.put(listForDefaultOne.get(i), prepareOneForRegisterList);
+    					}else if(listForDefaultOne.get(i).equalsIgnoreCase("orderActions")){
+    						prepareOneForOrderActions.put(listForDefaultOneClientList1.get(k), insidedefaultOneObj1.getString(listForDefaultOneClientList1.get(k)));
+    						prepareOne.put(listForDefaultOne.get(i), prepareOneForOrderActions);
     					}
     				}
     			}else if(readOne.has(listForDefaultOne.get(i)) && defaultOne.has(listForDefaultOne.get(i))){

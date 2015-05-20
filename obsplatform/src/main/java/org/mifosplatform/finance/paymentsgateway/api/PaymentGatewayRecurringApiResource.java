@@ -1,7 +1,6 @@
 package org.mifosplatform.finance.paymentsgateway.api;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -86,8 +85,8 @@ public class PaymentGatewayRecurringApiResource {
 	 */
 	@POST
 	@Path("changestatus")
-	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-	@Produces({ MediaType.TEXT_HTML })
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public String paypalChangeRecurringStatus(final String apiRequestBodyAsJson) {
 
 			final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePaypalProfileStatus().withJson(apiRequestBodyAsJson).build();
@@ -101,8 +100,8 @@ public class PaymentGatewayRecurringApiResource {
 	 */
 	@PUT
 	@Path("updaterecurring")
-	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
-	@Produces({ MediaType.TEXT_HTML })
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
 	public String paypalUpdateRecurringProfile(final String apiRequestBodyAsJson) {
 
 			final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePaypalProfileRecurring().withJson(apiRequestBodyAsJson).build();
