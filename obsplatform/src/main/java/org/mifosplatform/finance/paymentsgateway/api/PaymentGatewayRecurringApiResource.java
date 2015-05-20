@@ -113,7 +113,8 @@ public class PaymentGatewayRecurringApiResource {
 			return this.toApiJsonSerializer.serialize(result);
 	} 
 	
-	@DELETE
+	@PUT
+	@Path("delSubscription")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String deleteRecurringSubscriber(final String apiRequestBodyAsJson) {

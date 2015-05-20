@@ -933,8 +933,6 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 		} else{
 			return new CommandProcessingResult(new Long(-1));
 		}
-		
 	}
-
-
+	
 }

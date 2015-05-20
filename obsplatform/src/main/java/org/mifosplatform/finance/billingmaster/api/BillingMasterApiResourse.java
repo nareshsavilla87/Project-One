@@ -49,6 +49,7 @@ import com.google.gson.JsonElement;
 @Component
 @Scope("singleton")
 public class BillingMasterApiResourse {
+	
 	    private  final Set<String> RESPONSE_DATA_PARAMETERS=new HashSet<String>(Arrays.asList("transactionId", "transactionDate", "transactionType", "amount", "orderId",
 			"invoiceId", "chrageAmount", "taxAmount", "chargeType", "amount", "billDate", "dueDate", "id", "transaction", "chargeStartDate", "chargeEndDate"));
 	    
@@ -103,6 +104,7 @@ public class BillingMasterApiResourse {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveBillStatements(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+		
 		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 		final List<FinancialTransactionsData> data = this.billMasterReadPlatformService.retrieveStatments(clientId);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -137,6 +139,7 @@ public class BillingMasterApiResourse {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String getBillDetails(@PathParam("billId") final Long billId, @Context final UriInfo uriInfo) {
+		
 		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 		final List<BillDetailsData> data = this.billMasterReadPlatformService.retrievegetStatementDetails(billId);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -148,6 +151,7 @@ public class BillingMasterApiResourse {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String sendBillPathToMsg(@PathParam("billId") final Long billId) {
+		
 		final BillMaster billMaster = this.billMasterRepository.findOne(billId);
 		final String fileName = billMaster.getFileName();	
 		if("invoice".equalsIgnoreCase(fileName)){
@@ -162,8 +166,9 @@ public class BillingMasterApiResourse {
 	@Path("{billId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String cancelBill(@PathParam("billId") final Long billId) {
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().cancelBill(billId).build();
+	public String cancelBillStatement(@PathParam("billId") final Long billId) {
+		
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().cancelBillStatement(billId).build();
         final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toApiJsonSerializer.serialize(result);
 	}
