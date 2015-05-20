@@ -33,7 +33,8 @@ public final class DiscountCommandFromApiJsonDeserializer {
 	 * The parameters supported for this command.
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("discountCode", "discountDescription",
-					"discountType", "discountRate", "startDate", "discountStatus","locale", "dateFormat"));
+					"discountType", "discountRate", "startDate", "discountStatus","locale", "dateFormat",
+					"discountPrices","categoryId"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired

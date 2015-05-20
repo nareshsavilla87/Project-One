@@ -1,8 +1,6 @@
 package org.mifosplatform.billing.discountmaster.service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.hibernate.exception.ConstraintViolationException;
@@ -17,7 +15,6 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.logistics.item.domain.ItemPrice;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
