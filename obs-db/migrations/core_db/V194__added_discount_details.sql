@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS `b_discount_details` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `discount_id` int(20) NOT NULL,
-  `category_type` int(20) NOT NULL,
+  `category_type` varchar(30) NOT NULL,
   `discount_rate` decimal(22,6) NOT NULL,
   `is_deleted` char(1) DEFAULT 'N',
   PRIMARY KEY (`id`),

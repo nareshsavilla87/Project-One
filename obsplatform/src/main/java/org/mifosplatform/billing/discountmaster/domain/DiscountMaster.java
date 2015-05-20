@@ -220,6 +220,10 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 			this.isDelete = 'Y';
 			this.discountCode = this.discountCode+"_"+this.getId();
 		}
+		
+		for(DiscountDetails discountDetails: this.discountDetails ){
+			discountDetails.delete();
+		}
 
 	}
 

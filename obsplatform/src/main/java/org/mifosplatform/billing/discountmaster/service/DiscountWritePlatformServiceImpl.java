@@ -111,16 +111,12 @@ public class DiscountWritePlatformServiceImpl implements
 		final Throwable realCause = dve.getMostSpecificCause();
 		if (realCause.getMessage().contains("discountcode")) {
 			final String name = command.stringValueOfParameterNamed("discountCode");
-			throw new PlatformDataIntegrityException(
-					"error.msg.discount.duplicate.name",
-					"A discount with Code'" + name + "'already exists",
+			throw new PlatformDataIntegrityException("error.msg.discount.duplicate.name","A discount with Code'" + name + "'already exists",
 					"discountCode", name);
 		}
 
 		LOGGER.error(dve.getMessage(), dve);
-		throw new PlatformDataIntegrityException(
-				"error.msg.could.unknown.data.integrity.issue",
-				"Unknown data integrity issue with resource: "
+		throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue","Unknown data integrity issue with resource: "
 						+ realCause.getMessage());
 
 	}

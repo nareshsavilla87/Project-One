@@ -42,6 +42,13 @@ public class DiscountDetails extends AbstractPersistable<Long>{
             this.discountMaster= discountMaster;
 	}
 
+	public void delete() {
+
+		  this.isDeleted = "Y";
+		  this.categoryType = this.getId()+"_"+this.categoryType+"_Y";
+		
+	}
+
 	
 	
 
