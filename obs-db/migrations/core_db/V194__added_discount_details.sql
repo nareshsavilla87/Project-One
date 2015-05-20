@@ -9,3 +9,7 @@ CREATE TABLE IF NOT EXISTS `b_discount_details` (
   KEY `fk_discount_id` (`discount_id`),
   CONSTRAINT `fk_discount_price_id` FOREIGN KEY (`discount_id`) REFERENCES `b_discount_master` (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+
+insert ignore into b_discount_details (id,discount_id,category_type,discount_rate,is_deleted)
+select null,id,0,discount_rate,'N' from b_discount_master; 
