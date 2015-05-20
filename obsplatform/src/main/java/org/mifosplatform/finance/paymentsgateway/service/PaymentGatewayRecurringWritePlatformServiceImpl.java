@@ -986,38 +986,6 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 		this.paypalRecurringBillingRepository.save(billing);
 		return billing.getOrderId();
 	}
-<<<<<<< HEAD
-
-	@Override
-	public CommandProcessingResult deleteRecurringBilling(JsonCommand command) {
-		
-		String subscriptionId = command.stringValueOfParameterNamed(RecurringPaymentTransactionTypeConstants.SUBSCRID);
-		
-		CommandProcessingResult result = updatePaypalProfileStatus(command);
-		
-		if(null != result){
-			Map<String, Object> resultmap = result.getChanges();
-			
-			String outputRes = resultmap.get("result").toString();
-			
-			if(outputRes.equalsIgnoreCase(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUCCESS)){
-				
-				Long orderId = updatePaypalRecurringBilling(subscriptionId);
-				
-				return new CommandProcessingResult(orderId);
-			} else {
-				return new CommandProcessingResult(0L);
-			}
-			
-		} else{
-			return new CommandProcessingResult(new Long(-1));
-		}
-		
-	}
-
-
-}
-=======
 
 	@Override
 	public CommandProcessingResult deleteRecurringBilling(JsonCommand command) {
@@ -1046,4 +1014,3 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 	}
 	
 }
->>>>>>> upstream/obsplatform-3.0
