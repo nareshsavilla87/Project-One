@@ -96,8 +96,22 @@ DELIMITER ;
 call plancodekeyDrop();
 Drop procedure IF EXISTS plancodekeyDrop;
 
-
-
+Drop procedure IF EXISTS contractDurationCode; 
+DELIMITER //
+create procedure contractDurationCode() 
+Begin
+IF NOT EXISTS (
+     SELECT * FROM information_schema.TABLE_CONSTRAINTS
+     WHERE  CONSTRAINT_NAME = 'dur_uni_code' and TABLE_NAME = 'b_contract_period'
+     and TABLE_SCHEMA = DATABASE())THEN
+     alter table b_contract_period modify `contract_type` varchar(50) NOT NULL;
+ALTER TABLE `b_contract_period` ADD CONSTRAINT UNIQUE KEY `dur_uni_code` (`contract_type`,`contract_duration`);
+END IF;
+END //
+DELIMITER ;
+call contractDurationCode();
+Drop procedure IF EXISTS contractDurationCode;
+  
 Drop procedure IF EXISTS addb_invoicecolumnonetimesale;
 DELIMITER //
 create procedure addb_invoicecolumnonetimesale() 
