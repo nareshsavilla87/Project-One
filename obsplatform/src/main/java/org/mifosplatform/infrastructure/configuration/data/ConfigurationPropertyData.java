@@ -14,13 +14,25 @@ public class ConfigurationPropertyData {
     private String value;
     private boolean enabled;
     private Long id;
-
+    private String module;
+    private String description;
+    
     public ConfigurationPropertyData(final Long id, final String name, final boolean enabled, final String value) {
     	
         this.id = id;
     	this.name = name;
         this.enabled = enabled;
         this.value = value;
+       
+    }
+  public ConfigurationPropertyData(final Long id, final String name, final boolean enabled, final String value, final String module, final String description) {
+    	
+        this.id = id;
+    	this.name = name;
+        this.enabled = enabled;
+        this.value = value;
+        this.module=module;
+        this.description=description;
     }
 
 	public String getName() {
@@ -53,6 +65,22 @@ public class ConfigurationPropertyData {
 
 	public void setId(final Long id) {
 		this.id = id;
+	}
+
+	public String getModule() {
+		return module;
+	}
+
+	public void setModule(String module) {
+		this.module = module;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
     
 }
