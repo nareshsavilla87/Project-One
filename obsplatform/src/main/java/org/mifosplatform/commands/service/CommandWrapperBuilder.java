@@ -2528,7 +2528,7 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder cancelBill(Long billId) {
+	public CommandWrapperBuilder cancelBillStatement(Long billId) {
 
 		this.actionName = "DELETE";
 		this.entityName = "BILLMASTER";
