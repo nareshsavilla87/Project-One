@@ -110,7 +110,8 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 // ignore to allow 'preflight' requests from AJAX applications
                 // in different origin (domain name)
             	super.doFilter(req, res, chain); //ashok changed please comment when delete the else if statement
-            } else if(path.contains("/api/v1/paymentgateways") && request.getMethod().equalsIgnoreCase("POST")){
+            } else if((path.contains("/api/v1/paymentgateways") && request.getMethod().equalsIgnoreCase("POST")) || 
+            		(path.contains("/api/v1/entitlements/getuser") && request.getMethod().equalsIgnoreCase("GET"))){
             
            	    String username= request.getParameter("username");
                 String password= request.getParameter("password");
@@ -140,7 +141,37 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                	   throw new AuthenticationCredentialsNotFoundException("Credentials are not valid");
                 }
                 
-           }else if(path.contains("/api/v1/entitlements/get") && request.getMethod().equalsIgnoreCase("GET")){
+           }/*else if(path.contains("/api/v1/entitlements/getuser") && request.getMethod().equalsIgnoreCase("GET")){
+               
+          	    String username= request.getParameter("username");
+               String password= request.getParameter("password");
+               
+               final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");
+               
+	             boolean isValid =  this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
+	        	 if(!isValid){
+	        		 throw new InvalidLicenseKeyException("License key Exipired.");
+	        	 }
+	             ThreadLocalContextUtil.setTenant(tenant);
+               
+               if(!(org.apache.commons.lang.StringUtils.isBlank(username) || org.apache.commons.lang.StringUtils.isBlank(password))){
+	            	
+	                UsernamePasswordAuthenticationToken authRequest =
+	                        new UsernamePasswordAuthenticationToken(username, password);
+	                authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
+	                Authentication authResult = authenticationManager.authenticate(authRequest);
+	       
+	                SecurityContextHolder.getContext().setAuthentication(authResult);
+	
+	                rememberMeServices.loginSuccess(request, response, authResult);
+	
+	                onSuccessfulAuthentication(request, response, authResult);
+	                chain.doFilter(request, response);
+               }else{
+              	   throw new AuthenticationCredentialsNotFoundException("Credentials are not valid");
+               }
+               
+          }*/else if(path.contains("/api/v1/entitlements/get") && request.getMethod().equalsIgnoreCase("GET")){
            	
                final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");    
                
