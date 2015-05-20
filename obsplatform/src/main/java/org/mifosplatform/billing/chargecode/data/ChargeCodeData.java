@@ -14,6 +14,8 @@ public class ChargeCodeData {
 	private String durationType;
 	private Integer taxInclusive;
 	private String billFrequencyCode;
+	private String contractType;
+	private Integer units;
 
 	private List<ChargeCodeData> chargeCodeData;
 	private List<ChargeTypeData> chargeTypeData;
@@ -53,6 +55,21 @@ public class ChargeCodeData {
 		this.durationType = durationType;
 		this.taxInclusive = taxInclusive;
 		this.billFrequencyCode = billFrequencyCode;
+	}
+	
+	public ChargeCodeData(Long id, String chargeCode, String chargeDescription,
+			String chargeType, Integer chargeDuration, String durationType,
+			Integer taxInclusive, String billFrequencyCode,String contractType ,Integer units ) {
+		this.id = id;
+		this.chargeCode = chargeCode;
+		this.chargeDescription = chargeDescription;
+		this.chargeType = chargeType;
+		this.chargeDuration = chargeDuration;
+		this.durationType = durationType;
+		this.taxInclusive = taxInclusive;
+		this.billFrequencyCode = billFrequencyCode;
+		this.contractType = contractType;
+		this.units = units;
 	}
 
 	/**

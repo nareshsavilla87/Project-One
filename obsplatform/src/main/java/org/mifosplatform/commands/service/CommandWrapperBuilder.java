@@ -2912,6 +2912,7 @@ public CommandWrapperBuilder updatePaypalProfileRecurring() {
 		this.href = "";
 		return this;
 	}
+
 }
 
 
