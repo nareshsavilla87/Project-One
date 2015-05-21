@@ -45,7 +45,6 @@ public class EntitlementsData {
 	private Long orderId;
 	private LocalDate startDate;
 	private LocalDate endDate;
-	private StakerData stalkerData;
 	
 	private Long zebraSubscriberId;
 	private BigDecimal itemPrice;
@@ -341,7 +340,7 @@ public class EntitlementsData {
 	}
 
 	public void setResults(StakerData data) {
-		this.stalkerData=data;
+		this.results=data;
 		
 	}
 
@@ -371,10 +370,6 @@ public class EntitlementsData {
 
 	public String getServiceType() {
 		return serviceType;
-	}
-
-	public StakerData getStalkerData() {
-		return stalkerData;
 	}
 
 	public Long getZebraSubscriberId() {
