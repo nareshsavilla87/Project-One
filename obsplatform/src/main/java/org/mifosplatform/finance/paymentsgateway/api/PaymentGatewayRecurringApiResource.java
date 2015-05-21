@@ -1,7 +1,6 @@
 package org.mifosplatform.finance.paymentsgateway.api;
 
 import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -30,9 +29,6 @@ import org.mifosplatform.workflow.eventaction.service.EventActionReadPlatformSer
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 
 @Path("/recurringpayments")
 @Component
@@ -113,17 +109,6 @@ public class PaymentGatewayRecurringApiResource {
 			return this.toApiJsonSerializer.serialize(result);
 	} 
 	
-	@DELETE
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String deleteRecurringSubscriber(final String apiRequestBodyAsJson) {
-
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteRecurringBilling().withJson(apiRequestBodyAsJson).build();
-		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-		return this.toApiJsonSerializer.serialize(result);
-
-	} 
-	
 	@GET
 	@Path("{orderId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -141,6 +126,18 @@ public class PaymentGatewayRecurringApiResource {
 		RecurringData data = new RecurringData(billing.getId(), billing.getClientId(), billing.getOrderId(), billing.getSubscriberId());
 	
 		return this.toApiJsonSerializer.serialize(data);
-} 
+	}
+	
+	@PUT
+	@Path("delSubscription")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deleteRecurringSubscriber(final String apiRequestBodyAsJson) {
+
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteRecurringBilling().withJson(apiRequestBodyAsJson).build();
+		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+
+	}
 	
 }

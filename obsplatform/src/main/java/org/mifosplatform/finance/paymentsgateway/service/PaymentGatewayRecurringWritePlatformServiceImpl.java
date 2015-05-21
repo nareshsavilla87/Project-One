@@ -8,15 +8,11 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Enumeration;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.http.HttpServletRequest;
@@ -41,7 +37,6 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -66,22 +61,13 @@ import urn.ebay.api.PayPalAPI.ManageRecurringPaymentsProfileStatusReq;
 import urn.ebay.api.PayPalAPI.ManageRecurringPaymentsProfileStatusRequestType;
 import urn.ebay.api.PayPalAPI.ManageRecurringPaymentsProfileStatusResponseType;
 import urn.ebay.api.PayPalAPI.PayPalAPIInterfaceServiceService;
-import urn.ebay.api.PayPalAPI.SetExpressCheckoutReq;
-import urn.ebay.api.PayPalAPI.SetExpressCheckoutRequestType;
-import urn.ebay.api.PayPalAPI.SetExpressCheckoutResponseType;
 import urn.ebay.api.PayPalAPI.UpdateRecurringPaymentsProfileReq;
 import urn.ebay.api.PayPalAPI.UpdateRecurringPaymentsProfileRequestType;
 import urn.ebay.api.PayPalAPI.UpdateRecurringPaymentsProfileResponseType;
 import urn.ebay.apis.CoreComponentTypes.BasicAmountType;
 import urn.ebay.apis.eBLBaseComponents.AckCodeType;
-import urn.ebay.apis.eBLBaseComponents.BillingAgreementDetailsType;
-import urn.ebay.apis.eBLBaseComponents.BillingCodeType;
 import urn.ebay.apis.eBLBaseComponents.CurrencyCodeType;
-import urn.ebay.apis.eBLBaseComponents.ErrorType;
 import urn.ebay.apis.eBLBaseComponents.ManageRecurringPaymentsProfileStatusRequestDetailsType;
-import urn.ebay.apis.eBLBaseComponents.PaymentActionCodeType;
-import urn.ebay.apis.eBLBaseComponents.PaymentDetailsType;
-import urn.ebay.apis.eBLBaseComponents.SetExpressCheckoutRequestDetailsType;
 import urn.ebay.apis.eBLBaseComponents.StatusChangeActionType;
 import urn.ebay.apis.eBLBaseComponents.UpdateRecurringPaymentsProfileRequestDetailsType;
 
@@ -324,7 +310,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 				String ePaytermCode = createOrder.getString(RecurringPaymentTransactionTypeConstants.PAYTERMCODE);
 				Long eContractPeriod = createOrder.getLong(RecurringPaymentTransactionTypeConstants.CONTRACTPERIOD);
 				
-				if(planId == ePlanCode && paytermCode.equalsIgnoreCase(ePaytermCode) && contractPeriod == eContractPeriod){
+				if(planId.equals(ePlanCode) && paytermCode.equalsIgnoreCase(ePaytermCode) && contractPeriod.equals(eContractPeriod)) {
 					
 					// creating order and assign Recurring Details.
 					
@@ -347,8 +333,92 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 						
 						this.paypalRecurringBillingRepository.save(paypalRecurringBilling);
 					}
+				}
+				
+			} else if (eventAction.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_CHNAGE_PLAN)) {
+				
+				//Do the Change Order Functionality Here
+				Long planId   = obj.getLong(RecurringPaymentTransactionTypeConstants.PLANID);
+				String paytermCode = obj.getString(RecurringPaymentTransactionTypeConstants.PAYTERMCODE);
+				Long contractPeriod = obj.getLong(RecurringPaymentTransactionTypeConstants.CONTRACTPERIOD);
+				Long orderId   = obj.getLong(RecurringPaymentTransactionTypeConstants.ORDERID);
+				
+				JSONObject changeOrder = new JSONObject(eventAction.getCommandAsJson());
+				
+				Long ePlanCode   = changeOrder.getLong(RecurringPaymentTransactionTypeConstants.PLANCODE);
+				String ePaytermCode = changeOrder.getString(RecurringPaymentTransactionTypeConstants.PAYTERMCODE);
+				Long eContractPeriod = changeOrder.getLong(RecurringPaymentTransactionTypeConstants.CONTRACTPERIOD);
+				
+				if(planId.equals(ePlanCode) && paytermCode.equalsIgnoreCase(ePaytermCode) && contractPeriod.equals(eContractPeriod)){
 					
+					CommandWrapper commandRequest = new CommandWrapperBuilder().changePlan(orderId).withJson(changeOrder.toString()).build();
+					CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
+
+					if (null == result) {
+						System.out.println("Change Order Failed.");
+					}
 					
+					if(null != paypalRecurringBilling){
+						
+						if(changeOrder.has("start_date")){
+							changeOrder.remove("start_date");
+							changeOrder.put("start_date", DateUtils.getLocalDateOfTenant().toDate());
+						}
+						
+						eventAction.updateStatus('Y');
+						eventAction.setTransDate(DateUtils.getLocalDateOfTenant().toDate());
+						
+						eventAction.setCommandAsJson(changeOrder.toString());
+						this.eventActionRepository.save(eventAction);
+						
+						paypalRecurringBilling.setOrderId(result.resourceId());
+						
+						this.paypalRecurringBillingRepository.save(paypalRecurringBilling);
+					}
+				}
+				
+			} else if (eventAction.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_RENEWAL)) {
+				
+				//Do the renewal Order Functionality Here
+				//{"renewalPeriod":2,"priceId":0,"description":"renewal"}
+				
+				Long renewalPeriod = obj.getLong(RecurringPaymentTransactionTypeConstants.RENEWALPERIOD);
+				Long priceId = obj.getLong(RecurringPaymentTransactionTypeConstants.PRICEID);
+				Long orderId   = obj.getLong(RecurringPaymentTransactionTypeConstants.ORDERID);
+				
+				JSONObject renewalOrder = new JSONObject(eventAction.getCommandAsJson());
+				
+				Long eRenewalPeriod   = renewalOrder.getLong(RecurringPaymentTransactionTypeConstants.RENEWALPERIOD);
+				Long ePriceId = renewalOrder.getLong(RecurringPaymentTransactionTypeConstants.PRICEID);
+				Long eOrderId = renewalOrder.getLong(RecurringPaymentTransactionTypeConstants.ORDERID);
+				
+				if(renewalOrder.has(RecurringPaymentTransactionTypeConstants.CLIENTID)){
+					renewalOrder.remove(RecurringPaymentTransactionTypeConstants.CLIENTID);
+				}
+				
+				if(renewalOrder.has(RecurringPaymentTransactionTypeConstants.ORDERID)){
+					renewalOrder.remove(RecurringPaymentTransactionTypeConstants.ORDERID);
+				}
+				
+				if(renewalPeriod.equals(eRenewalPeriod) && priceId.equals(ePriceId) && orderId.equals(eOrderId)){
+					
+					// creating order and assign Recurring Details.
+					final CommandWrapper commandRequest = new CommandWrapperBuilder().renewalOrder(orderId).withJson(renewalOrder.toString()).build();
+					final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
+
+					if (null == result) {
+						System.out.println("Renewal Order Failed.");
+					}
+					
+					if(null != paypalRecurringBilling){
+						eventAction.updateStatus('Y');
+						eventAction.setTransDate(DateUtils.getLocalDateOfTenant().toDate());
+						this.eventActionRepository.save(eventAction);
+						
+						paypalRecurringBilling.setOrderId(orderId);
+						
+						this.paypalRecurringBillingRepository.save(paypalRecurringBilling);
+					}
 				}
 				
 			} else if (eventAction.getActionName().equalsIgnoreCase(EventActionConstants.ACTION_CHNAGE_PLAN)) {
@@ -393,7 +463,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 						eventAction.setCommandAsJson(changeOrder.toString());
 						this.eventActionRepository.save(eventAction);
 						
-						paypalRecurringBilling.setOrderId(orderId);
+						paypalRecurringBilling.setOrderId(result.resourceId());
 						
 						this.paypalRecurringBillingRepository.save(paypalRecurringBilling);
 					}
@@ -941,8 +1011,6 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 		} else{
 			return new CommandProcessingResult(new Long(-1));
 		}
-		
 	}
-
-
+	
 }

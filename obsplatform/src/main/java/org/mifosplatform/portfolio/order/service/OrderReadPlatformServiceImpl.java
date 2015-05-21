@@ -227,7 +227,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 			private static final class ClientOrderMapper implements RowMapper<OrderData> {
 
 			public String clientOrderLookupSchema() {
-			return  " o.id AS id,o.plan_id AS plan_id, o.start_date AS start_date,o.order_status AS order_status,p.plan_code AS plan_code,"
+			return  " o.id AS id,o.plan_id AS plan_id, o.start_date AS start_date,o.order_status AS order_status,o.auto_renew as autoRenew,p.plan_code AS plan_code,"
 				   +" o.end_date AS end_date,co.contract_period as contractPeriod,o.order_no as orderNo,o.user_action AS userAction,o.active_date AS activeDate," +
 					" p.is_prepaid as isprepaid,p.allow_topup as allowTopUp, ifnull(g.group_name, p.plan_code) as groupName,  " +
 					" date_sub(o.next_billable_day,INTERVAL 1 DAY) as invoiceTillDate,(SELECT sum(ol.price) AS price FROM b_order_price ol"
@@ -254,11 +254,12 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
             final String provSys=rs.getString("provSys");
             final String orderNo=rs.getString("orderNo");
             final String groupName=rs.getString("groupName");
+            final String autoRenew=rs.getString("autoRenew");
 			EnumOptionData Enumstatus=OrderStatusEnumaration.OrderStatusType(statusId);
 			String status=Enumstatus.getValue();
 
 			return new OrderData(id, planId, plancode, status, startDate,endDate,price,contractPeriod,isprepaid,allowtopup,userAction,
-					provSys,orderNo,invoiceTillDate,activaDate,groupName);
+					provSys,orderNo,invoiceTillDate,activaDate,groupName,autoRenew);
 			}
 			}
 
