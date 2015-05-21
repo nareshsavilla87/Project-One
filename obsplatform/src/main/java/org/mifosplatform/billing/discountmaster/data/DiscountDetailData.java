@@ -6,14 +6,14 @@ public class DiscountDetailData {
 	
 	private final  Long id;
 	private final String categoryType;
-	private final Long categoryTypeId;
+	private final Long categoryId;
 	private final BigDecimal discountRate;
 
 	public DiscountDetailData(Long id, String categoryType,Long categoryTypeId, BigDecimal discountRate) {
              
 		this.id=id;
 		this.categoryType = categoryType;
-		this.categoryTypeId = categoryTypeId;
+		this.categoryId = categoryTypeId;
 		this.discountRate = discountRate;
 	
 	}
@@ -27,7 +27,7 @@ public class DiscountDetailData {
 	}
 
 	public Long getCategoryTypeId() {
-		return categoryTypeId;
+		return categoryId;
 	}
 
 	public BigDecimal getDiscountRate() {

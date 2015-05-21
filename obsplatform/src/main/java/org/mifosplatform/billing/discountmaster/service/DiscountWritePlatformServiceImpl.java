@@ -110,6 +110,10 @@ public class DiscountWritePlatformServiceImpl implements
 			final String name = command.stringValueOfParameterNamed("discountCode");
 			throw new PlatformDataIntegrityException("error.msg.discount.duplicate.name","A discount with Code'" + name + "'already exists",
 					"discountCode", name);
+		}else if(realCause.getMessage().contains("discountid_with_category_uniquekey")){
+			final String name = command.stringValueOfParameterNamed("discountCode");
+			throw new PlatformDataIntegrityException("error.msg.customer.category.discount.duplicate.name","this customer category discount already defined",
+					"discountCode", name);
 		}
 
 		LOGGER.error(dve.getMessage(), dve);
@@ -135,9 +139,9 @@ public class DiscountWritePlatformServiceImpl implements
 			DiscountMaster discountMaster = discountRetrieveById(entityId);
 			discountMaster.getDiscountDetails().clear();
 			final Map<String, Object> changes = discountMaster.update(command);
-			final JsonArray discountPricesArray = command.arrayOfParameterNamed("discountPricesArray").getAsJsonArray();
+			final JsonArray discountPricesArray = command.arrayOfParameterNamed("discountPrices").getAsJsonArray();
 			discountMaster=assembleDiscountDetails(discountPricesArray, discountMaster);
-			this.discountMasterRepository.saveAndFlush(discountMaster);
+			this.discountMasterRepository.save(discountMaster);
 			
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 					       .withEntityId(discountMaster.getId()).with(changes).build();
