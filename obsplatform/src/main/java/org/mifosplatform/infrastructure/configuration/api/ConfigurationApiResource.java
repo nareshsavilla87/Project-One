@@ -111,6 +111,7 @@ public class ConfigurationApiResource {
 		defaultOne.put("date_format", "dd MMMM yyyy");
 		defaultOne.put("codeDefinitionLength", "10");
 		defaultOne.put("clientonlinecheck", "false");
+		defaultOne.put("isAutoRenew", "false");
 		
 		
 		/*********  Preparing 'defaultOneForClientList' JSONObject ******/

@@ -144,8 +144,10 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                	   throw new AuthenticationCredentialsNotFoundException("Credentials are not valid");
                 }
                 
-           }else if(path.contains("/api/v1/entitlements/get") && request.getMethod().equalsIgnoreCase("GET")){
            	
+
+           }else if(path.contains("/api/v1/entitlements/getauth") && request.getMethod().equalsIgnoreCase("GET")){
+ 
                final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");    
                
 	             boolean isValid =  this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
