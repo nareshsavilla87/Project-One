@@ -50,6 +50,7 @@ public class OrderData {
 	private String groupName;
 	private Long planStatus;
 	private List<OrderAddonsData> orderAddonsDatas;
+	private String autoRenew;
 
 	public OrderData(List<PlanCodeData> allowedtypes,List<PaytermData> paytermData,
 			List<SubscriptionData> contractPeriod, OrderData data) {
@@ -76,7 +77,7 @@ public class OrderData {
 
 	public OrderData(Long id, Long planId, String plancode, String status,LocalDate startDate, LocalDate endDate,
 			double price,String contractPeriod, String isprepaid, String allowtopup,String userAction,
-			String provisioningSys, String orderNo, LocalDate invoiceTillDate, LocalDate activaDate, String groupName) {
+			String provisioningSys, String orderNo, LocalDate invoiceTillDate, LocalDate activaDate, String groupName,String autoRenew) {
 		this.id = id;
 		this.pdid = planId;
 		this.planCode = plancode;
@@ -102,6 +103,7 @@ public class OrderData {
         this.invoiceTilldate=invoiceTillDate;
 		this.activeDate=activaDate;
 		this.groupName=groupName;
+		this.autoRenew=autoRenew;
 
 	}
 
