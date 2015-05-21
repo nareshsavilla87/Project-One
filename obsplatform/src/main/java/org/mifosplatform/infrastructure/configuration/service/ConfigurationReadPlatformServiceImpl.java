@@ -38,7 +38,6 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
     public ConfigurationData retrieveGlobalConfiguration() {
 
         context.authenticatedUser();
-
         final String sql = "SELECT c.id as id, c.name, c.enabled, c.value, c.module, c.description FROM c_configuration c order by c.id";
         final List<ConfigurationPropertyData> globalConfiguration = this.jdbcTemplate.query(sql, rowMap , new Object[] {});
 
