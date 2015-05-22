@@ -1307,4 +1307,8 @@ public class CommandWrapper {
 		public boolean isUpdatePaypalProfileStatus() {
 			return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILESTATUS");
 		}
+
+		public boolean isdeleteRecurringBilling() {
+			return this.actionName.equalsIgnoreCase("DELETERECURRINGBILLING");
+		}
 }

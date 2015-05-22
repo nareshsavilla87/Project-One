@@ -190,12 +190,13 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 				  }
 				}
 
-				if (billingOrderCommand.getTaxInclusive() != null) {
 
-					if (isTaxInclusive(billingOrderCommand.getTaxInclusive())) {
+				if (billingOrderCommand.getTaxInclusive() != null && (invoiceTaxCommands !=null && !invoiceTaxCommands.isEmpty())) {
+					
+					if (isTaxInclusive(billingOrderCommand.getTaxInclusive())&&invoiceTaxCommands.get(0).getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
 						netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
-						//charge.setNetChargeAmount(netChargeAmount);
-						// charge.setChargeAmount(netChargeAmount);
+						charge.setNetChargeAmount(netChargeAmount);
+						charge.setChargeAmount(netChargeAmount);
 					}
 				}
 			}
@@ -205,13 +206,7 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 
 		}
 
-		if (billingOrderCommands.get(0).getTaxInclusive() != null) {
-			if (isTaxInclusive(billingOrderCommands.get(0).getTaxInclusive())) {
-				invoiceAmount = totalChargeAmount;
-			} else {
-				invoiceAmount = totalChargeAmount.add(netTaxAmount);
-			}
-		}
+		invoiceAmount = totalChargeAmount.add(netTaxAmount);
 		invoice.setNetChargeAmount(totalChargeAmount);
 		invoice.setTaxAmount(netTaxAmount);
 		invoice.setInvoiceAmount(invoiceAmount);

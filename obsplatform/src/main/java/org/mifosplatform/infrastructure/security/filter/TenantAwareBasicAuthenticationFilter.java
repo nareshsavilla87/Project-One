@@ -113,7 +113,8 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 // ignore to allow 'preflight' requests from AJAX applications
                 // in different origin (domain name)
             	super.doFilter(req, res, chain); //ashok changed please comment when delete the else if statement
-            } else if(path.contains("/api/v1/paymentgateways") && request.getMethod().equalsIgnoreCase("POST")){
+            } else if((path.contains("/api/v1/paymentgateways") && request.getMethod().equalsIgnoreCase("POST")) || 
+            		(path.contains("/api/v1/entitlements/getuser") && request.getMethod().equalsIgnoreCase("GET"))){
             
            	    String username= request.getParameter("username");
                 String password= request.getParameter("password");
@@ -142,9 +143,9 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                 }else{
                	   throw new AuthenticationCredentialsNotFoundException("Credentials are not valid");
                 }
-                
-           }else if(path.contains("/api/v1/entitlements/get") && request.getMethod().equalsIgnoreCase("GET")){
-           	
+
+           }else if(path.contains("/api/v1/entitlements/getauth") && request.getMethod().equalsIgnoreCase("GET")){
+ 
                final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");    
                
 	             boolean isValid =  this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
