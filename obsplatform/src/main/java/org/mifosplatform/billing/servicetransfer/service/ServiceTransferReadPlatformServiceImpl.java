@@ -29,14 +29,14 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 	
 	
 	@Override
-	public List<FeeMasterData> retrieveSingleFeeDetails(Long clientId) {
+	public List<FeeMasterData> retrieveSingleFeeDetails(Long clientId,String serviceTransfer) {
 		try {
 			context.authenticatedUser();
 			FeeMasterDataMapper mapper = new FeeMasterDataMapper();
 			String sql ;
 				sql = "select " + mapper.schemaWithClientId(clientId)+" where  fm.is_deleted='N'  group by fm.id"; 
 		
-			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {serviceTransfer});
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
@@ -66,7 +66,7 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 					" WHERE b.priceregion_id = a.region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY' " +
 					" AND d.client_id = "+clientId+" AND a.fee_id = fm.id AND (s.id = b.state_id OR (b.state_id = 0 AND b.country_id = c.id))),0))" +
 					" LEFT JOIN b_priceregion_master prm ON prm.id = pd.priceregion_id LEFT JOIN b_fee_detail fd ON (fd.fee_id = fm.id AND fd.region_id = prm.id" +
-					" AND fd.is_deleted = 'N')";
+					" AND fd.is_deleted = 'N')   where fm.transaction_type = ?  group by fm.id";
 		}
 
 		@Override

@@ -1,9 +1,11 @@
 package org.mifosplatform.billing.discountmaster.service;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
-import org.hibernate.exception.ConstraintViolationException;
+import org.mifosplatform.billing.discountmaster.domain.DiscountDetailRepository;
 import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
@@ -38,6 +40,7 @@ public class DiscountWritePlatformServiceImpl implements
 	private final DiscountCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final DiscountMasterRepository discountMasterRepository;
 	private final FromJsonHelper fromApiJsonHelper;
+	private final DiscountDetailRepository discountDetailRepository;
 	/**
 	 * @param context
 	 * @param apiJsonDeserializer
@@ -45,12 +48,14 @@ public class DiscountWritePlatformServiceImpl implements
 	 */
 	@Autowired
 	public DiscountWritePlatformServiceImpl(final PlatformSecurityContext context,final DiscountCommandFromApiJsonDeserializer apiJsonDeserializer,
-			final DiscountMasterRepository discountMasterRepository,final FromJsonHelper fromApiJsonHelper) {
+			final DiscountMasterRepository discountMasterRepository,final FromJsonHelper fromApiJsonHelper,
+			final DiscountDetailRepository detailRepository) {
 		
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.fromApiJsonHelper = fromApiJsonHelper;
 		this.discountMasterRepository = discountMasterRepository;
+		this.discountDetailRepository = detailRepository;
 		
 	}
 
@@ -105,11 +110,13 @@ public class DiscountWritePlatformServiceImpl implements
 	}
 
 	private void handleCodeDataIntegrityIssues(final JsonCommand command,final DataIntegrityViolationException dve) {
+		
 		final Throwable realCause = dve.getMostSpecificCause();
 		if (realCause.getMessage().contains("discountcode")) {
 			final String name = command.stringValueOfParameterNamed("discountCode");
 			throw new PlatformDataIntegrityException("error.msg.discount.duplicate.name","A discount with Code'" + name + "'already exists",
 					"discountCode", name);
+			
 		}else if(realCause.getMessage().contains("discountid_with_category_uniquekey")){
 			final String name = command.stringValueOfParameterNamed("discountCode");
 			throw new PlatformDataIntegrityException("error.msg.customer.category.discount.duplicate.name","this customer category discount already defined",
@@ -128,7 +135,7 @@ public class DiscountWritePlatformServiceImpl implements
 	 * @see #updateDiscount(java.lang.Long,
 	 * org.mifosplatform.infrastructure.core.api.JsonCommand)
 	 */
-	@Transactional
+	//@Transactional
 	@Override
 	public CommandProcessingResult updateDiscount(final Long entityId,final JsonCommand command) {
 
@@ -137,20 +144,45 @@ public class DiscountWritePlatformServiceImpl implements
 			this.context.authenticatedUser();
 			this.apiJsonDeserializer.validateForCreate(command.json());
 			DiscountMaster discountMaster = discountRetrieveById(entityId);
-			discountMaster.getDiscountDetails().clear();
-			final Map<String, Object> changes = discountMaster.update(command);
+			List<DiscountDetails> details=new ArrayList<>(discountMaster.getDiscountDetails());
 			final JsonArray discountPricesArray = command.arrayOfParameterNamed("discountPrices").getAsJsonArray();
-			discountMaster=assembleDiscountDetails(discountPricesArray, discountMaster);
-			this.discountMasterRepository.save(discountMaster);
+			    String[] states =null;
+			    states=new String[discountPricesArray.size()];
+			    for(int i=0; i<discountPricesArray.size();i++){
+			    	states[i] =discountPricesArray.get(i).toString();
+			    }
+				 for (String discountPrice : states) {
+					  
+					 final JsonElement element = fromApiJsonHelper.parse(discountPrice);
+						final String categoryId = fromApiJsonHelper.extractStringNamed("categoryId", element);
+						final Long id = fromApiJsonHelper.extractLongNamed("id", element);
+						final BigDecimal discountRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("discountRate", element);
+						if(id != null){
+						DiscountDetails discountDetails =this.discountDetailRepository.findOne(id);
+						
+						if(discountDetails != null){
+							discountDetails.setCategoryType(categoryId);
+							discountDetails.setDiscountRate(discountRate);
+							this.discountDetailRepository.saveAndFlush(discountDetails);
+							if(details.contains(discountDetails)){
+							   details.remove(discountDetails);
+							}
+						}
+						}else {
+							DiscountDetails newDetails = new DiscountDetails(categoryId, discountRate);
+							discountMaster.addDetails(newDetails);
+						}
+						
+				  }
+					 discountMaster.getDiscountDetails().removeAll(details);
+			final Map<String, Object> changes = discountMaster.update(command);
+			this.discountMasterRepository.saveAndFlush(discountMaster);
 			
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 					       .withEntityId(discountMaster.getId()).with(changes).build();
 
 		} catch (DataIntegrityViolationException dve) {
-
-			if (dve.getCause() instanceof ConstraintViolationException) {
 				handleCodeDataIntegrityIssues(command, dve);
-			}
 			return new CommandProcessingResult(Long.valueOf(-1));
 
 		}

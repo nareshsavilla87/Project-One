@@ -1,52 +1,31 @@
 
 
-import java.util.HashMap;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class GenerateSign {
     
     public static void main(String[] args)
     {
-        // TODO Auto-generated method stub
-        
-        System.out.println(" Please enter the input string :" );
-        Scanner in = new Scanner (System.in);
-        String s=in.nextLine();
-        char c=firstNonRepeatedCharacter(s);
-        System.out.println("The first non repeated character is :  " + c);
+    	try{
+    	List<String> strings = new ArrayList<String>();
+    	strings.add("A");
+    	strings.add("B");
+    	strings.add("C");
+    	
+    	List<String> strings2=new ArrayList<String>(strings);
+    	//strings.clear();
+    	System.out.println(strings2);
+    	strings2.remove("C");
+    	strings.add("D");
+    	System.exit(0); 
+    	System.out.println(strings);
+    	}finally{
+    		System.out.println("finally");
+    	}
     }
     
-    public static Character firstNonRepeatedCharacter(String str)
-    {
-        HashMap<Character,Integer>  characterhashtable= 
-
-                     new HashMap<Character ,Integer>();
-        int i,length ;
-        Character c ;
-        length= str.length();  // Scan string and build hash table
-        for (i=0;i < length;i++)
-        {
-            c=str.charAt(i);
-            if(characterhashtable.containsKey(c))
-            {
-                // increment count corresponding to c
-                characterhashtable.put(  c ,  characterhashtable.get(c) +1 );
-            }
-            else
-            {
-                characterhashtable.put( c , 1 ) ;
-            }
-        }
-        // Search characterhashtable in in order of string str
-        
-        for (i =0 ; i < length ; i++ )
-        {
-            c= str.charAt(i);
-            if( characterhashtable.get(c)  == 1 )
-            return c;
-        }
-        return null ;
-    }
+   
 } 
 

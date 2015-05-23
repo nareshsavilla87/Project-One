@@ -244,6 +244,8 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 	public List<DiscountDetails> getDiscountDetails() {
 		return discountDetails;
 	}
+
+	
 	
 	
 

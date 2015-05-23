@@ -114,9 +114,10 @@ public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformServ
 	private static final class DiscountDetailsMapper implements RowMapper<DiscountDetailData>{
 
 		public String schema() {
-			return " dd.id AS id,if(dd.category_type = '0','Default',mcv.code_value)  as categoryType,dd.category_type AS categoryTypeId," +
-				   " dd.discount_rate AS discountRate FROM b_discount_details dd, m_code_value mcv " +
-				   " WHERE dd.id = ? AND dd.category_type = mcv.id and dd.is_deleted = 'N'";
+			return "  dd.id AS id,if(dd.category_type = '0', 'Default', mcv.code_value) AS categoryType,dd.category_type AS categoryTypeId," +
+				   " dd.discount_rate AS discountRate" +
+				   " FROM b_discount_details dd left join m_code_value mcv on mcv.id = dd.category_type" +
+				   " WHERE dd.discount_id = ? AND  dd.is_deleted = 'N' group by dd.id";
 			}
 		
 		@Override
