@@ -34,6 +34,8 @@ public interface OrderWritePlatformService {
 	CommandProcessingResult orderSuspention(JsonCommand command, Long entityId);
 
 	CommandProcessingResult reactiveOrder(JsonCommand command, Long entityId);
+	
+	void processNotifyMessages(String eventName, Long clientId, String orderId);
 
 	
 }

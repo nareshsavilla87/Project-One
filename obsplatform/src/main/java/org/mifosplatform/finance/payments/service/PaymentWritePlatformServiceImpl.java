@@ -44,6 +44,7 @@ import org.mifosplatform.organisation.partner.domain.PartnerBalanceRepository;
 import org.mifosplatform.organisation.partner.domain.OfficeControlBalance;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
+import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
 import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
 import org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
 import org.mifosplatform.workflow.eventaction.service.ActiondetailsWritePlatformService;
@@ -84,6 +85,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 	private final ClientRepository clientRepository;
 	private final PartnerBalanceRepository partnerBalanceRepository;
 	private final OfficeAdditionalInfoRepository infoRepository;
+	private final OrderWritePlatformService orderWritePlatformService;
 
 	@Autowired
 	public PaymentWritePlatformServiceImpl(final PlatformSecurityContext context,final PaymentRepository paymentRepository,
@@ -93,7 +95,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			final ConfigurationRepository globalConfigurationRepository,final PaypalEnquireyRepository paypalEnquireyRepository,
 			final FromJsonHelper fromApiJsonHelper,final PaymentGatewayConfigurationRepository paymentGatewayConfigurationRepository,
 			final ClientRepository clientRepository,final PartnerBalanceRepository partnerBalanceRepository,
-			final OfficeAdditionalInfoRepository infoRepository) {
+			final OfficeAdditionalInfoRepository infoRepository, final OrderWritePlatformService orderWritePlatformService) {
 		
 		this.context = context;
 		this.fromApiJsonHelper=fromApiJsonHelper;
@@ -109,6 +111,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 		this.clientRepository = clientRepository;
 		this.partnerBalanceRepository = partnerBalanceRepository;
 		this.infoRepository = infoRepository;
+		this.orderWritePlatformService = orderWritePlatformService;
 				
 		
 	}
@@ -149,6 +152,9 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 				this.invoiceRepository.save(invoice);
 				
 			}
+			
+			// Notify Payment Details to Clients. written by ashok
+			this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_PAYMENT, payment.getClientId(), payment.getAmountPaid().toString());
 			//Add New Action 
 			final List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_PAYMENT);
 				if(actionDetaislDatas.size() != 0){
