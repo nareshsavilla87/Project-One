@@ -30,6 +30,8 @@ Insert ignore into del_temp values ('UPDATE_ORDER');
 Insert ignore into del_temp values ('UPDATE_SELFCARE');
 Insert ignore into del_temp values ('READ_CLIENTIDENTIFIER');
 Insert ignore into del_temp values ('DISCONNECT_ORDER');
+Insert ignore into del_temp values ('DELETERECURRINGBILLING_PAYMENTGATEWAY');
+Insert ignore into del_temp values ('UPDATE_CLIENT');
 
 Insert ignore into m_role_permission 
 Select (Select id from m_role where name='selfcare') as rid,b.id from del_temp a,m_permission b where a.permission_name=b.code;
