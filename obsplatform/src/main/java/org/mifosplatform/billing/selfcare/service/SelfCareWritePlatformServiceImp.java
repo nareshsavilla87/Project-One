@@ -128,7 +128,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				if(mailnotification){
 				//platformEmailService.sendToUserAccount(new EmailDetail("OBS Self Care Organisation ", "SelfCare",email, selfCare.getUserName()), unencodedPassword); 
 				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_CREATE_SELFCARE);
-				System.out.println(new Date());
+				
 				if(messageDetails !=null){
 				String subject=messageDetails.getSubject();
 				String body=messageDetails.getBody();

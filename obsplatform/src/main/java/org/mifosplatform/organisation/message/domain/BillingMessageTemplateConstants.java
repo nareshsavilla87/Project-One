@@ -12,6 +12,13 @@ public class BillingMessageTemplateConstants {
 	public static final String MESSAGE_TEMPLATE_CREATE_USER="CREATE USER";
 	public static final String MESSAGE_TEMPLATE_PAYMENT_RECEIPT = "PAYMENT_RECEIPT";
 	
+	// Order Notify Events
+	public static final String MESSAGE_TEMPLATE_NOTIFY_ACTIVATION = "NOTIFY ACTIVATION";
+	public static final String MESSAGE_TEMPLATE_NOTIFY_DISCONNECTION = "NOTIFY DISCONNECTION";
+	public static final String MESSAGE_TEMPLATE_NOTIFY_RECONNECTION = "NOTIFY RECONNECTION";
+	public static final String MESSAGE_TEMPLATE_NOTIFY_PAYMENT = "NOTIFY PAYMENT";
+	
+	
 	//constants
 	public static final String MESSAGE_TEMPLATE_STATUS = "N";
 	public static final String MESSAGE_TEMPLATE_EMAIL_FROM = "";
