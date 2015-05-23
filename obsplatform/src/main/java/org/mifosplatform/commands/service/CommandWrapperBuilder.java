@@ -2903,7 +2903,7 @@ public CommandWrapperBuilder updatePaypalProfileRecurring() {
 	this.entityId = null;
 	this.href = "";
 	return this;
-	}
+}
 
 	public CommandWrapperBuilder updatePaypalProfileStatus() {
 		this.actionName = "UPDATEPAYPALPROFILESTATUS";

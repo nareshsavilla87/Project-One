@@ -8,7 +8,15 @@ CREATE TABLE IF NOT EXISTS `b_item_price` (
   UNIQUE KEY `itemid_with_region_uniquekey` (`item_id`,`region_id`),
   KEY `fk_item_price_id` (`item_id`),
   CONSTRAINT `fk_item_price_id` FOREIGN KEY (`item_id`) REFERENCES `b_item_master` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=17 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8;
+
+
+-- Price Region 
+insert ignore into b_priceregion_master (id,priceregion_code,priceregion_name,createdby_id,created_date,is_deleted) 
+ VALUES (null,'Default','Default Region',null,null,'N');
+ 
+ insert ignore	 into b_priceregion_detail (priceregion_id,country_id,state_id,is_deleted)
+select prm.id,0,0,'N' from b_priceregion_master prm where prm.priceregion_code ='Default';
 
 
 Drop procedure IF EXISTS regionIdToItemAudit; 
@@ -62,4 +70,11 @@ END //
 DELIMITER ;
 call addInvoiceInDeviceSale();
 Drop procedure IF EXISTS addInvoiceInDeviceSale; 
+
+
+
+set @id=(select id from b_priceregion_master where priceregion_code='Default'); 
+insert ignore into b_item_price (id,item_id,region_id,price,is_deleted) 
+   select null,id,@id,unit_price,'N' from b_item_master;
+  
 

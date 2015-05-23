@@ -190,7 +190,6 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 				  }
 				}
 
-
 				if (billingOrderCommand.getTaxInclusive() != null && (invoiceTaxCommands !=null && !invoiceTaxCommands.isEmpty())) {
 					
 					if (isTaxInclusive(billingOrderCommand.getTaxInclusive())&&invoiceTaxCommands.get(0).getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
@@ -198,7 +197,7 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 						charge.setNetChargeAmount(netChargeAmount);
 						charge.setChargeAmount(netChargeAmount);
 					}
-				}
+				  }
 			}
 			netTaxAmount = netTaxAmount.add(netChargeTaxAmount);
 			totalChargeAmount = totalChargeAmount.add(netChargeAmount);
