@@ -7,10 +7,10 @@ public class InvoiceData {
 	
 	 Long id;
 	 private BigDecimal amount;
-	 private Long dueAmount;
+	 private BigDecimal dueAmount;
 	 private Date billDate;
 	 Long billId;
-	 public InvoiceData(Long id,BigDecimal amount,Long dueAmount,Date billDate,Long billId) {
+	 public InvoiceData(Long id,BigDecimal amount,BigDecimal dueAmount,Date billDate,Long billId) {
 
 			this.id=id;
 			this.amount=amount;
@@ -35,11 +35,11 @@ public class InvoiceData {
 		this.amount = amount;
 	}
 
-	public Long getDiscountAmount() {
+	public BigDecimal getDiscountAmount() {
 		return dueAmount;
 	}
 
-	public void setDiscountAmount(Long dueAmount) {
+	public void setDiscountAmount(BigDecimal dueAmount) {
 		this.dueAmount = dueAmount;
 	}
 
