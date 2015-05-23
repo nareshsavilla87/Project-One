@@ -182,6 +182,14 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 					this.oneTimeSaleRepository.save(oneTimeSale);
 				
 				}
+				else if ("SERVICE_TRANSFER".equalsIgnoreCase(transIds.getTransactionType())) {
+					BillingOrder billingOrder = this.billingOrderRepository.findOne(transIds.getTransactionId());
+					billingOrder.updateBillId(billId);
+					this.billingOrderRepository.save(billingOrder);
+					Invoice invoice = this.invoiceRepository.findOne(billingOrder.getInvoice().getId());
+					invoice.updateBillId(billId);
+					this.invoiceRepository.save(invoice);
+				}
 
 			}
 		}catch(Exception ex){
@@ -236,6 +244,17 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 					oneTimeSale.updateBillId(null);
 					this.oneTimeSaleRepository.save(oneTimeSale);
 				}
+				else if ("SERVICE_TRANSFER".equalsIgnoreCase(billDetail.getTransactionType())) {
+					BillingOrder billingOrder = this.billingOrderRepository.findOne(billDetail.getTransactionId());
+					billingOrder.updateBillId(null);
+					this.billingOrderRepository.save(billingOrder);
+					Invoice invoice = this.invoiceRepository.findOne(billingOrder.getInvoice().getId());
+					invoice.updateBillId(null);
+					this.invoiceRepository.save(invoice);
+
+				}
+				
+				
 			
 			}
 			
