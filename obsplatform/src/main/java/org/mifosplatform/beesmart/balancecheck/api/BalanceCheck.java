@@ -1,6 +1,7 @@
 package org.mifosplatform.beesmart.balancecheck.api;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -44,7 +45,7 @@ public class BalanceCheck {
 	@Consumes({ MediaType.WILDCARD })
 	@Produces({ MediaType.WILDCARD })
 	public String onlinePayment(final String requestData){
-		
+		System.out.println("***************request comming*********");
 	     try{
 	    	 context.authenticatedUser();
 	    	 String checkBalanceResponseOut = "";
@@ -93,14 +94,14 @@ public class BalanceCheck {
 				
 	}
 	
-	@POST
-	@Path("/transaction")
+	@GET
+	@Path("/getPackages")
 	@Consumes({ MediaType.WILDCARD })
 	@Produces({ MediaType.WILDCARD })
 	public String transaction(final String requestData){
 		
+		System.out.println("******Get Packages calling*******");
 	    	 String checkBalanceResponseOut = "";
-	    	System.out.println(requestData);
 	    	 return checkBalanceResponseOut;   
 	}
 	 
