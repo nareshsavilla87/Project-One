@@ -183,11 +183,21 @@ public class ChargeCodeReadPlatformServiceImpl implements
 	private static final class ChargeCodeRecurringMapper implements RowMapper<ChargeCodeData> {
 
 		public String schema() {
-			return " cc.id as id, cc.charge_code AS chargeCode, pp.price AS price, cc.duration_type AS durationType," +
+			/*return " cc.id as id, cc.charge_code AS chargeCode, pp.price AS price, cc.duration_type AS durationType," +
 					" cc.charge_duration AS chargeDuration, cc.billfrequency_code AS billFrequencyCode " +
 					" FROM (b_plan_pricing pp JOIN b_plan_master pm ON pm.id = pp.plan_id) " +
 					" JOIN b_charge_codes cc ON pp.charge_code = cc.charge_code WHERE pm.is_deleted = 'n' " +
 					" AND pp.plan_id = ?  and cc.billfrequency_code = ? group by cc.id";
+			"pp.id as id,
+*/			return " pp.id as id, pp.charge_code as chargeCode,pp.price as price,cc.duration_type as durationType,cc.charge_duration as chargeDuration, cc.billfrequency_code as billFrequencyCode, "+
+					" ct.contract_type as contractType,ct.contract_duration as units from b_plan_pricing pp "+
+					" JOIN b_plan_master pm ON (pm.id = pp.plan_id) JOIN b_charge_codes cc ON (pp.charge_code = cc.charge_code) "+
+					" JOIN b_priceregion_master bprm ON (pp.price_region_id = bprm.id) JOIN b_priceregion_detail bpd ON (bprm.id=bpd.priceregion_id) "+
+					" JOIN b_state bs ON ((bpd.state_id = bs.id or bpd.state_id=0)  and bpd.country_id=bs.parent_code AND bpd.is_deleted = 'N') "+
+					" LEFT JOIN b_client_address bca ON (bca.state=bs.state_name and address_key='PRIMARY') "+
+					" LEFT JOIN b_contract_period ct ON pp.duration=ct.contract_period "+
+					" where pm.is_deleted = 'n' and pp.plan_id = ?  and cc.billfrequency_code=? and ct.contract_period=? and  bca.client_id=?  group by pp.id ";
+			
 		}
 
 		@Override
@@ -200,8 +210,10 @@ public class ChargeCodeReadPlatformServiceImpl implements
 			final String durationType = rs.getString("durationType");
 			final Integer chargeDuration = rs.getInt("chargeDuration");
 			final String billFrequencyCode = rs.getString("billFrequencyCode");
+			final String contractType = rs.getString("contractType");
+			final Integer units = rs.getInt("units");
 
-			ChargeCodeData chargeCodeData = new ChargeCodeData(id, chargeCode, null, null, chargeDuration, durationType, null, billFrequencyCode);
+			ChargeCodeData chargeCodeData = new ChargeCodeData(id,chargeCode, null, null, chargeDuration, durationType, null, billFrequencyCode,contractType,units);
 			chargeCodeData.setPrice(price);
 			
 			return chargeCodeData;	
@@ -210,7 +222,7 @@ public class ChargeCodeReadPlatformServiceImpl implements
 	
 	@Override
 	public ChargeCodeData retrieveChargeCodeForRecurring(Long planId,
-			String billingFrequency) {
+			String billingFrequency,String contractPeriod,Long clientId) {
 		try {
 
 			final ChargeCodeRecurringMapper mapper = new ChargeCodeRecurringMapper();
@@ -218,7 +230,7 @@ public class ChargeCodeReadPlatformServiceImpl implements
 			final String sql = "select " + mapper.schema();
 
 			return jdbcTemplate.queryForObject(sql, mapper, new Object[] {
-					planId, billingFrequency });
+					planId, billingFrequency ,contractPeriod, clientId});
 		
 		} catch (EmptyResultDataAccessException accessException) {
 			return null;

@@ -114,8 +114,8 @@ public class GenerateBill {
 			// plan with No prorata and not start day of month
 			if (plan.getBillRule() == 300 && startDate.compareTo(monthStartDate) > 0 && plan.isPrepaid() == 'N') {
 				price = BigDecimal.ZERO;
-			} else if(plan.getBillRule() == 200 && plan.isPrepaid() == 'N') {
-				price = billingOrderData.getPrice();
+			} else if(plan.getBillRule() == 200 && plan.isPrepaid() == 'N'){
+				price =billingOrderData.getPrice();
 			}
 
 		} else if (endDate.toDate().after(billingOrderData.getBillEndDate())) {
@@ -497,7 +497,6 @@ public class GenerateBill {
 					
 					taxRate = taxMappingRateData.getRate();
 					taxCode = taxMappingRateData.getTaxCode();
-
 					  if(isTaxInclusive.compareTo(Integer.valueOf(1))==0){  /*(2990 * 11) / (100 + 11)*/
                       	   taxAmount= price.multiply(taxRate).divide(new BigDecimal(100).add(taxRate),Integer.parseInt(roundingDecimal()), RoundingMode.HALF_UP);
                        }else{
