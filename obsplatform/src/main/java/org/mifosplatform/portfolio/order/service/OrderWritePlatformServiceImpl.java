@@ -260,6 +260,9 @@ try{
 			this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,clientId, order.getId().toString(),null);
 		}
 	}
+	
+	processNotifyMessages(EventActionConstants.EVENT_ACTIVE_ORDER, clientId, order.getId().toString());
+	
 	return new CommandProcessingResult(order.getId(),order.getClientId());	
 	}catch (DataIntegrityViolationException dve) {
 		handleCodeDataIntegrityIssues(command, dve);
@@ -267,7 +270,17 @@ try{
 		
 			}
 	}	
-			
+		
+	@Override
+	public void processNotifyMessages(String eventName, Long clientId, String orderId) {
+
+		List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(eventName);
+		
+		if(actionDetaislDatas.size() != 0){
+			this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas, clientId, orderId, null);
+		}
+	}
+
 	private void handleCodeDataIntegrityIssues(JsonCommand command,DataIntegrityViolationException dve) {
 				//   	Throwable realCause = dve.getMostSpecificCause();
 				throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue",
@@ -391,9 +404,9 @@ try{
 				
 			}		
 	
-			/*// checking for Paypal Recurring DisConnection
-			processPaypalRecurringActions(orderId, EventActionConstants.EVENT_PAYPAL_RECURRING_DISCONNECT_ORDER);*/
+			// checking for Paypal Recurring DisConnection
 			processPaypalRecurringActions(orderId, EventActionConstants.EVENT_PAYPAL_RECURRING_TERMINATE_ORDER);
+			processNotifyMessages(EventActionConstants.EVENT_DISCONNECTION_ORDER, order.getClientId(), order.getId().toString());
 			
 		//For Order History
 		final OrderHistory orderHistory = new OrderHistory(order.getId(), DateUtils.getLocalDateOfTenant(), DateUtils.getLocalDateOfTenant(), processingResultId, requstStatus, getUserId(), null);
@@ -507,13 +520,10 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 
 		     }
 
-	 		// checking for Paypal Recurring Reconnection 				
-	 		//processPaypalRecurringActions(orderId, EventActionConstants.EVENT_PAYPAL_RECURRING_RECONNECTION_ORDER);
-	 		
 		     //For Order History
    			OrderHistory orderHistory=new OrderHistory(orderDetails.getId(),DateUtils.getLocalDateOfTenant(),newStartdate,resourceId,requstStatus,userId,description);
    			this.orderHistoryRepository.save(orderHistory);
-   			
+   			processNotifyMessages(EventActionConstants.EVENT_RECONNECTION_ORDER, orderDetails.getClientId(), orderId.toString());
    			return new CommandProcessingResult(Long.valueOf(orderDetails.getClientId()),orderDetails.getClientId());
 		
 			
@@ -588,12 +598,11 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		order.setuserAction(UserActionStatusTypeEnum.RECONNECTION.toString());
 		this.orderRepository.save(order);
 		
-		// checking for Paypal Recurring Reconnection 				
- 		//processPaypalRecurringActions(orderId, EventActionConstants.EVENT_PAYPAL_RECURRING_RECONNECTION_ORDER);
-		
 		//For Order History
 		OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),processingResultId,requstStatus,getUserId(),null);
 		this.orderHistoryRepository.save(orderHistory);
+		
+		processNotifyMessages(EventActionConstants.EVENT_RECONNECTION_ORDER, order.getClientId(), order.getId().toString());
 		return new CommandProcessingResult(order.getId(),order.getClientId());
 	
 	}catch(final DataIntegrityViolationException dve){
@@ -708,6 +717,7 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		 for(OrderPrice orderPrice:orderPrices){
 			 if(billEndDate == null){
 				// orderPrice.setBillEndDate(null);	
+
 			//	 orderPrice.setBillEndDate(null);	
 			 }else{
 				// orderPrice.setBillEndDate(new LocalDate(billEndDate));
