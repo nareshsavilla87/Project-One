@@ -42,15 +42,11 @@ public class PaymentGatewayConfigurationWritePlatformServiceImpl implements Paym
 	@Override
 	public CommandProcessingResult updatePaymentGatewayConfig(final Long configId, JsonCommand command) {
 		
-		this.context.authenticatedUser();
-
         try {
+        	this.context.authenticatedUser();
             this.configurationFromApiJsonDeserializer.validateForUpdate(command);
-
             final PaymentGatewayConfiguration configItemForUpdate = this.paymentGatewayConfigurationRepository.findOne(configId);
-
             final Map<String, Object> changes = configItemForUpdate.update(command);
-
             this.paymentGatewayConfigurationRepository.save(configItemForUpdate);
 
             return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(configId).with(changes).build();
@@ -79,8 +75,7 @@ public class PaymentGatewayConfigurationWritePlatformServiceImpl implements Paym
 	@Override
 	public CommandProcessingResult createPaymentGatewayConfig(JsonCommand command) {
 
-		try{
-			
+		try{	
 			this.context.authenticatedUser();
 			final String name = command.stringValueOfParameterNamed(ConfigurationConstants.NAME);
 			final String value = command.stringValueOfParameterNamed(ConfigurationConstants.VALUE);
