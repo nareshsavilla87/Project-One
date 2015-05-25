@@ -49,6 +49,15 @@ insert ignore into stretchy_report_parameter(report_id,parameter_id,report_param
 
  Insert ignore into m_role_permission 
 Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'READ_CHARGECODE';
+
+   Insert ignore into m_role_permission 
+Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'DISCONNECT_ORDER';
+
+INSERT IGNORE INTO c_configuration VALUES(null,'sms-configuration',0,'{}');
+
+INSERT IGNORE INTO m_permission VALUES(null,'billing&finance','UPDATECHANGEPAYPALSTATUS_PAYMENTGATEWAY','PAYMENTGATEWAY','UPDATECHANGEPAYPALSTATUS',0);
+
+INSERT IGNORE INTO m_permission VALUES(null,'billing&finance','UPDATEPAYPALPROFILESTATUS_PAYMENTGATEWAY','PAYMENTGATEWAY','UPDATEPAYPALPROFILESTATUS',0);
  
 
 
