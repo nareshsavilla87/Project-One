@@ -61,7 +61,7 @@ public class InvoiceReadPlatformServiceImpl implements InvoiceReadPlatformServic
 			Long id = rs.getLong("id");
 			Date invoiceDate=rs.getDate("invoiceDate");
 			BigDecimal invoiceAmount=rs.getBigDecimal("invoiceAmount");
-			Long dueAmount=rs.getLong("dueAmount");
+			BigDecimal dueAmount=rs.getBigDecimal("dueAmount");
 			Long billId=rs.getLong("billId");
 			return new InvoiceData(id, invoiceAmount, dueAmount, invoiceDate,billId);
 

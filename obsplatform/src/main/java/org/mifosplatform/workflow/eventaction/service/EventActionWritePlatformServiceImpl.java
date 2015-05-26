@@ -42,6 +42,8 @@ import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
+import org.mifosplatform.portfolio.plan.domain.Plan;
+import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
@@ -50,6 +52,7 @@ import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
 import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
 import org.mifosplatform.workflow.eventaction.data.EventActionProcedureData;
+import org.mifosplatform.workflow.eventaction.data.OrderNotificationData;
 import org.mifosplatform.workflow.eventaction.domain.EventAction;
 import org.mifosplatform.workflow.eventaction.domain.EventActionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,6 +85,12 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
     private final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
+    private final EventActionReadPlatformService eventActionReadPlatformService;
+    
+    private BillingMessageTemplate activationTemplate;
+    private BillingMessageTemplate reConnectionTemplate;
+    private BillingMessageTemplate disConnectionTemplate;
+    private BillingMessageTemplate paymentTemplate;
 
 
 	@Autowired
@@ -92,7 +101,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			final BillingMessageTemplateRepository messageTemplateRepository,final EventMasterRepository eventMasterRepository,final EventOrderRepository eventOrderRepository,
 			final TicketMasterReadPlatformService ticketMasterReadPlatformService,final AppUserReadPlatformService readPlatformService,
 			final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService, final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-			final PaypalRecurringBillingRepository paypalRecurringBillingRepository)
+			final PaypalRecurringBillingRepository paypalRecurringBillingRepository, final EventActionReadPlatformService eventActionReadPlatformService)
 	{
 		this.repository=repository;
 		this.orderRepository=orderRepository;
@@ -112,6 +121,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
         this.paymentGatewayRecurringWritePlatformService = paymentGatewayRecurringWritePlatformService;
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
+        this.eventActionReadPlatformService = eventActionReadPlatformService;
 	}
 	
 	
@@ -410,9 +420,106 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	}	
 						
 			        	break;
-			      
-			       
+			        	
+				    case EventActionConstants.ACTION_NOTIFY_ACTIVATION : 
 				    	
+				    	OrderNotificationData data = this.eventActionReadPlatformService.retrieveNotifyDetails(clientId, new Long(resourceId));
+				    					 
+				    	SimpleDateFormat dateFormatObj = new SimpleDateFormat("dd MMMM yyyy");			    	
+				    	
+				    	BillingMessageTemplate template = getTemplate(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_ACTIVATION);
+				    	
+				    	String headerMessage = template.getHeader().replaceAll("<CustomerName>", data.getFirstName() + " " + data.getLastName());
+				    	String bodyMessage = template.getBody().replaceAll("<Service name>", data.getPlanName());
+				    	bodyMessage = bodyMessage.replaceAll("<Activation Date>", dateFormatObj.format(data.getActivationDate().toDate()));
+				    	
+				    	String footerMessage = template.getFooter().replaceAll("<Reseller Name>", data.getOfficeName());
+				    	footerMessage = footerMessage.replaceAll("<Contact Name>", data.getOfficeEmail());
+				    	footerMessage = footerMessage.replaceAll("<Number>", data.getOfficePhoneNo());
+				    	
+				    	BillingMessage billingMessage = new BillingMessage(headerMessage, bodyMessage, footerMessage, 
+				    			data.getOfficeEmail(), data.getEmailId(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
+				    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null );
+				    		
+				    	this.messageDataRepository.save(billingMessage);
+			        	  		
+				    	break;
+				    
+				    case EventActionConstants.ACTION_NOTIFY_DISCONNECTION : 
+				    	
+				    	OrderNotificationData disConnectData = this.eventActionReadPlatformService.retrieveNotifyDetails(clientId, new Long(resourceId));
+				    	
+				    	SimpleDateFormat disDateFormatObj = new SimpleDateFormat("dd MMMM yyyy");
+				    	
+				    	BillingMessageTemplate disConnectionTemplate = getTemplate(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_DISCONNECTION);
+				    	
+				    	String disHeaderMessage = disConnectionTemplate.getHeader().replaceAll("<CustomerName>", disConnectData.getFirstName() + " " + disConnectData.getLastName());
+				    	String disBodyMessage = disConnectionTemplate.getBody().replaceAll("<Service name>", disConnectData.getPlanName());
+				    	disBodyMessage = disBodyMessage.replaceAll("<Disconnection Date>", disDateFormatObj.format(disConnectData.getEndDate().toDate()));
+				    	
+				    	String disFooterMessage = disConnectionTemplate.getFooter().replaceAll("<Reseller Name>", disConnectData.getOfficeName());
+				    	disFooterMessage = disFooterMessage.replaceAll("<Contact Name>", disConnectData.getOfficeEmail());
+				    	disFooterMessage = disFooterMessage.replaceAll("<Number>", disConnectData.getOfficePhoneNo());
+				    	
+				    	BillingMessage disBillingMessage = new BillingMessage(disHeaderMessage, disBodyMessage, disFooterMessage, 
+				    			disConnectData.getOfficeEmail(), disConnectData.getEmailId(), disConnectionTemplate.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
+				    			disConnectionTemplate, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null );
+				    		
+				    	this.messageDataRepository.save(disBillingMessage);
+				    	
+				    	break;
+				    	
+				    case EventActionConstants.ACTION_NOTIFY_RECONNECTION : 
+				    	
+				    	OrderNotificationData reConnectData = this.eventActionReadPlatformService.retrieveNotifyDetails(clientId, new Long(resourceId));
+				    	
+				    	SimpleDateFormat reDateFormatObj = new SimpleDateFormat("dd MMMM yyyy");
+				    	
+				    	BillingMessageTemplate reConnectionTemplate = getTemplate(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_RECONNECTION);
+				    	
+				    	String reHeaderMessage = reConnectionTemplate.getHeader().replaceAll("<CustomerName>", reConnectData.getFirstName() + " " + reConnectData.getLastName());
+				    	String reBodyMessage = reConnectionTemplate.getBody().replaceAll("<Service name>", reConnectData.getPlanName());
+				    	reBodyMessage = reBodyMessage.replaceAll("<Reconnection Date>", reDateFormatObj.format(reConnectData.getStartDate().toDate()));
+				    	
+				    	String reFooterMessage = reConnectionTemplate.getFooter().replaceAll("<Reseller Name>", reConnectData.getOfficeName());
+				    	reFooterMessage = reFooterMessage.replaceAll("<Contact Name>", reConnectData.getOfficeEmail());
+				    	reFooterMessage = reFooterMessage.replaceAll("<Number>", reConnectData.getOfficePhoneNo());
+				    	
+				    	BillingMessage reBillingMessage = new BillingMessage(reHeaderMessage, reBodyMessage, reFooterMessage, 
+				    			reConnectData.getOfficeEmail(), reConnectData.getEmailId(), reConnectionTemplate.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
+				    			reConnectionTemplate, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null );
+				    		
+				    	this.messageDataRepository.save(reBillingMessage);
+				    	
+				    	break;
+				    	
+				    case EventActionConstants.ACTION_NOTIFY_PAYMENT : 
+				    	
+				    	OrderNotificationData paymentConnectData = this.eventActionReadPlatformService.retrieveNotifyDetails(clientId, null);
+				    	
+				    	SimpleDateFormat paymentDateFormatObj = new SimpleDateFormat("dd MMMM yyyy");
+				    	
+				    	BillingMessageTemplate paymentTemplate = getTemplate(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_PAYMENT);
+				    	
+				    	String paymentHeader = paymentTemplate.getHeader().replaceAll("<CustomerName>", paymentConnectData.getFirstName() + " " + paymentConnectData.getLastName());
+				    	String paymentBodyMessage = paymentTemplate.getBody().replaceAll("<Amount>", resourceId);
+				    	paymentBodyMessage = paymentBodyMessage.replaceAll("<Payment Date>", paymentDateFormatObj.format(new Date()));
+				    	
+				    	String paymentFooterMessage = paymentTemplate.getFooter().replaceAll("<Reseller Name>", paymentConnectData.getOfficeName());
+				    	paymentFooterMessage = paymentFooterMessage.replaceAll("<Contact Name>", paymentConnectData.getOfficeEmail());
+				    	paymentFooterMessage = paymentFooterMessage.replaceAll("<Number>", paymentConnectData.getOfficePhoneNo());
+				    	
+				    	BillingMessage paymentBillingMessage = new BillingMessage(paymentHeader, paymentBodyMessage, paymentFooterMessage, 
+				    			paymentConnectData.getOfficeEmail(), paymentConnectData.getEmailId(), paymentTemplate.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
+				    			paymentTemplate, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null );
+				    		
+				    	this.messageDataRepository.save(paymentBillingMessage);
+				    	
+				    	break;
+				    	
+				    default:
+				    	
+						break;
 				    }
 				    
 				    
@@ -583,5 +690,41 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
     	return null;
     }
 
+	}
+	
+	private BillingMessageTemplate getTemplate(String templateName){
+		
+		if(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_ACTIVATION.equalsIgnoreCase(templateName)){
+			
+			if(null == activationTemplate){
+				activationTemplate = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_ACTIVATION);
+			}
+			return activationTemplate;
+			
+		} else if (BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_DISCONNECTION.equalsIgnoreCase(templateName)) {
+			
+			if(null == disConnectionTemplate){
+				disConnectionTemplate = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_DISCONNECTION);
+			}
+			return disConnectionTemplate;
+			
+		} else if (BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_RECONNECTION.equalsIgnoreCase(templateName)) {
+			
+			if(null == reConnectionTemplate){
+				reConnectionTemplate = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_RECONNECTION);
+			}
+			return reConnectionTemplate;
+			
+		} else if (BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_PAYMENT.equalsIgnoreCase(templateName)) {
+			
+			if(null == paymentTemplate){
+				paymentTemplate = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_PAYMENT);
+			}
+			return paymentTemplate;
+			
+		} else {
+			throw new BillingMessageTemplateNotFoundException(templateName);
+		}
+		
 	}
 }
