@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
@@ -12,6 +13,7 @@ import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.EventActionData;
+import org.mifosplatform.workflow.eventaction.data.OrderNotificationData;
 import org.mifosplatform.workflow.eventaction.data.VolumeDetailsData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -141,6 +143,56 @@ public class EventActionReadPlatformServiceImpl implements EventActionReadPlatfo
 		String sql = "select " + mapper.schema() + " where a.is_processed='R' and a.client_id = ?";
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {clientId});
+	}
+	
+	@Override
+	public OrderNotificationData retrieveNotifyDetails(Long clientId, Long orderId) {
+		
+		OrderNotificationMapper mapper = new OrderNotificationMapper();
+		
+		String sql = "select " + mapper.schema();
+		
+		if(null == orderId){
+			sql = sql + " group by c.id";
+		} else{
+			sql = sql + " and o.id = " + orderId;
+		}
+
+		return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] {clientId});
+		
+	}
+	
+	private static final class OrderNotificationMapper implements RowMapper<OrderNotificationData> {
+
+		public String schema() {
+			return " c.firstname as firstName, c.lastname as lastName, p.plan_description as planName, c.email as emailId," +
+					" mo.name as officeName, boa.email_id as officeEmail, boa.phone_number as officePhoneNo, " +
+					" o.active_date as activationDate, o.start_date as startDate, o.end_date as endDate from m_client c " +
+					" Join m_office mo ON mo.id = c.office_id left Join b_office_address boa ON boa.office_id = mo.id " +
+					" Join b_orders o ON o.client_id = c.id Join b_plan_master p ON o.plan_id = p.id where c.id = ? ";
+		}
+		
+		@Override
+		public OrderNotificationData mapRow(final ResultSet rs, final int rowNum)
+				throws SQLException {
+			
+			String firstName = rs.getString("firstName");
+			String lastName = rs.getString("lastName");
+			String planName = rs.getString("planName");
+			String emailId = rs.getString("emailId");
+			
+			String officeName = rs.getString("officeName");
+			String officeEmail = rs.getString("officeEmail");
+			String officePhoneNo = rs.getString("officePhoneNo");
+			
+			LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
+			LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
+			LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
+			
+			return new OrderNotificationData(firstName, lastName, planName, emailId, officeName, officeEmail, officePhoneNo, 
+					activationDate, startDate, endDate);
+
+		}
 	}
 
 }
