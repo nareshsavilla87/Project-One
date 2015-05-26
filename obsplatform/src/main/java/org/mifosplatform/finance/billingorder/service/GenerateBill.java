@@ -447,7 +447,7 @@ public class GenerateBill {
 
 	}
 	
-	private List<InvoiceTaxCommand> calculateDiscountAndTax(BillingOrderData billingOrderData,DiscountMasterData discountMasterData, LocalDate startDate,
+	public List<InvoiceTaxCommand> calculateDiscountAndTax(BillingOrderData billingOrderData,DiscountMasterData discountMasterData, LocalDate startDate,
 			LocalDate endDate, BigDecimal price) {
 
 		List<InvoiceTaxCommand> listOfTaxes = new ArrayList<>();
