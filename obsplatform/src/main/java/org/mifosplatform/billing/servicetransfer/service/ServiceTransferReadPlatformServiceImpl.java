@@ -30,6 +30,7 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 	
 	@Override
 	public List<FeeMasterData> retrieveSingleFeeDetails(Long clientId, String transationType) {
+
 		try {
 			context.authenticatedUser();
 			FeeMasterDataMapper mapper = new FeeMasterDataMapper();
@@ -81,6 +82,7 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 		     " AND d.client_id = "+clientId+" and m.transaction_type = '"+transationType+"' and m.id = a.fee_id and  a.is_deleted = 'N' AND m.is_deleted = 'N'),0)) " +
 		     " LEFT JOIN b_priceregion_master prm ON prm.id = pd.priceregion_id LEFT JOIN b_fee_detail fd ON (fd.fee_id = fm.id AND fd.region_id = prm.id" +
 		     " AND fd.is_deleted = 'N')  ";
+
 		}
 
 		@Override

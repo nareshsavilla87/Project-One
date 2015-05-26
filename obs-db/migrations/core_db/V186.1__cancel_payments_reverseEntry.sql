@@ -1,4 +1,4 @@
-
+insert IGNORE into c_configuration (id,name,enabled,value) VALUES (null,'align-biiling-cycle',0,0);
 DROP PROCEDURE IF EXISTS cancelPayment;
 DELIMITER //
 CREATE PROCEDURE cancelPayment()
