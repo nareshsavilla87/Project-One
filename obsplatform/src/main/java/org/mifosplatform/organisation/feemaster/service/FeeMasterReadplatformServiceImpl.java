@@ -46,7 +46,7 @@ public class FeeMasterReadplatformServiceImpl implements FeeMasterReadplatformSe
 
 			public String schema() {
 				return " fm.id as id,fm.fee_code as feeCode,fm.fee_description as feeDescription,fm.transaction_type as transactionType,fm.charge_code as chargeCode," +
-						" fm.default_fee_amount as defaultFeeAmount from b_fee_master fm";
+						" fm.default_fee_amount as defaultFeeAmount,fm.item_id as itemId, fm.is_refundable as isRefundable from b_fee_master fm";
 				
 			}
 			@Override
@@ -59,7 +59,9 @@ public class FeeMasterReadplatformServiceImpl implements FeeMasterReadplatformSe
 				final String transactionType = rs.getString("transactionType");
 				final String chargeCode = rs.getString("chargeCode");
 				final BigDecimal defaultFeeAmount = rs.getBigDecimal("defaultFeeAmount");
-				return new FeeMasterData(id,feeCode,feeDescription,transactionType,chargeCode,defaultFeeAmount);
+				final Long itemId = rs.getLong("itemId");
+				final String isRefundable = rs.getString("isRefundable");
+				return new FeeMasterData(id,feeCode,feeDescription,transactionType,chargeCode,defaultFeeAmount,itemId,isRefundable);
 			
 			
 			}

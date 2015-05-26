@@ -25,6 +25,8 @@ import org.mifosplatform.logistics.item.domain.UnitEnumType;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
 import org.mifosplatform.logistics.itemdetails.service.ItemDetailsWritePlatformService;
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
+import org.mifosplatform.logistics.onetimesale.domain.DepositAndRefund;
+import org.mifosplatform.logistics.onetimesale.domain.DepositAndRefundRepository;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSaleRepository;
 import org.mifosplatform.logistics.onetimesale.exception.DeviceSaleNotFoundException;
@@ -67,6 +69,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 	private final EventValidationReadPlatformService eventValidationReadPlatformService;
 	private final ChargeCodeRepository chargeCodeRepository;
 	private final InvoiceRepository invoiceRepository;
+	private final DepositAndRefundRepository depositAndRefundRepository;
 
 	@Autowired
 	public OneTimeSaleWritePlatformServiceImpl(final PlatformSecurityContext context,final OneTimeSaleRepository oneTimeSaleRepository,
@@ -77,7 +80,8 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			final EventValidationReadPlatformService eventValidationReadPlatformService,
 			final DiscountReadPlatformService discountReadPlatformService,
 			final ChargeCodeRepository chargeCodeRepository,
-			final InvoiceRepository invoiceRepository) {
+			final InvoiceRepository invoiceRepository,
+			final DepositAndRefundRepository depositAndRefundRepository) {
 
 		
 		this.context = context;
@@ -93,6 +97,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		this.eventValidationReadPlatformService = eventValidationReadPlatformService;
 		this.chargeCodeRepository = chargeCodeRepository;
 		this.invoiceRepository = invoiceRepository;
+		this.depositAndRefundRepository = depositAndRefundRepository;
 
 	}
 
@@ -125,6 +130,11 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 					updateOneTimeSale(oneTimeSaleData,invoice);
 				}
 			}
+			
+			/** Deposit&Refund table */
+			final DepositAndRefund depositAndRefund = DepositAndRefund.fromJson(clientId, command);
+			this.depositAndRefundRepository.saveAndFlush(depositAndRefund);
+			
 			/**	Call if Item units is PIECES */
 			if(UnitEnumType.PIECES.toString().equalsIgnoreCase(item.getUnits())){
 				
@@ -214,11 +224,11 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		    if(UnitEnumType.PIECES.toString().equalsIgnoreCase(units)){
 		    	final Integer quantity = fromJsonHelper.extractIntegerWithLocaleNamed("quantity",query.parsedJson());
 		    	totalPrice = itemprice.multiply(new BigDecimal(quantity));
-		    	return new ItemData(itemCodeData, itemData, totalPrice, quantity.toString(), discountdata, chargesDatas);
+		    	return new ItemData(itemCodeData, itemData, totalPrice, quantity.toString(), discountdata, chargesDatas, null);
 		    }else{
 		    	final String quantityValue = fromJsonHelper.extractStringNamed("quantity",query.parsedJson());
 		    	totalPrice = itemprice.multiply(new BigDecimal(quantityValue));
-		    	return new ItemData(itemCodeData, itemData, totalPrice, quantityValue, discountdata, chargesDatas);
+		    	return new ItemData(itemCodeData, itemData, totalPrice, quantityValue, discountdata, chargesDatas, null);
 		    }
 			
 			
