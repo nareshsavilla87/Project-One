@@ -1,12 +1,21 @@
 package org.mifosplatform.billing.chargecode.service;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 import org.hibernate.exception.ConstraintViolationException;
+import org.mifosplatform.billing.chargecode.data.ChargeCodeData;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.chargecode.exception.ChargeCodeNotFoundException;
 import org.mifosplatform.billing.chargecode.serialization.ChargeCodeCommandFromApiJsonDeserializer;
+import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
+import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
+import org.mifosplatform.billing.planprice.domain.Price;
+import org.mifosplatform.billing.planprice.domain.PriceRepository;
+import org.mifosplatform.billing.taxmapping.domain.TaxMap;
+import org.mifosplatform.billing.taxmapping.domain.TaxMapRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -29,18 +38,19 @@ public class ChargeCodeWritePlatformServiceImp implements
 
 	private final static Logger LOGGER = (Logger) LoggerFactory.getLogger(ChargeCodeWritePlatformServiceImp.class);
 
-	private PlatformSecurityContext context;
-	private ChargeCodeRepository chargeCodeRepository;
-	private ChargeCodeCommandFromApiJsonDeserializer apiJsonDeserializer;
+	private final PlatformSecurityContext context;
+	private final ChargeCodeRepository chargeCodeRepository;
+	private final ChargeCodeCommandFromApiJsonDeserializer apiJsonDeserializer;
+	
 
 	@Autowired
-	public ChargeCodeWritePlatformServiceImp(
-			final PlatformSecurityContext context,
-			final ChargeCodeRepository chargeCodeRepository,
+	public ChargeCodeWritePlatformServiceImp(final PlatformSecurityContext context,final ChargeCodeRepository chargeCodeRepository,
 			final ChargeCodeCommandFromApiJsonDeserializer apiJsonDeserializer) {
+		
 		this.context = context;
 		this.chargeCodeRepository = chargeCodeRepository;
 		this.apiJsonDeserializer = apiJsonDeserializer;
+		
 
 	}
 
@@ -141,5 +151,7 @@ public class ChargeCodeWritePlatformServiceImp implements
 		}
 		return chargeCode;
 	}
+
+	
 
 }

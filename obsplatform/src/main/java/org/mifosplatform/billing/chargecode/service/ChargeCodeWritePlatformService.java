@@ -13,4 +13,5 @@ public interface ChargeCodeWritePlatformService {
 
 	 CommandProcessingResult updateChargeCode(JsonCommand command,
 			Long chargeCodeId);
+
 }
