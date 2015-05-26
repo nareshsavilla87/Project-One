@@ -161,9 +161,9 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 
 	@Override
 	public BigDecimal calculateFinalAmount(ChargeCodeData chargeCodeData,Long clientId,Long priceId) {
+		
 		Long defaultValue=Long.valueOf(0);
 		Date defaultDate= new Date();
-		
 		Price price = this.priceRepository.findOne(priceId);
 		DiscountMaster discountMaster = this.discountMasterRepository.findOne(price.getDiscountId());
 		LocalDate endDate=new LocalDate(discountMaster.getStartDate()).plusMonths(1);

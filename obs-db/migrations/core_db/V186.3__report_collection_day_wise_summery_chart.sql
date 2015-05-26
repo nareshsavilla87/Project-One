@@ -47,17 +47,15 @@ order by off.office_type , pay.payment_date' where report_name='Collection_Day_w
 insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@CID,@offId,'Office');
 insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@CID,@modId,'Payment Mode');
 
- Insert ignore into m_role_permission 
+  Insert ignore into m_role_permission 
 Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'READ_CHARGECODE';
 
-   Insert ignore into m_role_permission 
+Insert ignore into m_role_permission 
+Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'DELETERECURRINGBILLING_PAYMENTGATEWAY';
+
+Insert ignore into m_role_permission 
+Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'UPDATE_CLIENT';
+
+Insert ignore into m_role_permission 
 Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'DISCONNECT_ORDER';
-
-INSERT IGNORE INTO c_configuration VALUES(null,'sms-configuration',0,'{}');
-
-INSERT IGNORE INTO m_permission VALUES(null,'billing&finance','UPDATECHANGEPAYPALSTATUS_PAYMENTGATEWAY','PAYMENTGATEWAY','UPDATECHANGEPAYPALSTATUS',0);
-
-INSERT IGNORE INTO m_permission VALUES(null,'billing&finance','UPDATEPAYPALPROFILESTATUS_PAYMENTGATEWAY','PAYMENTGATEWAY','UPDATEPAYPALPROFILESTATUS',0);
  
-
-

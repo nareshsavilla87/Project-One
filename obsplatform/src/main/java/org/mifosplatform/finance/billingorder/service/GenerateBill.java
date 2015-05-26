@@ -514,7 +514,7 @@ public class GenerateBill {
 					}
 				}
 
-				invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, isTaxInclusive, taxRate, taxAmount);
+				invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, isTaxInclusive, taxRate, taxAmount,price);
 				invoiceTaxCommands.add(invoiceTaxCommand);
 			}
 
