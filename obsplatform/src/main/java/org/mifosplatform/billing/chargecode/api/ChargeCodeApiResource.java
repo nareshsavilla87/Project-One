@@ -175,7 +175,7 @@ public class ChargeCodeApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String retrieveChargeCodeTemplateData(@PathParam("priceId") final Long priceId, 
-			@PathParam("billingFrequency") final Long clientId, @Context final UriInfo uriInfo) {
+			@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
 	   
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
