@@ -34,7 +34,7 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 			context.authenticatedUser();
 			FeeMasterDataMapper mapper = new FeeMasterDataMapper();
 			String sql ;
-				sql = "select " + mapper.schemaWithClientId(clientId)+" where  fm.is_deleted='N'  group by fm.id"; 
+				sql = "select " + mapper.schemaWithClientId(clientId); 
 		
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {transType,transType,transType});
 		} catch (EmptyResultDataAccessException e) {
