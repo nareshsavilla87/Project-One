@@ -415,7 +415,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 				}
 				
 				if(renewalPeriod.equals(eRenewalPeriod) && priceId.equals(ePriceId) && orderId.equals(eOrderId)){
-					
+					System.out.println("if condition success");
 					// creating order and assign Recurring Details.
 					final CommandWrapper commandRequest = new CommandWrapperBuilder().renewalOrder(orderId).withJson(renewalOrder.toString()).build();
 					final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
@@ -432,6 +432,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 						paypalRecurringBilling.setOrderId(orderId);
 						
 						this.paypalRecurringBillingRepository.save(paypalRecurringBilling);
+						System.out.println("recurring table updated");
 					}
 				}
 				
@@ -456,7 +457,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 			PaypalRecurringBilling billing = this.paypalRecurringBillingRepository.findOneBySubscriberId(ProfileId);
 			
 			if (null == billing) {
-
+				System.out.println("Creating recurring account");
 				 JSONObject object = new JSONObject(jsonObj);
 				 Long clientId = object.getLong(RecurringPaymentTransactionTypeConstants.CLIENTID);
 				 
