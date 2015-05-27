@@ -18,7 +18,7 @@ public interface OrderReadPlatformService {
 	
 	List<OrderPriceData> retrieveOrderPriceData(Long orderId);
 	
-	List<PaytermData> getChargeCodes(Long planCode);
+	List<PaytermData> getChargeCodes(Long planCode, Long clientId);
 	
 	List<OrderPriceData> retrieveOrderPriceDetails(Long orderId, Long clientId);
 	
@@ -41,6 +41,8 @@ public interface OrderReadPlatformService {
 	List<OrderDiscountData> retrieveOrderDiscountDetails(Long orderId);
 
 	Long retrieveClientActiveOrderDetails(Long clientId, String serialNo);
+
+	
 	
 
 }
