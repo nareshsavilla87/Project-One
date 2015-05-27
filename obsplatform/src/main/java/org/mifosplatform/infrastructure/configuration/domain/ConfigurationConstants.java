@@ -55,6 +55,7 @@ public class ConfigurationConstants {
 	public static final String PAYMENTGATEWAY_FAILURE = "Failed";
 	public static final String PAYMENTGATEWAY_PENDING = "Pending";
 	public static final String PAYMENTGATEWAY_ALREADY_EXIST = "Decline";
+	public static final String PAYMENTGATEWAY_COMPLETED = "Completed"; 	
 	
 	//Paymentgateway configurations
 	public static final String PAYMENTGATEWAY_MPESA = "MPESA";
