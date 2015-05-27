@@ -717,8 +717,7 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		 for(OrderPrice orderPrice:orderPrices){
 			 if(billEndDate == null){
 				// orderPrice.setBillEndDate(null);	
-
-			//	 orderPrice.setBillEndDate(null);	
+				 
 			 }else{
 				// orderPrice.setBillEndDate(new LocalDate(billEndDate));
 			 }

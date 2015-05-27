@@ -170,16 +170,16 @@ public class ChargeCodeApiResource {
 	 * @return retrieved template data for creating charge codes
 	 */
 	@GET
-	@Path("{planId}/{billingFrequency}/{contractPeriod}/{clientId}")
+	@Path("{priceId}/{clientId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveChargeCodeTemplateData(@PathParam("planId") final Long planId, 
-			@PathParam("billingFrequency") final String billingFrequency,@PathParam("contractPeriod") final String contractPeriod,
+	public String retrieveChargeCodeTemplateData(@PathParam("priceId") final Long priceId, 
 			@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
-	   
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		final ChargeCodeData chargeCodeData = this.chargeCodeReadPlatformService.retrieveChargeCodeForRecurring(planId, billingFrequency,contractPeriod,clientId);
+		//context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final ChargeCodeData chargeCodeData = this.chargeCodeReadPlatformService.retrieveChargeCodeForRecurring(priceId);
+		final BigDecimal finalAmount=this.chargeCodeWritePlatformService.calculateFinalAmount(chargeCodeData,clientId,priceId);
+		chargeCodeData.setPlanfinalAmount(finalAmount);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, chargeCodeData, RESPONSE_PARAMETERS);
 

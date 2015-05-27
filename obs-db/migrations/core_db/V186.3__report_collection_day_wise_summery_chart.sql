@@ -57,6 +57,18 @@ Select (Select id from m_role where name='selfcare') as rid,b.id from m_permissi
 
 Insert ignore into m_role_permission 
 Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'DISCONNECT_ORDER';
- 
 
+
+  Insert ignore into m_role_permission 
+
+Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'READ_CHARGECODE';
+
+Insert ignore into m_role_permission 
+Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'DELETERECURRINGBILLING_PAYMENTGATEWAY';
+
+Insert ignore into m_role_permission 
+Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'UPDATE_CLIENT';
+
+Insert ignore into m_role_permission 
+Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'DISCONNECT_ORDER';
 
