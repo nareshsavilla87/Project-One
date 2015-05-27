@@ -104,7 +104,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		}
 	  dueAmount = chargeAmount.add(taxAmount).add(oneTimeSaleAmount).add(clientBalance)
 			      .add(adjustmentAmount).add(serviceTransferAmount).subtract(paymentAmount);
-	  
+
 	  billMaster.setChargeAmount(chargeAmount.add(oneTimeSaleAmount).add(serviceTransferAmount));
 	  billMaster.setAdjustmentAmount(adjustmentAmount);
 	  billMaster.setTaxAmount(taxAmount);

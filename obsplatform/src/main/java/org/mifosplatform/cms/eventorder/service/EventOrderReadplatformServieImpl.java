@@ -93,7 +93,8 @@ public class EventOrderReadplatformServieImpl implements EventOrderReadplatformS
 
 	@Override
 	public List<EventOrderDeviceData> getDevices(Long clientId) {
-		final String sql = "select al.serial_no as serialNumber from b_allocation al where client_id=? union select oh.serial_number as serialNumber from b_owned_hardware oh where client_id=?";
+		final String sql = "select al.serial_no as serialNumber from b_allocation al where client_id=? and al.is_deleted ='N'" +
+				" union select oh.serial_number as serialNumber from b_owned_hardware oh where client_id=? and oh.is_deleted ='N'";
 		EventOrderDeviceMapper rowMapper = new EventOrderDeviceMapper();
 		return this.jdbcTemplate.query(sql,rowMapper,new Object[]{clientId,clientId});
 	}
