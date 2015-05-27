@@ -61,6 +61,11 @@ private final Set<String> supportedParameters = new HashSet<String>(Arrays.asLis
         	baseDataValidator.reset().parameter("nationalId").value(nationalId).notNull().notExceedingLengthOf(100);
         }
         
+        if(fromApiJsonHelper.parameterExists("clientId", element)){
+        	final Long clientId = fromApiJsonHelper.extractLongNamed("clientId", element); 
+        	baseDataValidator.reset().parameter("nationalId").value(clientId).notNull().notExceedingLengthOf(20);
+        }
+        
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

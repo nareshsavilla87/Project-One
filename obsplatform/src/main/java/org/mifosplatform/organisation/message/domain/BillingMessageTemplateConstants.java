@@ -23,5 +23,6 @@ public class BillingMessageTemplateConstants {
 	public static final String MESSAGE_TEMPLATE_STATUS = "N";
 	public static final String MESSAGE_TEMPLATE_EMAIL_FROM = "";
 	public static final char MESSAGE_TEMPLATE_MESSAGE_TYPE = 'E';
+	public static final String SELFCARE_REGISTRATION_CONSTANT = "11011";
 
 }
