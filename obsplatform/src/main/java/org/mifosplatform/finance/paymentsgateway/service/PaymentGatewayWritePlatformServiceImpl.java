@@ -693,6 +693,9 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			paymentGateway.setRemarks(requestJson);
 		}else if(status.equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_SUCCESS)){
 			paymentGateway.setStatus(status);
+		}else if(status.equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_COMPLETED)){
+			paymentGateway.setStatus(status);
+			status = ConfigurationConstants.PAYMENTGATEWAY_SUCCESS;
 		}else{
 			paymentGateway.setStatus(status);
 			paymentGateway.setRemarks(error);
