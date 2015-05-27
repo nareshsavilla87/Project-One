@@ -17,7 +17,6 @@ import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.mifosplatform.billing.planprice.domain.Price;
 import org.mifosplatform.billing.planprice.domain.PriceRepository;
-import org.mifosplatform.billing.taxmapping.domain.TaxMap;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
 import org.mifosplatform.finance.billingorder.service.GenerateBill;
@@ -165,6 +164,7 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 		Long defaultValue=Long.valueOf(0);
 		Date defaultDate= new Date();
 		Price price = this.priceRepository.findOne(priceId);
+		BigDecimal finalAmount=BigDecimal.ZERO;
 		DiscountMaster discountMaster = this.discountMasterRepository.findOne(price.getDiscountId());
 		LocalDate endDate=new LocalDate(discountMaster.getStartDate()).plusMonths(1);
 		ChargeCodeMaster chargeCode = this.chargeCodeRepository.findOne(chargeCodeData.getId());
@@ -176,8 +176,15 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 				new LocalDate(),discountMaster.getDiscountType(),discountMaster.getDiscountRate(),"N");
 		
 		List<InvoiceTaxCommand> invoiceTaxCommands=this.generateBill.calculateDiscountAndTax(billingOrderData, discountMasterData, new LocalDate(discountMaster.getStartDate()),endDate, price.getPrice());
-		
-		return invoiceTaxCommands.get(0).getTaxAmount();
+		if(!invoiceTaxCommands.isEmpty()){
+		finalAmount = invoiceTaxCommands.get(0).getDiscountedAmount();
+		}
+		if(chargeCode.getTaxInclusive() !=1){
+		for(InvoiceTaxCommand invoiceTaxCommand:invoiceTaxCommands){
+			finalAmount = finalAmount.add(invoiceTaxCommand.getTaxAmount()); 
+		}
+		}
+		return finalAmount;
 	}
 
 	
