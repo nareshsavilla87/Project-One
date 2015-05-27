@@ -59,6 +59,7 @@ public class InvoiceClient {
 
 	}
 
+	
 	public Invoice invoicingSingleClient(Long clientId, LocalDate processDate) {
 
 		
