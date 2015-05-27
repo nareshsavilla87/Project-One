@@ -141,12 +141,11 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 		BigDecimal totalChargeAmount = BigDecimal.ZERO;
 		BigDecimal netTaxAmount = BigDecimal.ZERO;
 
-
 		TaxMappingRateData tax = this.billingOrderReadPlatformService.retriveExemptionTaxDetails(billingOrderCommands.get(0).getClientId());
-
+        
 		Invoice invoice = new Invoice(billingOrderCommands.get(0).getClientId(),DateUtils.getLocalDateOfTenant().toDate(), invoiceAmount, invoiceAmount,
 				netTaxAmount, "active");
-		
+
 		for (BillingOrderCommand billingOrderCommand : billingOrderCommands) {
 			
 			BigDecimal netChargeTaxAmount = BigDecimal.ZERO;
@@ -230,6 +229,89 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 			isTaxInclusive = true;
 
 		return isTaxInclusive;
+	}
+
+	@Override
+	public Invoice generateMultiOrderInvoice(List<BillingOrderCommand> billingOrderCommands, Invoice newInvoice) {
+
+		BigDecimal invoiceAmount = BigDecimal.ZERO;
+		BigDecimal totalChargeAmount = BigDecimal.ZERO;
+		BigDecimal netTaxAmount = BigDecimal.ZERO;
+		
+		Invoice invoice=null;
+		
+		TaxMappingRateData tax = this.billingOrderReadPlatformService.retriveExemptionTaxDetails(billingOrderCommands.get(0).getClientId());
+
+		if (newInvoice != null) {
+           
+			invoice=newInvoice;
+			
+		} else {
+			invoice = new Invoice(billingOrderCommands.get(0).getClientId(),DateUtils.getLocalDateOfTenant().toDate(), invoiceAmount,
+					invoiceAmount, netTaxAmount, "active");
+		}
+		for (BillingOrderCommand billingOrderCommand : billingOrderCommands) {
+
+			BigDecimal netChargeTaxAmount = BigDecimal.ZERO;
+			BigDecimal discountAmount = BigDecimal.ZERO;
+			BigDecimal netChargeAmount = billingOrderCommand.getPrice();
+
+			DiscountMaster discountMaster = null;
+			String discountCode = "None";
+
+			if (billingOrderCommand.getDiscountMasterData() != null) {
+				discountAmount = billingOrderCommand.getDiscountMasterData().getDiscountAmount();
+				discountMaster = this.discountMasterRepository.findOne(billingOrderCommand.getDiscountMasterData().getId());
+				discountCode = discountMaster.getDiscountCode();
+				netChargeAmount = billingOrderCommand.getPrice().subtract(discountAmount);
+
+			}
+
+			List<InvoiceTaxCommand> invoiceTaxCommands = billingOrderCommand.getListOfTax();
+
+			BillingOrder charge = new BillingOrder(billingOrderCommand.getClientId(),billingOrderCommand.getClientOrderId(),
+					billingOrderCommand.getOrderPriceId(),billingOrderCommand.getChargeCode(),
+					billingOrderCommand.getChargeType(), discountCode,billingOrderCommand.getPrice(), discountAmount,
+					netChargeAmount, billingOrderCommand.getStartDate(),billingOrderCommand.getEndDate());
+
+			// client TaxExemption
+			if (tax.getTaxExemption().equalsIgnoreCase("N")) {
+
+				if (invoiceTaxCommands != null) {
+
+					for (InvoiceTaxCommand invoiceTaxCommand : invoiceTaxCommands) {
+
+						if (invoiceTaxCommand.getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
+
+							netChargeTaxAmount = netChargeTaxAmount.add(invoiceTaxCommand.getTaxAmount());
+							InvoiceTax invoiceTax = new InvoiceTax(invoice,charge, invoiceTaxCommand.getTaxCode(),
+									invoiceTaxCommand.getTaxValue(),invoiceTaxCommand.getTaxPercentage(),invoiceTaxCommand.getTaxAmount());
+							charge.addChargeTaxes(invoiceTax);
+						}
+					}
+				}
+
+				if (billingOrderCommand.getTaxInclusive() != null&& (invoiceTaxCommands != null && !invoiceTaxCommands.isEmpty())) {
+
+					if (isTaxInclusive(billingOrderCommand.getTaxInclusive())&& invoiceTaxCommands.get(0).getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
+						netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
+						charge.setNetChargeAmount(netChargeAmount);
+						charge.setChargeAmount(netChargeAmount);
+					}
+				}
+			}
+			netTaxAmount = netTaxAmount.add(netChargeTaxAmount);
+			totalChargeAmount = totalChargeAmount.add(netChargeAmount);
+			invoice.addCharges(charge);
+
+		}
+
+		invoiceAmount = totalChargeAmount.add(netTaxAmount);
+		invoice.setNetChargeAmount(totalChargeAmount.add(invoice.getNetChargeAmount()));
+		invoice.setTaxAmount(netTaxAmount.add(invoice.getTaxAmount()));
+		invoice.setInvoiceAmount(invoiceAmount.add(invoice.getInvoiceAmount()));
+		return invoice;
+
 	}
 
 }
