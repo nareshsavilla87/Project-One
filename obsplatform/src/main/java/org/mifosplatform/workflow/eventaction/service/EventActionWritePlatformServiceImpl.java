@@ -320,9 +320,10 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	break; 	
 				    	
 				    case EventActionConstants.ACTION_INVOICE : 
-				    	  
+				    	Order order=this.orderRepository.findOne(new Long(resourceId));
 			        	  jsonObject.put("dateFormat","dd MMMM yyyy");
 			        	  jsonObject.put("locale","en");
+			        	  jsonObject.put("systemDate",dateFormat.format(order.getStartDate()));
 			        	  	if(detailsData.IsSynchronous().equalsIgnoreCase("N")){
 			        	  		eventAction=new EventAction(DateUtils.getDateOfTenant(), "CREATE",EventActionConstants.EVENT_ACTIVE_ORDER.toString(),
 			        	  		EventActionConstants.ACTION_INVOICE.toString(),"/billingorder/"+clientId,Long.parseLong(resourceId),
@@ -331,7 +332,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			        	  	
 			        	  	}else{
 			            	 
-			        	  		Order order=this.orderRepository.findOne(new Long(resourceId));
+			        	  		
 			        	  		jsonObject.put("dateFormat","dd MMMM yyyy");
 			        	  		jsonObject.put("locale","en");
 			        	  		jsonObject.put("systemDate",dateFormat.format(order.getStartDate()));

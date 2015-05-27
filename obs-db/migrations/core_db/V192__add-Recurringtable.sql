@@ -10,9 +10,9 @@ CREATE TABLE IF NOT EXISTS `b_recurring` (
 
 
 
-INSERT IGNORE  into c_configuration values(null,'sms-configuration',0,'{"URL":"http://smscountry.com/SMSCwebservice_Bulk.aspx"}');
+INSERT IGNORE INTO c_configuration VALUES(null,'sms-configuration',0,'{}','General','By Enabling this flag we can send sms from OBS');
 
-INSERT IGNORE INTO c_configuration VALUES(null,'sms-configuration',0,'{}');
+
 
 INSERT IGNORE INTO m_permission VALUES(null,'billing&finance','UPDATECHANGEPAYPALSTATUS_PAYMENTGATEWAY','PAYMENTGATEWAY','UPDATECHANGEPAYPALSTATUS',0);
 

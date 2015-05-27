@@ -1,7 +1,9 @@
 import java.math.BigInteger;
 import java.security.Key;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
@@ -19,6 +21,13 @@ private static byte[] keyValue=new String("hugoadminhugoadm").getBytes();
     // Performs Encryption
     public static String encrypt(String plainText) throws Exception 
     {
+    	
+    	ArrayList<String> arrayList=new ArrayList<String>();
+    	arrayList.add(0, "hi");
+    	arrayList.add(1, "hello");
+    	arrayList.add(2, "world");
+    	arrayList.add(0, "hai");
+    	System.out.println(arrayList);
             Key key = generateKey();
             Cipher chiper = Cipher.getInstance(algorithm);
             chiper.init(Cipher.ENCRYPT_MODE, key);
@@ -52,7 +61,6 @@ private static byte[] keyValue=new String("hugoadminhugoadm").getBytes();
     {
 
             String plainText = "Sapphire Networks=31-07-2015";
-
             String encryptedText = AESDemo.encrypt(plainText);
             System.out.println(encryptedText);
            // String decordedValue1 = String.format("%040x", encryptedText.getBytes());//new String(Base64.decodeBase64(encryptedText));
