@@ -95,6 +95,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 		private final ClientRepository clientRepository;
 		private final EventActionRepository eventActionRepository;
 		private final ConfigurationRepository configurationRepository;
+		private BillingMessageTemplate messageDetails;
 	   
 	   
 	    @Autowired
@@ -693,6 +694,9 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			paymentGateway.setRemarks(requestJson);
 		}else if(status.equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_SUCCESS)){
 			paymentGateway.setStatus(status);
+		}else if(status.equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_COMPLETED)){
+			paymentGateway.setStatus(status);
+			status = ConfigurationConstants.PAYMENTGATEWAY_SUCCESS;
 		}else{
 			paymentGateway.setStatus(status);
 			paymentGateway.setRemarks(error);
@@ -856,7 +860,9 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			
 		}
 	
-		BillingMessageTemplate messageDetails = this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT_RECEIPT);
+		if(null == messageDetails){
+			messageDetails = this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT_RECEIPT);
+		}
 		
 		if(messageDetails !=null){
 		String subject=messageDetails.getSubject();

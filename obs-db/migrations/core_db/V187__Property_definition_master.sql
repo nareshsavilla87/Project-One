@@ -44,7 +44,6 @@ INSERT IGNORE INTO c_configuration VALUES(null, 'is-propertycode-enabled', '1', 
 
 
 
-
 CREATE TABLE IF NOT EXISTS `b_property_history` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `transaction_date` datetime NOT NULL,

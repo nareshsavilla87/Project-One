@@ -23,6 +23,8 @@ public class ChargeCodeData {
 	private List<BillFrequencyCodeData> billFrequencyCodeData;
 	
 	private BigDecimal price;
+	private Integer contractDuration;
+	private BigDecimal finalAmount;
 
 
 	public ChargeCodeData() {
@@ -70,6 +72,18 @@ public class ChargeCodeData {
 		this.billFrequencyCode = billFrequencyCode;
 		this.contractType = contractType;
 		this.units = units;
+	}
+
+	public ChargeCodeData(Long id, String contractType,Integer contractDuration, String chargeType,
+			Integer chargeDuration, BigDecimal price) {
+             
+		this.id = id;
+		this.contractType = contractType;
+		this.contractDuration = contractDuration;
+		this.chargeType = chargeType;
+		this.chargeDuration = chargeDuration;
+		this.price = price;
+	
 	}
 
 	/**
@@ -223,6 +237,10 @@ public class ChargeCodeData {
 
 	public void setPrice(BigDecimal price) {
 		this.price = price;
+	}
+
+	public void setPlanfinalAmount(BigDecimal finalAmount) {
+		this.finalAmount=finalAmount;		
 	}
 	
 	

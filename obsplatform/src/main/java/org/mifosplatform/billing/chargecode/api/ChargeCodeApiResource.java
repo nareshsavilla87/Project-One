@@ -1,5 +1,6 @@
 package org.mifosplatform.billing.chargecode.api;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -21,6 +22,7 @@ import org.mifosplatform.billing.chargecode.data.ChargeCodeData;
 import org.mifosplatform.billing.chargecode.data.ChargeTypeData;
 import org.mifosplatform.billing.chargecode.data.DurationTypeData;
 import org.mifosplatform.billing.chargecode.service.ChargeCodeReadPlatformService;
+import org.mifosplatform.billing.chargecode.service.ChargeCodeWritePlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -53,19 +55,19 @@ public class ChargeCodeApiResource {
 	private final DefaultToApiJsonSerializer<ChargeCodeData> toApiJsonSerializer;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final ChargeCodeReadPlatformService chargeCodeReadPlatformService;
+	private final ChargeCodeWritePlatformService chargeCodeWritePlatformService;
 
 	@Autowired
-	public ChargeCodeApiResource(
-			final PlatformSecurityContext context,
-			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
-			final DefaultToApiJsonSerializer<ChargeCodeData> toApiJsonSerializer,
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final ChargeCodeReadPlatformService chargeCodeReadPlatformService) {
+	public ChargeCodeApiResource(final PlatformSecurityContext context,final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
+			final DefaultToApiJsonSerializer<ChargeCodeData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
+			final ChargeCodeReadPlatformService chargeCodeReadPlatformService,final ChargeCodeWritePlatformService chargeCodeWritePlatformService) {
+		
 		this.context = context;
 		this.commandSourceWritePlatformService = commandSourceWritePlatformService;
 		this.toApiJsonSerializer = toApiJsonSerializer;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.chargeCodeReadPlatformService = chargeCodeReadPlatformService;
+		this.chargeCodeWritePlatformService = chargeCodeWritePlatformService;
 	}
 
 	/**
@@ -169,16 +171,16 @@ public class ChargeCodeApiResource {
 	 * @return retrieved template data for creating charge codes
 	 */
 	@GET
-	@Path("{planId}/{billingFrequency}/{contractPeriod}/{clientId}")
+	@Path("{priceId}/{clientId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveChargeCodeTemplateData(@PathParam("planId") final Long planId, 
-			@PathParam("billingFrequency") final String billingFrequency,@PathParam("contractPeriod") final String contractPeriod,
+	public String retrieveChargeCodeTemplateData(@PathParam("priceId") final Long priceId, 
 			@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
-	   
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		final ChargeCodeData chargeCodeData = this.chargeCodeReadPlatformService.retrieveChargeCodeForRecurring(planId, billingFrequency,contractPeriod,clientId);
+		//context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final ChargeCodeData chargeCodeData = this.chargeCodeReadPlatformService.retrieveChargeCodeForRecurring(priceId);
+		final BigDecimal finalAmount=this.chargeCodeWritePlatformService.calculateFinalAmount(chargeCodeData,clientId,priceId);
+		chargeCodeData.setPlanfinalAmount(finalAmount);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, chargeCodeData, RESPONSE_PARAMETERS);
 

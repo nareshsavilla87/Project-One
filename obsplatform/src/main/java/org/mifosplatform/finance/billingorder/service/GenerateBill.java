@@ -114,6 +114,7 @@ public class GenerateBill {
 			// plan with No prorata and not start day of month
 			if (plan.getBillRule() == 300 && startDate.compareTo(monthStartDate) > 0 && plan.isPrepaid() == 'N') {
 				price = BigDecimal.ZERO;
+
 			} else if(plan.getBillRule() == 200 && plan.isPrepaid() == 'N'){
 				price =billingOrderData.getPrice();
 			}
@@ -447,7 +448,7 @@ public class GenerateBill {
 
 	}
 	
-	private List<InvoiceTaxCommand> calculateDiscountAndTax(BillingOrderData billingOrderData,DiscountMasterData discountMasterData, LocalDate startDate,
+	public List<InvoiceTaxCommand> calculateDiscountAndTax(BillingOrderData billingOrderData,DiscountMasterData discountMasterData, LocalDate startDate,
 			LocalDate endDate, BigDecimal price) {
 
 		List<InvoiceTaxCommand> listOfTaxes = new ArrayList<>();
@@ -514,7 +515,7 @@ public class GenerateBill {
 					}
 				}
 
-				invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, isTaxInclusive, taxRate, taxAmount);
+				invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, isTaxInclusive, taxRate, taxAmount,price);
 				invoiceTaxCommands.add(invoiceTaxCommand);
 			}
 
