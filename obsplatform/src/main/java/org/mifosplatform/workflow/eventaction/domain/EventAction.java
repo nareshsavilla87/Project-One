@@ -41,6 +41,9 @@ public class EventAction extends AbstractPersistable<Long> {
 
 	@Column(name = "is_processed")
 	private char isProcessed = 'N';
+	
+	@Column(name = "description")
+	private String description;
 
 	public EventAction() {
 	}
@@ -113,5 +116,15 @@ public class EventAction extends AbstractPersistable<Long> {
 	public void setCommandAsJson(String commandAsJson) {
 		this.commandAsJson = commandAsJson;
 	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String decription) {
+		description = description;
+	}
+	
+	
 
 }

@@ -12,5 +12,7 @@ public interface GenerateBillingOrderService {
 
 	public Invoice generateInvoice(List<BillingOrderCommand> billingOrderCommands);
 
+	public Invoice generateMultiOrderInvoice(List<BillingOrderCommand> billingOrderCommands, Invoice invoice);
+
 	
 }
