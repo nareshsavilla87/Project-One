@@ -2,6 +2,7 @@ package org.mifosplatform.provisioning.processrequest.service;
 
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mifosplatform.cms.eventmaster.domain.EventMasterRepository;
@@ -166,6 +167,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 							if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.ACTIVATION.toString())){
 
 								order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
+								order.setStartDate(new LocalDate());
 								client.setStatus(ClientStatus.ACTIVE.getValue());
 								this.orderRepository.saveAndFlush(order);
 								List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_ACTIVE_ORDER);
