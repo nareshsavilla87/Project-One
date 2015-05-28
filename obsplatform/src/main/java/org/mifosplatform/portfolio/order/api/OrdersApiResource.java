@@ -120,10 +120,10 @@ public class OrdersApiResource {
 	@Path("{planCode}/template")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String getBillingFrequency(@PathParam("planCode") final Long planCode,@Context final UriInfo uriInfo) {
+	public String getBillingFrequency(@PathParam("planCode") final Long planCode,@QueryParam("clientId") final Long clientId,@Context final UriInfo uriInfo) {
 	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 	OrderData orderData = handleTemplateRelatedData(new Long(0),null);
-	List<PaytermData> datas  = this.orderReadPlatformService.getChargeCodes(planCode);
+	List<PaytermData> datas  = this.orderReadPlatformService.getChargeCodes(planCode,clientId);
 	if(datas.size()==0){
 		throw new BillingOrderNoRecordsFoundException(planCode);
 	}

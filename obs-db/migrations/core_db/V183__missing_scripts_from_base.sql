@@ -471,7 +471,8 @@ Update m_permission set grouping='client&orders' where grouping like '%Ordering%
 Update m_permission set grouping='organisation' where grouping like '%Organization%';
 insert ignore into m_permission values(null,'Organisation','CREATE_IPPOOLMANAGEMENT','IPPOOLMANAGEMENT','CREAT',0);
 insert ignore into m_permission values(null,'client&orders','DISCONNECT_ORDER','ORDER','DISCONNECT',0);
-
+insert ignore into `m_appuser`(`id`,`is_deleted`,`office_id`,`staff_id`,`username`,`firstname`,`lastname`,`password`,`email`,`firsttime_login_remaining`,`nonexpired`,`nonlocked`,`nonexpired_credentials`,`enabled`) values (0,1,1,null,'jobs','jobs','obs','1c03139549fd730b00ed181d9f1b27ec99eb20a02d9b31586a3f3db6a022d737','info@openbillingsystem.com',1,0,1,1,0);
+update m_appuser set id=0 where username='jobs';
 
 insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',1,'Active','Active');
 insert ignore into `r_enum_value`(`enum_name`,`enum_id`,`enum_message_property`,`enum_value`) values ('order_status',2,'Cancelled','Cancelled');
