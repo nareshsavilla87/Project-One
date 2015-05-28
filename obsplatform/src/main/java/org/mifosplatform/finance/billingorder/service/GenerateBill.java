@@ -130,8 +130,8 @@ public class GenerateBill {
 		// check promotion or discount is apply or not --Tax is calculated on
 		// Net charges if those applied..
 		List<InvoiceTaxCommand> listOfTaxes=this.calculateDiscountAndTax(billingOrderData,discountMasterData,startDate,endDate,price);
-		return this.createBillingOrderCommand(billingOrderData, startDate,endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,
-				discountMasterData);
+		
+		return this.createBillingOrderCommand(billingOrderData, startDate,endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 	}
 	
 	// NextMonth Bill after prorata
@@ -159,6 +159,7 @@ public class GenerateBill {
 		nextbillDate = invoiceTillDate.plusDays(1);
 
 		List<InvoiceTaxCommand> listOfTaxes=this.calculateDiscountAndTax(billingOrderData,discountMasterData,startDate,endDate,price);
+		
 		return this.createBillingOrderCommand(billingOrderData, startDate,endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 
 	}
@@ -182,7 +183,8 @@ public class GenerateBill {
 			startDate = new LocalDate(billingOrderData.getNextBillableDate());
 			endDate = startDate.plusMonths(billingOrderData.getChargeDuration()).minusDays(1);
 			
-			if (endDate.toDate().before(billingOrderData.getBillEndDate()) || endDate.toDate().equals(billingOrderData.getBillEndDate())) {
+		}
+		   if (endDate.toDate().before(billingOrderData.getBillEndDate()) || endDate.toDate().equals(billingOrderData.getBillEndDate())) {
 				price = billingOrderData.getPrice();
 			
 			} else if (endDate.toDate().after(billingOrderData.getBillEndDate())) {
@@ -190,7 +192,7 @@ public class GenerateBill {
 				endDate = new LocalDate(billingOrderData.getBillEndDate());
 				price = getDisconnectionCredit(startDate, endDate,billingOrderData.getPrice(),billingOrderData.getDurationType(),billingOrderData.getChargeDuration());
 			}
-		}
+		
 
 		invoiceTillDate = endDate;
 		nextbillDate = invoiceTillDate.plusDays(1);
@@ -199,9 +201,7 @@ public class GenerateBill {
 		// Net charges if those applied..
 		List<InvoiceTaxCommand> listOfTaxes=this.calculateDiscountAndTax(billingOrderData,discountMasterData,startDate,endDate,price);
 
-
-		return this.createBillingOrderCommand(billingOrderData, startDate,endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,
-				discountMasterData);
+		return this.createBillingOrderCommand(billingOrderData, startDate,endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 
 	}
 

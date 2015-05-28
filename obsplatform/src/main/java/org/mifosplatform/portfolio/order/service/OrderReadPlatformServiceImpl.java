@@ -146,12 +146,24 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	}
 
 	@Override
-	public List<PaytermData> getChargeCodes(Long planCode) {
+	public List<PaytermData> getChargeCodes(Long planCode,Long clientId) {
 
 		   context.authenticatedUser();
-	        String sql = " SELECT DISTINCT b.billfrequency_code AS billfrequency_code,b.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid,a.price as price" +
+	        String sql = " SELECT DISTINCT b.billfrequency_code AS billfrequencyCode,b.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid,a.price as price" +
 	        		" FROM b_charge_codes b, b_plan_master pm,b_plan_pricing a LEFT JOIN b_contract_period c ON c.contract_period = a.duration" +
 	        		"  WHERE  a.charge_code = b.charge_code AND a.is_deleted = 'n' AND a.plan_id = ? AND pm.id = a.plan_id";
+	      if(clientId != null){
+		     sql="SELECT DISTINCT b.billfrequency_code AS billfrequencyCode,b.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid,a.price AS price" +
+		   		" FROM b_charge_codes b,b_plan_master pm,b_plan_pricing a LEFT JOIN b_contract_period c ON c.contract_period = a.duration LEFT JOIN b_priceregion_detail pd" +
+		   		" ON pd.priceregion_id = a.price_region_id JOIN b_client_address ca LEFT JOIN b_state s ON ca.state = s.state_name LEFT JOIN b_country con ON ca.country = con.country_name" +
+		   		" WHERE   a.charge_code = b.charge_code AND a.is_deleted = 'n' AND (pd.state_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_state c, b_charge_codes cc," +
+		   		" b_client_address d  WHERE b.priceregion_id = a.price_region_id AND b.state_id = c.id AND a.price_region_id = b.priceregion_id AND d.state = c.state_name " +
+		   		" AND cc.charge_code = a.charge_code AND cc.billfrequency_code = b.charge_code AND d.address_key = 'PRIMARY' AND d.client_id = "+clientId+" " +
+		   		" AND a.plan_id = "+planCode+"),0) AND pd.country_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_country c, b_charge_codes cc,b_client_address d" +
+		   		" WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND cc.charge_code = a.charge_code AND cc.billfrequency_code = b.charge_code AND a.price_region_id = b.priceregion_id" +
+		   		" AND c.country_name = d.country AND d.address_key = 'PRIMARY' AND d.client_id ="+clientId+" AND a.plan_id ="+planCode+"),0)) " +
+		   		" AND a.plan_id =?  AND pm.id = a.plan_id";
+	        }
 
 
 	        RowMapper<PaytermData> rm = new BillingFreaquencyMapper();
@@ -163,7 +175,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	        @Override
 	        public PaytermData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 			  Long id = rs.getLong("id");
-	            String serviceType = rs.getString("billfrequency_code");
+	            String serviceType = rs.getString("billfrequencyCode");
 	            String duration = rs.getString("duration");
 	            String isPrepaid = rs.getString("isPrepaid");
 	            BigDecimal price =rs.getBigDecimal("price");

@@ -58,14 +58,16 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 			final String durationType = resultSet.getString("durationType");
 			final Date billStartDate = resultSet.getDate("billStartDate");
 			final Date nextBillableDate = resultSet.getDate("nextBillableDate");
+			final Date invoiceTillDate = resultSet.getDate("invoiceTillDate");
+			final String billingAlign =  resultSet.getString("billingAlign");
 			
-			return new BillingOrderData(orderId, durationType, billStartDate,nextBillableDate);
+			return new BillingOrderData(orderId, durationType, billStartDate,nextBillableDate,invoiceTillDate,billingAlign);
 		}
 
 		public String orderIdSchema() {
 			
-			return " distinct os.id as orderId,op.duration_type as durationType,Date_format(IFNULL(op.invoice_tilldate,op.bill_start_date), '%Y-%m-%d') as billStartDate," +
-				    "ifnull(op.next_billable_day,op.bill_start_date) as  nextBillableDate FROM b_orders os "+
+			return " distinct os.id as orderId,op.duration_type as durationType, Date_format(IFNULL(op.invoice_tilldate,op.bill_start_date), '%Y-%m-%d') as billStartDate," +
+				    "ifnull(op.next_billable_day,op.bill_start_date) as  nextBillableDate,os.billing_align as billingAlign,op.invoice_tilldate as invoiceTillDate FROM b_orders os "+
 					" left outer join b_order_price op on os.id = op.order_id"+
 					" WHERE os.client_id = ? and os.order_status=1 AND Date_format(IFNULL(op.next_billable_day, ?), '%Y-%m-%d') <= ? and os.is_deleted = 'N' "+
 					" and Date_format(IFNULL(op.next_billable_day,Date_format(IFNULL(op.bill_start_date, '3099-12-12'),'%Y-%m-%d')), '%Y-%m-%d')" +
