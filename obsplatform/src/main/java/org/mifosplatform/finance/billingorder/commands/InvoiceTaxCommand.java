@@ -11,11 +11,10 @@ public class InvoiceTaxCommand {
 	private final BigDecimal taxValue;
 	private final BigDecimal taxPercentage;
 	private final BigDecimal taxAmount;
+	private BigDecimal discountedAmount;
 
-	public InvoiceTaxCommand(final Long clientId, final Long invoiceChargeId,
-			final Long invoiceId, final String taxCode,
-			final BigDecimal taxValue, final BigDecimal taxPercentage,
-			final BigDecimal taxAmount) {
+	public InvoiceTaxCommand(final Long clientId, final Long invoiceChargeId,final Long invoiceId, final String taxCode,
+			final BigDecimal taxValue, final BigDecimal taxPercentage,final BigDecimal taxAmount, BigDecimal price) {
 
 		this.clientId = clientId;
 		this.invoiceChargeId = invoiceChargeId;
@@ -24,6 +23,7 @@ public class InvoiceTaxCommand {
 		this.taxValue = taxValue;
 		this.taxPercentage = taxPercentage;
 		this.taxAmount = taxAmount;
+		this.discountedAmount = price;
 	}
 
 	public Long getClientId() {
@@ -52,6 +52,10 @@ public class InvoiceTaxCommand {
 
 	public BigDecimal getTaxAmount() {
 		return taxAmount;
+	}
+
+	public BigDecimal getDiscountedAmount() {
+		return discountedAmount;
 	}
 
 }

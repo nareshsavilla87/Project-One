@@ -99,7 +99,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	            String paytermtype = rs.getString("payterm_type");
 	            String units = rs.getString("units");
                  String data=units.concat(paytermtype);
-	            return new PaytermData(id,data,null,null);
+	            return new PaytermData(id,data,null,null,null);
 	        }
 	}
 

@@ -1,5 +1,6 @@
 package org.mifosplatform.billing.chargecode.api;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
