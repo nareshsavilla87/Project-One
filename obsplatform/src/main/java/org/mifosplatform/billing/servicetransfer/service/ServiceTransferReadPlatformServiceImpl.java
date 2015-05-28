@@ -29,6 +29,7 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 	
 	
 	@Override
+
 	public List<FeeMasterData> retrieveSingleFeeDetails(Long clientId,String transType) {
 		try {
 			context.authenticatedUser();

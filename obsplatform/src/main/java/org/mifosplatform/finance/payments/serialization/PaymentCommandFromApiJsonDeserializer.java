@@ -69,11 +69,11 @@ public class PaymentCommandFromApiJsonDeserializer {
 		
 		final String paymentCode = fromApiJsonHelper.extractStringNamed("paymentCode", element);
 		final BigDecimal amountPaid = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amountPaid", element);
-		String receiptNo = fromApiJsonHelper.extractStringNamed("receiptNo", element);
+		//String receiptNo = fromApiJsonHelper.extractStringNamed("receiptNo", element);
 		
 		baseDataValidator.reset().parameter("paymentCode").value(paymentCode).notBlank().notExceedingLengthOf(100);
 		baseDataValidator.reset().parameter("amountPaid").value(amountPaid).notBlank().notExceedingLengthOf(100);
-		baseDataValidator.reset().parameter("receiptNo").value(receiptNo).notBlank().notExceedingLengthOf(50);
+		//baseDataValidator.reset().parameter("receiptNo").value(receiptNo).notBlank().notExceedingLengthOf(50);
 		
 		if(fromApiJsonHelper.parameterExists("isChequeSelected", element)){
 			String isChequeSelected = fromApiJsonHelper.extractStringNamed("isChequeSelected", element);
