@@ -153,10 +153,10 @@ private static final class SalesDataMapper implements
 			   " b.Available AS available,a.reorder_level AS reorderLevel,b.Total_items AS totalItems " +
 			   " FROM b_item_master a LEFT JOIN (SELECT item_master_id, Sum(CASE WHEN Client_id IS NULL THEN 1 ELSE 0 END) Available," +
 			   " Sum(CASE WHEN Client_id IS NOT NULL THEN 1 ELSE 0 END) Used, Count(1) Total_items FROM b_item_detail GROUP BY item_master_id) b ON a.id = b.item_master_id" +
-			   " LEFT JOIN b_state s ON s.state_name ="+region+" LEFT JOIN b_priceregion_detail pd ON ( pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_item_price a," +
-			   " b_priceregion_detail b,b_state c WHERE b.priceregion_id = a.region_id AND b.state_id = c.id AND a.region_id = b.priceregion_id AND  c.state_name ="+region+"" +
+			   " LEFT JOIN b_state s ON s.state_name ='"+region+"' LEFT JOIN b_priceregion_detail pd ON ( pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_item_price a," +
+			   " b_priceregion_detail b,b_state c WHERE b.priceregion_id = a.region_id AND b.state_id = c.id AND a.region_id = b.priceregion_id AND  c.state_name ='"+region+"'" +
 			   " AND a.item_id = "+itemId+"),0) AND pd.country_id = ifnull((SELECT DISTINCT c.id FROM b_item_price a, b_priceregion_detail b, b_country c, b_state s " +
-			   " WHERE b.priceregion_id = a.region_id AND b.country_id = c.id AND c.id = s.parent_code AND a.item_id = "+itemId+" AND  s.state_name="+region+"" +
+			   " WHERE b.priceregion_id = a.region_id AND b.country_id = c.id AND c.id = s.parent_code AND a.item_id = "+itemId+" AND  s.state_name='"+region+"'" +
 			   " AND (s.id = b.state_id OR (b.state_id = 0 AND b.country_id = c.id))),0)) LEFT JOIN b_priceregion_master prm ON prm.id = pd.priceregion_id " +
 			   " LEFT JOIN b_item_price p ON (p.item_id = a.id AND p.region_id = prm.id AND p.is_deleted = 'N') ";
 	}
