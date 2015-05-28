@@ -18,7 +18,7 @@ public interface ItemReadPlatformService {
 
 	List<ItemData> retrieveAllItems();
 
-	ItemData retrieveSingleItemDetails(Long clientId, Long itemId, boolean isWithClientId);
+	ItemData retrieveSingleItemDetails(Long clientId, Long itemId, String region, boolean isWithClientId);
 
 	Page<ItemData> retrieveAllItems(SearchSqlQuery searchItems);
 
