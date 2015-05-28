@@ -149,7 +149,6 @@ public class OrdersApiResource {
     context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
     final List<OrderData> clientOrders = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
                 OrderData orderData=new OrderData(clientId,clientOrders);
-        
     final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
     return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
 	    }
