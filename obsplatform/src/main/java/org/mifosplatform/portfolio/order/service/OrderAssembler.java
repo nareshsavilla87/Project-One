@@ -2,9 +2,11 @@ package org.mifosplatform.portfolio.order.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.loader.custom.Return;
 import org.joda.time.LocalDate;
 import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
@@ -93,6 +95,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			
 
 	Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
+
 			
 			if(configuration != null && plan.isPrepaid() == 'N'){
 				order.setBillingAlign(configuration.isEnabled()?'Y':'N');
@@ -167,6 +170,28 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			 		}
 			 	return contractEndDate;
 			}
-	
 
+	
+	public Order setDatesOnOrderActivation(Order order, LocalDate startDate) {
+		
+		Contract contract = this.contractRepository.findOne(order.getClientId());
+	    LocalDate endDate = this.calculateEndDate(startDate, contract.getSubscriptionType(), contract.getUnits());
+	    order.setStartDate(startDate);
+	    if(order.getbillAlign() == 'Y'){
+	    	order.setEndDate(endDate.dayOfMonth().withMaximumValue());
+		}else{
+			order.setEndDate(endDate);
+		}
+
+			for (OrderPrice orderPrice: order.getPrice()) {
+				LocalDate billstartDate = startDate;
+				//end date is null for rc
+				if (orderPrice.getChargeType().equalsIgnoreCase("RC")	&& endDate != null) {
+					orderPrice.setBillEndDate(new LocalDate(order.getEndDate()));
+				} else if(orderPrice.getChargeType().equalsIgnoreCase("NRC")) {
+					orderPrice.setBillEndDate(billstartDate);
+				}
+	}
+			return order;
+	}
 }

@@ -128,6 +128,7 @@ private static final class SalesDataMapper implements
                 "left join b_priceregion_detail pd on (pd.state_id = s.id or (pd.state_id = 0 and pd.country_id = s.parent_code ) ) "+
                 "left join b_priceregion_master prm ON prm.id = pd.priceregion_id "+
                 "left join b_item_price p on (p.item_id = a.id and p.region_id = prm.id and p.is_deleted='N' ) ";*/
+		
 		return " a.id AS id,a.item_code AS itemCode,a.item_description AS itemDescription,a.item_class AS itemClass,a.units AS units," +
 				" a.charge_code AS chargeCode,round(p.price , 2) as price,(SELECT 1 FROM b_grn WHERE item_master_id="+itemId+"  LIMIT 1) as isActive, " +
 				"a.warranty AS warranty,b.Used AS used,b.Available AS available,a.reorder_level as reorderLevel," +
