@@ -175,7 +175,7 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 			// client TaxExemption
 			if (tax.getTaxExemption().equalsIgnoreCase("N")) {
 				
-				if(invoiceTaxCommands !=null){
+				if(invoiceTaxCommands !=null && !invoiceTaxCommands.isEmpty()){
 
 				for (InvoiceTaxCommand invoiceTaxCommand : invoiceTaxCommands) {
 
