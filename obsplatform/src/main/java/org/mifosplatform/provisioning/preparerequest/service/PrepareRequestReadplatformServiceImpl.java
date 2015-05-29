@@ -147,51 +147,45 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
  @Override
  public CommandProcessingResult processingClientDetails(PrepareRequestData requestData) {
 	
-	 PrepareRequest prepareRequest=this.prepareRequsetRepository.findOne(requestData.getRequestId());
-	 try{
-	 String requestType=null;
-	 ProcessRequest processRequest=null;
-	 Long processResultId=Long.valueOf(0);
-	 Order order=this.orderRepository.findOne(requestData.getOrderId());
-	 AllocationDetailsData detailsData=this.allocationReadPlatformService.getTheHardwareItemDetails(requestData.getOrderId());
-	 requestType=requestData.getRequestType();
+PrepareRequest prepareRequest=this.prepareRequsetRepository.findOne(requestData.getRequestId());
+try{
+	String requestType=null;
+	ProcessRequest processRequest=null;
+	Long processResultId=Long.valueOf(0);
+	Order order=this.orderRepository.findOne(requestData.getOrderId());
+	AllocationDetailsData detailsData=this.allocationReadPlatformService.getTheHardwareItemDetails(requestData.getOrderId());
+	requestType=requestData.getRequestType();
+	PlanMapping planMapping= this.planMappingRepository.findOneByPlanId(order.getPlanId());
 	
-	
-	 if(requestData.getIshardwareReq().equalsIgnoreCase("Y") && detailsData == null){
-		 String status=OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
-		 
-		 if(prepareRequest != null){
-		 		prepareRequest.setStatus(status);
+		if((requestData.getIshardwareReq().equalsIgnoreCase("Y") && detailsData == null) || planMapping == null){
+			String status=OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
+			if(prepareRequest != null){
+				prepareRequest.setStatus(status);
 		 		this.prepareRequsetRepository.save(prepareRequest);
-		 }
+			}
 		 
 		 //Update Order Status
 		 order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
 		 this.orderRepository.saveAndFlush(order);
 		
-	 }else {
-		 
-		 String HardWareId=null;
-		 if(detailsData!=null){
-			 HardWareId=detailsData.getSerialNo();
-		 }	
-		 processRequest=new ProcessRequest(requestData.getRequestId(),order.getClientId(), order.getId(),
-				 requestData.getProvisioningSystem(),requestType,'N','N');
-		 List<OrderLine> orderLineData=order.getServices();
-		 JSONObject jsonObject = new JSONObject();
-		 
-		 PlanMapping planMapping= this.planMappingRepository.findOneByPlanId(order.getPlanId());
+		}else {
+			String HardWareId=null;
+				if(detailsData!=null){
+					HardWareId=detailsData.getSerialNo();
+				}	
+			processRequest=new ProcessRequest(requestData.getRequestId(),order.getClientId(), order.getId(),
+		    requestData.getProvisioningSystem(),requestType,'N','N');
+			List<OrderLine> orderLineData=order.getServices();
+			JSONObject jsonObject = new JSONObject();
 		 
 		 if(planMapping != null){
 			 jsonObject.put("planIdentification", planMapping.getPlanIdentification());
 		 }
 		 
 		 JSONArray serviceArray = new JSONArray();
-		 
 		 if(requestData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.CHANGE_PLAN.toString())){
 			 Order oldOrder=this.orderRepository.findOldOrderByOrderNO(order.getOrderNo());
 			 List<OrderLine> orderdetails=oldOrder.getServices();
-			 
 			 planMapping= this.planMappingRepository.findOneByPlanId(oldOrder.getPlanId());
 			 
 			 if(planMapping != null){
@@ -202,8 +196,11 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 				 
 				 JSONObject oldsubjson = new JSONObject();
 				 List<ServiceMapping> provisionServiceDetails=this.provisionServiceDetailsRepository.findOneByServiceId(orderLine.getServiceId());
-				 ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId()); 
-				 oldsubjson.put("oldServiceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+				 
+				 ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId());
+				 if(!provisionServiceDetails.isEmpty()){
+					 oldsubjson.put("oldServiceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+				 }
 				 oldsubjson.put("oldServiceType", service.getServiceType());
 				 serviceArray.add(oldsubjson);
 			 }
@@ -211,14 +208,12 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 		 }
 
 		 JSONArray newServiceArray = new JSONArray();
-
 		 if(requestData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.DEVICE_SWAP.toString())){
 			 AllocationDetailsData allocationDetailsData=this.allocationReadPlatformService.getDisconnectedHardwareItemDetails(requestData.getOrderId(),requestData.getClientId());
 			 jsonObject.put("clientId", order.getClientId());
 			 jsonObject.put("OldHWId", allocationDetailsData.getSerialNo());
 			 jsonObject.put("NewHWId", HardWareId);
 		 }
-		 
 		 if(requestType.equalsIgnoreCase(UserActionStatusTypeEnum.ADDON_ACTIVATION.toString())){
 			 
 			 List<OrderAddons> orderAddons=this.orderAddonsRepository.findAddonsByOrderId(requestData.getOrderId());
@@ -229,46 +224,38 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 				 	 JSONObject subjson = new JSONObject();
 					 subjson.put("serviceName", service.getServiceCode());
 					 subjson.put("addonId", requestData.getAddonId());
-					 subjson.put("serviceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+					 if(!provisionServiceDetails.isEmpty()){
+						 subjson.put("serviceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+					 }
 					 subjson.put("serviceType", service.getServiceType());
 					 newServiceArray.add(subjson.toString());	 
 			 }
-			 
 		 }else{
-		  
-
-		 for(OrderLine orderLine:orderLineData){
-			 
-			 List<ServiceMapping> provisionServiceDetails=this.provisionServiceDetailsRepository.findOneByServiceId(orderLine.getServiceId());
-			 	ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId());
-
-				 JSONObject subjson = new JSONObject();
+			 for(OrderLine orderLine:orderLineData){
+				 List<ServiceMapping> provisionServiceDetails=this.provisionServiceDetailsRepository.findOneByServiceId(orderLine.getServiceId());
+			 		ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId());
+			 		JSONObject subjson = new JSONObject();
 				 subjson.put("serviceName", service.getServiceCode());
+				 if(!provisionServiceDetails.isEmpty()){
 				 subjson.put("serviceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+				 }
 				 subjson.put("serviceType", service.getServiceType());
 				 newServiceArray.add(subjson.toString());	 
-
-			 
-		  }
-
+			 }
 		 }
-
 		 jsonObject.put("services", new Gson().toJson(newServiceArray));
 		 ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(orderLineData.get(0).getId(),
 				 orderLineData.get(0).getServiceId(),jsonObject.toString(),"Recieved",
 				 HardWareId,order.getStartDate(),order.getEndDate(),null,null,'N',requestType,null);
 		 processRequest.add(processRequestDetails);
-		 
 		 this.processRequestRepository.save(processRequest);				
 		 String status=OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getValue().toString();
 		 processResultId=processRequest.getId();
-		 
 		 if(prepareRequest != null){
 			 prepareRequest.setIsProvisioning('Y');
 			 prepareRequest.setStatus(status);
 			 this.prepareRequsetRepository.save(prepareRequest);
 		 }
-		
 	 }
 	/* if(requestData.getProvisioningSystem().equalsIgnoreCase("None")){
 		 order.setStatus(new Long(1));

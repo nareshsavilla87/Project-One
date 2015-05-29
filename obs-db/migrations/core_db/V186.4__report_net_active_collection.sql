@@ -9,36 +9,6 @@ CREATE OR REPLACE VIEW `v_netact_summary` AS select `v_netact_dtls`.`year_mon` A
 CREATE OR REPLACE VIEW `v_netactpln_summary` AS select `net_activedtls_vw`.`year_mon` AS `Month`,`net_activedtls_vw`.`plan` AS `Plan`,`net_activedtls_vw`.`plan_id` AS `plan_id`,sum(`net_activedtls_vw`.`Op_Active`) AS `Op_Bal`,sum(`net_activedtls_vw`.`new`) AS `New`,sum(`net_activedtls_vw`.`rec`) AS `Reconnections`,sum(`net_activedtls_vw`.`ren`) AS `Renewals`,sum(`net_activedtls_vw`.`Op_Pending_add`) AS `Op_Pending_add`,sum(`net_activedtls_vw`.`Pending_add`) AS `Pending_add`,sum(((`net_activedtls_vw`.`new` + `net_activedtls_vw`.`rec`) + `net_activedtls_vw`.`ren`)) AS `NetAdditions`,sum(((`net_activedtls_vw`.`Op_Active` + `net_activedtls_vw`.`new`) + `net_activedtls_vw`.`rec`)) AS `Total`,sum(`net_activedtls_vw`.`Del`) AS `Deletions`,sum(`net_activedtls_vw`.`Pending_del`) AS `Pending_del`,sum(`net_activedtls_vw`.`Cum_Pending`) AS `Cum_Pending`,sum(`net_activedtls_vw`.`Del`) AS `NetSub`,sum((((((`net_activedtls_vw`.`Op_Active` + `net_activedtls_vw`.`new`) + `net_activedtls_vw`.`rec`) + `net_activedtls_vw`.`Op_Pending_add`) + `net_activedtls_vw`.`Pending_add`) - `net_activedtls_vw`.`Del`)) AS `NetBal`,sum(`net_activedtls_vw`.`Cl_Active`) AS `ClosingBal` from `net_activedtls_vw` group by `net_activedtls_vw`.`year_mon`,`net_activedtls_vw`.`plan` order by `net_activedtls_vw`.`month_number`,`net_activedtls_vw`.`plan_id` ;
 
 
-CREATE TABLE IF NOT EXISTS `dim_date` (
-  `date_key` int(10) unsigned NOT NULL,
-  `date_value` date NOT NULL,
-  `date_short` varchar(12) CHARACTER SET utf8 NOT NULL,
-  `date_medium` varchar(16) CHARACTER SET utf8 NOT NULL,
-  `date_long` varchar(24) CHARACTER SET utf8 NOT NULL,
-  `date_full` varchar(32) CHARACTER SET utf8 NOT NULL,
-  `day_in_week` smallint(6) NOT NULL,
-  `day_in_year` smallint(6) NOT NULL,
-  `day_in_month` smallint(6) NOT NULL,
-  `is_first_day_in_month` varchar(10) CHARACTER SET utf8 NOT NULL,
-  `is_last_day_in_month` varchar(10) CHARACTER SET utf8 NOT NULL,
-  `day_abbreviation` char(3) CHARACTER SET utf8 NOT NULL,
-  `day_name` varchar(12) CHARACTER SET utf8 NOT NULL,
-  `week_in_year` smallint(6) NOT NULL,
-  `week_in_month` smallint(6) NOT NULL,
-  `is_first_day_in_week` varchar(10) CHARACTER SET utf8 NOT NULL,
-  `is_last_day_in_week` varchar(10) CHARACTER SET utf8 NOT NULL,
-  `is_weekend` varchar(3) CHARACTER SET utf8 NOT NULL,
-  `month_number` smallint(6) NOT NULL,
-  `month_abbreviation` char(3) CHARACTER SET utf8 NOT NULL,
-  `month_name` varchar(12) CHARACTER SET utf8 NOT NULL,
-  `year2` char(2) CHARACTER SET utf8 NOT NULL,
-  `year4` char(4) CHARACTER SET utf8 NOT NULL,
-  `quarter_name` char(2) CHARACTER SET utf8 NOT NULL,
-  `quarter_number` smallint(6) NOT NULL,
-  `year_quarter` char(7) CHARACTER SET utf8 NOT NULL,
-  `year_month_number` char(7) CHARACTER SET utf8 NOT NULL,
-  `year_month_abbreviation` char(8) CHARACTER SET utf8 NOT NULL,
-  `fdm` date DEFAULT NULL,
-  `ldm` date DEFAULT NULL,
-  KEY `dt_dtval` (`date_value`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE OR REPLACE  VIEW  `billdetails_v` AS select `b`.`client_id` AS `client_id`,`a`.`id` AS `transId`,`b`.`invoice_date` AS `transDate`,'SERVICE_CHARGES' AS `transType`,`a`.`netcharge_amount` AS `amount`,concat(date_format(`a`.`charge_start_date`,'%Y-%m-%d'),' to ',date_format(`a`.`charge_end_date`,'%Y-%m-%d')) AS `description`,`c`.`plan_id` AS `plan_code`,`a`.`charge_type` AS `service_code` from (( `b_charge` `a` join  `b_invoice` `b`) join  `b_orders` `c`) where ((`a`.`invoice_id` = `b`.`id`) and (`a`.`order_id` = `c`.`id`) and isnull(`a`.`bill_id`) and (`b`.`invoice_date` <= now()) and (`a`.`priceline_id` >= 1)) union all select `b`.`client_id` AS `client_id`,`a`.`id` AS `transId`,date_format(`b`.`invoice_date`,'%Y-%m-%d') AS `transDate`,'TAXES' AS `transType`,`a`.`tax_amount` AS `amount`,`a`.`tax_code` AS `description`,NULL AS `plan_code`,`c`.`charge_type` AS `service_code` from (( `b_charge_tax` `a` join  `b_invoice` `b`) join  `b_charge` `c`) where ((`a`.`invoice_id` = `b`.`id`) and (`a`.`charge_id` = `c`.`id`) and isnull(`a`.`bill_id`) and (`b`.`invoice_date` <= now())) union all select  `b_adjustments`.`client_id` AS `client_id`, `b_adjustments`.`id` AS `transId`,date_format( `b_adjustments`.`adjustment_date`,'%Y-%m-%d') AS `transDate`,'ADJUSTMENT' AS `transType`,(case  `b_adjustments`.`adjustment_type` when 'DEBIT' then  `b_adjustments`.`adjustment_amount` when 'CREDIT' then -( `b_adjustments`.`adjustment_amount`) end) AS `amount`, `b_adjustments`.`remarks` AS `remarks`, `b_adjustments`.`adjustment_type` AS `adjustment_type`,NULL AS `service_code` from  `b_adjustments` where (isnull( `b_adjustments`.`bill_id`) and ( `b_adjustments`.`adjustment_date` <= now())) union all select `pa`.`client_id` AS `client_id`,`pa`.`id` AS `transId`,date_format(`pa`.`payment_date`,'%Y-%m-%d') AS `transDate`,concat('PAYMENT',' - ',`p`.`code_value`) AS `transType`,`pa`.`amount_paid` AS `invoiceAmount`,`pa`.`Remarks` AS `remarks`,`p`.`code_value` AS `code_value`,NULL AS `service_code` from ( `b_payments` `pa` join  `m_code_value` `p`) where (isnull(`pa`.`bill_id`) and (`pa`.`payment_date` <= now()) and (`pa`.`paymode_id` = `p`.`id`)) union all select `b`.`client_id` AS `client_id`,`a`.`id` AS `transId`,date_format(`c`.`sale_date`,'%Y-%m-%d') AS `transDate`,'ONETIME_CHARGES' AS `transType`,`a`.`netcharge_amount` AS `amount`,`c`.`charge_code` AS `charge_code`,`c`.`item_id` AS `item_id`,`a`.`charge_type` AS `service_code` from (( `b_charge` `a` join  `b_invoice` `b`) join  `b_onetime_sale` `c`) where ((`a`.`invoice_id` = `b`.`id`) and (`a`.`order_id` = `c`.`id`) and isnull(`a`.`bill_id`) and (`c`.`sale_date` <= now()) and (`c`.`invoice_id` = `b`.`id`) and (`a`.`priceline_id` = 0)) union all select `b`.`client_id` AS `client_id`,`a`.`id` AS `transId`,`b`.`invoice_date` AS `transDate`,'SERVICE_TRANSFER' AS `transType`,`a`.`netcharge_amount` AS `amount`,concat(date_format(`a`.`charge_start_date`,'%Y-%m-%d'),' to ',date_format(`a`.`charge_end_date`,'%Y-%m-%d')) AS `description`,`ph`.`property_code` AS `plan_code`,`a`.`charge_type` AS `service_code` from (( `b_charge` `a` join  `b_invoice` `b`) join  `b_property_history` `ph`) where ((`a`.`invoice_id` = `b`.`id`) and (`a`.`order_id` = `ph`.`id`) and isnull(`a`.`bill_id`) and (`b`.`invoice_date` <= now()) and (`a`.`priceline_id` = -(1)));
+
