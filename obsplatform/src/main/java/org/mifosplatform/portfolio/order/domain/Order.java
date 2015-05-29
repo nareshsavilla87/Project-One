@@ -203,19 +203,19 @@ public Order(Long clientId, Long planId, Long contractPeriod, String paytermCode
 	}
 
 	public static Order fromJson(Long clientId, JsonCommand command) {
+		
 		 final Long planId = command.longValueOfParameterNamed("planCode");
 		 final LocalDate startDate=command.localDateValueOfParameterNamed("start_date");
-		    final Long contractPeriod = command.longValueOfParameterNamed("contractPeriod");
-		    final String paytermCode = command.stringValueOfParameterNamed("paytermCode");
-		    final boolean billAlign=command.booleanPrimitiveValueOfParameterNamed("billAlign");
-		    char align=billAlign?'y':'n';
-		    return new Order(clientId,planId,contractPeriod,paytermCode,align,startDate);
+		 final Long contractPeriod = command.longValueOfParameterNamed("contractPeriod");
+		 final String paytermCode = command.stringValueOfParameterNamed("paytermCode");
+		 final boolean billAlign=command.booleanPrimitiveValueOfParameterNamed("billAlign");
+		 char align=billAlign?'y':'n';
+		 return new Order(clientId,planId,contractPeriod,paytermCode,align,startDate);
 	}
 
 	public char getbillAlign() {
 		return billingAlign;
 	}
-
 
 	public void setNextBillableDay(Date nextBillableDate) {
 		this.nextBillableDay=nextBillableDate;
