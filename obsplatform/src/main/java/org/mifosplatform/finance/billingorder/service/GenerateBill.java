@@ -518,6 +518,10 @@ public class GenerateBill {
 				invoiceTaxCommands.add(invoiceTaxCommand);
 			}
 
+		}else{
+			
+			invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, isTaxInclusive, taxRate, taxAmount,price);
+			invoiceTaxCommands.add(invoiceTaxCommand);
 		}
 		return invoiceTaxCommands;
 
