@@ -75,7 +75,8 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			return  " pd.id as Id,pd.property_type_id as propertyTypeId,c.code_value as propertyType,pd.property_code as propertyCode,unit_code as unitCode,pd.floor as floor," +
 					 " pd.building_code as buildingCode, pd.parcel as parcel,pd.street as street,pd.precinct as precinct,pd.po_box as poBox, pd.state as state, "+
 					 " pd.country as country, pd.status as status, ifnull(pd.client_id,'VACANT') AS clientId,pm.description  as floorDesc,pp.description  as parcelDesc" +
-					 " from b_property_defination pd left join  b_property_master pm on (pm.code=pd.floor) left join b_property_master pp on (pp.code=pd.parcel)" +
+					 " from b_property_defination pd left join  b_property_master pm on (pd.floor = pm.code and pm.property_code_type='Level/Floor') "  +
+					 " left join b_property_master pp on (pd.parcel = pp.code and pp.property_code_type='Parcel')"  +
 					 " left join m_code_value c on c.id=pd.property_type_id";
 
 		}
