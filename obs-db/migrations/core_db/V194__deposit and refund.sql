@@ -6,6 +6,10 @@ CREATE TABLE IF NOT EXISTS `b_deposit_refund` (
   `item_id` int(10) DEFAULT NULL,
   `credit_amount` decimal(24,4) DEFAULT NULL,
   `debit_amount` decimal(24,4) DEFAULT NULL,
+  `ref_id` bigint(20) DEFAULT NULL,
+  `payment_id` int(10) DEFAULT NULL,
+  `description` varchar(200) DEFAULT NULL,
+  `is_refund` char(1) DEFAULT 'N',
   `createdby_id` bigint(20) DEFAULT NULL,
   `created_date` datetime DEFAULT NULL,
   `lastmodified_date` datetime DEFAULT NULL,
@@ -43,6 +47,8 @@ Drop procedure IF EXISTS itemid ;
 INSERT IGNORE INTO m_code VALUES (null,'Transaction Type',0,'Define Customer Transaction Type');
 SET @id = (select id from m_code where code_name='Transaction Type');
 INSERT IGNORE INTO m_code_value VALUES (null,@id,'Deposit',3);
+
+INSERT IGNORE INTO m_permission values(null,'billing','CREATE_REFUND','REFUND','CREATE',0);
 
 
 

@@ -11,6 +11,8 @@ import org.mifosplatform.billing.discountmaster.service.DiscountReadPlatformServ
 import org.mifosplatform.finance.billingorder.domain.BillingOrder;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
+import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefund;
+import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefundRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -25,8 +27,6 @@ import org.mifosplatform.logistics.item.domain.UnitEnumType;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
 import org.mifosplatform.logistics.itemdetails.service.ItemDetailsWritePlatformService;
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
-import org.mifosplatform.logistics.onetimesale.domain.DepositAndRefund;
-import org.mifosplatform.logistics.onetimesale.domain.DepositAndRefundRepository;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSaleRepository;
 import org.mifosplatform.logistics.onetimesale.exception.DeviceSaleNotFoundException;
@@ -132,8 +132,15 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			}
 			
 			/** Deposit&Refund table */
-			final DepositAndRefund depositAndRefund = DepositAndRefund.fromJson(clientId, command);
-			this.depositAndRefundRepository.saveAndFlush(depositAndRefund);
+			if(command.hasParameter("addDeposit")){
+				if(command.booleanObjectValueOfParameterNamed("addDeposit")){
+					
+					final DepositAndRefund depositAndRefund = DepositAndRefund.fromJson(clientId, command);
+					depositAndRefund.setRefId(oneTimeSale.getId());
+					this.depositAndRefundRepository.saveAndFlush(depositAndRefund);
+				}
+				
+			}
 			
 			/**	Call if Item units is PIECES */
 			if(UnitEnumType.PIECES.toString().equalsIgnoreCase(item.getUnits())){
