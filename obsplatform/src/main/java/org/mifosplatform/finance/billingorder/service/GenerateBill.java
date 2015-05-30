@@ -487,7 +487,7 @@ public class GenerateBill {
 		List<InvoiceTaxCommand> invoiceTaxCommands = new ArrayList<InvoiceTaxCommand>();
 		InvoiceTaxCommand invoiceTaxCommand = null;
 
-		if (taxMappingRateDatas != null) {
+		if (taxMappingRateDatas != null && !taxMappingRateDatas.isEmpty()) {
 
 			for (TaxMappingRateData taxMappingRateData : taxMappingRateDatas) {
 
