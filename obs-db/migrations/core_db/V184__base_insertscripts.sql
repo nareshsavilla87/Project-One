@@ -34,6 +34,8 @@ update  b_service set id=0 where service_code='None';
 insert ignore into `b_discount_master`(`id`,`discount_code`,`discount_description`,`discount_type`,`discount_rate`,`start_date`,`discount_status`,`is_delete`) values (null,'None','None','Flat',0,'2015-04-16 00:00:00','ACTIVE','N');
 
 insert ignore  into `b_service`(`id`,`service_code`,`service_description`,`service_type`,`status`,`is_deleted`,`service_unittype`,`is_optional`,`is_auto`) values (0,'None','None','TV','ACtive','Y',null,'N','Y');
+update  b_service set id=0 where service_code='None'; 
+
 
 -- Event Action Mapping
 truncate table b_eventaction_mapping;
