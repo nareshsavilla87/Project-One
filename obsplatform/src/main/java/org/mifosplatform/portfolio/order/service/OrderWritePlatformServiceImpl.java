@@ -439,6 +439,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  Plan plan=this.planRepository.findOne(orderDetails.getPlanId());
 	  
 	  if(orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
+		  
 		  newStartdate=new LocalDate(orderDetails.getEndDate()).plusDays(1);
 		  requstStatus=UserActionStatusEnumaration.OrderStatusType(UserActionStatusTypeEnum.RENEWAL_BEFORE_AUTOEXIPIRY).getValue();
 					
