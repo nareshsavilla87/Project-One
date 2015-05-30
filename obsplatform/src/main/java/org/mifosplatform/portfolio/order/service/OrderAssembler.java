@@ -156,7 +156,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 	
 	public Order setDatesOnOrderActivation(Order order, LocalDate startDate) {
 		
-		Contract contract = this.contractRepository.findOne(order.getClientId());
+		Contract contract = this.contractRepository.findOne(order.getContarctPeriod());
 	    LocalDate endDate = this.calculateEndDate(startDate, contract.getSubscriptionType(), contract.getUnits());
 	    order.setStartDate(startDate);
 	    if(order.getbillAlign() == 'Y'){
@@ -167,6 +167,8 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 
 			for (OrderPrice orderPrice: order.getPrice()) {
 				LocalDate billstartDate = startDate;
+				
+				orderPrice.setBillStartDate(billstartDate);
 				//end date is null for rc
 				if (orderPrice.getChargeType().equalsIgnoreCase("RC")	&& endDate != null) {
 					orderPrice.setBillEndDate(new LocalDate(order.getEndDate()));
