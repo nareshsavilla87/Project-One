@@ -2913,6 +2913,14 @@ public class CommandWrapperBuilder {
 		this.href = "";
 		return this;
 	}
+	
+	public CommandWrapperBuilder createRefundAmount(Long depositId) {
+		this.actionName = "CREATE";
+		this.entityName = "REFUND";
+		this.entityId = depositId;
+		this.href = "/refund/" + depositId;
+		return this;
+	}
 
 }
 

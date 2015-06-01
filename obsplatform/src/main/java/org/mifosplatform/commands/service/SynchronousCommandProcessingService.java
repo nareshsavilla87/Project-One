@@ -1323,6 +1323,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 	    	  }else {
 	    		  throw new UnsupportedCommandException(wrapper.commandName());
 	    	  }
+	      }else if(wrapper.isRefund()){
+	    	  if(wrapper.isCreate()){
+	    		  handler = applicationContext.getBean("createRefundAmountCommandHandler",NewCommandSourceHandler.class);
+	    	  }else {
+	    		  throw new UnsupportedCommandException(wrapper.commandName());
+	    	  }
 	      }
 	       return handler;
 	}
