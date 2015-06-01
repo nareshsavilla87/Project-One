@@ -1,6 +1,7 @@
 package org.mifosplatform.finance.depositandrefund.api;
 
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Collection;
@@ -28,6 +29,8 @@ import org.mifosplatform.billing.selfcare.exception.SelfCareTemporaryEmailIdNotF
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
+import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
 import org.mifosplatform.finance.payments.data.McodeData;
 import org.mifosplatform.finance.payments.data.PaymentData;
 import org.mifosplatform.finance.payments.exception.DalpayRequestFailureException;
@@ -63,11 +66,14 @@ public class RefundApiResource {
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final PortfolioCommandSourceWritePlatformService writePlatformService;
 	private final SelfCareTemporaryRepository selfCareTemporaryRepository;
+	private final ClientBalanceRepository clientBalanceRepository;
 
 	@Autowired
 	public RefundApiResource(final PlatformSecurityContext context,final PaymentReadPlatformService readPlatformService,
 			final DefaultToApiJsonSerializer<PaymentData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PortfolioCommandSourceWritePlatformService writePlatformService, final SelfCareTemporaryRepository selfCareTemporaryRepository) {
+			final PortfolioCommandSourceWritePlatformService writePlatformService,
+			final SelfCareTemporaryRepository selfCareTemporaryRepository,
+			final ClientBalanceRepository clientBalanceRepository) {
 		
 		this.context = context;
 		this.readPlatformService = readPlatformService;
@@ -75,6 +81,7 @@ public class RefundApiResource {
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.writePlatformService = writePlatformService;
 		this.selfCareTemporaryRepository = selfCareTemporaryRepository;
+		this.clientBalanceRepository = clientBalanceRepository;
 	}
 
 	/**
@@ -89,5 +96,36 @@ public class RefundApiResource {
 		final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}
+	
+	@GET
+	@Path("{clientId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveRefundAmount(@PathParam("clientId") final Long clientId,@Context final UriInfo uriInfo,
+			@QueryParam("depositAmount") BigDecimal depositAmount) {
+		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
+		
+		ClientBalance clientBalance = clientBalanceRepository.findByClientId(clientId);
+		BigDecimal returnAmount = null;
+		if(clientBalance.getBalanceAmount().intValue() == 0){
+			returnAmount = depositAmount;
+		}else if(clientBalance.getBalanceAmount().intValue() <= depositAmount.intValue()){
+			
+			if(clientBalance.getBalanceAmount().intValue() > 0){
+				MathContext mc = new MathContext(4);
+				returnAmount = depositAmount.subtract(clientBalance.getBalanceAmount(), mc);
+			}else{
+				returnAmount = depositAmount;
+			}
+			
+		}
+		PaymentData paymentData = new PaymentData();
+		paymentData.setAvailAmount(returnAmount);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializer.serialize(settings, paymentData,RESPONSE_DATA_PARAMETERS);
+
+	}
+	
+	
     	 
 }

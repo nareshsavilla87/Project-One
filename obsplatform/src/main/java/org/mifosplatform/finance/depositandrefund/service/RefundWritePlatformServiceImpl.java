@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.math.MathContext;
 import java.util.List;
 
+import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
 import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefund;
@@ -58,6 +59,7 @@ public class RefundWritePlatformServiceImpl implements RefundWritePlatformServic
 		this.depositAndRefundRepository = depositAndRefundRepository;
 		this.orderReadPlatformService = orderReadPlatformService;
 		this.oneTimeSaleReadPlatformService = oneTimeSaleReadPlatformService;
+		
 	}
 
 	@Transactional
@@ -103,15 +105,22 @@ public class RefundWritePlatformServiceImpl implements RefundWritePlatformServic
 				BigDecimal amountValue = null;
 				if(clientBalanceAmount.intValue() > 0){
 					amountValue= refundBalance.subtract(clientBalanceAmount,mc);
+					processDepositAndRefund(clientId, itemId, amountValue, "Refund", "Credit", depositId);
+					processDepositAndRefund(clientId, itemId, amountValue, "Payment Towards Refund Entry", "Debit", depositId);
+					processDepositAndRefund(clientId, itemId, clientBalanceAmount, "Refund Adjustment towards Service Balance", "Credit", depositId);
+					// Update Client Balance
+					clientBalance.updateBalance("CREDIT",clientBalanceAmount,'N');
+					this.clientBalanceRepository.saveAndFlush(clientBalance);
 				}else{
-					amountValue= refundBalance.add(clientBalanceAmount, mc);
+					
+					processDepositAndRefund(clientId, itemId, refundAmount, "Refund", "Credit", depositId);
+					processDepositAndRefund(clientId, itemId, refundAmount, "Payment Towards Refund Entry", "Debit", depositId);
 				}
 				
-				processDepositAndRefund(clientId, itemId, refundBalance, "Refund", "Credit", depositId);
-				processDepositAndRefund(clientId, itemId, refundBalance, "Payment Towards Refund Entry", "Debit", depositId);
-				processDepositAndRefund(clientId, itemId, amountValue, "Refund Adjustment towards Service Balance", "Credit", depositId);
-				clientBalance.setBalanceAmount(BigDecimal.valueOf(0));
-				this.clientBalanceRepository.saveAndFlush(clientBalance);
+				deposit.setIsRefund('Y');
+				this.depositAndRefundRepository.saveAndFlush(deposit);
+				/*clientBalance.setBalanceAmount(BigDecimal.valueOf(0));
+				this.clientBalanceRepository.saveAndFlush(clientBalance);*/
 				
 			}else{
 				throw new ItemQualityAndStatusException(clientBalanceAmount);

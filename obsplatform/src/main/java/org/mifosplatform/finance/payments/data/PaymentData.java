@@ -58,6 +58,11 @@ public class PaymentData {
 	}
 
 
+	public PaymentData() {
+		
+	}
+
+
 	public Collection<McodeData> getData() {
 		return data;
 	}
@@ -105,6 +110,11 @@ public class PaymentData {
 
 	public BigDecimal getAvailAmount() {
 		return availAmount;
+	}
+
+
+	public void setAvailAmount(BigDecimal availAmount) {
+		this.availAmount = availAmount;
 	}
 	
 	

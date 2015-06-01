@@ -68,6 +68,7 @@ public class DepositAndRefund extends AbstractAuditableCustom<AppUser, Long>{
 		this.transactionType = transactionType;
 		this.itemId = itemId;
 		this.debitAmount = amount;
+		this.description = transactionType;
 		
 	}
 	
@@ -83,7 +84,9 @@ public class DepositAndRefund extends AbstractAuditableCustom<AppUser, Long>{
 		}else if(transType.equalsIgnoreCase("Credit")){
 			this.creditAmount = amount;
 		}
-		
+		if(transactionType.equalsIgnoreCase("Refund")){
+			this.isRefund = 'Y';
+		}
 		this.description = description;
 	}
 
@@ -165,6 +168,16 @@ public class DepositAndRefund extends AbstractAuditableCustom<AppUser, Long>{
 
 	public void setPaymentId(Long paymentId) {
 		this.paymentId = paymentId;
+	}
+
+
+	public char getIsRefund() {
+		return isRefund;
+	}
+
+
+	public void setIsRefund(char isRefund) {
+		this.isRefund = isRefund;
 	}
 	
 	
