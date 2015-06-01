@@ -14,7 +14,7 @@ INSERT IGNORE INTO b_eventaction_mapping (event_name,action_name,process,is_dele
 
 INSERT IGNORE INTO b_eventaction_mapping (event_name,action_name,process,is_deleted,is_synchronous) values ('Order reconnection','Notify Reconnection','workflow_events','Y','N');
 
-INSERT IGNORE INTO b_eventaction_mapping (event_name,action_name,process,is_deleted,is_synchronous) values ('Payment Receipt','Notify Payment','workflow_events','Y','N');
+INSERT IGNORE INTO b_eventaction_mapping (event_name,action_name,process,is_deleted,is_synchronous) values ('Notify Payment Receipt','Notify Payment','workflow_events','Y','N');
 
 Drop procedure IF EXISTS gatewayDescription; 
 DELIMITER //

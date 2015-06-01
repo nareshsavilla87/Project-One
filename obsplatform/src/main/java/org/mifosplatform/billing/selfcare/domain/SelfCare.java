@@ -64,7 +64,8 @@ public class SelfCare extends AbstractPersistable<Long>{
 	public static SelfCare fromJson(JsonCommand command) {
 		String uniqueReference = command.stringValueOfParameterNamed("uniqueReference");
 		String device = command.stringValueOfParameterNamed("device");
-		return new SelfCare(null,uniqueReference, null, uniqueReference,false,device);
+		Long clientId = command.longValueOfParameterNamed("clientId");
+		return new SelfCare(clientId, uniqueReference, null, uniqueReference, false, device);
 	}
 	
 	public static SelfCare fromJsonODP(JsonCommand command) {

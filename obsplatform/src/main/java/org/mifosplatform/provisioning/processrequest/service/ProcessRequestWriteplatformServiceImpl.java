@@ -155,11 +155,11 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 						switch(detailsData.getRequestType()){
  						   
 							case ProvisioningApiConstants.REQUEST_ACTIVATION :
-						
+						/*
 							if (detailsData.getOrderId() != null && detailsData.getOrderId() > 0) {
 								order = this.orderRepository.findOne(detailsData.getOrderId());
 								plan = this.planRepository.findOne(order.getPlanId());
-							}
+							}*/
 							
 							 client=this.clientRepository.findOne(detailsData.getClientId());
 							

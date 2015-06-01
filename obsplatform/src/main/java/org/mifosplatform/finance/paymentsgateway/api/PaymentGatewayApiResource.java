@@ -66,6 +66,7 @@ import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
+
 import com.google.gson.JsonObject;
 
 @Path("/paymentgateways")
@@ -428,7 +429,7 @@ public class PaymentGatewayApiResource {
 			if(status.equalsIgnoreCase("Success") || status.equalsIgnoreCase("Pending")){
 				
 				Long pgId = Long.valueOf(String.valueOf(output.get("pgId")));
-				String OutputData = this.paymentGatewayWritePlatformService.payment(clientId, pgId, txnId, amount);
+				String OutputData = this.paymentGatewayWritePlatformService.payment(clientId, pgId, txnId, amount, error);
 				
 				JSONObject object = new JSONObject(OutputData);
 				
@@ -509,6 +510,7 @@ public class PaymentGatewayApiResource {
 			jsonObject.put("dateFormat", dateFormat);
 			jsonObject.put("otherData", jsonObj.toString());
 			jsonObject.put("status", paymentStatus);
+			jsonObject.put("error", pendingReason);
 			
 			String data = OnlinePaymentMethod(jsonObject.toString());
 			
@@ -544,6 +546,9 @@ public class PaymentGatewayApiResource {
 				 }
 				 
 				
+			} else if (Result.equalsIgnoreCase("PENDING")) {
+				paymentStatus1 = " Payment Pending, Please Contact to Your Service Provider, Reason="+Description;
+			
 			} else {
 				paymentStatus1 = " Payment Failed, Please Contact to Your Service Provider, Reason="+Description;
 			}

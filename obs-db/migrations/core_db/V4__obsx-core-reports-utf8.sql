@@ -12,7 +12,7 @@ INSERT INTO `stretchy_report`
            'Individual Client Report\r\n\r\nLists the small number of defined fields on the client table.  Would expect to copy this \n\nreport and add any \'one to one\' additional data for specific tenant needs.\r\n\r\nCan be run for any size MFI but you\'d expect it only to be run within a branch for \n\nlarger ones.  Depending on how many columns are displayed, there is probably is a limit of about 20/50k clients returned for html display (export to excel doesn\'t \n\nhave that client browser/memory impact).',
            1,
            1),
-          (15,
+         /* (15,
            'Portfolio at Risk',
            'Table',
            NULL,
