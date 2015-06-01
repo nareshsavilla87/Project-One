@@ -133,6 +133,7 @@ public class ConfigurationApiResource {
 		orderActionsList.put("commandcenter", "true");
 		orderActionsList.put("ipchange", "true");
 		orderActionsList.put("terminate", "true");
+		orderActionsList.put("reconnect", "true");
 		
 		/*********  Adding 'defaultOneForClientList' to 'defaultOne' JSONObject ******/
 		defaultOne.put("clientListing", defaultOneForClientList);
