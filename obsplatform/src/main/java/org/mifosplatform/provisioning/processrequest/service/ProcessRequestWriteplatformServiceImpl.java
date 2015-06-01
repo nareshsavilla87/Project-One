@@ -239,12 +239,11 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
         							}
         							
         							 client=this.clientRepository.findOne(detailsData.getClientId());
-        							//if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.ACTIVATION.toString())){
         								order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
         								order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
         								client.setStatus(ClientStatus.ACTIVE.getValue());
         								this.orderRepository.saveAndFlush(order);
-        							//}
+
 								
 								default : 
 
