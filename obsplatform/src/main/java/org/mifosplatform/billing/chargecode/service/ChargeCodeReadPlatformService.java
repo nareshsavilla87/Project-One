@@ -23,5 +23,5 @@ public interface ChargeCodeReadPlatformService {
 
 	ChargeCodeData retrieveSingleChargeCodeDetails(Long chargeCodeId);
 	
-	ChargeCodeData retrieveChargeCodeForRecurring(Long planId, String billingFrequency);
+	ChargeCodeData retrieveChargeCodeForRecurring(Long planId);
 }

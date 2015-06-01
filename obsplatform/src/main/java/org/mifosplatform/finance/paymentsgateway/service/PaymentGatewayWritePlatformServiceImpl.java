@@ -694,8 +694,8 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 		}else if(status.equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_SUCCESS)){
 			paymentGateway.setStatus(status);
 		}else if(status.equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_COMPLETED)){
-			paymentGateway.setStatus(status);
 			status = ConfigurationConstants.PAYMENTGATEWAY_SUCCESS;
+			paymentGateway.setStatus(status);
 		}else{
 			paymentGateway.setStatus(status);
 			paymentGateway.setRemarks(error);
@@ -715,7 +715,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 	}
 	
 	@Override
-	public String payment(Long clientId, Long id, String txnId, String amount) throws JSONException{
+	public String payment(Long clientId, Long id, String txnId, String amount, String errorDescription) throws JSONException{
 		
 		JSONObject withChanges = new JSONObject();
 		
@@ -740,7 +740,8 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			object.addProperty("remarks", "Payment Done");
 			object.addProperty("paymentCode", paymodeId);
 			
-			if(paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_SUCCESS)){
+			if(paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_SUCCESS) || 
+					paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_COMPLETED)){
 				
 				object.addProperty("paymentDate", formattedDate);
 				
@@ -781,14 +782,19 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 							"/payments/"+clientId, id,object.toString(),null,clientId);	
 					eventAction.updateStatus('P');
 					this.eventActionRepository.save(eventAction);
-					     
-					withChanges.put("Result", ConfigurationConstants.PAYMENTGATEWAY_PENDING);
-					withChanges.put("Description", ConfigurationConstants.PAYMENT_PENDING_DESCRIPTION);	
-					withChanges.put("Amount", amount);	
-					withChanges.put("ObsPaymentId", "");	
-					withChanges.put("TransactionId", txnId);
-					withChanges.put("pgId", id);
 				}
+				
+				withChanges.put("Result", ConfigurationConstants.PAYMENTGATEWAY_PENDING);
+				if(null != errorDescription){
+					withChanges.put("Description", errorDescription);	
+				}else{
+					withChanges.put("Description", ConfigurationConstants.PAYMENT_PENDING_DESCRIPTION);	
+				}
+				
+				withChanges.put("Amount", amount);	
+				withChanges.put("ObsPaymentId", "");	
+				withChanges.put("TransactionId", txnId);
+				withChanges.put("pgId", id);
 				
 			}
 			
@@ -854,6 +860,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				if(value.equalsIgnoreCase(Result)){
 					Result = object.getString("result");
 					Description = object.getString("response");
+					break;
 				}
 			}
 			

@@ -364,6 +364,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             Configuration isSelfcareUser = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
             if(isSelfcareUser.isEnabled()){
             	SelfCare selfCare =selfCareRepository.findOneByClientId(clientId);
+            	if(selfCare != null){
             	String newUserName = command.stringValueOfParameterNamed("userName");
             	String newPassword = command.stringValueOfParameterNamed("password");
             	String existingUserName = selfCare.getUserName();
@@ -399,7 +400,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     					 this.processRequestRepository.save(processRequest);
     					
     				}
-    			
+                }
     			}
             }
             

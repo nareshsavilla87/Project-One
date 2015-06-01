@@ -6,6 +6,7 @@
 package org.mifosplatform.infrastructure.security.filter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -15,8 +16,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.time.StopWatch;
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.cache.domain.CacheType;
 import org.mifosplatform.infrastructure.cache.service.CacheWritePlatformService;
+import org.mifosplatform.infrastructure.configuration.data.LicenseData;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.mifosplatform.infrastructure.configuration.exception.InvalidLicenseKeyException;
 import org.mifosplatform.infrastructure.configuration.service.LicenseUpdateService;
@@ -141,37 +144,7 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
                	   throw new AuthenticationCredentialsNotFoundException("Credentials are not valid");
                 }
                 
-           }/*else if(path.contains("/api/v1/entitlements/getuser") && request.getMethod().equalsIgnoreCase("GET")){
-               
-          	    String username= request.getParameter("username");
-               String password= request.getParameter("password");
-               
-               final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");
-               
-	             boolean isValid =  this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
-	        	 if(!isValid){
-	        		 throw new InvalidLicenseKeyException("License key Exipired.");
-	        	 }
-	             ThreadLocalContextUtil.setTenant(tenant);
-               
-               if(!(org.apache.commons.lang.StringUtils.isBlank(username) || org.apache.commons.lang.StringUtils.isBlank(password))){
-	            	
-	                UsernamePasswordAuthenticationToken authRequest =
-	                        new UsernamePasswordAuthenticationToken(username, password);
-	                authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
-	                Authentication authResult = authenticationManager.authenticate(authRequest);
-	       
-	                SecurityContextHolder.getContext().setAuthentication(authResult);
-	
-	                rememberMeServices.loginSuccess(request, response, authResult);
-	
-	                onSuccessfulAuthentication(request, response, authResult);
-	                chain.doFilter(request, response);
-               }else{
-              	   throw new AuthenticationCredentialsNotFoundException("Credentials are not valid");
-               }
-               
-          }*/else if(path.contains("/api/v1/entitlements/get") && request.getMethod().equalsIgnoreCase("GET")){
+           }else if(path.contains("/api/v1/entitlements/get") && request.getMethod().equalsIgnoreCase("GET")){
            	
                final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");    
                
@@ -182,7 +155,13 @@ public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFil
 	             ThreadLocalContextUtil.setTenant(tenant);
 	             super.doFilter(req, res, chain);
                
-          }else if(path.contains("/api/v1/licensekey")){
+          }else if(path.contains("/api/v1/keyinfo")){
+        	  final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");    
+        	  LicenseData licenseData=this.licenseUpdateService.getLicenseDetails(tenant.getLicensekey());
+        	  PrintWriter printWriter = res.getWriter();
+        	  printWriter.print(new LocalDate(licenseData.getKeyDate()));
+        	  
+         }else if(path.contains("/api/v1/licensekey")){
         	  
         	  final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");    
         	  
