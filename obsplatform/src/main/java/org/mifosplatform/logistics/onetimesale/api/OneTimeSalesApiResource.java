@@ -148,12 +148,14 @@ public class OneTimeSalesApiResource {
 	@Path("{itemId}/item")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveSingleItemDetails(@PathParam("itemId") final Long itemId, @QueryParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+	public String retrieveSingleItemDetails(@PathParam("itemId") final Long itemId, @QueryParam("clientId") final Long clientId, 
+			 @QueryParam("region") final String region, @Context final UriInfo uriInfo) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final List<ItemData> itemCodeData = this.oneTimeSaleReadPlatformService.retrieveItemData();
 		final List<DiscountMasterData> discountdata = this.discountReadPlatformService.retrieveAllDiscounts();
-	    ItemData itemData = this.itemMasterReadPlatformService.retrieveSingleItemDetails(clientId, itemId, true); // If you pass clientId you can set to 'true' else 'false'
+	    ItemData itemData = this.itemMasterReadPlatformService.retrieveSingleItemDetails(clientId, itemId,region,clientId != null?true:false); // If you pass clientId you can set to 'true' else 'false'
+
 	    if(itemData == null){
 	    	throw new NoItemRegionalPriceFound();
 	    }

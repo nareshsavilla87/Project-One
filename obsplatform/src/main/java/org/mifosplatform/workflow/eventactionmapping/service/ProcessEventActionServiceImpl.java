@@ -91,7 +91,7 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 					 parsedCommand = this.fromApiJsonHelper.parse(jsonObject);
 					 command = JsonCommand.from(jsonObject,parsedCommand,this.fromApiJsonHelper,"DissconnectOrder",eventActionData.getClientId(), null,
 						null,eventActionData.getClientId(), null, null, null,null, null, null,null);
-					 this.orderWritePlatformService.disconnectOrder(command,	eventActionData.getOrderId());
+					 this.orderWritePlatformService.disconnectOrder(command,eventActionData.getOrderId());
 				 break;
 				
 			case EventActionConstants.ACTION_NEW :
