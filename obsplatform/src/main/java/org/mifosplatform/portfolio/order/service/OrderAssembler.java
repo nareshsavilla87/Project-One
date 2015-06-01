@@ -2,13 +2,9 @@ package org.mifosplatform.portfolio.order.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
 
-import org.hibernate.loader.custom.Return;
 import org.joda.time.LocalDate;
-import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.mifosplatform.billing.discountmaster.exception.DiscountMasterNotFoundException;
