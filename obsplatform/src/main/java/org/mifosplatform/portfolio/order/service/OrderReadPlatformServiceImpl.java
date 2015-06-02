@@ -149,12 +149,13 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	public List<PaytermData> getChargeCodes(Long planCode,Long clientId) {
 
 		   context.authenticatedUser();
-	        String sql = " SELECT DISTINCT b.billfrequency_code AS billfrequencyCode,b.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid,a.price as price" +
+	        String sql = " SELECT DISTINCT b.billfrequency_code AS billfrequencyCode,a.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid,a.price as price" +
 	        		" FROM b_charge_codes b, b_plan_master pm,b_plan_pricing a LEFT JOIN b_contract_period c ON c.contract_period = a.duration" +
 	        		"  WHERE  a.charge_code = b.charge_code AND a.is_deleted = 'n' AND a.plan_id = ? AND pm.id = a.plan_id";
-	        
-	      if(clientId != null){
-		     sql="SELECT DISTINCT b.billfrequency_code AS billfrequencyCode,b.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid,a.price AS price" +
+	      
+	        if(clientId != null){
+	    	  
+		     sql="SELECT DISTINCT b.billfrequency_code AS billfrequencyCode,a.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid,a.price AS price" +
 		   		" FROM b_charge_codes b,b_plan_master pm,b_plan_pricing a LEFT JOIN b_contract_period c ON c.contract_period = a.duration LEFT JOIN b_priceregion_detail pd" +
 		   		" ON pd.priceregion_id = a.price_region_id JOIN b_client_address ca LEFT JOIN b_state s ON ca.state = s.state_name LEFT JOIN b_country con ON ca.country = con.country_name" +
 		   		" WHERE   a.charge_code = b.charge_code AND a.is_deleted = 'n' AND (pd.state_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_state c, b_charge_codes cc," +

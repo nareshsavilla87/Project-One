@@ -27,19 +27,21 @@ insert ignore into `b_billing_rules`(`id`,`billing_rule`) values (null,'Prorata 
 insert ignore into `b_billing_rules`(`id`,`billing_rule`) values (null,'Prorata & NODC');
 insert ignore into `b_billing_rules`(`id`,`billing_rule`) values (null,'Full Month & NODC');
 
-insert into `b_service`(`id`,`service_code`,`service_description`,`service_type`,`status`,`is_deleted`,`service_unittype`,`is_optional`,`is_auto`) values (0,'None','None','TV','ACtive','Y',null,'N','Y');
-
+insert ignore into `b_service`(`id`,`service_code`,`service_description`,`service_type`,`status`,`is_deleted`,`service_unittype`,`is_optional`,`is_auto`) values (0,'None','None','TV','ACtive','Y',null,'N','Y');
+update  b_service set id=0 where service_code='None'; 
 -- Discount Codes
 
 insert ignore into `b_discount_master`(`id`,`discount_code`,`discount_description`,`discount_type`,`discount_rate`,`start_date`,`discount_status`,`is_delete`) values (null,'None','None','Flat',0,'2015-04-16 00:00:00','ACTIVE','N');
 
 insert ignore  into `b_service`(`id`,`service_code`,`service_description`,`service_type`,`status`,`is_deleted`,`service_unittype`,`is_optional`,`is_auto`) values (0,'None','None','TV','ACtive','Y',null,'N','Y');
+update  b_service set id=0 where service_code='None'; 
+
 
 -- Event Action Mapping
 truncate table b_eventaction_mapping;
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Client','Send Mail','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Client','SEND SMS','workflow_events','Y','N');
-insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Order activation','Invoice','workflow_events','Y','N');
+insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Order activation','Invoice','workflow_events','Y','Y');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Order Booking','Invoice','workflow_events','Y','Y');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Close Client','SEND PROVISION','workflow_events','Y','N');
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Ticket','Send Email','workflow_events','Y','N');
