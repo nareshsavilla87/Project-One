@@ -10,6 +10,7 @@ public class EventActionConstants {
 	public static final String EVENT_CREATE_ORDER="Order Booking";
 	public static final String EVENT_CHANGE_ORDER="change order";
 	public static final String EVENT_ACTIVE_ORDER="Order activation";
+	public static final String EVENT_CHANGE_PLAN ="Change Plan";
 	public static final String EVENT_ORDER_RENEWAL="Order Renewal";
 	public static final String EVENT_CREATE_TICKET="Create Ticket";
 	public static final String EVENT_EDIT_TICKET="Add Comment";
