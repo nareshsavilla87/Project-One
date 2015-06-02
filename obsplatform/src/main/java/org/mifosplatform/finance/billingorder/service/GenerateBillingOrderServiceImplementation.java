@@ -173,9 +173,8 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 					billingOrderCommand.getEndDate());
 
 			// client TaxExemption
-			if (tax.getTaxExemption().equalsIgnoreCase("N")) {
-				
-				if(invoiceTaxCommands !=null && !invoiceTaxCommands.isEmpty()){
+
+			if (tax.getTaxExemption().equalsIgnoreCase("N") && (invoiceTaxCommands != null && !invoiceTaxCommands.isEmpty())) {
 
 				for (InvoiceTaxCommand invoiceTaxCommand : invoiceTaxCommands) {
 
@@ -186,11 +185,9 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 								invoiceTaxCommand.getTaxValue(),invoiceTaxCommand.getTaxPercentage(),invoiceTaxCommand.getTaxAmount());
 						charge.addChargeTaxes(invoiceTax);
 					}
-				  }
 				}
 
-				if (billingOrderCommand.getTaxInclusive() != null && (invoiceTaxCommands !=null && !invoiceTaxCommands.isEmpty())) {
-					
+				if (billingOrderCommand.getTaxInclusive() != null){
 					if (isTaxInclusive(billingOrderCommand.getTaxInclusive())&&invoiceTaxCommands.get(0).getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
 						netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
 						charge.setNetChargeAmount(netChargeAmount);
@@ -273,9 +270,7 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 					netChargeAmount, billingOrderCommand.getStartDate(),billingOrderCommand.getEndDate());
 
 			// client TaxExemption
-			if (tax.getTaxExemption().equalsIgnoreCase("N")) {
-
-				if (invoiceTaxCommands != null) {
+			if (tax.getTaxExemption().equalsIgnoreCase("N") && (invoiceTaxCommands != null && !invoiceTaxCommands.isEmpty())) {
 
 					for (InvoiceTaxCommand invoiceTaxCommand : invoiceTaxCommands) {
 
@@ -286,11 +281,9 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 									invoiceTaxCommand.getTaxValue(),invoiceTaxCommand.getTaxPercentage(),invoiceTaxCommand.getTaxAmount());
 							charge.addChargeTaxes(invoiceTax);
 						}
-					}
 				}
 
-				if (billingOrderCommand.getTaxInclusive() != null&& (invoiceTaxCommands != null && !invoiceTaxCommands.isEmpty())) {
-
+				if (billingOrderCommand.getTaxInclusive() != null){
 					if (isTaxInclusive(billingOrderCommand.getTaxInclusive())&& invoiceTaxCommands.get(0).getTaxAmount().compareTo(BigDecimal.ZERO) > 0) {
 						netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
 						charge.setNetChargeAmount(netChargeAmount);
