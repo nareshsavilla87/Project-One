@@ -2,10 +2,8 @@ package org.mifosplatform.portfolio.order.service;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import org.hibernate.loader.custom.Return;
 import org.joda.time.LocalDate;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
@@ -159,7 +157,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 		Contract contract = this.contractRepository.findOne(order.getContarctPeriod());
 	    LocalDate endDate = this.calculateEndDate(startDate, contract.getSubscriptionType(), contract.getUnits());
 	    order.setStartDate(startDate);
-	    if(order.getbillAlign() == 'Y'){
+	    if(order.getbillAlign() == 'Y' && endDate != null){
 	    	order.setEndDate(endDate.dayOfMonth().withMaximumValue());
 		}else{
 			order.setEndDate(endDate);
@@ -172,6 +170,8 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 				//end date is null for rc
 				if (orderPrice.getChargeType().equalsIgnoreCase("RC")	&& endDate != null) {
 					orderPrice.setBillEndDate(new LocalDate(order.getEndDate()));
+				}else if(endDate == null){
+					orderPrice.setBillEndDate(endDate);
 				} else if(orderPrice.getChargeType().equalsIgnoreCase("NRC")) {
 					orderPrice.setBillEndDate(billstartDate);
 				}
