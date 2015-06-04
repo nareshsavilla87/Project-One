@@ -509,7 +509,8 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		    	
 			  //Prepare Provisioning Req
 			  CodeValue codeValue=this.codeValueRepository.findOneByCodeValue(plan.getProvisionSystem());
-			  if(codeValue.position() == 1){
+			  
+			  if(codeValue.position() == 1 && orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
 				  requestStatusForProv="RENEWAL_BE";
 			  
 			  }
