@@ -247,7 +247,7 @@ public class ItemDetailsApiResource {
 			 final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId,"Deposit");
 			 itemMasterData.setFeeMasterData(feeMasterData);
 			 ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-			
+			 
 		
 		return this.toApiJsonSerializerForItemData.serialize(settings, itemMasterData, RESPONSE_ITEM_MASTER_DETAILS_PARAMETERS);
 	}
