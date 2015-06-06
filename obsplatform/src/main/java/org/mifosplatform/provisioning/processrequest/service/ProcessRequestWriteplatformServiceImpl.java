@@ -1,9 +1,7 @@
 package org.mifosplatform.provisioning.processrequest.service;
 
-import java.util.Date;
 import java.util.List;
 
-import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.mifosplatform.infrastructure.configuration.domain.EnumDomainService;
@@ -11,7 +9,6 @@ import org.mifosplatform.infrastructure.configuration.domain.EnumDomainServiceRe
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
-import org.mifosplatform.infrastructure.core.service.DataSourcePerTenantService;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.ippool.domain.IpPoolManagementDetail;
@@ -242,12 +239,11 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
         							}
         							
         							 client=this.clientRepository.findOne(detailsData.getClientId());
-        							if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.ACTIVATION.toString())){
         								order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
         								order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
         								client.setStatus(ClientStatus.ACTIVE.getValue());
         								this.orderRepository.saveAndFlush(order);
-        							}
+
 								
 								default : 
 
