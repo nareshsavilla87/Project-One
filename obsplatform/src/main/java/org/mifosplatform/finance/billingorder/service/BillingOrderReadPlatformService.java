@@ -15,7 +15,7 @@ public interface BillingOrderReadPlatformService {
 	//List<GenerateInvoiceData> retrieveClientsWithOrders(LocalDate processDate);
 	
 	List<BillingOrderData> retrieveOrderIds(Long clientId, LocalDate processDate);
-
+	
 	List<BillingOrderData> retrieveBillingOrderData(Long clientId,LocalDate localDate, Long planId);
 
 	List<DiscountMasterData> retrieveDiscountOrders(Long orderId,Long orderPriceId);
@@ -31,5 +31,7 @@ public interface BillingOrderReadPlatformService {
 	AgreementData retriveClientOfficeDetails(Long clientId);
 
 	AgreementData retrieveOfficeChargesCommission(Long id);
+
+	List<Long> listOfInvoices(Long clientId, Long orderId);
 
 }
