@@ -64,7 +64,8 @@ public class PriceWritePlatformServiceImpl implements PriceWritePlatformService 
 			for (ServiceData data : serviceData) {
 				
 					if (data.getChargeCode() != null && data.getPlanId() == planId && data.getServiceCode().equalsIgnoreCase(price.getServiceCode())
-							&& data.getPriceregion().equalsIgnoreCase(price.getPriceRegion().toString()) && data.getChargeCode().equalsIgnoreCase(price.getChargeCode())){
+							&& data.getPriceregion().equalsIgnoreCase(price.getPriceRegion().toString()) && data.getChargeCode().equalsIgnoreCase(price.getChargeCode())
+							&&data.getDiscountId().toString().equalsIgnoreCase(price.getDiscountId().toString())){
 						
 						throw new ChargeCOdeExists(data.getChargeDescription());
 					}
