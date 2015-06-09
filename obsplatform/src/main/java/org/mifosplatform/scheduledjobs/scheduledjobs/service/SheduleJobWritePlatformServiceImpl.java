@@ -214,9 +214,16 @@ try
 				fw.append("ScheduleJobData Empty \r\n");
 			}
 			for (ScheduleJobData scheduleJobData : sheduleDatas) {
+				String sql=scheduleJobData.getQuery();
+				if(data.isDynamic().equalsIgnoreCase("N")){
+					if(sql.toLowerCase().matches("now()".toLowerCase())){
+						sql=sql.replace("now()", "?");
+					}
+				}
 				fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
 						" ,query="+scheduleJobData.getQuery()+"\r\n");
-				List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery());
+				
+				List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(sql,data);
 				if(clientIds.isEmpty()){
 					fw.append("Invoicing clients are not found \r\n");
 				}
@@ -396,7 +403,7 @@ try {
 					
 					fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
     			   " ,query="+scheduleJobData.getQuery()+"\r\n");
-					List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery());
+					List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(),data);
 
 					if(clientIds.isEmpty()){
 						fw.append("no records are available for statement generation \r\n");
@@ -521,7 +528,7 @@ try {
               for (ScheduleJobData scheduleJobData : sheduleDatas){
                  fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
                     " ,query="+scheduleJobData.getQuery()+"\r\n");
-                 List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery());
+                 List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(),data);
              
               if(clientIds.isEmpty()){
                 fw.append("no records are available for Auto Expiry \r\n");
