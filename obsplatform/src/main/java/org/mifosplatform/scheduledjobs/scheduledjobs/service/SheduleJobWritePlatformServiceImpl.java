@@ -60,7 +60,6 @@ import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.jobs.service.RadiusJobConstants;
-import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundException;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
@@ -216,9 +215,9 @@ try
 			for (ScheduleJobData scheduleJobData : sheduleDatas) {
 				String sql=scheduleJobData.getQuery();
 				if(data.isDynamic().equalsIgnoreCase("N")){
-					if(sql.toLowerCase().matches("now()".toLowerCase())){
-						sql=sql.replace("now()", "?");
-					}
+					//if(sql.toLowerCase().matches("now()".toLowerCase())){
+						sql=sql.toLowerCase().replace("now()","?");
+					//}
 				}
 				fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
 						" ,query="+scheduleJobData.getQuery()+"\r\n");
