@@ -52,7 +52,7 @@ public class ReverseInvoice {
 			
 		invoice = this.generateReverseBillingOrderService.generateNegativeInvoice(billingOrderCommands);
         invoiceAmount=invoice.getInvoiceAmount();
-        List<Long> invoices = this.billingOrderReadPlatformService.listOfInvoices(clientId, orderId);
+        /*List<Long> invoices = this.billingOrderReadPlatformService.listOfInvoices(clientId, orderId);
         if(!invoices.isEmpty() && invoiceAmount != null && invoiceAmount.intValue() != 0){
         
         	for(Long invoiceIds :invoices){
@@ -68,7 +68,9 @@ public class ReverseInvoice {
 	        		this.invoiceRepository.saveAndFlush(invoiceData);
 	        	}
 	        }
-        }}
+        }*/
+        
+		}
 		
 		//List<ClientBalanceData> clientBalancesDatas = clientBalanceReadPlatformService.retrieveAllClientBalances(clientId);
 		
