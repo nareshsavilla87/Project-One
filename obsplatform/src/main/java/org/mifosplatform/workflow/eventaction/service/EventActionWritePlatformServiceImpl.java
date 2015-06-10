@@ -42,8 +42,6 @@ import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
-import org.mifosplatform.portfolio.plan.domain.Plan;
-import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
@@ -57,8 +55,6 @@ import org.mifosplatform.workflow.eventaction.domain.EventAction;
 import org.mifosplatform.workflow.eventaction.domain.EventActionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import urn.ebay.apis.eBLBaseComponents.StatusChangeActionType;
 
 import com.google.gson.JsonObject;
 
@@ -86,6 +82,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
     private final EventActionReadPlatformService eventActionReadPlatformService;
+    
     
     private BillingMessageTemplate activationTemplate;
     private BillingMessageTemplate reConnectionTemplate;
@@ -122,6 +119,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
         this.eventActionReadPlatformService = eventActionReadPlatformService;
+       
 	}
 	
 	
@@ -517,6 +515,13 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	this.messageDataRepository.save(paymentBillingMessage);
 				    	
 				    	break;
+				    	
+					case EventActionConstants.ACTION_SEND_PAYMENT :
+						
+					  	eventAction=new EventAction(DateUtils.getDateOfTenant(), "SEND", "Payment Receipt",EventActionConstants.ACTION_SEND_PAYMENT.toString(),"/billmaster/payment/"+clientId+"/"+Long.parseLong(resourceId), 
+						    	Long.parseLong(resourceId),jsonObject.toString(),Long.parseLong(resourceId),clientId);
+					        	this.eventActionRepository.save(eventAction);
+						break;
 				    	
 				    default:
 				    	

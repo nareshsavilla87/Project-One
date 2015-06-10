@@ -1,7 +1,6 @@
 package org.mifosplatform.workflow.eventactionmapping.service;
 
 
-import java.util.Date;
 import java.util.List;
 
 import org.mifosplatform.cms.eventmaster.domain.EventMaster;
@@ -161,6 +160,12 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 				eventMaster=this.eventMasterRepository.findOne(eventActionData.getResourceId());
 				eventMaster.setStatus(Integer.valueOf(2));
 				this.eventMasterRepository.saveAndFlush(eventMaster);
+				
+				break;
+				
+			case EventActionConstants.ACTION_SEND_PAYMENT :
+				
+				this.billingMasterApiResourse.printPayment(eventAction.getResourceId(), eventAction.getClientId());
 				
 				break;
 			
