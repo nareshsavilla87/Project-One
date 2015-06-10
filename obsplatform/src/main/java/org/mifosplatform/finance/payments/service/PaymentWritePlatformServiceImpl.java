@@ -1,5 +1,6 @@
 
 package org.mifosplatform.finance.payments.service;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
@@ -42,8 +43,8 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfoRepository;
-import org.mifosplatform.organisation.partner.domain.PartnerBalanceRepository;
 import org.mifosplatform.organisation.partner.domain.OfficeControlBalance;
+import org.mifosplatform.organisation.partner.domain.PartnerBalanceRepository;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
@@ -118,6 +119,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 		this.infoRepository = infoRepository;
 		this.orderWritePlatformService = orderWritePlatformService;
 		this.depositAndRefundRepository = depositAndRefundRepository;
+
 		
 	}
 
@@ -179,8 +181,9 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			
 			// Notify Payment Details to Clients. written by ashok
 			this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_PAYMENT, payment.getClientId(), payment.getAmountPaid().toString());
+			
 			//Add New Action 
-			final List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_PAYMENT);
+			final List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_SEND_PAYMENT);
 				if(actionDetaislDatas.size() != 0){
 					this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,command.entityId(),payment.getId().toString(),null);
 				}
@@ -194,6 +197,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 					this.updatePartnerBalance(client.getOffice(),payment);
 				   }
 				}
+
 				return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(payment.getId()).withClientId(command.entityId()).build();
 
 			
