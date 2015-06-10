@@ -74,7 +74,6 @@ import org.mifosplatform.portfolio.plan.domain.PlanDetails;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.mifosplatform.portfolio.service.domain.ServiceMaster;
 import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
-import org.mifosplatform.portfolio.servicemapping.domain.ServiceMappingRepository;
 import org.mifosplatform.provisioning.preparerequest.domain.PrepareRequest;
 import org.mifosplatform.provisioning.preparerequest.domain.PrepareRequsetRepository;
 import org.mifosplatform.provisioning.preparerequest.exception.PrepareRequestActivationException;
@@ -293,6 +292,7 @@ try{
 	try{
 		final Long userId=context.authenticatedUser().getId();
 		final Order order = retrieveOrderById(orderId);
+		
 		Long orderPriceId=command.longValueOfParameterNamed("priceId");
 		BigDecimal price=command.bigDecimalValueOfParameterNamed("price");
 		OrderPrice orderPrice=this.OrderPriceRepository.findOne(orderPriceId);
