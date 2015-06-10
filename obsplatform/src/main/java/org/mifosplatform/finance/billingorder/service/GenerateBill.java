@@ -445,7 +445,7 @@ public class GenerateBill {
 
 	}
 	
-	private List<InvoiceTaxCommand> calculateDiscountAndTax(BillingOrderData billingOrderData,DiscountMasterData discountMasterData, LocalDate startDate,
+	public List<InvoiceTaxCommand> calculateDiscountAndTax(BillingOrderData billingOrderData,DiscountMasterData discountMasterData, LocalDate startDate,
 			LocalDate endDate, BigDecimal price) {
 
 		List<InvoiceTaxCommand> listOfTaxes = new ArrayList<>();
@@ -480,14 +480,14 @@ public class GenerateBill {
 	// Generate Invoice Tax
 	public List<InvoiceTaxCommand> generateInvoiceTax(List<TaxMappingRateData> taxMappingRateDatas, BigDecimal price,Long clientId,Integer taxInclusive) {
 
-		BigDecimal taxRate = null;
-		BigDecimal taxAmount = null;
+		BigDecimal taxRate = BigDecimal.ZERO;
+		BigDecimal taxAmount = BigDecimal.ZERO;
 		String taxCode = null;
 		
 		List<InvoiceTaxCommand> invoiceTaxCommands = new ArrayList<InvoiceTaxCommand>();
 		InvoiceTaxCommand invoiceTaxCommand = null;
 
-		if (taxMappingRateDatas != null) {
+		if (taxMappingRateDatas != null && !taxMappingRateDatas.isEmpty()) {
 
 			for (TaxMappingRateData taxMappingRateData : taxMappingRateDatas) {
 
@@ -513,10 +513,13 @@ public class GenerateBill {
 					}
 				}
 
-				invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, taxInclusive, taxRate, taxAmount);
+				invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, taxInclusive, taxRate, taxAmount,price);
 				invoiceTaxCommands.add(invoiceTaxCommand);
 			}
 
+		}else{
+			invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, null, taxRate, taxAmount,price);
+			invoiceTaxCommands.add(invoiceTaxCommand);
 		}
 		return invoiceTaxCommands;
 

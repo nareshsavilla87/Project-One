@@ -379,7 +379,7 @@ public class GenerateDisconnectionBill {
 				}
 			
 				invoiceTaxCommand = new InvoiceTaxCommand(billingOrderData.getClientId(), null, null,
-						                  taxCode, billingOrderData.getTaxInclusive(), taxRate, taxAmount);
+						                  taxCode, billingOrderData.getTaxInclusive(), taxRate, taxAmount,null);
 				invoiceTaxCommands.add(invoiceTaxCommand);
 			}
 

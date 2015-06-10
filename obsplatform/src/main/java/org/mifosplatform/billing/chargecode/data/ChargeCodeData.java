@@ -21,15 +21,17 @@ public class ChargeCodeData {
 	private List<BillFrequencyCodeData> billFrequencyCodeData;
 	
 	private BigDecimal price;
+	private String contractType;
+	private Integer contractDuration;
+	private BigDecimal finalAmount;
 
 
 	public ChargeCodeData() {
 	}
 
-	public ChargeCodeData(final List<ChargeCodeData> chargeCodeData,
-			final List<ChargeTypeData> chargeType,
-			final List<DurationTypeData> durationType,
-			final List<BillFrequencyCodeData> billFrequencyCodeData) {
+	public ChargeCodeData(final List<ChargeCodeData> chargeCodeData,final List<ChargeTypeData> chargeType,
+			final List<DurationTypeData> durationType,final List<BillFrequencyCodeData> billFrequencyCodeData) {
+		
 		this.chargeCodeData = chargeCodeData;
 		this.chargeTypeData = chargeType;
 		this.durationTypeData = durationType;
@@ -55,6 +57,17 @@ public class ChargeCodeData {
 		this.billFrequencyCode = billFrequencyCode;
 	}
 
+	public ChargeCodeData(Long id, String contractType,Integer contractDuration, String chargeType,Integer chargeDuration, BigDecimal price) {
+        
+		this.id = id;
+		this.contractType = contractType;
+		this.contractDuration = contractDuration;
+		this.chargeType = chargeType;
+		this.chargeDuration = chargeDuration;
+		this.price = price;
+	
+	}
+	
 	/**
 	 * @return the chargeCode
 	 */
@@ -206,6 +219,11 @@ public class ChargeCodeData {
 
 	public void setPrice(BigDecimal price) {
 		this.price = price;
+	}
+
+	public void setPlanfinalAmount(BigDecimal finalAmount) {
+		this.finalAmount = finalAmount;
+		
 	}
 	
 	

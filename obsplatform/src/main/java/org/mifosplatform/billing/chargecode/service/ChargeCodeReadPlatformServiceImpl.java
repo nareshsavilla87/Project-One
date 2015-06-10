@@ -22,14 +22,12 @@ import org.springframework.stereotype.Service;
  * 
  */
 @Service
-public class ChargeCodeReadPlatformServiceImpl implements
-		ChargeCodeReadPlatformService {
+public class ChargeCodeReadPlatformServiceImpl implements ChargeCodeReadPlatformService {
 
 	private final JdbcTemplate jdbcTemplate;
 
 	@Autowired
-	public ChargeCodeReadPlatformServiceImpl(
-			final TenantAwareRoutingDataSource dataSource) {
+	public ChargeCodeReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
@@ -179,15 +177,14 @@ public class ChargeCodeReadPlatformServiceImpl implements
 			return null;
 		}
 	}
-
+	
 	private static final class ChargeCodeRecurringMapper implements RowMapper<ChargeCodeData> {
 
 		public String schema() {
-			return " cc.id as id, cc.charge_code AS chargeCode, pp.price AS price, cc.duration_type AS durationType," +
-					" cc.charge_duration AS chargeDuration, cc.billfrequency_code AS billFrequencyCode " +
-					" FROM (b_plan_pricing pp JOIN b_plan_master pm ON pm.id = pp.plan_id) " +
-					" JOIN b_charge_codes cc ON pp.charge_code = cc.charge_code WHERE pm.is_deleted = 'n' " +
-					" AND pp.plan_id = ?  and cc.billfrequency_code = ? group by cc.id";
+			return "   cc.id AS id,c.contract_duration AS contractDuration,c.contract_type AS contractType,cc.duration_type AS chargeType," +
+					" cc.charge_duration AS chargeDuration,p.price AS price FROM b_charge_codes cc, b_plan_pricing p " +
+					" left join b_contract_period c on c.contract_period = p.duration WHERE  p.id = ? AND p.charge_code = cc.charge_code";
+  
 		}
 
 		@Override
@@ -195,34 +192,36 @@ public class ChargeCodeReadPlatformServiceImpl implements
 				throws SQLException {
 
 			final Long id = rs.getLong("id");
-			final String chargeCode = rs.getString("chargeCode");
+			final String contractType = rs.getString("contractType");
 			final BigDecimal price = rs.getBigDecimal("price");
-			final String durationType = rs.getString("durationType");
+			final String chargeType = rs.getString("chargeType");
 			final Integer chargeDuration = rs.getInt("chargeDuration");
-			final String billFrequencyCode = rs.getString("billFrequencyCode");
+			final Integer contractDuration = rs.getInt("contractDuration");
 
-			ChargeCodeData chargeCodeData = new ChargeCodeData(id, chargeCode, null, null, chargeDuration, durationType, null, billFrequencyCode);
+			ChargeCodeData chargeCodeData = new ChargeCodeData(id,contractType,contractDuration,chargeType,chargeDuration,price);
 			chargeCodeData.setPrice(price);
 			
 			return chargeCodeData;	
 		}
 	}
 	
+	
+
 	@Override
-	public ChargeCodeData retrieveChargeCodeForRecurring(Long planId,
-			String billingFrequency) {
+	public ChargeCodeData retrieveChargeCodeForRecurring(Long planId) {
 		try {
 
 			final ChargeCodeRecurringMapper mapper = new ChargeCodeRecurringMapper();
-
 			final String sql = "select " + mapper.schema();
-
-			return jdbcTemplate.queryForObject(sql, mapper, new Object[] {
-					planId, billingFrequency });
+			return jdbcTemplate.queryForObject(sql, mapper, new Object[] { planId});
 		
 		} catch (EmptyResultDataAccessException accessException) {
 			return null;
 		}
 	}
+
+	
+	
+	
 
 }

@@ -99,7 +99,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	            String paytermtype = rs.getString("payterm_type");
 	            String units = rs.getString("units");
                  String data=units.concat(paytermtype);
-	            return new PaytermData(id,data,null,null);
+	            return new PaytermData(id,data,null,null,null);
 	        }
 	}
 
@@ -141,7 +141,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	public List<PaytermData> getChargeCodes(Long planCode) {
 
 		   context.authenticatedUser();
-	        String sql = " SELECT DISTINCT b.billfrequency_code AS billfrequency_code,b.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid" +
+	        String sql = " SELECT DISTINCT b.billfrequency_code AS billfrequency_code,a.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid,a.price as price" +
 	        		" FROM b_charge_codes b, b_plan_master pm,b_plan_pricing a LEFT JOIN b_contract_period c ON c.contract_period = a.duration" +
 	        		"  WHERE  a.charge_code = b.charge_code AND a.is_deleted = 'n' AND a.plan_id = ? AND pm.id = a.plan_id";
 
@@ -158,7 +158,8 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	            String serviceType = rs.getString("billfrequency_code");
 	            String duration = rs.getString("duration");
 	            String isPrepaid = rs.getString("isPrepaid");
-	            return new PaytermData(id,serviceType,duration,isPrepaid);
+	            BigDecimal price=rs.getBigDecimal("price");
+	            return new PaytermData(id,serviceType,duration,isPrepaid,price);
 	}
 	}
 	@Override

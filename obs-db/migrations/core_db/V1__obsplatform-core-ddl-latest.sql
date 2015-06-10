@@ -83,17 +83,7 @@ CREATE TABLE `m_organisation_currency` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE `ref_loan_transaction_processing_strategy` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `code` varchar(100) DEFAULT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `createdby_id` bigint(20) DEFAULT NULL,
-  `created_date` datetime DEFAULT NULL,
-  `lastmodifiedby_id` bigint(20) DEFAULT NULL,
-  `lastmodified_date` datetime DEFAULT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `ltp_strategy_code` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 CREATE TABLE `c_configuration` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
