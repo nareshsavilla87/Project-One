@@ -313,7 +313,7 @@ try{
 	List<OrderLine> orderline = order.getServices();
 	List<OrderPrice> orderPrices=order.getPrice();
 	Plan plan=this.planRepository.findOne(order.getPlanId());
-		if(plan.isPrepaid() == 'N' && !plan.getProvisionSystem().equalsIgnoreCase("None")){
+		if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
 			List<Long> prepareIds=this.prepareRequestReadplatformService.getPrepareRequestDetails(orderId);
 			if(prepareIds.isEmpty()){
 				throw new PrepareRequestActivationException();	
