@@ -105,17 +105,19 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 			BigDecimal netChargeTaxAmount = BigDecimal.ZERO;
 			BigDecimal discountAmount = BigDecimal.ZERO;
 			BigDecimal netChargeAmount = billingOrderCommand.getPrice().subtract(discountAmount);
+			String discountCode="None";
 			
 			DiscountMaster discountMaster = null;
 			if(billingOrderCommand.getDiscountMasterData()!= null){
 				discountMaster = this.discountMasterRepository.findOne(billingOrderCommand.getDiscountMasterData().getId());
 				discountAmount = billingOrderCommand.getDiscountMasterData().getDiscountAmount();
+				discountCode=discountMaster.getDiscountCode();
 			}
 			
 			List<InvoiceTaxCommand> invoiceTaxCommands = billingOrderCommand.getListOfTax();
 
 			BillingOrder charge = new BillingOrder(billingOrderCommand.getClientId(), billingOrderCommand.getClientOrderId(), billingOrderCommand.getOrderPriceId(),
-					billingOrderCommand.getChargeCode(),billingOrderCommand.getChargeType(),discountMaster.getDiscountCode(), billingOrderCommand.getPrice(), discountAmount,
+					billingOrderCommand.getChargeCode(),billingOrderCommand.getChargeType(),discountCode, billingOrderCommand.getPrice(), discountAmount,
 					netChargeAmount, billingOrderCommand.getStartDate(), billingOrderCommand.getEndDate());
 			//client taxExemption
 			if(tax.getTaxExemption().equalsIgnoreCase("N")){
@@ -129,11 +131,12 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 				      charge.addChargeTaxes(invoiceTax);
 			     }
 			
-			   if(billingOrderCommand.getTaxInclusive()!=null){
+			   if(billingOrderCommand.getTaxInclusive()!=null && (invoiceTaxCommands!=null && !invoiceTaxCommands.isEmpty())){
 				
-				  if(isTaxInclusive(billingOrderCommand.getTaxInclusive())){
-					netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
-					charge.setNetChargeAmount(netChargeAmount);
+				  if(isTaxInclusive(billingOrderCommand.getTaxInclusive())&&invoiceTaxCommands.get(0).getTaxAmount().compareTo(BigDecimal.ZERO) > 0){
+					 netChargeAmount = netChargeAmount.subtract(netChargeTaxAmount);
+					 charge.setNetChargeAmount(netChargeAmount);
+					 charge.setChargeAmount(netChargeAmount);
 				}
 			}
 
@@ -144,14 +147,14 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 			
 		 }
 
-		    if(billingOrderCommands.get(0).getTaxInclusive()!=null){
+		    /*if(billingOrderCommands.get(0).getTaxInclusive()!=null){
 			    if(isTaxInclusive(billingOrderCommands.get(0).getTaxInclusive())){
 			       invoiceAmount = totalChargeAmount;
 			   }else{
 				   invoiceAmount = totalChargeAmount.add(netTaxAmount);
 			   }
-			   }
-		//invoiceAmount = totalChargeAmount.add(netTaxAmount);
+			   }*/
+		invoiceAmount = totalChargeAmount.add(netTaxAmount);
 		invoice.setNetChargeAmount(totalChargeAmount.negate());
 		invoice.setTaxAmount(netTaxAmount.negate());
 		invoice.setInvoiceAmount(invoiceAmount.negate());

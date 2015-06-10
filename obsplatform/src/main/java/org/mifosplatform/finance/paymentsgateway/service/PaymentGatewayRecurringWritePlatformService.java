@@ -29,5 +29,9 @@ public interface PaymentGatewayRecurringWritePlatformService {
 	public CommandProcessingResult updatePaypalProfileStatus(JsonCommand command);
 
 	public void disConnectOrder(HttpServletRequest request);
+
+	public Long getOrderId(HttpServletRequest request);
+
+	public String getOrderStatus(Long orderId);
 	
 }

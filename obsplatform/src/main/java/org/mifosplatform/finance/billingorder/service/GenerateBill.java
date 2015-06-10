@@ -473,12 +473,12 @@ public class GenerateBill {
 				taxMappingRateDatas = billingOrderReadPlatformService.retrieveDefaultTaxMappingData(billingOrderData.getClientId(),billingOrderData.getChargeCode());
 		}
 		
-		List<InvoiceTaxCommand> invoiceTaxCommand = generateInvoiceTax(taxMappingRateDatas, billPrice, billingOrderData.getClientId());
+		List<InvoiceTaxCommand> invoiceTaxCommand = generateInvoiceTax(taxMappingRateDatas, billPrice, billingOrderData.getClientId(),billingOrderData.getTaxInclusive());
 		return invoiceTaxCommand;
 	}
 
 	// Generate Invoice Tax
-	public List<InvoiceTaxCommand> generateInvoiceTax(List<TaxMappingRateData> taxMappingRateDatas, BigDecimal price,Long clientId) {
+	public List<InvoiceTaxCommand> generateInvoiceTax(List<TaxMappingRateData> taxMappingRateDatas, BigDecimal price,Long clientId,Integer taxInclusive) {
 
 		BigDecimal taxRate = BigDecimal.ZERO;
 		BigDecimal taxAmount = BigDecimal.ZERO;
@@ -495,8 +495,12 @@ public class GenerateBill {
 					
 					taxRate = taxMappingRateData.getRate();
 					taxCode = taxMappingRateData.getTaxCode();
-					taxAmount = price.multiply(taxRate.divide(new BigDecimal(100))).setScale(Integer.parseInt(roundingDecimal()), RoundingMode.HALF_UP);
-				
+					if(taxInclusive.compareTo(Integer.valueOf(1))==0){ /*(2990 * 11) / (100 + 11)*/
+						BigDecimal vatInclusive= price.multiply(taxRate);
+						taxAmount=vatInclusive.divide(new BigDecimal(100).add(taxRate),Integer.parseInt(roundingDecimal()), RoundingMode.HALF_UP);
+					}else{
+					  taxAmount = price.multiply(taxRate.divide(new BigDecimal(100))).setScale(Integer.parseInt(roundingDecimal()), RoundingMode.HALF_UP);
+					}
 				} else if (taxMappingRateData.getTaxType().equalsIgnoreCase("Flat")) {
 					
 					taxRate = taxMappingRateData.getRate();
@@ -509,7 +513,7 @@ public class GenerateBill {
 					}
 				}
 
-				invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, null, taxRate, taxAmount,price);
+				invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, taxInclusive, taxRate, taxAmount,price);
 				invoiceTaxCommands.add(invoiceTaxCommand);
 			}
 
