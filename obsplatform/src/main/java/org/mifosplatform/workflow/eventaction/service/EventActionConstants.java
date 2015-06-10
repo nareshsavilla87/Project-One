@@ -23,6 +23,7 @@ public class EventActionConstants {
 	public static final String EVENT_DISCONNECTION_ORDER="Order disconnection";
 	public static final String EVENT_RECONNECTION_ORDER="Order reconnection";
 	public static final String EVENT_NOTIFY_PAYMENT="Notify Payment Receipt";
+	public static final String EVENT_SEND_PAYMENT = "Send Payment Receipt";
 	
 	//Actions
 	public static final String ACTION_SEND_MAIL="Send Mail";
@@ -50,6 +51,8 @@ public class EventActionConstants {
 	public static final String ACTION_NOTIFY_DISCONNECTION="Notify Disconnection";
 	public static final String ACTION_NOTIFY_RECONNECTION="Notify Reconnection";
 	public static final String ACTION_NOTIFY_PAYMENT="Notify Payment";
+	public static final String ACTION_SEND_PAYMENT = "Send Payment";
+	
 	
 
 }
