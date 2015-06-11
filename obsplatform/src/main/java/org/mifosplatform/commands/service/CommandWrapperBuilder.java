@@ -2929,6 +2929,14 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+	public CommandWrapperBuilder createDeposit(Long clientId) {
+		this.actionName = "CREATE";
+		this.entityName = "DEPOSIT";
+		this.entityId =clientId;
+		this.href = "/deposit/" + clientId;
+		return this;
+	}
+
 }
 
 
