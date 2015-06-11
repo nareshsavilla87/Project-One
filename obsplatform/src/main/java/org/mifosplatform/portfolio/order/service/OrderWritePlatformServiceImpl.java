@@ -851,13 +851,13 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		this.eventValidationReadPlatformService.checkForCustomValidations(clientId,EventActionConstants.EVENT_CREATE_ORDER,command.json(),userId);
 			
 	    	  	//Check for Active Orders	
-	    	  Long activeorderId=this.orderReadPlatformService.retrieveClientActiveOrderDetails(clientId,null);
+	    	 /* Long activeorderId=this.orderReadPlatformService.retrieveClientActiveOrderDetails(clientId,null);
 	    	  	if(activeorderId !=null && activeorderId !=0){
 	    	  		Order order=this.orderRepository.findOne(activeorderId);
 				   		if(order.getEndDate() == null || !startDate.isAfter(new LocalDate(order.getEndDate()))){
 				   			throw new SchedulerOrderFoundException(activeorderId);				   
 				   		}
-	    	  	}
+	    	  	}*/
 	    	  
 	    	  	jsonObject.put("billAlign",command.booleanPrimitiveValueOfParameterNamed("billAlign"));
 	    	  	jsonObject.put("contractPeriod",command.longValueOfParameterNamed("contractPeriod"));
