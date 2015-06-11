@@ -48,7 +48,7 @@ import org.springframework.stereotype.Component;
 
 import com.google.gson.JsonObject;
 
-@Path("/refund")
+@Path("/deposite")
 @Component
 @Scope("singleton")
 public class RefundApiResource {
