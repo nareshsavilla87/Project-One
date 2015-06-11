@@ -260,7 +260,7 @@ try{
 		}
 	}
 	
-	processNotifyMessages(EventActionConstants.EVENT_ACTIVE_ORDER, clientId, order.getId().toString());
+	/*processNotifyMessages(EventActionConstants.EVENT_ACTIVE_ORDER, clientId, order.getId().toString());*/
 	
 	return new CommandProcessingResult(order.getId(),order.getClientId());	
 	}catch (DataIntegrityViolationException dve) {
