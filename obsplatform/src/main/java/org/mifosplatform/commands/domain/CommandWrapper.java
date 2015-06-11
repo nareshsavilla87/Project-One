@@ -1315,4 +1315,8 @@ public class CommandWrapper {
 		public boolean isRefund() {
 			return  this.entityName.equalsIgnoreCase("REFUND");
 		}
+
+		public boolean isDeposit() {
+			return  this.entityName.equalsIgnoreCase("DEPOSIT");
+		}
 }
