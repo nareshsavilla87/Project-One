@@ -2,6 +2,7 @@ package org.mifosplatform.finance.depositandrefund.service;
 
 import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefund;
 import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefundRepository;
+import org.mifosplatform.finance.depositandrefund.exception.InvalidDepositException;
 import org.mifosplatform.finance.depositandrefund.serialization.DepositeCommandFromApiJsonDeserializer;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -53,6 +54,9 @@ public class DepositeWritePlatformServiceImp implements DepositeWritePlatformSer
 			final String feeId = command.stringValueOfParameterNamed("feeId");
 			final String clientId = command.stringValueOfParameterNamed("clientId");
 		    FeeMasterData  feeMasterData= this.depositeReadPlatformService.retrieveDepositDetails(Long.valueOf(feeId),Long.valueOf(clientId));
+		    if(feeMasterData == null){
+		    	throw new InvalidDepositException(Long.valueOf(feeId));
+		    }
 		    DepositAndRefund depositfund=new DepositAndRefund(Long.valueOf(clientId),Long.valueOf(feeId),feeMasterData.getDefaultFeeAmount(),DateUtils.getDateOfTenant(),feeMasterData.getTransactionType());
 			this.depositAndRefundRepository.save(depositfund);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(depositfund.getId()).build();

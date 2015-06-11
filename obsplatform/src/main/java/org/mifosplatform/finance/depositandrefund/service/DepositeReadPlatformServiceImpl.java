@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class DepositeReadPlatformServiceImpl implements DepositeReadPlatformServ
 	 */
 	public FeeMasterData retrieveDepositDetails(Long feeId, Long clientId) {
 
+		try{
 		final String transaction="Deposit";
 		
 		final DepositeMapper mapper = new DepositeMapper();
@@ -39,6 +41,10 @@ public class DepositeReadPlatformServiceImpl implements DepositeReadPlatformServ
 		final String sql = "Select " + mapper.schema();
 
 		return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] {clientId,clientId,transaction,feeId,clientId,transaction,feeId,transaction,feeId});
+		}catch(EmptyResultDataAccessException accessException){
+			return null;
+		}
+		
 	}
 
 	private static final class DepositeMapper implements RowMapper<FeeMasterData> {
