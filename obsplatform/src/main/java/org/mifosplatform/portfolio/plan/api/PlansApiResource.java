@@ -35,9 +35,7 @@ import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.partner.data.PartnersData;
-import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.plan.data.BillRuleData;
-import org.mifosplatform.portfolio.plan.data.PlanCodeData;
 import org.mifosplatform.portfolio.plan.data.PlanData;
 import org.mifosplatform.portfolio.plan.data.PlanQulifierData;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
@@ -72,7 +70,6 @@ public class PlansApiResource  {
 	    private final ServiceMasterReadPlatformService serviceMasterReadPlatformService;
 	    private final MCodeReadPlatformService mCodeReadPlatformService;
 	    private final CodeReadPlatformService codeReadPlatformService;
-	    private final OrderReadPlatformService orderReadPlatformService;
 	    
 	   
 	    @Autowired
@@ -80,7 +77,7 @@ public class PlansApiResource  {
 	    		final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
 	    		final PlanReadPlatformService planReadPlatformService,final ServiceMasterReadPlatformService serviceMasterReadPlatformService,
 	    		final MCodeReadPlatformService mCodeReadPlatformService,final CodeReadPlatformService codeReadPlatformService,
-	    		final OrderReadPlatformService orderReadPlatformService,final DefaultToApiJsonSerializer<PlanQulifierData> apiJsonSerializer) {
+	    		final DefaultToApiJsonSerializer<PlanQulifierData> apiJsonSerializer) {
 	    	
 		        this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
@@ -91,7 +88,6 @@ public class PlansApiResource  {
 		        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
 		        this.codeReadPlatformService = codeReadPlatformService;
 		        this.apiJsonSerializer = apiJsonSerializer;
-		        this.orderReadPlatformService =  orderReadPlatformService;
 		    }	
 	    
 	/**
