@@ -463,6 +463,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
      Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
 		
 		if(configuration != null && plan.isPrepaid() == 'N'){
+			
 			orderDetails.setBillingAlign(configuration.isEnabled()?'Y':'N');
 			if(configuration.isEnabled() && renewalEndDate != null){
 				orderDetails.setEndDate(renewalEndDate.dayOfMonth().withMaximumValue());
@@ -482,6 +483,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 			 /* Price price=this.priceRepository.findOneByPlanAndService(plan.getId(), service.getServiceCode(),
 					  contractDetails.getSubscriptionPeriod(),orderprice.getChargeCode());*/
 				if(price != null){
+					
 					ChargeCodeMaster chargeCode=this.chargeCodeRepository.findOneByChargeCode(price.getChargeCode());
 					orderprice.setChargeCode(chargeCode.getChargeCode());
 					orderprice.setChargeDuration(chargeCode.getChargeDuration().toString());
@@ -505,6 +507,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	//  Set<PlanDetails> planDetails=plan.getDetails();
 	 // ServiceMaster serviceMaster=this.serviceMasterRepository.findOneByServiceCode(planDetails.iterator().next().getServiceCode());
 	  Long resourceId=Long.valueOf(0);
+	  
 	  	if(!plan.getProvisionSystem().equalsIgnoreCase("None")){ 
 		    	
 			  //Prepare Provisioning Req
