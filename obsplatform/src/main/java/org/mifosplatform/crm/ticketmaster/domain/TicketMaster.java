@@ -197,6 +197,8 @@ public class TicketMaster {
 	public void updateTicket(final TicketMasterCommand command) {
 		this.statusCode = command.getStatusCode();
 		this.assignedTo = command.getAssignedTo();
+		this.priority = command.getPriority();
+		this.problemCode = command.getProblemCodeId();
 	}
 
 	public void closeTicket(final JsonCommand command, final Long userId) {
