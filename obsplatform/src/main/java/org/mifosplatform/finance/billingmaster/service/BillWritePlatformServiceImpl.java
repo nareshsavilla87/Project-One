@@ -142,7 +142,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			final String printStatementLocation = statementDetailsLocation + File.separator + "Bill_" + billMaster.getId() + ".pdf";
 			final String jpath = fileLocation+File.separator+"jasper"; 
 			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-			final String jfilepath =jpath+File.separator+"statement_"+tenant+".jasper";
+			final String jfilepath =jpath+File.separator+"Statement_"+tenant+".jasper";
 			final Connection connection = this.dataSource.getConnection();
 		
 			Map<String, Object> parameters = new HashMap<String, Object>();
