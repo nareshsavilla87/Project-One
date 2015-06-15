@@ -141,6 +141,7 @@ public class ConfigurationApiResource {
 		
 		/*********  Preparing 'registrationClientList' JSONObject ******/
 		registrationList.put("passport", "false");
+		registrationList.put("is-redeem", "false");
 		
 		/*********  Adding 'registrationClientList' to 'defaultOne' JSONObject ******/
 		defaultOne.put("registrationListing", registrationList);
