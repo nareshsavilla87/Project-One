@@ -17,6 +17,8 @@ import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
+import org.mifosplatform.finance.creditdistribution.domain.CreditDistribution;
+import org.mifosplatform.finance.creditdistribution.domain.CreditDistributionRepository;
 import org.mifosplatform.finance.payments.domain.ChequePayment;
 import org.mifosplatform.finance.payments.domain.ChequePaymentRepository;
 import org.mifosplatform.finance.payments.domain.Payment;
@@ -84,6 +86,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 	private final ClientRepository clientRepository;
 	private final PartnerBalanceRepository partnerBalanceRepository;
 	private final OfficeAdditionalInfoRepository infoRepository;
+	private final CreditDistributionRepository creditDistributionRepository;
 
 	@Autowired
 	public PaymentWritePlatformServiceImpl(final PlatformSecurityContext context,final PaymentRepository paymentRepository,
@@ -93,7 +96,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			final ConfigurationRepository globalConfigurationRepository,final PaypalEnquireyRepository paypalEnquireyRepository,
 			final FromJsonHelper fromApiJsonHelper,final PaymentGatewayConfigurationRepository paymentGatewayConfigurationRepository,
 			final ClientRepository clientRepository,final PartnerBalanceRepository partnerBalanceRepository,
-			final OfficeAdditionalInfoRepository infoRepository) {
+			final OfficeAdditionalInfoRepository infoRepository, final CreditDistributionRepository creditDistributionRepository) {
 		
 		this.context = context;
 		this.fromApiJsonHelper=fromApiJsonHelper;
@@ -109,7 +112,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 		this.clientRepository = clientRepository;
 		this.partnerBalanceRepository = partnerBalanceRepository;
 		this.infoRepository = infoRepository;
-				
+		this.creditDistributionRepository = creditDistributionRepository;	
 		
 	}
 
@@ -209,6 +212,25 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			final ClientBalance clientBalance = clientBalanceRepository.findByClientId(payment.getClientId());
 			clientBalance.setBalanceAmount(payment.getAmountPaid(),payment.isWalletPayment());
 			this.clientBalanceRepository.save(clientBalance);
+			
+			List<CreditDistribution> listOfInvoices = creditDistributionRepository.findOneByPaymentId(paymentId);
+			if(listOfInvoices != null){
+				
+				for(CreditDistribution crd :listOfInvoices){
+					
+					Long invoiceId = crd.getInvoiceId();
+					BigDecimal amount = crd.getAmount();
+					
+					Invoice invoiceData = this.invoiceRepository.findOne(invoiceId);
+					BigDecimal dueAmount = invoiceData.getDueAmount();
+					BigDecimal updateAmount = dueAmount.add(amount);
+					invoiceData.setDueAmount(updateAmount);
+					this.invoiceRepository.saveAndFlush(invoiceData);
+					
+				}
+				
+			}
+				
 			
 			return new CommandProcessingResult(cancelPay.getId(),payment.getClientId());
 			
