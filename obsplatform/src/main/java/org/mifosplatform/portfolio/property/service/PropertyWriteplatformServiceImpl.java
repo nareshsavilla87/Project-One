@@ -456,9 +456,12 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		return propertyCodesMaster;
 	}
 
+	@Transactional
 	@Override
 	public CommandProcessingResult allocatePropertyDevice(Long entityId,JsonCommand command) {
         try{
+        	this.context.authenticatedUser();
+        	
         	
         }catch(DataIntegrityViolationException dve){
         	handleCodeDataIntegrityIssues(command, dve);
