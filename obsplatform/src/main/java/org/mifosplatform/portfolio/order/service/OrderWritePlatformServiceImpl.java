@@ -17,6 +17,8 @@ import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeMaster;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeRepository;
 import org.mifosplatform.billing.promotioncodes.exception.PromotionCodeNotFoundException;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
+import org.mifosplatform.finance.billingorder.domain.Invoice;
+import org.mifosplatform.finance.billingorder.service.InvoiceClient;
 import org.mifosplatform.finance.billingorder.service.ReverseInvoice;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBillingRepository;
@@ -136,6 +138,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final OrderHistoryRepository orderHistoryRepository;
 	private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
 	private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
+	private final InvoiceClient invoiceClient;
+	
    
     
 
@@ -157,7 +161,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		    final HardwareAssociationRepository associationRepository,final ProvisioningWritePlatformService provisioningWritePlatformService,
 		    final PaymentFollowupRepository paymentFollowupRepository,final PriceRepository priceRepository,final ChargeCodeRepository chargeCodeRepository,
 		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
-		    final PaypalRecurringBillingRepository paypalRecurringBillingRepository) {
+		    final PaypalRecurringBillingRepository paypalRecurringBillingRepository,
+		    final InvoiceClient invoiceClient) {
 
 		this.context = context;
 		this.reverseInvoice=reverseInvoice;
@@ -194,6 +199,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
 		this.accountIdentifierGeneratorFactory=accountIdentifierGeneratorFactory;
 		this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
+		this.invoiceClient = invoiceClient;
 		
 
 	}
@@ -260,7 +266,7 @@ try{
 		}
 	}
 	
-	processNotifyMessages(EventActionConstants.EVENT_ACTIVE_ORDER, clientId, order.getId().toString());
+	/*processNotifyMessages(EventActionConstants.EVENT_ACTIVE_ORDER, clientId, order.getId().toString());*/
 	
 	return new CommandProcessingResult(order.getId(),order.getClientId());	
 	}catch (DataIntegrityViolationException dve) {
@@ -500,7 +506,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  orderDetails.setContractPeriod(contractDetails.getId());
 	 
 	  orderDetails.setRenewalDate(newStartdate.toDate());
-	  this.orderRepository.save(orderDetails);
+	  this.orderRepository.saveAndFlush(orderDetails);
 
 	//  Set<PlanDetails> planDetails=plan.getDetails();
 	 // ServiceMaster serviceMaster=this.serviceMasterRepository.findOneByServiceCode(planDetails.iterator().next().getServiceCode());
@@ -523,7 +529,15 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 
 		     //For Order History
    			OrderHistory orderHistory=new OrderHistory(orderDetails.getId(),DateUtils.getLocalDateOfTenant(),newStartdate,resourceId,requstStatus,userId,description);
-   			this.orderHistoryRepository.save(orderHistory);
+   			this.orderHistoryRepository.saveAndFlush(orderHistory);
+   			
+   			//Auto renewal with invoice process  for Topup  orders
+   			
+   		  if(plan.isPrepaid() == 'Y' && orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
+   			  
+   		     Invoice invoice=this.invoiceClient.onTopUpAutoRenewalInvoice(orderDetails.getId(),orderDetails.getClientId(),newStartdate.plusDays(1));
+   		    
+   		  }
    			processNotifyMessages(EventActionConstants.EVENT_RECONNECTION_ORDER, orderDetails.getClientId(), orderId.toString());
    			return new CommandProcessingResult(Long.valueOf(orderDetails.getClientId()),orderDetails.getClientId());
 		

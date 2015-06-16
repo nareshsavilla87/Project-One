@@ -26,7 +26,6 @@ import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.organisation.message.domain.BillingMessage;
 import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
-import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
 import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Client;
