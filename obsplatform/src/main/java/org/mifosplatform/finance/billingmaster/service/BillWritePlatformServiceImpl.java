@@ -155,14 +155,19 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			System.out.println("Filling report successfully...");
 			
 		} catch (final DataIntegrityViolationException ex) {
+			
 			 LOGGER.error("Filling report failed..." + ex.getLocalizedMessage());
 			 System.out.println("Filling report failed...");
 			 ex.printStackTrace();
+		
 		} catch (final JRException  | JRRuntimeException e) {
+			
 			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 			e.printStackTrace();
+		
 		} catch (final Exception e) {
+			
 			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 			e.printStackTrace();

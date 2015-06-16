@@ -196,7 +196,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
         logger.error(dve.getMessage(), dve);
     }
 
-	//@SuppressWarnings("unused")
+	@Transactional
 	@Override
 	public CommandProcessingResult selfRegistrationProcess(JsonCommand command) {
 

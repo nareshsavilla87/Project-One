@@ -221,9 +221,9 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 			this.discountCode = this.discountCode+"_"+this.getId();
 		}
 		
-		for(DiscountDetails discountDetails: this.discountDetails ){
+		/*for(DiscountDetails discountDetails: this.discountDetails ){
 			discountDetails.delete();
-		}
+		}*/
 
 	}
 

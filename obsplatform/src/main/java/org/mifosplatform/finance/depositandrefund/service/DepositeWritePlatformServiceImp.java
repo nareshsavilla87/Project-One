@@ -1,5 +1,6 @@
 package org.mifosplatform.finance.depositandrefund.service;
 
+import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
 import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefund;
 import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefundRepository;
 import org.mifosplatform.finance.depositandrefund.exception.InvalidDepositException;
@@ -30,15 +31,18 @@ public class DepositeWritePlatformServiceImp implements DepositeWritePlatformSer
 	private final DepositeCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final DepositAndRefundRepository depositAndRefundRepository;
 	private final DepositeReadPlatformService depositeReadPlatformService;
+	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
 
 	
 	
 	@Autowired
 	public DepositeWritePlatformServiceImp(final PlatformSecurityContext context, final DepositAndRefundRepository depositAndRefundRepository,
-			final DepositeCommandFromApiJsonDeserializer apiJsonDeserializer,final DepositeReadPlatformService depositeReadPlatformService) {
+			final DepositeCommandFromApiJsonDeserializer apiJsonDeserializer,final DepositeReadPlatformService depositeReadPlatformService,
+			final BillingOrderWritePlatformService billingOrderWritePlatformService) {
 		
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
+		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
 		this.depositAndRefundRepository = depositAndRefundRepository;
 		this.depositeReadPlatformService = depositeReadPlatformService;
 
@@ -59,6 +63,10 @@ public class DepositeWritePlatformServiceImp implements DepositeWritePlatformSer
 		    }
 		    DepositAndRefund depositfund=new DepositAndRefund(Long.valueOf(clientId),Long.valueOf(feeId),feeMasterData.getDefaultFeeAmount(),DateUtils.getDateOfTenant(),feeMasterData.getTransactionType());
 			this.depositAndRefundRepository.save(depositfund);
+			
+			// Update Client Balance
+			this.billingOrderWritePlatformService.updateClientBalance(feeMasterData.getDefaultFeeAmount(),Long.valueOf(clientId),false);
+			
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(depositfund.getId()).build();
 			
 		}catch(final DataIntegrityViolationException dve){
