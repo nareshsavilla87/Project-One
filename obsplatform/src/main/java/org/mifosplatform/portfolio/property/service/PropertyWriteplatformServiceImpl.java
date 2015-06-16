@@ -455,5 +455,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		}
 		return propertyCodesMaster;
 	}
+
+	
 	
 }

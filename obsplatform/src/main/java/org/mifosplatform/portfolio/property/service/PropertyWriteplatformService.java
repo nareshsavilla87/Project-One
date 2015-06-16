@@ -19,4 +19,5 @@ public interface PropertyWriteplatformService {
 
 	CommandProcessingResult deletePropertyMaster(Long entityId);
 
+
 }

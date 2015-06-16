@@ -279,5 +279,17 @@ public class PropertyApiResource {
 		final Page<PropertyDefinationData> propertyDefinationData = this.propertyReadPlatformService.retrievePropertyHistory(searchPropertyDetails);
 		return this.toApiJsonSerializer.serialize(propertyDefinationData);
 	}
+	
+	@PUT
+	@Path("allocatedevice/{clientId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String allocateDeviceToProperty(@PathParam("clientId") final Long clientId,final String apiRequestBodyAsJson) {
+
+		context.authenticatedUser();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().allocateProperty(clientId).withJson(apiRequestBodyAsJson).build();
+		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
+		return this.toApiJsonSerializer.serialize(result);
+	}
 
 }

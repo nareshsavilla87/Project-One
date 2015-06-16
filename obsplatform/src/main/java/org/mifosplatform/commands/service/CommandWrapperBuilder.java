@@ -2937,6 +2937,15 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+	public CommandWrapperBuilder allocateProperty(Long clientId) {
+		
+		this.actionName = "ALLOCATEDEVICE";
+		this.entityName = "PROPERTY";
+		this.entityId = clientId;
+		this.href = "";
+		return this;
+	}
+
 }
 
 
