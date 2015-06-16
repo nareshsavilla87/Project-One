@@ -139,31 +139,23 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 			
 			OwnedHardware ownedHardware=this.hardwareJpaRepository.findBySerialNumber(serialNo);
 			ownedHardware.updateSerialNumbers(provisionNum);
-			
 			this.hardwareJpaRepository.saveAndFlush(ownedHardware);
 			
 			final ItemMaster itemMaster=this.itemRepository.findOne(Long.valueOf(ownedHardware.getItemType()));
-
-			
 	        List<HardwareAssociationData> allocationDetailsDatas=this.associationReadplatformService.retrieveClientAllocatedPlan(ownedHardware.getClientId(),itemMaster.getItemCode());
-	    
 	        if(!allocationDetailsDatas.isEmpty()){
 	    				this.associationWriteplatformService.createNewHardwareAssociation(ownedHardware.getClientId(),allocationDetailsDatas.get(0).getPlanId(),
 	    						ownedHardware.getSerialNumber(),allocationDetailsDatas.get(0).getorderId(),"ALLOT");
 	        }
+	        
 	   }else{
 		
 		//DeAllocate HardWare
 		ItemDetailsAllocation inventoryItemDetailsAllocation=this.inventoryItemDetailsWritePlatformService.deAllocateHardware(serialNo, entityId);
 		
-	
-		
-	//	this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,requstStatus);
-		
-		JSONObject allocation = new JSONObject();
+		 JSONObject allocation = new JSONObject();
 		 JSONObject allocation1 = new JSONObject();
 		 JSONArray  serialNumber=new JSONArray();
-		 
 		  
 		 allocation.put("itemMasterId",inventoryItemDetailsAllocation.getItemMasterId());
 		 allocation.put("clientId",entityId);
@@ -178,25 +170,18 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 		 allocation1.put("serialNumber",serialNumber);
 		 
 		//ReAllocate HardWare
-			//this.inventoryItemDetailsWritePlatformService.allocateHardware(command);
 			CommandWrapper commandWrapper = new CommandWrapperBuilder().allocateHardware().withJson(allocation1.toString()).build();
 			this.commandSourceWritePlatformService.logCommandSource(commandWrapper);
 		}
 			//for Reassociation With New SerialNumber
-			//this.associationWriteplatformService.createAssociation(command);
 		Long resouceId=Long.valueOf(0);
 		
 			if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
 			requstStatus =UserActionStatusTypeEnum.DEVICE_SWAP.toString();
-			//final CommandProcessingResult processingResult=this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,requstStatus);
 			order.setStatus( OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
-			
-	         //   if(plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
-					
 				CommandProcessingResult commandProcessingResult=	this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order,plan.getPlanCode(),UserActionStatusTypeEnum.DEVICE_SWAP.toString(),
 							Long.valueOf(0),null,serialNo,order.getId(),plan.getProvisionSystem(),null);
 				resouceId=commandProcessingResult.resourceId();
-			//	}
 			}
 			
 			//geting old serial number itemdetails data 

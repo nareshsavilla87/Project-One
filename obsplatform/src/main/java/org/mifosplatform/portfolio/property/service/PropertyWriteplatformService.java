@@ -19,4 +19,6 @@ public interface PropertyWriteplatformService {
 
 	CommandProcessingResult deletePropertyMaster(Long entityId);
 
+	CommandProcessingResult allocatePropertyDevice(Long entityId,JsonCommand command);
+
 }
