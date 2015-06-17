@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
+import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
@@ -21,6 +22,8 @@ import org.mifosplatform.finance.billingorder.service.GenerateReverseBillingOrde
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,11 +41,13 @@ public class InvoiceOneTimeSale {
 	private final DiscountMasterRepository discountMasterRepository;
 	private final GenerateDisconnectionBill generateDisconnectionBill;
 	private final GenerateReverseBillingOrderService generateReverseBillingOrderService;
+	private final ClientRepository clientRepository;
 	
 	@Autowired
 	public InvoiceOneTimeSale(final GenerateBill generateBill,final BillingOrderWritePlatformService billingOrderWritePlatformService,
 			final GenerateBillingOrderService generateBillingOrderService,final DiscountMasterRepository discountMasterRepository,
-			final GenerateDisconnectionBill generateDisconnectionBill,final GenerateReverseBillingOrderService generateReverseBillingOrderService) {
+			final GenerateDisconnectionBill generateDisconnectionBill,final GenerateReverseBillingOrderService generateReverseBillingOrderService,
+			final ClientRepository clientRepository) {
 		
 		this.generateBill = generateBill;
 		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
@@ -50,6 +55,7 @@ public class InvoiceOneTimeSale {
 		this.discountMasterRepository=discountMasterRepository;
 		this.generateDisconnectionBill = generateDisconnectionBill;
 		this.generateReverseBillingOrderService = generateReverseBillingOrderService;
+		this.clientRepository = clientRepository;
 	}
 
 /**
@@ -65,9 +71,19 @@ public class InvoiceOneTimeSale {
 				oneTimeSaleData.getChargeCode(),oneTimeSaleData.getChargeType(),oneTimeSaleData.getTotalPrice(),oneTimeSaleData.getTaxInclusive());
 
 		DiscountMaster discountMaster = this.discountMasterRepository.findOne(oneTimeSaleData.getDiscountId());
+		BigDecimal discountRate = BigDecimal.ZERO;
+		Client client=this.clientRepository.findOne(clientId);
+		List<DiscountDetails> discountDetails=discountMaster.getDiscountDetails();
+		for(DiscountDetails discountDetail:discountDetails){
+			if(client.getCategoryType().equals(Long.valueOf(discountDetail.getCategoryType()))){
+				discountRate = discountDetail.getDiscountRate();
+			}else if(discountRate.equals(BigDecimal.ZERO) && Long.valueOf(discountDetail.getCategoryType()).equals(Long.valueOf(0))){
+				discountRate = discountDetail.getDiscountRate();
+			}
+		}
 
 		DiscountMasterData discountMasterData = new DiscountMasterData(discountMaster.getId(), discountMaster.getDiscountCode(),discountMaster.getDiscountDescription(),
-				discountMaster.getDiscountType(),discountMaster.getDiscountRate(), null, null);
+				discountMaster.getDiscountType(),discountRate, null, null);
 
 		discountMasterData = this.calculateDiscount(discountMasterData,billingOrderData.getPrice());
 

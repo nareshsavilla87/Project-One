@@ -246,5 +246,23 @@ public class FeeMasterData {
 
 
 
+	public List<ItemData> getItemCodes() {
+		return itemCodes;
+	}
+
+
+
+	public Long getItemId() {
+		return itemId;
+	}
+
+
+
+	public String isRefundable() {
+		return isRefundable;
+	}
+
+
+
 
 }

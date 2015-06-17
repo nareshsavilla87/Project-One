@@ -1,8 +1,5 @@
 package org.mifosplatform.billing.selfcare.service;
 
-import java.sql.Timestamp;
-import java.util.Date;
-
 import org.apache.commons.lang.RandomStringUtils;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistory;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistoryRepository;

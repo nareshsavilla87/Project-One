@@ -111,19 +111,6 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 					if(result!=null){
 						this.billingMasterApiResourse.printInvoice(result.resourceId(),eventActionData.getClientId());
 					}
-						/*JSONObject jsonObj=new JSONObject();
-						jsonObj.put("dateFormat","dd MMMM yyyy");
-						jsonObj.put("locale","en");
-						jsonObj.put("dueDate", dateFormat.format(new Date()));
-						jsonObj.put("message","Statement");
-						parsedCommand = this.fromApiJsonHelper.parse(jsonObj.toString());
-						command = JsonCommand.from(jsonObj.toString(),parsedCommand,this.fromApiJsonHelper,"BILLMASTER",eventActionData.getClientId(), null,
-								null,eventActionData.getClientId(), null, null, null,null, null, null,null);
-			            result = this.billMasterWritePlatformService.createBillMaster(command, command.entityId());
-				           if(result.resourceId() != null){
-				        	  this.billingMasterApiResourse.printInvoice(result.resourceId());
-				        	  this.billingMasterApiResourse.sendBillPathToMsg(result.resourceId());
-				           }*/
 					
 				}catch(Exception exception){
 					
