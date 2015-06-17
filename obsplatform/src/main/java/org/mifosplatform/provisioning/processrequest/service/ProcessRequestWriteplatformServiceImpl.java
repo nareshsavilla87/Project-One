@@ -1,9 +1,11 @@
 package org.mifosplatform.provisioning.processrequest.service;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.mifosplatform.finance.billingorder.api.BillingOrderApiResourse;
 import org.mifosplatform.infrastructure.configuration.domain.EnumDomainService;
 import org.mifosplatform.infrastructure.configuration.domain.EnumDomainServiceRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -65,6 +67,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	  private final ServiceParametersRepository serviceParametersRepository;
 	  private final OrderAddonsRepository orderAddonsRepository;
       private final OrderAssembler orderAssembler;
+      private final BillingOrderApiResourse billingOrderApiResourse;
 	  
 	  
 
@@ -74,7 +77,8 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	    		final ClientRepository clientRepository,final PlanRepository planRepository,final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
 	    		final ActiondetailsWritePlatformService actiondetailsWritePlatformService,final PlatformSecurityContext context,
 	    		final EnumDomainServiceRepository enumDomainServiceRepository,final ServiceParametersRepository parametersRepository,
-	    		final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,final OrderAddonsRepository orderAddonsRepository) {
+	    		final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,final OrderAddonsRepository orderAddonsRepository,
+	    		final BillingOrderApiResourse billingOrderApiResourse) {
 
 	    	
 	    	    this.context = context;
@@ -90,6 +94,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	    	    this.processRequestRepository=processRequestRepository;
 	    	    this.orderReadPlatformService=orderReadPlatformService;
 	    	    this.enumDomainServiceRepository=enumDomainServiceRepository;
+	    	    this.billingOrderApiResourse = billingOrderApiResourse;
 
 	             
 	    }
@@ -243,7 +248,14 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
         								order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
         								client.setStatus(ClientStatus.ACTIVE.getValue());
         								this.orderRepository.saveAndFlush(order);
-
+        							 if(plan.isPrepaid() == 'Y'){
+        								JSONObject json=new JSONObject(); 
+        							    json.put("dateFormat","dd MMMM yyyy");
+        			        	  		json.put("locale","en");
+        			        	  		json.put("systemDate",new SimpleDateFormat("dd MMMM yyyy").format(order.getStartDate()));
+        			        	  		this.billingOrderApiResourse.retrieveBillingProducts(order.getClientId(),json.toString());	
+        							 }
+								break;
 								
 								default : 
 
