@@ -68,13 +68,13 @@ public class PriceWritePlatformServiceImpl implements PriceWritePlatformService 
 		try{
 		context.authenticatedUser();
 		this.fromApiJsonDeserializer.validateForCreate(command.json());
-		String planCode = command.stringValueOfParameterNamed("planCode");
+		String isPrepaid = command.stringValueOfParameterNamed("isPrepaid");
 		String chargeCode = command.stringValueOfParameterNamed("chargeCode");
 		String contractPeriod = command.stringValueOfParameterNamed("duration");
 		
 		ChargeCodeMaster chargeCodeMaster = chargeCodeRepository.findOneByChargeCode(chargeCode);
 		Contract contract = contractRepository.findOneByContractId(contractPeriod);
-		if(planCode.equalsIgnoreCase("Prepaid")){
+		if(isPrepaid.equalsIgnoreCase("Y")){
 			
 			if(chargeCodeMaster.getChargeDuration() != contract.getUnits().intValue()){
 				throw new ChargeCodeAndContractPeriodException(chargeCode);
@@ -114,13 +114,13 @@ public class PriceWritePlatformServiceImpl implements PriceWritePlatformService 
 		try{
 			context.authenticatedUser();
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
-			String planCode = command.stringValueOfParameterNamed("planCode");
+			String isPrepaid = command.stringValueOfParameterNamed("isPrepaid");
 			String chargeCode = command.stringValueOfParameterNamed("chargeCode");
 			String contractPeriod = command.stringValueOfParameterNamed("duration");
 			
 			ChargeCodeMaster chargeCodeMaster = chargeCodeRepository.findOneByChargeCode(chargeCode);
 			Contract contract = contractRepository.findOneByContractId(contractPeriod);
-			if(planCode.equalsIgnoreCase("Prepaid")){
+			if(isPrepaid.equalsIgnoreCase("Y")){
 				if(contract == null){
 					throw new ContractNotNullException();
 				}
