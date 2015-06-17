@@ -174,7 +174,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 		Contract contract = this.contractRepository.findOne(order.getContarctPeriod());
 	    LocalDate endDate = this.calculateEndDate(startDate, contract.getSubscriptionType(), contract.getUnits());
 	    order.setStartDate(startDate);
-	    if(order.getbillAlign() == 'Y'){
+	    if(order.getbillAlign() == 'Y' && endDate != null){
 	    	order.setEndDate(endDate.dayOfMonth().withMaximumValue());
 		}else{
 			order.setEndDate(endDate);
@@ -187,6 +187,8 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 				//end date is null for rc
 				if (orderPrice.getChargeType().equalsIgnoreCase("RC")	&& endDate != null) {
 					orderPrice.setBillEndDate(new LocalDate(order.getEndDate()));
+				}else if(endDate == null){
+					orderPrice.setBillEndDate(endDate);
 				} else if(orderPrice.getChargeType().equalsIgnoreCase("NRC")) {
 					orderPrice.setBillEndDate(billstartDate);
 				}

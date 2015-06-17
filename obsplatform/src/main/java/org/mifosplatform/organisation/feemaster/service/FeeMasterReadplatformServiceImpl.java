@@ -102,11 +102,14 @@ public class FeeMasterReadplatformServiceImpl implements FeeMasterReadplatformSe
 	}
 
 	@Override
-	public Collection<FeeMasterData> retrieveAllData() {
+	public Collection<FeeMasterData> retrieveAllData(final String transactionType) {
 		
 		try{
 			final FeeMasterDataMapper mapper = new FeeMasterDataMapper();			
-			final String sql = "select " + mapper.schema() +"  where is_deleted = 'N'";
+			 String sql = "select " + mapper.schema() +"  where is_deleted = 'N'";
+			if(transactionType != null){
+				sql = "select " + mapper.schema() +"  where is_deleted = 'N' and fm.transaction_type ="+transactionType;
+			}
 	    	return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 		
 		}catch (final EmptyResultDataAccessException e) {

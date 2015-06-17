@@ -101,10 +101,10 @@ public class RefundWritePlatformServiceImpl implements RefundWritePlatformServic
 				processDepositAndRefund(clientId, itemId, refundAmount, "Payment Towards Refund Entry", "Debit", depositId);
 				
 			}else if(clientBalanceAmount.intValue() <= refundBalance.intValue()){
-				MathContext mc = new MathContext(4);
+				//MathContext mc = new MathContext(4);
 				BigDecimal amountValue = null;
 				if(clientBalanceAmount.intValue() > 0){
-					amountValue= refundBalance.subtract(clientBalanceAmount,mc);
+					amountValue= refundBalance.subtract(clientBalanceAmount);
 					processDepositAndRefund(clientId, itemId, amountValue, "Refund", "Credit", depositId);
 					processDepositAndRefund(clientId, itemId, amountValue, "Payment Towards Refund Entry", "Debit", depositId);
 					processDepositAndRefund(clientId, itemId, clientBalanceAmount, "Refund Adjustment towards Service Balance", "Credit", depositId);
