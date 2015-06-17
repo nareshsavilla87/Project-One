@@ -162,3 +162,12 @@ from
 group by bm.id 
 ;
 
+
+CREATE OR REPLACE VIEW `netrevenue_vw_2015`
+AS
+select `dt`.`year4` AS `year4`,`dt`.`year_month_abbreviation` AS `year_mon`,`dt`.`month_number` AS `mon`,`c`.`id` AS `client_id`,ifnull((select round((sum(`biop`.`invoice_amount`) - ifnull(sum(`bpop`.`amount_paid`),0)),2) AS `op_bal` from (`b_invoice` `biop` left join `b_payments` `bpop` on((`biop`.`client_id` = `bpop`.`client_id`))) where ((`biop`.`invoice_date` < `fdm`.`date_value`) and (`bpop`.`payment_date` < `fdm`.`date_value`) and (`biop`.`client_id` = `c`.`id`))),0) AS `op_bal`,`bi`.`invoice_amount` AS `inv_amt`,round(ifnull(`bp`.`amount_paid`,0),2) AS `pmt_amt`,`ldm`.`date_value` AS `date_value`,round((select (ifnull(sum(`bicl`.`invoice_amount`),0) - ifnull(sum(`bpcl`.`amount_paid`),0)) AS `cl_bal` from (`b_invoice` `bicl` left join `b_payments` `bpcl` on((`bicl`.`client_id` = `bpcl`.`client_id`))) where ((`bicl`.`invoice_date` <= `ldm`.`date_value`) and (`bpcl`.`payment_date` <= `ldm`.`date_value`) and (`bicl`.`client_id` = `c`.`id`))),2) AS `cl_bal`
+from (((((`m_client` `c` join `dim_date` `dt` on(((`dt`.`year4` = 2015) and (`dt`.`month_number` <= month(now()))))) join `dim_date` `fdm` on(((`fdm`.`year_month_number` = `dt`.`year_month_number`) and (`fdm`.`is_first_day_in_month` = 'Yes')))) join `dim_date` `ldm` on(((`dt`.`year_month_number` = `ldm`.`year_month_number`) and (`ldm`.`is_last_day_in_month` = 'Yes')))) join `b_invoice` `bi` on(((`c`.`id` = `bi`.`client_id`) and (`dt`.`year_month_number` = concat(year(`bi`.`invoice_date`),'-',month(`bi`.`invoice_date`)))))) left join `b_payments` `bp` on(((`c`.`id` = `bp`.`client_id`) and (`dt`.`year_month_number` = concat(year(`bp`.`payment_date`),'-',month(`bp`.`payment_date`))))))
+group by `bi`.`client_id`,`dt`.`year_month_abbreviation` order by `c`.`id`,`dt`.`year4`,`dt`.`month_number`;
+
+
+

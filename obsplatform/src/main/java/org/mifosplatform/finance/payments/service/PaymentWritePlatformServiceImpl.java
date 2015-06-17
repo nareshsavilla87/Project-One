@@ -119,6 +119,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 		this.infoRepository = infoRepository;
 		this.orderWritePlatformService = orderWritePlatformService;
 		this.depositAndRefundRepository = depositAndRefundRepository;
+
 		
 	}
 

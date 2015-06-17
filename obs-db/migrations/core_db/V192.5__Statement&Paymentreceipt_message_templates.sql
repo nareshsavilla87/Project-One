@@ -3,7 +3,7 @@ SET @id=(select id from b_message_template where template_description='STATEMENT
 insert ignore into b_message_params values(null,@id, '<PARAM1>', '1');
 
 
-insert ignore into b_message_template values(null, 'INVOICE_EMAIL', 'TAX INVOICE FROM OBS <br/>', 'Dear <PARAM1> <br/>', 'Please find the attached TAX INVOCIE from Obs <br/>', 'Thanks', 'E', '1', '2014-07-30 12:33:42', '1', '2015-06-09 14:10:47', 'N');
+insert ignore into b_message_template values(null, 'INVOICE_EMAIL', 'TAX INVOICE FROM OBS', 'Dear <PARAM1> <br/>', 'Please find the attached TAX INVOCIE from Obs <br/>', 'Thanks', 'E', '1', '2014-07-30 12:33:42', '1', '2015-06-09 14:10:47', 'N');
 SET @id=(select id from b_message_template where template_description='INVOICE_EMAIL');
 insert ignore into b_message_params values(null,@id, '<PARAM1>', '1');
 
@@ -12,3 +12,4 @@ SET @id=(select id from b_message_template where template_description='PAYMENT_E
 insert ignore into b_message_params values(null,@id, '<PARAM1>', '1');
 
 insert ignore into b_eventaction_mapping values(null, 'Send Payment Receipt', 'Send Payment', 'workflow_events', 'Y', 'N');
+

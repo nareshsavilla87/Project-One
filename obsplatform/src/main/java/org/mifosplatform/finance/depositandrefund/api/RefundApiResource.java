@@ -1,18 +1,13 @@
 package org.mifosplatform.finance.depositandrefund.api;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -21,32 +16,24 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
-import org.json.JSONObject;
-import org.mifosplatform.billing.selfcare.domain.SelfCareTemporary;
 import org.mifosplatform.billing.selfcare.domain.SelfCareTemporaryRepository;
-import org.mifosplatform.billing.selfcare.exception.SelfCareTemporaryAlreadyExistException;
-import org.mifosplatform.billing.selfcare.exception.SelfCareTemporaryEmailIdNotFoundException;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
-import org.mifosplatform.finance.payments.data.McodeData;
+import org.mifosplatform.finance.depositandrefund.exception.ItemQualityAndStatusException;
 import org.mifosplatform.finance.payments.data.PaymentData;
-import org.mifosplatform.finance.payments.exception.DalpayRequestFailureException;
 import org.mifosplatform.finance.payments.service.PaymentReadPlatformService;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
-
-import com.google.gson.JsonObject;
 
 @Path("/refund")
 @Component
@@ -112,12 +99,14 @@ public class RefundApiResource {
 		}else if(clientBalance.getBalanceAmount().intValue() <= depositAmount.intValue()){
 			
 			if(clientBalance.getBalanceAmount().intValue() > 0){
-				MathContext mc = new MathContext(4);
-				returnAmount = depositAmount.subtract(clientBalance.getBalanceAmount(), mc);
+				//MathContext mc = new MathContext(4);
+				returnAmount = depositAmount.subtract(clientBalance.getBalanceAmount());
 			}else{
 				returnAmount = depositAmount;
 			}
 			
+		}else{
+			throw new ItemQualityAndStatusException(clientBalance.getBalanceAmount());	
 		}
 		PaymentData paymentData = new PaymentData();
 		paymentData.setAvailAmount(returnAmount);

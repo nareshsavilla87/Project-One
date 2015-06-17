@@ -2921,6 +2921,21 @@ public class CommandWrapperBuilder {
 		this.href = "/refund/" + depositId;
 		return this;
 	}
+	public CommandWrapperBuilder createDeposite() {
+		this.actionName = "CREATE";
+		this.entityName = "DEPOSIT";
+		this.entityId = null;
+		this.href = "";
+		return this;
+	}
+
+	public CommandWrapperBuilder createDeposit(Long clientId) {
+		this.actionName = "CREATE";
+		this.entityName = "DEPOSIT";
+		this.entityId =clientId;
+		this.href = "/deposit/" + clientId;
+		return this;
+	}
 
 }
 

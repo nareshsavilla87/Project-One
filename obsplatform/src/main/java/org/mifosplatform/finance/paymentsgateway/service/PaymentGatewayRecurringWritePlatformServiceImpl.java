@@ -162,7 +162,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 			paramName = (String) en.nextElement();
 			paramValue = request.getParameter(paramName);
 			
-			if (!"password".equalsIgnoreCase(paramName) && !"username".equalsIgnoreCase(paramName) && !"rm".equalsIgnoreCase(paramName)) {
+			if (!"password".equalsIgnoreCase(paramName) && !"username".equalsIgnoreCase(paramName) && !"rm".equalsIgnoreCase(paramName) && !"tenantIdentifier".equalsIgnoreCase(paramName)) {
 				cmd.append("&").append(paramName).append("=").append(URLEncoder.encode(paramValue, request.getParameter("charset")));
 				
 			} /*else {
