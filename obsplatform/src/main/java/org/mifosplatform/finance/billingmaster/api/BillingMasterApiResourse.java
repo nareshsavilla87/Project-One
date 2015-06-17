@@ -158,8 +158,8 @@ public class BillingMasterApiResourse {
 			final String msg = "No Generated Pdf file For This Statement";
 			throw new BillingOrderNoRecordsFoundException(msg, billId);
 		}
-		final Long msgId = this.billWritePlatformService.sendStatementToEmail(billMaster);
-	    return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(msgId, null));
+		this.billWritePlatformService.sendPdfToEmail(fileName, billMaster.getClientId(), BillingMess);
+	    return this.toApiJsonSerializer.serialize(CommandProcessingResult.resourceResult(billId, null));
 	}
 	
 	@DELETE
@@ -184,7 +184,7 @@ public class BillingMasterApiResourse {
 		
 		}catch(SQLException e) {e.printStackTrace();}
 		 final File file = new File(printFileName);
-		 this.billWritePlatformService.sendInvoiceToEmail(printFileName,clientId);
+		 this.billWritePlatformService.sendPdfToEmail(printFileName,clientId,);
 		 final ResponseBuilder response = Response.ok(file);
 		 response.header("Content-Disposition", "attachment; filename=\"" + printFileName + "\"");
 		 response.header("Content-Type", "application/pdf");

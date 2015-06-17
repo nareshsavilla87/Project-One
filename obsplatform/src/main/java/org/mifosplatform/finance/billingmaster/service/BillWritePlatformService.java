@@ -18,8 +18,6 @@ public interface BillWritePlatformService {
 
 	String generateInovicePdf(Long billId) throws SQLException;
 
-	void sendInvoiceToEmail(String printFileName, Long clientId);
-
-	Long sendStatementToEmail(BillMaster billMaster);
+	void sendPdfToEmail(String printFileName, Long clientId, String templateName);
 
 }
