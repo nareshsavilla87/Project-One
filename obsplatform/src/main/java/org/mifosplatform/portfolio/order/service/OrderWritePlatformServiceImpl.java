@@ -211,7 +211,8 @@ try{
 	this.fromApiJsonDeserializer.validateForCreate(command.json());
 	final Long userId=getUserId();
 	
-	checkingContractPeriodAndBillfrequncyValidation(command);
+	checkingContractPeriodAndBillfrequncyValidation(command.longValueOfParameterNamed("contractPeriod"),
+			command.stringValueOfParameterNamed("paytermCode"));
 	
 	//Check for Custome_Validation
 	this.eventValidationReadPlatformService.checkForCustomValidations(clientId,EventActionConstants.EVENT_CREATE_ORDER,command.json(),userId);
@@ -424,6 +425,17 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  final Long userId=getUserId();
 	  this.fromApiJsonDeserializer.validateForRenewalOrder(command.json());
 	  Order orderDetails=retrieveOrderById(orderId);
+	  
+	  	Contract contract = contractRepository.findOne(command.longValueOfParameterNamed("renewalPeriod"));
+		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(orderDetails.getBillingFrequency());
+		Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
+		if(contract == null){
+			throw new ContractNotNullException();
+		}
+		if(chargeCodeDuration > contract.getUnits().intValue()){
+			throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.get(0).getBillFrequencyCode(), contract.getSubscriptionPeriod());
+		}
+		
 	  this.eventValidationReadPlatformService.checkForCustomValidations(orderDetails.getClientId(),EventActionConstants.EVENT_ORDER_RENEWAL,command.json(),userId);	
 	  List<OrderPrice>  orderPrices=orderDetails.getPrice();
 	  final Long contractPeriod = command.longValueOfParameterNamed("renewalPeriod");
@@ -689,7 +701,8 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		
  try{
 	 Long userId=this.context.authenticatedUser().getId();
-	 checkingContractPeriodAndBillfrequncyValidation(command);
+	 checkingContractPeriodAndBillfrequncyValidation(command.longValueOfParameterNamed("contractPeriod"),
+			 command.stringValueOfParameterNamed("paytermCode"));
 	 Order order=this.orderRepository.findOne(entityId);
 	 order.updateDisconnectionstate();
 	 Date billEndDate=order.getPrice().get(0).getBillEndDate();
@@ -1143,10 +1156,10 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			}  
   }
   
-  private void checkingContractPeriodAndBillfrequncyValidation(JsonCommand command){
+  private void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode){
 	  
-	  Contract contract = contractRepository.findOne(command.longValueOfParameterNamed("contractPeriod"));
-		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(command.stringValueOfParameterNamed("paytermCode"));
+	  Contract contract = contractRepository.findOne(contractPeriod);
+		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(paytermCode);
 		Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
 		if(contract == null){
 			throw new ContractNotNullException();
