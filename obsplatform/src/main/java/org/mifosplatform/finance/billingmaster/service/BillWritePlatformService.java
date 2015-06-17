@@ -1,7 +1,6 @@
 package org.mifosplatform.finance.billingmaster.service;
 
 import java.math.BigDecimal;
-import java.sql.SQLException;
 import java.util.List;
 
 import org.mifosplatform.finance.billingmaster.domain.BillDetail;
@@ -14,10 +13,10 @@ public interface BillWritePlatformService {
 	
 	/*String generatePdf(BillDetailsData billDetails,List<FinancialTransactionsData> data);*/	
 	
-	void generateStatementPdf(Long billId) throws SQLException;
+	void generateStatementPdf(Long billId);
 
-	String generateInovicePdf(Long billId) throws SQLException;
+	String generateInovicePdf(Long billId);
 
-	void sendPdfToEmail(String printFileName, Long clientId, String templateName);
+	void sendPdfToEmail(String printFileName,Long clientId,String templateName);
 
 }
