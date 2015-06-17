@@ -12,6 +12,8 @@ import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.planprice.domain.Price;
 import org.mifosplatform.billing.planprice.domain.PriceRepository;
+import org.mifosplatform.billing.planprice.exceptions.ChargeCodeAndContractPeriodException;
+import org.mifosplatform.billing.planprice.exceptions.ContractNotNullException;
 import org.mifosplatform.billing.planprice.exceptions.PriceNotFoundException;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeMaster;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeRepository;
@@ -138,7 +140,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final OrderHistoryRepository orderHistoryRepository;
 	private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
 	private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
-   
+	private final ContractRepository contractRepository;
     
 
     @Autowired
@@ -159,7 +161,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		    final HardwareAssociationRepository associationRepository,final ProvisioningWritePlatformService provisioningWritePlatformService,
 		    final PaymentFollowupRepository paymentFollowupRepository,final PriceRepository priceRepository,final ChargeCodeRepository chargeCodeRepository,
 		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
-		    final PaypalRecurringBillingRepository paypalRecurringBillingRepository) {
+		    final PaypalRecurringBillingRepository paypalRecurringBillingRepository,
+		    final ContractRepository contractRepository) {
 
 		this.context = context;
 		this.reverseInvoice=reverseInvoice;
@@ -197,7 +200,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
 		this.accountIdentifierGeneratorFactory=accountIdentifierGeneratorFactory;
 		this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
-		
+		this.contractRepository = contractRepository;
 
 	}
 	
@@ -207,6 +210,8 @@ public CommandProcessingResult createOrder(Long clientId,JsonCommand command) {
 try{
 	this.fromApiJsonDeserializer.validateForCreate(command.json());
 	final Long userId=getUserId();
+	
+	checkingContractPeriodAndBillfrequncyValidation(command);
 	
 	//Check for Custome_Validation
 	this.eventValidationReadPlatformService.checkForCustomValidations(clientId,EventActionConstants.EVENT_CREATE_ORDER,command.json(),userId);
@@ -684,6 +689,7 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		
  try{
 	 Long userId=this.context.authenticatedUser().getId();
+	 checkingContractPeriodAndBillfrequncyValidation(command);
 	 Order order=this.orderRepository.findOne(entityId);
 	 order.updateDisconnectionstate();
 	 Date billEndDate=order.getPrice().get(0).getBillEndDate();
@@ -1135,6 +1141,20 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 					this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,billing.getClientId(), orderId.toString(),null);			
 				}		
 			}  
+  }
+  
+  private void checkingContractPeriodAndBillfrequncyValidation(JsonCommand command){
+	  
+	  Contract contract = contractRepository.findOne(command.longValueOfParameterNamed("contractPeriod"));
+		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(command.stringValueOfParameterNamed("paytermCode"));
+		Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
+		if(contract == null){
+			throw new ContractNotNullException();
+		}
+		if(chargeCodeDuration > contract.getUnits().intValue()){
+			throw new ChargeCodeAndContractPeriodException();
+		}
+		
   }
 
  }
