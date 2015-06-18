@@ -54,6 +54,13 @@ public class EventActionConstants {
 	public static final String ACTION_NOTIFY_PAYMENT="Notify Payment";
 	public static final String ACTION_SEND_PAYMENT = "Send Payment";
 	
+	public static final String ACTION_NOTIFY_SMS_ACTIVATION="Notify_SMS_Activation";
+	public static final String ACTION_NOTIFY_SMS_DISCONNECTION="Notify_SMS_Disconnection";
+	public static final String ACTION_NOTIFY_SMS_RECONNECTION="Notify_SMS_Reconnection";
+	public static final String ACTION_NOTIFY_SMS_PAYMENT="Notify_SMS_Payment";
+	
+	
+	
 	
 
 }

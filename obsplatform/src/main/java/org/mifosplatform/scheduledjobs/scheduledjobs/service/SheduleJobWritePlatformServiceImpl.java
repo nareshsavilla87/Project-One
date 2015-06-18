@@ -564,7 +564,7 @@ public void processNotify() {
 
   try {
 	  System.out.println("Processing Notify Details.......");
-	  List<BillingMessageDataForProcessing> billingMessageDataForProcessings=this.billingMesssageReadPlatformService.retrieveMessageDataForProcessing();
+	  List<BillingMessageDataForProcessing> billingMessageDataForProcessings=this.billingMesssageReadPlatformService.retrieveMessageDataForProcessing(null);
 	  
 	  	if(!billingMessageDataForProcessings.isEmpty()){
 	  		MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
