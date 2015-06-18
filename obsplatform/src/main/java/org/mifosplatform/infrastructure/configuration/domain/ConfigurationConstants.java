@@ -41,6 +41,7 @@ public class ConfigurationConstants {
 	public static final String CONFIG_ALIGN_BIILING_CYCLE = "align-biiling-cycle";
 	public static final String CONFIG_PRORATA_WITH_NEXT_BILLING_CYCLE = "prorata-with-next-billing-cycle";
 	public static final String CONFIG_SINGLE_INVOICE_FOR_MULTI_ORDERS = "single-invoice-for-multi-orders";
+	public static final String CONFIG_PROPERTY_SMS= "sms-configuration";
 	
 
 	public static final String ENABLED = "enabled";
@@ -101,10 +102,11 @@ public class ConfigurationConstants {
 	public static final String GLOBALPAY_HOST = "demo.globalpay.com.ng";
 	public static final String GLOBALPAY_CHARSET = "application/soap+xml; charset=utf-8";
 	
-	public static final String CONFIG_PROPERTY_SMS= "sms-configuration";
+	public static final String PAYPAL_URL_NAME= "paypalUrl";
 	
-	
-
+    //Encryption key config
+	public static final String AES_ENCRYPTION_KEY = "key-value";
+	public static final String PAYPAL_MAX_FAILED_COUNT = "paypal-max-failed-count";
 }
 
 
