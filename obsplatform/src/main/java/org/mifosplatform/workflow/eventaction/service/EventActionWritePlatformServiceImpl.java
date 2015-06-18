@@ -342,7 +342,6 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 					        	this.eventActionRepository.save(eventAction);
 			        	  	
 			        	  	}else{
-			            	 
 			        	  		
 			        	  		jsonObject.put("dateFormat","dd MMMM yyyy");
 			        	  		jsonObject.put("locale","en");
