@@ -1,7 +1,6 @@
 package org.mifosplatform.finance.billingmaster.api;
 
 import java.io.File;
-import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;

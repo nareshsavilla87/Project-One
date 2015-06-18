@@ -17,7 +17,6 @@ import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeMaster;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeRepository;
 import org.mifosplatform.billing.promotioncodes.exception.PromotionCodeNotFoundException;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
-import org.mifosplatform.finance.billingmaster.api.BillingMasterApiResourse;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.service.InvoiceClient;
 import org.mifosplatform.finance.billingorder.service.ReverseInvoice;
@@ -142,7 +141,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
 	private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
 	private final InvoiceClient invoiceClient;
-	private final BillingMasterApiResourse billingMasterApiResourse;
    
     
 
@@ -165,7 +163,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		    final PaymentFollowupRepository paymentFollowupRepository,final PriceRepository priceRepository,final ChargeCodeRepository chargeCodeRepository,
 		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
 		    final PaypalRecurringBillingRepository paypalRecurringBillingRepository,
-		    final InvoiceClient invoiceClient,final BillingMasterApiResourse billingMasterApiResourse) {
+		    final InvoiceClient invoiceClient) {
 
 		this.context = context;
 		this.reverseInvoice=reverseInvoice;
@@ -204,8 +202,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.accountIdentifierGeneratorFactory=accountIdentifierGeneratorFactory;
 		this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
 		this.invoiceClient = invoiceClient;
-		this.billingMasterApiResourse = billingMasterApiResourse;
-		
 
 	}
 	
@@ -531,7 +527,10 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
      		    Invoice invoice=this.invoiceClient.onTopUpAutoRenewalInvoice(orderDetails.getId(),orderDetails.getClientId(),newStartdate.plusDays(1));
      		    
      		    if(invoice!=null){
-     		    	this.billingMasterApiResourse.printInvoice(invoice.getId(), orderDetails.getClientId());
+     		    	List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_TOPUP_INVOICE_MAIL);
+     				if(actionDetaislDatas.size() != 0){
+     					this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,orderDetails.getClientId(), invoice.getId().toString(),null);
+     				}
      		    }
      		  }
    			

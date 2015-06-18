@@ -208,7 +208,7 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 		invoice.setNetChargeAmount(totalChargeAmount);
 		invoice.setTaxAmount(netTaxAmount);
 		invoice.setInvoiceAmount(invoiceAmount);
-		return this.invoiceRepository.save(invoice);
+		return this.invoiceRepository.saveAndFlush(invoice);
 	}
 
 	public BigDecimal getInvoiceAmount(List<BillingOrderCommand> billingOrderCommands) {
