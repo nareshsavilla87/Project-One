@@ -3,7 +3,6 @@ package org.mifosplatform.finance.billingmaster.service;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author ranjith
- *
+ * 
  */
 @Service
 public class BillWritePlatformServiceImpl implements BillWritePlatformService {
@@ -105,7 +104,6 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		}
 	  dueAmount = chargeAmount.add(taxAmount).add(oneTimeSaleAmount).add(clientBalance)
 			      .add(serviceTransferAmount).subtract(paymentAmount).subtract(adjustmentAmount);
-
 	  billMaster.setChargeAmount(chargeAmount.add(oneTimeSaleAmount).add(serviceTransferAmount));
 	  billMaster.setAdjustmentAmount(adjustmentAmount);
 	  billMaster.setTaxAmount(taxAmount);
@@ -122,7 +120,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 
 	@Transactional
 	@Override
-	public void generateStatementPdf(final Long billId) throws SQLException {
+	public void generateStatementPdf(final Long billId)  {
 		
 		try {
 			final String fileLocation = FileUtils.MIFOSX_BASE_DIR;
@@ -169,7 +167,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 
 	@Transactional
 	@Override
-	public String generateInovicePdf(final Long invoiceId)  {
+	public String generateInovicePdf(final Long invoiceId) {
 		
 		final String fileLocation = FileUtils.MIFOSX_BASE_DIR ;
 		/** Recursively create the directory if it does not exist **/
@@ -209,7 +207,6 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		}
 		return printInvoiceLocation;	
    }
-	
 	
 	@Transactional
 	@Override
@@ -276,7 +273,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	    }
 	  }
 	}
-	
+
 /*	@Override
 	public String generatePdf(final BillDetailsData billDetails,final List<FinancialTransactionsData> datas) {
 
@@ -577,4 +574,3 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		return printInvoicedetailsLocation;
 
 	}*/	
-	

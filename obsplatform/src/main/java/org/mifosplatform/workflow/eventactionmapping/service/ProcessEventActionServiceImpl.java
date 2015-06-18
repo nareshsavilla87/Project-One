@@ -150,11 +150,23 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 				
 				break;
 				
+<<<<<<< HEAD
 			case EventActionConstants.ACTION_SEND_PAYMENT :
 				
 				this.billingMasterApiResourse.printPayment(eventAction.getResourceId(), eventAction.getClientId());
 				
 				break;
+=======
+			case EventActionConstants.ACTION_TOPUP_INVOICE_MAIL :
+
+				try{
+					 this.billingMasterApiResourse.printInvoice(eventActionData.getResourceId(),eventActionData.getClientId());
+					}	
+				catch(Exception exception){
+					
+				}
+			break;		
+>>>>>>> obsplatform-2.04
 			
 			default:
 				break;

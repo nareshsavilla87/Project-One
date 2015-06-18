@@ -356,8 +356,14 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						    	Long.parseLong(resourceId),jsonObject.toString(),Long.parseLong(resourceId),clientId);
 					        	this.eventActionRepository.save(eventAction);
 						break;
-						
-				    	
+							      
+				    case EventActionConstants.ACTION_TOPUP_INVOICE_MAIL : 
+			        	  		eventAction=new EventAction(DateUtils.getDateOfTenant(), "SEND",EventActionConstants.EVENT_TOPUP_INVOICE_MAIL.toString(),
+			        	  		EventActionConstants.ACTION_TOPUP_INVOICE_MAIL.toString(),"/billmaster/print/"+clientId+"/"+resourceId,Long.parseLong(resourceId),
+			        	  		jsonObject.toString(),Long.parseLong(resourceId),clientId);
+					        	this.eventActionRepository.save(eventAction);
+			        	  break;
+		
 				    case EventActionConstants.ACTION_RECURRING_DISCONNECT : 
 				    	
 				    	JsonObject apiRequestBodyAsJson = new JsonObject();
@@ -439,7 +445,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	}	
 						
 			        	break;
-			        	
+
 				    case EventActionConstants.ACTION_NOTIFY_ACTIVATION : 
 				    	
 				    	orderData = this.eventActionReadPlatformService.retrieveNotifyDetails(clientId, new Long(resourceId));

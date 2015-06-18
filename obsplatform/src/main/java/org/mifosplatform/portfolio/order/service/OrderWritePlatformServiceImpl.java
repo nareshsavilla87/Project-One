@@ -139,7 +139,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
 	private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
 	private final InvoiceClient invoiceClient;
-	
    
     
 
@@ -200,7 +199,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.accountIdentifierGeneratorFactory=accountIdentifierGeneratorFactory;
 		this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
 		this.invoiceClient = invoiceClient;
-		
+
 
 	}
 	
@@ -266,7 +265,7 @@ try{
 		}
 	}
 	
-	/*processNotifyMessages(EventActionConstants.EVENT_ACTIVE_ORDER, clientId, order.getId().toString());*/
+	processNotifyMessages(EventActionConstants.EVENT_ORDER_CONFIRMATION, clientId, order.getId().toString());
 	
 	return new CommandProcessingResult(order.getId(),order.getClientId());	
 	}catch (DataIntegrityViolationException dve) {
@@ -532,13 +531,20 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
    			OrderHistory orderHistory=new OrderHistory(orderDetails.getId(),DateUtils.getLocalDateOfTenant(),newStartdate,resourceId,requstStatus,userId,description);
    			this.orderHistoryRepository.saveAndFlush(orderHistory);
    			
-   			//Auto renewal with invoice process  for Topup  orders
+   		     //Auto renewal with invoice process  for Topup  orders
    			
-   		  if(plan.isPrepaid() == 'Y' && orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
-   			  
-   		     Invoice invoice=this.invoiceClient.onTopUpAutoRenewalInvoice(orderDetails.getId(),orderDetails.getClientId(),newStartdate.plusDays(1));
-   		    
-   		  }
+     		 if(plan.isPrepaid() == 'Y' && orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
+     			  
+     		    Invoice invoice=this.invoiceClient.onTopUpAutoRenewalInvoice(orderDetails.getId(),orderDetails.getClientId(),newStartdate.plusDays(1));
+     		    
+     		    if(invoice!=null){
+     		    	List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_TOPUP_INVOICE_MAIL);
+     				if(actionDetaislDatas.size() != 0){
+     					this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,orderDetails.getClientId(), invoice.getId().toString(),null);
+     				}
+     		    }
+     		  }
+   		 
    			processNotifyMessages(EventActionConstants.EVENT_RECONNECTION_ORDER, orderDetails.getClientId(), orderId.toString());
    			return new CommandProcessingResult(Long.valueOf(orderDetails.getClientId()),orderDetails.getClientId());
 		
