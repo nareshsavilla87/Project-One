@@ -18,6 +18,8 @@ import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
+import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefund;
+import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefundRepository;
 import org.mifosplatform.finance.payments.domain.ChequePayment;
 import org.mifosplatform.finance.payments.domain.ChequePaymentRepository;
 import org.mifosplatform.finance.payments.domain.Payment;
@@ -57,6 +59,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.paypal.core.rest.OAuthTokenCredential;
@@ -87,6 +90,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 	private final PartnerBalanceRepository partnerBalanceRepository;
 	private final OfficeAdditionalInfoRepository infoRepository;
 	private final OrderWritePlatformService orderWritePlatformService;
+	private final DepositAndRefundRepository depositAndRefundRepository;
 
 	@Autowired
 	public PaymentWritePlatformServiceImpl(final PlatformSecurityContext context,final PaymentRepository paymentRepository,
@@ -96,7 +100,8 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			final ConfigurationRepository globalConfigurationRepository,final PaypalEnquireyRepository paypalEnquireyRepository,
 			final FromJsonHelper fromApiJsonHelper,final PaymentGatewayConfigurationRepository paymentGatewayConfigurationRepository,
 			final ClientRepository clientRepository,final PartnerBalanceRepository partnerBalanceRepository,
-			final OfficeAdditionalInfoRepository infoRepository, final OrderWritePlatformService orderWritePlatformService) {
+			final OfficeAdditionalInfoRepository infoRepository, final OrderWritePlatformService orderWritePlatformService,
+			final DepositAndRefundRepository depositAndRefundRepository) {
 		
 		this.context = context;
 		this.fromApiJsonHelper=fromApiJsonHelper;
@@ -112,7 +117,9 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 		this.clientRepository = clientRepository;
 		this.partnerBalanceRepository = partnerBalanceRepository;
 		this.infoRepository = infoRepository;
-		this.orderWritePlatformService = orderWritePlatformService;			
+		this.orderWritePlatformService = orderWritePlatformService;
+		this.depositAndRefundRepository = depositAndRefundRepository;
+
 		
 	}
 
@@ -124,8 +131,27 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			
 			this.context.authenticatedUser();
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
+			final JsonElement element = fromApiJsonHelper.parse(command.json());
 			Payment payment  = Payment.fromJson(command,command.entityId());
 			this.paymentRepository.saveAndFlush(payment);
+			
+			if(command.hasParameter("paymentType")){
+				final String paymentType = command.stringValueOfParameterNamed("paymentType");
+				if("Deposit".equalsIgnoreCase(paymentType)){
+					JsonArray depositData = fromApiJsonHelper.extractJsonArrayNamed("deposit", element);
+					for (JsonElement je : depositData) {
+						final Long depositId = fromApiJsonHelper.extractLongNamed("depositId", je);
+						final BigDecimal amount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amount", je);
+						DepositAndRefund deopositAndRefund = this.depositAndRefundRepository.findOne(depositId);
+						
+						deopositAndRefund.setPaymentId(payment.getId());
+						this.depositAndRefundRepository.saveAndFlush(deopositAndRefund);
+						/*final DepositAndRefund refund = DepositAndRefund.fromJson(deopositAndRefund.getClientId(), 
+								deopositAndRefund.getItemId(), amount);
+						this.depositAndRefundRepository.saveAndFlush(refund);*/
+					}
+				}
+			}
 			
 			if(command.stringValueOfParameterNamed("isChequeSelected").equalsIgnoreCase("yes")){
 				final ChequePayment chequePayment = ChequePayment.fromJson(command);

@@ -145,15 +145,9 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 						Client client=this.clientRepository.findOne(detailsData.getClientId());
 						
 						switch(detailsData.getRequestType()){
- 						   
-							case ProvisioningApiConstants.REQUEST_ACTIVATION :
 						
-							if (detailsData.getOrderId() != null && detailsData.getOrderId() > 0) {
-								order = this.orderRepository.findOne(detailsData.getOrderId());
-								plan = this.planRepository.findOne(order.getPlanId());
-							}
-							
-							 client=this.clientRepository.findOne(detailsData.getClientId());
+						case ProvisioningApiConstants.REQUEST_ACTIVATION  :
+							 
 							if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.ACTIVATION.toString())){
                                 order.setStartDate(DateUtils.getLocalDateOfTenant());
 								order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
@@ -167,6 +161,39 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 							}
 								
 								break;
+							case ProvisioningApiConstants.REQUEST_RECONNECTION :
+								
+								 //client=this.clientRepository.findOne(detailsData.getClientId());
+								//if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.ACTIVATION.toString())){
+	                                order.setStartDate(DateUtils.getLocalDateOfTenant());
+									order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
+									order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
+									client.setStatus(ClientStatus.ACTIVE.getValue());
+									this.orderRepository.saveAndFlush(order);
+									List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_ACTIVE_ORDER);
+									if(actionDetaislDatas.size() != 0){
+											this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,order.getClientId(), order.getId().toString(),null);
+									}
+								//}
+									
+									break;
+									
+							case ProvisioningApiConstants.REQUEST_CHANGE_PLAN :
+								
+								 //client=this.clientRepository.findOne(detailsData.getClientId());
+								//if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.ACTIVATION.toString())){
+	                                order.setStartDate(DateUtils.getLocalDateOfTenant());
+									order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
+									order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
+									client.setStatus(ClientStatus.ACTIVE.getValue());
+									this.orderRepository.saveAndFlush(order);
+									actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CHANGE_PLAN);
+									if(actionDetaislDatas.size() != 0){
+											this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,order.getClientId(), order.getId().toString(),null);
+									}
+								//}
+									
+									break;		
 								
 							case ProvisioningApiConstants.REQUEST_DISCONNECTION :
 								
@@ -236,6 +263,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
                                 	}
                                 	
 								break;
+								
                                 case ProvisioningApiConstants.REQUEST_RENEWAL_AE:
                                 	
                                 	if (detailsData.getOrderId() != null && detailsData.getOrderId() > 0) {
@@ -248,6 +276,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
         								order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
         								client.setStatus(ClientStatus.ACTIVE.getValue());
         								this.orderRepository.saveAndFlush(order);
+
         							 if(plan.isPrepaid() == 'Y'){
         								JSONObject json=new JSONObject(); 
         							    json.put("dateFormat","dd MMMM yyyy");
