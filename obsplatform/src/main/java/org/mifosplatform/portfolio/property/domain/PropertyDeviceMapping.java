@@ -35,11 +35,12 @@ public class PropertyDeviceMapping  extends AbstractAuditableCustom<AppUser, Lon
 		
 	}
 
-	public PropertyDeviceMapping(Long clientId, String propertyCode,String serialNumber) {
+	public PropertyDeviceMapping(Long clientId, String propertyCode,String serialNumber, Date allocationDate) {
          
 		this.clientId = clientId;
 		this.propertyCode = propertyCode;
 		this.serialNumber =  serialNumber;
+		this.allocateDate=allocationDate;
 	
 	}
 
@@ -48,7 +49,7 @@ public class PropertyDeviceMapping  extends AbstractAuditableCustom<AppUser, Lon
 		final String propertyCode = command.stringValueOfParameterNamed("propertCode");
         final String serialNumber = command.stringValueOfParameterNamed("serialNumber");
         
-        return new PropertyDeviceMapping(clientId,propertyCode,serialNumber);
+        return new PropertyDeviceMapping(clientId,propertyCode,serialNumber,new Date());
 	
 	
 	}

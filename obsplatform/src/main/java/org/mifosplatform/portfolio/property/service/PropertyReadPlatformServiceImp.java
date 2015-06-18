@@ -208,11 +208,17 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 		 try{
 				context.authenticatedUser();
 				final ClientPropertyMapper mapper = new ClientPropertyMapper();
-				 String sql = "SELECT " + mapper.schema() + " WHERE pd.client_id = ? group by pd.id" ;
-				if(propertyCode != null){
-					 sql = "SELECT " + mapper.schema() + " WHERE pd.client_id = ? and pd.property_code='"+propertyCode+"' group by pd.id" ;
-				}
-				return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] {clientId});
+				 final StringBuilder sqlBuilder = new StringBuilder(500);
+				 sqlBuilder.append("SELECT ");
+				 sqlBuilder.append(mapper.schema());
+				 if(propertyCode == null){
+					 sqlBuilder.append("join b_client_address ma  on (ma.client_id = m.id and ma.address_no = pd.property_code and ma.is_deleted='n' and  ma.address_key='PRIMARY')");
+					 sqlBuilder.append(" WHERE pd.client_id = ? group by pd.id");
+				 }else{
+					 sqlBuilder.append("join b_client_address ma  on (ma.client_id = m.id and ma.address_no = pd.property_code and ma.is_deleted='n')");
+					 sqlBuilder.append(" WHERE pd.client_id = ? and pd.property_code='"+propertyCode+"' group by pd.id");
+				 }
+				return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), mapper, new Object[] {clientId});
 	            }catch (EmptyResultDataAccessException accessException) {
 	    			return null;
 	    		}
@@ -222,12 +228,13 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 		
 
 		public String schema() {
+			
 			return " pd.id as Id,m.account_no as clientId, pd.property_type_id as propertyTypeId,c.code_value as propertyType, pd.property_code as propertyCode, "+
 				    " unit_code as unitCode, pd.floor as floor,pp.description as floorDesc, pd.building_code as buildingCode,pd.parcel as parcel,pm.description as parcelDesc, pd.street as street,pd.precinct as precinct, " +
 				    " pd.po_box as zip, pd.state as state,pd.country as country,pd.status as status,m.firstname as firstName,m.lastname as lastName, "+
 				    " m.display_name as displayName,m.email as email,ma.address_no as addressNo,address_key as addressKey,mc.code_value as categoryType "+
-			 	    " from b_property_defination pd join m_client m on (pd.client_id = m.id and pd.is_deleted='N') join b_client_address ma " +
-				    " on (ma.client_id = m.id and ma.address_no = pd.property_code and ma.is_deleted='n'  and  ma.address_key='PRIMARY') left join m_code_value c on (c.id = pd.property_type_id)" +
+			 	    " from b_property_defination pd join m_client m on (pd.client_id = m.id and pd.is_deleted='N') " +
+				    " left join m_code_value c on (c.id = pd.property_type_id)" +
 				    " left join b_property_master pm on (pd.parcel=pm.code and pm.is_deleted='N' and pm.property_code_type='Parcel')  " +
 				    " left join b_property_master pp on (pd.floor=pp.code and pp.is_deleted='N' and pp.property_code_type='Level/Floor')  "+
 				    " left  join  m_code_value mc on  mc.id =m.category_type  ";

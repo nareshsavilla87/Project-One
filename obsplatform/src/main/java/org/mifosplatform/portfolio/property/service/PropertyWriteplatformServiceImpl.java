@@ -210,7 +210,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 					}
 					// check shifting property same or not
 					if (!oldPropertyCode.equalsIgnoreCase(newPropertyCode) && oldPropertyMaster != null && newpropertyMaster != null
-							 && !newpropertyMaster.getClientId().equals(clientId)) {
+							&& newpropertyMaster.getClientId() != null && !newpropertyMaster.getClientId().equals(clientId)) {
 						
 						oldPropertyMaster.setClientId(null);
 						oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);

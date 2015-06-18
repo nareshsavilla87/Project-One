@@ -89,6 +89,22 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 			context.authenticatedUser();
 			final Address address = Address.fromJson(clientId,command);
 			this.addressRepository.save(address);
+			 PropertyMaster propertyMaster=null;
+	           Configuration propertyConfiguration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+				if(propertyConfiguration != null && propertyConfiguration.isEnabled()) {		
+					 propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(command.stringValueOfParameterNamed("addressNo"));
+					if(propertyMaster != null && propertyMaster.getClientId() != null ){
+						throw new PropertyCodeAllocatedException(propertyMaster.getPropertyCode());
+					}
+					
+					propertyMaster.setClientId(clientId);
+					propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
+				    this.propertyMasterRepository.saveAndFlush(propertyMaster);
+				    PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),
+				    		CodeNameConstants.CODE_PROPERTY_ALLOCATE,clientId,propertyMaster.getPropertyCode());
+				    this.propertyHistoryRepository.save(propertyHistory);
+				}
+				
 			return new CommandProcessingResult(address.getId(),clientId);
 		} catch (DataIntegrityViolationException dve) {
 			 handleCodeDataIntegrityIssues(command, dve);
