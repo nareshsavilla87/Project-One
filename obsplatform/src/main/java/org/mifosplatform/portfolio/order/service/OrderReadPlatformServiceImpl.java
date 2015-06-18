@@ -177,11 +177,11 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	        @Override
 	        public PaytermData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 			  Long id = rs.getLong("id");
-	            String serviceType = rs.getString("billfrequencyCode");
+	            String billfrequencyCode = rs.getString("billfrequencyCode");
 	            String duration = rs.getString("duration");
 	            String isPrepaid = rs.getString("isPrepaid");
 	            BigDecimal price =rs.getBigDecimal("price");
-	            return new PaytermData(id,serviceType,duration,isPrepaid,price);
+	            return new PaytermData(id,billfrequencyCode,duration,isPrepaid,price);
 	}
 	}
 	@Override

@@ -1,11 +1,12 @@
 package org.mifosplatform.provisioning.processrequest.service;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.mifosplatform.finance.billingorder.api.BillingOrderApiResourse;
+import org.mifosplatform.finance.billingorder.domain.Invoice;
+import org.mifosplatform.finance.billingorder.service.InvoiceClient;
 import org.mifosplatform.infrastructure.configuration.domain.EnumDomainService;
 import org.mifosplatform.infrastructure.configuration.domain.EnumDomainServiceRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -67,7 +68,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	  private final ServiceParametersRepository serviceParametersRepository;
 	  private final OrderAddonsRepository orderAddonsRepository;
       private final OrderAssembler orderAssembler;
-      private final BillingOrderApiResourse billingOrderApiResourse;
+      private final InvoiceClient invoiceClient;
 	  
 	  
 
@@ -78,7 +79,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	    		final ActiondetailsWritePlatformService actiondetailsWritePlatformService,final PlatformSecurityContext context,
 	    		final EnumDomainServiceRepository enumDomainServiceRepository,final ServiceParametersRepository parametersRepository,
 	    		final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,final OrderAddonsRepository orderAddonsRepository,
-	    		final BillingOrderApiResourse billingOrderApiResourse) {
+	    	    final InvoiceClient invoiceClient) {
 
 	    	
 	    	    this.context = context;
@@ -94,7 +95,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 	    	    this.processRequestRepository=processRequestRepository;
 	    	    this.orderReadPlatformService=orderReadPlatformService;
 	    	    this.enumDomainServiceRepository=enumDomainServiceRepository;
-	    	    this.billingOrderApiResourse = billingOrderApiResourse;
+	    	    this.invoiceClient = invoiceClient;
 
 	             
 	    }
@@ -145,10 +146,8 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 						Client client=this.clientRepository.findOne(detailsData.getClientId());
 						
 						switch(detailsData.getRequestType()){
- 						   
-							case ProvisioningApiConstants.REQUEST_ACTIVATION  :
 						
-							
+						case ProvisioningApiConstants.REQUEST_ACTIVATION  :
 							 
 							if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.ACTIVATION.toString())){
                                 order.setStartDate(DateUtils.getLocalDateOfTenant());
@@ -278,12 +277,15 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
         								order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
         								client.setStatus(ClientStatus.ACTIVE.getValue());
         								this.orderRepository.saveAndFlush(order);
+
         							 if(plan.isPrepaid() == 'Y'){
-        								JSONObject json=new JSONObject(); 
-        							    json.put("dateFormat","dd MMMM yyyy");
-        			        	  		json.put("locale","en");
-        			        	  		json.put("systemDate",new SimpleDateFormat("dd MMMM yyyy").format(order.getStartDate()));
-        			        	  		this.billingOrderApiResourse.retrieveBillingProducts(order.getClientId(),json.toString());	
+        			        	  		Invoice invoice=this.invoiceClient.onTopUpAutoRenewalInvoice(order.getId(),order.getClientId(),new LocalDate(order.getStartDate()).plusDays(1));
+        			        	  		 if(invoice!=null){
+        			          		    	List<ActionDetaislData> actionDetaislData=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_TOPUP_INVOICE_MAIL);
+        			          				if(actionDetaislData.size() != 0){
+        			          					this.actiondetailsWritePlatformService.AddNewActions(actionDetaislData,order.getClientId(), invoice.getId().toString(),null);
+        			          				}
+        			          		    }
         							 }
 								break;
 								

@@ -1315,4 +1315,11 @@ public class CommandWrapper {
 		public boolean isAllocateDevice() {
 			return this.actionName.equalsIgnoreCase("ALLOCATEDEVICE");
 		}
+		public boolean isRefund() {
+			return  this.entityName.equalsIgnoreCase("REFUND");
+		}
+
+		public boolean isDeposit() {
+			return  this.entityName.equalsIgnoreCase("DEPOSIT");
+		}
 }
