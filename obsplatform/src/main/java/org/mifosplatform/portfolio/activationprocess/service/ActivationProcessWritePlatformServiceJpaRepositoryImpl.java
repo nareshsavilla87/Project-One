@@ -447,7 +447,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 					
 					JSONObject redemptionJson = new JSONObject();
 					redemptionJson.put("clientId", resultClient.getClientId());
-					redemptionJson.put("pinNumber",command.longValueOfParameterNamed("pinNumber"));
+					redemptionJson.put("pinNumber",command.stringValueOfParameterNamed("pinNumber"));
 					CommandWrapper commandRequest = new CommandWrapperBuilder().createRedemption().withJson(redemptionJson.toString()).build();
 					resultRedemption = this.portfolioCommandSourceWritePlatformService.logCommandSource(commandRequest);
 					if (resultRedemption == null) {
