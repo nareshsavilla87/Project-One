@@ -7,6 +7,7 @@ import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
+import org.mifosplatform.portfolio.property.data.PropertyDeviceMappingData;
 
 public class ClientPropertyData {
 
@@ -39,12 +40,14 @@ public class ClientPropertyData {
 	private Collection<MCodeData> propertyTypes;
 	private String floorDesc;
 	private String parcelDesc;
+	private List<PropertyDeviceMappingData> deviceMappingDatas;
+	private List<String> propertyCodes;
 
 	public ClientPropertyData(final Long id, final Long propertyTypeId,final String propertyType, final String propertyCode,
 			final String unitCode, final String floor, final String floorDesc,final String buildingCode,final String parcel,
             final String parcelDesc,final String precinct, final String street,final String zip, final String state, final String country,
 	        final String status, final String clientId, final String firstName,final String lastName, String displayName, 
-	        final String email, final String addressNo,final String addressKey, final String categoryType) {
+	        final String email, final String addressNo,final String addressKey, final String categoryType, List<PropertyDeviceMappingData> deviceMappingDatas) {
 
 		this.id = id;
 		this.propertyTypeId = propertyTypeId;
@@ -70,6 +73,7 @@ public class ClientPropertyData {
 		this.addressNo = addressNo;
 		this.addressKey = addressKey;
 		this.categoryType = categoryType;
+		this.deviceMappingDatas = deviceMappingDatas;
 
 	}
 
@@ -207,6 +211,22 @@ public class ClientPropertyData {
 	public Collection<MCodeData> getPropertyTypes() {
 		return propertyTypes;
 	}
+
+	public void setProperties(List<String> propertyCodes) {
+
+		 this.propertyCodes = propertyCodes;
+		
+	}
+
+	public List<PropertyDeviceMappingData> getDeviceMappingDatas() {
+		return deviceMappingDatas;
+	}
+
+	public void setDeviceMappingDatas(List<PropertyDeviceMappingData> deviceMappingDatas) {
+		this.deviceMappingDatas = deviceMappingDatas;
+	}
+	
+	
 	
 
 }

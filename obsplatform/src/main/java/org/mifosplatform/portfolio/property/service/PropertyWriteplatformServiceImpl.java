@@ -29,6 +29,8 @@ import org.mifosplatform.organisation.address.domain.AddressRepository;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.portfolio.property.domain.PropertyCodesMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyCodesMasterRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMapping;
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
@@ -59,20 +61,16 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final GenerateBill generateBill;
 	private final PropertyReadPlatformService propertyReadPlatformService;
+	private final PropertyDeviceMappingRepository propertyDeviceMappingRepository;
 
 	@Autowired
-	public PropertyWriteplatformServiceImpl(final PlatformSecurityContext context,
-			final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer,
-			final PropertyMasterRepository propertyMasterRepository,
-			final PropertyHistoryRepository propertyHistoryRepository,
-			final PropertyCodesMasterRepository propertyCodesMasterRepository,
-			final AddressRepository addressRepository,
-		    final ChargeCodeRepository chargeCodeRepository,
-            final GenerateBillingOrderService generateBillingOrderService,
-            final BillingOrderWritePlatformService billingOrderWritePlatformService,
-            final BillingOrderReadPlatformService billingOrderReadPlatformService,
-            final GenerateBill generateBill,
-            final PropertyReadPlatformService propertyReadPlatformService) {
+	public PropertyWriteplatformServiceImpl(final PlatformSecurityContext context,final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer,
+			final PropertyMasterRepository propertyMasterRepository,final PropertyHistoryRepository propertyHistoryRepository,
+			final PropertyCodesMasterRepository propertyCodesMasterRepository,final AddressRepository addressRepository,
+		    final ChargeCodeRepository chargeCodeRepository,final GenerateBillingOrderService generateBillingOrderService,
+            final BillingOrderWritePlatformService billingOrderWritePlatformService,final BillingOrderReadPlatformService billingOrderReadPlatformService,
+            final GenerateBill generateBill,final PropertyReadPlatformService propertyReadPlatformService,
+            final PropertyDeviceMappingRepository propertyDeviceMappingRepository) {
 
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
@@ -80,6 +78,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		this.propertyHistoryRepository = propertyHistoryRepository;
 		this.propertyCodesMasterRepository = propertyCodesMasterRepository;
 		this.addressRepository = addressRepository;
+		this.propertyDeviceMappingRepository = propertyDeviceMappingRepository;
 		this.chargeCodeRepository = chargeCodeRepository;
 		this.generateBillingOrderService = generateBillingOrderService;
 		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
@@ -192,13 +191,15 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			this.apiJsonDeserializer.validateForServiceTransfer(command.json());
 			final String oldPropertyCode = command.stringValueOfParameterNamed("oldPropertyCode");
 			final String newPropertyCode = command.stringValueOfParameterNamed("newPropertyCode");
+			final String serialNumber = command.stringValueOfParameterNamed("serialNumber");
 			final BigDecimal shiftChargeAmount = command.bigDecimalValueOfParameterNamed("shiftChargeAmount");
 			final String chargeCode = command.stringValueOfParameterNamed("chargeCode");
 
 			PropertyTransactionHistory transactionHistory = null;
-			Address clientAddress = this.addressRepository.findOneByClientId(clientId);
+			Address clientAddress = this.addressRepository.findOneByClientIdAndPropertyCode(clientId,oldPropertyCode);
 
 			if (clientAddress != null && !StringUtils.isEmpty(newPropertyCode)) {
+				
 				PropertyMaster newpropertyMaster = this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
 				if (oldPropertyCode !=null&&!StringUtils.isEmpty(oldPropertyCode)) {
 					PropertyMaster oldPropertyMaster = this.propertyMasterRepository.findoneByPropertyCode(oldPropertyCode);
@@ -208,7 +209,9 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 						}
 					}
 					// check shifting property same or not
-					if (!oldPropertyCode.equalsIgnoreCase(newPropertyCode) && oldPropertyMaster != null && newpropertyMaster != null) {
+					if (!oldPropertyCode.equalsIgnoreCase(newPropertyCode) && oldPropertyMaster != null && newpropertyMaster != null
+							 && !newpropertyMaster.getClientId().equals(clientId)) {
+						
 						oldPropertyMaster.setClientId(null);
 						oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
 						this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
@@ -229,6 +232,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 					}
 
 				} else {
+					
 					newpropertyMaster.setClientId(clientId);
 					newpropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
 					this.propertyMasterRepository.saveAndFlush(newpropertyMaster);
@@ -241,9 +245,15 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 					this.addressRepository.save(clientAddress);
 
 				}
+				
+				PropertyDeviceMapping  deviceMapping=this.propertyDeviceMappingRepository.findBySerailNumber(serialNumber);
+					deviceMapping.setPropertyCode(newPropertyCode);
+					this.propertyDeviceMappingRepository.saveAndFlush(deviceMapping);
 				transactionHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),newpropertyMaster.getId(),
 						CodeNameConstants.CODE_PROPERTY_SERVICE_TRANSFER,newpropertyMaster.getClientId(),newpropertyMaster.getPropertyCode());
 				this.propertyHistoryRepository.save(transactionHistory);
+				
+				
 
 			} else {
 
@@ -461,12 +471,13 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	public CommandProcessingResult allocatePropertyDevice(Long entityId,JsonCommand command) {
         try{
         	this.context.authenticatedUser();
-        	
-        	
+        	PropertyDeviceMapping propertyDeviceMapping = PropertyDeviceMapping.fromJson(entityId,command);
+        	this.propertyDeviceMappingRepository.save(propertyDeviceMapping);
+        	return new CommandProcessingResult(propertyDeviceMapping.getId());
         }catch(DataIntegrityViolationException dve){
         	handleCodeDataIntegrityIssues(command, dve);
+        	return new CommandProcessingResult(Long.valueOf(-1));
         }
-		return null;
 	}
 	
 }
