@@ -1,5 +1,6 @@
 package org.mifosplatform.freeradius.radius.api;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -136,7 +137,7 @@ public class RadiusAPiResource {
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		final RadiusServiceData radServiceData = this.radiusReadPlatformService.retrieveRadServiceDetail(radServiceId);
 		if(settings.isTemplate()){
-		final String radServiceTemplateData = this.radiusReadPlatformService.retrieveRadServiceTemplateData(radServiceId);
+		final List<RadiusServiceData> radServiceTemplateData = this.radiusReadPlatformService.retrieveRadServiceTemplateData(radServiceId);
 		radServiceData.setRadServiceTemplateData(radServiceTemplateData);
 		}
 		return this.toApiJsonSerializer.serialize(settings,radServiceData,RESPONSE_DATA_PARAMETERS);
@@ -189,9 +190,13 @@ public class RadiusAPiResource {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		final String radServiceTemplateData = this.radiusReadPlatformService.retrieveRadServiceTemplateData(Long.valueOf(-1));
-		//return this.toApiJsonSerializer.serialize(settings, radServiceTemplateData, RESPONSE_DATA_PARAMETERS);
-		return radServiceTemplateData;
+		final List<RadiusServiceData> radServiceTemplateData = this.radiusReadPlatformService.retrieveRadServiceTemplateData(Long.valueOf(-1));
+		/*RadiusServiceData aa = new RadiusServiceData();
+		aa.setRadServiceTemplateData(temp);
+		final List<RadiusServiceData> radServiceTemplateData = new ArrayList<RadiusServiceData>();
+		radServiceTemplateData.add(aa);*/
+		return this.toApiJsonSerializer.serialize(settings, radServiceTemplateData, RESPONSE_DATA_PARAMETERS);
+		//return radServiceTemplateData;
 	}
 
 	@GET
