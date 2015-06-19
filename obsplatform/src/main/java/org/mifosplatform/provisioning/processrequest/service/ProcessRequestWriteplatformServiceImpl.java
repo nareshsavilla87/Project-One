@@ -276,7 +276,8 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
         								order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
         								client.setStatus(ClientStatus.ACTIVE.getValue());
         								this.orderRepository.saveAndFlush(order);
-           							 if(plan.isPrepaid() == 'Y'){
+
+        							 if(plan.isPrepaid() == 'Y'){
         								JSONObject json=new JSONObject(); 
         							    json.put("dateFormat","dd MMMM yyyy");
         			        	  		json.put("locale","en");
