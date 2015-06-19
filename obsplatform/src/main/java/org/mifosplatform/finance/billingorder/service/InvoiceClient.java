@@ -59,25 +59,6 @@ public class InvoiceClient {
 
 	}
 	
-
-	public CommandProcessingResult createInvoiceBill(JsonCommand command) {
-		try {
-			// validation not written
-			this.apiJsonDeserializer.validateForCreate(command.json());
-			LocalDate processDate = ProcessDate.fromJson(command);
-			Invoice invoice = this.invoicingSingleClient(command.entityId(),processDate);
-
-<<<<<<< HEAD
-=======
-			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(invoice.getId()).build();
-
-		} catch (DataIntegrityViolationException dve) {
-			return new CommandProcessingResult(Long.valueOf(-1));
-		}
-
-	}
->>>>>>> obsplatform-2.04
-	
 	public Invoice invoicingSingleClient(Long clientId, LocalDate processDate) {
 
 		
@@ -171,12 +152,7 @@ public class InvoiceClient {
 			return new GenerateInvoiceData(clientId, billingOrderCommands.get(0).getNextBillableDate(),singleInvoice.getInvoiceAmount(), singleInvoice);
 		}
 	}
-	
-<<<<<<< HEAD
-	
-	
-=======
->>>>>>> obsplatform-2.04
+
 	public Invoice onTopUpAutoRenewalInvoice(Long orderId, Long clientId,LocalDate processDate) {
 
 		// Get qualified order complete details
@@ -189,23 +165,11 @@ public class InvoiceClient {
 
 		// Update order-price
 		this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
-		System.out.println("TopUp:---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
-<<<<<<< HEAD
+		System.out.println("Top-Up:---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
 
 		// Update Client Balance
 		this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(), clientId, false);
-
-=======
-
-		// Update Client Balance
-		this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(), clientId, false);
-
->>>>>>> obsplatform-2.04
+		
 		return invoice;
 		}
 	}
-
-<<<<<<< HEAD
-
-=======
->>>>>>> obsplatform-2.04

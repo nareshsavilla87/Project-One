@@ -26,7 +26,7 @@ public class EventActionConstants {
 	public static final String EVENT_NOTIFY_PAYMENT="Notify Payment Receipt";
 	public static final String EVENT_SEND_PAYMENT = "Send Payment Receipt";
 	public static final String EVENT_TOPUP_INVOICE_MAIL = "Topup Invoice Mail";
-	public static final String EVENT_ORDER_CONFIRMATION = "Order Confirmation";
+	
 
 	
 	//Actions

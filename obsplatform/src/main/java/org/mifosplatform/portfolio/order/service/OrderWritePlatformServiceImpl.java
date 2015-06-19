@@ -265,8 +265,7 @@ try{
 		}
 	}
 	
-	processNotifyMessages(EventActionConstants.EVENT_ORDER_CONFIRMATION, clientId, order.getId().toString());
-	
+
 	return new CommandProcessingResult(order.getId(),order.getClientId());	
 	}catch (DataIntegrityViolationException dve) {
 		handleCodeDataIntegrityIssues(command, dve);

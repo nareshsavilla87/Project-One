@@ -20,6 +20,7 @@ import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFo
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.organisation.message.domain.BillingMessage;
 import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
@@ -136,7 +137,8 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			}
 			final String printStatementLocation = statementDetailsLocation + File.separator + "Bill_" + billMaster.getId() + ".pdf";
 			final String jpath = fileLocation+File.separator+"jasper"; 
-			final String jfilepath =jpath+File.separator+"Bill_Mainreport.jasper";
+			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+			final String jfilepath =jpath+File.separator+"Statement_"+tenant+".jasper";
 			final Connection connection = this.dataSource.getConnection();
 		
 			Map<String, Object> parameters = new HashMap<String, Object>();
@@ -182,7 +184,8 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
-			final String jasperfilepath =jpath+File.separator+"Invoicereport.jasper";
+			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+			final String jasperfilepath =jpath+File.separator+"Invoicereport_"+tenant+".jasper";
 			final Integer id = Integer.valueOf(invoiceId.toString());
 			final Connection connection = this.dataSource.getConnection();
 			Map<String, Object> parameters = new HashMap<String, Object>();
@@ -225,7 +228,8 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
-			final String jasperfilepath =jpath+File.separator+"Paymentreport.jasper";
+			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+			final String jasperfilepath =jpath+File.separator+"Paymentreport_"+tenant+".jasper";
 			final Integer id = Integer.valueOf(paymentId.toString());
 			final Connection connection = this.dataSource.getConnection();
 			Map<String, Object> parameters = new HashMap<String, Object>();

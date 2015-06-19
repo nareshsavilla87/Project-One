@@ -14,6 +14,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -171,14 +172,16 @@ public class BillingMasterApiResourse {
 	}
 	
 	@GET
-	@Path("/print/{clientId}/{invoiceId}")
+	@Path("/invoice/{clientId}/{invoiceId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response printInvoice(@PathParam("invoiceId") final Long invoiceId, @PathParam("clientId") final Long clientId) {
+	public Response printInvoice(@PathParam("invoiceId") final Long invoiceId, @PathParam("clientId") final Long clientId,@QueryParam("email") final boolean email) {
 		
 		 String printFileName=this.billWritePlatformService.generateInovicePdf(invoiceId);
 		 final File file = new File(printFileName);
+		 if(email){
 		 this.billWritePlatformService.sendPdfToEmail(printFileName,clientId,BillingMessageTemplateConstants.MESSAGE_TEMPLATE_INVOICE);
+		 }
 		 final ResponseBuilder response = Response.ok(file);
 		 response.header("Content-Disposition", "attachment; filename=\"" + printFileName + "\"");
 		 response.header("Content-Type", "application/pdf");
@@ -189,11 +192,13 @@ public class BillingMasterApiResourse {
 	@Path("/payment/{clientId}/{paymentId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response printPayment(@PathParam("paymentId") final Long paymentId, @PathParam("clientId") final Long clientId) {
+	public Response printPayment(@PathParam("paymentId") final Long paymentId, @PathParam("clientId") final Long clientId,@QueryParam("email") final boolean email) {
 		
 		 String printFileName=this.billWritePlatformService.generatePaymentPdf(paymentId);
 		 final File file = new File(printFileName);
-		 this.billWritePlatformService.sendPdfToEmail(printFileName,clientId,BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT);
+		 if(email){
+		   this.billWritePlatformService.sendPdfToEmail(printFileName,clientId,BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT);
+		 }
 		 final ResponseBuilder response = Response.ok(file);
 		 response.header("Content-Disposition", "attachment; filename=\"" + printFileName + "\"");
 		 response.header("Content-Type", "application/pdf");

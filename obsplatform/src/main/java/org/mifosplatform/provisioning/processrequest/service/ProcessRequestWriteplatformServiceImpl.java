@@ -286,7 +286,6 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
         			          					this.actiondetailsWritePlatformService.AddNewActions(actionDetaislData,order.getClientId(), invoice.getId().toString(),null);
         			          				}
         			          		    }
-        			        	  		
         							 }
 								break;
 								
