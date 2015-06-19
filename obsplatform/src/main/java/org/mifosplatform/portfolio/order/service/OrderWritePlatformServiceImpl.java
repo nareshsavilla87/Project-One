@@ -701,6 +701,7 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		
  try{
 	 Long userId=this.context.authenticatedUser().getId();
+	 this.fromApiJsonDeserializer.validateForCreate(command.json());
 	 checkingContractPeriodAndBillfrequncyValidation(command.longValueOfParameterNamed("contractPeriod"),
 			 command.stringValueOfParameterNamed("paytermCode"));
 	 Order order=this.orderRepository.findOne(entityId);
