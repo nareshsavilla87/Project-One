@@ -359,7 +359,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 							      
 				    case EventActionConstants.ACTION_TOPUP_INVOICE_MAIL : 
 			        	  		eventAction=new EventAction(DateUtils.getDateOfTenant(), "SEND",EventActionConstants.EVENT_TOPUP_INVOICE_MAIL.toString(),
-			        	  		EventActionConstants.ACTION_TOPUP_INVOICE_MAIL.toString(),"/billmaster/print/"+clientId+"/"+resourceId,Long.parseLong(resourceId),
+			        	  		EventActionConstants.ACTION_TOPUP_INVOICE_MAIL.toString(),"/billmaster/invoice/"+clientId+"/"+resourceId,Long.parseLong(resourceId),
 			        	  		jsonObject.toString(),Long.parseLong(resourceId),clientId);
 					        	this.eventActionRepository.save(eventAction);
 			        	  break;

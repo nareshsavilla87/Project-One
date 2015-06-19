@@ -8,6 +8,7 @@ import java.util.Set;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -175,7 +176,7 @@ public class BillingMasterApiResourse {
 	@Path("/invoice/{clientId}/{invoiceId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response printInvoice(@PathParam("invoiceId") final Long invoiceId, @PathParam("clientId") final Long clientId,@QueryParam("email") final boolean email) {
+	public Response printInvoice(@PathParam("invoiceId") final Long invoiceId, @PathParam("clientId") final Long clientId,@DefaultValue("true")@QueryParam("email") final boolean email) {
 		
 		 String printFileName=this.billWritePlatformService.generateInovicePdf(invoiceId);
 		 final File file = new File(printFileName);
@@ -192,7 +193,7 @@ public class BillingMasterApiResourse {
 	@Path("/payment/{clientId}/{paymentId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public Response printPayment(@PathParam("paymentId") final Long paymentId, @PathParam("clientId") final Long clientId,@QueryParam("email") final boolean email) {
+	public Response printPayment(@PathParam("paymentId") final Long paymentId, @PathParam("clientId") final Long clientId,@DefaultValue("true")@QueryParam("email") final boolean email) {
 		
 		 String printFileName=this.billWritePlatformService.generatePaymentPdf(paymentId);
 		 final File file = new File(printFileName);
