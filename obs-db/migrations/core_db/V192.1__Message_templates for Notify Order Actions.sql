@@ -8,7 +8,7 @@ Your service with <Service name> is activated on <Reconnection Date>.','Thanks<b
 
 INSERT IGNORE INTO b_message_template(template_description,subject,header,body,footer,message_type) values ('NOTIFY PAYMENT',' Payment Conformation','Dear <CustomerName>','We confirm the receipts of your payment <Amount> with Dated: <Payment Date>, done towards the Services.','Thanks<br><Reseller Name><br><Contact Name> & <Number>','E');
 
-INSERT IGNORE INTO b_eventaction_mapping (event_name,action_name,process,is_deleted,is_synchronous) values ('Order activation','Notify Activation','workflow_events','Y','N');
+INSERT IGNORE INTO b_eventaction_mapping (event_name,action_name,process,is_deleted,is_synchronous) values ('Order Booking','Notify Activation','workflow_events','Y','N');
 
 INSERT IGNORE INTO b_eventaction_mapping (event_name,action_name,process,is_deleted,is_synchronous) values ('Order disconnection','Notify Disconnection','workflow_events','Y','N');
 

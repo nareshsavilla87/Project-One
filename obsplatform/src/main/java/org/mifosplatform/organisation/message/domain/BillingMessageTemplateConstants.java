@@ -34,7 +34,7 @@ public class BillingMessageTemplateConstants {
 	public static final String MESSAGE_TEMPLATE_NOTIFY_DISCONNECTION = "NOTIFY DISCONNECTION";
 	public static final String MESSAGE_TEMPLATE_NOTIFY_RECONNECTION = "NOTIFY RECONNECTION";
 	public static final String MESSAGE_TEMPLATE_NOTIFY_PAYMENT = "NOTIFY PAYMENT";
-	
+
 	
 	//constants
 	public static final String MESSAGE_TEMPLATE_STATUS = "N";

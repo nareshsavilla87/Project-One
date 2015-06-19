@@ -109,7 +109,7 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 						null,eventActionData.getClientId(), null, null, null,null, null, null,null);
 					result=this.invoiceClient.createInvoiceBill(command);
 					if(result!=null){
-						this.billingMasterApiResourse.printInvoice(result.resourceId(),eventActionData.getClientId());
+						this.billingMasterApiResourse.printInvoice(result.resourceId(),eventActionData.getClientId(),true);
 					}
 					
 				}catch(Exception exception){
@@ -151,10 +151,23 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 				break;
 				
 			case EventActionConstants.ACTION_SEND_PAYMENT :
-				
-				this.billingMasterApiResourse.printPayment(eventAction.getResourceId(), eventAction.getClientId());
-				
+				try{
+				   this.billingMasterApiResourse.printPayment(eventAction.getResourceId(), eventAction.getClientId(),true);
+				   }	
+				catch(Exception exception){
+					
+				}
 				break;
+
+			case EventActionConstants.ACTION_TOPUP_INVOICE_MAIL :
+
+				try{
+					 this.billingMasterApiResourse.printInvoice(eventActionData.getResourceId(),eventActionData.getClientId(),true);
+					}	
+				catch(Exception exception){
+				}
+			break;		
+
 			
 			default:
 				break;
