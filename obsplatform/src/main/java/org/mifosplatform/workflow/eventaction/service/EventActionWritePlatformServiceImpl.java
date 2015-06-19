@@ -55,8 +55,6 @@ import org.mifosplatform.workflow.eventaction.domain.EventActionRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import urn.ebay.apis.eBLBaseComponents.StatusChangeActionType;
-
 import com.google.gson.JsonObject;
 
 @Service
@@ -412,8 +410,13 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						
 			        	break;
 			      
+				    case EventActionConstants.ACTION_TOPUP_INVOICE_MAIL : 
+			        	  		eventAction=new EventAction(DateUtils.getDateOfTenant(), "SEND",EventActionConstants.EVENT_TOPUP_INVOICE_MAIL.toString(),
+			        	  		EventActionConstants.ACTION_TOPUP_INVOICE_MAIL.toString(),"/billmaster/print/"+clientId+"/"+resourceId,Long.parseLong(resourceId),
+			        	  		jsonObject.toString(),Long.parseLong(resourceId),clientId);
+					        	this.eventActionRepository.save(eventAction);
+			        	  break;
 			       
-				    	
 				    }
 				    
 				    
