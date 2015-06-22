@@ -35,9 +35,7 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 			context.authenticatedUser();
 			FeeMasterDataMapper mapper = new FeeMasterDataMapper();
 			String sql = "select " + mapper.schemaWithClientId(clientId,transationType)+" where fm.transaction_type = ? and fm.is_deleted='N'  group by fm.id"; 
-		
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {transationType});
-
 		} catch (EmptyResultDataAccessException e) {
 			return null;
 		}
@@ -67,7 +65,6 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 					" WHERE b.priceregion_id = a.region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
 					" AND d.client_id = "+clientId+" and m.transaction_type =? and m.id = a.fee_id and  a.is_deleted = 'N' AND m.is_deleted = 'N'),0)) " +
 					" LEFT JOIN b_priceregion_master prm ON prm.id = pd.priceregion_id LEFT JOIN b_fee_detail fd ON (fd.fee_id = fm.id AND fd.region_id = prm.id" +
-<<<<<<< HEAD
 					" AND fd.is_deleted = 'N')  ";*/
 					
 			return "  fm.id AS id,fm.fee_code AS feeCode,fm.fee_description AS feeDescription,fm.transaction_type AS transactionType," +
@@ -88,8 +85,7 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 		}
 
 		@Override
-		public FeeMasterData mapRow(ResultSet rs, int rowNum)
-				throws SQLException {
+		public FeeMasterData mapRow(ResultSet rs, int rowNum) throws SQLException {
 		
 			final Long id = rs.getLong("id");
 			final String feeCode = rs.getString("feeCode");
@@ -97,10 +93,9 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 			final String transactionType = rs.getString("transactionType");
 			final String chargeCode = rs.getString("chargeCode");
 			final BigDecimal amount = rs.getBigDecimal("amount");
-			return new FeeMasterData(id,feeCode,feeDescription,transactionType,chargeCode,amount,null,null);
-		
+			return new FeeMasterData(id,feeCode,feeDescription,transactionType,chargeCode,amount,null);
 		
 		}
-}
+    }
 
 }
