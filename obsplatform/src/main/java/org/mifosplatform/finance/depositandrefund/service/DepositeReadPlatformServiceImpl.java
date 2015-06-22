@@ -44,7 +44,7 @@ public class DepositeReadPlatformServiceImpl implements DepositeReadPlatformServ
 	private static final class DepositeMapper implements RowMapper<FeeMasterData> {
 
 		public String schema() {
-			return "fm.id AS id,fm.fee_code AS feeCode,fm.item_id AS itemId,fm.is_refundable as isRefundable,fm.charge_code AS chargeCode,"+
+			return "fm.id AS id,fm.fee_code AS feeCode,fm.is_refundable as isRefundable,fm.charge_code AS chargeCode,"+
 				      " ifnull(round(fd.amount, 2), fm.default_fee_amount) AS amount FROM b_fee_master fm LEFT JOIN b_client_address ca ON ca.client_id = ? "+
 				       " LEFT JOIN b_state s ON s.state_name = ca.state LEFT JOIN b_priceregion_detail pd ON ( pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_fee_detail a,"+
 				       " b_priceregion_detail b,b_state c,b_client_address d,b_fee_master m  WHERE b.priceregion_id = a.region_id AND b.state_id = c.id "+
@@ -66,9 +66,8 @@ public class DepositeReadPlatformServiceImpl implements DepositeReadPlatformServ
 			//final String transactionType = rs.getString("transactionType");
 			final String chargeCode = rs.getString("chargeCode");
 			final BigDecimal defaultFeeAmount = rs.getBigDecimal("amount");
-			final Long itemId = rs.getLong("itemId");
 			final String isRefundable = rs.getString("isRefundable");
-			return new FeeMasterData(id, feeCode, " ", "Depsoit", chargeCode, defaultFeeAmount, itemId, isRefundable);
+			return new FeeMasterData(id, feeCode, " ", "Depsoit", chargeCode, defaultFeeAmount, isRefundable);
 
 		}
 	}
