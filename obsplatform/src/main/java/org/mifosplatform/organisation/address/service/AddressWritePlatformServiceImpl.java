@@ -83,8 +83,8 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		this.addressReadPlatformService=addressReadPlatformService;
 		this.locationValidatorCommandFromApiJsonDeserializer = locationValidatorCommandFromApiJsonDeserializer;
 		this.propertyMasterRepository = propertyMasterRepository;
-		this.propertyHistoryRepository = propertyHistoryRepository;
 		this.propertyDeviceMappingRepository = propertyDeviceMappingRepository;
+		this.propertyHistoryRepository = propertyHistoryRepository;
 		this.configurationRepository = configurationRepository;
 		
 		
@@ -364,7 +364,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		address.delete();
 		this.addressRepository.saveAndFlush(address);
 		Configuration  configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
-		if(configuration != null && configuration.isEnabled()) {
+		if(configuration != null && configuration.isEnabled()) {	
 			final String newPropertyCode=command.stringValueOfParameterNamed("addressNo");
 			List<PropertyDeviceMapping>  propertyDeviceMapping=this.propertyDeviceMappingRepository.findByPropertyCode(newPropertyCode);
 			if(propertyDeviceMapping != null && !propertyDeviceMapping.isEmpty()){
