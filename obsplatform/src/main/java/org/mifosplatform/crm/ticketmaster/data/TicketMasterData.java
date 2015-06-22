@@ -26,6 +26,7 @@ public class TicketMasterData {
     private String problemDescription;
     private String userName;
     private Integer statusCode;
+    private Integer problemCode;
     private String statusDescription;
 	private LocalDate createdDate;
 	private String attachedFile;
@@ -51,7 +52,8 @@ public class TicketMasterData {
 
 	public TicketMasterData(final Long id, final String priority, final String status, final Integer assignedTo, 
 			final LocalDate ticketDate, final String lastComment, final String problemDescription, final String userName, 
-			final String sourceOfTicket, final Date dueDate, final String description, final String resolutionDescription) {
+			final String sourceOfTicket, final Date dueDate, final String description, final String resolutionDescription,
+			final Integer problemCode, final Integer statusCode) {
 		
 		this.id = id;
 		this.priority = priority;
@@ -65,6 +67,8 @@ public class TicketMasterData {
 		this.dueDate = dueDate;
 		this.statusDescription = description;
 		this.resolutionDescription = resolutionDescription;
+		this.problemCode = problemCode;
+		this.statusCode = statusCode;
 		
 	}
 
@@ -165,5 +169,15 @@ public class TicketMasterData {
 	public void setUsersData(final List<UsersData> usersData) {
 		this.usersData = usersData;
 	}
+
+	public void setPriorityType(List<EnumOptionData> priorityType) {
+		this.priorityType = priorityType;
+	}
+
+	public void setProblemsDatas(Collection<MCodeData> problemsDatas) {
+		this.problemsDatas = problemsDatas;
+	}
+	
+	
 	
 }

@@ -20,7 +20,6 @@ import javax.ws.rs.core.UriInfo;
 
 import org.mifosplatform.billing.discountmaster.data.DiscountDetailData;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
-import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.service.DiscountReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;

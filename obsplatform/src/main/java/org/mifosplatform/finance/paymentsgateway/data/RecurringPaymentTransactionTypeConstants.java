@@ -1,7 +1,5 @@
 package org.mifosplatform.finance.paymentsgateway.data;
 
-import java.util.Collection;
-
 public class RecurringPaymentTransactionTypeConstants {
 
 	// Recurring Payments Transaction Types
@@ -24,6 +22,7 @@ public class RecurringPaymentTransactionTypeConstants {
 	
 	public static final String RECURRING_PAYMENT_FAILURE			= "FAILURE";
 	public static final String RECURRING_PAYMENT_SUCCESS			= "SUCCESS";
+	public static final String RECURRING_PAYMENT_UNKNOWN			= "UNKNOWN";
 	
 	//constants
 	public static final String RECURRING_TXNTYPE		= "txn_type";
@@ -43,7 +42,8 @@ public class RecurringPaymentTransactionTypeConstants {
 	public static final String ORDERID 				= "orderId";
 	public static final String RENEWALPERIOD			= "renewalPeriod";
 	public static final String PRICEID 				= "priceId";
-	
+	public static final String RP_INVOICE_ID 			= "rp_invoice_id";
+	public static final String MC_CURRENCY 			= "mc_currency";
 	
 	
 	
@@ -62,7 +62,19 @@ public class RecurringPaymentTransactionTypeConstants {
 	public static final String SUCCESS 				= "Success";
 	public static final String PAYPAL 				= "paypal";
 	
-	
+	// Paypal Credit/Debit Card Data Storage
+	public static final String CARD_NUMBER			= "cardNumber";
+	public static final String CARD_TYPE		  		= "cardType";
+	public static final String CARD_EXPIRY_DATE		= "expiryDate";
+	public static final String CARD_CVV				= "cardCVV";
+	public static final String NAME_ON_CARD			= "nameOnCard";
+			
+	//paypal IPN Verification Use Parameters
+	public static final String NOTIFY_VALIDATE		= "cmd=_notify-validate";
+	public static final String CONTENT_TYPE_VALUE		= "application/x-www-form-urlencoded";
+	public static final String CONTENT_TYPE			= "Content-Type";
+	public static final String HOST					= "Host";
+	public static final String POST					= "POST";
 	
 	
 	

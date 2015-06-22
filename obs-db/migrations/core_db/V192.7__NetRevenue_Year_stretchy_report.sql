@@ -10,7 +10,8 @@ select * from netrevenue_vw_2015 ',
 SET @ID=(select id from stretchy_report where report_name='Net Revenue Report for Year');
 SET @PID=(select id from stretchy_parameter where parameter_name='year');
 
-INSERT ignore INTO `stretchy_report_parameter` (`report_id`,`parameter_id`,`report_parameter_name`) 
+
+INSERT IGNORE INTO `stretchy_report_parameter` (`report_id`,`parameter_id`,`report_parameter_name`) 
 VALUES (@ID,@PID,'year');
 
 
