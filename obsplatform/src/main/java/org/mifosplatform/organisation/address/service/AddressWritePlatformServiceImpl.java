@@ -30,11 +30,13 @@ import org.mifosplatform.organisation.address.exception.CountryNotFoundException
 import org.mifosplatform.organisation.address.exception.StateNotFoundException;
 import org.mifosplatform.organisation.address.serialization.LocationValidatorCommandFromApiJsonDeserializer;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMapping;
 import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyTransactionHistory;
 import org.mifosplatform.portfolio.property.exceptions.PropertyCodeAllocatedException;
+import org.mifosplatform.portfolio.property.exceptions.PropertyDeviceMappingExistException;
 import org.mifosplatform.portfolio.property.exceptions.PropertyMasterNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,6 +60,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	private final PropertyMasterRepository propertyMasterRepository;
     private final PropertyHistoryRepository propertyHistoryRepository;
     private final ConfigurationRepository configurationRepository;
+	private Object propertyDeviceMappingRepository;
 	public static final String ADDRESSTYPE="addressType";
 	
 	
@@ -358,8 +361,12 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		address.delete();
 		this.addressRepository.saveAndFlush(address);
 		Configuration  configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
-		if(configuration != null && configuration.isEnabled()) {		
+		if(configuration != null && configuration.isEnabled()) {	
 			final String newPropertyCode=command.stringValueOfParameterNamed("addressNo");
+			List<PropertyDeviceMapping>  propertyDeviceMapping=this.propertyDeviceMappingRepository.findByPropertyCode(newPropertyCode);
+			if(propertyDeviceMapping != null && !propertyDeviceMapping.isEmpty()){
+				throw new PropertyDeviceMappingExistException();
+			}
    		  	PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
    		  		if(propertyMaster!=null){
    		  			propertyMaster.setClientId(null);
