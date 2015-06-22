@@ -11,5 +11,9 @@ CREATE TABLE IF NOT EXISTS `b_propertydevice_mapping` (
   `lastmodifiedby_id` bigint(20) DEFAULT NULL,
    PRIMARY KEY (`id`)
   );
-  
+ 
+ insert ignore into b_eventaction_mapping values(null, 'Order Booking', 'Notify Activation', 'workflow_events', 'N', 'N');
+ 
 insert ignore into m_permission VALUES (null,'client&orders','ALLOCATEDEVICE_PROPERTY','PROPERTY','ALLOCATEDEVICE',0);
+
+INSERT IGNORE INTO c_configuration VALUES(null, 'freeradius_rest', '1', 'http://localhost:8080/','Client','');
