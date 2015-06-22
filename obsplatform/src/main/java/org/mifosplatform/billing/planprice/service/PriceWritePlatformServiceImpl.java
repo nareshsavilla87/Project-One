@@ -3,9 +3,13 @@ package org.mifosplatform.billing.planprice.service;
 import java.util.List;
 import java.util.Map;
 
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.planprice.domain.Price;
 import org.mifosplatform.billing.planprice.domain.PriceRepository;
 import org.mifosplatform.billing.planprice.exceptions.ChargeCOdeExists;
+import org.mifosplatform.billing.planprice.exceptions.ChargeCodeAndContractPeriodException;
+import org.mifosplatform.billing.planprice.exceptions.ContractNotNullException;
 import org.mifosplatform.billing.planprice.exceptions.PriceNotFoundException;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -16,6 +20,8 @@ import org.mifosplatform.organisation.redemption.exception.PinNumberNotFoundExce
 import org.mifosplatform.organisation.voucher.data.VoucherData;
 import org.mifosplatform.organisation.voucher.domain.VoucherRepository;
 import org.mifosplatform.organisation.voucher.exception.AlreadyProcessedException;
+import org.mifosplatform.portfolio.contract.domain.Contract;
+import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
 import org.mifosplatform.portfolio.service.serialization.PriceCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.service.service.ServiceMasterWritePlatformServiceImpl;
@@ -38,17 +44,22 @@ public class PriceWritePlatformServiceImpl implements PriceWritePlatformService 
 	 private final PriceCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	 private final PriceRepository priceRepository;
 	 private final VoucherRepository voucherRepository;
+	 private final ChargeCodeRepository chargeCodeRepository;
+	 private final ContractRepository contractRepository;
 	 
 	@Autowired
 	 public PriceWritePlatformServiceImpl(final PlatformSecurityContext context,final PriceReadPlatformService priceReadPlatformService,
 			 final PriceCommandFromApiJsonDeserializer fromApiJsonDeserializer,final PriceRepository priceRepository,
-			 final VoucherRepository voucherRepository)
+			 final VoucherRepository voucherRepository, final ChargeCodeRepository chargeCodeRepository,
+			 final ContractRepository contractRepository)
 		{
 			this.context=context;
 			this.priceReadPlatformService=priceReadPlatformService;
 			this.fromApiJsonDeserializer=fromApiJsonDeserializer;
 			this.priceRepository=priceRepository;
 			this.voucherRepository=voucherRepository;
+			this.chargeCodeRepository = chargeCodeRepository;
+			this.contractRepository = contractRepository;
 		}
 	
 	@Override
@@ -57,6 +68,18 @@ public class PriceWritePlatformServiceImpl implements PriceWritePlatformService 
 		try{
 		context.authenticatedUser();
 		this.fromApiJsonDeserializer.validateForCreate(command.json());
+		String isPrepaid = command.stringValueOfParameterNamed("isPrepaid");
+		String chargeCode = command.stringValueOfParameterNamed("chargeCode");
+		String contractPeriod = command.stringValueOfParameterNamed("duration");
+		
+		ChargeCodeMaster chargeCodeMaster = chargeCodeRepository.findOneByChargeCode(chargeCode);
+		Contract contract = contractRepository.findOneByContractId(contractPeriod);
+		if(isPrepaid.equalsIgnoreCase("Y")){
+			
+			if(chargeCodeMaster.getChargeDuration() != contract.getUnits().intValue()){
+				throw new ChargeCodeAndContractPeriodException(chargeCode);
+			}
+		}
 		List<ServiceData> serviceData = this.priceReadPlatformService.retrieveServiceCodeDetails(planId);
 		
 		final Price price =Price.fromJson(command,serviceData,planId);
@@ -91,6 +114,21 @@ public class PriceWritePlatformServiceImpl implements PriceWritePlatformService 
 		try{
 			context.authenticatedUser();
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
+			String isPrepaid = command.stringValueOfParameterNamed("isPrepaid");
+			String chargeCode = command.stringValueOfParameterNamed("chargeCode");
+			String contractPeriod = command.stringValueOfParameterNamed("duration");
+			
+			ChargeCodeMaster chargeCodeMaster = chargeCodeRepository.findOneByChargeCode(chargeCode);
+			Contract contract = contractRepository.findOneByContractId(contractPeriod);
+			if(isPrepaid.equalsIgnoreCase("Y")){
+				if(contract == null){
+					throw new ContractNotNullException();
+				}
+				if(chargeCodeMaster.getChargeDuration() != contract.getUnits().intValue()){
+					throw new ChargeCodeAndContractPeriodException(chargeCode);
+				}
+			}
+				
 			final Price price = retrievePriceBy(priceId);
 			final  Map<String, Object> changes = price.update(command);
 			if (changes.containsKey("duration")) {
