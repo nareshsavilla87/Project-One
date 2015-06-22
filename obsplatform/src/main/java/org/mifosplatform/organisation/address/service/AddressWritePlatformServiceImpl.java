@@ -24,6 +24,7 @@ import org.mifosplatform.organisation.address.domain.Country;
 import org.mifosplatform.organisation.address.domain.CountryRepository;
 import org.mifosplatform.organisation.address.domain.State;
 import org.mifosplatform.organisation.address.domain.StateRepository;
+import org.mifosplatform.organisation.address.exception.AddressNoRecordsFoundException;
 import org.mifosplatform.organisation.address.exception.CityNotFoundException;
 import org.mifosplatform.organisation.address.exception.CountryNotFoundException;
 import org.mifosplatform.organisation.address.exception.StateNotFoundException;
@@ -40,11 +41,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 
 @Service
 public class AddressWritePlatformServiceImpl implements AddressWritePlatformService {
-	  private final static Logger logger = LoggerFactory.getLogger(AddressWritePlatformServiceImpl.class);
+	 
+	private final static Logger logger = LoggerFactory.getLogger(AddressWritePlatformServiceImpl.class);
 	private final PlatformSecurityContext context;
 	private final AddressRepository addressRepository;
 	private final CityRepository cityRepository;
@@ -62,12 +65,11 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
 
 	@Autowired
-	public AddressWritePlatformServiceImpl(final PlatformSecurityContext context,final CityRepository cityRepository,
-			final AddressReadPlatformService addressReadPlatformService,final StateRepository stateRepository,
-			final CountryRepository countryRepository,final AddressRepository addressRepository,
-			final LocationValidatorCommandFromApiJsonDeserializer locationValidatorCommandFromApiJsonDeserializer,
-			final PropertyMasterRepository propertyMasterRepository, final PropertyHistoryRepository propertyHistoryRepository,
-		    final ConfigurationRepository configurationRepository) {
+	public AddressWritePlatformServiceImpl(final PlatformSecurityContext context,final CityRepository cityRepository,final ConfigurationRepository configurationRepository,
+			final AddressReadPlatformService addressReadPlatformService,final StateRepository stateRepository,final CountryRepository countryRepository,
+			final AddressRepository addressRepository,final LocationValidatorCommandFromApiJsonDeserializer locationValidatorCommandFromApiJsonDeserializer,
+			final PropertyMasterRepository propertyMasterRepository, final PropertyHistoryRepository propertyHistoryRepository) {
+		
 		this.context = context;
 		this.addressRepository = addressRepository;
 		this.cityRepository=cityRepository;
@@ -89,6 +91,22 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 			context.authenticatedUser();
 			final Address address = Address.fromJson(clientId,command);
 			this.addressRepository.save(address);
+			 PropertyMaster propertyMaster=null;
+	           Configuration propertyConfiguration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+				if(propertyConfiguration != null && propertyConfiguration.isEnabled()) {		
+					 propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(command.stringValueOfParameterNamed("addressNo"));
+					if(propertyMaster != null && propertyMaster.getClientId() != null ){
+						throw new PropertyCodeAllocatedException(propertyMaster.getPropertyCode());
+					}
+					
+					propertyMaster.setClientId(clientId);
+					propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
+				    this.propertyMasterRepository.saveAndFlush(propertyMaster);
+				    PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),
+				    		CodeNameConstants.CODE_PROPERTY_ALLOCATE,clientId,propertyMaster.getPropertyCode());
+				    this.propertyHistoryRepository.save(propertyHistory);
+				}
+				
 			return new CommandProcessingResult(address.getId(),clientId);
 		} catch (DataIntegrityViolationException dve) {
 			 handleCodeDataIntegrityIssues(command, dve);
@@ -325,5 +343,36 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		return null;
   	}
   }
+
+	@Transactional
+	@Override
+	public CommandProcessingResult deleteAddress(Long entityId,JsonCommand command) {
+  
+		 try{
+			 this.context.authenticatedUser();
+			 Address address=this.addressRepository.findOne(entityId);
+			 if(address == null){
+				 throw new AddressNoRecordsFoundException("clientAddress");
+			 }
+			 
+		address.delete();
+		this.addressRepository.saveAndFlush(address);
+		Configuration  configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+		if(configuration != null && configuration.isEnabled()) {		
+			final String newPropertyCode=command.stringValueOfParameterNamed("addressNo");
+   		  	PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
+   		  		if(propertyMaster!=null){
+   		  			propertyMaster.setClientId(null);
+   		  			propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
+   		  			this.propertyMasterRepository.saveAndFlush(propertyMaster);
+   		  		}
+   		  	}
+		return new CommandProcessingResult(entityId);
+		 }catch(DataIntegrityViolationException dve){
+			 handleCodeDataIntegrityIssues(command, dve);
+			 return new CommandProcessingResult(Long.valueOf(-1));
+			 
+		 }
+	}
 }
 

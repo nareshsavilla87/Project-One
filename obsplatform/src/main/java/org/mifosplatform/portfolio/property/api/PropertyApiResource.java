@@ -291,5 +291,16 @@ public class PropertyApiResource {
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}
+	
+	@GET
+	@Path("propertycodes/{clientId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveClientProperties(@Context final UriInfo uriInfo,@PathParam("clientId") final Long clientId) {
+
+//		this.context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
+		final List<String> propertyDefinationData = this.propertyReadPlatformService.retrieveclientProperties(clientId);
+		return this.toApiJsonSerializer.serialize(propertyDefinationData);
+	}
 
 }
