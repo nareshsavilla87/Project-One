@@ -16,8 +16,6 @@ JpaSpecificationExecutor<PropertyDeviceMapping>{
 	@Query("from PropertyDeviceMapping propertyDeviceMapping where propertyDeviceMapping.propertyCode =:propertyCode and propertyDeviceMapping.isDeleted = 'N'")
 	List<PropertyDeviceMapping> findByPropertyCode(@Param("propertyCode")String propertyCode);
 
-	@Query("from PropertyDeviceMapping propertyDeviceMapping where propertyDeviceMapping.propertyCode =:propertyCode and propertyDeviceMapping.isDeleted = 'N'")
-	List<PropertyDeviceMapping> findByPropertyCode(@Param("propertyCode")String propertyCode);
 
 }
 
