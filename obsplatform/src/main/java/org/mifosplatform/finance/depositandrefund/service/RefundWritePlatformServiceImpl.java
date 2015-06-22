@@ -80,21 +80,24 @@ public class RefundWritePlatformServiceImpl implements RefundWritePlatformServic
 			ClientBalance clientBalance = clientBalanceRepository.findByClientId(clientId);
 			BigDecimal clientBalanceAmount = clientBalance.getBalanceAmount();
 			
-			final List<AllocationDetailsData> allocationData = this.oneTimeSaleReadPlatformService.retrieveUnAllocationDetails(saleId, clientId);
-			String serialNumber = allocationData.get(0).getSerialNo();
-			String itemQuality = allocationData.get(0).getQuality();
-			String hardwareStatus = allocationData.get(0).getHardwareStatus();
-			
-			final Long activeorders=this.orderReadPlatformService.retrieveClientActiveOrderDetails(clientId,serialNumber);
-    	   	if(activeorders!= 0){
-    	   		throw new ActivePlansFoundException();
-    	   	}
-    	   	if(!itemQuality.equalsIgnoreCase("Good")){
-    	   		throw new ItemQualityAndStatusException(itemQuality);
-    	   	}
-    	   	if(!hardwareStatus.equalsIgnoreCase("unallocated")){
-    	   		throw new ItemQualityAndStatusException();
-    	   	}
+			/*final List<AllocationDetailsData> allocationData = this.oneTimeSaleReadPlatformService.retrieveUnAllocationDetails(saleId, clientId);
+			if(!allocationData.isEmpty()){
+				
+				String serialNumber = allocationData.get(0).getSerialNo();
+				String itemQuality = allocationData.get(0).getQuality();
+				String hardwareStatus = allocationData.get(0).getHardwareStatus();
+				
+				final Long activeorders=this.orderReadPlatformService.retrieveClientActiveOrderDetails(clientId,serialNumber);
+	    	   	if(activeorders!= 0){
+	    	   		throw new ActivePlansFoundException();
+	    	   	}
+	    	   	if(!itemQuality.equalsIgnoreCase("Good")){
+	    	   		throw new ItemQualityAndStatusException(itemQuality);
+	    	   	}
+	    	   	if(!hardwareStatus.equalsIgnoreCase("unallocated")){
+	    	   		throw new ItemQualityAndStatusException();
+	    	   	}
+			}*/
     	   	
 			if(clientBalanceAmount.intValue() == 0){
 				processDepositAndRefund(clientId, itemId, refundAmount, "Refund", "Credit", depositId);
