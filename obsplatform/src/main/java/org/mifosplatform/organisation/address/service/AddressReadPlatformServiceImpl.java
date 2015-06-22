@@ -41,12 +41,17 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
 
 	@Override
-	public List<AddressData> retrieveAddressDetailsBy(final Long clientId) {
+	public List<AddressData> retrieveAddressDetailsBy(final Long clientId,String addressType) {
 
 		try{
 		context.authenticatedUser();
 		final AddressMapper mapper = new AddressMapper();
-		final String sql = "select " + mapper.schema()+" where is_deleted='n' and a.address_key='PRIMARY' and a.client_id="+clientId;
+		String sql =null;
+		if(addressType == null){
+		  sql = "select " + mapper.schema()+" where is_deleted='n' and a.address_key='PRIMARY' and a.client_id="+clientId;
+		}else{
+		  sql = "select " + mapper.schema()+" where is_deleted='n' and a.address_key='"+addressType+"' and a.client_id="+clientId;
+		}
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 		}catch (final EmptyResultDataAccessException e) {
 			return null;

@@ -18,6 +18,8 @@ public interface AddressWritePlatformService {
 
 	CommandProcessingResult updateLocation(JsonCommand command,String supportedEntityType, Long entityId);
 
+	CommandProcessingResult deleteAddress(Long entityId, JsonCommand command);
+
 	
 
 }

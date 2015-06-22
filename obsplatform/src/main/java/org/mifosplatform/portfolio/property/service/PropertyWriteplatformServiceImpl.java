@@ -194,15 +194,23 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			final String serialNumber = command.stringValueOfParameterNamed("serialNumber");
 			final BigDecimal shiftChargeAmount = command.bigDecimalValueOfParameterNamed("shiftChargeAmount");
 			final String chargeCode = command.stringValueOfParameterNamed("chargeCode");
-
+			Address clientAddress =null;
 			PropertyTransactionHistory transactionHistory = null;
-			Address clientAddress = this.addressRepository.findOneByClientIdAndPropertyCode(clientId,oldPropertyCode);
+			if(oldPropertyCode != null){
+				clientAddress = this.addressRepository.findOneByClientIdAndPropertyCode(clientId,oldPropertyCode);	
+			}else{
+				clientAddress = this.addressRepository.findOneByClientId(clientId);
+			}
+			
 
 			if (clientAddress != null && !StringUtils.isEmpty(newPropertyCode)) {
 				
 				PropertyMaster newpropertyMaster = this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
+				
 				if (oldPropertyCode !=null&&!StringUtils.isEmpty(oldPropertyCode)) {
+					
 					PropertyMaster oldPropertyMaster = this.propertyMasterRepository.findoneByPropertyCode(oldPropertyCode);
+					
 					if (newpropertyMaster != null && newpropertyMaster.getClientId() != null) {
 						if (!newpropertyMaster.getClientId().equals(clientId)) {
 							throw new PropertyCodeAllocatedException(newpropertyMaster.getPropertyCode());
@@ -210,11 +218,11 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 					}
 					// check shifting property same or not
 					if (!oldPropertyCode.equalsIgnoreCase(newPropertyCode) && oldPropertyMaster != null && newpropertyMaster != null
-							&& newpropertyMaster.getClientId() != null && !newpropertyMaster.getClientId().equals(clientId)) {
+							&& newpropertyMaster.getClientId() == null) {
 						
-						oldPropertyMaster.setClientId(null);
+						/*oldPropertyMaster.setClientId(null);
 						oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
-						this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
+						this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);*/
 						PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
 								CodeNameConstants.CODE_PROPERTY_FREE, null,oldPropertyMaster.getPropertyCode());
 						this.propertyHistoryRepository.save(propertyHistory);
