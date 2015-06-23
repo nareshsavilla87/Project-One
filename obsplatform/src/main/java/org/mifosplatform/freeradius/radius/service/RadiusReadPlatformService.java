@@ -33,7 +33,7 @@ public interface RadiusReadPlatformService {
 	String processRadiusDelete(String url, String encodePassword)
 			throws ClientProtocolException, IOException;
 
-   String retrieveRadServiceTemplateData(Long radServiceId);
+    List<RadiusServiceData> retrieveRadServiceTemplateData(Long radServiceId);
 	
    String processRadiusGet(String url, String encodePassword) throws ClientProtocolException, IOException;
    
