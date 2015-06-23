@@ -144,10 +144,12 @@ public class Invoice extends AbstractAuditableCustom<AppUser,Long>{
 	public BigDecimal getDueAmount() {
 		return dueAmount;
 	}
-
+	
 	public void setDueAmount(BigDecimal dueAmount) {
 		this.dueAmount = dueAmount;
 	}
+	
+
 	
 }
 

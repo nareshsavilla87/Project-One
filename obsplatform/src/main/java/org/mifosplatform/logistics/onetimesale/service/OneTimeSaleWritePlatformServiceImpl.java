@@ -274,6 +274,8 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 				   cancelDeviceSale.setInvoiceId(invoice.resourceId());
 				   cancelDeviceSale.setIsInvoiced('Y');
 				   this.oneTimeSaleRepository.save(cancelDeviceSale);
+				   oldInvoice.setDueAmount(BigDecimal.ZERO);
+				   this.invoiceRepository.save(oldInvoice);
 				  }
 			 }
 			oneTimeSale.setIsDeleted('Y');

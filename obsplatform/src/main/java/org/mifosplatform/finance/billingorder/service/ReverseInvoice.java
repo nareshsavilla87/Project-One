@@ -52,24 +52,25 @@ public class ReverseInvoice {
 			
 		invoice = this.generateReverseBillingOrderService.generateNegativeInvoice(billingOrderCommands);
         invoiceAmount=invoice.getInvoiceAmount();
-        /*List<Long> invoices = this.billingOrderReadPlatformService.listOfInvoices(clientId, orderId);
-        if(!invoices.isEmpty() && invoiceAmount != null && invoiceAmount.intValue() != 0){
-        
-        	for(Long invoiceIds :invoices){
-	        	Long invoiceId = invoiceIds;
-	        	Invoice invoiceData = this.invoiceRepository.findOne(invoiceId);
-	        	BigDecimal dueAmount = invoiceData.getDueAmount();
-	        	if(dueAmount != null && dueAmount.intValue() > 0 && invoiceAmount.intValue() < dueAmount.intValue()){
-	        		BigDecimal updateAmount = dueAmount.add(invoiceAmount);
-	        		invoiceData.setDueAmount(updateAmount);
-	        		this.invoiceRepository.saveAndFlush(invoiceData);
-	        	}else if(dueAmount != null && dueAmount.intValue() > 0 && invoiceAmount.intValue() > dueAmount.intValue()){
-	        		invoiceData.setDueAmount(BigDecimal.ZERO);
-	        		this.invoiceRepository.saveAndFlush(invoiceData);
-	        	}
+       
+	        List<Long> invoices = this.billingOrderReadPlatformService.listOfInvoices(clientId, orderId);
+	        if(!invoices.isEmpty() && invoiceAmount != null && invoiceAmount.intValue() != 0){
+	        
+	        	for(Long invoiceIds :invoices){
+		        	Long invoiceId = invoiceIds;
+		        	Invoice invoiceData = this.invoiceRepository.findOne(invoiceId);
+		        	BigDecimal dueAmount = invoiceData.getDueAmount();
+		        	if(dueAmount != null && dueAmount.intValue() > 0 && invoiceAmount.intValue() < dueAmount.intValue()){
+		        		BigDecimal updateAmount = dueAmount.add(invoiceAmount);
+		        		invoiceData.setDueAmount(updateAmount);
+		        		this.invoiceRepository.saveAndFlush(invoiceData);
+		        	}else if(dueAmount != null && dueAmount.intValue() > 0 && invoiceAmount.intValue() > dueAmount.intValue()){
+		        		invoiceData.setDueAmount(BigDecimal.ZERO);
+		        		this.invoiceRepository.saveAndFlush(invoiceData);
+		        	}
+		        }
 	        }
-        }*/
-        
+	        
 		}
 		
 		//List<ClientBalanceData> clientBalancesDatas = clientBalanceReadPlatformService.retrieveAllClientBalances(clientId);
