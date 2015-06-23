@@ -6,7 +6,7 @@ public class TicketMasterCommand {
 
 	private final Long id;
 	private final Long clientId;
-	private final String priority;
+	private String priority;
 	private final LocalDate ticketDate;
 	private final String problemCode;
 	private final String description;
@@ -17,6 +17,7 @@ public class TicketMasterCommand {
 	private final Long ticketId;
 	private final Long createdbyId;
 	private final Integer statusCode;
+	private Integer problemCodeId;
 	
 	public TicketMasterCommand(final Long clientId, final String priority,
 								final String description, final String problemCode, final String status,
@@ -38,7 +39,8 @@ public class TicketMasterCommand {
 		this.statusCode = null;
 	}
 	public TicketMasterCommand(final Long ticketId, final String comments, final String status,
-			final Integer assignedTo, final Long createdbyId, final Integer statusCode) {
+			final Integer assignedTo, final Long createdbyId, final Integer statusCode,
+			final Integer problemCode, final String priority) {
 		
 		this.id = null;
 		this.clientId = null;
@@ -53,6 +55,8 @@ public class TicketMasterCommand {
 		this.ticketId = ticketId;
 		this.createdbyId = createdbyId;
 		this.statusCode = statusCode;
+		this.problemCodeId = problemCode;
+		this.priority = priority;
 		
 	}
 	public TicketMasterCommand(final String status, final String resolutionDescription, final Integer statusCode) {
@@ -112,5 +116,12 @@ public class TicketMasterCommand {
 	public Integer getStatusCode() {
 		return statusCode;
 	}
+	public Integer getProblemCodeId() {
+		return problemCodeId;
+	}
+	public void setProblemCodeId(Integer problemCodeId) {
+		this.problemCodeId = problemCodeId;
+	}
+	
 	
 }

@@ -112,6 +112,10 @@ public class BillingOrderData {
 
 
 
+	public BillingOrderData(Long invoiceId) {
+		this.invoiceId = invoiceId;
+	}
+
 	public Long getClientId() {
 		return clientId;
 	}
