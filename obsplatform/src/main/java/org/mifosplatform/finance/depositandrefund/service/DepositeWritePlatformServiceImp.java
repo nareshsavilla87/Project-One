@@ -25,7 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class DepositeWritePlatformServiceImp implements DepositeWritePlatformService {
 
-	private final static Logger LOGGER = (Logger) LoggerFactory.getLogger(DepositeWritePlatformServiceImp.class);
+	private final static Logger LOGGER = LoggerFactory.getLogger(DepositeWritePlatformServiceImp.class);
 
 	private final PlatformSecurityContext context;
 	private final DepositeCommandFromApiJsonDeserializer apiJsonDeserializer;

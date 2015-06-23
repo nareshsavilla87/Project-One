@@ -87,14 +87,6 @@ public class ServiceTransferApiResource {
 		clientPropertyData = this.propertyReadPlatformService.retrieveClientPropertyDetails(clientId);
 		if(clientPropertyData !=null){
 			serviceTransferGetData(clientPropertyData,clientId);
-			/*final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId,"Service Transfer");
-			final Collection<MCodeData> propertyTypes = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROPERTY_TYPE);
-			if(!feeMasterData.isEmpty()){
-		    	clientPropertyData.setFeeMasterData(feeMasterData.get(0));
-			    clientPropertyData.setPropertyTypes(propertyTypes);
-			 }else{
-				throw new NoFeeMasterRegionalPriceFound();
-			}*/
 		}else{
 			clientPropertyData = new ClientPropertyData();
 			serviceTransferGetData(clientPropertyData,clientId);
