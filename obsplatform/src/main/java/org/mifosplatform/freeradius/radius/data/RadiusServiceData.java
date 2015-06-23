@@ -17,10 +17,11 @@ public class RadiusServiceData {
 	private boolean limitComb;
 	private boolean limitExpiration;
 	private String radVersion;
-	private String radServiceTemplateData;
+	private List<RadiusServiceData> radServiceTemplateData;
 	private boolean renew;
 	private String listRads;
 	private String nextServiceId;
+	private String radService;
 
 	public RadiusServiceData(Long id, String serviceName, String downRate,String upRate, Long nextServicId,
 			Long trafficUnitdl,String nextService) {
@@ -57,6 +58,10 @@ public class RadiusServiceData {
 	public RadiusServiceData(String listRads) {
 		
 		this.listRads = listRads;
+	}
+
+	public RadiusServiceData() {
+		// TODO Auto-generated constructor stub
 	}
 
 	public Long getId() {
@@ -111,11 +116,11 @@ public class RadiusServiceData {
 		this.radVersion = radVersion;
 	}
 
-	public String getRadServiceTemplateData() {
+	public List<RadiusServiceData> getRadServiceTemplateData() {
 		return radServiceTemplateData;
 	}
 
-	public void setRadServiceTemplateData(String radServiceTemplateData) {
+	public void setRadServiceTemplateData(List<RadiusServiceData> radServiceTemplateData) {
 		this.radServiceTemplateData = radServiceTemplateData;
 	}
 
@@ -125,6 +130,14 @@ public class RadiusServiceData {
 
 	public void setRenew(boolean renew) {
 		this.renew = renew;
+	}
+
+	public String getRadService() {
+		return radService;
+	}
+
+	public void setRadService(String radService) {
+		this.radService = radService;
 	}
 	
 	

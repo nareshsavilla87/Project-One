@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -89,17 +90,37 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	public String retrieveAllNasDetails() {
 
 		try {
-			/*JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());*/
-			final Configuration property = this.repository.findOneByName("freeradius_rest");
-
-			if(property == null){
+			
+			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
+			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
-			String url = property.getValue() + "nas";
-			//String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
-			//byte[] encoded = Base64.encodeBase64(credentials.getBytes());
-			String encodedPassword = new String("");
-			String nasData = this.processRadiusGet(url, encodedPassword);
+			String url;
+			String nasData = null;
+			if(data.getProvSystem().equalsIgnoreCase("version-1")){
+				url = data.getUrl() + "nas";
+				String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+				byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+				String encodedPassword = new String(encoded);
+				nasData = this.processRadiusGet(url, encodedPassword);
+				
+			}else if(data.getProvSystem().equalsIgnoreCase("version-2")){
+				
+				final Configuration property = this.repository.findOneByName("freeradius_rest");
+
+				if(property == null){
+					throw new RadiusDetailsNotFoundException();
+				}
+				url = property.getValue() + "nas";
+				//String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+				//byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+				String encodedPassword = new String("");
+				nasData = this.processRadiusGet(url, encodedPassword);
+			}
+			JSONObject jsonObj = new JSONObject();
+			jsonObj.put("radiusVersion", data.getProvSystem().toLowerCase());
+			jsonObj.put("nasData", new JSONArray(nasData));
+			nasData = jsonObj.toString();
 			return nasData;
 		 
 		} catch (ClientProtocolException e) {
@@ -107,6 +128,8 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			return e.getMessage();
 		} catch (IOException e) {
 			e.printStackTrace();
+			return e.getMessage();
+		} catch (JSONException e) {
 			return e.getMessage();
 		}
 
@@ -118,17 +141,35 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	public String retrieveNasDetail(final Long nasId) {
 
 		try {
-			/*JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());*/
-			final Configuration property = this.repository.findOneByName("freeradius_rest");
-
-			if(property == null){
+			
+			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
+			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
-			String url = property.getValue() + "nas/"+nasId;
-			//String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
-			//byte[] encoded = Base64.encodeBase64(credentials.getBytes());
-			String encodedPassword = new String("");
-			String nasData = this.processRadiusGet(url, encodedPassword);
+			String url;
+			String nasData = null;
+			if(data.getProvSystem().equalsIgnoreCase("version-1")){
+				
+				url = data.getUrl() + "nas/"+nasId;
+				String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+				byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+				String encodedPassword = new String(encoded);
+				nasData = this.processRadiusGet(url, encodedPassword);
+				
+			}else if(data.getProvSystem().equalsIgnoreCase("version-2")){
+				
+				final Configuration property = this.repository.findOneByName("freeradius_rest");
+
+				if(property == null){
+					throw new RadiusDetailsNotFoundException();
+				}
+				url = property.getValue() + "nas/"+nasId;
+				//String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+				//byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+				String encodedPassword = new String("");
+				nasData = this.processRadiusGet(url, encodedPassword);
+				
+			}
 			return nasData;
 			
 		} catch (ClientProtocolException e) {
@@ -145,73 +186,108 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	public String createNas(final String jsonData) {
 		
 		try {
-			/*JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());*/
-			final Configuration property = this.repository.findOneByName("freeradius_rest");
-
-			if(property == null){
+			
+			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
+			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
-			String url = property.getValue() + "nas";
-			//String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
-			//byte[] encoded = Base64.encodeBase64(credentials.getBytes());
-			String encodedPassword = new String("");
-			String nasData = this.processRadiusPost(url, encodedPassword,jsonData);
-			
-			/*JSONObject objectResponce = new JSONObject(nasData);
-			
-			if(objectResponce.getString("resultData").equalsIgnoreCase("success")){
+			String url;
+			String nasData = null;
+			if(data.getProvSystem().equalsIgnoreCase("version-1")){
 				
-				final String CONFIGURATION_PATH_LOCATION = 
-						"/usr"+ File.separator +
-						"local"+ File.separator + "etc"+ File.separator + "raddb";
-				final String CONFIGURATION_FILE_LOCATION = CONFIGURATION_PATH_LOCATION + File.separator + "clients.conf";
-				final String defaultOne = "################################################################################"+"\n"+
-											"#"+"\n"+
-											"# This file is updated by Radius Manager, do not edit it!"+"\n"+
-											"#"+"\n";
-				File fileForPath = new File(CONFIGURATION_PATH_LOCATION);
-				String readDatas;
-		        if(!fileForPath.isDirectory()){
-		        	fileForPath.mkdir();
-		        }
-		        File fileForLocation = new File(CONFIGURATION_FILE_LOCATION);
-		        String jsonDataOfNew = "\n"+"client "+objectResponce.getString("nasName")+" {"+"\n"+
-		        		"secret		=  "+objectResponce.getString("secret")+" "+"\n"+
-		        		"shortname	=  "+objectResponce.getString("shortName")+" "+"\n"+
-		        	"}";
-		        if (!fileForLocation.isFile()) {
-		        	writeFileData(CONFIGURATION_FILE_LOCATION, defaultOne+jsonDataOfNew);
-		        	
-		        }else{
-		        	
-		        	readDatas = readFileData(fileForLocation);
-		        	//StringBuilder updatedata = new StringBuilder();
-		        	//updatedata.append(readDatas);
-		        	//updatedata.append(jsonDataOfNew);
-		        	writeFileData(CONFIGURATION_FILE_LOCATION, jsonDataOfNew);
-		        }
-			}*/
-			
-			/**
-			 * @Deprecated
-			 * 
-			 ** /
-			 *
-			/*ProvisionActions provisionActions = this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_NAS);
-			
-			if(provisionActions.getIsEnable() == 'Y'){
+				url = data.getUrl() + "nas";
+				String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+				byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+				String encodedPassword = new String(encoded);
+				nasData = this.processRadiusPost(url, encodedPassword,jsonData);
 				
-				 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), Long.valueOf(0), Long.valueOf(0),
-						 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
+				ProvisionActions provisionActions = this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_NAS);
+				
+				if(provisionActions.getIsEnable() == 'Y'){
+					
+					 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), Long.valueOf(0), Long.valueOf(0),
+							 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
 
-				 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
-						 Long.valueOf(0), jsonData, "Recieved",
-						 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
+					 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
+							 Long.valueOf(0), jsonData, "Recieved",
+							 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
 
-				 processRequest.add(processRequestDetails);
-				 this.processRequestRepository.save(processRequest);
+					 processRequest.add(processRequestDetails);
+					 this.processRequestRepository.save(processRequest);
+					
+				}
 				
-			}*/
+			}else if(data.getProvSystem().equalsIgnoreCase("version-2")){
+				
+				final Configuration property = this.repository.findOneByName("freeradius_rest");
+
+				if(property == null){
+					throw new RadiusDetailsNotFoundException();
+				}
+				url = property.getValue() + "nas";
+				//String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+				//byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+				String encodedPassword = new String("");
+				nasData = this.processRadiusPost(url, encodedPassword,jsonData);
+				
+				/*JSONObject objectResponce = new JSONObject(nasData);
+				
+				if(objectResponce.getString("resultData").equalsIgnoreCase("success")){
+					
+					final String CONFIGURATION_PATH_LOCATION = 
+							"/usr"+ File.separator +
+							"local"+ File.separator + "etc"+ File.separator + "raddb";
+					final String CONFIGURATION_FILE_LOCATION = CONFIGURATION_PATH_LOCATION + File.separator + "clients.conf";
+					final String defaultOne = "################################################################################"+"\n"+
+												"#"+"\n"+
+												"# This file is updated by Radius Manager, do not edit it!"+"\n"+
+												"#"+"\n";
+					File fileForPath = new File(CONFIGURATION_PATH_LOCATION);
+					String readDatas;
+			        if(!fileForPath.isDirectory()){
+			        	fileForPath.mkdir();
+			        }
+			        File fileForLocation = new File(CONFIGURATION_FILE_LOCATION);
+			        String jsonDataOfNew = "\n"+"client "+objectResponce.getString("nasName")+" {"+"\n"+
+			        		"secret		=  "+objectResponce.getString("secret")+" "+"\n"+
+			        		"shortname	=  "+objectResponce.getString("shortName")+" "+"\n"+
+			        	"}";
+			        if (!fileForLocation.isFile()) {
+			        	writeFileData(CONFIGURATION_FILE_LOCATION, defaultOne+jsonDataOfNew);
+			        	
+			        }else{
+			        	
+			        	readDatas = readFileData(fileForLocation);
+			        	//StringBuilder updatedata = new StringBuilder();
+			        	//updatedata.append(readDatas);
+			        	//updatedata.append(jsonDataOfNew);
+			        	writeFileData(CONFIGURATION_FILE_LOCATION, jsonDataOfNew);
+			        }
+				}*/
+				
+				/**
+				 * @Deprecated
+				 * 
+				 ** /
+				 *
+				/*ProvisionActions provisionActions = this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_NAS);
+				
+				if(provisionActions.getIsEnable() == 'Y'){
+					
+					 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), Long.valueOf(0), Long.valueOf(0),
+							 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
+
+					 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
+							 Long.valueOf(0), jsonData, "Recieved",
+							 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
+
+					 processRequest.add(processRequestDetails);
+					 this.processRequestRepository.save(processRequest);
+					
+				}*/
+				
+				
+			}
 			return nasData;
 			
 		} catch (ClientProtocolException e) {
@@ -228,17 +304,35 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	public String deleteNasDetail(final Long nasId) {
 
 		try {
-			/*JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());*/
-			final Configuration property = this.repository.findOneByName("freeradius_rest");
-
-			if(property == null){
+			
+			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
+			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
-			String url = property.getValue() + "nas/"+nasId;
-			//String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
-			//byte[] encoded = Base64.encodeBase64(credentials.getBytes());
-			String encodedPassword = new String("");
-			String nasData = this.processRadiusDelete(url, encodedPassword);
+			String url;
+			String nasData = null;
+			if(data.getProvSystem().equalsIgnoreCase("version-1")){
+				
+				url = data.getUrl() + "nas/"+nasId;
+				String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+				byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+				String encodedPassword = new String(encoded);
+				nasData = this.processRadiusDelete(url, encodedPassword);
+				
+			}else if(data.getProvSystem().equalsIgnoreCase("version-2")){
+				
+				final Configuration property = this.repository.findOneByName("freeradius_rest");
+
+				if(property == null){
+					throw new RadiusDetailsNotFoundException();
+				}
+				url = property.getValue() + "nas/"+nasId;
+				//String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+				//byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+				String encodedPassword = new String("");
+				nasData = this.processRadiusDelete(url, encodedPassword);
+				
+			}
 			return nasData;
 		
 		} catch (ClientProtocolException e) {
@@ -615,9 +709,10 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 		}
 
 	@Override
-	public String retrieveRadServiceTemplateData(final Long radServiceId) {
+	public List<RadiusServiceData> retrieveRadServiceTemplateData(final Long radServiceId) {
 		
 		try {
+			
 			/*JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
 			if(data == null){
 				throw new RadiusDetailsNotFoundException();
@@ -639,16 +734,29 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
-			List<RadiusServiceData> radServiceData=null;
+			List<RadiusServiceData> radServiceData=new ArrayList<RadiusServiceData>();
+			if(data.getProvSystem().equalsIgnoreCase("version-1")){
+				
+				ServiceDetailsMapper mapper = new ServiceDetailsMapper();
+				String sql = "select " + mapper.schema() + " where rs.srvid <> ?";
+				
+				radServiceData = this.jdbcTemplate.query(sql, mapper, new Object[] {radServiceId});
+				
+			}else if(data.getProvSystem().equalsIgnoreCase("version-2")){
+				
+				final Configuration property = this.repository.findOneByName("freeradius_rest");
+				String url = property.getValue() + "raduser2/template";
+				String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
+				byte[] encoded = Base64.encodeBase64(credentials.getBytes());
+				String encodedPassword = new String(encoded);
+				String radService = this.processRadiusGet(url, encodedPassword);
+				RadiusServiceData aa = new RadiusServiceData();
+				aa.setRadService(radService);
+				radServiceData.add(aa);
+				System.out.println("------radService:---"+radService+"-----");
+			}
 			
-			final Configuration property = this.repository.findOneByName("freeradius_rest");
-			String url = property.getValue() + "raduser2/template";
-			String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
-			byte[] encoded = Base64.encodeBase64(credentials.getBytes());
-			String encodedPassword = new String(encoded);
-			String radService = this.processRadiusGet(url, encodedPassword);
-			System.out.println("------radService:---"+radService+"-----");
-			return radService;
+			return radServiceData;
 
 		}catch (EmptyResultDataAccessException e) {
 			return null;
