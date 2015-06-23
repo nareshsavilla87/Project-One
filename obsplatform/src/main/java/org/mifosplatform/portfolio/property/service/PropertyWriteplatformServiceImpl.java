@@ -219,23 +219,30 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 					// check shifting property same or not
 					if (!oldPropertyCode.equalsIgnoreCase(newPropertyCode) && oldPropertyMaster != null && newpropertyMaster != null
 							&& newpropertyMaster.getClientId() == null) {
-						
-						/*oldPropertyMaster.setClientId(null);
+					
+						if(clientAddress.getAddressKey().equalsIgnoreCase("PRIMARY")){
+						oldPropertyMaster.setClientId(null);
 						oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
-						this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);*/
+						this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
 						PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
 								CodeNameConstants.CODE_PROPERTY_FREE, null,oldPropertyMaster.getPropertyCode());
 						this.propertyHistoryRepository.save(propertyHistory);
-
-						newpropertyMaster.setClientId(clientId);
-						newpropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
-						this.propertyMasterRepository.saveAndFlush(newpropertyMaster);
 						clientAddress.setAddressNo(newpropertyMaster.getPropertyCode());
 						clientAddress.setStreet(newpropertyMaster.getStreet());
 						clientAddress.setCity(newpropertyMaster.getPrecinct());
 						clientAddress.setState(newpropertyMaster.getState());
 						clientAddress.setCountry(newpropertyMaster.getCountry());
 						clientAddress.setZip(newpropertyMaster.getPoBox());
+
+						}else{
+						   clientAddress = new Address(clientId, "BILLING", newpropertyMaster.getPropertyCode(), newpropertyMaster.getStreet(), newpropertyMaster.getPrecinct(),
+								   newpropertyMaster.getState(), newpropertyMaster.getCountry(), newpropertyMaster.getPoBox(), null,null);	
+						}
+
+						newpropertyMaster.setClientId(clientId);
+						newpropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
+						this.propertyMasterRepository.saveAndFlush(newpropertyMaster);
+						
 						this.addressRepository.save(clientAddress);
 					}
 

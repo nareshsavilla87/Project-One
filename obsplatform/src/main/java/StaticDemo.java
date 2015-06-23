@@ -8,10 +8,16 @@
 public class StaticDemo {
  
     public static void main(String args[]) {
-     
-     System.out.println(1.0/0.0);
-        //if we can  override static , this should call method from Child class
-     
+     try{
+   int i=1;
+   int j=0;
+   int k =i/j;
+   System.out.println(k);
+     }catch(ArithmeticException exception){
+    	 System.out.println("Pl.....enter valid num");
+    	// exception.printStackTrace();
+    	 
+     }
     } 
  
 }
