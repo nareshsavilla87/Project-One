@@ -3,7 +3,6 @@ package org.mifosplatform.finance.billingmaster.service;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +20,7 @@ import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFo
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.organisation.message.domain.BillingMessage;
 import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
@@ -38,7 +38,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author ranjith
- *
+ * 
  */
 @Service
 public class BillWritePlatformServiceImpl implements BillWritePlatformService {
@@ -105,7 +105,6 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		}
 	  dueAmount = chargeAmount.add(taxAmount).add(oneTimeSaleAmount).add(clientBalance)
 			      .add(serviceTransferAmount).subtract(paymentAmount).subtract(adjustmentAmount);
-
 	  billMaster.setChargeAmount(chargeAmount.add(oneTimeSaleAmount).add(serviceTransferAmount));
 	  billMaster.setAdjustmentAmount(adjustmentAmount);
 	  billMaster.setTaxAmount(taxAmount);
@@ -122,7 +121,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 
 	@Transactional
 	@Override
-	public void generateStatementPdf(final Long billId) throws SQLException {
+	public void generateStatementPdf(final Long billId)  {
 		
 		try {
 			final String fileLocation = FileUtils.MIFOSX_BASE_DIR;
@@ -138,7 +137,8 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			}
 			final String printStatementLocation = statementDetailsLocation + File.separator + "Bill_" + billMaster.getId() + ".pdf";
 			final String jpath = fileLocation+File.separator+"jasper"; 
-			final String jfilepath =jpath+File.separator+"Bill_Mainreport.jasper";
+			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+			final String jfilepath =jpath+File.separator+"Statement_"+tenant+".jasper";
 			final Connection connection = this.dataSource.getConnection();
 		
 			Map<String, Object> parameters = new HashMap<String, Object>();
@@ -169,7 +169,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 
 	@Transactional
 	@Override
-	public String generateInovicePdf(final Long invoiceId)  {
+	public String generateInovicePdf(final Long invoiceId) {
 		
 		final String fileLocation = FileUtils.MIFOSX_BASE_DIR ;
 		/** Recursively create the directory if it does not exist **/
@@ -184,7 +184,8 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
-			final String jasperfilepath =jpath+File.separator+"Invoicereport.jasper";
+			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+			final String jasperfilepath =jpath+File.separator+"Invoicereport_"+tenant+".jasper";
 			final Integer id = Integer.valueOf(invoiceId.toString());
 			final Connection connection = this.dataSource.getConnection();
 			Map<String, Object> parameters = new HashMap<String, Object>();
@@ -210,7 +211,6 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		return printInvoiceLocation;	
    }
 	
-	
 	@Transactional
 	@Override
 	public String generatePaymentPdf(final Long paymentId)  {
@@ -228,7 +228,8 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
-			final String jasperfilepath =jpath+File.separator+"Paymentreport.jasper";
+			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+			final String jasperfilepath =jpath+File.separator+"Paymentreport_"+tenant+".jasper";
 			final Integer id = Integer.valueOf(paymentId.toString());
 			final Connection connection = this.dataSource.getConnection();
 			Map<String, Object> parameters = new HashMap<String, Object>();
@@ -276,7 +277,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	    }
 	  }
 	}
-	
+
 /*	@Override
 	public String generatePdf(final BillDetailsData billDetails,final List<FinancialTransactionsData> datas) {
 
@@ -577,4 +578,3 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		return printInvoicedetailsLocation;
 
 	}*/	
-	

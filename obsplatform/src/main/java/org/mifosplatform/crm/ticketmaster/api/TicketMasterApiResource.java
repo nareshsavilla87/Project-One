@@ -223,6 +223,10 @@ public class TicketMasterApiResource {
 	        data.setStatusData(statusdata);
 	        final List<UsersData>  userData = this.ticketMasterReadPlatformService.retrieveUsers();
 	        data.setUsersData(userData);
+	        final List<EnumOptionData> priorityData = this.ticketMasterReadPlatformService.retrievePriorityData();
+			final Collection<MCodeData> problemsDatas = this.codeReadPlatformService.getCodeValue("Problem Code");
+			data.setPriorityType(priorityData);
+			data.setProblemsDatas(problemsDatas);
 	        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	        return this.toApiJsonSerializer.serialize(settings, data, RESPONSE_PARAMETERS);
 	    }

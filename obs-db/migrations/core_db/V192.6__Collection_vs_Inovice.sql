@@ -19,7 +19,7 @@ from
     Left join
     m_code_value mcv1 ON  off.office_type = mcv1.id
  where (off.id = ''${officeId}'' or -1 = ''${officeId}'') and (pay.paymode_id = ''${paymode_id}'' or -1 = ''${paymode_id}'' ) and pay.payment_date between ''${startDate}'' and ''${endDate}''
-group by pay.payment_date,pay.paymode_id', 'Collections From Clients---Date wise details', '0', '1');
+group by Client_Id,pay.payment_date,pay.paymode_id', 'Collections From Clients---Date wise details', '0', '1');
 
   UPDATE stretchy_report
   SET report_sql ='select
@@ -41,7 +41,7 @@ from
     Left join
     m_code_value mcv1 ON  off.office_type = mcv1.id
 where (off.id = ''${officeId}'' or -1 = ''${officeId}'') and (pay.paymode_id = ''${paymode_id}'' or -1 = ''${paymode_id}'' ) and pay.payment_date between ''${startDate}'' and ''${endDate}''
-group by pay.payment_date,pay.paymode_id'
+group by Client_Id,pay.payment_date,pay.paymode_id'
 where report_name='Collection Date Wise Details';
 
 -- Collection Date Wise Details parameters --
@@ -108,7 +108,7 @@ FROM
  GROUP BY inv.invoice_date,charge.invoice_id,ctx.invoice_id'
  where report_name='Invoice Date Wise Details' ;
 
--- invoice_date_wise_details parameters --
+-- Invoice Date wise Details --
 
 SET @id=(select id from stretchy_report where report_name='Invoice Date Wise Details');
 SET @offId=(SELECT id FROM stretchy_parameter where parameter_label='Office');
@@ -345,6 +345,7 @@ insert ignore into stretchy_report_parameter(report_id,parameter_id,report_param
 SET SQL_SAFE_UPDATES=0;
 Delete from stretchy_report where report_name='collection_date_wise_details';
 Delete from stretchy_report where report_name='invoice_date_wise_details';
+
 
 
 

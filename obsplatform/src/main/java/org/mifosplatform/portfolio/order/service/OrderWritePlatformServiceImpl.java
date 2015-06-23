@@ -12,6 +12,8 @@ import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.planprice.domain.Price;
 import org.mifosplatform.billing.planprice.domain.PriceRepository;
+import org.mifosplatform.billing.planprice.exceptions.ChargeCodeAndContractPeriodException;
+import org.mifosplatform.billing.planprice.exceptions.ContractNotNullException;
 import org.mifosplatform.billing.planprice.exceptions.PriceNotFoundException;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeMaster;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeRepository;
@@ -138,9 +140,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final OrderHistoryRepository orderHistoryRepository;
 	private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
 	private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
+	private final ContractRepository contractRepository;
 	private final InvoiceClient invoiceClient;
-	
-   
     
 
     @Autowired
@@ -162,7 +163,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		    final PaymentFollowupRepository paymentFollowupRepository,final PriceRepository priceRepository,final ChargeCodeRepository chargeCodeRepository,
 		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
 		    final PaypalRecurringBillingRepository paypalRecurringBillingRepository,
-		    final InvoiceClient invoiceClient) {
+		    final ContractRepository contractRepository, final InvoiceClient invoiceClient) {
+		    
 
 		this.context = context;
 		this.reverseInvoice=reverseInvoice;
@@ -199,8 +201,9 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
 		this.accountIdentifierGeneratorFactory=accountIdentifierGeneratorFactory;
 		this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
+		this.contractRepository = contractRepository;
 		this.invoiceClient = invoiceClient;
-		
+
 
 	}
 	
@@ -210,6 +213,9 @@ public CommandProcessingResult createOrder(Long clientId,JsonCommand command) {
 try{
 	this.fromApiJsonDeserializer.validateForCreate(command.json());
 	final Long userId=getUserId();
+	
+	checkingContractPeriodAndBillfrequncyValidation(command.longValueOfParameterNamed("contractPeriod"),
+			command.stringValueOfParameterNamed("paytermCode"));
 	
 	//Check for Custome_Validation
 	this.eventValidationReadPlatformService.checkForCustomValidations(clientId,EventActionConstants.EVENT_CREATE_ORDER,command.json(),userId);
@@ -266,8 +272,7 @@ try{
 		}
 	}
 	
-	/*processNotifyMessages(EventActionConstants.EVENT_ACTIVE_ORDER, clientId, order.getId().toString());*/
-	
+
 	return new CommandProcessingResult(order.getId(),order.getClientId());	
 	}catch (DataIntegrityViolationException dve) {
 		handleCodeDataIntegrityIssues(command, dve);
@@ -436,6 +441,17 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  final Long userId=getUserId();
 	  this.fromApiJsonDeserializer.validateForRenewalOrder(command.json());
 	  Order orderDetails=retrieveOrderById(orderId);
+	  
+	  	Contract contract = contractRepository.findOne(command.longValueOfParameterNamed("renewalPeriod"));
+		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(orderDetails.getBillingFrequency());
+		Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
+		if(contract == null){
+			throw new ContractNotNullException();
+		}
+		if(chargeCodeDuration > contract.getUnits().intValue()){
+			throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.get(0).getBillFrequencyCode(), contract.getSubscriptionPeriod());
+		}
+		
 	  this.eventValidationReadPlatformService.checkForCustomValidations(orderDetails.getClientId(),EventActionConstants.EVENT_ORDER_RENEWAL,command.json(),userId);	
 	  List<OrderPrice>  orderPrices=orderDetails.getPrice();
 	  final Long contractPeriod = command.longValueOfParameterNamed("renewalPeriod");
@@ -532,13 +548,20 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
    			OrderHistory orderHistory=new OrderHistory(orderDetails.getId(),DateUtils.getLocalDateOfTenant(),newStartdate,resourceId,requstStatus,userId,description);
    			this.orderHistoryRepository.saveAndFlush(orderHistory);
    			
-   			//Auto renewal with invoice process  for Topup  orders
+   		     //Auto renewal with invoice process  for Topup  orders
    			
-   		  if(plan.isPrepaid() == 'Y' && orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
-   			  
-   		     Invoice invoice=this.invoiceClient.onTopUpAutoRenewalInvoice(orderDetails.getId(),orderDetails.getClientId(),newStartdate.plusDays(1));
-   		    
-   		  }
+     		 if(plan.isPrepaid() == 'Y' && orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
+     			  
+     		    Invoice invoice=this.invoiceClient.onTopUpAutoRenewalInvoice(orderDetails.getId(),orderDetails.getClientId(),newStartdate.plusDays(1));
+     		    
+     		    if(invoice!=null){
+     		    	List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_TOPUP_INVOICE_MAIL);
+     				if(actionDetaislDatas.size() != 0){
+     					this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,orderDetails.getClientId(), invoice.getId().toString(),null);
+     				}
+     		    }
+     		  }
+   		 
    			processNotifyMessages(EventActionConstants.EVENT_RECONNECTION_ORDER, orderDetails.getClientId(), orderId.toString());
    			return new CommandProcessingResult(Long.valueOf(orderDetails.getClientId()),orderDetails.getClientId());
 		
@@ -707,6 +730,9 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		
  try{
 	 Long userId=this.context.authenticatedUser().getId();
+	 this.fromApiJsonDeserializer.validateForCreate(command.json());
+	 checkingContractPeriodAndBillfrequncyValidation(command.longValueOfParameterNamed("contractPeriod"),
+			 command.stringValueOfParameterNamed("paytermCode"));
 	 Order order=this.orderRepository.findOne(entityId);
 	 order.updateDisconnectionstate();
 	 Date billEndDate=order.getPrice().get(0).getBillEndDate();
@@ -1159,6 +1185,20 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 					this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,billing.getClientId(), orderId.toString(),null);			
 				}		
 			}  
+  }
+  
+  private void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode){
+	  
+	  Contract contract = contractRepository.findOne(contractPeriod);
+		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(paytermCode);
+		Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
+		if(contract == null){
+			throw new ContractNotNullException();
+		}
+		if(chargeCodeDuration > contract.getUnits().intValue()){
+			throw new ChargeCodeAndContractPeriodException();
+		}
+		
   }
 
  }

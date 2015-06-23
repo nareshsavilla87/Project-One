@@ -58,7 +58,6 @@ public class InvoiceClient {
 		}
 
 	}
-
 	
 	public Invoice invoicingSingleClient(Long clientId, LocalDate processDate) {
 
@@ -153,9 +152,7 @@ public class InvoiceClient {
 			return new GenerateInvoiceData(clientId, billingOrderCommands.get(0).getNextBillableDate(),singleInvoice.getInvoiceAmount(), singleInvoice);
 		}
 	}
-	
-	
-	
+
 	public Invoice onTopUpAutoRenewalInvoice(Long orderId, Long clientId,LocalDate processDate) {
 
 		// Get qualified order complete details
@@ -168,13 +165,11 @@ public class InvoiceClient {
 
 		// Update order-price
 		this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
-		System.out.println("TopUp:---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
+		System.out.println("Top-Up:---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
 
 		// Update Client Balance
 		this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(), clientId, false);
-
+		
 		return invoice;
 		}
 	}
-
-

@@ -15,7 +15,6 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -28,16 +27,14 @@ import com.google.gson.JsonElement;
 @Scope("singleton")
 public class BillingOrderApiResourse {
 
-
-    private final PlatformSecurityContext context;
     private final DefaultToApiJsonSerializer<CodeData> toApiJsonSerializer;
     private final InvoiceClient invoiceClient;
     private final FromJsonHelper fromApiJsonHelper;
+    
 	@Autowired
-	BillingOrderApiResourse(final PlatformSecurityContext context, final DefaultToApiJsonSerializer<CodeData> toApiJsonSerializer,
-			final InvoiceClient invoiceClient,final FromJsonHelper fromApiJsonHelper){
+	BillingOrderApiResourse(final DefaultToApiJsonSerializer<CodeData> toApiJsonSerializer,final InvoiceClient invoiceClient,
+			final FromJsonHelper fromApiJsonHelper){
 		
-		this.context = context;
         this.toApiJsonSerializer = toApiJsonSerializer;
 		this.invoiceClient=invoiceClient;
 		this.fromApiJsonHelper=fromApiJsonHelper;
@@ -66,5 +63,4 @@ public class BillingOrderApiResourse {
 	}
 	
 	
-
 }
