@@ -34,7 +34,7 @@ public final class PropertyCommandFromApiJsonDeserializer {
 					"floor", "buildingCode", "parcel", "street", "status","precinct", "poBox", "state", "country"));
 	
 	private final Set<String> supportedParametersForServiceTransfer = new HashSet<String>(Arrays.asList("oldPropertyCode", "newPropertyCode", "shiftChargeAmount","locale","unitCode",
-			           "clientId","chargeCode"));
+			           "clientId","chargeCode","serialNumber"));
 	
     private final Set<String> supportedParametersForMaster = new HashSet<String>(Arrays.asList("propertyCodeType","code","description","referenceValue"));
 	

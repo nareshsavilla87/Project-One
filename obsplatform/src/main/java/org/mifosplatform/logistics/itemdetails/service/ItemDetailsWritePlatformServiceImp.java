@@ -41,6 +41,8 @@ import org.mifosplatform.portfolio.association.service.HardwareAssociationWritep
 import org.mifosplatform.portfolio.order.exceptions.NoGrnIdFoundException;
 import org.mifosplatform.portfolio.order.service.OrderAssembler;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMapping;
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.provisioning.provisioning.service.ProvisioningWritePlatformService;
 import org.mifosplatform.provisioning.provsionactions.domain.ProvisionActions;
@@ -81,6 +83,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 	private final ProvisioningActionsRepository provisioningActionsRepository;
 	private final ProvisioningWritePlatformService provisioningWritePlatformService;
 	private final ItemDetailsAllocationRepository inventoryItemDetailsAllocationRepository; 
+	private final PropertyDeviceMappingRepository propertyDeviceMappingRepository;
 	private final InventoryTransactionHistoryJpaRepository inventoryTransactionHistoryJpaRepository;
 	private final InventoryItemCommandFromApiJsonDeserializer inventoryItemCommandFromApiJsonDeserializer;
 	private final InventoryItemAllocationCommandFromApiJsonDeserializer inventoryItemAllocationCommandFromApiJsonDeserializer;
@@ -96,7 +99,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			final HardwareAssociationReadplatformService associationReadplatformService,final HardwareAssociationWriteplatformService associationWriteplatformService,
 			final ItemRepository itemRepository,final OrderReadPlatformService orderReadPlatformService,
 			final ProvisioningWritePlatformService provisioningWritePlatformService,final EventValidationReadPlatformService eventValidationReadPlatformService,
-			final ProvisioningActionsRepository provisioningActionsRepository) 
+			final ProvisioningActionsRepository provisioningActionsRepository,final PropertyDeviceMappingRepository propertyDeviceMappingRepository) 
 	{
 		this.inventoryItemDetailsReadPlatformService = inventoryItemDetailsReadPlatformService;
 		this.context=context;
@@ -113,6 +116,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 		this.configurationRepository=configurationRepository;
 		this.associationReadplatformService=associationReadplatformService;
 		this.associationWriteplatformService=associationWriteplatformService;
+		this.propertyDeviceMappingRepository = propertyDeviceMappingRepository;
 		this.itemRepository=itemRepository;
 		this.orderReadPlatformService=orderReadPlatformService;
 		this.provisioningWritePlatformService=provisioningWritePlatformService;
@@ -367,6 +371,16 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
         	   OneTimeSale oneTimeSale=this.oneTimeSaleRepository.findOne(inventoryItemDetailsAllocation.getOrderId());
         	   oneTimeSale.setStatus();
         	   this.oneTimeSaleRepository.save(oneTimeSale);
+        	   
+        	   
+  			 Configuration globalConfiguration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+  			 
+  			 if(globalConfiguration.isEnabled()){
+  				 
+  				 PropertyDeviceMapping deviceMapping = this.propertyDeviceMappingRepository.findBySerailNumber(serialNo);
+  				 deviceMapping.delete();
+  				 this.propertyDeviceMappingRepository.save(deviceMapping);
+  			 }
         	   ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_RELEASE_DEVICE);
                if(provisionActions != null && provisionActions.isEnable() == 'Y'){
    				

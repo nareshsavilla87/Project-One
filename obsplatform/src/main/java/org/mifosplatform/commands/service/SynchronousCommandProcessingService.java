@@ -1277,7 +1277,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 	                handler = applicationContext.getBean("updatePropertyCommandHandler",NewCommandSourceHandler.class);
 	              }else if(wrapper.isDelete()){
 	               handler = applicationContext.getBean("deletePropertyCommandHandler",NewCommandSourceHandler.class);
-	              }else {
+	              }else if(wrapper.isAllocateDevice()){
+		               handler = applicationContext.getBean("allocateDevicePropertyCommandHandler",NewCommandSourceHandler.class);
+		          }else {
 	               throw new UnsupportedCommandException(wrapper.commandName());
 	          }
 	              
