@@ -443,16 +443,6 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  this.fromApiJsonDeserializer.validateForRenewalOrder(command.json());
 	  Order orderDetails=retrieveOrderById(orderId);
 	  
-	  	Contract contract = contractRepository.findOne(command.longValueOfParameterNamed("renewalPeriod"));
-		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(orderDetails.getBillingFrequency());
-		Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
-		if(contract == null){
-			throw new ContractNotNullException();
-		}
-		if(chargeCodeDuration > contract.getUnits().intValue()){
-			throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.get(0).getBillFrequencyCode(), contract.getSubscriptionPeriod());
-		}
-		
 	  this.eventValidationReadPlatformService.checkForCustomValidations(orderDetails.getClientId(),EventActionConstants.EVENT_ORDER_RENEWAL,command.json(),userId);	
 	  List<OrderPrice>  orderPrices=orderDetails.getPrice();
 	  final Long contractPeriod = command.longValueOfParameterNamed("renewalPeriod");
@@ -461,6 +451,14 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  Contract contractDetails=this.subscriptionRepository.findOne(contractPeriod);
 	  Plan plan=this.planRepository.findOne(orderDetails.getPlanId());
 	  
+		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(orderDetails.getBillingFrequency());
+		Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
+		if(contractDetails == null){
+			throw new ContractNotNullException();
+		}
+		if(chargeCodeDuration > contractDetails.getUnits().intValue() && plan.isPrepaid() == 'N'){
+			throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.get(0).getBillFrequencyCode(), contractDetails.getSubscriptionPeriod());
+		}
 	  if(orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
 		  
 		  newStartdate=new LocalDate(orderDetails.getEndDate()).plusDays(1);
@@ -499,12 +497,13 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  //orderDetails.setEndDate(renewalEndDate);
 		 orderDetails.setuserAction(requstStatus);
 	  for(OrderPrice orderprice:orderPrices){
+		  
 		  if(plan.isPrepaid() == 'Y'){
 			  final Long priceId = command.longValueOfParameterNamed("priceId");
-			 // ServiceMaster service=this.serviceMasterRepository.findOne(orderprice.getServiceId()); 
-			    Price price=this.priceRepository.findOne(priceId);
-			 /* Price price=this.priceRepository.findOneByPlanAndService(plan.getId(), service.getServiceCode(),
-					  contractDetails.getSubscriptionPeriod(),orderprice.getChargeCode());*/
+			 ServiceMaster service=this.serviceMasterRepository.findOne(orderprice.getServiceId()); 
+			 Price price1=this.priceRepository.findOne(priceId);
+			 Price price=this.priceRepository.findOneByPlanAndService(plan.getId(), service.getServiceCode(),
+					  contractDetails.getSubscriptionPeriod(),price1.getChargeCode(),price1.getPriceRegion());
 				if(price != null){
 					
 					ChargeCodeMaster chargeCode=this.chargeCodeRepository.findOneByChargeCode(price.getChargeCode());
@@ -896,6 +895,9 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			
 	    	  	//Check for Active Orders	
 	    	 /* Long activeorderId=this.orderReadPlatformService.retrieveClientActiveOrderDetails(clientId,null);
+	    	/*  Long activeorderId=this.orderReadPlatformService.retrieveClientActiveOrderDetails(clientId,null);
+>>>>>>> upstream/obsplatform-3.0
+>>>>>>> obsplatform-3.0
 	    	  	if(activeorderId !=null && activeorderId !=0){
 	    	  		Order order=this.orderRepository.findOne(activeorderId);
 				   		if(order.getEndDate() == null || !startDate.isAfter(new LocalDate(order.getEndDate()))){
