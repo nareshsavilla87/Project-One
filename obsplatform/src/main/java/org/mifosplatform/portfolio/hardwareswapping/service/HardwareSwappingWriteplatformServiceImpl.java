@@ -1,7 +1,5 @@
 package org.mifosplatform.portfolio.hardwareswapping.service;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.codehaus.jettison.json.JSONArray;
@@ -11,11 +9,11 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.infrastructure.configuration.domain.Configuration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
@@ -41,6 +39,8 @@ import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMapping;
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
 import org.mifosplatform.provisioning.provisioning.service.ProvisioningWritePlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +72,7 @@ public class HardwareSwappingWriteplatformServiceImpl implements HardwareSwappin
 	private final ItemRepository itemRepository;
 	private final ProvisioningWritePlatformService provisioningWritePlatformService;
 	private final ItemDetailsRepository itemDetailsRepository;
+	private final PropertyDeviceMappingRepository propertyDeviceMappingRepository;
 	  
 	@Autowired
 	public HardwareSwappingWriteplatformServiceImpl(final PlatformSecurityContext context,final HardwareAssociationWriteplatformService associationWriteplatformService,
@@ -80,13 +81,14 @@ public class HardwareSwappingWriteplatformServiceImpl implements HardwareSwappin
 			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,final OrderHistoryRepository orderHistoryRepository,
 			final ConfigurationRepository configurationRepository,final OwnedHardwareJpaRepository hardwareJpaRepository,
 			final HardwareAssociationReadplatformService associationReadplatformService,final ItemRepository itemRepository,
-			final ItemDetailsRepository itemDetailsRepository) {
+			final ItemDetailsRepository itemDetailsRepository,final PropertyDeviceMappingRepository propertyDeviceMappingRepository) {
  
 		this.context=context;
 		this.associationWriteplatformService=associationWriteplatformService;
 		this.inventoryItemDetailsWritePlatformService=inventoryItemDetailsWritePlatformService;
 		this.orderRepository=orderRepository;
 		this.planRepository=planRepository;
+		this.propertyDeviceMappingRepository = propertyDeviceMappingRepository;
 		this.fromApiJsonDeserializer=apiJsonDeserializer;
 		this.commandSourceWritePlatformService=commandSourceWritePlatformService;
 		this.orderHistoryRepository=orderHistoryRepository;
@@ -139,31 +141,23 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 			
 			OwnedHardware ownedHardware=this.hardwareJpaRepository.findBySerialNumber(serialNo);
 			ownedHardware.updateSerialNumbers(provisionNum);
-			
 			this.hardwareJpaRepository.saveAndFlush(ownedHardware);
 			
 			final ItemMaster itemMaster=this.itemRepository.findOne(Long.valueOf(ownedHardware.getItemType()));
-
-			
 	        List<HardwareAssociationData> allocationDetailsDatas=this.associationReadplatformService.retrieveClientAllocatedPlan(ownedHardware.getClientId(),itemMaster.getItemCode());
-	    
 	        if(!allocationDetailsDatas.isEmpty()){
 	    				this.associationWriteplatformService.createNewHardwareAssociation(ownedHardware.getClientId(),allocationDetailsDatas.get(0).getPlanId(),
 	    						ownedHardware.getSerialNumber(),allocationDetailsDatas.get(0).getorderId(),"ALLOT");
 	        }
+	        
 	   }else{
 		
 		//DeAllocate HardWare
 		ItemDetailsAllocation inventoryItemDetailsAllocation=this.inventoryItemDetailsWritePlatformService.deAllocateHardware(serialNo, entityId);
 		
-	
-		
-	//	this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,requstStatus);
-		
-		JSONObject allocation = new JSONObject();
+		 JSONObject allocation = new JSONObject();
 		 JSONObject allocation1 = new JSONObject();
 		 JSONArray  serialNumber=new JSONArray();
-		 
 		  
 		 allocation.put("itemMasterId",inventoryItemDetailsAllocation.getItemMasterId());
 		 allocation.put("clientId",entityId);
@@ -178,25 +172,18 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 		 allocation1.put("serialNumber",serialNumber);
 		 
 		//ReAllocate HardWare
-			//this.inventoryItemDetailsWritePlatformService.allocateHardware(command);
 			CommandWrapper commandWrapper = new CommandWrapperBuilder().allocateHardware().withJson(allocation1.toString()).build();
 			this.commandSourceWritePlatformService.logCommandSource(commandWrapper);
 		}
 			//for Reassociation With New SerialNumber
-			//this.associationWriteplatformService.createAssociation(command);
 		Long resouceId=Long.valueOf(0);
 		
 			if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
 			requstStatus =UserActionStatusTypeEnum.DEVICE_SWAP.toString();
-			//final CommandProcessingResult processingResult=this.prepareRequestWriteplatformService.prepareNewRequest(order,plan,requstStatus);
 			order.setStatus( OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
-			
-	         //   if(plan.getProvisionSystem().equalsIgnoreCase(ProvisioningApiConstants.PROV_PACKETSPAN)){
-					
 				CommandProcessingResult commandProcessingResult=	this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order,plan.getPlanCode(),UserActionStatusTypeEnum.DEVICE_SWAP.toString(),
 							Long.valueOf(0),null,serialNo,order.getId(),plan.getProvisionSystem(),null);
 				resouceId=commandProcessingResult.resourceId();
-			//	}
 			}
 			
 			//geting old serial number itemdetails data 
@@ -207,6 +194,15 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 				
 			 this.itemDetailsRepository.save(oldSerailNoItemData);
 			 this.itemDetailsRepository.save(newSerailNoItemData);
+			 
+			 Configuration globalConfiguration=this.globalConfigurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+			 
+			 if(globalConfiguration.isEnabled()){
+				 
+				 PropertyDeviceMapping deviceMapping = this.propertyDeviceMappingRepository.findBySerailNumber(serialNo);
+				 deviceMapping.setSerialNumber(provisionNum);
+				 this.propertyDeviceMappingRepository.save(deviceMapping);
+			 }
 			 
  			this.orderRepository.save(order);
 				//For Order History

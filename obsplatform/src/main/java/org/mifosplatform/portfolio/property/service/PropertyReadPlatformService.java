@@ -6,6 +6,7 @@ import org.mifosplatform.billing.servicetransfer.data.ClientPropertyData;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
+import org.mifosplatform.portfolio.property.data.PropertyDeviceMappingData;
 
 public interface PropertyReadPlatformService {
 
@@ -17,7 +18,7 @@ public interface PropertyReadPlatformService {
 
 	Page<PropertyDefinationData> retrievePropertyHistory(SearchSqlQuery searchPropertyDetails);
 
-	ClientPropertyData retrieveClientPropertyDetails(Long clientId);
+	ClientPropertyData retrieveClientPropertyDetails(Long clientId,String propertyCode);
 
 	List<PropertyDefinationData> retrieveAllProperties();
 
@@ -28,5 +29,9 @@ public interface PropertyReadPlatformService {
 	PropertyDefinationData retrieveSinglePropertyMaster(Long codeId);
 
 	Boolean retrievePropertyMasterCount(String code, String propertyCodeType);
+	
+	List<PropertyDeviceMappingData> retrievePropertyDeviceMappingData(Long clienId);
+
+	List<String> retrieveclientProperties(Long clientId);
 
 }

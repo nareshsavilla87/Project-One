@@ -892,6 +892,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			
 	    	  	//Check for Active Orders	
 	    	/*  Long activeorderId=this.orderReadPlatformService.retrieveClientActiveOrderDetails(clientId,null);
+>>>>>>> upstream/obsplatform-3.0
 	    	  	if(activeorderId !=null && activeorderId !=0){
 	    	  		Order order=this.orderRepository.findOne(activeorderId);
 				   		if(order.getEndDate() == null || !startDate.isAfter(new LocalDate(order.getEndDate()))){

@@ -4,7 +4,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.apache.poi.ss.formula.functions.Vlookup;
 import org.joda.time.LocalDate;
+import org.mifosplatform.billing.planprice.service.PriceReadPlatformService;
 import org.mifosplatform.billing.servicetransfer.data.ClientPropertyData;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -14,6 +16,7 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
+import org.mifosplatform.portfolio.property.data.PropertyDeviceMappingData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -200,27 +203,38 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 	}
 
 	@Override
-	public ClientPropertyData retrieveClientPropertyDetails(final Long clientId) {
+	public ClientPropertyData retrieveClientPropertyDetails(final Long clientId,final String propertyCode) {
 		
 		 try{
 				context.authenticatedUser();
 				final ClientPropertyMapper mapper = new ClientPropertyMapper();
-				final String sql = "SELECT " + mapper.schema() + " WHERE pd.client_id = ? group by pd.id" ;
-				return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] {clientId});
+				 final StringBuilder sqlBuilder = new StringBuilder(500);
+				 sqlBuilder.append("SELECT ");
+				 sqlBuilder.append(mapper.schema());
+				 if(propertyCode == null){
+					 sqlBuilder.append("join b_client_address ma  on (ma.client_id = m.id and ma.address_no = pd.property_code and ma.is_deleted='n' and  ma.address_key='PRIMARY')");
+					 sqlBuilder.append(" WHERE pd.client_id = ? group by pd.id");
+				 }else{
+					 sqlBuilder.append("join b_client_address ma  on (ma.client_id = m.id and ma.address_no = pd.property_code and ma.is_deleted='n')");
+					 sqlBuilder.append(" WHERE pd.client_id = ? and pd.property_code='"+propertyCode+"' group by pd.id");
+				 }
+				return this.jdbcTemplate.queryForObject(sqlBuilder.toString(), mapper, new Object[] {clientId});
 	            }catch (EmptyResultDataAccessException accessException) {
 	    			return null;
 	    		}
 	}
 	
 	private static final class ClientPropertyMapper implements RowMapper<ClientPropertyData> {
+		
 
 		public String schema() {
+			
 			return " pd.id as Id,m.account_no as clientId, pd.property_type_id as propertyTypeId,c.code_value as propertyType, pd.property_code as propertyCode, "+
 				    " unit_code as unitCode, pd.floor as floor,pp.description as floorDesc, pd.building_code as buildingCode,pd.parcel as parcel,pm.description as parcelDesc, pd.street as street,pd.precinct as precinct, " +
 				    " pd.po_box as zip, pd.state as state,pd.country as country,pd.status as status,m.firstname as firstName,m.lastname as lastName, "+
 				    " m.display_name as displayName,m.email as email,ma.address_no as addressNo,address_key as addressKey,mc.code_value as categoryType "+
-			 	    " from b_property_defination pd join m_client m on (pd.client_id = m.id and pd.is_deleted='N') join b_client_address ma " +
-				    " on (ma.client_id = m.id and ma.address_no = pd.property_code and ma.is_deleted='n'  and  ma.address_key='PRIMARY') left join m_code_value c on (c.id = pd.property_type_id)" +
+			 	    " from b_property_defination pd join m_client m on (pd.client_id = m.id and pd.is_deleted='N') " +
+				    " left join m_code_value c on (c.id = pd.property_type_id)" +
 				    " left join b_property_master pm on (pd.parcel=pm.code and pm.is_deleted='N' and pm.property_code_type='Parcel')  " +
 				    " left join b_property_master pp on (pd.floor=pp.code and pp.is_deleted='N' and pp.property_code_type='Level/Floor')  "+
 				    " left  join  m_code_value mc on  mc.id =m.category_type  ";
@@ -255,10 +269,43 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final String categoryType = rs.getString("categoryType");
 			
 			return new ClientPropertyData(Id,propertyTypeId,propertyType,propertyCode,unitCode,floor,floorDesc,buildingCode,parcel,parcelDesc,
-					precinct,street,zip,state,country,status,clientId,firstName,lastName,displayName,email,addressNo,addressKey,categoryType);
+					precinct,street,zip,state,country,status,clientId,firstName,lastName,displayName,email,addressNo,addressKey,categoryType,null);
 		}
-
+		
 	}
+	
+	private static final class PropertyDeviceMapper implements RowMapper<PropertyDeviceMappingData> {
+		
+		
+
+		@Override
+		public PropertyDeviceMappingData mapRow(ResultSet rs, int rowNum) throws SQLException {
+			
+			final Long id =rs.getLong("id");
+			final String serialnumber = rs.getString("serialnumber");
+			final String propertyCode = rs.getString("propertyCode");
+			
+			return new PropertyDeviceMappingData(id,serialnumber,propertyCode);
+		}
+		
+	}
+		@Override
+		public List<PropertyDeviceMappingData> retrievePropertyDeviceMappingData(Long clienId) {
+			 try{
+  					context.authenticatedUser();
+					final PropertyDeviceMapper mapper = new PropertyDeviceMapper();
+					
+					final String sql = "select pd.id as id,pd.serial_number as serialnumber,pd.property_code as propertyCode " +
+							" from b_propertydevice_mapping pd where pd.client_id =? and pd.is_deleted = 'N'";
+					
+					return this.jdbcTemplate.query(sql, mapper, new Object[] {clienId});
+		            }catch (EmptyResultDataAccessException accessException) {
+		    			return null;
+		    		}
+		}
+		
+
+	
 
 	@Override
 	public List<PropertyDefinationData> retrieveAllProperties() {
@@ -377,6 +424,19 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 		 }
 		 return result;
 	}
+
+	@Override
+	public List<String> retrieveclientProperties(Long clientId) {
+		
+		try {
+			context.authenticatedUser();
+			final String sql = "select pd.property_code from b_property_defination pd where pd.client_id="+clientId;
+			return (List<String>)  this.jdbcTemplate.queryForList(sql,String.class);
+		  
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+     }
 	
 	
 }
