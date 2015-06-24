@@ -381,6 +381,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
    		  		}
    		  	}
 		return new CommandProcessingResult(entityId);
+		
 		 }catch(DataIntegrityViolationException dve){
 			 handleCodeDataIntegrityIssues(command, dve);
 			 return new CommandProcessingResult(Long.valueOf(-1));
