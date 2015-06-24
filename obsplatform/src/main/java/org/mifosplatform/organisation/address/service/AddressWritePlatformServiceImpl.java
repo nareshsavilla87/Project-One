@@ -364,7 +364,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 		this.addressRepository.saveAndFlush(address);
 		Configuration  configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
 		if(configuration != null && configuration.isEnabled()) {	
-			final String newPropertyCode=command.stringValueOfParameterNamed("addressNo");
+			final String newPropertyCode=address.getAddressNo();
 			List<PropertyDeviceMapping>  propertyDeviceMapping=this.propertyDeviceMappingRepository.findByPropertyCode(newPropertyCode);
 			if(propertyDeviceMapping != null && !propertyDeviceMapping.isEmpty()){
 				throw new PropertyDeviceMappingExistException();
@@ -374,9 +374,13 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
    		  			propertyMaster.setClientId(null);
    		  			propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
    		  			this.propertyMasterRepository.saveAndFlush(propertyMaster);
+   		  		PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),
+						CodeNameConstants.CODE_PROPERTY_FREE, null,propertyMaster.getPropertyCode());
+				this.propertyHistoryRepository.save(propertyHistory);
    		  		}
    		  	}
 		return new CommandProcessingResult(entityId);
+		
 		 }catch(DataIntegrityViolationException dve){
 			 handleCodeDataIntegrityIssues(command, dve);
 			 return new CommandProcessingResult(Long.valueOf(-1));
