@@ -220,7 +220,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 					if (!oldPropertyCode.equalsIgnoreCase(newPropertyCode) && oldPropertyMaster != null && newpropertyMaster != null
 							&& newpropertyMaster.getClientId() == null) {
 					
-						if(clientAddress.getAddressKey().equalsIgnoreCase("PRIMARY")){
+					/*	if(clientAddress.getAddressKey().equalsIgnoreCase("PRIMARY")){
 						oldPropertyMaster.setClientId(null);
 						oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
 						this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
@@ -234,10 +234,10 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 						clientAddress.setCountry(newpropertyMaster.getCountry());
 						clientAddress.setZip(newpropertyMaster.getPoBox());
 
-						}else{
+						}else{*/
 						   clientAddress = new Address(clientId, "BILLING", newpropertyMaster.getPropertyCode(), newpropertyMaster.getStreet(), newpropertyMaster.getPrecinct(),
 								   newpropertyMaster.getState(), newpropertyMaster.getCountry(), newpropertyMaster.getPoBox(), null,null);	
-						}
+					//	}
 
 						newpropertyMaster.setClientId(clientId);
 						newpropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
