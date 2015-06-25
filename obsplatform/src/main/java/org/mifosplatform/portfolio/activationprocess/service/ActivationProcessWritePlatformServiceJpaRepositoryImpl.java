@@ -12,6 +12,10 @@ import java.util.List;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
+import org.mifosplatform.billing.planprice.domain.Price;
+import org.mifosplatform.billing.planprice.domain.PriceRepository;
 import org.mifosplatform.billing.selfcare.domain.SelfCareTemporary;
 import org.mifosplatform.billing.selfcare.domain.SelfCareTemporaryRepository;
 import org.mifosplatform.billing.selfcare.exception.SelfCareNotVerifiedException;
@@ -78,6 +82,8 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 	private final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService;
 	private final CodeValueRepository codeValueRepository;
 	private final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService;
+	private final PriceRepository priceRepository;
+	private final ChargeCodeRepository chargeCodeRepository;
 	
 	
 	
@@ -88,9 +94,10 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
     		final OwnedHardwareWritePlatformService ownedHardwareWritePlatformService, final AddressReadPlatformService addressReadPlatformService,
     		final ActivationProcessCommandFromApiJsonDeserializer commandFromApiJsonDeserializer, final ItemDetailsRepository itemDetailsRepository,
     		final SelfCareTemporaryRepository selfCareTemporaryRepository,final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService,
-    		final CodeValueRepository codeValueRepository,final ItemRepository itemRepository,
+    		final CodeValueRepository codeValueRepository,final ItemRepository itemRepository,final PriceRepository priceRepository,
     		final BillingMessageTemplateRepository billingMessageTemplateRepository,final MessagePlatformEmailService messagePlatformEmailService,
-    		final BillingMessageRepository messageDataRepository,final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService) {
+    		final BillingMessageRepository messageDataRepository,final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService,
+    		final ChargeCodeRepository chargeCodeRepository) {
 
         
     	this.context = context;
@@ -104,6 +111,8 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
         this.addressReadPlatformService = addressReadPlatformService;
         this.commandFromApiJsonDeserializer = commandFromApiJsonDeserializer;
         this.itemDetailsRepository = itemDetailsRepository;
+        this.priceRepository = priceRepository;
+        this.chargeCodeRepository = chargeCodeRepository;
         this.selfCareTemporaryRepository = selfCareTemporaryRepository;
         this.portfolioCommandSourceWritePlatformService = portfolioCommandSourceWritePlatformService;
         this.codeValueRepository = codeValueRepository;
@@ -229,6 +238,8 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			String password = command.stringValueOfParameterNamed("password");
 			String isMailCheck=command.stringValueOfParameterNamed("isMailCheck");
 			String passport=command.stringValueOfParameterNamed("passport");
+			Long planId = command.longValueOfParameterNamed("planId");
+			String duration =command.stringValueOfParameterNamed("duration");
 			SelfCareTemporary temporary =null;
 			
 			if(isMailCheck == null || isMailCheck.isEmpty()){
@@ -415,8 +426,17 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 					} else {
 
 						String paytermCode = command.stringValueOfParameterNamed("paytermCode");
-						Long contractPeriod = command.longValueOfParameterNamed("contractPeriod");
+						String  contractPeriod = command.stringValueOfParameterNamed("contractPeriod");
 						Long planCode = command.longValueOfParameterNamed("planCode");
+						
+						List<Price> prices=this.priceRepository.findChargeCodeByPlanAndContract(planCode,contractPeriod);
+						
+						if(!prices.isEmpty()){
+							ChargeCodeMaster chargeCodeMaster = this.chargeCodeRepository.findOneByChargeCode(prices.get(0).getChargeCode());	
+						if(paytermCode == null && chargeCodeMaster != null){
+							paytermCode = chargeCodeMaster.getBillFrequencyCode(); 
+							}
+						}
 
 						JSONObject ordeJson = new JSONObject();
 
