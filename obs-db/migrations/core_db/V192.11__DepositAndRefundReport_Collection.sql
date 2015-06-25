@@ -121,7 +121,7 @@ insert ignore into stretchy_report_parameter(report_id,parameter_id,report_param
 
 --Deposite And Refund Date wise Details
 
-insert ignore into stretchy_report values(Null, 'Deposite And Refund Date wise Details', 'Table', '', 'select
+insert ignore into stretchy_report values(Null, 'Deposite And Refund Date wise Details', 'Table', '','Invoice&Collections', 'select
      off.name as Office_Name,
      clnt.id as Client_Id,
      clnt.display_name as Client_Name,

@@ -232,15 +232,8 @@ task deployPentahoReports() {
     }
 }
 
-task copyJasperFiles(type: Copy) {
-    from 'src/main/resources/Files'
-    into 'WEB-INF/classes/files'
-    println':resource files copied'
-}
-
 war {
     it.dependsOn deployPentahoReports
-    it.dependsOn copyJasperFiles
     from ('../obs-db/migrations/core_db') {
     	into "WEB-INF/classes/sql"
     }

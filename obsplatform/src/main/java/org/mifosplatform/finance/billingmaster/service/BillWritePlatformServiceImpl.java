@@ -141,7 +141,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			final String jfilepath =jpath+File.separator+"Statement_"+tenant+".jasper";
 			File destinationFile=new File(jfilepath);
 		      if(!destinationFile.exists()){
-		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Statement.jasper").getFile());
+		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Files/Statement.jasper").getFile());
 		    	FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
 		       }
 			final Connection connection = this.dataSource.getConnection();
@@ -193,7 +193,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			final String jasperfilepath =jpath+File.separator+"Invoicereport_"+tenant+".jasper";
 			File destinationFile=new File(jasperfilepath);
 		      if(!destinationFile.exists()){
-		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Invoicereport.jasper").getFile());
+		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Files/Invoicereport.jasper").getFile());
 		    	FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
 		       }
 			final Connection connection = this.dataSource.getConnection();
@@ -242,7 +242,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			final String jasperfilepath =jpath+File.separator+"Paymentreport_"+tenant+".jasper";
 			File destinationFile=new File(jasperfilepath);
 		      if(!destinationFile.exists()){
-		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Paymentreport.jasper").getFile());
+		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Files/Paymentreport.jasper").getFile());
 		    	FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
 		      }
 			final Connection connection = this.dataSource.getConnection();
