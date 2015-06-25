@@ -26,7 +26,7 @@ insert ignore into stretchy_report_parameter(report_id,parameter_id,report_param
 insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@ID,@startDate,'startDate');
 insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@ID,@endDate,'endDate');
 
-SET @CID=(SELECT id FROM stretchy_report where report_name='Collection_Day_wise_Details');
+/*SET @CID=(SELECT id FROM stretchy_report where report_name='Collection_Day_wise_Details');
 update stretchy_report set report_sql='select
     off.office_type,
     off.name as officeName,
@@ -47,7 +47,7 @@ and (pay.paymode_id = ''${paymode_id}'' or -1 = ''${paymode_id}'')
 group by pay.payment_date,pay.paymode_id
 order by off.office_type , pay.payment_date' where report_name='Collection_Day_wise_Details';
 insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@CID,@offId,'Office');
-insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@CID,@modId,'Payment Mode');
+insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@CID,@modId,'Payment Mode');*/
 
  Insert ignore into m_role_permission 
 Select (Select id from m_role where name='selfcare') as rid,b.id from m_permission b where b.code = 'READ_CHARGECODE';

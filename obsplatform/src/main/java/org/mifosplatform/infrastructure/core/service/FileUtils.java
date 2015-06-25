@@ -263,9 +263,13 @@ public class FileUtils {
 	}
 
 	/**
-	 * Copy a new file if  file not exist's in System location
+	 * Copy file from one location to another location through Apache-commons API
+	 * @param sourceFile
+	 * @param destinationFile
+	 * @throws IOException 
 	 */
-	public static void copyFileUsingApacheCommonsIO(File source, File destination) throws IOException {
-		org.apache.commons.io.FileUtils.copyFile(source, destination);
+	public static void copyFileUsingApacheCommonsIO(File source,File destination) throws IOException {
+         	org.apache.commons.io.FileUtils.copyFile(source, destination);
+
 	}
 }
