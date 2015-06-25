@@ -18,6 +18,8 @@ import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.billingorder.domain.InvoiceTax;
 import org.mifosplatform.finance.billingorder.domain.InvoiceTaxRepository;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
+import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefund;
+import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefundRepository;
 import org.mifosplatform.finance.financialtransaction.data.FinancialTransactionsData;
 import org.mifosplatform.finance.payments.domain.Payment;
 import org.mifosplatform.finance.payments.domain.PaymentRepository;
@@ -54,6 +56,7 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 		private final PaymentRepository paymentRepository;
 		private final AdjustmentRepository adjustmentRepository;
 		private final OneTimeSaleRepository oneTimeSaleRepository;
+		private final DepositAndRefundRepository depositAndRefundRepository;
 		 
 	@Autowired
 	 public BillMasterWritePlatformServiceImplementation(final PlatformSecurityContext context,final BillMasterRepository billMasterRepository,
@@ -61,7 +64,8 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 				final BillMasterCommandFromApiJsonDeserializer apiJsonDeserializer,final ClientRepository clientRepository,
 				final BillingOrderRepository billingOrderRepository, final InvoiceTaxRepository invoiceTaxRepository,
 		        final InvoiceRepository invoiceRepository, final PaymentRepository paymentRepository,
-		        final AdjustmentRepository adjustmentRepository,final OneTimeSaleRepository oneTimeSaleRepository){
+		        final AdjustmentRepository adjustmentRepository,final OneTimeSaleRepository oneTimeSaleRepository,
+		        final DepositAndRefundRepository depositAndRefundRepository){
 		
 		    this.context = context;
 			this.billMasterRepository = billMasterRepository;
@@ -75,6 +79,7 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 			this.adjustmentRepository = adjustmentRepository;
 			this.paymentRepository = paymentRepository;
 			this.oneTimeSaleRepository = oneTimeSaleRepository;
+			this.depositAndRefundRepository = depositAndRefundRepository;
 			
 	}
 	
@@ -106,10 +111,11 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 		final BigDecimal taxAmount = BigDecimal.ZERO;
 		final BigDecimal paidAmount = BigDecimal.ZERO;
 		final BigDecimal dueAmount = BigDecimal.ZERO;
+		final BigDecimal depositRefundAmount = BigDecimal.ZERO;
 		final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
 		final String message = command.stringValueOfParameterNamed("message");
 		BillMaster  billMaster = new BillMaster(clientId, clientId,billDate.toDate(), null, null, dueDate.toDate(),previousBalance, 
-				                    chargeAmount, adjustmentAmount, taxAmount, paidAmount, dueAmount,null, message, parentId);
+				                    chargeAmount, adjustmentAmount, taxAmount, paidAmount, dueAmount,null, message, parentId,depositRefundAmount);
 		
 		List<BillDetail> listOfBillingDetail = new ArrayList<BillDetail>();
 		
@@ -190,7 +196,12 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 					invoice.updateBillId(billId);
 					this.invoiceRepository.save(invoice);
 				}
-
+				/*else if ("DEPOSIT&REFUND".equalsIgnoreCase(transIds.getTransactionType())) {
+					DepositAndRefund depositAndRefund = this.depositAndRefundRepository.findOne(transIds.getTransactionId());
+					depositAndRefund.updateBillId(billId);
+					this.depositAndRefundRepository.save(depositAndRefund);
+				}
+*/
 			}
 		}catch(Exception ex){
 			 LOGGER.error(ex.getLocalizedMessage());
@@ -253,6 +264,11 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 					this.invoiceRepository.save(invoice);
 
 				}
+				/*else if ("DEPOSIT&REFUND".equalsIgnoreCase(billDetail.getTransactionType())) {
+					DepositAndRefund depositAndRefund = this.depositAndRefundRepository.findOne(billDetail.getTransactionId());
+					depositAndRefund.updateBillId(null);
+					this.depositAndRefundRepository.save(depositAndRefund);
+				}*/
 			}
 			
 		billMaster.delete();

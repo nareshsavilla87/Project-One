@@ -75,6 +75,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		BigDecimal taxAmount = BigDecimal.ZERO;
 		BigDecimal oneTimeSaleAmount = BigDecimal.ZERO;
 		BigDecimal serviceTransferAmount =BigDecimal.ZERO;
+		//BigDecimal depositRefundAmount =BigDecimal.ZERO;
 		
 		for (final BillDetail billDetail : billDetails) {
 			if ("SERVICE_CHARGES".equalsIgnoreCase(billDetail.getTransactionType())) {
@@ -93,17 +94,20 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				if (billDetail.getAmount() != null)
 					paymentAmount = paymentAmount.add(billDetail.getAmount());
 
-			} else if (billDetail.getTransactionType().contains("ONETIME_CHARGES")) {
+			} else if ("ONETIME_CHARGES".equalsIgnoreCase(billDetail.getTransactionType())) {
 				if (billDetail.getAmount() != null)
 					oneTimeSaleAmount = oneTimeSaleAmount.add(billDetail.getAmount());
 
-			}else if (billDetail.getTransactionType().contains("SERVICE_TRANSFER")) {
+			}else if ("SERVICE_TRANSFER".equalsIgnoreCase(billDetail.getTransactionType())) {
 				if (billDetail.getAmount() != null)
 					serviceTransferAmount = serviceTransferAmount.add(billDetail.getAmount());
-			}
-			
+					
+			} /*else if ("DEPOSIT&REFUND".equalsIgnoreCase(billDetail.getTransactionType())) {
+				if (billDetail.getAmount() != null)
+					depositRefundAmount = depositRefundAmount.add(billDetail.getAmount());
+				}*/
 		}
-	  dueAmount = chargeAmount.add(taxAmount).add(oneTimeSaleAmount).add(clientBalance)
+	  dueAmount = chargeAmount.add(taxAmount).add(oneTimeSaleAmount).add(clientBalance) //.add(depositRefundAmount)
 			      .add(serviceTransferAmount).subtract(paymentAmount).subtract(adjustmentAmount);
 	  billMaster.setChargeAmount(chargeAmount.add(oneTimeSaleAmount).add(serviceTransferAmount));
 	  billMaster.setAdjustmentAmount(adjustmentAmount);
@@ -111,6 +115,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	  billMaster.setPaidAmount(paymentAmount);
 	  billMaster.setDueAmount(dueAmount);
 	  billMaster.setPreviousBalance(clientBalance);
+	 // billMaster.setDepositRefundAmount(depositRefundAmount);
 	  this.billMasterRepository.save(billMaster);
 	  return new CommandProcessingResult(billMaster.getId(),billMaster.getClientId());
 	}catch(DataIntegrityViolationException dve){
@@ -124,13 +129,12 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	public void generateStatementPdf(final Long billId)  {
 		
 		try {
+			BillMaster billMaster=this.billMasterRepository.findOne(billId);
 			final String fileLocation = FileUtils.MIFOSX_BASE_DIR;
 			/** Recursively create the directory if it does not exist **/
 			if (!new File(fileLocation).isDirectory()) {
 				new File(fileLocation).mkdirs();
 			}
-			BillMaster billMaster=this.billMasterRepository.findOne(billId);
-			
 			final String statementDetailsLocation = fileLocation + File.separator + "StatementPdfFiles"; 
 			if (!new File(statementDetailsLocation).isDirectory()) {
 				new File(statementDetailsLocation).mkdirs();
@@ -139,8 +143,12 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			final String jpath = fileLocation+File.separator+"jasper"; 
 			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
 			final String jfilepath =jpath+File.separator+"Statement_"+tenant+".jasper";
+			File destinationFile=new File(jfilepath);
+		      if(!destinationFile.exists()){
+		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Files/Statement.jasper").getFile());
+		    	FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
+		       }
 			final Connection connection = this.dataSource.getConnection();
-		
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			final Integer id = Integer.valueOf(billMaster.getId().toString());
 			parameters.put("param1", id);
@@ -186,12 +194,17 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			 new File(InvoiceDetailsLocation).mkdirs();
 		}
 		final String printInvoiceLocation = InvoiceDetailsLocation +File.separator + "Invoice_" + invoiceId + ".pdf";
+		final Integer id = Integer.valueOf(invoiceId.toString());
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
 			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
 			final String jasperfilepath =jpath+File.separator+"Invoicereport_"+tenant+".jasper";
-			final Integer id = Integer.valueOf(invoiceId.toString());
+			File destinationFile=new File(jasperfilepath);
+		      if(!destinationFile.exists()){
+		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Files/Invoicereport.jasper").getFile());
+		    	FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
+		       }
 			final Connection connection = this.dataSource.getConnection();
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("param1", id);
@@ -230,12 +243,17 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			 new File(PaymentDetailsLocation).mkdirs();
 		}
 		final String printPaymentLocation = PaymentDetailsLocation +File.separator + "Payment_" + paymentId + ".pdf";
+		final Integer id = Integer.valueOf(paymentId.toString());
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
 			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
 			final String jasperfilepath =jpath+File.separator+"Paymentreport_"+tenant+".jasper";
-			final Integer id = Integer.valueOf(paymentId.toString());
+			File destinationFile=new File(jasperfilepath);
+		      if(!destinationFile.exists()){
+		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Files/Paymentreport.jasper").getFile());
+		    	FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
+		      }
 			final Connection connection = this.dataSource.getConnection();
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("param1", id);
