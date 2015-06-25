@@ -465,6 +465,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		  requstStatus=UserActionStatusEnumaration.OrderStatusType(UserActionStatusTypeEnum.RENEWAL_BEFORE_AUTOEXIPIRY).getValue();
 					
 	  } else if(orderDetails.getStatus().equals(StatusTypeEnum.DISCONNECTED.getValue().longValue())){
+		  
 		  newStartdate = DateUtils.getLocalDateOfTenant(); 
 		  requstStatus=UserActionStatusEnumaration.OrderStatusType(UserActionStatusTypeEnum.RENEWAL_AFTER_AUTOEXIPIRY).getValue();
 		  if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
@@ -496,6 +497,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		}
 	  //orderDetails.setEndDate(renewalEndDate);
 		 orderDetails.setuserAction(requstStatus);
+		 
 	  for(OrderPrice orderprice:orderPrices){
 		  
 		  if(plan.isPrepaid() == 'Y'){
@@ -512,6 +514,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 					orderprice.setChargeType(chargeCode.getChargeType());
 					orderprice.setChargeDurationType(chargeCode.getDurationType());
 					orderprice.setPrice(price.getPrice());
+					
 				}else{
 					throw new PriceNotFoundException(priceId);
 				}
