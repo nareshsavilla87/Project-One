@@ -90,7 +90,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				if (billDetail.getAmount() != null)
 					adjustmentAmount = adjustmentAmount.add(billDetail.getAmount());
 				
-			} else if ("PAYMENT".contains(billDetail.getTransactionType())) {
+			} else if (billDetail.getTransactionType().contains("PAYMENT")) {
 				if (billDetail.getAmount() != null)
 					paymentAmount = paymentAmount.add(billDetail.getAmount());
 
@@ -129,13 +129,12 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	public void generateStatementPdf(final Long billId)  {
 		
 		try {
+			BillMaster billMaster=this.billMasterRepository.findOne(billId);
 			final String fileLocation = FileUtils.MIFOSX_BASE_DIR;
 			/** Recursively create the directory if it does not exist **/
 			if (!new File(fileLocation).isDirectory()) {
 				new File(fileLocation).mkdirs();
 			}
-			BillMaster billMaster=this.billMasterRepository.findOne(billId);
-			
 			final String statementDetailsLocation = fileLocation + File.separator + "StatementPdfFiles"; 
 			if (!new File(statementDetailsLocation).isDirectory()) {
 				new File(statementDetailsLocation).mkdirs();
@@ -144,8 +143,12 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			final String jpath = fileLocation+File.separator+"jasper"; 
 			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
 			final String jfilepath =jpath+File.separator+"Statement_"+tenant+".jasper";
-			final Connection connection = this.dataSource.getConnection();
-		
+		    File destinationFile=new File(jfilepath);
+		      if(!destinationFile.exists()){
+		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Statement.jasper").getFile());
+		    	FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
+		       }
+		    final Connection connection = this.dataSource.getConnection();
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			final Integer id = Integer.valueOf(billMaster.getId().toString());
 			parameters.put("param1", id);

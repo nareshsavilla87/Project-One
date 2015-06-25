@@ -261,4 +261,11 @@ public class FileUtils {
 		return FileUtils.MIFOSX_BASE_DIR+ File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "images"
 				+ File.separator + "partnerLogo" + File.separator + resourceId;
 	}
+
+	/**
+	 * Copy a new file if  file not exist's in System location
+	 */
+	public static void copyFileUsingApacheCommonsIO(File source, File destination) throws IOException {
+		org.apache.commons.io.FileUtils.copyFile(source, destination);
+	}
 }

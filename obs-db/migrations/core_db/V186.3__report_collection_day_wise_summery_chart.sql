@@ -22,6 +22,7 @@ group by pay.payment_date,mcv.code_value
 order by pay.payment_date' where report_name='PaymodeCollection Chart';
 
 SET @ID=(SELECT id FROM stretchy_report where report_name='Paymode Collection Chart');
+insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@ID,@offId,'Office');
 insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@ID,@startDate,'startDate');
 insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@ID,@endDate,'endDate');
 
