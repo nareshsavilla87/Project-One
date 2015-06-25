@@ -52,7 +52,7 @@ public class Address{
 	private String email;
 
 	@Column(name = "is_deleted", nullable = false)
-	private final char deleted='n';
+	private  char deleted='n';
 
 	
 
@@ -239,6 +239,14 @@ public class Address{
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+
+
+	public void delete() {
+
+		this.deleted = 'Y';
+				
 	}
 		
 	

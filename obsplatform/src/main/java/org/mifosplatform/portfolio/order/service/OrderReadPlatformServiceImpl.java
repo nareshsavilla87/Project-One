@@ -502,11 +502,11 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 
 						try {
 							final ClientActiveOrderMapper mapper = new ClientActiveOrderMapper();
-                          
-							String sql="select "+mapper.activeOrderLookupSchema();
-							
+							String sql=null;
 							if(serialNo !=null){
-								sql="select "+mapper.activeOrderLookupSchemaForAssociation()+" and a.hw_serial_no='"+serialNo+"'";
+								sql="select "+mapper.activeOrderLookupSchemaForAssociation()+"  and a.is_deleted = 'N' and a.hw_serial_no='"+serialNo+"'";
+							}else{
+								sql="select "+mapper.activeOrderLookupSchema();	
 							}
 							return jdbcTemplate.queryForObject(sql, mapper, new Object[] { clientId});
 							} catch (EmptyResultDataAccessException e) {

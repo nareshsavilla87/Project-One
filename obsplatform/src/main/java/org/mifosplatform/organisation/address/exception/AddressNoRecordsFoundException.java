@@ -9,8 +9,8 @@ public class AddressNoRecordsFoundException extends AbstractPlatformDomainRuleEx
 	 */
 	private static final long serialVersionUID = 1L;
 
-	public AddressNoRecordsFoundException() {
-		super("error.msg.billing.address.city.not.found", "City Not Found");
+	public AddressNoRecordsFoundException(String entity) {
+		super("error.msg.billing.address."+entity+".not.found", "City Not Found");
 	}
 
 }

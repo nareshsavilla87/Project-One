@@ -12,6 +12,7 @@ import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -31,6 +32,7 @@ import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
+import org.mifosplatform.portfolio.property.data.PropertyDeviceMappingData;
 import org.mifosplatform.portfolio.property.service.PropertyReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -56,6 +58,7 @@ public class ServiceTransferApiResource {
 	private final PropertyReadPlatformService propertyReadPlatformService;
 	private final ServiceTransferReadPlatformService serviceTransferReadPlatformService;
 	private final MCodeReadPlatformService mCodeReadPlatformService;
+	
 
 	@Autowired
 	public ServiceTransferApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<ClientPropertyData> toApiJsonSerializer,
@@ -80,16 +83,26 @@ public class ServiceTransferApiResource {
 	@Path("{clientId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveClientPropertyData(@PathParam("clientId") final Long clientId,@Context final UriInfo uriInfo) {
+	public String retrieveClientPropertyData(@PathParam("clientId") final Long clientId,@QueryParam("propertyCode") String propertyCode,@Context final UriInfo uriInfo) {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		ClientPropertyData clientPropertyData;
-		clientPropertyData = this.propertyReadPlatformService.retrieveClientPropertyDetails(clientId);
+		ClientPropertyData clientPropertyData = null;
+		List<PropertyDeviceMappingData> deviceMappingDatas = this.propertyReadPlatformService.retrievePropertyDeviceMappingData(clientId);
+		List<String> propertyCodes=this.propertyReadPlatformService.retrieveclientProperties(clientId);
+		
+			if(propertyCode == null && !deviceMappingDatas.isEmpty()){
+				propertyCode = deviceMappingDatas.get(0).getPropertycode();
+			}
+			clientPropertyData = this.propertyReadPlatformService.retrieveClientPropertyDetails(clientId,propertyCode);
+		
 		if(clientPropertyData !=null){
-			serviceTransferGetData(clientPropertyData,clientId);
+			
+			serviceTransferGetData(clientPropertyData,clientId,propertyCodes,deviceMappingDatas);
+
 		}else{
+			
 			clientPropertyData = new ClientPropertyData();
-			serviceTransferGetData(clientPropertyData,clientId);
+			serviceTransferGetData(clientPropertyData,clientId,propertyCodes,deviceMappingDatas);
 		}
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, clientPropertyData,RESPONSE_DATA_PARAMETERS);
@@ -111,12 +124,16 @@ public class ServiceTransferApiResource {
 		return this.toApiJsonSerializer.serialize(result);
 	}
 	
-	public void serviceTransferGetData(ClientPropertyData clientPropertyData, Long clientId){
+	public void serviceTransferGetData(ClientPropertyData clientPropertyData, Long clientId, List<String> propertyCodes, List<PropertyDeviceMappingData> deviceMappingDatas){
+		
 		final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId,"Service Transfer");
 		final Collection<MCodeData> propertyTypes = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROPERTY_TYPE);
+		clientPropertyData.setProperties(propertyCodes);
+		clientPropertyData.setDeviceMappingDatas(deviceMappingDatas);
 		if(!feeMasterData.isEmpty()){
 	    	clientPropertyData.setFeeMasterData(feeMasterData.get(0));
 		    clientPropertyData.setPropertyTypes(propertyTypes);
+		    
 		 }else{
 			throw new NoFeeMasterRegionalPriceFound();
 		}
