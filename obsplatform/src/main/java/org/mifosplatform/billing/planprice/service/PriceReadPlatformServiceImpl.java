@@ -260,8 +260,7 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService {
 		try {
 			this.context.authenticatedUser();
 			PlanAndPricingMapper mapper = new PlanAndPricingMapper(this, region);
-			String sql = "SELECT pm.plan_code AS planCode, pm.id AS planId, pm.is_prepaid as isPrepaid FROM b_plan_master pm where pm.is_deleted='N'"
-					+ " and pm.is_prepaid='Y'";
+			String sql = "SELECT pm.plan_code AS planCode, pm.id AS planId, pm.is_prepaid as isPrepaid FROM b_plan_master pm where pm.is_deleted='N'";
 
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 
