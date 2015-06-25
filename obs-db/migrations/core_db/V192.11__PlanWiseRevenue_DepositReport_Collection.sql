@@ -119,42 +119,6 @@ where (off.id = ''${officeId}'' or -1 = ''${officeId}'')
 SET@id = (select id from stretchy_report where report_name='Invoice Month Wise chart');
 insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@id,@offId,'Office');
 
---Deposite And Refund Date wise Details
-
-insert ignore into stretchy_report values(Null, 'Deposite And Refund Date wise Details', 'Table', '','Invoice&Collections', 'select
-     off.name as Office_Name,
-     clnt.id as Client_Id,
-     clnt.display_name as Client_Name,
-     DATE_FORMAT(bdr.transaction_date,''%Y-%m-%d'') as Deposite_Date,
-    TRUNCATE(ifnull( bdr.debit_amount, 0),2) as Deposit_Amount,
-     DATE_FORMAT(pay.payment_date,''%Y-%m-%d'') as Collection_Date,
-     TRUNCATE((pay.amount_paid),2) as Collection_Amount,
-     DATE_FORMAT(bdr1.transaction_date,''%Y-%m-%d'')as Refund_Date,
-     TRUNCATE(bdr1.credit_amount,2) as Refund_Amount            
-  From
-    m_office off
-       join
-    m_client clnt ON off.id = clnt.office_id
-     join
-    b_deposit_refund bdr ON bdr.client_id=clnt.id and bdr.description=''Deposit''
-     left join 
-    b_deposit_refund bdr1 ON bdr.client_id=clnt.id and bdr1.ref_id=bdr.id and bdr1.description=''Refund''
-      left join
-    b_payments pay ON clnt.id = pay.client_id and pay.id=bdr.payment_id 
-  where (off.id = ''${officeId}'' or -1 = ''${officeId}'') and  bdr.transaction_date between ''${startDate}'' and ''${endDate}''
- group by clnt.id,bdr.id
- order by off.office_type,clnt.id', 'Deposite And Refund Date wise Details of Customers', '0', '1');
-
-SET @id=(select id from stretchy_report where report_name='Deposite And Refund Date wise Details');
-SET @offId=(SELECT id FROM stretchy_parameter where parameter_label='Office');
-insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@id,@offId,'Office');
-
-SET @DATEID=(SELECT id FROM stretchy_parameter where parameter_label='StartDate');
-insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@id,@DATEID,'StartDate');
-
-SET @DID=(SELECT id FROM stretchy_parameter where parameter_label='EndDate');
-insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@id,@DID,'EndDate');
-
 SET SQL_SAFE_UPDATES=0;
 Delete from stretchy_report where report_name='Collection_Day_wise_Details';
 Delete from stretchy_report where report_name='Collection_Month_wise_Summary';
@@ -236,7 +200,41 @@ SET @id=(SELECT id FROM stretchy_report where report_name='Plan_wise_Revenue_Mon
 SET @planID=(SELECT id FROM stretchy_parameter where parameter_label='Plan Name');
 insert ignore into stretchy_report_parameter (report_id,parameter_id,report_parameter_name) values (@id,@planID,'Plan Name');
 
+--Deposite And Refund Date wise Details
 
+insert ignore into stretchy_report values(Null, 'Deposite And Refund Date wise Details', 'Table', '','Invoice&Collections', 'select
+     off.name as Office_Name,
+     clnt.id as Client_Id,
+     clnt.display_name as Client_Name,
+     DATE_FORMAT(bdr.transaction_date,''%Y-%m-%d'') as Deposite_Date,
+    TRUNCATE(ifnull( bdr.debit_amount, 0),2) as Deposit_Amount,
+     DATE_FORMAT(pay.payment_date,''%Y-%m-%d'') as Collection_Date,
+     TRUNCATE((pay.amount_paid),2) as Collection_Amount,
+     DATE_FORMAT(bdr1.transaction_date,''%Y-%m-%d'')as Refund_Date,
+     TRUNCATE(bdr1.credit_amount,2) as Refund_Amount            
+  From
+    m_office off
+       join
+    m_client clnt ON off.id = clnt.office_id
+     join
+    b_deposit_refund bdr ON bdr.client_id=clnt.id and bdr.description=''Deposit''
+     left join 
+    b_deposit_refund bdr1 ON bdr.client_id=clnt.id and bdr1.ref_id=bdr.id and bdr1.description=''Refund''
+      left join
+    b_payments pay ON clnt.id = pay.client_id and pay.id=bdr.payment_id 
+  where (off.id = ''${officeId}'' or -1 = ''${officeId}'') and  bdr.transaction_date between ''${startDate}'' and ''${endDate}''
+ group by clnt.id,bdr.id
+ order by off.office_type,clnt.id', 'Deposite And Refund Date wise Details of Customers', '0', '1');
+
+SET @id=(select id from stretchy_report where report_name='Deposite And Refund Date wise Details');
+SET @offId=(SELECT id FROM stretchy_parameter where parameter_label='Office');
+insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@id,@offId,'Office');
+
+SET @DATEID=(SELECT id FROM stretchy_parameter where parameter_label='StartDate');
+insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@id,@DATEID,'StartDate');
+
+SET @DID=(SELECT id FROM stretchy_parameter where parameter_label='EndDate');
+insert ignore into stretchy_report_parameter(report_id,parameter_id,report_parameter_name)values (@id,@DID,'EndDate');
 
     
 
