@@ -28,7 +28,7 @@ public class ActivationProcessCommandFromApiJsonDeserializer {
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("fullname", "phone","homePhoneNumber", "city","firstname","address", 
     		"nationalId","device", "email", "planCode", "paytermCode", "contractPeriod", "amount", "transactionId" ,"emailSubject", "zipCode","kortaToken",
-    		"deviceAgreementType","password","isMailCheck","passport","pinNumber"));
+    		"deviceAgreementType","password","isMailCheck","passport","pinNumber","lastname"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -49,7 +49,7 @@ public class ActivationProcessCommandFromApiJsonDeserializer {
         final JsonElement element = fromApiJsonHelper.parse(json);
         
         final String fullname = fromApiJsonHelper.extractStringNamed("fullname", element);
-        baseDataValidator.reset().parameter("fullname").value(fullname).notBlank().notExceedingLengthOf(50);
+      //  baseDataValidator.reset().parameter("fullname").value(fullname).notBlank().notExceedingLengthOf(50);
         
         final Long phone = fromApiJsonHelper.extractLongNamed("phone", element);
         baseDataValidator.reset().parameter("phone").value(phone).notNull().longGreaterThanZero();
