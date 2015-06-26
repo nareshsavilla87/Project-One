@@ -52,7 +52,9 @@ public class DepositAndRefund extends AbstractAuditableCustom<AppUser, Long>{
 	@Column(name = "is_refund")
 	private char isRefund = 'N';
 	
-
+	@Column(name = "bill_id", nullable = true, length = 20)
+	private Long billId;
+	
 	public DepositAndRefund(){}
 
 
@@ -174,6 +176,11 @@ public class DepositAndRefund extends AbstractAuditableCustom<AppUser, Long>{
 
 	public void setIsRefund(char isRefund) {
 		this.isRefund = isRefund;
+	}
+
+	public void updateBillId(Long billId) {
+		this.billId = billId;
+
 	}
 	
 	
