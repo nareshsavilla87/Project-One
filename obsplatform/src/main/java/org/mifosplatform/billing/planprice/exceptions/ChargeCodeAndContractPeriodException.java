@@ -16,5 +16,9 @@ public class ChargeCodeAndContractPeriodException extends AbstractPlatformDomain
 	public ChargeCodeAndContractPeriodException(final String chargeCode, final String contractPeriod) {
 		super("error.msg.select.renewal.period.more.than", "Renewal Period should be more than:"+chargeCode, chargeCode);
 	}
+	
+	public ChargeCodeAndContractPeriodException(final String chargeCode, final Boolean contractPeriod) {
+		super("error.msg.select.renewal.period.must.be", "Renewal Period must be:"+chargeCode, chargeCode);
+	}
 
 }
