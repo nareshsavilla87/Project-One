@@ -96,8 +96,9 @@ public class ServiceTransferApiResource {
 			clientPropertyData = this.propertyReadPlatformService.retrieveClientPropertyDetails(clientId,propertyCode);
 		
 		if(clientPropertyData !=null){
+			
 			serviceTransferGetData(clientPropertyData,clientId,propertyCodes,deviceMappingDatas);
-		
+
 		}else{
 			
 			clientPropertyData = new ClientPropertyData();

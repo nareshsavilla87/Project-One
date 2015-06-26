@@ -88,8 +88,7 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 		}
 
 		@Override
-		public FeeMasterData mapRow(ResultSet rs, int rowNum)
-				throws SQLException {
+		public FeeMasterData mapRow(ResultSet rs, int rowNum) throws SQLException {
 		
 			final Long id = rs.getLong("id");
 			final String feeCode = rs.getString("feeCode");
@@ -97,7 +96,7 @@ public class ServiceTransferReadPlatformServiceImpl implements ServiceTransferRe
 			final String transactionType = rs.getString("transactionType");
 			final String chargeCode = rs.getString("chargeCode");
 			final BigDecimal amount = rs.getBigDecimal("amount");
-			return new FeeMasterData(id,feeCode,feeDescription,transactionType,chargeCode,amount,null,null);
+			return new FeeMasterData(id,feeCode,feeDescription,transactionType,chargeCode,amount,null);
 		
 		
 		}

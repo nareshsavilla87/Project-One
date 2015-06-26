@@ -25,6 +25,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -54,8 +55,7 @@ public class ConfigurationApiResource {
     private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("globalConfiguration"));
 
     private static final String RESOURCENAMEFORPERMISSIONS = "CONFIGURATION";
-    private static final String CONFIGURATION_PATH_LOCATION = System.getProperty("user.home") + File.separator + ".obs" + File.separator + ".clientconfigurations";
-    private static final String CONFIGURATION_FILE_LOCATION = CONFIGURATION_PATH_LOCATION + File.separator + "ClientConfiguration.txt";
+    
 
 
     private final PlatformSecurityContext context;
@@ -83,7 +83,7 @@ public class ConfigurationApiResource {
     @GET
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveAllConfigurations(@Context final UriInfo uriInfo) throws JSONException {
+    public String retrieveAllConfigurations(@Context final UriInfo uriInfo,@QueryParam("tenant") String tenant) throws JSONException {
 
 
         final ConfigurationData configurationData = this.readPlatformService.retrieveGlobalConfiguration();
@@ -148,10 +148,13 @@ public class ConfigurationApiResource {
 		defaultOne.put("orderActions", orderActionsList);
 		
         String readDatas;  /****** Reding data from file ******/
+        String CONFIGURATION_PATH_LOCATION = System.getProperty("user.home") + File.separator + ".obs" + File.separator + ".clientconfigurations_"+tenant;
         File fileForPath = new File(CONFIGURATION_PATH_LOCATION);
         if(!fileForPath.isDirectory()){
         	fileForPath.mkdir();
         }
+        
+        final String CONFIGURATION_FILE_LOCATION = CONFIGURATION_PATH_LOCATION + File.separator + "ClientConfiguration.txt";
         File fileForLocation = new File(CONFIGURATION_FILE_LOCATION);
         if (!fileForLocation.isFile()) {
         	writeFileData(CONFIGURATION_FILE_LOCATION, defaultOne.toString());
@@ -290,13 +293,15 @@ public class ConfigurationApiResource {
     @Path("config")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String updateConfig(final String apiRequestBodyAsJson) throws JSONException {
+    public String updateConfig(final String apiRequestBodyAsJson,@QueryParam("tenant") String tenant) throws JSONException {
     	String newtext = null;
     	JSONObject json = new JSONObject(apiRequestBodyAsJson);
     	String name = json.getString("name");
     	String oldValue = json.getString("oldValue");
     	String newValue = json.getString("newValue");
     	
+    	String CONFIGURATION_PATH_LOCATION = System.getProperty("user.home") + File.separator + ".obs" + File.separator + ".clientconfigurations_"+tenant;
+    	final String CONFIGURATION_FILE_LOCATION = CONFIGURATION_PATH_LOCATION + File.separator + "ClientConfiguration.txt";
     	File file = new File(CONFIGURATION_FILE_LOCATION);
     	String readData = readFileData(file);
     	newtext = readData.replaceAll("\""+name+"\":\""+oldValue+"\"", "\""+name+"\":\""+newValue+"\"");

@@ -29,7 +29,7 @@ public class FeeMasterCommandFromApiJsonDeserializer {
 	 * The parameters supported for this command.
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("feeCode", "feeDescription", "transactionType",
-					"chargeCode","defaultFeeAmount", "regionPrices","locale","removeRegionPrices","itemId","isRefundable"));
+					"chargeCode","defaultFeeAmount", "regionPrices","locale","removeRegionPrices","isRefundable"));
 	
 	private final FromJsonHelper fromApiJsonHelper;
 

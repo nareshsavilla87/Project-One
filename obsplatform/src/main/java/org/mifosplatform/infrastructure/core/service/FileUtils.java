@@ -261,4 +261,15 @@ public class FileUtils {
 		return FileUtils.MIFOSX_BASE_DIR+ File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "images"
 				+ File.separator + "partnerLogo" + File.separator + resourceId;
 	}
+
+	/**
+	 * Copy file from one location to another location through Apache-commons API
+	 * @param sourceFile
+	 * @param destinationFile
+	 * @throws IOException 
+	 */
+	public static void copyFileUsingApacheCommonsIO(File source,File destination) throws IOException {
+         	org.apache.commons.io.FileUtils.copyFile(source, destination);
+		
+	}
 }
