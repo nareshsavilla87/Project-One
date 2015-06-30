@@ -70,6 +70,7 @@ public class TicketMasterApiResource {
 		private final PlatformSecurityContext context;
 		final private MCodeReadPlatformService codeReadPlatformService;
 		private final FromJsonHelper fromApiJsonHelper;
+		
 		@Autowired
 		public TicketMasterApiResource(final TicketMasterWritePlatformService ticketMasterWritePlatformService,final TicketMasterReadPlatformService ticketMasterReadPlatformService,
 										final DefaultToApiJsonSerializer<TicketMasterData> toApiJsonSerializer, final DefaultToApiJsonSerializer<ClientTicketData> clientToApiJsonSerializer,
@@ -78,6 +79,7 @@ public class TicketMasterApiResource {
 										final MCodeReadPlatformService codeReadPlatformService,
 										final FromJsonHelper fromApiJsonHelper,
 										final DefaultToApiJsonSerializer<MCodeData> statusToApiJsonSerializer)	{
+			
 			this.ticketMasterWritePlatformService = ticketMasterWritePlatformService;
 			this.ticketMasterReadPlatformService = ticketMasterReadPlatformService;
 		    this.toApiJsonSerializer = toApiJsonSerializer;

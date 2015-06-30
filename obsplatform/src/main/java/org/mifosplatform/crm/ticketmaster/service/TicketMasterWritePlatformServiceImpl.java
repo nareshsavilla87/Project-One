@@ -67,8 +67,7 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 	}
 
 	@Override
-	public Long upDateTicketDetails(
-			TicketMasterCommand ticketMasterCommand,
+	public Long upDateTicketDetails(TicketMasterCommand ticketMasterCommand,
 			DocumentCommand documentCommand, Long ticketId, InputStream inputStream, String ticketURL) {
 		
 	 	try {
