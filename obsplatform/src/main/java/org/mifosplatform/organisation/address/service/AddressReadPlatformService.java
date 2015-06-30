@@ -15,7 +15,7 @@ public interface AddressReadPlatformService {
 
 	List<AddressData> retrieveSelectedAddressDetails(String selectedname);
 
-	List<AddressData> retrieveAddressDetailsBy(Long clientId);
+	List<AddressData> retrieveAddressDetailsBy(Long clientId, String addressType);
 
 	List<AddressData> retrieveAddressDetails();
 	

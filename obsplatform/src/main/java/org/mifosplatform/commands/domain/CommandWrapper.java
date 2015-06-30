@@ -1311,7 +1311,10 @@ public class CommandWrapper {
 		public boolean isdeleteRecurringBilling() {
 			return this.actionName.equalsIgnoreCase("DELETERECURRINGBILLING");
 		}
-		
+
+		public boolean isAllocateDevice() {
+			return this.actionName.equalsIgnoreCase("ALLOCATEDEVICE");
+		}
 		public boolean isRefund() {
 			return  this.entityName.equalsIgnoreCase("REFUND");
 		}

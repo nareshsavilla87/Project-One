@@ -2,12 +2,14 @@ package org.mifosplatform.finance.paymentsgateway.service;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -18,7 +20,14 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.http.HttpServletRequest;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -93,6 +102,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 	private final PaymentGatewayCommandFromApiJsonDeserializer paymentGatewayCommandFromApiJsonDeserializer;
 	private final ConfigurationRepository configurationRepository;
 	private final RecurringBillingHistoryRepository recurringBillingHistoryRepository;
+	private final HttpClient client = new DefaultHttpClient();
       
     @Autowired
     public PaymentGatewayRecurringWritePlatformServiceImpl(final PlatformSecurityContext context, 
@@ -135,68 +145,57 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
      * And Send this String to Paypal Server(We can take Paypal Url From c_paymentgateway_conf table )
      */
 	
-	@SuppressWarnings("rawtypes")
-	@Override
-	public String paypalRecurringVerification(HttpServletRequest request) throws IllegalStateException, ClientProtocolException, IOException, JSONException {
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+    @Override
+    public String paypalRecurringVerification(HttpServletRequest request) throws IllegalStateException, ClientProtocolException, IOException, JSONException {
 
-		BufferedReader bufferedReader = null;
-		PrintWriter printWriter = null;
-		String paramName, paramValue, paypalUrl, line;
-		final String splitParam = "\\?", addParam = "&", equalParam = "=", charSet = "charset";
-		
-		try {
-			
-			this.context.authenticatedUser();
-	
-			PaymentGatewayConfiguration pgConfig = this.paymentGatewayConfigurationRepository.findOneByName(ConfigurationConstants.PAYPAL_PAYMENTGATEWAY);
-			
-			if (null == pgConfig || null == pgConfig.getValue() || !pgConfig.isEnabled()) {
-				throw new PaymentGatewayConfigurationException(ConfigurationConstants.PAYPAL_PAYMENTGATEWAY);
-			}
-			
-			JSONObject pgConfigJsonObj = new JSONObject(pgConfig.getValue());
-			paypalUrl = pgConfigJsonObj.getString(ConfigurationConstants.PAYPAL_URL_NAME);
-			
-			//2. Prepare 'notify-validate' command with exactly the same parameters
-			Enumeration enumeration = request.getParameterNames();
-			StringBuilder requestData = new StringBuilder(RecurringPaymentTransactionTypeConstants.NOTIFY_VALIDATE);
-			
-			while (enumeration.hasMoreElements()) {
-				
-				paramName = (String) enumeration.nextElement();
-				paramValue = request.getParameter(paramName);
-				
-				if (!"password".equalsIgnoreCase(paramName) && !"username".equalsIgnoreCase(paramName) && !"tenantIdentifier".equalsIgnoreCase(paramName) && !"rm".equalsIgnoreCase(paramName)) {
-					requestData.append(addParam).append(paramName).append(equalParam).append(URLEncoder.encode(paramValue, request.getParameter(charSet)));
-				}
-			}
-			 
-			//3. Post above command to Paypal IPN URL {@link IpnConfig#ipnUrl}
-			URL url = new URL(paypalUrl.split(splitParam)[0].trim());
-			HttpsURLConnection uc = (HttpsURLConnection) url.openConnection();
-			uc.setDoOutput(true);
-			uc.setRequestProperty(RecurringPaymentTransactionTypeConstants.CONTENT_TYPE, RecurringPaymentTransactionTypeConstants.CONTENT_TYPE_VALUE);
-			uc.setRequestProperty(RecurringPaymentTransactionTypeConstants.HOST, url.getHost());
-			uc.setRequestMethod(RecurringPaymentTransactionTypeConstants.POST);
-			
-			printWriter = new PrintWriter(uc.getOutputStream());
-			printWriter.println(requestData.toString());
-			
-			//4. Read response from Paypal
-			bufferedReader = new BufferedReader(new InputStreamReader(uc.getInputStream()));
-			
-			StringBuilder builder = new StringBuilder();
-			while ((line = bufferedReader.readLine()) != null) {
-		        builder = builder.append(line);
-		    }
-			return builder.toString();
-			
-		} finally {
-			if(null != printWriter) printWriter.close();
-			if(null != bufferedReader) bufferedReader.close();
-		}
+     BufferedReader bufferedReader = null;
+     InputStream is = null;
+     String paramName, paramValue, paypalUrl, line;
+     final String splitParam = "\\?", charSet = "charset";
+     
+     try {
+      
+      this.context.authenticatedUser();
+    
+      PaymentGatewayConfiguration pgConfig = this.paymentGatewayConfigurationRepository.findOneByName(ConfigurationConstants.PAYPAL_PAYMENTGATEWAY);
+      
+      if (null == pgConfig || null == pgConfig.getValue() || !pgConfig.isEnabled()) {
+       throw new PaymentGatewayConfigurationException(ConfigurationConstants.PAYPAL_PAYMENTGATEWAY);
+      }
+      
+      JSONObject pgConfigJsonObj = new JSONObject(pgConfig.getValue());
+      paypalUrl = pgConfigJsonObj.getString(ConfigurationConstants.PAYPAL_URL_NAME);
+     
+      HttpPost post = new HttpPost(paypalUrl.split(splitParam)[0].trim());
+      List<NameValuePair> params = new ArrayList<NameValuePair>();
+      params.add(new BasicNameValuePair("cmd", "_notify-validate")); //You need to add this parameter to tell PayPal to verify
+      for (Enumeration<String> e = request.getParameterNames(); e.hasMoreElements();) {
+    	  paramName = e.nextElement();
+    	  paramValue = request.getParameter(paramName);
+      
+      if (!"password".equalsIgnoreCase(paramName) && !"username".equalsIgnoreCase(paramName) && !"tenantIdentifier".equalsIgnoreCase(paramName) && !"rm".equalsIgnoreCase(paramName)) {
+       params.add(new BasicNameValuePair(paramName, paramValue));
+      }
+      }
+      post.setEntity(new UrlEncodedFormEntity(params, request.getParameter(charSet)));
+      HttpResponse response = client.execute(post);
+      
+      is = response.getEntity().getContent();
+      bufferedReader = new BufferedReader(new InputStreamReader(is));
+      String result = "";
+      
+      while ((line = bufferedReader.readLine()) != null) {
+      result += line;
+      }
+      return result;
+      
+     } finally {
+      if(null != is) is.close();
+      if(null != bufferedReader) bufferedReader.close();
+     }
 
-	}
+    }
 
 	/**
 	 * This recurringEventUpdate(HttpServletRequest request) Method Used For Creating/Renewal/Change the Orders

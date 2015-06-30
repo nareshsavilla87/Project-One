@@ -1,6 +1,10 @@
 package org.mifosplatform.billing.selfcare.service;
 
+import java.util.Date;
+
 import org.apache.commons.lang.RandomStringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistory;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistoryRepository;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
@@ -31,6 +35,12 @@ import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientStatusException;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
+import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
+import org.mifosplatform.provisioning.provsionactions.domain.ProvisionActions;
+import org.mifosplatform.provisioning.provsionactions.domain.ProvisioningActionsRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,8 +71,8 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 	private BillingMessageTemplate newSelfcarePasswordMessageDetails = null;
 	private BillingMessageTemplate createSelfcareMessageDetailsForSMS = null;
 	private BillingMessageTemplate newSelfcarePasswordMessageDetailsForSMS = null;
-	
-	
+	private final ProvisioningActionsRepository provisioningActionsRepository;
+	private final ProcessRequestRepository processRequestRepository;
 
 	@Autowired
 	public SelfCareWritePlatformServiceImp(final PlatformSecurityContext context, 
@@ -75,7 +85,9 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			final ClientRepository clientRepository,
 			final LoginHistoryRepository loginHistoryRepository,
 			final BillingMessageRepository messageDataRepository,
-			final ConfigurationRepository configurationRepository) {
+			final ConfigurationRepository configurationRepository,
+			final ProvisioningActionsRepository provisioningActionsRepository,
+			final ProcessRequestRepository processRequestRepository) {
 		
 		this.context = context;
 		this.selfCareRepository = selfCareRepository;
@@ -89,7 +101,8 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 		this.loginHistoryRepository=loginHistoryRepository;
 		this.messageDataRepository = messageDataRepository;
 		this.configurationRepository = configurationRepository;
-				
+		this.provisioningActionsRepository = provisioningActionsRepository;		
+		this.processRequestRepository = processRequestRepository;
 	}
 	
 	@Override
@@ -460,19 +473,54 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			this.context.authenticatedUser();
 			this.selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
 			String uniqueReference = command.stringValueOfParameterNamed("uniqueReference");
+			String userName = command.stringValueOfParameterNamed("userName");
 			String password = command.stringValueOfParameterNamed("password");
 			SelfCare selfCare =selfCareRepository.findOneByEmail(uniqueReference);
-			
 			if(selfCare == null){				
 				throw new SelfcareEmailIdNotFoundException(uniqueReference);			
-			}else{		
-				if(command.parameterExists("userName")){
+			}
+			String existingUserName = selfCare.getUserName();
+			String existingPassword = selfCare.getPassword();
+			
+				/*if(command.parameterExists("userName")){
 					String userName = command.stringValueOfParameterNamed("userName");
 					selfCare.setUserName(userName);
 				}
 				selfCare.setPassword(password);
 				this.selfCareRepository.save(selfCare);
-			}
+				*/
+				
+				if((userName != null && password != null) && (!userName.isEmpty() && !password.isEmpty()) &&
+                		((existingUserName.equalsIgnoreCase(userName)) && (!existingPassword.equalsIgnoreCase(password)))){				
+                	
+                	selfCare.setUserName(userName);
+                	selfCare.setPassword(password);
+    				this.selfCareRepository.save(selfCare);
+               
+    				ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_Change_CREDENTIALS);
+    				if(provisionActions.getIsEnable() == 'Y'){
+    					JSONObject object = new JSONObject();
+    					try {
+    						object.put("newUserName", userName);
+    						object.put("newPassword", password);
+    						object.put("existingUserName", existingUserName);
+    						object.put("existingPassword", existingPassword);
+    					} catch (JSONException e) {
+    						e.printStackTrace();
+    					}
+    					ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), selfCare.getClientId(), Long.valueOf(0),
+							 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
+
+    					ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
+							 Long.valueOf(0), object.toString(), "Recieved",
+							 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
+
+    					processRequest.add(processRequestDetails);
+    					this.processRequestRepository.save(processRequest);
+					
+    				}
+				}
+			
 			
 			return new CommandProcessingResultBuilder().withEntityId(selfCare.getId()).withClientId(selfCare.getClientId()).build();
 			
