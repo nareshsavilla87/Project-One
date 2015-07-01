@@ -52,7 +52,7 @@ public class CountryCurrencyReadPlatformServiceImpl implements CountryCurrencyRe
 
 		public String schema() {
 			return "  c.id as id,c.country as country,c.currency as currency,c.status as status,c.base_currency as baseCurrency, "
-					+ "  c.conversion_rate as conversionRate FROM b_country_currency c ";
+					+ "  c.conversion_rate as conversionRate, c.country_isd as countryISD  FROM b_country_currency c ";
 
 		}
 
@@ -66,8 +66,9 @@ public class CountryCurrencyReadPlatformServiceImpl implements CountryCurrencyRe
 			final String status = rs.getString("status");
 			final String baseCurrency = rs.getString("baseCurrency");
 			final BigDecimal conversionRate = rs.getBigDecimal("conversionRate");
+			final String countryISD = rs.getString("countryISD");
 
-			return new CountryCurrencyData(id, country, currency, baseCurrency,conversionRate, status);
+			return new CountryCurrencyData(id, country, currency, baseCurrency,conversionRate, status, countryISD);
 		}
 	}
 

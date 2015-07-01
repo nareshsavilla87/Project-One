@@ -799,6 +799,9 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 						UserActionStatusTypeEnum.CHANGE_PLAN.toString(),new Long(0), null, null,newOrder.getId(),plan.getProvisionSystem(),null);
 
 				processResuiltId=processingResult.commandId();
+			} else {
+				//Notify details for change plan	
+				processNotifyMessages(EventActionConstants.EVENT_CHANGE_PLAN, newOrder.getClientId(), newOrder.getId().toString());
 			}
 		     
     	// For Order History
@@ -1074,6 +1077,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 					UserActionStatusTypeEnum.TERMINATION.toString(),appUser.getId(),null);
 			
 			// checking for Paypal Recurring DisConnection
+			processNotifyMessages(EventActionConstants.EVENT_NOTIFY_ORDER_TERMINATE, order.getClientId(), order.getId().toString());
 			processPaypalRecurringActions(orderId, EventActionConstants.EVENT_PAYPAL_RECURRING_TERMINATE_ORDER);
 			
 			this.orderHistoryRepository.save(orderHistory);	

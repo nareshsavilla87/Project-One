@@ -41,13 +41,16 @@ public class CountryCurrency extends AbstractPersistable<Long> {
 
 	@Column(name = "is_deleted")
 	private char isDeleted = 'N';
+	
+	@Column(name = "country_isd")
+	private String countryISD;
 
 	public CountryCurrency() {
 	}
 
 	public CountryCurrency(final String country, final String currency,
 			final String basecurrency, final BigDecimal conversionRate,
-			final String status)
+			final String status, String countryISD)
 
 	{
 		this.country = country;
@@ -55,6 +58,7 @@ public class CountryCurrency extends AbstractPersistable<Long> {
 		this.status = status;
 		this.baseCurrency = basecurrency;
 		this.conversionRate = conversionRate;
+		this.countryISD = countryISD;
 
 	}
 
@@ -113,6 +117,14 @@ public class CountryCurrency extends AbstractPersistable<Long> {
 		this.conversionRate = conversionRate;
 	}
 
+	public String getCountryISD() {
+		return countryISD;
+	}
+
+	public void setCountryISD(String countryISD) {
+		this.countryISD = countryISD;
+	}
+
 	/**
 	 * updating column 'is_deleted' with 'Y' for delete of country currency
 	 * configuration
@@ -139,8 +151,10 @@ public class CountryCurrency extends AbstractPersistable<Long> {
 				.stringValueOfParameterNamed("baseCurrency");
 		final BigDecimal conversionRate = command
 				.bigDecimalValueOfParameterNamed("conversionRate");
+		final String countryISD = command.stringValueOfParameterNamed("countryISD");
+		
 		return new CountryCurrency(country, currency, baseCurrency,
-				conversionRate, status);
+				conversionRate, status, countryISD);
 
 	}
 
@@ -188,6 +202,13 @@ public class CountryCurrency extends AbstractPersistable<Long> {
 					.bigDecimalValueOfParameterNamed("conversionRate");
 			actualChanges.put("conversionRate", newValue);
 			this.conversionRate = newValue;
+		}
+		
+		if (command.isChangeInStringParameterNamed("countryISD", this.countryISD)) {
+			final String newValue = command
+					.stringValueOfParameterNamed("countryISD");
+			actualChanges.put("countryISD", newValue);
+			this.countryISD = StringUtils.defaultIfEmpty(newValue, null);
 		}
 
 		return actualChanges;
