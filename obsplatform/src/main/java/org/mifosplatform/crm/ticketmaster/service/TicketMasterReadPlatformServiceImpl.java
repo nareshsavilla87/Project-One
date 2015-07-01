@@ -168,7 +168,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 			final String resolutionDescription = resultSet.getString("resolutionDescription");
 			final String ticketstatus = resultSet.getString("ticketstatus");
 			final Integer problemCode = resultSet.getInt("problemCode");
-			final Integer statusCode = resultSet.getInt("ticketstatus");
+			final Integer statusCode = resultSet.getInt("statusCode");
 			
 			return new TicketMasterData(id, priority, status, userId, ticketDate, LastComment, problemDescription, assignedTo, sourceOfTicket,
 					dueDate, description, resolutionDescription, problemCode, statusCode,ticketstatus);
