@@ -137,7 +137,9 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 		public String clientOrderLookupSchema() {
 				
 		return "tckt.id as id, tckt.priority as priority, tckt.ticket_date as ticketDate, tckt.assigned_to as userId,tckt.source_of_ticket as sourceOfTicket, "
-					+" tckt.problem_code as problemCode, tckt.status_code as statusCode, tckt.due_date as dueDate,tckt.description as description,tckt.resolution_description as resolutionDescription, "
+					+" tckt.problem_code as problemCode, tckt.status_code as statusCode, tckt.due_date as dueDate," +
+					"(SELECT code_value FROM m_code_value mcv WHERE  tckt.status_code = mcv.id) AS ticketstatus," +
+					" tckt.description as description,tckt.resolution_description as resolutionDescription, "
 			        + " (select code_value from m_code_value mcv where tckt.problem_code=mcv.id)as problemDescription," 
 					+ " tckt.status as status, "
 			        + " (select m_appuser.username from m_appuser "
@@ -164,11 +166,12 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 			final Date dueDate = resultSet.getTimestamp("dueDate");
 			final String description = resultSet.getString("description");
 			final String resolutionDescription = resultSet.getString("resolutionDescription");
+			final String ticketstatus = resultSet.getString("ticketstatus");
 			final Integer problemCode = resultSet.getInt("problemCode");
-			final Integer statusCode = resultSet.getInt("statusCode");
+			final Integer statusCode = resultSet.getInt("ticketstatus");
 			
 			return new TicketMasterData(id, priority, status, userId, ticketDate, LastComment, problemDescription, assignedTo, sourceOfTicket,
-					dueDate, description, resolutionDescription, problemCode, statusCode);
+					dueDate, description, resolutionDescription, problemCode, statusCode,ticketstatus);
 		}
 	}
 

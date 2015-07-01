@@ -33,6 +33,7 @@ public class TicketMasterData {
 	private String sourceOfTicket;
 	private Date dueDate;
 	private String resolutionDescription;
+	private String ticketstatus;
 	
   	public TicketMasterData(final List<EnumOptionData> statusType,
 			final List<EnumOptionData> priorityType) {
@@ -53,7 +54,7 @@ public class TicketMasterData {
 	public TicketMasterData(final Long id, final String priority, final String status, final Integer assignedTo, 
 			final LocalDate ticketDate, final String lastComment, final String problemDescription, final String userName, 
 			final String sourceOfTicket, final Date dueDate, final String description, final String resolutionDescription,
-			final Integer problemCode, final Integer statusCode) {
+			final Integer problemCode, final Integer statusCode, String ticketstatus) {
 		
 		this.id = id;
 		this.priority = priority;
@@ -69,6 +70,7 @@ public class TicketMasterData {
 		this.resolutionDescription = resolutionDescription;
 		this.problemCode = problemCode;
 		this.statusCode = statusCode;
+		this.ticketstatus = ticketstatus;
 		
 	}
 
