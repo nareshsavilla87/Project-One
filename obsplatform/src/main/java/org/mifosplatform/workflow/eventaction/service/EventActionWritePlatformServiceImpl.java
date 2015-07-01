@@ -345,7 +345,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						resultJson.addProperty("error", resultMap.get("error").toString());
 						
 						
-						EventAction eventAction1=new EventAction(new Date(),"Recurring Disconnect","Recurring Disconnect",EventActionConstants.ACTION_RECURRING_DISCONNECT.toString(),
+						EventAction eventAction1=new EventAction(DateUtils.getDateOfTenant(),"Recurring Disconnect","Recurring Disconnect",EventActionConstants.ACTION_RECURRING_DISCONNECT.toString(),
 				    			 "/eventmaster",Long.parseLong(resourceId),resultJson.toString(),Long.valueOf(0),Long.valueOf(0));
 						
 						eventAction1.updateStatus('Y');
@@ -371,7 +371,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						resultJsonObj.addProperty("error", resultMapObj.get("error").toString());
 						
 						
-						EventAction eventActionObj=new EventAction(new Date(),"Recurring Reconnection","Recurring Reconnection",EventActionConstants.ACTION_RECURRING_RECONNECTION.toString(),
+						EventAction eventActionObj=new EventAction(DateUtils.getDateOfTenant(),"Recurring Reconnection","Recurring Reconnection",EventActionConstants.ACTION_RECURRING_RECONNECTION.toString(),
 				    			 "/eventmaster",Long.parseLong(resourceId),resultJsonObj.toString(),Long.valueOf(0),Long.valueOf(0));
 						
 						eventActionObj.updateStatus('Y');
@@ -401,7 +401,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 							resultJsonObject.addProperty("error", resultMapForTerminate.get("error").toString());
 							
 							
-							EventAction eventActionTermination=new EventAction(new Date(),"Cancel Recurring","Cancel Recurring Profile",EventActionConstants.ACTION_RECURRING_TERMINATION.toString(),
+							EventAction eventActionTermination=new EventAction(DateUtils.getDateOfTenant(),"Cancel Recurring","Cancel Recurring Profile",EventActionConstants.ACTION_RECURRING_TERMINATION.toString(),
 					    			 "/eventmaster",Long.parseLong(resourceId),resultJsonObject.toString(),Long.valueOf(0),Long.valueOf(0));
 							
 							eventActionTermination.updateStatus('Y');
