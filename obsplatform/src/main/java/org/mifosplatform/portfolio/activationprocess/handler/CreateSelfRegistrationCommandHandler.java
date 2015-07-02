@@ -21,6 +21,7 @@ public class CreateSelfRegistrationCommandHandler implements NewCommandSourceHan
     @Transactional
 	@Override
 	public CommandProcessingResult processCommand(JsonCommand command) {
+    	
     	 return this.activationProcessWritePlatformService.selfRegistrationProcess(command);
 	}
 

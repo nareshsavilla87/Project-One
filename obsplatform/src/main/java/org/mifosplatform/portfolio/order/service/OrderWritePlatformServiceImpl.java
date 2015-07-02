@@ -488,6 +488,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 			}
 		  requestStatusForProv="RENEWAL_AE";//UserActionStatusTypeEnum.ACTIVATION.toString();
 		  orderDetails.setNextBillableDay(null);
+		  orderDetails.setRenewalDate(newStartdate.toDate());
 	  }
 	  LocalDate renewalEndDate=this.orderAssembler.calculateEndDate(newStartdate,contractDetails.getSubscriptionType(),contractDetails.getUnits());
 	  
@@ -531,7 +532,6 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	
 	  orderDetails.setContractPeriod(contractDetails.getId());
 	 
-	  orderDetails.setRenewalDate(newStartdate.toDate());
 	  this.orderRepository.saveAndFlush(orderDetails);
 
 	//  Set<PlanDetails> planDetails=plan.getDetails();
