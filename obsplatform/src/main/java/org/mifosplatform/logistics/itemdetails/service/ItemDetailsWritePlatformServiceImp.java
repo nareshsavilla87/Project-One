@@ -378,8 +378,10 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
   			 if(globalConfiguration.isEnabled()){
   				 
   				 PropertyDeviceMapping deviceMapping = this.propertyDeviceMappingRepository.findBySerailNumber(serialNo);
+  				 if(deviceMapping != null){
   				 deviceMapping.delete();
   				 this.propertyDeviceMappingRepository.save(deviceMapping);
+  				 }
   			 }
         	   ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_RELEASE_DEVICE);
                if(provisionActions != null && provisionActions.isEnable() == 'Y'){
