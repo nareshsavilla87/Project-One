@@ -70,11 +70,9 @@ public class BillingMesssageReadPlatformServiceImpl implements
 	private static String parameterValue;
 	private static BillingMesssageReadPlatformService billingMesssageReadPlatformService;
 	private static FileWriter fw;
-	private static ConfigurationRepository globalConfigurationRepository;
 	private static ProvisioningCommandRepository provisioningCommandRepository;
 
 	
-
 	@SuppressWarnings("static-access")
 	@Autowired
 	public BillingMesssageReadPlatformServiceImpl(
@@ -89,7 +87,6 @@ public class BillingMesssageReadPlatformServiceImpl implements
 		this.messageDataRepository = messageDataRepository;
 		this.processRequestRepository = processRequestRepository;
 		this.messageTemplateRepository = messageTemplateRepository;
-		this.globalConfigurationRepository = globalConfigurationRepository;
 		this.provisioningCommandRepository = provisioningCommandRepository;
 	}
 
@@ -188,10 +185,10 @@ public class BillingMesssageReadPlatformServiceImpl implements
 			RowMapper<BillingMessageDataForProcessing> {
 
 		public String schema() {
-
-			return " md.id as id,md.message_to as messageto,md.message_from as messagefrom,md.subject as subject,md.header as header,"
-					+ " md.body as body,md.footer as footer,md.message_type as messageType,md.attachment as attachment from"
-					+ " b_message_data md where md.status='N' ";
+			
+			return " md.id as id,md.message_to as messageto,md.message_from as messagefrom,md.subject as subject,md.header as header," +
+					" md.body as body,md.footer as footer,md.message_type as messageType,md.attachment as attachment " +
+					" from b_message_data md  where md.status='N' ";
 		}
 
 		@Override
