@@ -19,8 +19,6 @@ public class BillingMessageDataForProcessing {
 	private final Long id;
 	private char messageType;
 	private final String attachment;
-
-	
 	
 	public BillingMessageDataForProcessing(final Long id, final String messageto,
 			final String messagefrom, final String subject, final String header, 
@@ -37,7 +35,6 @@ public class BillingMessageDataForProcessing {
 		this.subject=subject;
 		this.messageType=messageType;
 		this.attachment=attachment;
-		
 	}
 
 	public String getMessageTo() {
@@ -72,10 +69,8 @@ public class BillingMessageDataForProcessing {
 		return messageType;
 	}
 
-
 	public String getAttachment() {
 		return attachment;
 	}
-	
-	
+
 }

@@ -33,7 +33,9 @@ import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.freeradius.radius.data.RadiusServiceData;
 import org.mifosplatform.infrastructure.configuration.domain.Configuration;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
+import org.mifosplatform.infrastructure.configuration.exception.ConfigurationPropertyNotFoundException;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
@@ -69,6 +71,9 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 	private final ProcessRequestRepository processRequestRepository;
 	private final ConfigurationRepository repository;
 	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+	private final String nasUrl = "nas";
+	private final String radService = "radservice";
+	
 	
 	@Autowired
 	public RadiusReadPlatformServiceImp(final SheduleJobReadPlatformService sheduleJobReadPlatformService, final TenantAwareRoutingDataSource dataSource,
@@ -88,7 +93,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 	@Override
 	public String retrieveAllNasDetails() {
-
+		
 		try {
 			
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
@@ -122,30 +127,41 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			jsonObj.put("nasData", new JSONArray(nasData));
 			nasData = jsonObj.toString();
 			return nasData;
-		 
+
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return stackTraceToString(e);
 		} catch (IOException e) {
 			e.printStackTrace();
 			return e.getMessage();
 		} catch (JSONException e) {
 			return e.getMessage();
 		}
+		
 
 	}
 	
+	private String stackTraceToString(Throwable e) {
+		
+		StringBuilder sb = new StringBuilder();
+		for (StackTraceElement element : e.getStackTrace()) {
+			sb.append(element.toString());
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
 	
 
 	@Override
 	public String retrieveNasDetail(final Long nasId) {
 
 		try {
-			
+
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
 			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
+			
 			String url;
 			String nasData = null;
 			if(data.getProvSystem().equalsIgnoreCase("version-1")){
@@ -170,27 +186,28 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 				nasData = this.processRadiusGet(url, encodedPassword);
 				
 			}
+
 			return nasData;
 			
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return stackTraceToString(e);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return stackTraceToString(e);
 		}
-
 	}
 	
 	@Override
 	public String createNas(final String jsonData) {
 		
 		try {
-			
+
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
 			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
+
 			String url;
 			String nasData = null;
 			if(data.getProvSystem().equalsIgnoreCase("version-1")){
@@ -271,6 +288,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 				 ** /
 				 *
 				/*ProvisionActions provisionActions = this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_NAS);
+>>>>>>> upstream/obsplatform-3.0
 				
 				if(provisionActions.getIsEnable() == 'Y'){
 					
@@ -283,32 +301,59 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 					 processRequest.add(processRequestDetails);
 					 this.processRequestRepository.save(processRequest);
+<<<<<<< HEAD
+				}
+					
+			}else if(data.getProvSystem().equalsIgnoreCase(ConfigurationConstants.FREE_RADIUS_VERSION_TWO)){
+				
+				final Configuration property = this.repository.findOneByName(ConfigurationConstants.CONFIG_FREERADIUS_REST);
+				
+				if(null == property) 
+					throw new ConfigurationPropertyNotFoundException(ConfigurationConstants.CONFIG_FREERADIUS_REST);
+				
+				if (property.isEnabled()) {
+					
+					if (property.getValue().isEmpty())
+						throw new RadiusDetailsNotFoundException();
+					
+					JSONObject obj = new JSONObject(property.getValue());
+					String url = obj.getString("url").trim() + nasUrl;
+					String password = obj.getString("password");
+					byte[] encoded = Base64.encodeBase64(password.getBytes());
+					String encodedPassword = new String(encoded);
+					nasData = this.processRadiusPost(url, encodedPassword, jsonData);
+				}
+				
+			}	
+=======
 					
 				}*/
 				
 				
 			}
+
 			return nasData;
 			
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return stackTraceToString(e);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return stackTraceToString(e);
 		}
 	}
 	
 	
 	@Override
 	public String deleteNasDetail(final Long nasId) {
-
+		
 		try {
-			
+
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
 			if(data == null){
 				throw new RadiusDetailsNotFoundException();
 			}
+
 			String url;
 			String nasData = null;
 			if(data.getProvSystem().equalsIgnoreCase("version-1")){
@@ -333,16 +378,16 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 				nasData = this.processRadiusDelete(url, encodedPassword);
 				
 			}
+			
 			return nasData;
-		
+			
 		} catch (ClientProtocolException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return stackTraceToString(e);
 		} catch (IOException e) {
 			e.printStackTrace();
-			return e.getMessage();
+			return stackTraceToString(e);
 		}
-
 	}
 	
 	@Override
@@ -356,11 +401,11 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 			String url ="";
 			String radServiceData =null;
 			JSONObject jsonObj = new JSONObject();
-			if(data.getProvSystem().equalsIgnoreCase("version-1")){
+			if(data.getProvSystem().equalsIgnoreCase(ConfigurationConstants.FREE_RADIUS_VERSION_ONE)){
 				if(attribute!=null){
-					url= data.getUrl() + "radservice?attribute="+attribute;
+					url= data.getUrl() + radService + "?attribute="+attribute;
 				}else{
-					url= data.getUrl() + "radservice";
+					url= data.getUrl() + radService;
 				}
 				String credentials = data.getUsername().trim() + ":" + data.getPassword().trim();
 				byte[] encoded = Base64.encodeBase64(credentials.getBytes());
@@ -371,7 +416,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 				radServiceData = jsonObj.toString();
 				
 				
-			}else if(data.getProvSystem().equalsIgnoreCase("version-2")){
+			}else if(data.getProvSystem().equalsIgnoreCase(ConfigurationConstants.FREE_RADIUS_VERSION_TWO)){
 				
 				final Configuration property = this.repository.findOneByName("freeradius_rest");
 				String urlValue = property.getValue();

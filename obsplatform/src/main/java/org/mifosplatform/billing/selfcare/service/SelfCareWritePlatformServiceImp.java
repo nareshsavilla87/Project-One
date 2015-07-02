@@ -41,6 +41,8 @@ import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestReposi
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.provisioning.provsionactions.domain.ProvisionActions;
 import org.mifosplatform.provisioning.provsionactions.domain.ProvisioningActionsRepository;
+import org.mifosplatform.workflow.eventaction.data.OrderNotificationData;
+import org.mifosplatform.workflow.eventaction.service.EventActionReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +75,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 	private BillingMessageTemplate newSelfcarePasswordMessageDetailsForSMS = null;
 	private final ProvisioningActionsRepository provisioningActionsRepository;
 	private final ProcessRequestRepository processRequestRepository;
+	private final EventActionReadPlatformService eventActionReadPlatformService;
 
 	@Autowired
 	public SelfCareWritePlatformServiceImp(final PlatformSecurityContext context, 
@@ -87,7 +90,8 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			final BillingMessageRepository messageDataRepository,
 			final ConfigurationRepository configurationRepository,
 			final ProvisioningActionsRepository provisioningActionsRepository,
-			final ProcessRequestRepository processRequestRepository) {
+			final ProcessRequestRepository processRequestRepository,
+			final EventActionReadPlatformService eventActionReadPlatformService) {
 		
 		this.context = context;
 		this.selfCareRepository = selfCareRepository;
@@ -103,6 +107,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 		this.configurationRepository = configurationRepository;
 		this.provisioningActionsRepository = provisioningActionsRepository;		
 		this.processRequestRepository = processRequestRepository;
+		this.eventActionReadPlatformService = eventActionReadPlatformService;
 	}
 	
 	@Override
@@ -129,6 +134,8 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			
 			Client client = this.clientRepository.findOne(selfCare.getClientId());
 			
+			OrderNotificationData orderData = this.eventActionReadPlatformService.retrieveNotifyDetails(client.getId(), null);
+			
 			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_SMS);
 			
 			if(null != configuration && configuration.isEnabled()) {
@@ -144,9 +151,9 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 					body = body.replace("<PARAM1>", selfCare.getUserName().trim());
 					body = body.replace("<PARAM2>", selfCare.getPassword().trim());
 					
-					BillingMessage billingMessage = new BillingMessage(null, body, null, 
-							BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM, client.getPhone(), subject,
-							BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, createSelfcareMessageDetailsForSMS, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_TYPE, null);
+					BillingMessage billingMessage = new BillingMessage(null, body, null, orderData.getOfficeEmail(), 
+							orderData.getClientPhone(), subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
+							createSelfcareMessageDetailsForSMS, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_TYPE, null);
 
 					this.messageDataRepository.save(billingMessage);
 
@@ -169,7 +176,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 					body = body.replace("<PARAM3>", selfCare.getPassword().trim());
 
 					BillingMessage billingMessage = new BillingMessage(header, body, footer, 
-							BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM, client.getEmail(), subject,
+							orderData.getOfficeEmail(), client.getEmail(), subject,
 							BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, createSelfcareMessageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 
 					this.messageDataRepository.save(billingMessage);
