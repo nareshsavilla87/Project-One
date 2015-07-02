@@ -63,6 +63,7 @@ public class EntitlementsData {
 	private String macId;
 	private Long regionId;
 	private Long officeId;
+	private String countryISD;
 	
 	
 	public EntitlementsData(){
@@ -170,7 +171,7 @@ public class EntitlementsData {
 			String phone, String email, String city, String zip, String street, String country, Long countryId,
 			String provisioingSystem, Long serviceId, Long prdetailsId, String product, String macId, 
 			String deviceId, String requestType, Long zebraSubscriberId, Long regionId, String regionName,
-			String selfcareUsername, String selfcarePassword) {
+			String selfcareUsername, String selfcarePassword, String countryISD) {
 		
 		this.id = id;
 		this.clientId = clientId;
@@ -195,6 +196,7 @@ public class EntitlementsData {
 		this.regionName = regionName;
 		this.selfcareUsername = selfcareUsername;
 		this.selfcarePassword = selfcarePassword;
+		this.countryISD = countryISD;
 		
 	}
 
@@ -404,6 +406,30 @@ public class EntitlementsData {
 
 	public String getSelfcarePassword() {
 		return selfcarePassword;
+	}
+
+	public String getSubscriberId() {
+		return subscriberId;
+	}
+
+	public String getStreet() {
+		return street;
+	}
+
+	public String getMacId() {
+		return macId;
+	}
+
+	public Long getRegionId() {
+		return regionId;
+	}
+
+	public Long getOfficeId() {
+		return officeId;
+	}
+
+	public String getCountryISD() {
+		return countryISD;
 	}
 
 }
