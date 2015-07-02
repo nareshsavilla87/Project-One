@@ -18,13 +18,14 @@ public class CountryCurrencyData {
 	private String baseCurrency;
 	private BigDecimal conversionRate;
 	private String status;
+	private String countryISD;
 	private ApplicationCurrencyConfigurationData currencydata;
 	private List<String> countryData;
 	private List<EnumOptionData> statusData;
 
 	public CountryCurrencyData(final Long id, final String country,
 			final String currency, final String baseCurrency,
-			final BigDecimal conversionRate, final String status) {
+			final BigDecimal conversionRate, final String status, final String countryISD) {
 
 		this.id = id;
 		this.country = country;
@@ -32,6 +33,7 @@ public class CountryCurrencyData {
 		this.baseCurrency = baseCurrency;
 		this.conversionRate = conversionRate;
 		this.status = status;
+		this.countryISD = countryISD;
 
 	}
 
@@ -47,6 +49,7 @@ public class CountryCurrencyData {
 			this.status = currencyData.getStatus();
 			this.baseCurrency = currencyData.getBaseCurrency();
 			this.conversionRate = currencyData.getConversionRate();
+			this.countryISD = currencyData.getCountryISD();
 		}
 
 		this.currencydata = currency;
@@ -117,4 +120,8 @@ public class CountryCurrencyData {
 		return statusData;
 	}
 
+	public String getCountryISD() {
+		return countryISD;
+	}
+	
 }

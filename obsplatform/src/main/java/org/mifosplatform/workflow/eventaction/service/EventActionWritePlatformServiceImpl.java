@@ -92,10 +92,15 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
     private BillingMessageTemplate reConnectionTemplates;
     private BillingMessageTemplate disConnectionTemplates;
     private BillingMessageTemplate paymentTemplates;
+    private BillingMessageTemplate changePlanTemplates;
+    private BillingMessageTemplate orderTerminationTemplates;
+    
     private BillingMessageTemplate smsActivationTemplates;
     private BillingMessageTemplate smsDisconnectionTemplates;
     private BillingMessageTemplate smsReConnectionTemplates;
     private BillingMessageTemplate smsPaymentTemplates;
+    private BillingMessageTemplate smsChangePlanTemplates;
+    private BillingMessageTemplate smsOrderTerminationTemplates;
 
 
 	@Autowired
@@ -142,6 +147,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 	if(actionDetaislDatas!=null){
 	   EventAction eventAction=null;
 	   String headerMessage = null, bodyMessage = null, footerMessage = null;
+	   BillingMessage billingMessage = null;
 	   OrderNotificationData orderData = null;
 	   BillingMessageTemplate template = null;
 			
@@ -170,7 +176,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				         // removeUrl.replaceAll("(PARAMURL)", ticketURL+""+resourceId); 	
 				        	if(detailsData.getEventName().equalsIgnoreCase(EventActionConstants.EVENT_CREATE_TICKET)){
 				        	  	if(!user.getEmail().isEmpty()){
-				        	  		BillingMessage billingMessage = new BillingMessage("CREATE TICKET", data.getProblemDescription()+"<br/>"
+				        	  		billingMessage = new BillingMessage("CREATE TICKET", data.getProblemDescription()+"<br/>"
 				        	  	    +ticketMaster.getDescription()+"\n"+removeUrl, "", user.getEmail(), user.getEmail(),
 									 "Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
 									 BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
@@ -181,7 +187,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	  			throw new EmailNotFoundException(new Long(data.getUserId()));
 				        	  		}else{
 				        	  			
-				        	  			BillingMessage billingMessage = new BillingMessage("CREATE TICKET", data.getProblemDescription()+"<br/>"
+				        	  			billingMessage = new BillingMessage("CREATE TICKET", data.getProblemDescription()+"<br/>"
 				        	  		    +ticketMaster.getDescription()+"\n"+removeUrl, "", actionProcedureData.getEmailId(), actionProcedureData.getEmailId(),
 										"Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
 										BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
@@ -193,7 +199,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	  		
 				        	    if(!user.getEmail().isEmpty()){
 				        	    	
-				        	  		BillingMessage billingMessage = new BillingMessage("ADD COMMENT", data.getProblemDescription()+"<br/>"
+				        	  		billingMessage = new BillingMessage("ADD COMMENT", data.getProblemDescription()+"<br/>"
 				        	        +ticketMaster.getDescription()+"<br/>"+"COMMENT: "+data.getLastComment()+"<br/>"+removeUrl, "", user.getEmail(), user.getEmail(),
 									"Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
 									BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
@@ -204,7 +210,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	  		if(actionProcedureData.getEmailId().isEmpty()){
 					        	  			throw new EmailNotFoundException(new Long(data.getUserId()));	
 					        	  	}else{
-					        	  		BillingMessage billingMessage = new BillingMessage("ADD COMMENT", data.getProblemDescription()+"<br/>"
+					        	  		billingMessage = new BillingMessage("ADD COMMENT", data.getProblemDescription()+"<br/>"
 					        	  	     +ticketMaster.getDescription()+"<br/>"+"COMMENT: \t"+data.getLastComment()+"<br/>"+removeUrl, "", actionProcedureData.getEmailId(),
 					        	  	     actionProcedureData.getEmailId(),"Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
 					        	  	     BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
@@ -215,7 +221,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	}else if(detailsData.getEventName().equalsIgnoreCase(EventActionConstants.EVENT_CLOSE_TICKET)){
 				        		
 				        	  	if(!user.getEmail().isEmpty()){
-				        	  			BillingMessage billingMessage = new BillingMessage("CLOSED TICKET", data.getProblemDescription()+"<br/>"
+				        	  			billingMessage = new BillingMessage("CLOSED TICKET", data.getProblemDescription()+"<br/>"
 				        	  			+ticketMaster.getDescription()+"<br/>"+"RESOLUTION: \t"+ticketMaster.getResolutionDescription()+"<br/>"+removeUrl, "", user.getEmail(), user.getEmail(),
 										"Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
 										BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
@@ -224,7 +230,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	  		if(actionProcedureData.getEmailId().isEmpty()){
 					        	  		throw new EmailNotFoundException(new Long(data.getUserId()));	
 					        	  	}else{
-					        	  		     BillingMessage billingMessage = new BillingMessage("CLOSED TICKET", data.getProblemDescription()+"<br/>"
+					        	  		     billingMessage = new BillingMessage("CLOSED TICKET", data.getProblemDescription()+"<br/>"
 					        	  		    +ticketMaster.getDescription()+"<br/>"+"RESOLUTION: \t"+ticketMaster.getResolutionDescription()+"<br/>"+removeUrl, "", actionProcedureData.getEmailId(),
 					        	  	         actionProcedureData.getEmailId(),"Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
 					        	  	       BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
@@ -460,7 +466,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	footerMessage = footerMessage.replaceAll("<Contact Name>", orderData.getOfficeEmail());
 				    	footerMessage = footerMessage.replaceAll("<Number>", orderData.getOfficePhoneNo());
 				    	
-				    	BillingMessage billingMessage = new BillingMessage(headerMessage, bodyMessage, footerMessage, 
+				    	billingMessage = new BillingMessage(headerMessage, bodyMessage, footerMessage, 
 				    			orderData.getOfficeEmail(), orderData.getEmailId(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
 				    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null );
 				    		
@@ -482,11 +488,11 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	footerMessage = footerMessage.replaceAll("<Contact Name>", orderData.getOfficeEmail());
 				    	footerMessage = footerMessage.replaceAll("<Number>", orderData.getOfficePhoneNo());
 				    	
-				    	BillingMessage disBillingMessage = new BillingMessage(headerMessage, bodyMessage, footerMessage, 
+				    	billingMessage = new BillingMessage(headerMessage, bodyMessage, footerMessage, 
 				    			orderData.getOfficeEmail(), orderData.getEmailId(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
 				    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null );
 				    		
-				    	this.messageDataRepository.save(disBillingMessage);
+				    	this.messageDataRepository.save(billingMessage);
 				    	
 				    	break;
 				    	
@@ -504,11 +510,11 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	footerMessage = footerMessage.replaceAll("<Contact Name>", orderData.getOfficeEmail());
 				    	footerMessage = footerMessage.replaceAll("<Number>", orderData.getOfficePhoneNo());
 				    	
-				    	BillingMessage reBillingMessage = new BillingMessage(headerMessage, bodyMessage, footerMessage, 
+				    	billingMessage = new BillingMessage(headerMessage, bodyMessage, footerMessage, 
 				    			orderData.getOfficeEmail(), orderData.getEmailId(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
 				    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null );
 				    		
-				    	this.messageDataRepository.save(reBillingMessage);
+				    	this.messageDataRepository.save(billingMessage);
 				    	
 				    	break;
 				    	
@@ -526,11 +532,55 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	footerMessage = footerMessage.replaceAll("<Contact Name>", orderData.getOfficeEmail());
 				    	footerMessage = footerMessage.replaceAll("<Number>", orderData.getOfficePhoneNo());
 				    	
-				    	BillingMessage paymentBillingMessage = new BillingMessage(headerMessage, bodyMessage, footerMessage, 
+				    	billingMessage = new BillingMessage(headerMessage, bodyMessage, footerMessage, 
 				    			orderData.getOfficeEmail(), orderData.getEmailId(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
 				    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null );
 				    		
-				    	this.messageDataRepository.save(paymentBillingMessage);
+				    	this.messageDataRepository.save(billingMessage);
+				    	
+				    	break;
+				    	
+				    case EventActionConstants.ACTION_NOTIFY_CHANGEPLAN : 
+				    	
+				    	orderData = this.eventActionReadPlatformService.retrieveNotifyDetails(clientId, new Long(resourceId));
+				    	
+				    	template = getTemplate(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_CHANGEPLAN);
+				    	
+				    	headerMessage = template.getHeader().replaceAll("<CustomerName>", orderData.getFirstName() + " " + orderData.getLastName());
+				    	bodyMessage = template.getBody().replaceAll("<Service name>", orderData.getPlanName());
+				    	bodyMessage = bodyMessage.replaceAll("<Activation Date>", dateFormat.format(orderData.getActivationDate().toDate()));
+				    	
+				    	footerMessage = template.getFooter().replaceAll("<Reseller Name>", orderData.getOfficeName());
+				    	footerMessage = footerMessage.replaceAll("<Contact Name>", orderData.getOfficeEmail());
+				    	footerMessage = footerMessage.replaceAll("<Number>", orderData.getOfficePhoneNo());
+				    	
+				    	billingMessage = new BillingMessage(headerMessage, bodyMessage, footerMessage, 
+				    			orderData.getOfficeEmail(), orderData.getEmailId(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
+				    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null );
+				    		
+				    	this.messageDataRepository.save(billingMessage);
+				    	
+				    	break;
+				    	
+				    case EventActionConstants.ACTION_NOTIFY_ORDER_TERMINATE : 
+				    	
+				    	orderData = this.eventActionReadPlatformService.retrieveNotifyDetails(clientId, new Long(resourceId));
+				    	
+				    	template = getTemplate(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_ORDERTERMINATION);
+				    	
+				    	headerMessage = template.getHeader().replaceAll("<CustomerName>", orderData.getFirstName() + " " + orderData.getLastName());
+				    	bodyMessage = template.getBody().replaceAll("<Service name>", orderData.getPlanName());
+				    	bodyMessage = bodyMessage.replaceAll("<Disconnection Date>", dateFormat.format(new Date()));
+				    	
+				    	footerMessage = template.getFooter().replaceAll("<Reseller Name>", orderData.getOfficeName());
+				    	footerMessage = footerMessage.replaceAll("<Contact Name>", orderData.getOfficeEmail());
+				    	footerMessage = footerMessage.replaceAll("<Number>", orderData.getOfficePhoneNo());
+				    	
+				    	billingMessage = new BillingMessage(headerMessage, bodyMessage, footerMessage, 
+				    			orderData.getOfficeEmail(), orderData.getEmailId(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
+				    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null );
+				    		
+				    	this.messageDataRepository.save(billingMessage);
 				    	
 				    	break;
 				    	
@@ -553,11 +603,11 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						    	bodyMessage = template.getBody().replaceAll("<Service name>", orderData.getPlanName());
 						    	bodyMessage = bodyMessage.replaceAll("<Activation Date>", dateFormat.format(orderData.getActivationDate().toDate()));
 						    	
-						    	BillingMessage smsActivation = new BillingMessage(null, bodyMessage, null, 
+						    	billingMessage = new BillingMessage(null, bodyMessage, null, 
 						    			orderData.getOfficeEmail(), orderData.getClientPhone(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
 						    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_TYPE, null );
 						    		
-						    	this.messageDataRepository.save(smsActivation);
+						    	this.messageDataRepository.save(billingMessage);
 					        	  		
 						    	break;
 						    
@@ -570,11 +620,11 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						    	bodyMessage = template.getBody().replaceAll("<Service name>", orderData.getPlanName());
 						    	bodyMessage = bodyMessage.replaceAll("<Disconnection Date>", dateFormat.format(orderData.getEndDate().toDate()));
 						 
-						    	BillingMessage disconnectBillingMessage = new BillingMessage(null, bodyMessage, null, 
+						    	billingMessage = new BillingMessage(null, bodyMessage, null, 
 						    			orderData.getOfficeEmail(), orderData.getClientPhone(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
 						    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_TYPE, null );
 						    		
-						    	this.messageDataRepository.save(disconnectBillingMessage);
+						    	this.messageDataRepository.save(billingMessage);
 						    	
 						    	break;
 						    
@@ -587,11 +637,11 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						    	bodyMessage = template.getBody().replaceAll("<Service name>", orderData.getPlanName());
 						    	bodyMessage = bodyMessage.replaceAll("<Reconnection Date>", dateFormat.format(orderData.getStartDate().toDate()));
 						    	
-						    	BillingMessage reConnectionBillingMessage = new BillingMessage(null, bodyMessage, null, 
+						    	billingMessage = new BillingMessage(null, bodyMessage, null, 
 						    			orderData.getOfficeEmail(), orderData.getClientPhone(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
 						    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_TYPE, null );
 						    		
-						    	this.messageDataRepository.save(reConnectionBillingMessage);
+						    	this.messageDataRepository.save(billingMessage);
 						    	
 						    	break;
 						    
@@ -604,11 +654,45 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 						    	bodyMessage = template.getBody().replaceAll("<Amount>", resourceId);
 						    	bodyMessage = bodyMessage.replaceAll("<Payment Date>", dateFormat.format(new Date()));
 						    	
-						    	BillingMessage paymentSmsBillingMessage = new BillingMessage(null, bodyMessage, null, 
+						    	billingMessage = new BillingMessage(null, bodyMessage, null, 
 						    			orderData.getOfficeEmail(), orderData.getClientPhone(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
 						    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_TYPE, null );
 						    		
-						    	this.messageDataRepository.save(paymentSmsBillingMessage);
+						    	this.messageDataRepository.save(billingMessage);
+						    	
+						    	break;
+						    	
+							case EventActionConstants.ACTION_NOTIFY_SMS_CHANGEPLAN :
+						    	
+								orderData = this.eventActionReadPlatformService.retrieveNotifyDetails(clientId, null);
+						    
+								template = getTemplate(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NOTIFY_CHANGEPLAN);
+						    	
+								bodyMessage = template.getBody().replaceAll("<Service name>", orderData.getPlanName());
+								bodyMessage = bodyMessage.replaceAll("<Activation Date>", dateFormat.format(orderData.getActivationDate().toDate()));
+						    	
+						    	billingMessage = new BillingMessage(null, bodyMessage, null, 
+						    			orderData.getOfficeEmail(), orderData.getClientPhone(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
+						    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_TYPE, null );
+						    		
+						    	this.messageDataRepository.save(billingMessage);
+						    	
+						    	break;
+						    	
+							case EventActionConstants.ACTION_NOTIFY_SMS_ORDER_TERMINATE :
+						    	
+								orderData = this.eventActionReadPlatformService.retrieveNotifyDetails(clientId, null);
+						    
+								template = getTemplate(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NOTIFY_ORDERTERMINATION);
+						    	
+								bodyMessage = template.getBody().replaceAll("<Service name>", orderData.getPlanName());
+								bodyMessage = bodyMessage.replaceAll("<Disconnection Date>", dateFormat.format(new Date()));
+						    	
+						    	billingMessage = new BillingMessage(null, bodyMessage, null, 
+						    			orderData.getOfficeEmail(), orderData.getClientPhone(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
+						    			template, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_TYPE, null );
+						    		
+						    	this.messageDataRepository.save(billingMessage);
 						    	
 						    	break;
 						    	
@@ -789,7 +873,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 
 	}
 	
-	private BillingMessageTemplate getTemplate(String templateName){
+private BillingMessageTemplate getTemplate(String templateName){
 		
 		if(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_ACTIVATION.equalsIgnoreCase(templateName)){
 			
@@ -819,6 +903,20 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			}
 			return paymentTemplates;
 			
+		} else if (BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_CHANGEPLAN.equalsIgnoreCase(templateName)) {
+			
+			if(null == changePlanTemplates){
+				changePlanTemplates = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_CHANGEPLAN);
+			}
+			return changePlanTemplates;
+			
+		} else if (BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_ORDERTERMINATION.equalsIgnoreCase(templateName)) {
+			
+			if(null == orderTerminationTemplates){
+				orderTerminationTemplates = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_ORDERTERMINATION);
+			}
+			return orderTerminationTemplates;
+			
 		} else if (BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NOTIFY_ACTIVATION.equalsIgnoreCase(templateName)) {
 			
 			if(null == smsActivationTemplates){
@@ -846,6 +944,20 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				smsPaymentTemplates = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NOTIFY_PAYMENT);
 			}
 			return smsPaymentTemplates;
+			
+		} else if (BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NOTIFY_CHANGEPLAN.equalsIgnoreCase(templateName)) {
+			
+			if(null == smsChangePlanTemplates){
+				smsChangePlanTemplates = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NOTIFY_CHANGEPLAN);
+			}
+			return smsChangePlanTemplates;
+			
+		} else if (BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NOTIFY_ORDERTERMINATION.equalsIgnoreCase(templateName)) {
+			
+			if(null == smsOrderTerminationTemplates){
+				smsOrderTerminationTemplates = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NOTIFY_ORDERTERMINATION);
+			}
+			return smsOrderTerminationTemplates;
 			
 		} else {
 			throw new BillingMessageTemplateNotFoundException(templateName);
