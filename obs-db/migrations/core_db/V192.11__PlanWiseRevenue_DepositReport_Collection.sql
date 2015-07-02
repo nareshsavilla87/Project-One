@@ -125,7 +125,7 @@ Delete from stretchy_report where report_name='Collection_Month_wise_Summary';
 Delete from stretchy_report where report_name='Invoice_Datewise_Details';
 Delete from stretchy_report where report_name='Invoice_Monthwise_Summary';
 
-DROP VIEW IF EXISTS `bMaster_vw_SN`,`bDetails_vw_sn`,`bmaster_vw_sn`,`bdetails_vw_sn`;
+-- DROP VIEW IF EXISTS `bMaster_vw_SN`,`bDetails_vw_sn`,`bmaster_vw_sn`,`bdetails_vw_sn`;
 
 -- Plan_Wise_Revenue_Detail --
 
@@ -200,7 +200,7 @@ SET @id=(SELECT id FROM stretchy_report where report_name='Plan_wise_Revenue_Mon
 SET @planID=(SELECT id FROM stretchy_parameter where parameter_label='Plan Name');
 insert ignore into stretchy_report_parameter (report_id,parameter_id,report_parameter_name) values (@id,@planID,'Plan Name');
 
---Deposite And Refund Date wise Details
+-- Deposit And Refund Date wise Details
 
 insert ignore into stretchy_report values(Null, 'Deposite And Refund Date wise Details', 'Table', '','Invoice&Collections', 'select
      off.name as Office_Name,
