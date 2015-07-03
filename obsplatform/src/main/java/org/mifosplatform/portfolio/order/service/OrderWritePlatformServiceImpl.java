@@ -1211,7 +1211,8 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			}  
   }
   
-  private void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode){
+  @Override
+  public void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode){
 	  
 	  Contract contract = contractRepository.findOne(contractPeriod);
 		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(paytermCode);
