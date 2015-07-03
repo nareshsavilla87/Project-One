@@ -26,9 +26,7 @@ public class EventActionConstants {
 	public static final String EVENT_NOTIFY_PAYMENT="Notify Payment Receipt";
 	public static final String EVENT_SEND_PAYMENT = "Send Payment Receipt";
 	public static final String EVENT_TOPUP_INVOICE_MAIL = "Topup Invoice Mail";
-
-	
-
+	public static final String EVENT_NOTIFY_ORDER_TERMINATE="Notify Order Terminate";
 	
 	//Actions
 	public static final String ACTION_SEND_MAIL="Send Mail";
@@ -47,26 +45,29 @@ public class EventActionConstants {
 	public static final String ACTION_ACTIVE_LIVE_EVENT = "Active Live Event";
 	public static final String ACTION_INACTIVE_LIVE_EVENT = "InActive Live Event";
 	public static final String ACTION_CREATE_PAYMENT="Create Payment";
+	public static final String ACTION_CARD_PAYMENT="Card Payment";
+	public static final String ACTION_TOPUP_INVOICE_MAIL = "Invoice Mail";
 
 	public static final String ACTION_RECURRING_DISCONNECT="RecurringDisconnect";
 	public static final String ACTION_RECURRING_RECONNECTION="RecurringReconnection";
 	public static final String ACTION_RECURRING_TERMINATION="RecurringTerminate";
+	
 	public static final String ACTION_NOTIFY_ACTIVATION="Notify Activation";
 	public static final String ACTION_NOTIFY_DISCONNECTION="Notify Disconnection";
 	public static final String ACTION_NOTIFY_RECONNECTION="Notify Reconnection";
 	public static final String ACTION_NOTIFY_PAYMENT="Notify Payment";
 	public static final String ACTION_SEND_PAYMENT = "Send Payment";
+	public static final String ACTION_NOTIFY_CHANGEPLAN = "Notify ChangePlan";
+	public static final String ACTION_NOTIFY_ORDER_TERMINATE="Notify Order Terminate";
 	
 	public static final String ACTION_NOTIFY_SMS_ACTIVATION="Notify_SMS_Activation";
 	public static final String ACTION_NOTIFY_SMS_DISCONNECTION="Notify_SMS_Disconnection";
 	public static final String ACTION_NOTIFY_SMS_RECONNECTION="Notify_SMS_Reconnection";
 	public static final String ACTION_NOTIFY_SMS_PAYMENT="Notify_SMS_Payment";
-	public static final String ACTION_TOPUP_INVOICE_MAIL = "Invoice Mail";
+	public static final String ACTION_NOTIFY_SMS_CHANGEPLAN = "Notify_SMS_ChangePlan";
+	public static final String ACTION_NOTIFY_SMS_ORDER_TERMINATE="Notify_SMS_Order_Terminate";
 	
 	
-
-	
-
 }
 
 

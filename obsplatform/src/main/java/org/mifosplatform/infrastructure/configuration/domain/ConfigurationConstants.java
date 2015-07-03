@@ -44,6 +44,8 @@ public class ConfigurationConstants {
 
 	public static final String CONFIG_PROPERTY_SMS= "sms-configuration";
 	public static final String CONFIG_IS_REDEMPTION = "is-redemption";
+	public static final String CONFIG_FREERADIUS_REST = "freeradius_rest";
+	
 
 	public static final String ENABLED = "enabled";
 	public static final String VALUE = "value";
@@ -97,6 +99,8 @@ public class ConfigurationConstants {
 	public static final char CONST_IS_Y = 'Y';
 	public static final char CONST_IS_N = 'N';
 	public static final String OSM_COMMAND = "OSM";
+	public static final String FREE_RADIUS_VERSION_ONE = "version-1";
+	public static final String FREE_RADIUS_VERSION_TWO = "version-2";
 
 	//Globalpay URL Configurations
 	public static final String GLOBALPAY_URL = "https://demo.globalpay.com.ng/GlobalpayWebService_demo/service.asmx";

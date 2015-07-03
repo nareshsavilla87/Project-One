@@ -412,10 +412,11 @@ public class EntitlementReadPlatformServiceImpl implements
 			String regionName = rs.getString("regionName");
 			String selfcareUsername = rs.getString("selfcareUsername");
 			String selfcarePassword = rs.getString("selfcarePassword");
+			String countryISD = rs.getString("countryISD");
 
 			return new EntitlementsData(id, clientId, firstName, lastName, phone, email, city, zip, street, country, countryId,
 					provisioingSystem, serviceId, prdetailsId, product, macId, deviceId, requestType,
-					zebraSubscriberId, regionId, regionName, selfcareUsername, selfcarePassword);
+					zebraSubscriberId, regionId, regionName, selfcareUsername, selfcarePassword, countryISD);
 		}
 
 		public String schema() {
@@ -426,7 +427,7 @@ public class EntitlementReadPlatformServiceImpl implements
 					" bprd.sent_message AS sentMessage, ifnull(bid.provisioning_serialno ,oh.provisioning_serial_number) AS macId," +
 					" ifnull(bid.serial_no ,oh.serial_number) AS deviceId, bprd.request_type AS requestType," +
 					" bcu.zebra_subscriber_id as zebraSubscriberId, bcu.username as selfcareUsername, bcu.password as selfcarePassword, " +
-					" bprm.id as regionId, bprm.priceregion_name as regionName" +
+					" bprm.id as regionId, bprm.priceregion_name as regionName , bcc.country_isd as countryISD" +
 					" from m_client c " +
 					" left join m_office o on (o.id = c.office_id) " +
 					" left join b_process_request bpr on (c.id = bpr.client_id ) " +
@@ -440,6 +441,7 @@ public class EntitlementReadPlatformServiceImpl implements
 					" left join b_item_detail bid on (bprd.hardware_id = bid.provisioning_serialno) " +
 					" left join b_item_master bim on (bid.item_master_id = bim.id) " +
 					" left join b_owned_hardware oh on (bprd.hardware_id =oh.provisioning_serial_number AND oh.is_deleted = 'N')" +
+					" left join b_country_currency bcc on (bpd.country_id = bcc.id AND bcc.is_deleted = 'N')" +
 					" WHERE bpr.is_processed = 'N' ";
 		}
 

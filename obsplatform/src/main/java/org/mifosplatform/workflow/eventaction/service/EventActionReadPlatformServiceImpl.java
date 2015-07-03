@@ -165,11 +165,19 @@ public class EventActionReadPlatformServiceImpl implements EventActionReadPlatfo
 	private static final class OrderNotificationMapper implements RowMapper<OrderNotificationData> {
 
 		public String schema() {
-			return " c.firstname as firstName, c.lastname as lastName, c.phone as clientPhone, p.plan_description as planName, c.email as emailId," +
-					" mo.name as officeName, boa.email_id as officeEmail, boa.phone_number as officePhoneNo, " +
-					" o.active_date as activationDate, o.start_date as startDate, o.end_date as endDate from m_client c " +
-					" Join m_office mo ON mo.id = c.office_id left Join b_office_address boa ON boa.office_id = mo.id " +
-					" Join b_orders o ON o.client_id = c.id Join b_plan_master p ON o.plan_id = p.id where c.id = ? ";
+			 
+			return " c.firstname as firstName, c.lastname as lastName, c.phone as clientPhone, c.email as emailId, " +
+					" p.plan_description as planName, mo.name as officeName, boa.email_id as officeEmail, " +
+					" boa.phone_number as officePhoneNo, o.active_date as activationDate, o.start_date as startDate, " +
+					" o.end_date as endDate, bcc.country_isd as countryISD from m_client c " +
+					" Join m_office mo ON mo.id = c.office_id " +
+					" left join b_office_address boa ON boa.office_id = mo.id left join b_orders o ON o.client_id = c.id" +
+					" left join b_plan_master p ON o.plan_id = p.id " +
+					" left join b_client_address bca on (c.id=bca.client_id and address_key='PRIMARY') " +
+					" left join b_state bs on (bca.state = bs.state_name) " +
+					" left join b_country bc on (bs.parent_code = bc.id) " +
+					" left join b_country_currency bcc on (bc.country_name = bcc.country AND bcc.is_deleted = 'N')" +
+					" where c.id = ? ";
 		}
 		
 		@Override
@@ -189,6 +197,12 @@ public class EventActionReadPlatformServiceImpl implements EventActionReadPlatfo
 			LocalDate activationDate = JdbcSupport.getLocalDate(rs, "activationDate");
 			LocalDate startDate = JdbcSupport.getLocalDate(rs, "startDate");
 			LocalDate endDate = JdbcSupport.getLocalDate(rs, "endDate");
+			
+			String countryISD = rs.getString("countryISD");
+			
+			if(null != countryISD && !countryISD.isEmpty()){
+				clientPhone = countryISD + clientPhone;
+			}
 			
 			return new OrderNotificationData(firstName, lastName, planName, emailId, officeName, officeEmail, officePhoneNo, 
 					activationDate, startDate, endDate, clientPhone);
