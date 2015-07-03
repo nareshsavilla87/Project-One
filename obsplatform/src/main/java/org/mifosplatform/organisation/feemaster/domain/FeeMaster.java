@@ -177,6 +177,8 @@ public class FeeMaster extends AbstractPersistable<Long>{
 
 	public void delete() {
 		this.deleted='Y';
+		this.feeCode=this.feeCode+"_"+this.getId();
+		this.transactionType=this.transactionType+"_"+this.getId();
 		
 	}
 
