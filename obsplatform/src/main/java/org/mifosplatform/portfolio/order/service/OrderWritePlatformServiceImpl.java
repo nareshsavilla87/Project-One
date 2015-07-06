@@ -832,8 +832,8 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		LocalDate enddate=this.orderAssembler.calculateEndDate(startDate,promotion.getDurationType(),promotion.getDuration());
 		
 		for(OrderDiscount orderDiscount:orderDiscounts){
-			orderDiscount.updateDates(promotion.getDiscountRate(),promotion.getDiscountType(),enddate);
-			this.orderDiscountRepository.save(orderDiscount);
+			orderDiscount.updateDates(promotion.getDiscountRate(),promotion.getDiscountType(),enddate,startDate);
+			//this.orderDiscountRepository.save(orderDiscount);
 		}
 		this.orderRepository.save(order);
 		return new CommandProcessingResult(command.entityId(),order.getClientId());
@@ -1202,7 +1202,8 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			}  
   }
   
-  private void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode){
+  @Override
+  public void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode){
 	  
 	  Contract contract = contractRepository.findOne(contractPeriod);
 		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(paytermCode);

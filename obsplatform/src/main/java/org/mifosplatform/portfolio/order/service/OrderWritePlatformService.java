@@ -36,6 +36,8 @@ public interface OrderWritePlatformService {
 	CommandProcessingResult reactiveOrder(JsonCommand command, Long entityId);
 	
 	void processNotifyMessages(String eventName, Long clientId, String orderId);
+	
+	void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode);
 
 	
 }

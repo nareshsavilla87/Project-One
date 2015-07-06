@@ -21,10 +21,10 @@ import org.mifosplatform.logistics.item.exception.ItemNotFoundException;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "b_fee_master", uniqueConstraints = { @UniqueConstraint(columnNames = { "fee_code" }, name = "fee_code"),
-		 @UniqueConstraint(columnNames = { "transaction_type" }, name = "fee_transaction_type") })
-public class FeeMaster extends AbstractPersistable<Long>{
-
+@Table(name = "b_fee_master", uniqueConstraints = {
+		@UniqueConstraint(columnNames = { "fee_code" }, name = "fee_code"),
+		@UniqueConstraint(columnNames = { "transaction_type" }, name = "fee_transaction_type") })
+public class FeeMaster extends AbstractPersistable<Long> {
 
 	/**
 	 * 
@@ -36,36 +36,38 @@ public class FeeMaster extends AbstractPersistable<Long>{
 
 	@Column(name = "fee_description")
 	private String feeDescription;
-	
+
 	@Column(name = "transaction_type")
 	private String transactionType;
-	
+
 	@Column(name = "charge_code")
 	private String chargeCode;
-	
+
 	@Column(name = "default_fee_amount")
 	private BigDecimal defaultFeeAmount;
-	
+
 	@Column(name = "is_deleted", nullable = false)
 	private char deleted = 'N';
-	
+
 	@Column(name = "is_refundable")
 	private String isRefundable;
-	
+
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "feeMaster", orphanRemoval = true)
 	private List<FeeDetail> regionPrices = new ArrayList<FeeDetail>();
-	
-	public FeeMaster(){}
-	
-	public FeeMaster(final String feeCode, final String feeDescription,final String transactionType,
-						final String chargeCode, final BigDecimal defaultFeeAmount, final String isRefundable) {
-             this.feeCode=feeCode;
-             this.feeDescription=feeDescription;
-             this.transactionType=transactionType;
-             this.chargeCode=chargeCode;
-             this.defaultFeeAmount=defaultFeeAmount;
-             this.isRefundable = isRefundable;
+
+	public FeeMaster() {
+	}
+
+	public FeeMaster(final String feeCode, final String feeDescription,
+			final String transactionType, final String chargeCode,
+			final BigDecimal defaultFeeAmount, final String isRefundable) {
+		this.feeCode = feeCode;
+		this.feeDescription = feeDescription;
+		this.transactionType = transactionType;
+		this.chargeCode = chargeCode;
+		this.defaultFeeAmount = defaultFeeAmount;
+		this.isRefundable = isRefundable;
 	}
 
 	public String getFeeCode() {
@@ -116,64 +118,74 @@ public class FeeMaster extends AbstractPersistable<Long>{
 		this.deleted = deleted;
 	}
 
-	public Map<String, Object> update(JsonCommand command){
-		if("Y".equals(deleted)){
+	public Map<String, Object> update(JsonCommand command) {
+		if ("Y".equals(deleted)) {
 			throw new ItemNotFoundException(command.entityId().toString());
 		}
-		
-		final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
-		
+
+		final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(
+				1);
+
 		final String itemCodeParamName = "feeCode";
-		if(command.isChangeInStringParameterNamed(itemCodeParamName, this.feeCode)){
-			final String newValue = command.stringValueOfParameterNamed(itemCodeParamName);
+		if (command.isChangeInStringParameterNamed(itemCodeParamName,
+				this.feeCode)) {
+			final String newValue = command
+					.stringValueOfParameterNamed(itemCodeParamName);
 			actualChanges.put(itemCodeParamName, newValue);
-			this.feeCode = StringUtils.defaultIfEmpty(newValue,null);
+			this.feeCode = StringUtils.defaultIfEmpty(newValue, null);
 		}
 		final String itemDescriptionParamName = "feeDescription";
-		if(command.isChangeInStringParameterNamed(itemDescriptionParamName, this.feeDescription)){
-			final String newValue = command.stringValueOfParameterNamed(itemDescriptionParamName);
+		if (command.isChangeInStringParameterNamed(itemDescriptionParamName,
+				this.feeDescription)) {
+			final String newValue = command
+					.stringValueOfParameterNamed(itemDescriptionParamName);
 			actualChanges.put(itemDescriptionParamName, newValue);
 			this.feeDescription = StringUtils.defaultIfEmpty(newValue, null);
 		}
-		
+
 		final String itemClassParamName = "transactionType";
-		if(command.isChangeInStringParameterNamed(itemClassParamName,this.transactionType)){
-			final String newValue = command.stringValueOfParameterNamed(itemClassParamName);
+		if (command.isChangeInStringParameterNamed(itemClassParamName,
+				this.transactionType)) {
+			final String newValue = command
+					.stringValueOfParameterNamed(itemClassParamName);
 			actualChanges.put(itemClassParamName, newValue);
-			this.transactionType =StringUtils.defaultIfEmpty(newValue,null);
+			this.transactionType = StringUtils.defaultIfEmpty(newValue, null);
 		}
-		
+
 		final String chargeCodeParamName = "chargeCode";
-		if(command.isChangeInStringParameterNamed(chargeCodeParamName,this.chargeCode)){
-			final String newValue = command.stringValueOfParameterNamed(chargeCodeParamName);
+		if (command.isChangeInStringParameterNamed(chargeCodeParamName,
+				this.chargeCode)) {
+			final String newValue = command
+					.stringValueOfParameterNamed(chargeCodeParamName);
 			actualChanges.put(chargeCodeParamName, newValue);
-			this.chargeCode = StringUtils.defaultIfEmpty(newValue,null);
+			this.chargeCode = StringUtils.defaultIfEmpty(newValue, null);
 		}
-		
+
 		final String unitPriceParamName = "defaultFeeAmount";
-		if(command.isChangeInBigDecimalParameterNamed(unitPriceParamName, this.defaultFeeAmount)){
-			final BigDecimal newValue = command.bigDecimalValueOfParameterNamed(unitPriceParamName);
-			actualChanges.put(unitPriceParamName,newValue);
+		if (command.isChangeInBigDecimalParameterNamed(unitPriceParamName,
+				this.defaultFeeAmount)) {
+			final BigDecimal newValue = command
+					.bigDecimalValueOfParameterNamed(unitPriceParamName);
+			actualChanges.put(unitPriceParamName, newValue);
 			this.defaultFeeAmount = newValue;
 		}
-		
+
 		final String isRefundableParamName = "isRefundable";
-		if(command.hasParameter(isRefundableParamName)){
-			if(command.isChangeInStringParameterNamed(isRefundableParamName, this.isRefundable)){
-				final String newValue = command.stringValueOfParameterNamed(isRefundableParamName);
-				actualChanges.put(isRefundableParamName,newValue);
+		if (command.hasParameter(isRefundableParamName)) {
+			if (command.isChangeInStringParameterNamed(isRefundableParamName,
+					this.isRefundable)) {
+				final String newValue = command
+						.stringValueOfParameterNamed(isRefundableParamName);
+				actualChanges.put(isRefundableParamName, newValue);
 				this.isRefundable = newValue;
 			}
-		}else{
+		} else {
 			this.isRefundable = null;
 		}
-		
-		
+
 		return actualChanges;
-	
+
 	}
-	
-	
 
 	public void delete() {
 		this.deleted='Y';
@@ -183,19 +195,26 @@ public class FeeMaster extends AbstractPersistable<Long>{
 	}
 
 	public static FeeMaster fromJson(JsonCommand command) {
-		final String feeCode=command.stringValueOfParameterNamed("feeCode");
-		final String feeDescription=command.stringValueOfParameterNamed("feeDescription");
-		final String transactionType=command.stringValueOfParameterNamed("transactionType");
-		final String chargeCode=command.stringValueOfParameterNamed("chargeCode");
-		final BigDecimal defaultFeeAmount=command.bigDecimalValueOfParameterNamed("defaultFeeAmount");
-		final String isRefundable = command.stringValueOfParameterNamed("isRefundable");
-		//final char isRefundable = command.booleanObjectValueOfParameterNamed("isRefundable")?'Y':'N';
-		return new FeeMaster(feeCode, feeDescription, transactionType, chargeCode, defaultFeeAmount,isRefundable);
+		final String feeCode = command.stringValueOfParameterNamed("feeCode");
+		final String feeDescription = command
+				.stringValueOfParameterNamed("feeDescription");
+		final String transactionType = command
+				.stringValueOfParameterNamed("transactionType");
+		final String chargeCode = command
+				.stringValueOfParameterNamed("chargeCode");
+		final BigDecimal defaultFeeAmount = command
+				.bigDecimalValueOfParameterNamed("defaultFeeAmount");
+		final String isRefundable = command
+				.stringValueOfParameterNamed("isRefundable");
+		// final char isRefundable =
+		// command.booleanObjectValueOfParameterNamed("isRefundable")?'Y':'N';
+		return new FeeMaster(feeCode, feeDescription, transactionType,
+				chargeCode, defaultFeeAmount, isRefundable);
 	}
-	
+
 	public void addRegionPrices(final FeeDetail feeDetail) {
 		feeDetail.update(this);
-        this.regionPrices.add(feeDetail);
+		this.regionPrices.add(feeDetail);
 	}
 
 	public List<FeeDetail> getRegionPrices() {
@@ -205,7 +224,5 @@ public class FeeMaster extends AbstractPersistable<Long>{
 	public void setRegionPrices(List<FeeDetail> feeDetail) {
 		this.regionPrices = feeDetail;
 	}
-	
-	
 
 }

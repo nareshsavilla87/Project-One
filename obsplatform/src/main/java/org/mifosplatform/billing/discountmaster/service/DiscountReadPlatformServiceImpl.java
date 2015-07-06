@@ -34,7 +34,9 @@ public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformServ
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see #retrieveAllDiscounts()
 	 */
 	@Override
@@ -44,17 +46,14 @@ public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformServ
 			context.authenticatedUser();
 			final DiscountMapper mapper = new DiscountMapper();
 			final String sql = "select " + mapper.schema();
-
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
-
 		} catch (EmptyResultDataAccessException accessException) {
 			return null;
 		}
 
 	}
 
-	private static final class DiscountMapper implements
-			RowMapper<DiscountMasterData> {
+	private static final class DiscountMapper implements RowMapper<DiscountMasterData> {
 
 		public String schema() {
 			return "ds.id as id, ds.discount_code as discountCode, ds.discount_description as discountDescription,"
@@ -63,9 +62,9 @@ public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformServ
 
 		}
 
+
 		@Override
-		public DiscountMasterData mapRow(final ResultSet resultSet,
-				final int rowNum) throws SQLException {
+		public DiscountMasterData mapRow(final ResultSet resultSet,final int rowNum) throws SQLException {
 
 			final Long id = resultSet.getLong("id");
 			final String discountCode = resultSet.getString("discountCode");
@@ -88,7 +87,6 @@ public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformServ
 			context.authenticatedUser();
 			final DiscountMapper mapper = new DiscountMapper();
 			final String sql = "select " + mapper.schema() + " and ds.id=?";
-
 			return this.jdbcTemplate.queryForObject(sql, mapper,new Object[] { discountId });
 		} catch (EmptyResultDataAccessException accessException) {
 			return null;
@@ -99,16 +97,13 @@ public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformServ
 	@Override
 	public List<DiscountDetailData> retrieveDiscountdetails(Long discountId) {
 		try{
-			this.context.authenticatedUser();
-			
-		final DiscountDetailsMapper mapper = new DiscountDetailsMapper();
-		final String sql="select "+mapper.schema();
-		return this.jdbcTemplate.query(sql, mapper,new Object[] {discountId});
-			
+		   this.context.authenticatedUser();
+		   final DiscountDetailsMapper mapper = new DiscountDetailsMapper();
+		   final String sql="select "+mapper.schema();
+		   return this.jdbcTemplate.query(sql, mapper,new Object[] {discountId});
 		}catch(EmptyResultDataAccessException dve){
 			return null;	
 		}
-		
 	}
 	
 	private static final class DiscountDetailsMapper implements RowMapper<DiscountDetailData>{
@@ -129,8 +124,7 @@ public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformServ
 			final BigDecimal discountRate =rs.getBigDecimal("discountRate");
 			return new DiscountDetailData(id,categoryType,categoryTypeId,discountRate);
 		}
-
-	
 		
 	}
+
 }
