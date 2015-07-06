@@ -75,7 +75,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		BigDecimal taxAmount = BigDecimal.ZERO;
 		BigDecimal oneTimeSaleAmount = BigDecimal.ZERO;
 		BigDecimal serviceTransferAmount =BigDecimal.ZERO;
-		//BigDecimal depositRefundAmount =BigDecimal.ZERO;
+		BigDecimal depositRefundAmount =BigDecimal.ZERO;
 		
 		for (final BillDetail billDetail : billDetails) {
 			if ("SERVICE_CHARGES".equalsIgnoreCase(billDetail.getTransactionType())) {
@@ -102,12 +102,12 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				if (billDetail.getAmount() != null)
 					serviceTransferAmount = serviceTransferAmount.add(billDetail.getAmount());
 					
-			} /*else if ("DEPOSIT&REFUND".equalsIgnoreCase(billDetail.getTransactionType())) {
+			} else if ("DEPOSIT&REFUND".equalsIgnoreCase(billDetail.getTransactionType())) {
 				if (billDetail.getAmount() != null)
 					depositRefundAmount = depositRefundAmount.add(billDetail.getAmount());
-				}*/
+				}
 		}
-	  dueAmount = chargeAmount.add(taxAmount).add(oneTimeSaleAmount).add(clientBalance) //.add(depositRefundAmount)
+	  dueAmount = chargeAmount.add(taxAmount).add(oneTimeSaleAmount).add(clientBalance).add(depositRefundAmount)
 			      .add(serviceTransferAmount).subtract(paymentAmount).subtract(adjustmentAmount);
 	  billMaster.setChargeAmount(chargeAmount.add(oneTimeSaleAmount).add(serviceTransferAmount));
 	  billMaster.setAdjustmentAmount(adjustmentAmount);
@@ -115,7 +115,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	  billMaster.setPaidAmount(paymentAmount);
 	  billMaster.setDueAmount(dueAmount);
 	  billMaster.setPreviousBalance(clientBalance);
-	 // billMaster.setDepositRefundAmount(depositRefundAmount);
+	  billMaster.setDepositRefundAmount(depositRefundAmount);
 	  this.billMasterRepository.save(billMaster);
 	  return new CommandProcessingResult(billMaster.getId(),billMaster.getClientId());
 	}catch(DataIntegrityViolationException dve){

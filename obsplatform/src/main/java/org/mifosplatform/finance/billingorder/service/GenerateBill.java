@@ -336,9 +336,11 @@ public class GenerateBill {
 		    nextbillDate = invoiceTillDate;
 		}
 
-		if (discountMasterData.getDiscountAmount().compareTo(BigDecimal.ZERO) >= 1) {
+		if(discountMasterData !=null && discountMasterData.getDiscountAmount().compareTo(BigDecimal.ZERO) >= 1){
+
 			listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());
 		} else {
+			
 			listOfTaxes = this.calculateTax(billingOrderData,billingOrderData.getPrice());
 		}
 
