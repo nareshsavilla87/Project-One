@@ -13,42 +13,46 @@ import javax.persistence.UniqueConstraint;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "b_discount_details", uniqueConstraints = { @UniqueConstraint(columnNames = { "discount_id", "category_type"}, name = "discountid_with_category_uniquekey") })
-public class DiscountDetails extends AbstractPersistable<Long>{
+@Table(name = "b_discount_details", uniqueConstraints = { @UniqueConstraint(columnNames = {"discount_id", "category_type" }, name = "discountid_with_category_uniquekey") })
+public class DiscountDetails extends AbstractPersistable<Long> {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@Column(name = "category_type")
 	private String categoryType;
 
 	@Column(name = "discount_rate")
 	private BigDecimal discountRate;
-	
+
 	@Column(name = "is_deleted")
-	private String isDeleted="N";
-	
+	private String isDeleted = "N";
+
 	@ManyToOne
-    @JoinColumn(name="discount_id")
+	@JoinColumn(name = "discount_id")
 	private DiscountMaster discountMaster;
 
-	
-	public DiscountDetails(){}
+	public DiscountDetails() {
+	}
 
 	public DiscountDetails(String categoryId, BigDecimal discountRate) {
-            
+
 		this.categoryType = categoryId;
 		this.discountRate = discountRate;
-		
-	
+
 	}
 
 	public void update(DiscountMaster discountMaster) {
-            this.discountMaster= discountMaster;
+		this.discountMaster = discountMaster;
 	}
 
 	public void delete() {
 
-		  this.isDeleted = "Y";
-		  this.categoryType = this.getId()+"_"+this.categoryType+"_Y";
-		
+		this.isDeleted = "Y";
+		this.categoryType = this.getId() + "_" + this.categoryType + "_Y";
+
 	}
 
 	public String getCategoryType() {
@@ -82,8 +86,5 @@ public class DiscountDetails extends AbstractPersistable<Long>{
 	public void setDiscountMaster(DiscountMaster discountMaster) {
 		this.discountMaster = discountMaster;
 	}
-
-	
-	
 
 }

@@ -98,9 +98,9 @@ public class OrderDiscount extends AbstractPersistable<Long> {
 		return orderpriceid;
 	}
 
-	public void updateDates(BigDecimal discountRate, String discountType, LocalDate enddate) {
+	public void updateDates(BigDecimal discountRate, String discountType, LocalDate enddate,LocalDate startDate) {
          
-		  this.discountStartdate=DateUtils.getDateOfTenant();
+		  this.discountStartdate=startDate.toDate();
 		  if(enddate != null){
 		  this.discountEndDate=enddate.toDate();
 		  }
