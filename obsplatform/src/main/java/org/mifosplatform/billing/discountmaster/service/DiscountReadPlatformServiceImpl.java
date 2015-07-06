@@ -62,12 +62,6 @@ public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformServ
 
 		}
 
-		public String schemaOfCategory() {
-			return " ds.id as id, ds.discount_code as discountCode, ds.discount_description as discountDescription,"
-					+ "ds.discount_type as discountType, ds.start_date as startDate,ds.discount_status as discountStatus,"
-					+ "dd.discount_rate as discountRate from b_discount_master ds INNER JOIN b_discount_details dd "
-					+ "ON ds.id=dd.discount_id where ds.is_delete='N' ";
-		}
 
 		@Override
 		public DiscountMasterData mapRow(final ResultSet resultSet,final int rowNum) throws SQLException {
@@ -133,17 +127,4 @@ public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformServ
 		
 	}
 
-	@Override
-	public DiscountMasterData retrieveCustomerCategoryDiscount(final Long discountId, final Long categoryType) {
-		
-		try {
-			context.authenticatedUser();
-			final DiscountMapper mapper = new DiscountMapper();
-			final String sql = "select " + mapper.schemaOfCategory()+" and ds.id=? and dd.category_type=?";
-			return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] {discountId,categoryType});
-			
-		} catch (EmptyResultDataAccessException accessException) {
-			return null;
-		}
-	}
 }
