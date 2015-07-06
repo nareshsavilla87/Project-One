@@ -109,7 +109,22 @@ public class GenerateDisconnectionBill {
 			}
 			price=netAmount.multiply(new BigDecimal(numberOfDays));
 			
-			 listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
+			if(discountMasterData !=null){
+
+		           if(discountMasterData.getDiscountRate() !=null&& (billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
+		        		   ||billingOrderData.getBillStartDate().compareTo(discountMasterData.getDiscountStartDate().toDate())==0)){
+
+		    		if (discountMasterData.getDiscountType().equalsIgnoreCase("percentage")){
+		    			discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
+			               price = price.subtract(discountAmount);
+		    		 }else if(discountMasterData.getDiscountType().equalsIgnoreCase("flat")){
+		    		     price = price.subtract(discountMasterData.getDiscountRate());
+		              }
+		           }
+			}
+			if(price.compareTo(BigDecimal.ZERO) !=0){
+			   listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
+			}
 				
 		}else { // If Invoice till date not equal to null
 		  

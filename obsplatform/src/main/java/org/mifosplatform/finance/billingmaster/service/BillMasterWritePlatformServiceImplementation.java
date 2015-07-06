@@ -196,12 +196,12 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 					invoice.updateBillId(billId);
 					this.invoiceRepository.save(invoice);
 				}
-				/*else if ("DEPOSIT&REFUND".equalsIgnoreCase(transIds.getTransactionType())) {
+				else if ("DEPOSIT&REFUND".equalsIgnoreCase(transIds.getTransactionType())) {
 					DepositAndRefund depositAndRefund = this.depositAndRefundRepository.findOne(transIds.getTransactionId());
 					depositAndRefund.updateBillId(billId);
 					this.depositAndRefundRepository.save(depositAndRefund);
 				}
-*/
+
 			}
 		}catch(Exception ex){
 			 LOGGER.error(ex.getLocalizedMessage());
@@ -264,11 +264,11 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 					this.invoiceRepository.save(invoice);
 
 				}
-				/*else if ("DEPOSIT&REFUND".equalsIgnoreCase(billDetail.getTransactionType())) {
+				else if ("DEPOSIT&REFUND".equalsIgnoreCase(billDetail.getTransactionType())) {
 					DepositAndRefund depositAndRefund = this.depositAndRefundRepository.findOne(billDetail.getTransactionId());
 					depositAndRefund.updateBillId(null);
 					this.depositAndRefundRepository.save(depositAndRefund);
-				}*/
+				}
 			}
 			
 		billMaster.delete();

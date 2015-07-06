@@ -19,7 +19,6 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.logistics.item.domain.ItemPrice;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 /**
@@ -218,23 +217,14 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 
 		if (this.isDelete == 'N') {
 			this.isDelete = 'Y';
-			this.discountCode = this.discountCode+"_"+this.getId();
+			this.discountCode = this.discountCode + "_" + this.getId();
 		}
-		
-		/*for(DiscountDetails discountDetails: this.discountDetails ){
-			discountDetails.delete();
-		}*/
-
 	}
 
 	public void addDetails(DiscountDetails discountDetail) {
-         discountDetail.update(this);
-         this.discountDetails.add(discountDetail);
-		
-	}
+		discountDetail.update(this);
+		this.discountDetails.add(discountDetail);
 
-	public static long getSerialversionuid() {
-		return serialVersionUID;
 	}
 
 	public char getIsDelete() {
@@ -244,9 +234,5 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 	public List<DiscountDetails> getDiscountDetails() {
 		return discountDetails;
 	}
-
 	
-	
-	
-
 }
