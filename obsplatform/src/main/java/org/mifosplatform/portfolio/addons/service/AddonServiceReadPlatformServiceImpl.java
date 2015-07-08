@@ -137,8 +137,8 @@ public List<AddonsPriceData> retrievePlanAddonDetails(Long planId,String chargeC
 
 		this.context.authenticatedUser();
 		PlanAddonsMapper mapper=new PlanAddonsMapper();
-		final String sql="select "+mapper.schema()+" AND c.billfrequency_code = ? AND ads.plan_id = ?";
-		return this.jdbcTemplate.query(sql,mapper,new Object[]{chargeCode,planId});
+		final String sql="select "+mapper.schema()+" AND ads.plan_id = ?";
+		return this.jdbcTemplate.query(sql,mapper,new Object[]{planId});
 	
 	}catch(EmptyResultDataAccessException dve){
 	 return null;

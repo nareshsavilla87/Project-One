@@ -40,6 +40,9 @@ public class OrderAddons extends AbstractAuditableCustom<AppUser,Long>{
 	@Column(name = "status")
 	private String status;
 	
+	@Column(name = "price_id")
+	private Long priceId;
+	
 	@Column(name = "provision_system")
 	private String provisionSystem;
 	
@@ -84,6 +87,15 @@ public class OrderAddons extends AbstractAuditableCustom<AppUser,Long>{
 		return endDate;
 	}
 
+	
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	public Long getPriceId() {
+		return priceId;
+	}
+
 	public String getStatus() {
 		return status;
 	}
@@ -108,6 +120,10 @@ public class OrderAddons extends AbstractAuditableCustom<AppUser,Long>{
 	public void setStatus(String status) {
 		this.status=status;
 		
+	}
+
+	public void setPriceId(Long priceId) {
+		this.priceId = priceId;
 	}
 	
 	

@@ -111,10 +111,8 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 			final Long orderStatus = resultSet.getLong("orderStatus");
 			final Integer taxInclusive = resultSet.getInt("taxInclusive");
 			
-			return new BillingOrderData(clientOderId,orderPriceId,planId, clientId, startDate,
-					nextBillableDate, endDate, billingFrequency, chargeCode,
-					chargeType, chargeDuration, durationType, invoiceTillDate,
-					price, billingAlign,billStartDate,billEndDate,orderStatus,taxInclusive);
+			return new BillingOrderData(clientOderId,orderPriceId,planId, clientId, startDate,nextBillableDate, endDate, billingFrequency, chargeCode,
+					chargeType, chargeDuration, durationType, invoiceTillDate,price, billingAlign,billStartDate,billEndDate,orderStatus,taxInclusive);
 		}
 
 		public String billingOrderSchema() {

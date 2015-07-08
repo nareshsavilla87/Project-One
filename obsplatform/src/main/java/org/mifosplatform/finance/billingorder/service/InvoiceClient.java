@@ -101,6 +101,7 @@ public class InvoiceClient {
 			// validation not written
 			this.apiJsonDeserializer.validateForCreate(command.json());
 			LocalDate processDate = ProcessDate.fromJson(command);
+			
 			Invoice invoice = this.invoicingSingleClient(command.entityId(),processDate);
 
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(invoice.getId()).build();
