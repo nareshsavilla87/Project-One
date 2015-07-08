@@ -3,7 +3,6 @@ package org.mifosplatform.finance.billingmaster.service;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +24,7 @@ import org.mifosplatform.organisation.message.domain.BillingMessage;
 import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.slf4j.Logger;
@@ -37,7 +37,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author ranjith
- *
+ * 
  */
 @Service
 public class BillWritePlatformServiceImpl implements BillWritePlatformService {
@@ -99,7 +99,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			
 		}
 	  dueAmount = chargeAmount.add(taxAmount).add(oneTimeSaleAmount).add(clientBalance)
-			      .add(adjustmentAmount).subtract(paymentAmount);
+			      .subtract(paymentAmount).subtract(adjustmentAmount);
 	  billMaster.setChargeAmount(chargeAmount.add(oneTimeSaleAmount));
 	  billMaster.setAdjustmentAmount(adjustmentAmount);
 	  billMaster.setTaxAmount(taxAmount);
@@ -116,7 +116,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 
 	@Transactional
 	@Override
-	public void generateStatementPdf(final Long billId) throws SQLException {
+	public void generateStatementPdf(final Long billId)  {
 		
 		try {
 			final String fileLocation = FileUtils.MIFOSX_BASE_DIR;
@@ -163,7 +163,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 
 	@Transactional
 	@Override
-	public String generateInovicePdf(final Long invoiceId) throws SQLException {
+	public String generateInovicePdf(final Long invoiceId) {
 		
 		final String fileLocation = FileUtils.MIFOSX_BASE_DIR ;
 		/** Recursively create the directory if it does not exist **/
@@ -203,56 +203,30 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		}
 		return printInvoiceLocation;	
    }
-	@Transactional
-	@Override
-	public void sendInvoiceToEmail(final String printFileName, final Long clientId) {
 	
-		final Client client = this.clientRepository.findOne(clientId);
-		final String clientEmail = client.getEmail();
-			if(clientEmail == null){
-				final String msg = "Please provide email first";
-				throw new BillingOrderNoRecordsFoundException(msg, client);
-			}
-		BillingMessage billingMessage = null;
-		final List<BillingMessageTemplate> billingMessageTemplate = this.messageTemplateRepository.findAll();
-		for(final BillingMessageTemplate  msgTemplate:billingMessageTemplate){
-			
-     	   if("Bill_EMAIL".equalsIgnoreCase(msgTemplate.getTemplateDescription())){
-				              
-				  billingMessage = new BillingMessage(msgTemplate.getHeader(), msgTemplate.getBody(), msgTemplate.getFooter(), clientEmail, clientEmail, 
-				    		                    msgTemplate.getSubject(), "N", msgTemplate, msgTemplate.getMessageType(), printFileName);
-				  this.messageDataRepository.save(billingMessage);
-	   }
-	}
- }
 	@Transactional
 	@Override
-	public Long sendStatementToEmail(final BillMaster billMaster) {
+	public void sendPdfToEmail(final String printFileName, final Long clientId,final String templateName) {
 		
 		//context.authenticatedUser();
-		final Client client = this.clientRepository.findOne(billMaster.getClientId());
+		final Client client = this.clientRepository.findOne(clientId);
 		final String clientEmail = client.getEmail();
-		final String filePath = billMaster.getFileName();
 		if(clientEmail == null){
 			final String msg = "Please provide email first";
 			throw new BillingOrderNoRecordsFoundException(msg, client);
 		}
-		BillingMessage billingMessage = null;
-		final List<BillingMessageTemplate> billingMessageTemplate = this.messageTemplateRepository.findAll();
-		
-		for(final BillingMessageTemplate  msgTemplate:billingMessageTemplate){
-
-			if("Bill_EMAIL".equalsIgnoreCase(msgTemplate.getTemplateDescription())){
-		              
-		    billingMessage = new BillingMessage(msgTemplate.getHeader(), msgTemplate.getBody(), msgTemplate.getFooter(), clientEmail, clientEmail, 
-		    		                    msgTemplate.getSubject(), "N", msgTemplate, msgTemplate.getMessageType(), filePath);
+		final BillingMessageTemplate messageTemplate = this.messageTemplateRepository.findByTemplateDescription(templateName);
+		if(messageTemplate !=null){
+		  String header = messageTemplate.getHeader().replace("<PARAM1>", client.getDisplayName().isEmpty()?client.getFirstname():client.getDisplayName());
+		  BillingMessage  billingMessage = new BillingMessage(header, messageTemplate.getBody(), messageTemplate.getFooter(), clientEmail, clientEmail, 
+		    		messageTemplate.getSubject(), "N", messageTemplate, messageTemplate.getMessageType(), printFileName);
 		    this.messageDataRepository.save(billingMessage);
+	    }else{
+	    	throw new BillingMessageTemplateNotFoundException(templateName);
 	    }
+	  }
 	}
-		
-	return billMaster.getId();
-	}
-	
+
 /*	@Override
 	public String generatePdf(final BillDetailsData billDetails,final List<FinancialTransactionsData> datas) {
 
@@ -554,4 +528,3 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 
 	}*/	
 	
-}

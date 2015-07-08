@@ -170,7 +170,7 @@ private OrderAddons assembleOrderAddons(JsonElement jsonElement,FromJsonHelper f
 	this.orderRepository.saveAndFlush(order);
 	Plan plan = this.planRepository.findOne(order.getPlanId());
 	List<ServiceMapping> serviceMapping=this.serviceMappingRepository.findOneByServiceId(orderAddons.getServiceId());
-	if(!plan.getProvisionSystem().equalsIgnoreCase("None") && serviceMapping.isEmpty() && serviceMapping){ throw new AddonEndDateValidationException(orderAddons.getServiceId().toString());}
+	if(!plan.getProvisionSystem().equalsIgnoreCase("None") && serviceMapping.isEmpty()){ throw new AddonEndDateValidationException(orderAddons.getServiceId().toString());}
 	String status=StatusTypeEnum.ACTIVE.toString();
 	if(!"None".equalsIgnoreCase(serviceMapping.get(0).getProvisionSystem())){
 		status=StatusTypeEnum.PENDING.toString();

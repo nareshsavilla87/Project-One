@@ -1,7 +1,6 @@
 package org.mifosplatform.workflow.eventactionmapping.service;
 
 
-import java.util.Date;
 import java.util.List;
 
 import org.mifosplatform.cms.eventmaster.domain.EventMaster;
@@ -163,6 +162,16 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 				this.eventMasterRepository.saveAndFlush(eventMaster);
 				
 				break;
+				
+			case EventActionConstants.ACTION_TOPUP_INVOICE_MAIL :
+
+				try{
+					 this.billingMasterApiResourse.printInvoice(eventActionData.getResourceId(),eventActionData.getClientId());
+					}	
+				catch(Exception exception){
+					
+				}
+			break;		
 			
 			default:
 				break;
