@@ -8,11 +8,10 @@ import org.mifosplatform.finance.billingorder.domain.Invoice;
 
 public interface GenerateBillingOrderService {
 
-	public List<BillingOrderCommand> generatebillingOrder(List<BillingOrderData> products);
+	List<BillingOrderCommand> generatebillingOrder(List<BillingOrderData> products);
 
-	public Invoice generateInvoice(List<BillingOrderCommand> billingOrderCommands);
+	Invoice generateInvoice(List<BillingOrderCommand> billingOrderCommands);
 
-	public Invoice generateMultiOrderInvoice(List<BillingOrderCommand> billingOrderCommands, Invoice invoice);
-
+	Invoice generateMultiOrderInvoice(List<BillingOrderCommand> billingOrderCommands, Invoice invoice);
 	
 }

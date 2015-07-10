@@ -31,8 +31,8 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 
 
 	@Autowired
-	public GenerateBillingOrderServiceImplementation(GenerateBill generateBill,BillingOrderReadPlatformService billingOrderReadPlatformService,
-			InvoiceRepository invoiceRepository,final DiscountMasterRepository discountMasterRepository) {
+	public GenerateBillingOrderServiceImplementation(final GenerateBill generateBill,final BillingOrderReadPlatformService billingOrderReadPlatformService,
+			final InvoiceRepository invoiceRepository,final DiscountMasterRepository discountMasterRepository) {
 	
 		this.generateBill = generateBill;
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
@@ -73,7 +73,6 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 				} else if (generateBill.isChargeTypeRC(billingOrderData)) {
 
 					System.out.println("---- RC ----");
-
 					// monthly
 					if (billingOrderData.getDurationType().equalsIgnoreCase("month(s)")) {
 						 if (billingOrderData.getBillingAlign().equalsIgnoreCase("N")) {
