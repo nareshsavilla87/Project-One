@@ -16,10 +16,6 @@ import org.mifosplatform.useradministration.domain.AppUser;
 @Table(name = "b_deposit_refund")
 public class DepositAndRefund extends AbstractAuditableCustom<AppUser, Long>{
 
-	
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 2876090423570296480L;
 
 	@Column(name="client_id", nullable=false, length=20)
@@ -54,6 +50,9 @@ public class DepositAndRefund extends AbstractAuditableCustom<AppUser, Long>{
 	
 	@Column(name = "bill_id", nullable = true, length = 20)
 	private Long billId;
+	
+	@Column(name = "refundmode_id", nullable = true, length = 20)
+	private Long refundMode;
 	
 	public DepositAndRefund(){}
 
@@ -183,5 +182,13 @@ public class DepositAndRefund extends AbstractAuditableCustom<AppUser, Long>{
 
 	}
 	
+	public Long getRefundMode() {
+		return refundMode;
+	}
+
+	public void setRefundMode(Long refundMode) {
+		this.refundMode = refundMode;
+	}
+
 	
 }

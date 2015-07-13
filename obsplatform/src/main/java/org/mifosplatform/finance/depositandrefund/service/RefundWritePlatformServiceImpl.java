@@ -10,6 +10,7 @@ import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
 import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefund;
 import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefundRepository;
 import org.mifosplatform.finance.depositandrefund.exception.ItemQualityAndStatusException;
+import org.mifosplatform.finance.depositandrefund.serialization.DepositeCommandFromApiJsonDeserializer;
 import org.mifosplatform.finance.payments.domain.Payment;
 import org.mifosplatform.finance.payments.domain.PaypalEnquireyRepository;
 import org.mifosplatform.finance.payments.exception.ReceiptNoDuplicateException;
@@ -44,6 +45,7 @@ public class RefundWritePlatformServiceImpl implements RefundWritePlatformServic
 	private final DepositAndRefundRepository depositAndRefundRepository;
 	private final OrderReadPlatformService orderReadPlatformService;
 	private final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService;
+	private final DepositeCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 
 
 	@Autowired
@@ -51,7 +53,8 @@ public class RefundWritePlatformServiceImpl implements RefundWritePlatformServic
 			final ConfigurationRepository globalConfigurationRepository,final PaypalEnquireyRepository paypalEnquireyRepository,
 			final PartnerBalanceRepository partnerBalanceRepository, final DepositAndRefundRepository depositAndRefundRepository, 
 			final OrderReadPlatformService orderReadPlatformService, 
-			final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService) {
+			final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService,
+			final DepositeCommandFromApiJsonDeserializer fromApiJsonDeserializer) {
 		
 		this.context = context;
 		this.clientBalanceRepository=clientBalanceRepository;
@@ -59,6 +62,7 @@ public class RefundWritePlatformServiceImpl implements RefundWritePlatformServic
 		this.depositAndRefundRepository = depositAndRefundRepository;
 		this.orderReadPlatformService = orderReadPlatformService;
 		this.oneTimeSaleReadPlatformService = oneTimeSaleReadPlatformService;
+		this.fromApiJsonDeserializer =  fromApiJsonDeserializer;
 		
 	}
 
@@ -69,7 +73,9 @@ public class RefundWritePlatformServiceImpl implements RefundWritePlatformServic
 		try {
 			
 			this.context.authenticatedUser();
+			this.fromApiJsonDeserializer.validaForCreateRefund(command.json());
 			final BigDecimal refundAmount = command.bigDecimalValueOfParameterNamed("refundAmount");
+			final Long refundMode = command.longValueOfParameterNamed("refundMode");
 			DepositAndRefund deposit = this.depositAndRefundRepository.findOne(depositId);
 			Long clientId = deposit.getClientId();
 			Long itemId = deposit.getItemId();
@@ -100,24 +106,24 @@ public class RefundWritePlatformServiceImpl implements RefundWritePlatformServic
 			}*/
     	   	
 			if(clientBalanceAmount.intValue() == 0){
-				processDepositAndRefund(clientId, itemId, refundAmount, "Refund", "Credit", depositId);
-				processDepositAndRefund(clientId, itemId, refundAmount, "Payment Towards Refund Entry", "Debit", depositId);
+				processDepositAndRefund(clientId, itemId, refundAmount, "Refund", "Credit", depositId,null);
+				processDepositAndRefund(clientId, itemId, refundAmount, "Payment Towards Refund Entry", "Debit", depositId,refundMode);
 				
 			}else if(clientBalanceAmount.intValue() <= refundBalance.intValue()){
 				//MathContext mc = new MathContext(4);
 				BigDecimal amountValue = null;
 				if(clientBalanceAmount.intValue() > 0){
 					amountValue= refundBalance.subtract(clientBalanceAmount);
-					processDepositAndRefund(clientId, itemId, amountValue, "Refund", "Credit", depositId);
-					processDepositAndRefund(clientId, itemId, amountValue, "Payment Towards Refund Entry", "Debit", depositId);
-					processDepositAndRefund(clientId, itemId, clientBalanceAmount, "Refund Adjustment towards Service Balance", "Credit", depositId);
+					processDepositAndRefund(clientId, itemId, amountValue, "Refund", "Credit", depositId,null);
+					processDepositAndRefund(clientId, itemId, amountValue, "Payment Towards Refund Entry", "Debit", depositId,refundMode);
+					processDepositAndRefund(clientId, itemId, clientBalanceAmount, "Refund Adjustment towards Service Balance", "Credit", depositId,null);
 					// Update Client Balance
 					clientBalance.updateBalance("CREDIT",clientBalanceAmount,'N');
 					this.clientBalanceRepository.saveAndFlush(clientBalance);
 				}else{
 					
-					processDepositAndRefund(clientId, itemId, refundAmount, "Refund", "Credit", depositId);
-					processDepositAndRefund(clientId, itemId, refundAmount, "Payment Towards Refund Entry", "Debit", depositId);
+					processDepositAndRefund(clientId, itemId, refundAmount, "Refund", "Credit", depositId,null);
+					processDepositAndRefund(clientId, itemId, refundAmount, "Payment Towards Refund Entry", "Debit", depositId,refundMode);
 				}
 				
 				deposit.setIsRefund('Y');
@@ -150,9 +156,10 @@ public class RefundWritePlatformServiceImpl implements RefundWritePlatformServic
 	}
 	
 	private void processDepositAndRefund(Long clientId, Long itemId, BigDecimal refundAmount,
-				String description, String transType, Long depositId){
+				String description, String transType, Long depositId,Long refundMode){
 		DepositAndRefund refund = DepositAndRefund.fromJson(clientId, itemId, refundAmount, description, transType);
 		refund.setRefId(depositId);
+		refund.setRefundMode(refundMode);
 		this.depositAndRefundRepository.saveAndFlush(refund);
 	}
 

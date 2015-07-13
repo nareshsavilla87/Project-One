@@ -2,6 +2,7 @@ package org.mifosplatform.finance.depositandrefund.api;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,6 +24,7 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
 import org.mifosplatform.finance.depositandrefund.exception.ItemQualityAndStatusException;
+import org.mifosplatform.finance.payments.data.McodeData;
 import org.mifosplatform.finance.payments.data.PaymentData;
 import org.mifosplatform.finance.payments.service.PaymentReadPlatformService;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
@@ -56,12 +58,15 @@ public class RefundApiResource {
 	private final ClientBalanceRepository clientBalanceRepository;
 
 	@Autowired
-	public RefundApiResource(final PlatformSecurityContext context,final PaymentReadPlatformService readPlatformService,
-			final DefaultToApiJsonSerializer<PaymentData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
+	public RefundApiResource(
+			final PlatformSecurityContext context,
+			final PaymentReadPlatformService readPlatformService,
+			final DefaultToApiJsonSerializer<PaymentData> toApiJsonSerializer,
+			final ApiRequestParameterHelper apiRequestParameterHelper,
 			final PortfolioCommandSourceWritePlatformService writePlatformService,
 			final SelfCareTemporaryRepository selfCareTemporaryRepository,
 			final ClientBalanceRepository clientBalanceRepository) {
-		
+
 		this.context = context;
 		this.readPlatformService = readPlatformService;
 		this.toApiJsonSerializer = toApiJsonSerializer;
@@ -78,43 +83,45 @@ public class RefundApiResource {
 	@Path("{depositId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String createRefundAmount(@PathParam("depositId") final Long depositId,	final String apiRequestBodyAsJson) {
+	public String createRefundAmount(@PathParam("depositId") final Long depositId,final String apiRequestBodyAsJson) {
+		
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().createRefundAmount(depositId).withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}
-	
+
 	@GET
 	@Path("{clientId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveRefundAmount(@PathParam("clientId") final Long clientId,@Context final UriInfo uriInfo,
+	public String retrieveRefundAmount(	@PathParam("clientId") final Long clientId,@Context final UriInfo uriInfo,
 			@QueryParam("depositAmount") BigDecimal depositAmount) {
-		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
 		
+		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
+
 		ClientBalance clientBalance = clientBalanceRepository.findByClientId(clientId);
 		BigDecimal returnAmount = null;
-		if(clientBalance.getBalanceAmount().intValue() == 0){
+		if (clientBalance.getBalanceAmount().intValue() == 0) {
 			returnAmount = depositAmount;
-		}else if(clientBalance.getBalanceAmount().intValue() <= depositAmount.intValue()){
-			
-			if(clientBalance.getBalanceAmount().intValue() > 0){
-				//MathContext mc = new MathContext(4);
+		} else if (clientBalance.getBalanceAmount().intValue() <= depositAmount.intValue()) {
+
+			if (clientBalance.getBalanceAmount().intValue() > 0) {
+				// MathContext mc = new MathContext(4);
 				returnAmount = depositAmount.subtract(clientBalance.getBalanceAmount());
-			}else{
+			} else {
 				returnAmount = depositAmount;
 			}
-			
-		}else{
-			throw new ItemQualityAndStatusException(clientBalance.getBalanceAmount());	
+
+		} else {
+			throw new ItemQualityAndStatusException(clientBalance.getBalanceAmount());
 		}
+	   final Collection<McodeData> paymodeData = this.readPlatformService.retrievemCodeDetails("Payment Mode");
 		PaymentData paymentData = new PaymentData();
 		paymentData.setAvailAmount(returnAmount);
+		paymentData.setData(paymodeData);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, paymentData,RESPONSE_DATA_PARAMETERS);
 
 	}
-	
-	
-    	 
+
 }
