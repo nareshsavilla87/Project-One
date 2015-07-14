@@ -98,15 +98,14 @@ call refundMode();
 DROP procedure IF EXISTS refundMode;
 
 
-/*UPDATE stretchy_report SET report_sql='select 
-   -- officeType,
-    officeName,
-    clientId,
-    clientName,
-    transactionDate,
-    `Paymode or Refundmode`,
-    amountCollection
-from
+UPDATE stretchy_report SET report_sql='select 
+      t.officeName as officeName,
+      t.clientId as clientId,
+      t.clientName as clientName,
+      t.transactionDate as transactionDate,
+      t.typeOfMode as typeOfMode,
+      t.amountCollection as amountCollection
+FROM
     ((select 
         mcv1.code_value as officeType,
             off.name as officeName,
@@ -115,8 +114,8 @@ from
             clnt.display_name as clientName,
             DATE_FORMAT(pay.payment_date, ''%Y-%m-%d'') as transactionDate,
             pay.paymode_id as modeId,
-            mcv.code_value as `Paymode or Refundmode`,
-            TRUNCATE(sum(ifnull(pay.amount_paid, 0)), 2) as amountCollection
+            mcv.code_value as typeOfMode,
+            cast(TRUNCATE(sum(ifnull(pay.amount_paid, 0)), 2) as char) as amountCollection
     from
         m_office off
     join m_client clnt ON off.id = clnt.office_id
@@ -125,16 +124,17 @@ from
     Left join m_code_value mcv1 ON off.office_type = mcv1.id
     where
         off.id = clnt.office_id
-    group by clientId , transactionDate , pay.paymode_id order by clientId) union all (select 
-        mcv1.code_value as officeType,
+    group by clientId , transactionDate , pay.paymode_id order by clientId) 
+   union all 
+  (select mcv1.code_value as officeType,
             off.name as officeName,
             off.id as officeId,
             clnt.id as clientId,
             clnt.display_name as clientName,
             DATE_FORMAT(dbr.transaction_date, ''%Y-%m-%d'') as transactionDate,
             dbr.refundmode_id as modeId,
-            concat(''Refund Through'' '-',mcv.code_value )as `Paymode or Refundmode`,
-            TRUNCATE(- sum(ifnull(dbr.debit_amount, 0)), 2) as amountCollection
+            concat(''Refund Through -'',mcv.code_value ) as typeOfMode,
+            cast(TRUNCATE(- sum(ifnull(dbr.debit_amount, 0)), 2) as char) as amountCollection
     from
         m_office off
     join m_client clnt ON off.id = clnt.office_id
@@ -143,10 +143,16 @@ from
     Left join m_code_value mcv1 ON off.office_type = mcv1.id
     where
         off.id = clnt.office_id
-    group by clientId ,transactionDate,dbr.refundmode_id order by clientId)) t where (t.officeId= ''${officeId}'' or -1 = ''${officeId}'') 
-and (t.modeId= ''${paymode_id}'' or -1 = ''${paymode_id}'') 
-and t.transactionDate  between ''${startDate}'' and ''${endDate}''
-group by clientId ,transactionDate,`Paymode or Refundmode` order by clientId' where report_name='Collection Date Wise Details';*/
+    group by clientId ,transactionDate,dbr.refundmode_id order by clientId)) t 
+ where (t.officeId= ''${officeId}'' or -1 = ''${officeId}'') 
+ and (t.modeId= ''${paymode_id}'' or -1 = ''${paymode_id}'') 
+ and t.transactionDate  between ''${startDate}'' and ''${endDate}''
+group by clientId ,transactionDate,typeOfMode order by clientId'
+where report_name='Collection Date Wise Details';
+
+
+
+
 
 
 
