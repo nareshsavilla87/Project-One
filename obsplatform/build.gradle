@@ -6,13 +6,15 @@ gradle clean tomcatrunwar
 buildscript {
   repositories {
      mavenLocal()
-     mavenCentral()
-     mavenRepo(name: 'zt-public-snapshots',
-               url: 'http://repos.zeroturnaround.com/nexus/content/groups/zt-public/')
+     mavenCentral() 
+       maven {
+           url 'http://repos.zeroturnaround.com/nexus/content/groups/zt-public/'
+    }
+                  
     flatDir {
        dirs 'src/main/resources'
     }
-
+    
   }
 
   dependencies {
