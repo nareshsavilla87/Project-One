@@ -495,7 +495,7 @@ public class GenerateBill {
 
 			for (TaxMappingRateData taxMappingRateData : taxMappingRateDatas) {
 
-				if (taxMappingRateData.getTaxType().equalsIgnoreCase("Percentage")) {
+				if ("Percentage".equalsIgnoreCase(taxMappingRateData.getTaxType())) {
 					
 					taxRate = taxMappingRateData.getRate();
 					taxCode = taxMappingRateData.getTaxCode();
@@ -504,7 +504,7 @@ public class GenerateBill {
                        }else{
 					       taxAmount = price.multiply(taxRate.divide(new BigDecimal(100))).setScale(Integer.parseInt(roundingDecimal()), RoundingMode.HALF_UP);
                     }
-				} else if (taxMappingRateData.getTaxType().equalsIgnoreCase("Flat")) {
+				} else if ("Flat".equalsIgnoreCase(taxMappingRateData.getTaxType())) {
 					
 					taxRate = taxMappingRateData.getRate();
 					taxCode = taxMappingRateData.getTaxCode();
@@ -559,7 +559,7 @@ public class GenerateBill {
 	// if is percentage
 	public boolean isDiscountPercentage(DiscountMasterData discountMasterData) {
 		boolean isDiscountPercentage = false;
-		if (discountMasterData.getDiscountType().equalsIgnoreCase("percentage")) {
+		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())) {
 			isDiscountPercentage = true;
 		}
 		return isDiscountPercentage;
@@ -568,7 +568,7 @@ public class GenerateBill {
 	// if is discount
 	public boolean isDiscountFlat(DiscountMasterData discountMasterData) {
 		boolean isDiscountFlat = false;
-		if (discountMasterData.getDiscountType().equalsIgnoreCase("Flat")) {
+		if ("Flat".equalsIgnoreCase(discountMasterData.getDiscountType())) {
 			isDiscountFlat = true;
 		}
 		return isDiscountFlat;

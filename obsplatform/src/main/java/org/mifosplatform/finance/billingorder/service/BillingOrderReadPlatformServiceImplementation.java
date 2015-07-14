@@ -212,6 +212,8 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 		public DiscountMasterData mapRow(ResultSet rs, int rowNum) throws SQLException {
 			
 			final Long discountId = rs.getLong("discountId");
+			final String discountCode = rs.getString("discountCode");
+			final String discountDescription = rs.getString("discountDescription");
 			final Long orderPriceId = rs.getLong("orderPriceId");
 			final Long orderDiscountId = rs.getLong("orderDiscountId");
 			final LocalDate discountStartDate = JdbcSupport.getLocalDate(rs,"discountStartDate");
@@ -220,16 +222,18 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 			final BigDecimal discountRate = rs.getBigDecimal("discountRate");
 			final String isDeleted = rs.getString("isDeleted");
 			
-			return new DiscountMasterData(discountId, orderPriceId,orderDiscountId, 
-					      discountStartDate, discountEndDate,discountType, discountRate, isDeleted);
+			
+			return new DiscountMasterData(discountId, orderPriceId,orderDiscountId,discountStartDate, discountEndDate,
+					             discountType, discountRate, isDeleted,discountCode,discountDescription);
 		}
 
 		public String discountOrderSchema() {
 			
 			return    " od.id AS orderDiscountId,od.orderprice_id AS orderPriceId,od.discount_id AS discountId,od.discount_startdate AS discountStartDate,"
-					+ " od.discount_enddate AS discountEndDate,od.discount_type AS discountType,od.discount_rate AS discountRate,od.is_deleted AS isDeleted "
+					+ " od.discount_enddate AS discountEndDate,od.discount_type AS discountType,od.discount_rate AS discountRate,od.is_deleted AS isDeleted," 
+					+ " dm.discount_code as discountCode,dm.discount_description AS discountDescription"
 					+ " FROM b_orders os inner join b_order_price op on op.order_id = os.id inner join b_order_discount od on od.order_id = os.id and od.orderprice_id=op.id "
-					+ " WHERE od.is_deleted='N' and os.id= ? and op.id= ? ";
+					+ " inner join b_discount_master dm on od.discount_id=dm.id WHERE od.is_deleted='N' and os.id= ? and op.id= ? ";
 
 		}
 	}
@@ -287,9 +291,9 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 		}
 	}
 	 
-	 /* (non-Javadoc)
+	/*  (non-Javadoc)
 	 * @see #retriveExemptionTaxDetails(java.lang.Long)
-	 */
+	 
 	@Override
 		public TaxMappingRateData retriveExemptionTaxDetails(final Long clientId) {
 		 
@@ -310,7 +314,7 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 				final String taxExemption=rs.getString("taxExemption");
 				return new TaxMappingRateData(taxExemption);
 			}
-		}
+		}*/
 		
 	@Override
 	public AgreementData retriveClientOfficeDetails(final Long clientId) {
