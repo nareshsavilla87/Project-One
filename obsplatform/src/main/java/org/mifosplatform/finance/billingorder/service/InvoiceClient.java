@@ -68,7 +68,7 @@ public class InvoiceClient {
 		GenerateInvoiceData invoiceData = null;
 		Invoice invoice=null;
 		
-		// Get list of qualified orders
+		// Get list of qualified orders of customer
 		List<BillingOrderData> billingOrderDatas = billingOrderReadPlatformService.retrieveOrderIds(clientId, processDate);
 		
 		if (billingOrderDatas.size() == 0) {
@@ -79,7 +79,7 @@ public class InvoiceClient {
 		for (BillingOrderData billingOrderData : billingOrderDatas) {
 
 			nextBillableDate = billingOrderData.getNextBillableDate();
-			  if (configuration != null&& configuration.isEnabled() && (billingOrderData.getInvoiceTillDate() == null && billingOrderData.getBillingAlign().equalsIgnoreCase("Y"))) {
+			  if (configuration != null&& configuration.isEnabled() && (billingOrderData.getInvoiceTillDate() == null && "Y".equalsIgnoreCase(billingOrderData.getBillingAlign()))) {
 				     LocalDate alignEndDate = new LocalDate(nextBillableDate).dayOfMonth().withMaximumValue();
 				      if (!processDate.toDate().after(alignEndDate.toDate())) {
 					        processDate = alignEndDate.plusDays(2);

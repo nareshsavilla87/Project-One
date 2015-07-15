@@ -10,10 +10,6 @@ import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 
 public interface BillingOrderReadPlatformService {
 
-	//List<OrderPriceData> retrieveInvoiceTillDate(Long clientOrderId);
-	 
-	//List<GenerateInvoiceData> retrieveClientsWithOrders(LocalDate processDate);
-	
 	List<BillingOrderData> retrieveOrderIds(Long clientId, LocalDate processDate);
 	
 	List<BillingOrderData> retrieveBillingOrderData(Long clientId,LocalDate localDate, Long planId);
@@ -26,7 +22,7 @@ public interface BillingOrderReadPlatformService {
 
 	List<BillingOrderData> getReverseBillingOrderData(Long clientId,LocalDate disconnectionDate, Long orderId);
 
-	TaxMappingRateData retriveExemptionTaxDetails(Long clientId);
+	//TaxMappingRateData retriveExemptionTaxDetails(Long clientId);
 
 	AgreementData retriveClientOfficeDetails(Long clientId);
 

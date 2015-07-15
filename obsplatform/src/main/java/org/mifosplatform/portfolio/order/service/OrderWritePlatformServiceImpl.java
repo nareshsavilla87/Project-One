@@ -460,16 +460,16 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 			  contractDetails.getSubscriptionType(),contractDetails.getUnits());
 	  LocalDate chargeCodeEndDate = this.orderAssembler.calculateEndDate(DateUtils.getLocalDateOfTenant(),
 				chargeCodeMaster.get(0).getDurationType(),chargeCodeMaster.get(0).getChargeDuration().longValue());
-		
-	  if(contractEndDate.toDate().before(chargeCodeEndDate.toDate())){
+	if(contractEndDate !=null && chargeCodeEndDate !=null)	{
+	   if(contractEndDate.toDate().before(chargeCodeEndDate.toDate())){
 		  if(plan.isPrepaid() == 'N' || plan.isPrepaid() == 'n'){
 			  throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.get(0).getBillFrequencyCode(), contractDetails.getSubscriptionPeriod());
 		  }else{
 			  throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.get(0).getBillFrequencyCode(), true);
 		  }
-			
+	    }
 	  }
-	  
+	   
 	  if(orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
 		  
 		  newStartdate=new LocalDate(orderDetails.getEndDate()).plusDays(1);
@@ -1224,8 +1224,10 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 				contract.getSubscriptionType(),contract.getUnits());
 		LocalDate chargeCodeEndDate = this.orderAssembler.calculateEndDate(DateUtils.getLocalDateOfTenant(),
 				chargeCodeMaster.get(0).getDurationType(),chargeCodeMaster.get(0).getChargeDuration().longValue());
-		if(contractEndDate.toDate().before(chargeCodeEndDate.toDate()) ){
+		if(contractEndDate !=null && chargeCodeEndDate !=null){
+		   if(contractEndDate.toDate().before(chargeCodeEndDate.toDate()) ){
 			throw new ChargeCodeAndContractPeriodException();
+		   }
 		}
 		
   }

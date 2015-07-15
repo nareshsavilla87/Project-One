@@ -172,7 +172,7 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 				chargeCode.getChargeType(),defaultDate,price.getPrice(),"",discountMaster.getStartDate(),defaultDate,defaultValue,chargeCode.getTaxInclusive()); 
 		
 		DiscountMasterData discountMasterData = new DiscountMasterData(discountMaster.getId(),defaultValue,defaultValue,new LocalDate(discountMaster.getStartDate()),
-				new LocalDate(),discountMaster.getDiscountType(),discountMaster.getDiscountRate(),"N");
+				new LocalDate(),discountMaster.getDiscountType(),discountMaster.getDiscountRate(),"N",discountMaster.getDiscountCode(),discountMaster.getDiscountDescription());
 		
 		List<InvoiceTaxCommand> invoiceTaxCommands=this.generateBill.calculateDiscountAndTax(billingOrderData, discountMasterData, new LocalDate(discountMaster.getStartDate()),endDate, price.getPrice());
 		if(!invoiceTaxCommands.isEmpty()){

@@ -51,8 +51,7 @@ public final class DiscountCommandFromApiJsonDeserializer {
 			throw new InvalidJsonException();
 		}
 
-		final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-		}.getType();
+		final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
 		fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,supportedParameters);
 
 		final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();

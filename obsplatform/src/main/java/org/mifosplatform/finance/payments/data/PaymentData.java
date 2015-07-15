@@ -116,7 +116,11 @@ public class PaymentData {
 	public void setAvailAmount(BigDecimal availAmount) {
 		this.availAmount = availAmount;
 	}
-	
+
+	public void setData(Collection<McodeData> payData) {
+		this.data = payData;
+
+	}
 	
 	
 }

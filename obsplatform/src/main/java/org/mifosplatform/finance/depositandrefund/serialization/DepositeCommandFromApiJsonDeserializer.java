@@ -1,6 +1,7 @@
 package org.mifosplatform.finance.depositandrefund.serialization;
 
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -29,12 +30,11 @@ public class DepositeCommandFromApiJsonDeserializer {
 	/**
 	 * The parameters supported for this command.
 	 */
-	final private Set<String> supportedParameters = new HashSet<String>(Arrays.asList("clientId", "feeId"));
+	final private Set<String> supportedParameters = new HashSet<String>(Arrays.asList("clientId", "feeId","refundMode","refundAmount","locale"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
-	public DepositeCommandFromApiJsonDeserializer(
-			final FromJsonHelper fromApiJsonHelper) {
+	public DepositeCommandFromApiJsonDeserializer(final FromJsonHelper fromApiJsonHelper) {
 		this.fromApiJsonHelper = fromApiJsonHelper;
 	}
 
@@ -49,11 +49,9 @@ public class DepositeCommandFromApiJsonDeserializer {
 		}
 
 		final Type typeOfMap = new TypeToken<Map<String, Object>>() {
-			private static final long serialVersionUID = 1L;
-		}.getType();
+			private static final long serialVersionUID = 1L;}.getType();
 
-		fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,
-				supportedParameters);
+		this.fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,supportedParameters);
 
 		final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("deposite");
@@ -70,12 +68,38 @@ public class DepositeCommandFromApiJsonDeserializer {
 
 	}
 
-	private void throwExceptionIfValidationWarningsExist(
-			final List<ApiParameterError> dataValidationErrors) {
+	private void throwExceptionIfValidationWarningsExist(final List<ApiParameterError> dataValidationErrors) {
 		if (!dataValidationErrors.isEmpty()) {
-			throw new PlatformApiDataValidationException(
-					"validation.msg.validation.errors.exist",
+			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist",
 					"Validation errors exist.", dataValidationErrors);
 		}
+	}
+
+	/**
+	 * @param json
+	 */
+	public void validaForCreateRefund(final String json) {
+		
+		if (StringUtils.isBlank(json)) {
+			throw new InvalidJsonException();
+		}
+
+		final  Type typeOfMap = new TypeToken<Map<String, Object>>() {
+			private static final long serialVersionUID = 1L;}.getType();
+
+		fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json,supportedParameters);
+
+		final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("refund");
+		
+		final JsonElement element = fromApiJsonHelper.parse(json);
+		
+		final Long refundMode = fromApiJsonHelper.extractLongNamed("refundMode", element);
+		baseDataValidator.reset().parameter("refundMode").value(refundMode).notBlank();
+		
+		final BigDecimal refundAmount = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("refundAmount", element);
+		baseDataValidator.reset().parameter("refundAmount").value(refundAmount).notBlank();
+		
+		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	}
 }

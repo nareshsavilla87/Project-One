@@ -114,10 +114,10 @@ public class GenerateDisconnectionBill {
 		           if(discountMasterData.getDiscountRate() !=null&& (billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
 		        		   ||billingOrderData.getBillStartDate().compareTo(discountMasterData.getDiscountStartDate().toDate())==0)){
 
-		    		if (discountMasterData.getDiscountType().equalsIgnoreCase("percentage")){
+		    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
 		    			discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
 			               price = price.subtract(discountAmount);
-		    		 }else if(discountMasterData.getDiscountType().equalsIgnoreCase("flat")){
+		    		 }else if("flat".equalsIgnoreCase(discountMasterData.getDiscountType())){
 		    		     price = price.subtract(discountMasterData.getDiscountRate());
 		              }
 		           }
@@ -134,10 +134,10 @@ public class GenerateDisconnectionBill {
            if(discountMasterData.getDiscountRate() !=null&& (billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
         		   ||billingOrderData.getBillStartDate().compareTo(discountMasterData.getDiscountStartDate().toDate())==0)){
 
-    		if (discountMasterData.getDiscountType().equalsIgnoreCase("percentage")){
+    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
     			discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
 	               price = price.subtract(discountAmount);
-    		 }else if(discountMasterData.getDiscountType().equalsIgnoreCase("flat")){
+    		 }else if("flat".equalsIgnoreCase(discountMasterData.getDiscountType())){
     		     price = price.subtract(discountMasterData.getDiscountRate());
               }
            }
@@ -234,10 +234,10 @@ public class GenerateDisconnectionBill {
 	       if(discountMasterData.getDiscountRate() !=null && (billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
 	        		   ||billingOrderData.getBillStartDate().compareTo(discountMasterData.getDiscountStartDate().toDate())==0)){
 
-		    		if (discountMasterData.getDiscountType().equalsIgnoreCase("percentage")){
+		    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
 		    			   discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
 			               price = price.subtract(discountAmount);
-		    		}else if(discountMasterData.getDiscountType().equalsIgnoreCase("flat")){
+		    		}else if("flat".equalsIgnoreCase(discountMasterData.getDiscountType())){
 		    			  price = price.subtract(discountMasterData.getDiscountRate());
 		              }
 		           }
@@ -356,7 +356,7 @@ public class GenerateDisconnectionBill {
 
 			for (TaxMappingRateData taxMappingRateData : taxMappingRateDatas) {
 
-				if (taxMappingRateData.getTaxType().equalsIgnoreCase("Percentage")) {
+				if ("Percentage".equalsIgnoreCase(taxMappingRateData.getTaxType())) {
 					
 					taxRate = taxMappingRateData.getRate();
 					taxCode = taxMappingRateData.getTaxCode();
@@ -365,11 +365,11 @@ public class GenerateDisconnectionBill {
 	                     }else{
 	                    	 taxAmount = price.multiply(taxRate.divide(new BigDecimal(100))).setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
 	                    }
-				} else if(taxMappingRateData.getTaxType().equalsIgnoreCase("Flat")) {
+				} else if("Flat".equalsIgnoreCase(taxMappingRateData.getTaxType())) {
 					
 					taxRate = taxMappingRateData.getRate();
 					taxCode = taxMappingRateData.getTaxCode();
-					if(billingOrderData.getChargeType().equalsIgnoreCase("RC")||billingOrderData.getChargeType().equalsIgnoreCase("NRC")){
+					if("RC".equalsIgnoreCase(billingOrderData.getChargeType())||"NRC".equalsIgnoreCase(billingOrderData.getChargeType())){
 					      taxAmount =taxRate;
 					}else{
 					BigDecimal numberOfMonthsPrice = BigDecimal.ZERO;

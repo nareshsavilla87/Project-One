@@ -5,10 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
-import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
-import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
@@ -17,6 +14,8 @@ import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.billingorder.domain.InvoiceTax;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,18 +29,18 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final GenerateDisconnectionBill generateDisconnectionBill;
 	private final InvoiceRepository invoiceRepository;
-	private final DiscountMasterRepository discountMasterRepository;
+	private final ClientRepositoryWrapper clientRepository;
 
 	
 	@Autowired
 	public GenerateReverseBillingOrderServiceImp(final BillingOrderReadPlatformService billingOrderReadPlatformService,
 			final GenerateDisconnectionBill generateDisconnectionBill,final InvoiceRepository invoiceRepository,
-			final DiscountMasterRepository discountMasterRepository) {
+			final ClientRepositoryWrapper clientRepository) {
 
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.generateDisconnectionBill = generateDisconnectionBill;
 		this.invoiceRepository = invoiceRepository;
-		this.discountMasterRepository = discountMasterRepository;
+		this.clientRepository = clientRepository;
 	}
 
 	@Override
@@ -94,8 +93,7 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 		BigDecimal totalChargeAmount = BigDecimal.ZERO;
 		BigDecimal netTaxAmount = BigDecimal.ZERO;
 		
-		
-		TaxMappingRateData tax=this.billingOrderReadPlatformService.retriveExemptionTaxDetails(billingOrderCommands.get(0).getClientId());
+		Client client=this.clientRepository.findOneWithNotFoundDetection(billingOrderCommands.get(0).getClientId());
 		
 		Invoice invoice = new Invoice(billingOrderCommands.get(0).getClientId(), DateUtils.getLocalDateOfTenant().toDate(), invoiceAmount, invoiceAmount, 
 				                         netTaxAmount, "active");
@@ -106,16 +104,13 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 			String discountCode="None";
 			BigDecimal discountAmount = BigDecimal.ZERO;
 		    BigDecimal netChargeAmount = billingOrderCommand.getPrice();
-			DiscountMaster discountMaster = null;
+		    
 			if(billingOrderCommand.getDiscountMasterData()!= null){
-				discountMaster = this.discountMasterRepository.findOne(billingOrderCommand.getDiscountMasterData().getId());
-				 discountCode=discountMaster.getDiscountCode();
 				 discountAmount = billingOrderCommand.getDiscountMasterData().getDiscountAmount();
+				 discountCode = billingOrderCommand.getDiscountMasterData().getDiscountCode();
 				 if(billingOrderCommand.getChargeType().equalsIgnoreCase("NRC")){
 				  netChargeAmount = billingOrderCommand.getPrice().subtract(discountAmount);
 				 }
-
-		
 			}
 			
 			List<InvoiceTaxCommand> invoiceTaxCommands = billingOrderCommand.getListOfTax();
@@ -126,15 +121,17 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 					netChargeAmount.negate(), billingOrderCommand.getStartDate(), billingOrderCommand.getEndDate());
 
 			//client taxExemption
-			if(tax.getTaxExemption().equalsIgnoreCase("N") && (invoiceTaxCommands !=null && !invoiceTaxCommands.isEmpty())){
+			if(('N'==client.getTaxExemption()) && (invoiceTaxCommands !=null && !invoiceTaxCommands.isEmpty())){
 			
 			     for(InvoiceTaxCommand invoiceTaxCommand : invoiceTaxCommands){
 				
+			    	if (BigDecimal.ZERO.compareTo(invoiceTaxCommand.getTaxAmount()) != 0) {
+			    		
 				     netChargeTaxAmount = netChargeTaxAmount.add(invoiceTaxCommand.getTaxAmount());
-				
 				     InvoiceTax invoiceTax = new InvoiceTax(invoice, charge, invoiceTaxCommand.getTaxCode(),invoiceTaxCommand.getTaxValue(), 
 						                  invoiceTaxCommand.getTaxPercentage(), invoiceTaxCommand.getTaxAmount().negate());
 				      charge.addChargeTaxes(invoiceTax);
+			    	}
 			     }
 
 

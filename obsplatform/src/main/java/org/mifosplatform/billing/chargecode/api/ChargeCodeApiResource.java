@@ -188,6 +188,9 @@ public class ChargeCodeApiResource {
 			 
 		}
 
+		if(contractId !=null && paytermCode != null){
+			this.orderWritePlatformService.checkingContractPeriodAndBillfrequncyValidation(contractId, paytermCode);
+		}
 		//context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final ChargeCodeData chargeCodeData = this.chargeCodeReadPlatformService.retrieveChargeCodeForRecurring(priceId);
 		final BigDecimal finalAmount=this.chargeCodeWritePlatformService.calculateFinalAmount(chargeCodeData,clientId,priceId);

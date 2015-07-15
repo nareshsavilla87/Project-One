@@ -18,6 +18,13 @@ public class StaticDemo {
     	// exception.printStackTrace();
     	 
      }
+     
+     String s="Ranjith";
+     String rev="";
+     for(int i=s.length()-1; i>=0; i--){
+    	 rev +=s.charAt(i);
+     }
+    System.out.println(rev);
     } 
  
 }

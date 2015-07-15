@@ -50,15 +50,10 @@ public class BillingOrderCommandFromApiJsonDeserializer {
 	        final String dataFormat = fromApiJsonHelper.extractStringNamed("dateFormat", element);
 	        final LocalDate systemDate = fromApiJsonHelper.extractLocalDateNamed("systemDate", element);
 	        
-	        
-	        
 	        baseDataValidator.reset().parameter("locale").value(locale).notBlank();
 	        baseDataValidator.reset().parameter("dataFormat").value(dataFormat).notNull();
 	        baseDataValidator.reset().parameter("systemDate").value(systemDate).notBlank();
-			
-			
-			
-	        
+							        
 			throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	  }
 	
