@@ -58,7 +58,8 @@ public class DiscountMasterData {
 	}
 
 	public DiscountMasterData(final Long id, final Long orderPriceId,final Long orderDiscountId, final LocalDate discountStartDate,
-			final LocalDate discountEndDate, final String discountType,final BigDecimal discountRate, final String isDeleted) {
+			final LocalDate discountEndDate, final String discountType,final BigDecimal discountRate, final String isDeleted,
+			final String discountCode,final String discountDescription) {
 		this.id = id;
 		this.orderPriceId = orderPriceId;
 		this.orderDiscountId = orderDiscountId;
@@ -69,6 +70,8 @@ public class DiscountMasterData {
 		this.isDeleted = isDeleted;
 		this.discountAmount = BigDecimal.ZERO;
 		this.discountedChargeAmount = BigDecimal.ZERO;
+		this.discountCode = discountCode;
+		this.discountDescription = discountDescription;
 	}
 
 	public DiscountMasterData(final List<EnumOptionData> statusData,final Collection<MCodeData> discountTypeData, 
