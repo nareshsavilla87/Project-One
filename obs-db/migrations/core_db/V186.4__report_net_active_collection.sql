@@ -1,5 +1,3 @@
-
-
 INSERT ignore INTO `stretchy_report` (`id`,`report_name`,`report_type`,`report_subtype`,`report_category`,`report_sql`,`description`,`core_report`,`use_report`) VALUES (Null,'Monthly Net Activations','Table',NULL,'Client','select * from v_netact_summary ','Monthly Net Activations',1,1);
 INSERT ignore INTO `stretchy_report` (`id`,`report_name`,`report_type`,`report_subtype`,`report_category`,`report_sql`,`description`,`core_report`,`use_report`) VALUES (Null,'Monthly Planwise Net Activations','Table',NULL,'Client','select * from v_netactpln_summary ','Monthly Planwise Net Activations',1,1);
 INSERT ignore  INTO `stretchy_report` (`id`,`report_name`,`report_type`,`report_subtype`,`report_category`,`report_sql`,`description`,`core_report`,`use_report`) VALUES (Null,'Net Activative Details','Table',NULL,'Client','select * from v_netact_dtls \r\nwhere  op_Active =1 or (op_active=0 and Cl_active=1)','Net Activative Details',1,1);
