@@ -57,6 +57,8 @@ import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformSe
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.UserActionStatusEnumaration;
 import org.mifosplatform.portfolio.order.domain.Order;
+import org.mifosplatform.portfolio.order.domain.OrderAddons;
+import org.mifosplatform.portfolio.order.domain.OrderAddonsRepository;
 import org.mifosplatform.portfolio.order.domain.OrderDiscount;
 import org.mifosplatform.portfolio.order.domain.OrderDiscountRepository;
 import org.mifosplatform.portfolio.order.domain.OrderHistory;
@@ -78,7 +80,6 @@ import org.mifosplatform.portfolio.plan.domain.PlanDetails;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.mifosplatform.portfolio.service.domain.ServiceMaster;
 import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
-import org.mifosplatform.portfolio.servicemapping.domain.ServiceMappingRepository;
 import org.mifosplatform.provisioning.preparerequest.domain.PrepareRequest;
 import org.mifosplatform.provisioning.preparerequest.domain.PrepareRequsetRepository;
 import org.mifosplatform.provisioning.preparerequest.exception.PrepareRequestActivationException;
@@ -112,11 +113,11 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final ReverseInvoice reverseInvoice;
 	private final PlatformSecurityContext context;
 	private final OrderRepository orderRepository;
+	private final OrderAddonsRepository orderAddonsRepository;
 	private final PriceRepository  priceRepository;
 	private final OrderAssembler  orderAssembler;
 	private final ClientRepository clientRepository;
 	private final EventValidationReadPlatformService eventValidationReadPlatformService;
-	private final ServiceMappingRepository provisionServiceDetailsRepository;
 	private final PrepareRequestReadplatformService prepareRequestReadplatformService;
 	private final ActiondetailsWritePlatformService actiondetailsWritePlatformService;
 	private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
@@ -137,7 +138,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final PromotionCodeRepository promotionCodeRepository;
 	private final HardwareAssociationReadplatformService hardwareAssociationReadplatformService;
 	private final ChargeCodeRepository chargeCodeRepository;
-	private final OrderPriceRepository OrderPriceRepository;
+	private final OrderPriceRepository orderPriceRepository;
 	private final EventActionRepository eventActionRepository;
 	private final OrderHistoryRepository orderHistoryRepository;
 	private final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory;
@@ -154,18 +155,15 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			final PrepareRequestWriteplatformService prepareRequestWriteplatformService,final OrderHistoryRepository orderHistoryRepository,
 			final  ConfigurationRepository configurationRepository,final AllocationReadPlatformService allocationReadPlatformService,
 			final HardwareAssociationWriteplatformService associationWriteplatformService,final PrepareRequestReadplatformService prepareRequestReadplatformService,
-			final ServiceMappingRepository provisionServiceDetailsRepository,final OrderReadPlatformService orderReadPlatformService,
+			final OrderReadPlatformService orderReadPlatformService,final OrderAddonsRepository  addonsRepository,final OrderAssembler orderAssembler,
 		    final ProcessRequestRepository processRequestRepository,final HardwareAssociationReadplatformService hardwareAssociationReadplatformService,
-		    final PrepareRequsetRepository prepareRequsetRepository,final PromotionCodeRepository promotionCodeRepository,
-		    final OrderDiscountRepository orderDiscountRepository, final OrderAssembler orderAssembler,
-		    final ClientRepository clientRepository,final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
+		    final PrepareRequsetRepository prepareRequsetRepository,final PromotionCodeRepository promotionCodeRepository,final ContractRepository contractRepository, 
+		    final OrderDiscountRepository orderDiscountRepository,  final ClientRepository clientRepository,  final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
 		    final ActiondetailsWritePlatformService actiondetailsWritePlatformService,final EventValidationReadPlatformService eventValidationReadPlatformService,
-		    final EventActionRepository eventActionRepository,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,
+		    final EventActionRepository eventActionRepository,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,final InvoiceClient invoiceClient,
 		    final HardwareAssociationRepository associationRepository,final ProvisioningWritePlatformService provisioningWritePlatformService,
 		    final PaymentFollowupRepository paymentFollowupRepository,final PriceRepository priceRepository,final ChargeCodeRepository chargeCodeRepository,
-		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,
-		    final PaypalRecurringBillingRepository paypalRecurringBillingRepository,
-		    final ContractRepository contractRepository, final InvoiceClient invoiceClient) {
+		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,final PaypalRecurringBillingRepository paypalRecurringBillingRepository) {
 		    
 
 		this.context = context;
@@ -183,9 +181,9 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.orderAssembler=orderAssembler;
 		this.eventValidationReadPlatformService=eventValidationReadPlatformService;
 		this.priceRepository=priceRepository;
-		this.provisionServiceDetailsRepository=provisionServiceDetailsRepository;
 		this.planRepository = planRepository;
 		this.orderRepository = orderRepository;
+		this.orderAddonsRepository = addonsRepository;
 		this.clientRepository=clientRepository;
 		this.codeValueRepository=codeRepository;
 		this.promotionCodeRepository=promotionCodeRepository;
@@ -196,7 +194,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.prepareRequestWriteplatformService=prepareRequestWriteplatformService;
 		this.hardwareAssociationReadplatformService=hardwareAssociationReadplatformService;
 		this.chargeCodeRepository=chargeCodeRepository;
-		this.OrderPriceRepository = OrderPriceRepository;
+		this.orderPriceRepository = OrderPriceRepository;
 		this.eventActionRepository=eventActionRepository;
 		this.associationRepository=associationRepository;
 		this.orderHistoryRepository=orderHistoryRepository;
@@ -295,9 +293,9 @@ try{
 		final Order order = retrieveOrderById(orderId);
 		Long orderPriceId=command.longValueOfParameterNamed("priceId");
 		BigDecimal price=command.bigDecimalValueOfParameterNamed("price");
-		OrderPrice orderPrice=this.OrderPriceRepository.findOne(orderPriceId);
+		OrderPrice orderPrice=this.orderPriceRepository.findOne(orderPriceId);
 		orderPrice.setPrice(price);
-		this.OrderPriceRepository.save(orderPrice);
+		this.orderPriceRepository.save(orderPrice);
 		
 		//For Order History
 		OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),null,"UPDATE PRICE",userId,null);
@@ -438,7 +436,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 			throw new ContractNotNullException();
 		}
 		if(chargeCodeDuration > contract.getUnits().intValue()){
-			throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.get(0).getBillFrequencyCode(), contract.getSubscriptionPeriod());
+			throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.get(0).getBillFrequencyCode(),"Renewal");
 		}
 		
 	  this.eventValidationReadPlatformService.checkForCustomValidations(orderDetails.getClientId(),EventActionConstants.EVENT_ORDER_RENEWAL,command.json(),userId);	
@@ -455,6 +453,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		  requstStatus=UserActionStatusEnumaration.OrderStatusType(UserActionStatusTypeEnum.RENEWAL_BEFORE_AUTOEXIPIRY).getValue();
 					
 	  } else if(orderDetails.getStatus().equals(StatusTypeEnum.DISCONNECTED.getValue().longValue())){
+		  
 		  newStartdate = DateUtils.getLocalDateOfTenant(); 
 		  requstStatus=UserActionStatusEnumaration.OrderStatusType(UserActionStatusTypeEnum.RENEWAL_AFTER_AUTOEXIPIRY).getValue();
 		  if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
@@ -487,7 +486,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  //orderDetails.setEndDate(renewalEndDate);
 
 	  for(OrderPrice orderprice:orderPrices){
-		  if(plan.isPrepaid() == 'Y'){
+		  if(plan.isPrepaid() == 'Y' && orderprice.isAddon() == 'N'){
 			  final Long priceId = command.longValueOfParameterNamed("priceId");
 			 // ServiceMaster service=this.serviceMasterRepository.findOne(orderprice.getServiceId()); 
 			    Price price=this.priceRepository.findOne(priceId);
@@ -597,11 +596,13 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		final List<OrderPrice> orderPrices=order.getPrice();
 		
 		for(OrderPrice price:orderPrices){
-			
-			price.setBillStartDate(startDate);
-			price.setBillEndDate(EndDate);
-			price.setNextBillableDay(null);
-			price.setInvoiceTillDate(null);
+			if(price.isAddon() == 'N'){
+				
+				price.setBillStartDate(startDate);
+				price.setBillEndDate(EndDate);
+				price.setNextBillableDay(null);
+				price.setInvoiceTillDate(null);
+			}
 		}
 		
 		Plan plan=this.planRepository.findOne(order.getPlanId());
@@ -742,8 +743,20 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 	 
 	 newOrder.updateOrderNum(order.getOrderNo());
 	 newOrder.updateActivationDate(order.getActiveDate());
-	
+      List<OrderAddons> addons = this.orderAddonsRepository.findAddonsByOrderId(order.getId());
+      
+      for(OrderAddons orderAddons:addons){
+    	  
+    	  orderAddons.setOrderId(newOrder.getId());
+    	  OrderPrice orderPrice =this.orderPriceRepository.findOne(orderAddons.getPriceId());
+    	  orderPrice.update(newOrder);
+    	  this.orderRepository.save(newOrder);
+    	 this.orderPriceRepository.saveAndFlush(orderPrice);
+    	  this.orderAddonsRepository.saveAndFlush(orderAddons);
+      }
+      
 	 if(property.isEnabled()){
+		 
 		 List<OrderPrice> orderPrices=newOrder.getPrice();
 		 for(OrderPrice orderPrice:orderPrices){
 			 if(billEndDate == null){
@@ -957,7 +970,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 								orderprice.setBillEndDate(endDate);
 								orderprice.setInvoiceTillDate(endDate.toDate());
 								orderprice.setNextBillableDay(endDate.toDate());
-								this.OrderPriceRepository.save(orderprice);
+								this.orderPriceRepository.save(orderprice);
 							}
 					}else if(order.getStatus().intValue() == StatusTypeEnum.DISCONNECTED.getValue()){
 						for(OrderPrice orderprice:orderPrices){
@@ -965,7 +978,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 				    		orderprice.setBillEndDate(endDate);
 				    		orderprice.setNextBillableDay(null);
 				    		orderprice.setInvoiceTillDate(null);
-				    		this.OrderPriceRepository.save(orderprice);
+				    		this.orderPriceRepository.save(orderprice);
 						}
 				if(plan.getProvisionSystem().equalsIgnoreCase("None")){
 					order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
@@ -1176,17 +1189,23 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
   }
   
   private void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode){
-	  
+	
 	  Contract contract = contractRepository.findOne(contractPeriod);
-		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(paytermCode);
-		Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
-		if(contract == null){
-			throw new ContractNotNullException();
-		}
-		if(chargeCodeDuration > contract.getUnits().intValue()){
-			throw new ChargeCodeAndContractPeriodException();
-		}
-		
-  }
+      List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(paytermCode);
 
- }
+     if(contract == null){
+       throw new ContractNotNullException();
+     }
+  
+     LocalDate contractEndDate = this.orderAssembler.calculateEndDate(DateUtils.getLocalDateOfTenant(),
+     contract.getSubscriptionType(),contract.getUnits());
+     LocalDate chargeCodeEndDate = this.orderAssembler.calculateEndDate(DateUtils.getLocalDateOfTenant(),
+    chargeCodeMaster.get(0).getDurationType(),chargeCodeMaster.get(0).getChargeDuration().longValue());
+     
+     if(contractEndDate !=null && chargeCodeEndDate !=null){
+    	 if(contractEndDate.toDate().before(chargeCodeEndDate.toDate()) ){
+    		 throw new ChargeCodeAndContractPeriodException();
+     }
+  }
+     }
+}

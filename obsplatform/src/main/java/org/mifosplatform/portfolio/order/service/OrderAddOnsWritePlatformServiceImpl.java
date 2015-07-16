@@ -6,12 +6,14 @@ import java.util.Date;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
+import org.mifosplatform.billing.planprice.exceptions.ChargeCodeAndContractPeriodException;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
 import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderService;
-import org.mifosplatform.finance.billingorder.service.InvoiceClient;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -60,14 +62,15 @@ public class OrderAddOnsWritePlatformServiceImpl implements OrderAddOnsWritePlat
 	private final GenerateBillingOrderService generateBillingOrderService;
 	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
 	private final PlanRepository planRepository;
+	private  final ChargeCodeRepository chargeCodeRepository;
 	
 @Autowired
  public OrderAddOnsWritePlatformServiceImpl(final PlatformSecurityContext context,final OrderAddOnsCommandFromApiJsonDeserializer fromApiJsonDeserializer,
 		 final FromJsonHelper fromJsonHelper,final ContractRepository contractRepository,final OrderAssembler orderAssembler,final OrderRepository orderRepository,
-		 final ServiceMappingRepository serviceMappingRepository,final OrderAddonsRepository addonsRepository,
+		 final ServiceMappingRepository serviceMappingRepository,final OrderAddonsRepository addonsRepository,final PlanRepository  planRepository,
 		 final ProvisioningWritePlatformService provisioningWritePlatformService,final HardwareAssociationRepository associationRepository,
 		 final OrderPriceRepository orderPriceRepository,final GenerateBillingOrderService generateBillingOrderService,
-		 final BillingOrderWritePlatformService billingOrderWritePlatformService,final PlanRepository  planRepository){
+		 final BillingOrderWritePlatformService billingOrderWritePlatformService,final ChargeCodeRepository chargeCodeRepository){
 		
 	this.context=context;
 	this.fromJsonHelper=fromJsonHelper;
@@ -83,6 +86,7 @@ public class OrderAddOnsWritePlatformServiceImpl implements OrderAddOnsWritePlat
 	this.serviceMappingRepository=serviceMappingRepository;
 	this.billingOrderWritePlatformService = billingOrderWritePlatformService;
 	this.generateBillingOrderService = generateBillingOrderService;
+	this.chargeCodeRepository = chargeCodeRepository;
 	
 }
 
@@ -101,14 +105,16 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 		final LocalDate startDate=command.localDateValueOfParameterNamed("startDate");
 	    Order order=this.orderRepository.findOne(orderId);
 	    Contract contract=this.contractRepository.findOne(contractId);
-	    
+	    Date addonEndDate = null;
 	    LocalDate endDate = this.orderAssembler.calculateEndDate(new LocalDate(startDate),
                 contract.getSubscriptionType(), contract.getUnits());
 	    
 	    if(order.getEndDate() != null && endDate.isAfter(new LocalDate(order.getEndDate()))){
-          //  throw new AddonEndDateValidationException(orderId);
-	    	endDate = new LocalDate(order.getEndDate());
+           throw new AddonEndDateValidationException(orderId);
+	    //	endDate = new LocalDate(order.getEndDate());
 	    }
+	    
+	    if(endDate != null){ addonEndDate = endDate.toDate();}
 	    
 	    HardwareAssociation association=this.hardwareAssociationRepository.findOneByOrderId(orderId);
 		for (JsonElement jsonElement : addonServices) {
@@ -123,12 +129,12 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 		OrderPrice orderPrice =this.orderPriceRepository.findOne(addons.getPriceId());
 		List<BillingOrderData> billingOrderDatas = new ArrayList<BillingOrderData>(); 
 		
-		if(order.getNextBillableDay() != null){
+		//if(order.getNextBillableDay() != null){
 			
 			billingOrderDatas.add(new BillingOrderData(orderId,addons.getPriceId(),order.getPlanId(),order.getClientId(),startDate.toDate(),
-					orderPrice.getNextBillableDay(),endDate.toDate(),"",orderPrice.getChargeCode(),orderPrice.getChargeType(),Integer.valueOf(orderPrice.getChargeDuration()),
-					orderPrice.getDurationType(),orderPrice.getInvoiceTillDate(),orderPrice.getPrice(),"N",orderPrice.getBillStartDate(),orderPrice.getBillEndDate(),
-					null,orderPrice.isTaxInclusive()?1:0));
+					orderPrice.getNextBillableDay(),addonEndDate,"",orderPrice.getChargeCode(),orderPrice.getChargeType(),Integer.valueOf(orderPrice.getChargeDuration()),
+					orderPrice.getDurationType(),orderPrice.getInvoiceTillDate(),orderPrice.getPrice(),"N",orderPrice.getBillStartDate(),addonEndDate,
+					order.getStatus(),orderPrice.isTaxInclusive()?1:0));
 			
 			List<BillingOrderCommand> billingOrderCommands = this.generateBillingOrderService.generatebillingOrder(billingOrderDatas);
 			Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
@@ -140,7 +146,7 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
 			 System.out.println("---------------------"+billingOrderCommands.get(0).getNextBillableDate());
 		 }
-		}
+		//}
 		return new CommandProcessingResult(orderId);
 		
 	}catch(DataIntegrityViolationException dve){
@@ -151,19 +157,28 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 }
 
 
-private OrderAddons assembleOrderAddons(JsonElement jsonElement,FromJsonHelper fromJsonHelper, Order order, LocalDate startDate,
-		                                    LocalDate endDate, Long contractId) {
+private OrderAddons assembleOrderAddons(JsonElement jsonElement,FromJsonHelper fromJsonHelper, Order order,
+		          LocalDate startDate,LocalDate endDate, Long contractId) {
 	
 	OrderAddons orderAddons = OrderAddons.fromJson(jsonElement,fromJsonHelper,order.getId(),startDate,contractId);
 	final BigDecimal price=fromJsonHelper.extractBigDecimalWithLocaleNamed("price", jsonElement);
 	
-	List<OrderPrice> orderPrices = order.getPrice();
+	 ChargeCodeMaster chargeCodeMaster = chargeCodeRepository.findOne(fromJsonHelper.extractLongNamed("chargeCodeId", jsonElement));
+		Contract contract = contractRepository.findOne(orderAddons.getContractId());
+			
+			if(endDate != null && chargeCodeMaster.getChargeDuration() != contract.getUnits().intValue()  &&
+					  chargeCodeMaster.getDurationType().equalsIgnoreCase(contract.getSubscriptionType())){
+				
+				throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.getBillFrequencyCode(),"addon");
+			}
 	
-	OrderPrice orderPrice =new OrderPrice(orderAddons.getServiceId(),orderPrices.get(0).getChargeCode(),orderPrices.get(0).getChargeType(), price,null,
-			orderPrices.get(0).getChargeType(),orderPrices.get(0).getChargeDuration(),orderPrices.get(0).getDurationType(),
-			startDate.toDate(),endDate,orderPrices.get(0).isTaxInclusive());
+	
+	OrderPrice orderPrice =new OrderPrice(orderAddons.getServiceId(),chargeCodeMaster.getChargeCode(),chargeCodeMaster.getChargeType(), price,null,
+			chargeCodeMaster.getChargeType(),chargeCodeMaster.getChargeDuration().toString(),chargeCodeMaster.getDurationType(),
+			startDate.toDate(),endDate,chargeCodeMaster.getTaxInclusive() == 1?true:false);
 	//OrderDiscount orderDiscount=new OrderDiscount(order, orderPrice,Long.valueOf(0), new Date(), new LocalDate(), "NONE", BigDecimal.ZERO);
 	orderPrice.update(order);
+	orderPrice.setIsAddon('Y');
 	order.addOrderDeatils(orderPrice);
 	
 	this.orderPriceRepository.saveAndFlush(orderPrice);

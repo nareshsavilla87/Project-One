@@ -125,6 +125,10 @@ public class OrderAddons extends AbstractAuditableCustom<AppUser,Long>{
 	public void setPriceId(Long priceId) {
 		this.priceId = priceId;
 	}
+
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
 	
 	
 
