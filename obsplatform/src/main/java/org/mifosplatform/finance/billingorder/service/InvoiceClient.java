@@ -155,6 +155,7 @@ public class InvoiceClient {
 
 	public Invoice onTopUpAutoRenewalInvoice(Long orderId, Long clientId,LocalDate processDate) {
 
+
 		// Get qualified order complete details
 		List<BillingOrderData> products = this.billingOrderReadPlatformService.retrieveBillingOrderData(clientId, processDate,orderId);
 
