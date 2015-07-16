@@ -58,6 +58,9 @@ public class OrderPrice extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "is_deleted")
 	private char isDeleted;
 	
+	@Column(name = "is_addon")
+	private char isAddon = 'N';
+	
 	@Column(name = "tax_inclusive")
 	private  boolean taxInclusive;
 
@@ -66,13 +69,8 @@ public class OrderPrice extends AbstractAuditableCustom<AppUser, Long> {
 	private Order orders;
  
 
-/*	@OneToOne(cascade = CascadeType.ALL, mappedBy = "orderpriceid", orphanRemoval = true)
-	private OrderDiscount orderDiscount = new OrderDiscount();
-*/
-	public OrderPrice(final Long serviceId, final String chargeCode,
-			final String chargeType, final BigDecimal price,
-			final Date invoiceTillDate, final String chargetype,
-			final String chargeduration, final String durationType,
+	public OrderPrice(final Long serviceId, final String chargeCode,final String chargeType, final BigDecimal price,
+			final Date invoiceTillDate, final String chargetype,final String chargeduration, final String durationType,
 			final Date billStartDate,final LocalDate billEndDate, boolean isTaxInclusive) {
 
 		this.orders = null;
@@ -113,6 +111,10 @@ public class OrderPrice extends AbstractAuditableCustom<AppUser, Long> {
 	
 	
 
+	public void setIsAddon(char isAddon) {
+		this.isAddon = isAddon;
+	}
+
 	public Date getNextBillableDay() {
 		return nextBillableDay;
 	}
@@ -129,9 +131,16 @@ public class OrderPrice extends AbstractAuditableCustom<AppUser, Long> {
 		return orderDiscount;
 	}*/
 
+	
 	public void updateDates(LocalDate date) {
 		this.billEndDate =date.toDate();
 		//this.nextBillableDay=date.plusDays(1).toDate();
+	}
+
+
+
+	public char isAddon() {
+		return isAddon;
 	}
 
 	public String getChargeCode() {
@@ -242,6 +251,7 @@ public class OrderPrice extends AbstractAuditableCustom<AppUser, Long> {
 
 	public void setDatesOnOrderStatus(LocalDate newStartdate,LocalDate renewalEndDate, String orderstatus) {
 		
+		if(this.isAddon == 'N'){
 		if(orderstatus.equalsIgnoreCase("RENEWAL AFTER AUTOEXIPIRY")){
 			
 			if(newStartdate!=null){
@@ -256,7 +266,7 @@ public class OrderPrice extends AbstractAuditableCustom<AppUser, Long> {
 		}else{
 		   this.billEndDate=null;
 		}
-		
+		}
 
 	}
 
