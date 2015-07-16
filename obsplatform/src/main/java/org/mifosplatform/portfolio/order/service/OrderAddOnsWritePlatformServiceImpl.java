@@ -114,7 +114,7 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 	    //	endDate = new LocalDate(order.getEndDate());
 	    }
 	    
-	    if(endDate != null){ addonEndDate = endDate.toDate();}
+	   
 	    
 	    HardwareAssociation association=this.hardwareAssociationRepository.findOneByOrderId(orderId);
 		for (JsonElement jsonElement : addonServices) {
@@ -128,6 +128,8 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 			}
 		OrderPrice orderPrice =this.orderPriceRepository.findOne(addons.getPriceId());
 		List<BillingOrderData> billingOrderDatas = new ArrayList<BillingOrderData>(); 
+		 if(endDate != null){ addonEndDate = endDate.toDate();}
+		 else{addonEndDate = startDate.plusYears(100).toDate();}
 		
 		//if(order.getNextBillableDay() != null){
 			
