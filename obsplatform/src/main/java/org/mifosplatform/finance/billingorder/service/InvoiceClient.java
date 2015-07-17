@@ -144,6 +144,7 @@ public class InvoiceClient {
 
 			// Update order-price
 			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
+
 			System.out.println("---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
 
 			// Update Client Balance
