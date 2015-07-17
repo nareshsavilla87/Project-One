@@ -56,6 +56,8 @@ public class SchedulerJobApiConstants {
     public static final String JOB_MESSANGER ="Merge Messages";
     public static final String JOB_EXPORT_DATA ="Export Data";
 	public static final String JOB_RESELLER_COMMISSION ="Reseller Commission";
+	public static final String  jobisDisconnectUnpaidCustomers="isDisconnectUnpaidCustomers";
+	public static final String  DISCONNET_UNPAID_CUSTOMERS="DisconnectUnpaidCustomers";
 
     public static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobIdentifierParamName,
             displayNameParamName, nextRunTimeParamName, initializingErrorParamName, cronExpressionParamName, jobActiveStatusParamName,
@@ -76,7 +78,7 @@ public class SchedulerJobApiConstants {
 
     public static final Set<String> CREATE_REQUEST_JOB_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobProcessdate,jobDueDate,jobPromotionalMessage,
     		jobMessageTemplate,jobExipiryDate,"locale","dateFormat","isDynamic","jobName","reportName","isAutoRenewal","isCreateTicket","isUpdateStatus",schedulerJobParamName,jobReportName,
-    		JOB_REPORTEMAIL,JOB_EmailId,JOB_ProvSystem,JOB_URL,JOB_Username,JOB_Password,JOB_MiddleWare));
+    		JOB_REPORTEMAIL,JOB_EmailId,JOB_ProvSystem,JOB_URL,JOB_Username,JOB_Password,JOB_MiddleWare,"isDisconnectUnpaidCustomers"));
 
 
 
@@ -90,5 +92,7 @@ public class SchedulerJobApiConstants {
     public static final String JOB_RUN_HISTORY = "runhistory";
     public static final String JOB_PARAMETERS = "jopparameters";
     public static final String SCHEDULER_STATUS_PATH = "scheduler";
+    
+	
 
 }

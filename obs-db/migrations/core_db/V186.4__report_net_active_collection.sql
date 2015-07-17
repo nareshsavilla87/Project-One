@@ -12,6 +12,6 @@ insert ignore into m_code_value (id,code_id,code_value,order_position)
 select null,c.id,'Halfyearly',0 from  m_code_value prm, m_code c where c.id=prm.code_id and c.code_name ='Bill Frequency';
 
 insert ignore into m_code_value (id,code_id,code_value,order_position)
-select null,c.id,' 	yearly',0 from  m_code_value prm, m_code c where c.id=prm.code_id and c.code_name ='Bill Frequency';
+select null,c.id,'yearly',0 from  m_code_value prm, m_code c where c.id=prm.code_id and c.code_name ='Bill Frequency';
 
 
