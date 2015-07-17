@@ -24,6 +24,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -162,7 +163,7 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 	public BigDecimal calculateFinalAmount(ChargeCodeData chargeCodeData,Long clientId,Long priceId) {
 		
 		Long defaultValue=Long.valueOf(0);
-		Date defaultDate= new Date();
+		Date defaultDate= DateUtils.getDateOfTenant();
 		Price price = this.priceRepository.findOne(priceId);
 		BigDecimal finalAmount=BigDecimal.ZERO;
 		DiscountMaster discountMaster = this.discountMasterRepository.findOne(price.getDiscountId());
@@ -173,7 +174,7 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 				chargeCode.getChargeType(),defaultDate,price.getPrice(),"",discountMaster.getStartDate(),defaultDate,defaultValue,chargeCode.getTaxInclusive()); 
 		
 		DiscountMasterData discountMasterData = new DiscountMasterData(discountMaster.getId(),defaultValue,defaultValue,new LocalDate(discountMaster.getStartDate()),
-				new LocalDate(),discountMaster.getDiscountType(),discountMaster.getDiscountRate(),"N");
+				DateUtils.getLocalDateOfTenant(),discountMaster.getDiscountType(),discountMaster.getDiscountRate(),"N");
 		
 		List<InvoiceTaxCommand> invoiceTaxCommands=this.generateBill.calculateDiscountAndTax(billingOrderData, discountMasterData, new LocalDate(discountMaster.getStartDate()),endDate, price.getPrice());
 		if(!invoiceTaxCommands.isEmpty()){

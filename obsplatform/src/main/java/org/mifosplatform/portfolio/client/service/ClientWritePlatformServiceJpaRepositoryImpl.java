@@ -38,6 +38,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -394,7 +395,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     					 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
     							 Long.valueOf(0), object.toString(), "Recieved",
-    							 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
+    							 null, DateUtils.getDateOfTenant(), null, null, null, 'N', provisionActions.getAction(), null);
 
     					 processRequest.add(processRequestDetails);
     					 this.processRequestRepository.save(processRequest);
