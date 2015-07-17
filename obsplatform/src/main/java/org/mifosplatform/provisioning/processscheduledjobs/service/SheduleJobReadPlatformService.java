@@ -13,8 +13,6 @@ public interface SheduleJobReadPlatformService {
 
 	Long getMessageId(String processParam);
 
-
-
 	List<ScheduleJobData> retrieveSheduleJobParameterDetails(String paramValue);
 
 	JobParameterData getJobParameters(String jobName);

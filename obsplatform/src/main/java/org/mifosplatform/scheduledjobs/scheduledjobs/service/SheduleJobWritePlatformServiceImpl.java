@@ -58,6 +58,7 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
+import org.mifosplatform.infrastructure.jobs.api.SchedulerJobApiConstants;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.jobs.service.RadiusJobConstants;
 import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundException;
@@ -543,14 +544,44 @@ try {
                 	for (OrderData orderData : orderDatas){
                 		this.scheduleJob.ProcessAutoExipiryDetails(orderData,fw,exipirydate,data,clientId);
                 	}
+                }
+              }
+              if("Y".equalsIgnoreCase(data.getIsDisconnectUnpaidCustomers())){
+            	  System.out.println("Processing disconnect Unpaid Customers.......");
+            	   fw.append("Processing disconnect Unpaid Customers....... \r\n");
+            	   sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(SchedulerJobApiConstants.DISCONNET_UNPAID_CUSTOMERS);
+            	   if(sheduleDatas.isEmpty()){
+                 	  fw.append("Disconnect Unpaid Customers ScheduleJobData Empty \r\n");
+                   }
+            	   for (ScheduleJobData scheduleJobData : sheduleDatas){
+                       fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
+                          " ,query="+scheduleJobData.getQuery()+"\r\n");
+                       List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(),data);
+                   
+                    if(clientIds.isEmpty()){
+                      fw.append("no records are available for Disconnect Unpaid Customers \r\n");
+                    }
+                    for(Long clientId:clientIds){
+                  	  
+                      fw.append("processing client id :"+clientId+"\r\n");
+                      List<OrderData> orderDatas = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
+                      	if(orderDatas.isEmpty()){
+                      		fw.append("No Orders are Found for :"+clientId+"\r\n");
+                      	}	
+                      	for (OrderData orderData : orderDatas){
+                      		this.scheduleJob.ProcessDisconnectUnPaidCustomers(orderData,fw,data,clientId);
+                      	}
+                      }
+            	  
+               }
               }
                 fw.append("Auto Exipiry Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
                 fw.flush();
                 fw.close();
-              }
+              
               System.out.println("Auto Exipiry Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
-        }
-}catch(IOException exception){
+              }
+ }catch(IOException exception){
        System.out.println(exception);
 }catch (Exception dve) {
      System.out.println(dve.getMessage());

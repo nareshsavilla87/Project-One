@@ -26,6 +26,8 @@ public class JobParameterData {
 	private String createTicket;
 	private String updateStatus;
 	private String mikrotikApi;
+	private String isDisconnectUnpaidCustomers;
+	private String unpaidCustomers;
 	
 	public JobParameterData(List<JobParameters> jobParameters) {
               
@@ -75,22 +77,24 @@ public class JobParameterData {
 			     this.mikrotikApi=parameter.getParamValue();
 					
 		    }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_IS_RENEWAL)){
-                
             	this.isAutoRenewal=parameter.getParamValue();
             	
-           }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_EMAIL)){
-		          this.emailId=parameter.getParamValue();	
-					
-		   }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_TICKET)){
-			       this.createTicket=parameter.isDynamic();
-			       
-		   }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_STATUS)){
-		            this.updateStatus=parameter.isDynamic();
-		   }else{
-				 this.batchName=parameter.getParamValue();
-				 this.defaultValue=parameter.getParamDefaultValue();
-				 this.isDynamic=parameter.isDynamic();
-				 
+			} else if (parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_EMAIL)) {
+				this.emailId = parameter.getParamValue();
+
+			} else if (parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_TICKET)) {
+				this.createTicket = parameter.isDynamic();
+				
+			} else if (parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_STATUS)) {
+				this.updateStatus = parameter.isDynamic();
+				
+			} else if (parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_IS_DISCONNECT_UNPAIDCUSTOMERS)){
+				this.isDisconnectUnpaidCustomers=parameter.getParamValue();
+				
+			}else {
+				this.batchName = parameter.getParamValue();
+				this.defaultValue = parameter.getParamDefaultValue();
+				this.isDynamic = parameter.isDynamic();
 			}
 			/*if(parameter.isDynamic() == "Y" && parameter.getParamValue() == null){
 				
@@ -192,6 +196,22 @@ public class JobParameterData {
 	
 	public String getMikrotikApi() {
 		return mikrotikApi;
+	}
+
+	public String getIsDisconnectUnpaidCustomers() {
+		return isDisconnectUnpaidCustomers;
+	}
+	
+	public void setIsDisconnectUnpaidCustomers(String isDisconnectUnpaidCustomers) {
+		this.isDisconnectUnpaidCustomers = isDisconnectUnpaidCustomers;
+	}
+	
+	public String getUnpaidCustomers() {
+		return unpaidCustomers;
+	}
+
+	public void setUnpaidCustomers(String unpaidCustomers) {
+		this.unpaidCustomers = unpaidCustomers;
 	}
 
 	

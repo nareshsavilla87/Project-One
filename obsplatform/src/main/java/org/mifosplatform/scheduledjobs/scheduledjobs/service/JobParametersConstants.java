@@ -18,5 +18,6 @@ public class JobParametersConstants {
 	public static final String PARAM_TICKET = "Ticket";
 	public static final String PARAM_STATUS = "status";
 	public static final String PARAM_MIKROTIK_API="Mikrotik_api";
+	public static final String PARAM_IS_DISCONNECT_UNPAIDCUSTOMERS="isDisconnectUnpaidCustomers";
 	
 }
