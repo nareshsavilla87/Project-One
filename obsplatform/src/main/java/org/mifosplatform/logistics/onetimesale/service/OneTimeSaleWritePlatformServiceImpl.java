@@ -12,10 +12,6 @@ import org.mifosplatform.finance.billingorder.domain.BillingOrder;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
-import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
-import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
-import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefund;
-import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefundRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -72,8 +68,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 	private final EventValidationReadPlatformService eventValidationReadPlatformService;
 	private final ChargeCodeRepository chargeCodeRepository;
 	private final InvoiceRepository invoiceRepository;
-	private final DepositAndRefundRepository depositAndRefundRepository;
-	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
+	
 
 	@Autowired
 	public OneTimeSaleWritePlatformServiceImpl(final PlatformSecurityContext context,final OneTimeSaleRepository oneTimeSaleRepository,
@@ -85,7 +80,6 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			final DiscountReadPlatformService discountReadPlatformService,
 			final ChargeCodeRepository chargeCodeRepository,
 			final InvoiceRepository invoiceRepository,
-			final DepositAndRefundRepository depositAndRefundRepository,
 			final BillingOrderWritePlatformService billingOrderWritePlatformService) {
 
 		
@@ -102,8 +96,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		this.eventValidationReadPlatformService = eventValidationReadPlatformService;
 		this.chargeCodeRepository = chargeCodeRepository;
 		this.invoiceRepository = invoiceRepository;
-		this.depositAndRefundRepository = depositAndRefundRepository;
-		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
+		
 	}
 
 	/* (non-Javadoc)
@@ -137,7 +130,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			}
 			
 			/** Deposit&Refund table */
-			if(command.hasParameter("addDeposit")){
+		/*	if(command.hasParameter("addDeposit")){
 				if(command.booleanObjectValueOfParameterNamed("addDeposit")){
 					final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
 					final DepositAndRefund depositAndRefund = DepositAndRefund.fromJson(clientId, command);
@@ -150,7 +143,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 					
 				}
 				
-			}
+			}*/
 			
 			/**	Call if Item units is PIECES */
 			if(UnitEnumType.PIECES.toString().equalsIgnoreCase(item.getUnits())){
