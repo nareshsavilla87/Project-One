@@ -21,6 +21,7 @@ public class ServiceData {
 	private final String isPrepaid;
 	private final String serviceType;
 	private final String chargeDescription;
+	private String image;
 
 	public ServiceData(final Long id, final String planCode,final  String serviceCode,final String planDescription,final  String chargeCode,
 			final String chargingVariant,final BigDecimal price,final String priceregion,final Long contractId,final String duration,
@@ -65,6 +66,29 @@ public class ServiceData {
 		this.priceregion=priceRegion;
 		this.serviceType=serviceType;
 		this.isPrepaid=isPrepaid;
+		this.contractId=null;
+		this.duration=null;
+		this.billingFrequency=null;
+
+	}
+	
+	public ServiceData(final Long id,final  String serviceCode,final String serviceDescription,final String image) {
+		
+		this.id = id;
+		this.serviceCode = serviceCode;
+		this.serviceDescription = serviceDescription;
+		this.image=image;
+		this.planId = null;
+		this.discountId = null;
+		this.planDescription = null;
+		this.planCode = null;
+		this.chargeCode = null;
+		this.chargeDescription=null;
+		this.chargeVariant = null;
+		this.price = null;
+		this.priceregion=null;
+		this.serviceType=null;
+		this.isPrepaid=null;
 		this.contractId=null;
 		this.duration=null;
 		this.billingFrequency=null;
