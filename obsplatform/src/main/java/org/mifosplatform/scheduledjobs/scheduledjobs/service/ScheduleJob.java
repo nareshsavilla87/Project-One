@@ -17,6 +17,7 @@ import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBillingRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
@@ -212,4 +213,31 @@ public void ProcessAutoExipiryDetails(OrderData orderData, FileWriter fw, LocalD
 			 exception.printStackTrace();  
 		 }	
 	}
+
+
+/**
+ * @param orderData
+ * @param fw
+ * @param data
+ * @param clientId
+ */
+public void ProcessDisconnectUnPaidCustomers(OrderData orderData,FileWriter fw, JobParameterData data, Long clientId) {
+	
+	try{
+		SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
+		JSONObject jsonobject = new JSONObject();
+        jsonobject.put("disconnectReason","Payment Due");
+        jsonobject.put("disconnectionDate",dateFormat.format(DateUtils.getDateOfTenant()));
+        jsonobject.put("dateFormat","dd MMMM yyyy");
+        jsonobject.put("locale","en");
+        final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonobject.toString());
+        final JsonCommand command = JsonCommand.from(jsonobject.toString(),parsedCommand,this.fromApiJsonHelper,"DissconnectOrder",clientId, null,
+               null,clientId, null, null, null,null, null, null,null);
+        this.orderWritePlatformService.disconnectOrder(command, orderData.getId());
+        fw.append("Client Id"+clientId+" With this Orde"+orderData.getId()+" has been disconnected via Payment Due on Dated"+dateFormat.format(DateUtils.getDateOfTenant()));
+		
+	}catch(Exception exception){    
+			 exception.printStackTrace();     
+		 } 
+   }
 }

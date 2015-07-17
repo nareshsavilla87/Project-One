@@ -58,6 +58,7 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
+import org.mifosplatform.infrastructure.jobs.api.SchedulerJobApiConstants;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.jobs.service.RadiusJobConstants;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
@@ -201,7 +202,7 @@ try
 			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 			LocalTime date=new LocalTime(zone);
 			String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-			String path=FileUtils.generateLogFileDirectory()+ JobName.INVOICE.toString() + File.separator +"Invoice_"+new LocalDate().toString().replace("-","")+
+			String path=FileUtils.generateLogFileDirectory()+ JobName.INVOICE.toString() + File.separator +"Invoice_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+
 					"_"+dateTime+".log";
 			File fileHandler = new File(path.trim());
 			fileHandler.createNewFile();
@@ -234,7 +235,7 @@ try
 				for (Long clientId : clientIds) {
 					try {
 						if(data.isDynamic().equalsIgnoreCase("Y")){
-							Invoice  invoice=this.invoiceClient.invoicingSingleClient(clientId,new LocalDate());	
+							Invoice  invoice=this.invoiceClient.invoicingSingleClient(clientId,DateUtils.getLocalDateOfTenant());	
 							fw.append("ClientId: "+clientId+"\tAmount: "+invoice.getInvoiceAmount().toString()+"\r\n");
 						
 						}else{
@@ -274,7 +275,7 @@ public void processRequest() {
 			   final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 			   LocalTime date=new LocalTime(zone);
 	           String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-	           String path=FileUtils.generateLogFileDirectory()+JobName.REQUESTOR.toString()+ File.separator +"Requester_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+	           String path=FileUtils.generateLogFileDirectory()+JobName.REQUESTOR.toString()+ File.separator +"Requester_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".log";
 	           File fileHandler = new File(path.trim());
 	           fileHandler.createNewFile();
 	           FileWriter fw = new FileWriter(fileHandler);
@@ -317,7 +318,7 @@ public void processSimulator() {
 				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 				LocalTime date=new LocalTime(zone);
 				String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-				String path=FileUtils.generateLogFileDirectory()+JobName.SIMULATOR.toString()+ File.separator +"Simulator_"+new LocalDate().toString().
+				String path=FileUtils.generateLogFileDirectory()+JobName.SIMULATOR.toString()+ File.separator +"Simulator_"+DateUtils.getLocalDateOfTenant().toString().
 						replace("-","")+"_"+dateTime+".log";
 				File fileHandler = new File(path.trim());
 				fileHandler.createNewFile();
@@ -356,7 +357,7 @@ public void processSimulator() {
 				jsonobject.put("description","ClientId"+processRequest.getClientId()+" Order No:"+order.getOrderNo()+" Request Type:"+processRequest.getRequestType()
 						+" Generated at:"+new LocalTime().toString(formatter2));
 				}
-							jsonobject.put("ticketDate",formatter1.print(new LocalDate()));
+							jsonobject.put("ticketDate",formatter1.print(DateUtils.getLocalDateOfTenant()));
 				jsonobject.put("sourceOfTicket","Phone");
 				jsonobject.put("assignedTo", userId);
 				jsonobject.put("priority",priorityData.get(0).getValue());
@@ -387,7 +388,7 @@ try {
 			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 			LocalTime date=new LocalTime(zone);
 			String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-			String path=FileUtils.generateLogFileDirectory()+ JobName.GENERATE_STATEMENT.toString() + File.separator +"statement_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+			String path=FileUtils.generateLogFileDirectory()+ JobName.GENERATE_STATEMENT.toString() + File.separator +"statement_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".log";
 			File fileHandler = new File(path.trim());
 			fileHandler.createNewFile();
 			FileWriter fw = new FileWriter(fileHandler);
@@ -415,7 +416,7 @@ try {
 						DateTimeFormatter formatter1 = DateTimeFormat.forPattern("dd MMMM yyyy");
 						String formattedDate ;
 							if(data.isDynamic().equalsIgnoreCase("Y")){
-								formattedDate = formatter1.print(new LocalDate());	
+								formattedDate = formatter1.print(DateUtils.getLocalDateOfTenant());	
 							}else{
 								formattedDate = formatter1.print(data.getDueDate());
 							}
@@ -453,7 +454,7 @@ JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobNam
          final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
          LocalTime date=new LocalTime(zone);
          String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-         String path=FileUtils.generateLogFileDirectory()+ JobName.MESSAGE_MERGE.toString() + File.separator +"Messanger_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+         String path=FileUtils.generateLogFileDirectory()+ JobName.MESSAGE_MERGE.toString() + File.separator +"Messanger_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".log";
          File fileHandler = new File(path.trim());
          fileHandler.createNewFile();
          FileWriter fw = new FileWriter(fileHandler);
@@ -508,7 +509,7 @@ try {
             final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
             LocalTime date=new LocalTime(zone);
             String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-            String path=FileUtils.generateLogFileDirectory()+ JobName.AUTO_EXIPIRY.toString() + File.separator +"AutoExipiry_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+            String path=FileUtils.generateLogFileDirectory()+ JobName.AUTO_EXIPIRY.toString() + File.separator +"AutoExipiry_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".log";
             File fileHandler = new File(path.trim());
             fileHandler.createNewFile();
             FileWriter fw = new FileWriter(fileHandler);
@@ -520,7 +521,7 @@ try {
             	  fw.append("ScheduleJobData Empty \r\n");
                	}
               if(data.isDynamic().equalsIgnoreCase("Y")){
-            	  exipirydate=new LocalDate();
+            	  exipirydate=DateUtils.getLocalDateOfTenant();
               }else{
                		exipirydate=data.getExipiryDate();
               }
@@ -542,14 +543,44 @@ try {
                 	for (OrderData orderData : orderDatas){
                 		this.scheduleJob.ProcessAutoExipiryDetails(orderData,fw,exipirydate,data,clientId);
                 	}
+                }
               }
+        /*      if("Y".equalsIgnoreCase(data.getIsDisconnectUnpaidCustomers())){
+            	  System.out.println("Processing disconnect Unpaid Customers.......");
+            	   fw.append("Processing disconnect Unpaid Customers....... \r\n");
+            	   sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(SchedulerJobApiConstants.DISCONNET_UNPAID_CUSTOMERS);
+            	   if(sheduleDatas.isEmpty()){
+                 	  fw.append("Disconnect Unpaid Customers ScheduleJobData Empty \r\n");
+                   }
+            	   for (ScheduleJobData scheduleJobData : sheduleDatas){
+                       fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
+                          " ,query="+scheduleJobData.getQuery()+"\r\n");
+                       List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(),data);
+                   
+                    if(clientIds.isEmpty()){
+                      fw.append("no records are available for Disconnect Unpaid Customers \r\n");
+                    }
+                    for(Long clientId:clientIds){
+                  	  
+                      fw.append("processing client id :"+clientId+"\r\n");
+                      List<OrderData> orderDatas = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
+                      	if(orderDatas.isEmpty()){
+                      		fw.append("No Orders are Found for :"+clientId+"\r\n");
+                      	}	
+                      	for (OrderData orderData : orderDatas){
+                      		this.scheduleJob.ProcessDisconnectUnPaidCustomers(orderData,fw,data,clientId);
+                      	}
+                      }
+            	  
+               }
+              }*/
                 fw.append("Auto Exipiry Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
                 fw.flush();
                 fw.close();
-              }
+              
               System.out.println("Auto Exipiry Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
-        }
-}catch(IOException exception){
+              }
+ }catch(IOException exception){
        System.out.println(exception);
 }catch (Exception dve) {
      System.out.println(dve.getMessage());
@@ -570,7 +601,7 @@ public void processNotify() {
 	  		final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 	  		LocalTime date=new LocalTime(zone);
 	  		String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-	  		String path=FileUtils.generateLogFileDirectory()+JobName.PUSH_NOTIFICATION.toString() + File.separator +"PushNotification_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+	  		String path=FileUtils.generateLogFileDirectory()+JobName.PUSH_NOTIFICATION.toString() + File.separator +"PushNotification_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".log";
 	  		File fileHandler = new File(path.trim());
 	  		fileHandler.createNewFile();
 	  		FileWriter fw = new FileWriter(fileHandler);
@@ -882,7 +913,7 @@ public void processNotify() {
 				if (!entitlementDataForProcessings.isEmpty()) {
 					
 					String path = FileUtils.generateLogFileDirectory() + JobName.RADIUS.toString() + File.separator
-							+ "radius_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".log";
+							+ "radius_" + DateUtils.getLocalDateOfTenant().toString().replace("-", "") + "_" + dateTime + ".log";
 					
 					File fileHandler = new File(path.trim());
 					fileHandler.createNewFile();
@@ -1170,7 +1201,7 @@ public void eventActionProcessor() {
 		String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
 
 		//Retrieve Event Actions
-		String path=FileUtils.generateLogFileDirectory()+ JobName.EVENT_ACTION_PROCESSOR.toString() + File.separator +"Activationprocess_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+		String path=FileUtils.generateLogFileDirectory()+ JobName.EVENT_ACTION_PROCESSOR.toString() + File.separator +"Activationprocess_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".log";
 		File fileHandler = new File(path.trim());
 		fileHandler.createNewFile();
 		FileWriter fw = new FileWriter(fileHandler);
@@ -1206,9 +1237,9 @@ public void reportEmail() {
           		final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
           		LocalTime date=new LocalTime(zone);
           		String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-          		String fileLocation=FileUtils.MIFOSX_BASE_DIR+ File.separator + JobName.REPORT_EMAIL.toString() + File.separator +"ReportEmail_"+new LocalDate().toString().replace("-","")+"_"+dateTime;
+          		String fileLocation=FileUtils.MIFOSX_BASE_DIR+ File.separator + JobName.REPORT_EMAIL.toString() + File.separator +"ReportEmail_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime;
 				//Retrieve Event Actions
-				String path=FileUtils.generateLogFileDirectory()+ JobName.REPORT_EMAIL.toString() + File.separator +"ReportEmail_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+				String path=FileUtils.generateLogFileDirectory()+ JobName.REPORT_EMAIL.toString() + File.separator +"ReportEmail_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".log";
 				File fileHandler = new File(path.trim());
 				fileHandler.createNewFile();
 				FileWriter fw = new FileWriter(fileHandler);
@@ -1271,7 +1302,7 @@ public void reportStatmentPdf() {
 			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 			LocalTime date=new LocalTime(zone);
 			String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-			String path=FileUtils.generateLogFileDirectory()+ JobName.REPORT_STATMENT.toString() + File.separator +"statement_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+			String path=FileUtils.generateLogFileDirectory()+ JobName.REPORT_STATMENT.toString() + File.separator +"statement_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".log";
 			File fileHandler = new File(path.trim());
 			fileHandler.createNewFile();
 			FileWriter fw = new FileWriter(fileHandler);
@@ -1325,7 +1356,7 @@ public void reportStatmentPdf() {
 				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 				LocalTime date = new LocalTime(zone);
 				String dateTime = date.getHourOfDay() + "_"+ date.getMinuteOfHour() + "_"+ date.getSecondOfMinute();
-				String path = FileUtils.generateLogFileDirectory()+ JobName.EXPORT_DATA.toString() + File.separator	+ "ExportData_"+ new LocalDate().toString().replace("-", "") + "_"+ dateTime + ".log";
+				String path = FileUtils.generateLogFileDirectory()+ JobName.EXPORT_DATA.toString() + File.separator	+ "ExportData_"+ DateUtils.getLocalDateOfTenant().toString().replace("-", "") + "_"+ dateTime + ".log";
 				File fileHandler = new File(path.trim());
 				fileHandler.createNewFile();
 				FileWriter fw = new FileWriter(fileHandler);
@@ -1339,7 +1370,7 @@ public void reportStatmentPdf() {
 				simpleJdbcCall.setProcedureName("p_int_fa");//p --> procedure int --> integration fa --> financial account s/w {p_todt=2014-12-30}
 				
 				if (data.isDynamic().equalsIgnoreCase("Y")) {
-					parameterSource.addValue("p_todt", new LocalDate().toString(), Types.DATE);
+					parameterSource.addValue("p_todt", DateUtils.getLocalDateOfTenant().toString(), Types.DATE);
 				} else {
 					parameterSource.addValue("p_todt", data.getProcessDate().toString(), Types.DATE);
 				}
@@ -1378,7 +1409,7 @@ public void reportStatmentPdf() {
 				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 				LocalTime date = new LocalTime(zone);
 				String dateTime = date.getHourOfDay() + "_"+ date.getMinuteOfHour() + "_"+ date.getSecondOfMinute();
-				String path = FileUtils.generateLogFileDirectory()+ JobName.RESELLER_COMMISSION.toString()+ File.separator + "Commission_"+ new LocalDate().toString().replace("-", "") + "_"+ dateTime + ".log";
+				String path = FileUtils.generateLogFileDirectory()+ JobName.RESELLER_COMMISSION.toString()+ File.separator + "Commission_"+ DateUtils.getLocalDateOfTenant().toString().replace("-", "") + "_"+ dateTime + ".log";
 				File fileHandler = new File(path.trim());
 				fileHandler.createNewFile();
 				FileWriter fw = new FileWriter(fileHandler);
@@ -1429,7 +1460,7 @@ public void reportStatmentPdf() {
 			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 			LocalTime date = new LocalTime(zone);
 			String dateTime = date.getHourOfDay() + "_"+ date.getMinuteOfHour() + "_"+ date.getSecondOfMinute();
-			String path = FileUtils.generateLogFileDirectory()+ JobName.AGING_DISTRIBUTION.toString() + File.separator	+ "Distribution"+ new LocalDate().toString().replace("-", "") + "_"+ dateTime + ".log";
+			String path = FileUtils.generateLogFileDirectory()+ JobName.AGING_DISTRIBUTION.toString() + File.separator	+ "Distribution"+ DateUtils.getLocalDateOfTenant().toString().replace("-", "") + "_"+ dateTime + ".log";
 			File fileHandler = new File(path.trim());
 			fileHandler.createNewFile();
 			FileWriter fw = new FileWriter(fileHandler);
@@ -1478,7 +1509,7 @@ public void reportStatmentPdf() {
 			LocalTime date=new LocalTime(zone);
 			String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
 
-			String path=FileUtils.generateLogFileDirectory()+ JobName.REPROCESS.toString() + File.separator +"ReProcess_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".log";
+			String path=FileUtils.generateLogFileDirectory()+ JobName.REPROCESS.toString() + File.separator +"ReProcess_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".log";
 			File fileHandler = new File(path.trim());
 			fileHandler.createNewFile();
 			FileWriter fw = new FileWriter(fileHandler);
@@ -1512,7 +1543,7 @@ public void reportStatmentPdf() {
 					reProcessObject = new JSONObject(data.getReprocessDetail());
 					
 					Date reProcessingDate = dateformat.parse(reProcessObject.get("processTime").toString());
-					Date newDate = new Date();
+					Date newDate = DateUtils.getDateOfTenant();
 					long diff = newDate.getTime() - reProcessingDate.getTime();
 					long hours = diff / (60 * 60 * 1000);
 					
@@ -1524,7 +1555,7 @@ public void reportStatmentPdf() {
 					
 					if(paymentGateway.getSource().equalsIgnoreCase(ConfigurationConstants.GLOBALPAY_PAYMENTGATEWAY)){
 						
-						final String formattedDate =dateformat.format(new Date());
+						final String formattedDate =dateformat.format(DateUtils.getDateOfTenant());
 
 						int id = reProcessObject.getInt("id");
 						reProcessObject.remove("id");

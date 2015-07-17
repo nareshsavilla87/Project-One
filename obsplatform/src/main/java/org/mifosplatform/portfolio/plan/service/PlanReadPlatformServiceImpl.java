@@ -270,8 +270,8 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 		  context.authenticatedUser();
 
 	        String sql = "SELECT sm.id AS id,sm.service_description AS serviceDescription,p.plan_code as planCode,"
-			     +" pm.service_code AS serviceCode   FROM b_plan_detail pm, b_service sm,b_plan_master p"
-				 +" WHERE pm.service_code = sm.service_code AND p.id = pm.plan_id and sm.is_deleted ='n' and  pm.plan_id=?";
+			     +" pm.service_code AS serviceCode,psd.image AS image FROM b_plan_detail pm, b_service sm,b_plan_master p,b_prov_service_details psd "
+				 +" WHERE pm.service_code = sm.service_code AND p.id = pm.plan_id AND psd.service_id = sm.id and sm.is_deleted ='n' and  pm.plan_id=? group by sm.id";
 
 
 	        RowMapper<ServiceData> rm = new PeriodMapper();
@@ -288,7 +288,8 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 	            final Long id = rs.getLong("id");
 	            final String serviceCode = rs.getString("serviceCode");
 	            final String serviceDescription = rs.getString("serviceDescription");
-	        	return new ServiceData(id,null,null,null,serviceCode, serviceDescription,null,null,null,null);
+	            final String image = rs.getString("image");
+	        	return new ServiceData(id,serviceCode, serviceDescription,image);
 	           
 	        }
 }

@@ -15,6 +15,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -235,7 +236,7 @@ public class CenterReadPlatformServiceImpl implements CenterReadPlatformService 
         // final boolean clientPendingApprovalAllowed =
         // this.configurationDomainService.isClientPendingApprovalAllowedEnabled();
 
-        return CenterData.template(officeIdDefaulted, new LocalDate(), officeOptions, staffOptions, groupMembersOptions);
+        return CenterData.template(officeIdDefaulted, DateUtils.getLocalDateOfTenant(), officeOptions, staffOptions, groupMembersOptions);
     }
 
     private Collection<GroupGeneralData> retrieveAllGroupsForCenterDropdown(final Long officeId) {

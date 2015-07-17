@@ -79,7 +79,6 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			final ChargeCodeRepository chargeCodeRepository,
 			final InvoiceRepository invoiceRepository) {
 
-		
 		this.context = context;
 		this.fromJsonHelper = fromJsonHelper;
 		this.invoiceOneTimeSale = invoiceOneTimeSale;

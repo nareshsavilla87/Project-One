@@ -17,6 +17,7 @@ import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderServic
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
@@ -130,6 +131,7 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 		List<BillingOrderData> billingOrderDatas = new ArrayList<BillingOrderData>(); 
 		 if(endDate != null){ addonEndDate = endDate.toDate();}
 		 else{addonEndDate = startDate.plusYears(100).toDate();}
+
 		
 		//if(order.getNextBillableDay() != null){
 			
