@@ -316,7 +316,7 @@ public class GenerateDisconnectionBill {
 			LocalDate  invoiceTillDate = startDate;
 			LocalDate   nextbillDate = invoiceTillDate;
 			BigDecimal price = billingOrderData.getPrice();//totalPrice
-			  if(discountMasterData !=null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountAmount()) > 0){	
+			  if(discountMasterData !=null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountAmount()) < 0){	
 				   BigDecimal discountedPrice = price.subtract(discountMasterData.getDiscountAmount());
 				   listOfTaxes = this.calculateTax(billingOrderData,discountedPrice,startDate);
 		        }else{
