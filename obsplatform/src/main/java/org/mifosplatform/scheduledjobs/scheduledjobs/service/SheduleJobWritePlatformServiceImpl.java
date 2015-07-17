@@ -58,10 +58,8 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
-import org.mifosplatform.infrastructure.jobs.api.SchedulerJobApiConstants;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.jobs.service.RadiusJobConstants;
-import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundException;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
@@ -546,7 +544,7 @@ try {
                 	}
                 }
               }
-        /*      if("Y".equalsIgnoreCase(data.getIsDisconnectUnpaidCustomers())){
+           /* if("Y".equalsIgnoreCase(data.getIsDisconnectUnpaidCustomers())){
             	  System.out.println("Processing disconnect Unpaid Customers.......");
             	   fw.append("Processing disconnect Unpaid Customers....... \r\n");
             	   sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(SchedulerJobApiConstants.DISCONNET_UNPAID_CUSTOMERS);
@@ -564,16 +562,17 @@ try {
                     for(Long clientId:clientIds){
                   	  
                       fw.append("processing client id :"+clientId+"\r\n");
-                      List<OrderData> orderDatas = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
-                      	if(orderDatas.isEmpty()){
+                      List<Order> orders = this.orderReadPlatformService.retrieveCustomerActiveOrderDetails(clientId);
+                      	if(orders.isEmpty()){
                       		fw.append("No Orders are Found for :"+clientId+"\r\n");
                       	}	
-                      	for (OrderData orderData : orderDatas){
-                      		this.scheduleJob.ProcessDisconnectUnPaidCustomers(orderData,fw,data,clientId);
+                      	for (Order order : orders){
+                      		this.scheduleJob.ProcessDisconnectUnPaidCustomers(order,fw,data,clientId);
                       	}
-                      }
-            	  
-               }
+                    }
+                 }
+                fw.append("Disconnect Unpaid Customers Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
+
               }*/
                 fw.append("Auto Exipiry Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
                 fw.flush();

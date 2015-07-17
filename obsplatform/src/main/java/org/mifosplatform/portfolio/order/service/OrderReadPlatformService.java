@@ -42,7 +42,5 @@ public interface OrderReadPlatformService {
 
 	Long retrieveClientActiveOrderDetails(Long clientId, String serialNo);
 
-	
-	
 
 }
