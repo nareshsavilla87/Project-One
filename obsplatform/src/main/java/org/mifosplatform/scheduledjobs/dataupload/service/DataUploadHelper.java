@@ -29,6 +29,7 @@ import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
 import org.mifosplatform.portfolio.property.service.PropertyReadPlatformService;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.scheduledjobs.dataupload.data.MRNErrorData;
 import org.mifosplatform.scheduledjobs.dataupload.domain.DataUpload;
 import org.mifosplatform.scheduledjobs.dataupload.domain.DataUploadRepository;
@@ -360,7 +361,7 @@ public class DataUploadHelper {
 				uploadStatus.setErrorMessage("Processing failed");
 			}
 			
-			uploadStatus.setProcessDate(new LocalDate().toDate());
+			uploadStatus.setProcessDate(DateUtils.getDateOfTenant());
 			this.dataUploadRepository.save(uploadStatus);
 			uploadStatus = null;
 		}catch(Exception  exception){

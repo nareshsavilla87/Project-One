@@ -11,6 +11,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
 import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfoRepository;
@@ -120,7 +121,7 @@ public class PartnersAgreementWritePlatformServiceImp implements PartnersAgreeme
 					final Long detailId = fromApiJsonHelper.extractLongNamed("detailId", element);
 					AgreementDetails detail = this.agreementDetailsRepository.findOne(detailId);
 					detail.setSourceType(Long.valueOf((detail.getSourceType().toString()+detail.getId().toString())));
-					detail.setEndDate(new Date());
+					detail.setEndDate(DateUtils.getDateOfTenant());
 					detail.setIsDeleted('Y');
 					this.agreementDetailsRepository.saveAndFlush(detail);
 				}
@@ -174,7 +175,7 @@ public class PartnersAgreementWritePlatformServiceImp implements PartnersAgreeme
 			List<AgreementDetails> details = agreement.getDetails();
 			for (AgreementDetails detail : details) {
 				detail.setSourceType(Long.valueOf((detail.getSourceType().toString() + detail.getId().toString())));
-				detail.setEndDate(new Date());
+				detail.setEndDate(DateUtils.getDateOfTenant());
 				detail.setIsDeleted('Y');
 			}
 			agreement.delete();

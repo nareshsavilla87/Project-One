@@ -15,6 +15,7 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.mifosplatform.finance.financialtransaction.data.FinancialTransactionsData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.monetary.data.CurrencyData;
@@ -175,7 +176,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
 
         context.authenticatedUser();
 
-        return OfficeData.template(null, new LocalDate(), null);
+        return OfficeData.template(null, DateUtils.getLocalDateOfTenant(), null);
     }
 
     @Override
@@ -223,7 +224,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
         final Collection<OfficeData> parentLookups = retrieveAllOfficesForDropdown();
         final Collection<CurrencyData> currencyOptions = currencyReadPlatformService.retrieveAllowedCurrencies();
 
-        return OfficeTransactionData.template(new LocalDate(), parentLookups, currencyOptions);
+        return OfficeTransactionData.template(DateUtils.getLocalDateOfTenant(), parentLookups, currencyOptions);
     }
 
 	@Override
