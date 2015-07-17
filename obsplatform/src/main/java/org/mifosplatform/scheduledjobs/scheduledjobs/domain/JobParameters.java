@@ -19,7 +19,10 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "job_parameters")
 public class JobParameters extends AbstractPersistable<Long>{
 
-
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	@ManyToOne
     @JoinColumn(name="job_id")
@@ -221,6 +224,18 @@ public class JobParameters extends AbstractPersistable<Long>{
 	    	}else
 	    		this.isDynamic="N";
 	        }
+	    
+	    final String isDisconnectUnpaidCustomersParamName = "isDisconnectUnpaidCustomers";
+	    final boolean isDisconnectUnpaidCustomers= command.booleanPrimitiveValueOfParameterNamed(isDisconnectUnpaidCustomersParamName);
+	    if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.jobisDisconnectUnpaidCustomers)){
+	    	if(isDisconnectUnpaidCustomers){
+	    	this.isDynamic="Y";
+	    	this.paramValue="Y";
+	    	}else{
+	    		this.isDynamic="N";
+	    	this.paramValue="N";
+	    	}
+	    }
 	    
 	}
 

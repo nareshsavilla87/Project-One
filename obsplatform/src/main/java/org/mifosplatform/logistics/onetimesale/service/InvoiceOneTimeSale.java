@@ -54,6 +54,7 @@ public class InvoiceOneTimeSale {
 		this.generateReverseBillingOrderService = generateReverseBillingOrderService;
 		this.discountMasterRepository = discountMasterRepository;
 		this.clientRepository = clientRepository;
+
 	}
 
 /**
@@ -63,14 +64,17 @@ public class InvoiceOneTimeSale {
  */
 	public CommandProcessingResult invoiceOneTimeSale(final Long clientId,final OneTimeSaleData oneTimeSaleData, boolean isWalletEnable) {
 
+		BigDecimal discountRate = BigDecimal.ZERO;
+		
 		List<BillingOrderCommand> billingOrderCommands = new ArrayList<BillingOrderCommand>();
 
 		BillingOrderData billingOrderData = new BillingOrderData(oneTimeSaleData.getId(), oneTimeSaleData.getClientId(),DateUtils.getLocalDateOfTenant().toDate(),
 				oneTimeSaleData.getChargeCode(),oneTimeSaleData.getChargeType(),oneTimeSaleData.getTotalPrice(),oneTimeSaleData.getTaxInclusive());
 
-		BigDecimal discountRate = BigDecimal.ZERO;
 		Client client=this.clientRepository.findOneWithNotFoundDetection(clientId);
+		
 		DiscountMaster discountMaster=this.discountMasterRepository.findOne(oneTimeSaleData.getDiscountId());
+		
 		List<DiscountDetails> discountDetails=discountMaster.getDiscountDetails();
 		for(DiscountDetails discountDetail:discountDetails){
 			if(client.getCategoryType().equals(Long.valueOf(discountDetail.getCategoryType()))){
@@ -115,7 +119,6 @@ public class InvoiceOneTimeSale {
 
 		BillingOrderData billingOrderData = new BillingOrderData(oneTimeSaleData.getId(), clientId, DateUtils.getLocalDateOfTenant().toDate(),
 				oneTimeSaleData.getChargeCode(),oneTimeSaleData.getChargeType(),oneTimeSaleData.getTotalPrice(),oneTimeSaleData.getTaxInclusive());
-
 		
 		Client client=this.clientRepository.findOneWithNotFoundDetection(clientId);
 
@@ -131,7 +134,7 @@ public class InvoiceOneTimeSale {
 		}
 		
 		DiscountMasterData discountMasterData = new DiscountMasterData(discountMaster.getId(), discountMaster.getDiscountCode(),discountMaster.getDiscountDescription(),
-				discountMaster.getDiscountType(),discountRate, null, null);
+				discountMaster.getDiscountType(),discountRate, null, null,discountAmount);
 
 		BillingOrderCommand billingOrderCommand = this.generateDisconnectionBill.getReverseOneTimeBill(billingOrderData, discountMasterData);
 		
