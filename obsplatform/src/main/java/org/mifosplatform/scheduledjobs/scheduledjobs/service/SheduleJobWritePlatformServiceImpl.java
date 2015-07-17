@@ -546,7 +546,7 @@ try {
                 	}
                 }
               }
-              if("Y".equalsIgnoreCase(data.getIsDisconnectUnpaidCustomers())){
+        /*      if("Y".equalsIgnoreCase(data.getIsDisconnectUnpaidCustomers())){
             	  System.out.println("Processing disconnect Unpaid Customers.......");
             	   fw.append("Processing disconnect Unpaid Customers....... \r\n");
             	   sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(SchedulerJobApiConstants.DISCONNET_UNPAID_CUSTOMERS);
@@ -574,7 +574,7 @@ try {
                       }
             	  
                }
-              }
+              }*/
                 fw.append("Auto Exipiry Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
                 fw.flush();
                 fw.close();
