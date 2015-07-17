@@ -22,6 +22,14 @@ import org.mifosplatform.finance.payments.data.McodeData;
 import org.mifosplatform.finance.payments.exception.PaymentCodeNotFoundException;
 import org.mifosplatform.finance.payments.service.PaymentReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.organisation.address.data.CityDetailsData;
+import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
+import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
+import org.mifosplatform.portfolio.property.service.PropertyReadPlatformService;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.scheduledjobs.dataupload.data.MRNErrorData;
 import org.mifosplatform.scheduledjobs.dataupload.domain.DataUpload;
 import org.mifosplatform.scheduledjobs.dataupload.domain.DataUploadRepository;
@@ -37,14 +45,21 @@ public class DataUploadHelper {
 	private final DataUploadRepository dataUploadRepository;
 	private final AdjustmentReadPlatformService adjustmentReadPlatformService;
 	private final PaymentReadPlatformService paymodeReadPlatformService;
+	private final MCodeReadPlatformService mCodeReadPlatformService;
+	private final PropertyReadPlatformService propertyReadPlatformService;
+	private final AddressReadPlatformService addressReadPlatformService;
 	
 	@Autowired
 	public DataUploadHelper(final DataUploadRepository dataUploadRepository,final PaymentReadPlatformService paymodeReadPlatformService,
-			final AdjustmentReadPlatformService adjustmentReadPlatformService){
-		
+			final AdjustmentReadPlatformService adjustmentReadPlatformService,final MCodeReadPlatformService mCodeReadPlatformService,
+		final PropertyReadPlatformService propertyReadPlatformService,final AddressReadPlatformService addressReadPlatformService) {
 		this.dataUploadRepository=dataUploadRepository;
 		this.paymodeReadPlatformService=paymodeReadPlatformService;
 		this.adjustmentReadPlatformService=adjustmentReadPlatformService;
+		this.mCodeReadPlatformService=mCodeReadPlatformService;
+		this.propertyReadPlatformService=propertyReadPlatformService;
+		this.addressReadPlatformService=addressReadPlatformService;
+		
 	}
 	
 	
@@ -346,7 +361,7 @@ public class DataUploadHelper {
 				uploadStatus.setErrorMessage("Processing failed");
 			}
 			
-			uploadStatus.setProcessDate(new LocalDate().toDate());
+			uploadStatus.setProcessDate(DateUtils.getDateOfTenant());
 			this.dataUploadRepository.save(uploadStatus);
 			uploadStatus = null;
 		}catch(Exception  exception){
@@ -354,6 +369,127 @@ public class DataUploadHelper {
 		}
 		
 		
+	}
+
+	public String buildjsonForPropertyDefinition(String[] currentLineData,ArrayList<MRNErrorData> errorData, int i) {
+
+		if (currentLineData.length >= 10) {
+			final HashMap<String, String> map = new HashMap<>();
+			 map.put("propertyCode", currentLineData[0]);
+			final Collection<MCodeData> propertyTypesList = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROPERTY_TYPE);
+			if (!propertyTypesList.isEmpty()) {
+				for (MCodeData mCodeData : propertyTypesList) {
+					if (mCodeData.getmCodeValue().equalsIgnoreCase(currentLineData[1].toString().trim())) {
+						map.put("propertyType", mCodeData.getId().toString());
+						break;
+					} 
+				}
+
+				final Collection<PropertyDefinationData> unitCodesList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_UNIT,currentLineData[2].trim());
+				if (!unitCodesList.isEmpty()) {
+					for (PropertyDefinationData unitData : unitCodesList) {
+						if (unitData.getCode().equalsIgnoreCase(currentLineData[2].toString().trim())) {
+							map.put("unitCode", currentLineData[2].trim());
+							break;
+						}
+					}
+
+					final Collection<PropertyDefinationData> floorList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_FLOOR,currentLineData[3].trim());
+					if (!floorList.isEmpty()) {
+						for (PropertyDefinationData floorData : floorList) {
+							if (floorData.getCode().equalsIgnoreCase(currentLineData[3].toString().trim())) {
+								map.put("floor", currentLineData[3].trim());
+								break;
+							}
+						}
+
+						final Collection<PropertyDefinationData> buildingCodeList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_BUILDING,currentLineData[4].trim());
+						if (!buildingCodeList.isEmpty()) {
+							for (PropertyDefinationData buildingCode : buildingCodeList) {
+								if (buildingCode.getCode().equalsIgnoreCase(currentLineData[4].toString().trim())) {
+									map.put("buildingCode", currentLineData[4].trim());
+									break;
+								}
+							}
+
+							final Collection<PropertyDefinationData> parcelList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_PARCEL,currentLineData[5].trim());
+							if (!buildingCodeList.isEmpty()) {
+								for (PropertyDefinationData parcel : parcelList) {
+									if (parcel.getCode().equalsIgnoreCase(currentLineData[5].toString().trim())) {
+										map.put("parcel", currentLineData[5].trim());
+										break;
+									}
+								}
+					         final List<CityDetailsData> cityDetailsList = this.addressReadPlatformService.retrieveAddressDetailsByCityName(currentLineData[6].trim());
+					         if (!cityDetailsList.isEmpty()) {
+									for (CityDetailsData cityDetail : cityDetailsList) {
+										if (cityDetail.getCityName().equalsIgnoreCase(currentLineData[6].toString().trim())) {
+											map.put("precinct", currentLineData[6].trim());
+											break;
+										}
+									}
+								map.put("poBox", currentLineData[7]);
+								map.put("street", currentLineData[8]);
+								map.put("state", currentLineData[9]);
+								map.put("country", currentLineData[10]);
+								return new Gson().toJson(map);
+							  } else {
+								errorData.add(new MRNErrorData((long) i,"Precinct list is empty"));
+								return null;
+							  }
+							} else {
+								errorData.add(new MRNErrorData((long) i,"Parcel list is empty"));
+								return null;
+							}
+						} else {
+							errorData.add(new MRNErrorData((long) i,"buildingCode list is empty"));
+							return null;
+						}
+					} else {
+						errorData.add(new MRNErrorData((long) i,"floor list is empty"));
+						return null;
+					}
+				} else {
+					errorData.add(new MRNErrorData((long) i,"unitCode list is empty"));
+					return null;
+				}
+			} else {
+				errorData.add(new MRNErrorData((long) i,"Property Types list is empty"));
+				return null;
+			}
+		} else {
+			errorData.add(new MRNErrorData((long) i,"Improper Data in this line"));
+			return null;
+		}
+	}
+
+	public String buildjsonForPropertyCodeMaster(String[] currentLineData, ArrayList<MRNErrorData> errorData, int i) {
+		
+		if(currentLineData.length>=3){
+			final HashMap<String, String> map = new HashMap<>();
+		    final Collection<MCodeData> propertyCodeTypesList =this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.PROPERTY_CODE_TYPE);
+			if(!propertyCodeTypesList.isEmpty()){
+				 for(MCodeData mCodeData:propertyCodeTypesList){
+					   if(mCodeData.getmCodeValue().equalsIgnoreCase(currentLineData[0].toString())){ 
+							map.put("propertyCodeType",mCodeData.getmCodeValue());
+						   break;
+					   }
+				    }
+				    map.put("code",currentLineData[1]);
+					map.put("description",currentLineData[2]);
+					if(currentLineData.length==4){
+						map.put("referenceValue", currentLineData[3]);
+					}
+					return new Gson().toJson(map);	
+			}else{
+				errorData.add(new MRNErrorData((long)i, "Property Code Type list is empty"));
+				return null;
+			}
+		}else{
+			errorData.add(new MRNErrorData((long)i, "Improper Data in this line"));
+			return null;
+			
+		}
 	}
 
 }

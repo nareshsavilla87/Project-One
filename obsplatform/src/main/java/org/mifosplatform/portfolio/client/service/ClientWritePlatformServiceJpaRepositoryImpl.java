@@ -8,6 +8,7 @@ package org.mifosplatform.portfolio.client.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -35,6 +36,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.domain.Base64EncodedImage;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
@@ -44,6 +46,7 @@ import org.mifosplatform.organisation.address.domain.Address;
 import org.mifosplatform.organisation.address.domain.AddressRepository;
 import org.mifosplatform.organisation.groupsdetails.domain.GroupsDetails;
 import org.mifosplatform.organisation.groupsdetails.domain.GroupsDetailsRepository;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
@@ -52,8 +55,11 @@ import org.mifosplatform.portfolio.client.data.ClientDataValidator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGenerator;
 import org.mifosplatform.portfolio.client.domain.AccountNumberGeneratorFactory;
 import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientAdditionalFieldsRepository;
+import org.mifosplatform.portfolio.client.domain.ClientAdditionalfields;
 import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
+import org.mifosplatform.portfolio.client.exception.ClientAdditionalDataNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.InvalidClientStateTransitionException;
 import org.mifosplatform.portfolio.group.domain.Group;
@@ -64,7 +70,15 @@ import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyMaster;
+import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyTransactionHistory;
+import org.mifosplatform.portfolio.property.exceptions.PropertyCodeAllocatedException;
 import org.mifosplatform.provisioning.preparerequest.service.PrepareRequestReadplatformService;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.provisioning.provisioning.domain.ServiceParameters;
 import org.mifosplatform.provisioning.provisioning.domain.ServiceParametersRepository;
@@ -102,6 +116,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final OrderRepository orderRepository;
     private final PlatformSecurityContext context;
     private final OfficeRepository officeRepository;
+    private final ClientAdditionalFieldsRepository clientAdditionalFieldsRepository;
     private final AddressRepository addressRepository;
     private final SelfCareRepository selfCareRepository;
     private final CodeValueRepository codeValueRepository;
@@ -109,7 +124,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ClientDataValidator fromApiJsonDeserializer;
     private final GroupsDetailsRepository groupsDetailsRepository;
     private final ProvisioningActionsRepository provisioningActionsRepository;
-  
+    private final ProcessRequestRepository processRequestRepository;
+    private final PropertyMasterRepository propertyMasterRepository;
+    private final PropertyHistoryRepository propertyHistoryRepository;
     
    
 
@@ -123,7 +140,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final GroupsDetailsRepository groupsDetailsRepository,final OrderRepository orderRepository,final PlanRepository planRepository,
             final PrepareRequestWriteplatformService prepareRequestWriteplatformService,final ClientReadPlatformService clientReadPlatformService,
             final SelfCareRepository selfCareRepository,final PortfolioCommandSourceWritePlatformService  portfolioCommandSourceWritePlatformService,
-            final ProvisioningActionsRepository provisioningActionsRepository,final PrepareRequestReadplatformService prepareRequestReadplatformService) {
+            final ProvisioningActionsRepository provisioningActionsRepository,final PrepareRequestReadplatformService prepareRequestReadplatformService,
+            final ProcessRequestRepository processRequestRepository,final ClientAdditionalFieldsRepository clientAdditionalFieldsRepository,
+            final PropertyMasterRepository propertyMasterRepository, final PropertyHistoryRepository propertyHistoryRepository) {
     	
         this.context = context;
         this.ProvisioningWritePlatformService=ProvisioningWritePlatformService;
@@ -136,6 +155,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.orderReadPlatformService=orderReadPlatformService;
         this.clientReadPlatformService = clientReadPlatformService;
         this.serviceParametersRepository = serviceParametersRepository;
+        this.clientAdditionalFieldsRepository = clientAdditionalFieldsRepository;
         this.actionDetailsReadPlatformService=actionDetailsReadPlatformService;
         this.portfolioCommandSourceWritePlatformService=portfolioCommandSourceWritePlatformService;
         this.orderRepository=orderRepository;
@@ -146,6 +166,9 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.selfCareRepository=selfCareRepository;
         this.codeValueRepository=codeValueRepository;
         this.configurationRepository=configurationRepository;
+        this.processRequestRepository = processRequestRepository;
+        this.propertyMasterRepository = propertyMasterRepository;
+        this.propertyHistoryRepository = propertyHistoryRepository;
        
     }
 
@@ -199,6 +222,14 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,command.entityId(), clientId.toString(),null);
 			}
 			
+			  ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CLOSE_CLIENT);
+				
+	            if(provisionActions != null && provisionActions.isEnable() == 'Y'){
+				
+					this.ProvisioningWritePlatformService.postDetailsForProvisioning(clientId,Long.valueOf(0),ProvisioningApiConstants.REQUEST_TERMINATION,
+							               provisionActions.getProvisioningSystem(),null);
+				}
+			
 			
             return new CommandProcessingResultBuilder() //
                     .withCommandId(command.commandId()) //
@@ -224,10 +255,15 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final String externalId = command.stringValueOfParameterNamed("externalId");
             throw new PlatformDataIntegrityException("error.msg.client.duplicate.externalId", "Client with externalId `" + externalId
                     + "` already exists", "externalId", externalId);
+            
         } else if (realCause.getMessage().contains("account_no_UNIQUE")) {
             final String accountNo = command.stringValueOfParameterNamed("accountNo");
             throw new PlatformDataIntegrityException("error.msg.client.duplicate.accountNo", "Client with accountNo `" + accountNo
                     + "` already exists", "accountNo", accountNo);
+        }else if (realCause.getMessage().contains("username")) {
+            final String username = command.stringValueOfParameterNamed("username");
+            throw new PlatformDataIntegrityException("error.msg.client.duplicate.username", "Client with username" + username
+                    + "` already exists", "username", username);
         }else if (realCause.getMessage().contains("email_key")) {
             final String email = command.stringValueOfParameterNamed("email");
             throw new PlatformDataIntegrityException("error.msg.client.duplicate.email", "Client with email `" + email
@@ -250,7 +286,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
         try {
             context.authenticatedUser();
-            final Configuration configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
+             Configuration configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
             
             if(configuration == null){
             	throw new ConfigurationPropertyNotFoundException(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
@@ -264,6 +300,14 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
             final Long groupId = command.longValueOfParameterNamed(ClientApiConstants.groupIdParamName);
             final Group clientParentGroup = null;
+            PropertyMaster propertyMaster=null;
+           Configuration propertyConfiguration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+			if(propertyConfiguration != null && propertyConfiguration.isEnabled()) {		
+				 propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(command.stringValueOfParameterNamed("addressNo"));
+				if(propertyMaster != null && propertyMaster.getClientId() != null ){
+					throw new PropertyCodeAllocatedException(propertyMaster.getPropertyCode());
+				}
+			}
 
             final Client newClient = Client.createNew(clientOffice, clientParentGroup, command);
             this.clientRepository.save(newClient);
@@ -292,8 +336,21 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 						.withJson(selfcarecreation.toString()).build();
 				this.portfolioCommandSourceWritePlatformService.logCommandSource(selfcareCommandRequest);
 			}
-
-            
+			
+			 //for property code updation with client details
+				//configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+				if(propertyConfiguration != null && propertyConfiguration.isEnabled()) {		
+				//	PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(address.getAddressNo());
+					if(propertyMaster !=null){
+						propertyMaster.setClientId(newClient.getId());
+						propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
+					    this.propertyMasterRepository.saveAndFlush(propertyMaster);
+					    PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),
+					    		CodeNameConstants.CODE_PROPERTY_ALLOCATE,newClient.getId(),propertyMaster.getPropertyCode());
+					    this.propertyHistoryRepository.save(propertyHistory);
+					}
+					
+				}
             
             final List<ActionDetaislData> actionDetailsDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_CLIENT);
             if(!actionDetailsDatas.isEmpty()){
@@ -305,7 +362,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if(provisionActions != null && provisionActions.isEnable() == 'Y'){
 				/*this.prepareRequestWriteplatformService.prepareRequestForRegistration(newClient.getId(),provisionActions.getAction(),
 						   provisionActions.getProvisioningSystem());*/
-				this.ProvisioningWritePlatformService.postDetailsForProvisioning(newClient.getId(),ProvisioningApiConstants.REQUEST_CLIENT_ACTIVATION,
+				this.ProvisioningWritePlatformService.postDetailsForProvisioning(newClient.getId(),Long.valueOf(0),ProvisioningApiConstants.REQUEST_CLIENT_ACTIVATION,
 						               provisionActions.getProvisioningSystem(),null);
 			}
 
@@ -342,7 +399,51 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             if (clientOffice == null) { throw new OfficeNotFoundException(officeId); }
             final Map<String, Object> changes = clientForUpdate.update(command);
             clientForUpdate.setOffice(clientOffice);
+            
             this.clientRepository.saveAndFlush(clientForUpdate);
+            
+            Configuration isSelfcareUser = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
+            if(isSelfcareUser.isEnabled()){
+            	SelfCare selfCare =selfCareRepository.findOneByClientId(clientId);
+            	if(selfCare != null){
+            	String newUserName = command.stringValueOfParameterNamed("userName");
+            	String newPassword = command.stringValueOfParameterNamed("password");
+            	String existingUserName = selfCare.getUserName();
+            	String existingPassword = selfCare.getPassword();
+            	
+                if((selfCare != null) && (newUserName != null && newPassword != null) && (!newUserName.isEmpty() && !newPassword.isEmpty()) &&
+                		((!existingUserName.equalsIgnoreCase(newUserName)) || (!existingPassword.equalsIgnoreCase(newPassword)))){				
+                	
+                	selfCare.setUserName(newUserName);
+                	selfCare.setPassword(newPassword);
+                	
+    				this.selfCareRepository.save(selfCare);
+    				
+    				ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_Change_CREDENTIALS);
+    				if(provisionActions.getIsEnable() == 'Y'){
+    					JSONObject object = new JSONObject();
+    					try {
+							object.put("newUserName", newUserName);
+							object.put("newPassword", newPassword);
+							object.put("existingUserName", existingUserName);
+							object.put("existingPassword", existingPassword);
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+    					 ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), clientId, Long.valueOf(0),
+    							 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
+
+    					 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
+    							 Long.valueOf(0), object.toString(), "Recieved",
+    							 null, DateUtils.getDateOfTenant(), null, null, null, 'N', provisionActions.getAction(), null);
+
+    					 processRequest.add(processRequestDetails);
+    					 this.processRequestRepository.save(processRequest);
+    					
+    				}
+                }
+    			}
+            }
             
             if (changes.containsKey(ClientApiConstants.groupParamName)) {
             	
@@ -605,6 +706,76 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			this.clientRepository.saveAndFlush(childClient);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(parentId).build();
 	
+		}catch(DataIntegrityViolationException dve){
+			handleDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+		
+	}
+
+	@Override
+	public CommandProcessingResult createClientAdditionalInfo(JsonCommand command, Long entityId) {
+            try{
+                 this.context.authenticatedUser();
+     				
+     			final Long genderId = command.longValueOfParameterNamed(ClientApiConstants.genderParamName);
+     			final CodeValue gender = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_GENDER, genderId);
+     				
+     			final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityParamName);
+     			final CodeValue nationality = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_NATIONALITY, nationalityId);
+     				
+     			final Long customerTypeId = command.longValueOfParameterNamed(ClientApiConstants.idTypeParamName);
+     			final CodeValue customerIdentifier = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_CUSTOMER_IDENTIFIER, customerTypeId);
+     			
+     			final Long prefLangId = command.longValueOfParameterNamed(ClientApiConstants.preferredLangParamName);
+     			final CodeValue preferLang = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_LANG, prefLangId);
+     				
+     			final Long prefCommId = command.longValueOfParameterNamed(ClientApiConstants.preferredCommunicationParamName);
+     			final CodeValue preferCommunication = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_COMMUNICATION, prefCommId);
+     				
+     			final Long ageGroupId = command.longValueOfParameterNamed(ClientApiConstants.ageGroupParamName);
+     			final CodeValue ageGroup = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_AGE_GROUP, ageGroupId);
+     			
+     			ClientAdditionalfields clientAdditionalData = ClientAdditionalfields.fromJson(entityId,gender,nationality,customerIdentifier,preferLang,preferCommunication,ageGroup,command);
+     			this.clientAdditionalFieldsRepository.save(clientAdditionalData);
+     			
+                 return new CommandProcessingResult(Long.valueOf(entityId));
+            }catch(DataIntegrityViolationException dve){
+            	handleDataIntegrityIssues(command, dve);
+    			return new CommandProcessingResult(Long.valueOf(-1));
+            }
+	}
+
+	@Override
+	public CommandProcessingResult updateClientAdditionalInfo(JsonCommand command) {
+		try{
+				
+			   ClientAdditionalfields additionalfields=this.clientAdditionalFieldsRepository.findOneByClientId(command.entityId());
+			   if(additionalfields == null){
+				   throw new ClientAdditionalDataNotFoundException(command.entityId());
+			   }
+				final Long genderId = command.longValueOfParameterNamed(ClientApiConstants.genderParamName);
+				final CodeValue gender = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_GENDER, genderId);
+					
+				final Long nationalityId = command.longValueOfParameterNamed(ClientApiConstants.nationalityParamName);
+				final CodeValue nationality = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_NATIONALITY, nationalityId);
+					
+				final Long customerTypeId = command.longValueOfParameterNamed(ClientApiConstants.idTypeParamName);
+				final CodeValue customerIdentifier = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_CUSTOMER_IDENTIFIER, customerTypeId);
+				
+				final Long prefLangId = command.longValueOfParameterNamed(ClientApiConstants.preferredLangParamName);
+				final CodeValue preferLang = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_LANG, prefLangId);
+					
+				final Long prefCommId = command.longValueOfParameterNamed(ClientApiConstants.preferredCommunicationParamName);
+				final CodeValue preferCommunication = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_PREFER_COMMUNICATION, prefCommId);
+					
+				final Long ageGroupId = command.longValueOfParameterNamed(ClientApiConstants.ageGroupParamName);
+				final CodeValue ageGroup = this.codeValueRepository.findByCodeNameAndId(CodeNameConstants.CODE_AGE_GROUP, ageGroupId);
+				
+				additionalfields.upadate(gender,nationality,customerIdentifier,preferLang,preferCommunication,ageGroup,command);
+				this.clientAdditionalFieldsRepository.save(additionalfields);
+				
+			return new CommandProcessingResult(command.entityId());
 		}catch(DataIntegrityViolationException dve){
 			handleDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));

@@ -15,6 +15,9 @@ public interface PlanWritePlatformService {
 
 	CommandProcessingResult deleteplan(Long entityId);
 
+	CommandProcessingResult updatePlanQualifierData(Long entityId,
+			JsonCommand command);
+
 	
 
 }

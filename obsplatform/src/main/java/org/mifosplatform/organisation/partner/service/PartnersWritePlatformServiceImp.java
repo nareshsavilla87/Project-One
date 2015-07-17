@@ -27,6 +27,10 @@ import org.mifosplatform.organisation.office.domain.OfficeAddressRepository;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.exception.OfficeNotFoundException;
 import org.mifosplatform.organisation.partner.serialization.PartnersCommandFromApiJsonDeserializer;
+import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
+import org.mifosplatform.provisioning.provisioning.service.ProvisioningWritePlatformService;
+import org.mifosplatform.provisioning.provsionactions.domain.ProvisionActions;
+import org.mifosplatform.provisioning.provsionactions.domain.ProvisioningActionsRepository;
 import org.mifosplatform.useradministration.api.UsersApiResource;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.useradministration.domain.AppUserRepository;
@@ -54,20 +58,23 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
     private final RoleRepository roleRepository;
     private final UsersApiResource userApiResource;
     private final AppUserRepository userRepository;
+    private final ProvisioningActionsRepository provisioningActionsRepository;
+    private final ProvisioningWritePlatformService provisioningWritePlatformService;
     private final OfficeAddressRepository addressRepository;
     private final OfficeAdditionalInfoRepository officeAdditionalInfoRepository;
 
 	@Autowired
-	public PartnersWritePlatformServiceImp(final PlatformSecurityContext context,
-			final PartnersCommandFromApiJsonDeserializer apiJsonDeserializer,
-			final OfficeRepository officeRepository,final RoleRepository roleRepository,
-			final UsersApiResource userApiResource,final AppUserRepository userRepository,
-			final OfficeAddressRepository addressRepository,
-			final OfficeAdditionalInfoRepository officeAdditionalInfoRepository) {
+	public PartnersWritePlatformServiceImp(final PlatformSecurityContext context,final PartnersCommandFromApiJsonDeserializer apiJsonDeserializer,
+			final OfficeRepository officeRepository,final RoleRepository roleRepository,final UsersApiResource userApiResource,final AppUserRepository userRepository,
+			final OfficeAddressRepository addressRepository,final OfficeAdditionalInfoRepository officeAdditionalInfoRepository,
+			final ProvisioningActionsRepository provisioningActionsRepository,final ProvisioningWritePlatformService provisioningWritePlatformService) {
+		
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.officeRepository = officeRepository;
 		this.roleRepository = roleRepository;
+		this.provisioningActionsRepository=provisioningActionsRepository;
+		this.provisioningWritePlatformService = provisioningWritePlatformService;
 		this.userApiResource = userApiResource;
 		this.userRepository = userRepository;
 		this.addressRepository = addressRepository;
@@ -121,7 +128,16 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 	        final String result=this.userApiResource.createUser(json.toString());
 	        JSONObject resultJson = new JSONObject(result);
 	        final String userId=resultJson.getString("resourceId");
-			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
+	        
+           ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_CREATE_AGENT);
+			
+            if(provisionActions != null && provisionActions.isEnable() == 'Y'){
+				
+				this.provisioningWritePlatformService.postDetailsForProvisioning(Long.valueOf(0),office.getId(),ProvisioningApiConstants.REQUEST_CREATE_AGENT,
+						               provisionActions.getProvisioningSystem(),null);
+			}
+			
+	        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 					       .withEntityId(additionalInfo.getId()).withOfficeId(office.getId()).withResourceIdAsString(userId).build();
 		} catch (final DataIntegrityViolationException e) {
 			handleDataIntegrityIssues(command, e);
@@ -170,6 +186,10 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 	            final String name = command.stringValueOfParameterNamed("partnerName");
 	            throw new PlatformDataIntegrityException("error.msg.partner.duplicate.name", "Partner with name `" + name + "` already exists",
 	                    "name", name);
+	         }else if(realCause.getMessage().contains("externalid_org")) {
+	        	 final String externalId=command.stringValueOfParameterNamed("externalId");
+	            throw new PlatformDataIntegrityException("error.msg.office or partner.duplicate.externalId", "office or partner with externalId `" + externalId + "` already exists",
+	                    "externalId", externalId);
 	        }
 		
 		throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue",
@@ -255,6 +275,7 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
             if(office==null){
             	throw new OfficeNotFoundException(partnerId);
             }
+           // final Office office = officeAdditionalInfo.getOffice();
             //update office
             final Map<String, Object> officeChanges = office.update(command);
             if (officeChanges.containsKey("parentId")) {
@@ -288,16 +309,6 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
         	   user.setEmail(officeAddress.getEmail());
            }else{}
            this.userRepository.saveAndFlush(user);
-           /*final String[] roles = command.arrayValueOfParameterNamed("roles");
-            JSONObject json = new JSONObject();
-		    json.put("username", loginName);
-		    json.put("firstname",office.getName());
-		    json.put("lastname", office.getName());
-		    json.put("sendPasswordToEmail",Boolean.FALSE);
-		    json.put("email",officeAddress.getEmail());
-		    json.put("officeId", office.getId());
-		    json.put("roles", roles);
-            this.userApiResource.updateUser(userId, json.toString());*/
             
 	        return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 				       .withEntityId(officeAdditionalInfo.getId()).withOfficeId(office.getId()).with(officeChanges).build();

@@ -10,4 +10,5 @@ public interface ContractRepository  extends JpaRepository<Contract, Long>,JpaSp
 
 	@Query("from Contract contract where contract.subscriptionPeriod =:contractPeriod")
 	Contract findOneByContractId(@Param("contractPeriod") String contractPeriod);
+
 }

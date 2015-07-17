@@ -7,6 +7,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.organisation.address.data.AddressData;
 import org.mifosplatform.organisation.address.data.AddressLocationDetails;
+import org.mifosplatform.organisation.address.data.CityDetailsData;
 import org.mifosplatform.organisation.address.data.CountryDetails;
 
 public interface AddressReadPlatformService {
@@ -14,7 +15,7 @@ public interface AddressReadPlatformService {
 
 	List<AddressData> retrieveSelectedAddressDetails(String selectedname);
 
-	List<AddressData> retrieveAddressDetailsBy(Long clientId);
+	List<AddressData> retrieveAddressDetailsBy(Long clientId, String addressType);
 
 	List<AddressData> retrieveAddressDetails();
 	
@@ -35,6 +36,10 @@ public interface AddressReadPlatformService {
 	List<AddressData> retrieveClientAddressDetails(Long clientId);
 	
 	Page<AddressLocationDetails> retrieveAllAddressLocations(SearchSqlQuery searchAddresses);
+
+	List<CityDetailsData> retrieveCitywithCodeDetails();
+
+	List<CityDetailsData> retrieveAddressDetailsByCityName(String cityName);
 	
 
 }

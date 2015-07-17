@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.data.AddressData;
 import org.mifosplatform.organisation.address.data.AddressLocationDetails;
+import org.mifosplatform.organisation.address.data.CityDetailsData;
 import org.mifosplatform.organisation.address.exception.AddressNoRecordsFoundException;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,9 +102,9 @@ public class ClientAddressApiResource {
 	@Path("addressdetails/{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
-    public String retrieveClientAddress( @PathParam("clientId") final Long clientId , @Context final UriInfo uriInfo) {
+    public String retrieveClientAddress( @PathParam("clientId") final Long clientId,@QueryParam("addressType")String addressType, @Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-        final List<AddressData> addressdata = this.addressReadPlatformService.retrieveAddressDetailsBy(clientId);
+        final List<AddressData> addressdata = this.addressReadPlatformService.retrieveAddressDetailsBy(clientId,addressType);
         final List<String> citiesData = this.addressReadPlatformService.retrieveCityDetails();
         final List<EnumOptionData> enumOptionDatas = this.addressReadPlatformService.addressType();
         final AddressData data=new AddressData(addressdata,null,null,citiesData,enumOptionDatas);
@@ -124,7 +125,7 @@ public class ClientAddressApiResource {
         final AddressData addressData = this.addressReadPlatformService.retrieveAdressBy(cityName);
      
         if(addressData== null){
-        	throw new AddressNoRecordsFoundException();
+        	throw new AddressNoRecordsFoundException("city");
         }
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, addressData, RESPONSE_DATA_PARAMETERS);
@@ -220,6 +221,28 @@ public class ClientAddressApiResource {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final List<String> countryData = this.addressReadPlatformService.retrieveCountryDetails();
 		 return this.toApiJsonSerializer.serialize(countryData);
+	}
+	
+	@GET
+	@Path("/city")
+	@Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveAddressDetailsWithcityName(@Context final UriInfo uriInfo,@QueryParam("query") final String cityName){
+		
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final List<CityDetailsData> cityDetails = this.addressReadPlatformService.retrieveAddressDetailsByCityName(cityName);
+		 return this.toApiJsonSerializer.serialize(cityDetails);
+	}
+	
+	@DELETE
+	@Path("{id}")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String deleteclientAddress(@PathParam("id") final Long id, final String apiRequestBodyAsJson){
+		 final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteAddress(id).withJson(apiRequestBodyAsJson).build();
+		 final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		  return this.toApiJsonSerializer.serialize(result);
+
 	}
 	
 }

@@ -8,11 +8,12 @@ import org.mifosplatform.finance.billingorder.service.InvoiceClient;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
-import org.mifosplatform.portfolio.order.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderAddons;
 import org.mifosplatform.portfolio.order.domain.OrderAddonsRepository;
@@ -88,11 +89,12 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 	    Order order=this.orderRepository.findOne(orderId);
 	    Contract contract=this.contractRepository.findOne(contractId);
 	    
-	    final LocalDate endDate = this.orderAssembler.calculateEndDate(new LocalDate(startDate),
+	    LocalDate endDate = this.orderAssembler.calculateEndDate(new LocalDate(startDate),
                 contract.getSubscriptionType(), contract.getUnits());
 	    
 	    if(order.getEndDate() != null && endDate.isAfter(new LocalDate(order.getEndDate()))){
-            throw new AddonEndDateValidationException(orderId);
+          //  throw new AddonEndDateValidationException(orderId);
+	    	endDate = new LocalDate(order.getEndDate());
 	    }
 	    
 	    HardwareAssociation association=this.hardwareAssociationRepository.findOneByOrderId(orderId);
@@ -107,7 +109,7 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 		}
 		
 		if(order.getNextBillableDay() != null){
-			this.invoiceClient.invoicingSingleClient(order.getClientId(),new LocalDate());
+			this.invoiceClient.invoicingSingleClient(order.getClientId(),DateUtils.getLocalDateOfTenant());
 		}
 		
 		return new CommandProcessingResult(orderId);
@@ -142,8 +144,11 @@ private OrderAddons assembleOrderAddons(JsonElement jsonElement,FromJsonHelper f
 	if(!"None".equalsIgnoreCase(serviceMapping.get(0).getProvisionSystem())){
 		status=StatusTypeEnum.PENDING.toString();
 	}
-	
-	orderAddons.setEndDate(endDate.toDate());
+	if(endDate !=null){
+	   orderAddons.setEndDate(endDate.toDate());
+	}else{
+	  orderAddons.setEndDate(null);
+	}
 	orderAddons.setProvisionSystem(serviceMapping.get(0).getProvisionSystem());
 	orderAddons.setStatus(status);
 	

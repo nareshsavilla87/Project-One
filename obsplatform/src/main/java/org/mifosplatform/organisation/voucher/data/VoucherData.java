@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.office.data.OfficeData;
 
 /**
@@ -36,6 +37,7 @@ public class VoucherData {
 	private String pinNo;
 	private String status;
 	private Long clientId;
+	private Collection<MCodeData> reasondatas;
 
 	public VoucherData(final String batchName, final Long officeId,
 			final Long length, final String pinCategory, final String pinType, final Long quantity,
@@ -101,6 +103,10 @@ public class VoucherData {
 	}
 	public VoucherData(Long priceId) {
 		this.priceId = priceId;
+	}
+
+	public VoucherData(Collection<MCodeData> reasondatas) {
+        this.reasondatas = reasondatas;
 	}
 
 	public List<EnumOptionData> getPinCategoryData() {

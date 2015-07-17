@@ -40,7 +40,7 @@ public class PaymentGatewayCommandFromApiJsonDeserializer {
 	private final Set<String> onlinePaymentSupportedParameters = new HashSet<String>(Arrays.asList("total_amount", 
 			"clientId", "emailId", "transactionId", "source", "otherData", "device", "currency","dateFormat","locale",
 			"paytermCode","planCode","contractPeriod","value","verificationCode","screenName",
-			"renewalPeriod", "description","cardType","cardNumber"));
+			"renewalPeriod", "description","cardType","cardNumber","status","error"));
 	
     private final FromJsonHelper fromApiJsonHelper;
     

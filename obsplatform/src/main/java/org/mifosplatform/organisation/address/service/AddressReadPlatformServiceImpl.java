@@ -13,6 +13,7 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.data.AddressData;
 import org.mifosplatform.organisation.address.data.AddressLocationDetails;
+import org.mifosplatform.organisation.address.data.CityDetailsData;
 import org.mifosplatform.organisation.address.data.CountryDetails;
 import org.mifosplatform.organisation.address.domain.AddressEnum;
 import org.mifosplatform.portfolio.order.data.AddressStatusEnumaration;
@@ -40,12 +41,17 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 
 
 	@Override
-	public List<AddressData> retrieveAddressDetailsBy(final Long clientId) {
+	public List<AddressData> retrieveAddressDetailsBy(final Long clientId,String addressType) {
 
 		try{
 		context.authenticatedUser();
 		final AddressMapper mapper = new AddressMapper();
-		final String sql = "select " + mapper.schema()+" where is_deleted='n' and a.address_key='PRIMARY' and a.client_id="+clientId;
+		String sql =null;
+		if(addressType == null){
+		  sql = "select " + mapper.schema()+" where is_deleted='n' and a.address_key='PRIMARY' and a.client_id="+clientId;
+		}else{
+		  sql = "select " + mapper.schema()+" where is_deleted='n' and a.address_key='"+addressType+"' and a.client_id="+clientId;
+		}
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 		}catch (final EmptyResultDataAccessException e) {
 			return null;
@@ -113,7 +119,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 	private static final class AddressMapper1 implements RowMapper<String> {
 
 		public String sqlschema(final String placeholder,final String tablename) {
-			return placeholder+" as data from b_"+tablename;
+			return placeholder+" as data from b_"+tablename+" ";
 
 		}
 
@@ -146,7 +152,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 		context.authenticatedUser();
 		final AddressMapper1 mapper = new AddressMapper1();
 
-		final String sql = "select " + mapper.sqlschema("city_name","city");
+		final String sql = "select " + mapper.sqlschema("city_name","city")+ " where is_delete = 'N'";
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 
@@ -200,7 +206,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 		context.authenticatedUser();
 		String sql;
 		final retrieveMapper mapper=new retrieveMapper();
-	    sql = "SELECT  " + mapper.schema();
+	    sql = "SELECT  " + mapper.schema() + "and c.is_delete = 'N'";
 	
 		return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { cityName });
 	}catch (EmptyResultDataAccessException e) {
@@ -333,7 +339,69 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 				}
 			}
 
+	@Override
+	public List<CityDetailsData> retrieveCitywithCodeDetails() {
 
+		try {
+			context.authenticatedUser();
+			final CityMapper mapper = new CityMapper();
+			final String sql = "select " + mapper.schema();
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	 private static final class CityMapper implements RowMapper<CityDetailsData> {
+		
+		public String schema() {
+			return " city_name as cityName,city_code as cityCode from b_city where is_delete = 'N'";
+
+		}
+
+		@Override
+		public CityDetailsData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
+			final String cityName = rs.getString("cityName");
+			final String cityCode = rs.getString("cityCode");
+			return new CityDetailsData(cityName, cityCode);
+
+		}
+
+	}
+
+	@Override
+	public List<CityDetailsData> retrieveAddressDetailsByCityName(final String cityName) {
+
+		try {
+			context.authenticatedUser();
+			final CityDetailMapper mapper = new CityDetailMapper();
+			final String sql = "select "+ mapper.schema()+ " where cc.is_delete ='N' and bc.is_active='Y' and cc.city_name like '%"+cityName+"%' order by bc.id LIMIT 15";
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	private static final class CityDetailMapper implements RowMapper<CityDetailsData> {
+
+		public String schema() {
+			return " bc.country_name as countryName, bs.state_name as stateName,city_name as cityName,cc.city_code as cityCode "
+					+ " from b_city cc join b_state bs on (cc.parent_code = bs.id) join b_country bc on (bc.id = bs.parent_code) ";
+
+		}
+
+		@Override
+		public CityDetailsData mapRow(final ResultSet rs, final int rowNum)throws SQLException {
+
+			final String cityName = rs.getString("cityName");
+			final String cityCode = rs.getString("cityCode");
+			final String state = rs.getString("stateName");
+			final String country = rs.getString("countryName");
+			return new CityDetailsData(cityName, cityCode, state, country);
+
+		}
+	}
 }
 
 

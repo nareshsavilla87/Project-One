@@ -1,16 +1,30 @@
 package org.mifosplatform.billing.chargecode.service;
 
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import org.hibernate.exception.ConstraintViolationException;
+import org.joda.time.LocalDate;
+import org.mifosplatform.billing.chargecode.data.ChargeCodeData;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.chargecode.exception.ChargeCodeNotFoundException;
 import org.mifosplatform.billing.chargecode.serialization.ChargeCodeCommandFromApiJsonDeserializer;
+import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
+import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
+import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
+import org.mifosplatform.billing.planprice.domain.Price;
+import org.mifosplatform.billing.planprice.domain.PriceRepository;
+import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
+import org.mifosplatform.finance.billingorder.data.BillingOrderData;
+import org.mifosplatform.finance.billingorder.service.GenerateBill;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,23 +38,27 @@ import org.springframework.transaction.annotation.Transactional;
  * 
  */
 @Service
-public class ChargeCodeWritePlatformServiceImp implements
-		ChargeCodeWritePlatformService {
+public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatformService {
 
 	private final static Logger LOGGER = (Logger) LoggerFactory.getLogger(ChargeCodeWritePlatformServiceImp.class);
 
-	private PlatformSecurityContext context;
-	private ChargeCodeRepository chargeCodeRepository;
-	private ChargeCodeCommandFromApiJsonDeserializer apiJsonDeserializer;
-
+	private final PlatformSecurityContext context;
+	private final ChargeCodeRepository chargeCodeRepository;
+	private final ChargeCodeCommandFromApiJsonDeserializer apiJsonDeserializer;
+	private final DiscountMasterRepository discountMasterRepository;
+	private final PriceRepository priceRepository;
+    private final GenerateBill generateBill;
 	@Autowired
-	public ChargeCodeWritePlatformServiceImp(
-			final PlatformSecurityContext context,
-			final ChargeCodeRepository chargeCodeRepository,
-			final ChargeCodeCommandFromApiJsonDeserializer apiJsonDeserializer) {
+	public ChargeCodeWritePlatformServiceImp(final PlatformSecurityContext context,final ChargeCodeRepository chargeCodeRepository,
+			final ChargeCodeCommandFromApiJsonDeserializer apiJsonDeserializer,final DiscountMasterRepository discountMasterRepository,
+			final PriceRepository priceRepository,final GenerateBill generateBill) {
+		
 		this.context = context;
 		this.chargeCodeRepository = chargeCodeRepository;
 		this.apiJsonDeserializer = apiJsonDeserializer;
+		this.discountMasterRepository = discountMasterRepository;
+		this.priceRepository = priceRepository;
+		this.generateBill = generateBill;
 
 	}
 
@@ -110,8 +128,7 @@ public class ChargeCodeWritePlatformServiceImp implements
 	 */
 	@Transactional
 	@Override
-	public CommandProcessingResult updateChargeCode(final JsonCommand command,
-			final Long chargeCodeId) {
+	public CommandProcessingResult updateChargeCode(final JsonCommand command,final Long chargeCodeId) {
 		ChargeCodeMaster chargeCode = null;
 		try {
 			context.authenticatedUser();
@@ -140,6 +157,34 @@ public class ChargeCodeWritePlatformServiceImp implements
 			throw new ChargeCodeNotFoundException(chargeCodeId.toString());
 		}
 		return chargeCode;
+	}
+	@Override
+	public BigDecimal calculateFinalAmount(ChargeCodeData chargeCodeData,Long clientId,Long priceId) {
+		
+		Long defaultValue=Long.valueOf(0);
+		Date defaultDate= DateUtils.getDateOfTenant();
+		Price price = this.priceRepository.findOne(priceId);
+		BigDecimal finalAmount=BigDecimal.ZERO;
+		DiscountMaster discountMaster = this.discountMasterRepository.findOne(price.getDiscountId());
+		LocalDate endDate=new LocalDate(discountMaster.getStartDate()).plusMonths(1);
+		ChargeCodeMaster chargeCode = this.chargeCodeRepository.findOne(chargeCodeData.getId());
+		BillingOrderData billingOrderData = new BillingOrderData(defaultValue,defaultValue,defaultValue,clientId,discountMaster.getStartDate(),
+				defaultDate,defaultDate,chargeCodeData.getBillFrequencyCode(),chargeCode.getChargeCode(),chargeCode.getChargeType(),chargeCode.getChargeDuration(),
+				chargeCode.getChargeType(),defaultDate,price.getPrice(),"",discountMaster.getStartDate(),defaultDate,defaultValue,chargeCode.getTaxInclusive()); 
+		
+		DiscountMasterData discountMasterData = new DiscountMasterData(discountMaster.getId(),defaultValue,defaultValue,new LocalDate(discountMaster.getStartDate()),
+							DateUtils.getLocalDateOfTenant(),discountMaster.getDiscountType(),discountMaster.getDiscountRate(),"N",discountMaster.getDiscountCode(),discountMaster.getDiscountDescription());
+		
+		List<InvoiceTaxCommand> invoiceTaxCommands=this.generateBill.calculateDiscountAndTax(billingOrderData, discountMasterData, new LocalDate(discountMaster.getStartDate()),endDate, price.getPrice());
+		if(!invoiceTaxCommands.isEmpty()){
+		finalAmount = invoiceTaxCommands.get(0).getDiscountedAmount();
+		}
+		if(chargeCode.getTaxInclusive() !=1){
+		for(InvoiceTaxCommand invoiceTaxCommand:invoiceTaxCommands){
+			finalAmount = finalAmount.add(invoiceTaxCommand.getTaxAmount()); 
+		}
+		}
+		return finalAmount;
 	}
 
 }

@@ -65,7 +65,7 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 			final String units = rs.getString("units");
 			final BigDecimal unitPrice = rs.getBigDecimal("unitPrice");
 
-			return new ItemData(id, itemCode, units, units, units, null, 0,unitPrice,null,null,null);
+			return new ItemData(id, itemCode, units, units, units, null, 0,unitPrice,null,null,null,null);
 		}
 	}
 
@@ -87,11 +87,12 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 
 		public String schema() {
 			
-			return "o.id AS id,i.item_code AS itemCode, i.item_class as itemClass, a.serial_no as serialNo,o.sale_date as saleDate,o.charge_code AS chargeCode,"
-					+ "o.quantity as quantity,o.total_price as totalPrice,o.hardware_allocated as hardwareAllocated,o.units as units,o.device_mode as saleType,id.warranty_date as warrantyDate "
+			return "o.id AS id,i.item_code AS itemCode, i.item_class as itemClass, a.serial_no as serialNo,o.sale_date as saleDate,o.charge_code AS chargeCode," +
+					"pdm.property_code as propertyCode,o.quantity as quantity,o.total_price as totalPrice,o.hardware_allocated as hardwareAllocated,o.units as units,o.device_mode as saleType,id.warranty_date as warrantyDate "
 					+ "  FROM b_item_master i,b_onetime_sale o" +
-					" left join b_allocation a on a.order_id=o.id and a.is_deleted = 'N' "+
-					" left join b_item_detail id on id.item_master_id=o.id and id.is_deleted = 'N'  ";
+					" left join b_allocation a on a.order_id=o.id and a.is_deleted = 'N' " +
+					" LEFT JOIN b_propertydevice_mapping pdm ON pdm.serial_number = a.serial_no" +
+					" left join   b_item_detail id ON id.serial_no = a.serial_no AND id.is_deleted = 'N'  ";
 
 		}
 
@@ -108,9 +109,10 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 			final String itemClass = rs.getString("itemClass");
 			final String serialNo = rs.getString("serialNo");
 			final String units = rs.getString("units");
+			final String propertyCode =rs.getString("propertyCode");
 			final String saleType = rs.getString("saleType");
-			final LocalDate warrantyDate = JdbcSupport.getLocalDate(rs, "saleDate");
-			return new OneTimeSaleData(id, saleDate, itemCode, chargeCode,quantity, totalPrice,haardwareAllocated,itemClass,serialNo,units,saleType,warrantyDate);
+			final LocalDate warrantyDate = JdbcSupport.getLocalDate(rs, "warrantyDate");
+			return new OneTimeSaleData(id, saleDate, itemCode, chargeCode,quantity, totalPrice,haardwareAllocated,itemClass,serialNo,units,saleType,warrantyDate,propertyCode);
 
 		}
 
@@ -190,9 +192,18 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 	private static final class AllocationDataMapper implements	RowMapper<AllocationDetailsData> {
 
 		public String schema() {
-			return "  a.id AS id,id.id AS itemDetailId,i.item_description AS itemDescription,a.serial_no AS serialNo,a.allocation_date AS allocationDate" +
+			return "  a.id AS id,id.id AS itemDetailId,id.quality as quality,a.status as hardwareStatus,i.item_description AS itemDescription,a.serial_no AS serialNo,a.allocation_date AS allocationDate" +
 					" FROM b_allocation a, b_item_master i, b_item_detail id WHERE  a.item_master_id = i.id   AND a.is_deleted = 'N' and id.client_id = a.client_id " +
 					"  and id.serial_no = a.serial_no ";
+
+		}
+		
+		public String schemaForUnallocated(Long clientId) {
+			return "  a.id AS id,id.id AS itemDetailId,id.quality as quality,a.status as hardwareStatus,"+
+					" i.item_description AS itemDescription,a.serial_no AS serialNo,a.allocation_date AS allocationDate "+
+					" FROM b_allocation a, b_item_master i, b_item_detail id "+
+					" WHERE  a.item_master_id = i.id "+
+					" and a.client_id = "+clientId+" and id.serial_no = a.serial_no ";
 
 		}
 
@@ -204,8 +215,10 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 			final String itemDescription = rs.getString("itemDescription");
             final String serialNo = rs.getString("serialNo");
 		    final LocalDate allocationDate=JdbcSupport.getLocalDate(rs,"allocationDate");
+		    final String quality = rs.getString("quality");
+		    final String hardwareStatus = rs.getString("hardwareStatus");
 		    
-			return new AllocationDetailsData(id,itemDescription,serialNo,allocationDate,itemDetailId,null);
+			return new AllocationDetailsData(id,itemDescription,serialNo,allocationDate,itemDetailId,null,quality,hardwareStatus);
 
 		}
 	}
@@ -228,5 +241,16 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 		}
 	
 	}
+	
+	@Override
+	public List<AllocationDetailsData> retrieveUnAllocationDetails(final Long orderId, final Long clientId) {
+		
+		this.context.authenticatedUser();
+		final AllocationDataMapper mapper = new AllocationDataMapper();
+		final String sql = "select " + mapper.schemaForUnallocated(clientId)+ " and a.order_id=? ";
+
+		return this.jdbcTemplate.query(sql, mapper, new Object[] { orderId });
+	}
+	
 	}
 

@@ -29,6 +29,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.priceregion.data.PriceRegionData;
@@ -60,14 +61,11 @@ public class TaxMapApiResource {
 	private final MCodeReadPlatformService mCodeReadPlatformService;
 
 	@Autowired
-	public TaxMapApiResource(
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PlatformSecurityContext context,
-			final DefaultToApiJsonSerializer<TaxMapData> apiJsonSerializer,
-			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
-			final TaxMapReadPlatformService taxMapReadPlatformService,
-			final RegionalPriceReadplatformService regionalPriceReadplatformService,
+	public TaxMapApiResource(final ApiRequestParameterHelper apiRequestParameterHelper,final PlatformSecurityContext context,
+			final DefaultToApiJsonSerializer<TaxMapData> apiJsonSerializer,final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
+			final TaxMapReadPlatformService taxMapReadPlatformService,final RegionalPriceReadplatformService regionalPriceReadplatformService,
 			final MCodeReadPlatformService mCodeReadPlatformService) {
+		
 		this.context = context;
 		this.apiJsonSerializer = apiJsonSerializer;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
@@ -84,7 +82,7 @@ public class TaxMapApiResource {
 	public String retriveTaxMapTemplate(@QueryParam("chargeCode") final String chargeCode,@Context final UriInfo uriInfo) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		final Collection<MCodeData> taxTypeData = this.mCodeReadPlatformService.getCodeValue("type");
+		final Collection<MCodeData> taxTypeData = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
 		final List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
 		final TaxMapData taxMapData=new TaxMapData(taxTypeData,priceRegionData,chargeCode);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
@@ -126,7 +124,7 @@ public class TaxMapApiResource {
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		if(settings.isTemplate()){
 		final List<ChargeCodeData> chargeCodeData = this.taxMapReadPlatformService.retrivedChargeCodeTemplateData();
-		final Collection<MCodeData> taxTypeData = this.mCodeReadPlatformService.getCodeValue("type");
+		final Collection<MCodeData> taxTypeData = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
 		final List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
 		taxMapData.setChargeCodesForTax(chargeCodeData);
 		taxMapData.setTaxTypeData(taxTypeData);

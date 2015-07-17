@@ -40,7 +40,8 @@ import org.springframework.stereotype.Component;
 public class ContractPeriodApiResource {
 	  private  final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id",
 	           "subscriptionPeriod","subscriptionType","units","allowedtypes","subscriptionTypeId"));
-        private final static String RESOURCENAMEFORPERMISSIONS = "CONTRACT";
+        
+	  private final static String RESOURCENAMEFORPERMISSIONS = "CONTRACT";
 	    private final PlatformSecurityContext context;
 	    private final DefaultToApiJsonSerializer<SubscriptionData> toApiJsonSerializer;
 	    private final ApiRequestParameterHelper apiRequestParameterHelper;
@@ -69,6 +70,7 @@ public class ContractPeriodApiResource {
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
 	public String createNewContract(final String apiRequestBodyAsJson) {
+		
 		  final CommandWrapper commandRequest = new CommandWrapperBuilder().createContract().withJson(apiRequestBodyAsJson).build();
 	        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 	        return this.toApiJsonSerializer.serialize(result);

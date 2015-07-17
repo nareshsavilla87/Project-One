@@ -43,6 +43,7 @@ public class OneTimeSaleData {
 	private String chargeType;
 	private String saleType;
 	private LocalDate warrantyDate;
+	private String propertyCode;
 	
 	public OneTimeSaleData(final List<ItemData> itemData, final List<DiscountMasterData> discountData,
 			final Collection<OfficeData> officesData, final Collection<SubscriptionData> contractPeriods) {
@@ -56,7 +57,8 @@ public class OneTimeSaleData {
 	/*hardware allocated and flag is added by rahman */
 
 	public OneTimeSaleData(Long id, LocalDate saleDate, String itemCode,
-			String chargeCode, String quantity, BigDecimal totalPrice,String hardwareAllocated,String itemClass, String serialNo,String units,String saleType,LocalDate warrantyDate) {
+			String chargeCode, String quantity, BigDecimal totalPrice,String hardwareAllocated,String itemClass, String serialNo,
+			String units,String saleType,LocalDate warrantyDate, String propertyCode) {
 		this.id=id;
 		this.saleDate=saleDate;
 		this.itemCode=itemCode;
@@ -70,6 +72,7 @@ public class OneTimeSaleData {
 		this.units = units;
 		this.saleType = saleType;
 		this.warrantyDate = warrantyDate;
+		this.propertyCode = propertyCode;
 	}
 
 
@@ -78,10 +81,10 @@ public class OneTimeSaleData {
 			String isInvoiced, Long itemId, Long discountId,Integer taxInclusive) {
 		this.id = oneTimeSaleId;
 		this.clientId = clientId;
-		this.setUnits(units);
+		this.units=units;
 		this.chargeCode = chargeCode;
 		this.chargeType = chargeType;
-		this.setUnitPrice(unitPrice);
+		this.unitPrice= unitPrice;
 		this.quantity = quantity;
 		this.totalPrice = totalPrice;
 		this.isInvoiced = isInvoiced;

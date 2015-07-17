@@ -1,5 +1,6 @@
 package org.mifosplatform.billing.chargecode.api;
 
+import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -12,6 +13,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
@@ -21,6 +23,7 @@ import org.mifosplatform.billing.chargecode.data.ChargeCodeData;
 import org.mifosplatform.billing.chargecode.data.ChargeTypeData;
 import org.mifosplatform.billing.chargecode.data.DurationTypeData;
 import org.mifosplatform.billing.chargecode.service.ChargeCodeReadPlatformService;
+import org.mifosplatform.billing.chargecode.service.ChargeCodeWritePlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -29,6 +32,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -53,19 +57,21 @@ public class ChargeCodeApiResource {
 	private final DefaultToApiJsonSerializer<ChargeCodeData> toApiJsonSerializer;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final ChargeCodeReadPlatformService chargeCodeReadPlatformService;
+	private final ChargeCodeWritePlatformService chargeCodeWritePlatformService;
+	private final OrderWritePlatformService orderWritePlatformService;
 
 	@Autowired
-	public ChargeCodeApiResource(
-			final PlatformSecurityContext context,
-			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
-			final DefaultToApiJsonSerializer<ChargeCodeData> toApiJsonSerializer,
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final ChargeCodeReadPlatformService chargeCodeReadPlatformService) {
+	public ChargeCodeApiResource(final PlatformSecurityContext context,final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
+			final DefaultToApiJsonSerializer<ChargeCodeData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
+			final ChargeCodeReadPlatformService chargeCodeReadPlatformService,final ChargeCodeWritePlatformService chargeCodeWritePlatformService,
+			final OrderWritePlatformService orderWritePlatformService) {
 		this.context = context;
 		this.commandSourceWritePlatformService = commandSourceWritePlatformService;
 		this.toApiJsonSerializer = toApiJsonSerializer;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.chargeCodeReadPlatformService = chargeCodeReadPlatformService;
+		this.chargeCodeWritePlatformService = chargeCodeWritePlatformService;
+		this.orderWritePlatformService = orderWritePlatformService;
 	}
 
 	/**
@@ -162,6 +168,36 @@ public class ChargeCodeApiResource {
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateChargeCode(chargeCodeId).withJson(apiRequestBodyAsJson)	.build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
+	}
+	
+	/**
+	 * @param uriInfo
+	 * @return retrieved template data for creating charge codes
+	 */
+	@GET
+	@Path("{priceId}/{clientId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveChargeCodeTemplateData(@PathParam("priceId") final Long priceId, 
+			@PathParam("clientId") final Long clientId,@QueryParam("contractId")Long contractId,
+			@QueryParam("paytermCode")String paytermCode, @Context final UriInfo uriInfo) {
+		
+		if(contractId !=null && paytermCode != null){
+			
+			 this.orderWritePlatformService.checkingContractPeriodAndBillfrequncyValidation(contractId, paytermCode);
+			 
+		}
+
+		if(contractId !=null && paytermCode != null){
+			this.orderWritePlatformService.checkingContractPeriodAndBillfrequncyValidation(contractId, paytermCode);
+		}
+		//context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		final ChargeCodeData chargeCodeData = this.chargeCodeReadPlatformService.retrieveChargeCodeForRecurring(priceId);
+		final BigDecimal finalAmount=this.chargeCodeWritePlatformService.calculateFinalAmount(chargeCodeData,clientId,priceId);
+		chargeCodeData.setPlanfinalAmount(finalAmount);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializer.serialize(settings, chargeCodeData, RESPONSE_PARAMETERS);
+
 	}
 
 }

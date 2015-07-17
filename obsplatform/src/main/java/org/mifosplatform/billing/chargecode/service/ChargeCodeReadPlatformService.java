@@ -22,4 +22,6 @@ public interface ChargeCodeReadPlatformService {
 	List<BillFrequencyCodeData> getBillFrequency();
 
 	ChargeCodeData retrieveSingleChargeCodeDetails(Long chargeCodeId);
+
+	ChargeCodeData retrieveChargeCodeForRecurring(Long planId);
 }

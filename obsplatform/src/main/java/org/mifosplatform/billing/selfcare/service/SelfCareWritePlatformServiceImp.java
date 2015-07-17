@@ -3,6 +3,8 @@ package org.mifosplatform.billing.selfcare.service;
 import java.util.Date;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistory;
 import org.mifosplatform.billing.loginhistory.domain.LoginHistoryRepository;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
@@ -12,6 +14,9 @@ import org.mifosplatform.billing.selfcare.exception.SelfCareAlreadyVerifiedExcep
 import org.mifosplatform.billing.selfcare.exception.SelfCareEmailIdDuplicateException;
 import org.mifosplatform.billing.selfcare.exception.SelfCareTemporaryGeneratedKeyNotFoundException;
 import org.mifosplatform.billing.selfcare.exception.SelfcareEmailIdNotFoundException;
+import org.mifosplatform.infrastructure.configuration.domain.Configuration;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -24,17 +29,28 @@ import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
 import org.mifosplatform.organisation.message.service.MessagePlatformEmailService;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientStatusException;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
+import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
+import org.mifosplatform.provisioning.provsionactions.domain.ProvisionActions;
+import org.mifosplatform.provisioning.provsionactions.domain.ProvisioningActionsRepository;
+import org.mifosplatform.workflow.eventaction.data.OrderNotificationData;
+import org.mifosplatform.workflow.eventaction.service.EventActionReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+
+
 
 
 @Service
@@ -50,8 +66,16 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 	private final BillingMessageTemplateRepository billingMessageTemplateRepository;
 	private SelfCareCommandFromApiJsonDeserializer selfCareCommandFromApiJsonDeserializer;
 	private final BillingMessageRepository messageDataRepository;
+	private final ConfigurationRepository configurationRepository;
 	private final static Logger logger = (Logger) LoggerFactory.getLogger(SelfCareWritePlatformServiceImp.class);
-	
+	private BillingMessageTemplate createSelfcareMessageDetails = null;
+	private BillingMessageTemplate registerSelfcareMessageDetails = null;
+	private BillingMessageTemplate newSelfcarePasswordMessageDetails = null;
+	private BillingMessageTemplate createSelfcareMessageDetailsForSMS = null;
+	private BillingMessageTemplate newSelfcarePasswordMessageDetailsForSMS = null;
+	private final ProvisioningActionsRepository provisioningActionsRepository;
+	private final ProcessRequestRepository processRequestRepository;
+	private final EventActionReadPlatformService eventActionReadPlatformService;
 
 	@Autowired
 	public SelfCareWritePlatformServiceImp(final PlatformSecurityContext context, 
@@ -63,7 +87,11 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			final MessagePlatformEmailService messagePlatformEmailService,
 			final ClientRepository clientRepository,
 			final LoginHistoryRepository loginHistoryRepository,
-			final BillingMessageRepository messageDataRepository) {
+			final BillingMessageRepository messageDataRepository,
+			final ConfigurationRepository configurationRepository,
+			final ProvisioningActionsRepository provisioningActionsRepository,
+			final ProcessRequestRepository processRequestRepository,
+			final EventActionReadPlatformService eventActionReadPlatformService) {
 		
 		this.context = context;
 		this.selfCareRepository = selfCareRepository;
@@ -76,74 +104,91 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 		this.clientRepository=clientRepository;
 		this.loginHistoryRepository=loginHistoryRepository;
 		this.messageDataRepository = messageDataRepository;
-				
+		this.configurationRepository = configurationRepository;
+		this.provisioningActionsRepository = provisioningActionsRepository;		
+		this.processRequestRepository = processRequestRepository;
+		this.eventActionReadPlatformService = eventActionReadPlatformService;
 	}
 	
 	@Override
 	public CommandProcessingResult createSelfCare(JsonCommand command) {
 		
-		SelfCare selfCare = null;
-		Long clientId = null;
-		String password = null;
 		try{
-			context.authenticatedUser();
-			selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
-			selfCare = SelfCare.fromJson(command);
-			clientId = command.longValueOfParameterNamed("clientId");
-			password = command.stringValueOfParameterNamed("password");
-			if(clientId == null){
-				try{
-					clientId = selfCareReadPlatformService.getClientId(selfCare.getUniqueReference());					
-				}catch(EmptyResultDataAccessException erdae){
-						throw new PlatformDataIntegrityException("this user is not registered","this user is not registered","");
-				}catch(Exception e){
-					if(e.getMessage() != null){
-							throw new PlatformDataIntegrityException("this user not found","this user not found",e.getMessage());
-					}else if(e.getCause().getLocalizedMessage() != null){
-							throw new PlatformDataIntegrityException("this user not found","this user not found",e.getCause().getLocalizedMessage());
-					}else{
-							throw new PlatformDataIntegrityException("this user not found","this user not found","");
-						}
-					}
-			}
+			this.context.authenticatedUser();
+			this.selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
+			SelfCare selfCare = SelfCare.fromJson(command);
+			String password = command.stringValueOfParameterNamed("password");
+			boolean mailnotification = command.booleanPrimitiveValueOfParameterNamed("mailNotification");
 			
-			boolean mailnotification=command.booleanPrimitiveValueOfParameterNamed("mailNotification");
-			
-			if(clientId !=null && clientId > 0 ){
-				
-				selfCare.setClientId(clientId);
-				if(password != null && password != ""){
-					selfCare.setPassword(password);
-				}else{
-					RandomPasswordGenerator passwordGenerator = new RandomPasswordGenerator(8);
-					String unencodedPassword = passwordGenerator.generate();
-					selfCare.setPassword(unencodedPassword);
-				}
-				
-				selfCareRepository.save(selfCare);
-				if(mailnotification){
-				//platformEmailService.sendToUserAccount(new EmailDetail("OBS Self Care Organisation ", "SelfCare",email, selfCare.getUserName()), unencodedPassword); 
-				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_CREATE_SELFCARE);
-				String subject=messageDetails.getSubject();
-				String body=messageDetails.getBody();
-				String footer=messageDetails.getFooter();
-				String header=messageDetails.getHeader().replace("<PARAM1>", selfCare.getUserName() +",");
-				body=body.replace("<PARAM2>", selfCare.getUniqueReference());
-				body=body.replace("<PARAM3>", selfCare.getPassword());
-				/*StringBuilder prepareEmail =new StringBuilder();
-				prepareEmail.append(header);
-				prepareEmail.append("\t").append(body);
-				prepareEmail.append(messageDetails.getFooter());*/
-				
-				BillingMessage billingMessage = new BillingMessage(header, body, footer, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM, selfCare.getUniqueReference(),
-						subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
-				
-				this.messageDataRepository.save(billingMessage);
-				//messagePlatformEmailService.sendGeneralMessage(selfCare.getUniqueReference(), prepareEmail.toString().trim(), subject);
-				}
-			}else{
+			if(null == selfCare.getClientId() || selfCare.getClientId()<1L){
 				throw new PlatformDataIntegrityException("client does not exist", "client not registered","clientId", "client is null ");
 			}
+			
+			if(password == null || password.isEmpty()){
+				selfCare.setPassword(new RandomPasswordGenerator(8).generate().toString());
+			}else{
+				selfCare.setPassword(password);
+			}
+			
+			this.selfCareRepository.save(selfCare);
+			
+			Client client = this.clientRepository.findOne(selfCare.getClientId());
+			
+			OrderNotificationData orderData = this.eventActionReadPlatformService.retrieveNotifyDetails(client.getId(), null);
+			
+			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_SMS);
+			
+			if(null != configuration && configuration.isEnabled()) {
+				
+				if(null == createSelfcareMessageDetailsForSMS){
+					createSelfcareMessageDetailsForSMS = this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_CREATE_SELFCARE);
+				}
+				
+				if (createSelfcareMessageDetailsForSMS != null) {
+					
+					String subject = createSelfcareMessageDetailsForSMS.getSubject();
+					String body = createSelfcareMessageDetailsForSMS.getBody();
+					body = body.replace("<PARAM1>", selfCare.getUserName().trim());
+					body = body.replace("<PARAM2>", selfCare.getPassword().trim());
+					
+					BillingMessage billingMessage = new BillingMessage(null, body, null, orderData.getOfficeEmail(), 
+							orderData.getClientPhone(), subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
+							createSelfcareMessageDetailsForSMS, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_TYPE, null);
+
+					this.messageDataRepository.save(billingMessage);
+
+				} else throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_CREATE_SELFCARE);
+			}
+			
+			if (mailnotification) {
+
+				if(null == createSelfcareMessageDetails){
+					createSelfcareMessageDetails = this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_CREATE_SELFCARE);
+				}
+				
+				if (createSelfcareMessageDetails != null) {
+					
+					String subject = createSelfcareMessageDetails.getSubject();
+					String body = createSelfcareMessageDetails.getBody();
+					String footer = createSelfcareMessageDetails.getFooter();
+					String header = createSelfcareMessageDetails.getHeader().replace("<PARAM1>", client.getDisplayName()==null || client.getDisplayName().isEmpty()?client.getFirstname(): client.getDisplayName() + ",");
+					body = body.replace("<PARAM2>", selfCare.getUserName().trim());
+					body = body.replace("<PARAM3>", selfCare.getPassword().trim());
+
+					BillingMessage billingMessage = new BillingMessage(header, body, footer, 
+							orderData.getOfficeEmail(), client.getEmail(), subject,
+							BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, createSelfcareMessageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
+
+					this.messageDataRepository.save(billingMessage);
+
+				} else throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_CREATE_SELFCARE);
+				
+			}	
+			
+			
+		
+			
+			return new CommandProcessingResultBuilder().withEntityId(selfCare.getId()).withClientId(selfCare.getClientId()).build();
 			
 		}catch(DataIntegrityViolationException dve){
 			handleDataIntegrityIssues(command, dve);
@@ -152,7 +197,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			throw new PlatformDataIntegrityException("empty.result.set", "empty.result.set");
 		}
 		
-		return new CommandProcessingResultBuilder().withEntityId(selfCare.getId()).withClientId(clientId).build();
+		
 	}
 	
 	@Override
@@ -270,79 +315,80 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 	@Override
 	public CommandProcessingResult registerSelfCare(JsonCommand command) {
 		
-		SelfCareTemporary selfCareTemporary = null;
+		//SelfCareTemporary selfCareTemporary = null;
 		Long clientId = 0L;
-		try{
+		try {
 			context.authenticatedUser();
 			selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
 			String uniqueReference = command.stringValueOfParameterNamed("userName");
 			String returnUrl = command.stringValueOfParameterNamed("returnUrl");
-			SelfCare repository=selfCareRepository.findOneByEmail(uniqueReference);
-			if(repository != null){				
-				throw new SelfCareEmailIdDuplicateException(uniqueReference);				
-			}else{		
-				selfCareTemporary = SelfCareTemporary.fromJson(command);
+			SelfCare repository = selfCareRepository.findOneByEmail(uniqueReference);
+			
+			if (null == repository) {
+
+				SelfCareTemporary selfCareTemporary = SelfCareTemporary.fromJson(command);
 				String unencodedPassword = RandomStringUtils.randomAlphanumeric(27);
 				selfCareTemporary.setGeneratedKey(unencodedPassword);
-				
+
 				selfCareTemporaryRepository.save(selfCareTemporary);
-				String generatedKey = selfCareTemporary.getGeneratedKey() + "11011";
-				
-				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SELFCARE_REGISTER);
-				String subject=messageDetails.getSubject();
-				String body=messageDetails.getBody();
-				String header=messageDetails.getHeader()+",";
-				String footer=messageDetails.getFooter();
-				
-				body=body.replace("<PARAM1>", returnUrl + generatedKey);
-				/*StringBuilder prepareEmail =new StringBuilder();
-				prepareEmail.append(header);
-				prepareEmail.append("\t").append(body);
-				prepareEmail.append(messageDetails.getFooter());*/
-				
-				BillingMessage billingMessage = new BillingMessage(header, body, footer, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM, selfCareTemporary.getUserName(),
-						subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
-				
-				this.messageDataRepository.save(billingMessage);
-				
-				//this.messagePlatformEmailService.sendGeneralMessage(selfCareTemporary.getUserName(), prepareEmail.toString().trim(), subject);
-				return new CommandProcessingResultBuilder().withEntityId(selfCareTemporary.getId()).withClientId(clientId).build();
-			}
-				
-		}catch(DataIntegrityViolationException dve){
+				String generatedKey = selfCareTemporary.getGeneratedKey() + BillingMessageTemplateConstants.SELFCARE_REGISTRATION_CONSTANT;
+
+				if(null == registerSelfcareMessageDetails){
+					registerSelfcareMessageDetails = this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SELFCARE_REGISTER);
+				}
+				 
+				if (registerSelfcareMessageDetails != null) {
+					String subject = registerSelfcareMessageDetails.getSubject();
+					String body = registerSelfcareMessageDetails.getBody();
+					String header = registerSelfcareMessageDetails.getHeader() + ",";
+					String footer = registerSelfcareMessageDetails.getFooter();
+
+					body = body.replace("<PARAM1>", returnUrl + generatedKey);
+					
+					BillingMessage billingMessage = new BillingMessage(header, body, footer, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM,
+							selfCareTemporary.getUserName(), subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS,
+							registerSelfcareMessageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
+
+					this.messageDataRepository.save(billingMessage);
+
+					return new CommandProcessingResultBuilder().withEntityId(selfCareTemporary.getId()).withClientId(clientId).build();
+
+				} else throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SELFCARE_REGISTER);
+
+			} else throw new SelfCareEmailIdDuplicateException(uniqueReference);
+
+		} catch(DataIntegrityViolationException dve){
 			handleDataIntegrityIssues(command, dve);
 			throw new PlatformDataIntegrityException("duplicate.username", "duplicate.username","duplicate.username", "duplicate.username");
-		}catch(EmptyResultDataAccessException emp){
+		} catch(EmptyResultDataAccessException emp){
 			throw new PlatformDataIntegrityException("empty.result.set", "empty.result.set");
 		}
 	}
 
 	@Override
 	public CommandProcessingResult selfCareEmailVerification(JsonCommand command) {
-		SelfCareTemporary selfCareTemporary = null;
-		Long clientId = 0L;
+	
 		try{
-			context.authenticatedUser();
-			selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
+		
+			this.context.authenticatedUser();
+			this.selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
+			
 			String verificationKey = command.stringValueOfParameterNamed("verificationKey");
 			String uniqueReference = command.stringValueOfParameterNamed("uniqueReference");
 			
-			
-			selfCareTemporary =selfCareTemporaryRepository.findOneByGeneratedKey(verificationKey,uniqueReference);
-			
-			if(selfCareTemporary == null){				
+			SelfCareTemporary selfCareTemporary = this.selfCareTemporaryRepository.findOneByGeneratedKey(verificationKey,uniqueReference);
+
+			if(null == selfCareTemporary){				
 				throw new SelfCareTemporaryGeneratedKeyNotFoundException(verificationKey,uniqueReference);				
-			}else{		
-				
-				if(selfCareTemporary.getStatus().equalsIgnoreCase("INACTIVE") || selfCareTemporary.getStatus().equalsIgnoreCase("PENDING")){
-					
+			} else {
+				if (selfCareTemporary.getStatus().equalsIgnoreCase("INACTIVE")
+						|| selfCareTemporary.getStatus().equalsIgnoreCase("PENDING"))
 					selfCareTemporary.setStatus("PENDING");
-					
-				} else{
-					throw new SelfCareAlreadyVerifiedException(verificationKey);		
-				}
+				else throw new SelfCareAlreadyVerifiedException(verificationKey);
 			}
-				
+			
+			return new CommandProcessingResultBuilder().withEntityId(selfCareTemporary.getId()).withClientId(0L).build();
+			
 		}catch(DataIntegrityViolationException dve){
 			handleDataIntegrityIssues(command, dve);
 			throw new PlatformDataIntegrityException("duplicate.username", "duplicate.username","duplicate.username", "duplicate.username");
@@ -350,15 +396,14 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			throw new PlatformDataIntegrityException("empty.result.set", "empty.result.set");
 		}
 		
-		return new CommandProcessingResultBuilder().withEntityId(selfCareTemporary.getId()).withClientId(clientId).build();
 	}
 
 	@Override
 	public CommandProcessingResult generateNewSelfcarePassword(JsonCommand command) {
 		
 		try{
-			context.authenticatedUser();
-			selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
+			this.context.authenticatedUser();
+			this.selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
 			String uniqueReference = command.stringValueOfParameterNamed("uniqueReference");
 
 			SelfCare selfCare =selfCareRepository.findOneByEmail(uniqueReference);
@@ -369,24 +414,50 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				String generatedKey = RandomStringUtils.randomAlphabetic(10);	
 				selfCare.setPassword(generatedKey);
 				
-				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NEW_SELFCARE_PASSWORD);
-				String subject=messageDetails.getSubject();
-				String body=messageDetails.getBody();
-				String footer=messageDetails.getFooter();
-				String header=messageDetails.getHeader().replace("<PARAM1>", selfCare.getUserName() +",");
-				body=body.replace("<PARAM2>", uniqueReference);
-				body=body.replace("<PARAM3>", generatedKey);
-				/*StringBuilder prepareEmail =new StringBuilder();
-				prepareEmail.append(header);
-				prepareEmail.append("\t").append(body);
-				//prepareEmail.append("\n").append("\n");
-				prepareEmail.append(messageDetails.getFooter());
-				messagePlatformEmailService.sendGeneralMessage(selfCare.getUniqueReference(), prepareEmail.toString().trim(), subject);*/
+				Client client = this.clientRepository.findOne(selfCare.getClientId());
+				Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_SMS);
 				
-				BillingMessage billingMessage = new BillingMessage(header, body, footer, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM, selfCare.getUniqueReference(),
-						subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
+				if(null != configuration && configuration.isEnabled()) {
+					
+					if(null == newSelfcarePasswordMessageDetailsForSMS){
+						newSelfcarePasswordMessageDetailsForSMS = this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NEW_SELFCARE_PASSWORD);
+					}
+					
+					if (newSelfcarePasswordMessageDetailsForSMS != null) {
+						
+						String subject = newSelfcarePasswordMessageDetailsForSMS.getSubject();
+						String body = newSelfcarePasswordMessageDetailsForSMS.getBody();
+						body = body.replace("<PARAM1>", selfCare.getUserName().trim());
+						body = body.replace("<PARAM2>", selfCare.getPassword().trim());
+
+						BillingMessage billingMessage = new BillingMessage(null, body, null, 
+								BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM, client.getPhone(), subject,
+								BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, newSelfcarePasswordMessageDetailsForSMS, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_TYPE, null);
+
+						this.messageDataRepository.save(billingMessage);
+
+					} else throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NEW_SELFCARE_PASSWORD);
+				}
+				
+				if(null == newSelfcarePasswordMessageDetails){
+					newSelfcarePasswordMessageDetails =this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NEW_SELFCARE_PASSWORD);
+				}
+				
+				if(newSelfcarePasswordMessageDetails != null){
+				String subject = newSelfcarePasswordMessageDetails.getSubject();
+				String body = newSelfcarePasswordMessageDetails.getBody();
+				String footer = newSelfcarePasswordMessageDetails.getFooter();
+				String header = newSelfcarePasswordMessageDetails.getHeader().replace("<PARAM1>", client.getDisplayName()==null || client.getDisplayName().isEmpty()?client.getFirstname(): client.getDisplayName() + ",");
+				body = body.replace("<PARAM2>", selfCare.getUserName().trim());
+				body = body.replace("<PARAM3>", generatedKey);
+				
+				BillingMessage billingMessage = new BillingMessage(header, body, footer, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM, client.getEmail(),
+						subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, newSelfcarePasswordMessageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 				
 				this.messageDataRepository.save(billingMessage);
+				
+				} else throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NEW_SELFCARE_PASSWORD);
+				
 			}
 			
 			return new CommandProcessingResultBuilder().withEntityId(selfCare.getId()).withClientId(selfCare.getClientId()).build();
@@ -406,23 +477,57 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 		
 		try{
 			
-			context.authenticatedUser();
-			selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
+			this.context.authenticatedUser();
+			this.selfCareCommandFromApiJsonDeserializer.validateForCreate(command);
 			String uniqueReference = command.stringValueOfParameterNamed("uniqueReference");
+			String userName = command.stringValueOfParameterNamed("userName");
 			String password = command.stringValueOfParameterNamed("password");
 			SelfCare selfCare =selfCareRepository.findOneByEmail(uniqueReference);
-			
 			if(selfCare == null){				
 				throw new SelfcareEmailIdNotFoundException(uniqueReference);			
-			}else{		
-				if(command.parameterExists("userName")){
+			}
+			String existingUserName = selfCare.getUserName();
+			String existingPassword = selfCare.getPassword();
+			
+				/*if(command.parameterExists("userName")){
 					String userName = command.stringValueOfParameterNamed("userName");
 					selfCare.setUserName(userName);
 				}
 				selfCare.setPassword(password);
 				this.selfCareRepository.save(selfCare);
+				*/
+				
+				if((userName != null && password != null) && (!userName.isEmpty() && !password.isEmpty()) &&
+                		((existingUserName.equalsIgnoreCase(userName)) && (!existingPassword.equalsIgnoreCase(password)))){				
+                	
+                	selfCare.setUserName(userName);
+                	selfCare.setPassword(password);
+    				this.selfCareRepository.save(selfCare);
+               
+    				ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_Change_CREDENTIALS);
+    				if(provisionActions.getIsEnable() == 'Y'){
+    					JSONObject object = new JSONObject();
+    					try {
+    						object.put("newUserName", userName);
+    						object.put("newPassword", password);
+    						object.put("existingUserName", existingUserName);
+    						object.put("existingPassword", existingPassword);
+    					} catch (JSONException e) {
+    						e.printStackTrace();
+    					}
+    					ProcessRequest processRequest = new ProcessRequest(Long.valueOf(0), selfCare.getClientId(), Long.valueOf(0),
+							 provisionActions.getProvisioningSystem(),provisionActions.getAction(), 'N', 'N');
+
+    					ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
+							 Long.valueOf(0), object.toString(), "Recieved",
+							 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
+
+    					processRequest.add(processRequestDetails);
+    					this.processRequestRepository.save(processRequest);
+					
+    				}
+				}
 			
-			}
 			
 			return new CommandProcessingResultBuilder().withEntityId(selfCare.getId()).withClientId(selfCare.getClientId()).build();
 			

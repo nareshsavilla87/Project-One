@@ -4,13 +4,19 @@ import java.math.BigDecimal;
 import java.util.List;
 
 import org.mifosplatform.billing.chargecode.data.ChargesData;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.discountmaster.service.DiscountReadPlatformService;
+import org.mifosplatform.finance.billingorder.domain.BillingOrder;
+import org.mifosplatform.finance.billingorder.domain.Invoice;
+import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.api.JsonQuery;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
@@ -21,7 +27,9 @@ import org.mifosplatform.logistics.itemdetails.service.ItemDetailsWritePlatformS
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSaleRepository;
+import org.mifosplatform.logistics.onetimesale.exception.DeviceSaleNotFoundException;
 import org.mifosplatform.logistics.onetimesale.serialization.OneTimesaleCommandFromApiJsonDeserializer;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.workflow.eventvalidation.service.EventValidationReadPlatformService;
 import org.slf4j.Logger;
@@ -57,6 +65,8 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 	private final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService;
 	private final ItemDetailsWritePlatformService inventoryItemDetailsWritePlatformService;
 	private final EventValidationReadPlatformService eventValidationReadPlatformService;
+	private final ChargeCodeRepository chargeCodeRepository;
+	private final InvoiceRepository invoiceRepository;
 
 	@Autowired
 	public OneTimeSaleWritePlatformServiceImpl(final PlatformSecurityContext context,final OneTimeSaleRepository oneTimeSaleRepository,
@@ -64,7 +74,10 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			final InvoiceOneTimeSale invoiceOneTimeSale,final ItemReadPlatformService itemReadPlatformService,
 			final FromJsonHelper fromJsonHelper,final OneTimeSaleReadPlatformService oneTimeSaleReadPlatformService,
 			final ItemDetailsWritePlatformService inventoryItemDetailsWritePlatformService,
-			final EventValidationReadPlatformService eventValidationReadPlatformService,final DiscountReadPlatformService discountReadPlatformService) {
+			final EventValidationReadPlatformService eventValidationReadPlatformService,
+			final DiscountReadPlatformService discountReadPlatformService,
+			final ChargeCodeRepository chargeCodeRepository,
+			final InvoiceRepository invoiceRepository) {
 
 		
 		this.context = context;
@@ -78,6 +91,8 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		this.oneTimeSaleReadPlatformService = oneTimeSaleReadPlatformService;
 		this.inventoryItemDetailsWritePlatformService = inventoryItemDetailsWritePlatformService;
 		this.eventValidationReadPlatformService = eventValidationReadPlatformService;
+		this.chargeCodeRepository = chargeCodeRepository;
+		this.invoiceRepository = invoiceRepository;
 
 	}
 
@@ -106,12 +121,30 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			final String saleType = command.stringValueOfParameterNamed("saleType");
 			if (saleType.equalsIgnoreCase("NEWSALE")) {
 				for (OneTimeSaleData oneTimeSaleData : oneTimeSaleDatas) {
-					this.invoiceOneTimeSale.invoiceOneTimeSale(clientId,oneTimeSaleData,false);
-					updateOneTimeSale(oneTimeSaleData);
+					CommandProcessingResult invoice=this.invoiceOneTimeSale.invoiceOneTimeSale(clientId,oneTimeSaleData,false);
+					updateOneTimeSale(oneTimeSaleData,invoice);
 				}
 			}
+			
+			/** Deposit&Refund table *//*
+			if(command.hasParameter("addDeposit")){
+				if(command.booleanObjectValueOfParameterNamed("addDeposit")){
+					final BigDecimal amount = command.bigDecimalValueOfParameterNamed("amount");
+					final DepositAndRefund depositAndRefund = DepositAndRefund.fromJson(clientId, command);
+					depositAndRefund.setRefId(oneTimeSale.getId());
+					this.depositAndRefundRepository.saveAndFlush(depositAndRefund);
+					
+					// Update Client Balance
+					this.billingOrderWritePlatformService.updateClientBalance(amount, clientId, false);
+					
+					
+				}
+				
+			}*/
+			
 			/**	Call if Item units is PIECES */
 			if(UnitEnumType.PIECES.toString().equalsIgnoreCase(item.getUnits())){
+				
 				JsonArray serialData = fromJsonHelper.extractJsonArrayNamed("serialNumber", element);
 				for (JsonElement je : serialData) {
 					JsonObject serialNumber = je.getAsJsonObject();
@@ -159,10 +192,11 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 
 	}
 
-	public void updateOneTimeSale(final OneTimeSaleData oneTimeSaleData) {
+	public void updateOneTimeSale(final OneTimeSaleData oneTimeSaleData,final CommandProcessingResult invoice) {
 
 		OneTimeSale oneTimeSale = oneTimeSaleRepository.findOne(oneTimeSaleData.getId());
-		oneTimeSale.setIsInvoiced('y');
+		oneTimeSale.setIsInvoiced('Y');
+		oneTimeSale.setInvoiceId(invoice.resourceId());
 		oneTimeSaleRepository.save(oneTimeSale);
 
 	}
@@ -190,17 +224,18 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			}
 		    List<ItemData> itemCodeData = this.oneTimeSaleReadPlatformService.retrieveItemData();
 			List<DiscountMasterData> discountdata = this.discountReadPlatformService.retrieveAllDiscounts();
-			ItemData itemData = this.itemReadPlatformService.retrieveSingleItemDetails(itemId);
+			ItemData itemData = this.itemReadPlatformService.retrieveSingleItemDetails(null, itemId,null,false);
+			itemData.setUnitPrice(itemprice);
 			List<ChargesData> chargesDatas = this.itemReadPlatformService.retrieveChargeCode();
 
 		    if(UnitEnumType.PIECES.toString().equalsIgnoreCase(units)){
 		    	final Integer quantity = fromJsonHelper.extractIntegerWithLocaleNamed("quantity",query.parsedJson());
 		    	totalPrice = itemprice.multiply(new BigDecimal(quantity));
-		    	return new ItemData(itemCodeData, itemData, totalPrice, quantity.toString(), discountdata, chargesDatas);
+		    	return new ItemData(itemCodeData, itemData, totalPrice, quantity.toString(), discountdata, chargesDatas, null);
 		    }else{
 		    	final String quantityValue = fromJsonHelper.extractStringNamed("quantity",query.parsedJson());
 		    	totalPrice = itemprice.multiply(new BigDecimal(quantityValue));
-		    	return new ItemData(itemCodeData, itemData, totalPrice, quantityValue, discountdata, chargesDatas);
+		    	return new ItemData(itemCodeData, itemData, totalPrice, quantityValue, discountdata, chargesDatas, null);
 		    }
 			
 			
@@ -220,7 +255,29 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 
 		OneTimeSale oneTimeSale = null;
 		try {
-			oneTimeSale = oneTimeSaleRepository.findOne(entityId);
+			oneTimeSale = this.findOneById(entityId);
+		    if(oneTimeSale.getDeviceMode().equalsIgnoreCase("NEWSALE")&&oneTimeSale.getIsInvoiced()=='Y'){
+				ChargeCodeMaster chargeCode=this.chargeCodeRepository.findOneByChargeCode(oneTimeSale.getChargeCode());
+				if(oneTimeSale.getInvoiceId()!=null){//check for old onetimesale's
+				   Invoice oldInvoice=this.invoiceRepository.findOne(oneTimeSale.getInvoiceId());
+				   List<BillingOrder> charge=oldInvoice.getCharges();
+				   BigDecimal discountAmount=charge.get(0).getDiscountAmount();
+				   //cancel sale calling 
+				   OneTimeSale cancelDeviceSale= new OneTimeSale(oneTimeSale.getClientId(), oneTimeSale.getItemId(), oneTimeSale.getUnits(),oneTimeSale.getQuantity(),oneTimeSale.getChargeCode(), oneTimeSale.getUnitPrice(), oneTimeSale.getTotalPrice(), 
+			        		                           DateUtils.getLocalDateOfTenant(),oneTimeSale.getDiscountId(),oneTimeSale.getOfficeId(),CodeNameConstants.CODE_CANCEL_SALE,null);
+				   this.oneTimeSaleRepository.saveAndFlush(cancelDeviceSale);
+				   OneTimeSaleData oneTimeSaleData = new OneTimeSaleData(cancelDeviceSale.getId(),oneTimeSale.getClientId(), oneTimeSale.getUnits(), oneTimeSale.getChargeCode(), 
+						                             chargeCode.getChargeType(),oneTimeSale.getUnitPrice(),oneTimeSale.getQuantity(), oneTimeSale.getTotalPrice(), "Y",
+						                             oneTimeSale.getItemId(),oneTimeSale.getDiscountId(),chargeCode.getTaxInclusive());
+				   CommandProcessingResult invoice=this.invoiceOneTimeSale.reverseInvoiceForOneTimeSale(oneTimeSale.getClientId(),oneTimeSaleData,discountAmount,false);
+				   cancelDeviceSale.setIsDeleted('Y');
+				   cancelDeviceSale.setInvoiceId(invoice.resourceId());
+				   cancelDeviceSale.setIsInvoiced('Y');
+				   this.oneTimeSaleRepository.save(cancelDeviceSale);
+				   oldInvoice.setDueAmount(BigDecimal.ZERO);
+				   this.invoiceRepository.save(oldInvoice);
+				  }
+			 }
 			oneTimeSale.setIsDeleted('Y');
 			this.oneTimeSaleRepository.save(oneTimeSale);
 
@@ -229,5 +286,15 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		}
 		return new CommandProcessingResult(Long.valueOf(oneTimeSale.getId()),
 				oneTimeSale.getClientId());
+	}
+
+	private OneTimeSale findOneById(final Long saleId) {
+	
+		try{
+			OneTimeSale oneTimeSale=this.oneTimeSaleRepository.findOne(saleId);
+			return oneTimeSale;
+		}catch(Exception e){
+			throw new DeviceSaleNotFoundException(saleId.toString());
+		}
 	}
 }

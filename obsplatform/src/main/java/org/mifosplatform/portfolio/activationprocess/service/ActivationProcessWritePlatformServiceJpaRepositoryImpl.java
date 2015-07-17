@@ -6,16 +6,23 @@
 package org.mifosplatform.portfolio.activationprocess.service;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
+import org.mifosplatform.billing.planprice.domain.Price;
+import org.mifosplatform.billing.planprice.domain.PriceRepository;
+import org.mifosplatform.billing.selfcare.domain.SelfCare;
 import org.mifosplatform.billing.selfcare.domain.SelfCareTemporary;
 import org.mifosplatform.billing.selfcare.domain.SelfCareTemporaryRepository;
 import org.mifosplatform.billing.selfcare.exception.SelfCareNotVerifiedException;
 import org.mifosplatform.billing.selfcare.exception.SelfCareTemporaryEmailIdNotFoundException;
+import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -26,6 +33,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConsta
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
@@ -48,6 +56,8 @@ import org.mifosplatform.portfolio.activationprocess.exception.ClientAlreadyCrea
 import org.mifosplatform.portfolio.activationprocess.serialization.ActivationProcessCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.client.service.ClientIdentifierWritePlatformService;
 import org.mifosplatform.portfolio.client.service.ClientWritePlatformService;
+import org.mifosplatform.portfolio.contract.domain.Contract;
+import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -78,7 +88,10 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 	private final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService;
 	private final CodeValueRepository codeValueRepository;
 	private final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService;
-	
+	private final PriceRepository priceRepository;
+	private final ChargeCodeRepository chargeCodeRepository;
+	private final SelfCareRepository selfCareRepository;
+	private final ContractRepository contractRepository;
 	
 	
     @Autowired
@@ -88,9 +101,10 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
     		final OwnedHardwareWritePlatformService ownedHardwareWritePlatformService, final AddressReadPlatformService addressReadPlatformService,
     		final ActivationProcessCommandFromApiJsonDeserializer commandFromApiJsonDeserializer, final ItemDetailsRepository itemDetailsRepository,
     		final SelfCareTemporaryRepository selfCareTemporaryRepository,final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService,
-    		final CodeValueRepository codeValueRepository,final ItemRepository itemRepository,
+    		final CodeValueRepository codeValueRepository,final ItemRepository itemRepository,final PriceRepository priceRepository,
     		final BillingMessageTemplateRepository billingMessageTemplateRepository,final MessagePlatformEmailService messagePlatformEmailService,
-    		final BillingMessageRepository messageDataRepository,final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService) {
+    		final BillingMessageRepository messageDataRepository,final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService,
+    		final ChargeCodeRepository chargeCodeRepository,final SelfCareRepository selfCareRepository,final ContractRepository contractRepository) {
 
         
     	this.context = context;
@@ -104,8 +118,12 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
         this.addressReadPlatformService = addressReadPlatformService;
         this.commandFromApiJsonDeserializer = commandFromApiJsonDeserializer;
         this.itemDetailsRepository = itemDetailsRepository;
+        this.priceRepository = priceRepository;
+        this.chargeCodeRepository = chargeCodeRepository;
         this.selfCareTemporaryRepository = selfCareTemporaryRepository;
+        this.contractRepository = contractRepository;
         this.portfolioCommandSourceWritePlatformService = portfolioCommandSourceWritePlatformService;
+        this.selfCareRepository = selfCareRepository;
         this.codeValueRepository = codeValueRepository;
         this.clientIdentifierWritePlatformService = clientIdentifierWritePlatformService;
     }
@@ -196,7 +214,8 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
         logger.error(dve.getMessage(), dve);
     }
 
-	//@SuppressWarnings("unused")
+
+    @Transactional
 	@Override
 	public CommandProcessingResult selfRegistrationProcess(JsonCommand command) {
 
@@ -211,12 +230,14 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			CommandProcessingResult resultClient = null;
 			CommandProcessingResult resultSale = null;
 			CommandProcessingResult resultOrder = null;
+			CommandProcessingResult resultRedemption = null;
 			String device = null;
 			String dateFormat = "dd MMMM yyyy";
 			String activationDate = new SimpleDateFormat(dateFormat).format(DateUtils.getDateOfTenant());
 
 			String fullname = command.stringValueOfParameterNamed("fullname");
 			String firstName = command.stringValueOfParameterNamed("firstname");
+			String lastname = command.stringValueOfParameterNamed("lastname");
 			String city = command.stringValueOfParameterNamed("city");
 			String address = command.stringValueOfParameterNamed("address");
 			Long phone = command.longValueOfParameterNamed("phone");	
@@ -228,6 +249,8 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 			String password = command.stringValueOfParameterNamed("password");
 			String isMailCheck=command.stringValueOfParameterNamed("isMailCheck");
 			String passport=command.stringValueOfParameterNamed("passport");
+			Long planId = command.longValueOfParameterNamed("planId");
+			String duration =command.stringValueOfParameterNamed("duration");
 			SelfCareTemporary temporary =null;
 			
 			if(isMailCheck == null || isMailCheck.isEmpty()){
@@ -254,7 +277,11 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				clientcreation.put("officeId", new Long(1));
 				clientcreation.put("clientCategory", codeValue.getId());
 				clientcreation.put("firstname",firstName);
+				if(fullname == null || fullname.isEmpty()){
+					clientcreation.put("lastname", lastname);
+				}else{
 				clientcreation.put("lastname", fullname);
+				}
 				clientcreation.put("phone", phone);
 				clientcreation.put("homePhoneNumber", homePhoneNumber);
 				clientcreation.put("entryType","IND");// new Long(1));
@@ -395,7 +422,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				
 				if (selfregistrationconfiguration != null && selfregistrationconfiguration.isEnabled()) {
 						
-					if (selfregistrationconfiguration.getValue() != null) {
+					if (selfregistrationconfiguration.getValue() != null && !selfregistrationconfiguration.getValue().isEmpty()) {
 
 						JSONObject ordeJson = new JSONObject(selfregistrationconfiguration.getValue());
 						ordeJson.put("locale", "en");
@@ -414,8 +441,20 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 					} else {
 
 						String paytermCode = command.stringValueOfParameterNamed("paytermCode");
-						Long contractPeriod = command.longValueOfParameterNamed("contractPeriod");
+						String  contractPeriod = command.stringValueOfParameterNamed("contractPeriod");
 						Long planCode = command.longValueOfParameterNamed("planCode");
+						Contract contract =this.contractRepository.findOneByContractId(contractPeriod);
+						List<Price> prices=this.priceRepository.findChargeCodeByPlanAndContract(planCode,contractPeriod);
+						
+						if(!prices.isEmpty()){
+							ChargeCodeMaster chargeCodeMaster = this.chargeCodeRepository.findOneByChargeCode(prices.get(0).getChargeCode());	
+						if(chargeCodeMaster != null){
+						 	paytermCode = chargeCodeMaster.getBillFrequencyCode();
+						}
+						}
+						if(contract != null){
+						contractPeriod = contract.getId().toString();	
+						}
 
 						JSONObject ordeJson = new JSONObject();
 
@@ -438,9 +477,29 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 
 					} 		
 				}
-  				
-  				return resultClient;
-  				
+				
+				//redemption creation
+				Configuration isRedemptionconfiguration = configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_REDEMPTION);
+				
+				if (isRedemptionconfiguration != null && isRedemptionconfiguration.isEnabled()) {
+					
+					JSONObject redemptionJson = new JSONObject();
+					redemptionJson.put("clientId", resultClient.getClientId());
+					redemptionJson.put("pinNumber",command.stringValueOfParameterNamed("pinNumber"));
+					CommandWrapper commandRequest = new CommandWrapperBuilder().createRedemption().withJson(redemptionJson.toString()).build();
+					resultRedemption = this.portfolioCommandSourceWritePlatformService.logCommandSource(commandRequest);
+					if (resultRedemption == null) {
+						throw new PlatformDataIntegrityException("error.msg.redemption.creation",
+								"Redemption Failed for ClientId:" + resultClient.getClientId(), "Redemption Failed");
+					}
+				}
+				SelfCare selfCare  =this.selfCareRepository.findOneByClientId(resultClient.getClientId());
+				final Map<String, Object> changes = new LinkedHashMap<String, Object>(1);
+				changes.put("username", selfCare.getUserName());
+				changes.put("password", selfCare.getPassword());
+  				return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(resultClient.getClientId()) //
+  		         .with(changes) //
+  		         .build();
   			/*}  else {
   				return new CommandProcessingResult(Long.valueOf(-1));
   			}*/	

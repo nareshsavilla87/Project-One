@@ -31,10 +31,13 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
+import org.mifosplatform.organisation.partner.data.PartnersData;
 import org.mifosplatform.portfolio.plan.data.BillRuleData;
 import org.mifosplatform.portfolio.plan.data.PlanData;
+import org.mifosplatform.portfolio.plan.data.PlanQulifierData;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
 import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
 import org.mifosplatform.portfolio.service.service.ServiceMasterReadPlatformService;
@@ -60,6 +63,7 @@ public class PlansApiResource  {
 		private static final String RESOURCE_NAME_FOR_PERMISSION="PLAN";//resourceNameForPermissions = "PLAN";
 		private  final  PlatformSecurityContext context;
 	    private final DefaultToApiJsonSerializer<PlanData> toApiJsonSerializer;
+	    private final DefaultToApiJsonSerializer<PlanQulifierData> apiJsonSerializer;
 	    private final ApiRequestParameterHelper apiRequestParameterHelper;
 	    private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	    private final PlanReadPlatformService planReadPlatformService;
@@ -72,7 +76,8 @@ public class PlansApiResource  {
 	    public PlansApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<PlanData> toApiJsonSerializer,
 	    		final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
 	    		final PlanReadPlatformService planReadPlatformService,final ServiceMasterReadPlatformService serviceMasterReadPlatformService,
-	    		final MCodeReadPlatformService mCodeReadPlatformService,final CodeReadPlatformService codeReadPlatformService) {
+	    		final MCodeReadPlatformService mCodeReadPlatformService,final CodeReadPlatformService codeReadPlatformService,
+	    		final DefaultToApiJsonSerializer<PlanQulifierData> apiJsonSerializer) {
 	    	
 		        this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
@@ -82,6 +87,7 @@ public class PlansApiResource  {
 		        this.serviceMasterReadPlatformService=serviceMasterReadPlatformService;
 		        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
 		        this.codeReadPlatformService = codeReadPlatformService;
+		        this.apiJsonSerializer = apiJsonSerializer;
 		    }	
 	    
 	/**
@@ -123,7 +129,7 @@ public class PlansApiResource  {
 	     final List<BillRuleData> billData = this.codeReadPlatformService.retrievebillRules(EnumValuesConstants.ENUMVALUE_PROPERTY_BILLING_RULES);
 
 		 final List<EnumOptionData> status = this.planReadPlatformService.retrieveNewStatus();
-		 final Collection<MCodeData> provisionSysData = this.mCodeReadPlatformService.getCodeValue("Provisioning");
+		 final Collection<MCodeData> provisionSysData = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PROVISIONING);
 		 final List<EnumOptionData> volumeType = this.planReadPlatformService.retrieveVolumeTypes();
 		 List<ServiceData> services = new ArrayList<>();
 		 
@@ -212,5 +218,29 @@ public class PlansApiResource  {
           return this.toApiJsonSerializer.serialize(result);
 
 		}
-	
+	   
+	    @GET
+		@Path("planQulifier/{planId}")
+		@Consumes({ MediaType.APPLICATION_JSON })
+		@Produces({ MediaType.APPLICATION_JSON })
+		public String retrievePlanQulifierDetails(@PathParam("planId") final Long planId,@Context final UriInfo uriInfo) {
+			
+			context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
+			
+			List<PartnersData> partnersDatas =this.planReadPlatformService.retrievePartnersData(planId);
+			List<PartnersData> availablePartnersDatas = this.planReadPlatformService.retrieveAvailablePartnersData(planId);
+			PlanQulifierData data=new PlanQulifierData(partnersDatas,availablePartnersDatas);  
+			final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+			return this.apiJsonSerializer.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
+		}
+	    
+	    @PUT
+		@Path("planQulifier/{planId}")
+		@Consumes({ MediaType.APPLICATION_JSON })
+		@Produces({ MediaType.APPLICATION_JSON })
+		public String updatePlanQulifierData(@PathParam("planId") final Long planId,final String apiRequestBodyAsJson) {
+			 final CommandWrapper commandRequest = new CommandWrapperBuilder().updatePlanQualifier(planId).withJson(apiRequestBodyAsJson).build();
+			 final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+			  return this.toApiJsonSerializer.serialize(result);
+		}
 }

@@ -293,18 +293,34 @@ private final class SerialNumberForValidation implements RowMapper<String>{
 		}
 
 	@Override
-	public ItemData retriveItemDetailsDataBySerialNum(final String query) {
+	public ItemData retriveItemDetailsDataBySerialNum(final String query,final Long clientId) {
 
 	  try{
 
 		   	context.authenticatedUser();
 			final ItemMastersDataMapper rowMapper = new ItemMastersDataMapper();
 	
-			final String sql="SELECT m.id AS id, m.item_code AS itemCode,m.item_description AS itemDescription,m.charge_code AS chargeCode,"
+			/*final String sql="SELECT m.id AS id, m.item_code AS itemCode,m.item_description AS itemDescription,m.charge_code AS chargeCode,"
 								+ "m.unit_price AS unitPrice FROM b_item_detail itd, b_item_master m "
-								+ " WHERE itd.serial_no = '"+query+"' AND itd.client_id IS NULL and m.id=itd.item_master_id";
+								+ " WHERE itd.serial_no = '"+query+"' AND itd.client_id IS NULL and m.id=itd.item_master_id";*/
+			
+			final String sql ="SELECT m.id AS id, m.item_code AS itemCode,m.item_description AS itemDescription,m.charge_code AS chargeCode," +
+					" round(p.price , 2)  AS unitPrice FROM b_item_detail itd, b_item_master m " +
+					" LEFT JOIN(SELECT item_master_id,Sum(CASE WHEN Client_id IS NULL THEN 1 ELSE 0 END) Available, " +
+					" Sum(CASE WHEN Client_id IS NOT NULL THEN 1 ELSE 0 END) Used,Count(1) Total_items FROM b_item_detail GROUP BY item_master_id) b" +
+					" ON m.id = b.item_master_id left join b_client_address ca on ca.client_id = "+clientId+" left join b_state s on s.state_name = ca.state" +
+					" left join b_priceregion_detail pd on (pd.state_id = s.id or (pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_item_price a, b_priceregion_detail b, b_state c," +
+					" b_client_address d" +
+					" WHERE b.priceregion_id = a.region_id AND b.state_id = c.id   AND a.region_id  = b.priceregion_id" +
+					" AND d.state = c.state_name AND d.address_key = 'PRIMARY' AND d.client_id = "+clientId+" and a.item_id = itd.item_master_id),0) and " +
+					"  pd.country_id =ifnull((SELECT DISTINCT c.id FROM b_item_price a,b_priceregion_detail b,b_country c, b_state s,b_client_address d" +
+					" WHERE     b.priceregion_id = a.region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY' " +
+					" AND d.client_id = ? and a.item_id = itd.item_master_id  and (s.id =b.state_id or(b.state_id = 0 and b.country_id = c.id ))), 0))) left join b_priceregion_master prm ON prm.id = pd.priceregion_id" +
+					" left join b_item_price p on (p.item_id = m.id and p.region_id = prm.id and p.is_deleted='N' ) " +
+					"WHERE itd.serial_no = ? AND itd.client_id IS NULL and m.id=itd.item_master_id and p.item_id = m.id " +
+					" group by m.id";
 	
-			return this.jdbcTemplate.queryForObject(sql,rowMapper,new Object[]{});
+			return this.jdbcTemplate.queryForObject(sql,rowMapper,new Object[]{clientId,query});
 
 		}catch(EmptyResultDataAccessException e){
 			return null;

@@ -37,6 +37,7 @@ import org.mifosplatform.logistics.itemdetails.data.ItemSerialNumberData;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetailsAllocation;
 import org.mifosplatform.logistics.itemdetails.service.ItemDetailsReadPlatformService;
 import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -97,6 +98,7 @@ public class ItemDetailsApiResource {
 	    this.toApiJsonSerializerForItemData = toApiJsonSerializerForItemData;
 	    this.officeReadPlatformService = officeReadPlatformService;
 	    this.oneTimeSaleReadPlatformService = oneTimeSaleReadPlatformService;
+	    
 	}
 
 	/*
@@ -190,8 +192,8 @@ public class ItemDetailsApiResource {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForGrnPermissions);
 		Collection<InventoryGrnData> inventoryGrnData = this.inventoryGrnReadPlatformService.retriveGrnIds();
-		Collection<MCodeData> qualityDatas=this.mCodeReadPlatformService.getCodeValue("Item Quality");
-		Collection<MCodeData> statusDatas=this.mCodeReadPlatformService.getCodeValue("Item Status");
+		Collection<MCodeData> qualityDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_ITEM_QUALITY);
+		Collection<MCodeData> statusDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_ITEM_STATUS);
 		ItemDetailsData itemDetailsData=new ItemDetailsData(inventoryGrnData,qualityDatas,statusDatas,null,null);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializerForItem.serialize(settings,itemDetailsData,RESPONSE_DATA_GRN_IDS_PARAMETERS);
@@ -235,12 +237,14 @@ public class ItemDetailsApiResource {
 	@Path("serialnum")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retriveItemDetailsBySerialNum(@QueryParam("query") final String query,@Context final UriInfo uriInfo){
+	public String retriveItemDetailsBySerialNum(@QueryParam("query") final String query,@QueryParam("clientId") final Long clientId,@Context final UriInfo uriInfo){
 		
 			 context.authenticatedUser().validateHasReadPermission(resourceNameForPermissionsAllocation);
-			 final ItemData itemMasterData = this.itemDetailsReadPlatformService.retriveItemDetailsDataBySerialNum(query);
+			 final ItemData itemMasterData = this.itemDetailsReadPlatformService.retriveItemDetailsDataBySerialNum(query,clientId);
+			// final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId,"Deposit");
+			// itemMasterData.setFeeMasterData(feeMasterData);
 			 ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-			
+			 
 		
 		return this.toApiJsonSerializerForItemData.serialize(settings, itemMasterData, RESPONSE_ITEM_MASTER_DETAILS_PARAMETERS);
 	}

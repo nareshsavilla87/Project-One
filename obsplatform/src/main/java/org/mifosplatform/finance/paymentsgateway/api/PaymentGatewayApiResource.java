@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
@@ -31,6 +33,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.http.client.ClientProtocolException;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -42,9 +45,14 @@ import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.finance.payments.exception.ReceiptNoDuplicateException;
 import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayData;
 import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayDownloadData;
+import org.mifosplatform.finance.paymentsgateway.data.RecurringPaymentTransactionTypeConstants;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGateway;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayRepository;
+import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
+import org.mifosplatform.finance.paymentsgateway.domain.RecurringBillingHistory;
+import org.mifosplatform.finance.paymentsgateway.domain.RecurringBillingHistoryRepository;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayReadPlatformService;
+import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayRecurringWritePlatformService;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayWritePlatformService;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
@@ -57,6 +65,8 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundException;
+import org.mifosplatform.portfolio.order.domain.OrderRepository;
+import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -89,7 +99,6 @@ public class PaymentGatewayApiResource {
 	private final PaymentGatewayReadPlatformService readPlatformService;
 	private final ApiRequestParameterHelper apiRequestParameterHelper;
 	private final DefaultToApiJsonSerializer<PaymentGatewayData> toApiJsonSerializer;
-	private final PortfolioCommandSourceWritePlatformService writePlatformService;
 	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	private String returnMessage;
 	private String success;
@@ -100,23 +109,30 @@ public class PaymentGatewayApiResource {
 	private Long errorCode;
 	private final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService;
 	private final PaymentGatewayRepository paymentGatewayRepository;
+	private final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService;
+	private final OrderRepository orderRepository;
+	private final RecurringBillingHistoryRepository recurringBillingHistoryRepository;
 
 	@Autowired
 	public PaymentGatewayApiResource(final PlatformSecurityContext context,final PaymentGatewayReadPlatformService readPlatformService,
 			final DefaultToApiJsonSerializer<PaymentGatewayData> toApiJsonSerializer,final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PortfolioCommandSourceWritePlatformService writePlatformService,
 			final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
     		final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService,
-    		final PaymentGatewayRepository paymentGatewayRepository) {
+    		final PaymentGatewayRepository paymentGatewayRepository, final OrderRepository orderRepository,
+    		final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService,
+    		final RecurringBillingHistoryRepository recurringBillingHistoryRepository) {
 
 		this.toApiJsonSerializer = toApiJsonSerializer;
-		this.writePlatformService = writePlatformService;
 		this.context=context;
 		this.readPlatformService=readPlatformService;
 		this.apiRequestParameterHelper=apiRequestParameterHelper;
 		this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
     	this.paymentGatewayWritePlatformService = paymentGatewayWritePlatformService;
     	this.paymentGatewayRepository = paymentGatewayRepository;
+    	this.paymentGatewayRecurringWritePlatformService = paymentGatewayRecurringWritePlatformService;
+    	this.orderRepository = orderRepository;
+    	this.recurringBillingHistoryRepository = recurringBillingHistoryRepository;
+    	
 	}
 
 	/**
@@ -136,7 +152,7 @@ public class PaymentGatewayApiResource {
 			final JSONObject xmlJSONObj = XML.toJSONObject(requestData);
 			jsonData=this.returnJsonFromXml(xmlJSONObj);
 			final CommandWrapper commandRequest = new CommandWrapperBuilder().createPaymentGateway().withJson(jsonData.toString()).build();
-			result = this.writePlatformService.logCommandSource(commandRequest);
+			result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 			success = "SUCCESS";
 			errorDesc = "";
 			errorCode = Long.valueOf(0);	
@@ -389,7 +405,7 @@ public class PaymentGatewayApiResource {
 		try{
 			
 			final CommandWrapper commandRequest = new CommandWrapperBuilder().OnlinePaymentGateway().withJson(apiRequestBodyAsJson).build();
-			final CommandProcessingResult result = this.writePlatformService.logCommandSource(commandRequest);
+			final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 			
 			Map<String, Object> output = result.getChanges();
 			
@@ -420,7 +436,7 @@ public class PaymentGatewayApiResource {
 			if(status.equalsIgnoreCase("Success") || status.equalsIgnoreCase("Pending")){
 				
 				Long pgId = Long.valueOf(String.valueOf(output.get("pgId")));
-				String OutputData = this.paymentGatewayWritePlatformService.payment(clientId, pgId, txnId, amount);
+				String OutputData = this.paymentGatewayWritePlatformService.payment(clientId, pgId, txnId, amount, error);
 				
 				JSONObject object = new JSONObject(OutputData);
 				
@@ -452,7 +468,7 @@ public class PaymentGatewayApiResource {
 	
 	/**
 	 * This method is using for posting data to create payment using paypal
-	 */
+	 *//*
 	 @POST
 	 @Path("paypal")
 	 @Consumes("application/x-www-form-urlencoded")
@@ -461,7 +477,8 @@ public class PaymentGatewayApiResource {
 			 @FormParam("mc_gross") final BigDecimal amount,
 			 @FormParam("address_name") final String name,@FormParam("payer_email") final String payerEmail,
 			 @FormParam("custom") final String customData, @FormParam("mc_currency") final String currency,
-			 @FormParam("receiver_email") final String receiverEmail, @FormParam("payer_status") final String payerStatus){
+			 @FormParam("receiver_email") final String receiverEmail, @FormParam("payer_status") final String payerStatus,
+			 @FormParam("payment_status") final String paymentStatus, @FormParam("pending_reason") final String pendingReason){
 		 
 		String returnUrl = null;
 		
@@ -487,9 +504,11 @@ public class PaymentGatewayApiResource {
 			jsonObj.addProperty("receiverEmail", receiverEmail);
 			jsonObj.addProperty("payerStatus", payerStatus);
 			jsonObj.addProperty("currency", currency);
+			jsonObj.addProperty("paymentStatus", paymentStatus);
+			jsonObj.addProperty("pendingReason", pendingReason);
 
 			JSONObject jsonObject = new JSONObject();
-			jsonObject.put("source", "paypal");
+			jsonObject.put("source", RecurringPaymentTransactionTypeConstants.PAYPAL);
 			jsonObject.put("transactionId", txnId);
 			jsonObject.put("currency", currency);
 			jsonObject.put("clientId", clientId);
@@ -497,6 +516,8 @@ public class PaymentGatewayApiResource {
 			jsonObject.put("locale", "en");
 			jsonObject.put("dateFormat", dateFormat);
 			jsonObject.put("otherData", jsonObj.toString());
+			jsonObject.put("status", paymentStatus);
+			jsonObject.put("error", pendingReason);
 			
 			String data = OnlinePaymentMethod(jsonObject.toString());
 			
@@ -506,7 +527,7 @@ public class PaymentGatewayApiResource {
 			String Description = resultJsonObject.getString("Description");
 			
 			
-			String paymentStatus = null;
+			String paymentStatus1 = null;
 			
 			if(Result.equalsIgnoreCase("SUCCESS")){
 				
@@ -514,7 +535,7 @@ public class PaymentGatewayApiResource {
 				 jsonCustomData.remove("returnUrl");
 				 String pgId = resultJsonObject.getString("pgId");
 				 try{
-					 paymentStatus = orderBooking(customData, date, clientId);
+					 paymentStatus1 = orderBooking(customData, date, clientId);
 				 } catch (Exception e){
 					 PaymentGateway  paymentGateway= this.paymentGatewayRepository.findOne(new Long(pgId));
 					
@@ -525,28 +546,33 @@ public class PaymentGatewayApiResource {
 					 } else{
 						 StringWriter errors = new StringWriter();
 						 e.printStackTrace(new PrintWriter(errors));
-						 paymentGateway.setRemarks(errors.toString());	 
-						 paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";					 }
+						 paymentGateway.setRemarks(errors.toString());	 	
+					 }
+					 this.paymentGatewayRepository.save(paymentGateway);
+					 paymentStatus1 = "Payment Failed, Please Contact to Your Service Provider.  ";	
 				 }
 				 
 				
+			} else if (Result.equalsIgnoreCase("PENDING")) {
+				paymentStatus1 = " Payment Pending, Please Contact to Your Service Provider, Reason="+Description;
+			
 			} else {
-				paymentStatus = " Payment Failed, Please Contact to Your Service Provider, Reason="+Description;
+				paymentStatus1 = " Payment Failed, Please Contact to Your Service Provider, Reason="+Description;
 			}
 			
-			String htmlData = "<a href=\""+returnUrl+"\"> Click On Me. </a>" + "<strong>"+ paymentStatus + "</Strong>";
+			String htmlData = "<a href=\""+returnUrl+"\"> Click On Me. </a>" + "<strong>"+ paymentStatus1 + "</Strong>";
 			
 			return htmlData;
 
 		} 
 	   catch(Exception e){
-		   String paymentStatus = "Payment Failed, Please Contact to Your Service Provider.  ";
-		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus + "</Strong>";
+		   String paymentStatus1 = "Payment Failed, Please Contact to Your Service Provider.  ";
+		   String htmlData = "<a href=\""+returnUrl+"\"> Click On Me </a>" + "<strong>"+ paymentStatus1 + "</Strong>";
 		   return htmlData;   
 	   }
-	 }
-	 
-	public String orderBooking(String jsonObject, String date, Long clientId) {
+	 }*/
+
+	/*public String orderBooking(String jsonObject, String date, Long clientId) {
 		
 		try {
 			
@@ -559,7 +585,6 @@ public class PaymentGatewayApiResource {
 
 			if (jsonCustomData.has("clientId"))
 				jsonCustomData.remove("clientId");
-
 			if (jsonCustomData.has("returnUrl"))
 				jsonCustomData.remove("returnUrl");
 
@@ -613,7 +638,7 @@ public class PaymentGatewayApiResource {
 				jsonCustomData.put("start_date", date);
 
 				CommandWrapper commandRequest = new CommandWrapperBuilder().createOrder(clientId).withJson(jsonCustomData.toString()).build();
-				CommandProcessingResult resultOrder = this.writePlatformService.logCommandSource(commandRequest);
+				CommandProcessingResult resultOrder = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 
 				if (resultOrder == null) {
 					return "failure : Payment Done and Plan Booking Failed";
@@ -666,12 +691,12 @@ public class PaymentGatewayApiResource {
 			return "failure : Payment Done and Plan Booking Failed with throwing ActivePlansFoundException";
 		}
 		
-	}
+	}*/
 	 
 	 
 	/**
 	 * This method is using for posting data to create payment using Neteller
-	 */
+	 *//*
 	@POST
 	@Path("neteller")
 	@Consumes({ MediaType.APPLICATION_JSON })
@@ -720,8 +745,193 @@ public class PaymentGatewayApiResource {
 			String output = "{\"Result\":\"FAILURE\", \"Description\":\"JsonException\"" + e.getMessage() + "}";
 			return output;
 		}
+	}	 */
+	
+	/**
+	 * This method is using for Handling Paypal IPN Requests. 
+	 * 
+	 * i) We have to Verify the Paypal IPN Request by Re-Sending the Received Parameters to Paypal IPN Server. 
+	 * 
+	 * ii) Paypal IPN Server Checks Whether IPN Server Sending Request Parameters and 
+	 * Received Parameters(Which are Sending by OBS on (i)). 
+	 * 
+	 * iii) If Both Request Parameters are Match, Then Only Paypal Server Send "VERIFIED" as Response
+	 * 
+	 * iv) If Both are mis-match, Then Send "INVALID" as Response.
+	 */
+	
+	@POST
+	@Path("ipnhandler")
+	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
+	@Produces({ MediaType.TEXT_HTML })
+	public void paypalRecurringPayment(final @Context HttpServletRequest request) {
+
+		RecurringBillingHistory recurringBillingHistory = new RecurringBillingHistory();
+		
+		try {
+			String verifiyMessage = this.paymentGatewayRecurringWritePlatformService.paypalRecurringVerification(request);
+			String txnType = request.getParameter(RecurringPaymentTransactionTypeConstants.RECURRING_TXNTYPE);
+			
+			System.out.println("Transaction Type :" +txnType+ " , Result:" + verifiyMessage);
+			
+			String requestParameters = this.paymentGatewayRecurringWritePlatformService.getRequestParameters(request);
+			
+			recurringBillingHistory.setTransactionData(requestParameters);
+			recurringBillingHistory.setTransactionDate(new Date());
+			recurringBillingHistory.setSource(RecurringPaymentTransactionTypeConstants.PAYPAL);
+			recurringBillingHistory.setTransactionStatus(verifiyMessage);
+			recurringBillingHistory.setTransactionCategory(txnType);
+			
+			if(request.getParameterMap().containsKey("txn_id")){
+				recurringBillingHistory.setTransactionId(request.getParameter("txn_id"));
+			}
+			
+			if (RecurringPaymentTransactionTypeConstants.RECURRING_VERIFIED.equals(verifiyMessage)) {
+				
+				switch (txnType) {
+				
+				case RecurringPaymentTransactionTypeConstants.SUBSCR_SIGNUP:
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_PROFILE_CREATED:
+					
+					this.paymentGatewayRecurringWritePlatformService.recurringSubscriberSignUp(request, recurringBillingHistory);
+			
+					break;
+					
+				case RecurringPaymentTransactionTypeConstants.SUBSCR_PAYMENT:
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT:
+					
+					PaypalRecurringBilling paypalRecurringBilling = this.paymentGatewayRecurringWritePlatformService.recurringSubscriberSignUp(request, recurringBillingHistory);
+					
+					if(null != paypalRecurringBilling){
+						
+						String jsonObject = this.paymentGatewayRecurringWritePlatformService.createJsonForOnlineMethod(request);
+						
+						String data = OnlinePaymentMethod(jsonObject);
+						
+						JSONObject resultJsonObject = new JSONObject(data);
+						
+						String result = resultJsonObject.getString("Result");
+						String description = resultJsonObject.getString("Description");
+						
+						if(result.equalsIgnoreCase(RecurringPaymentTransactionTypeConstants.SUCCESS)){
+							
+							this.paymentGatewayRecurringWritePlatformService.recurringEventUpdate(request, recurringBillingHistory);				
+						
+						} else{
+							recurringBillingHistory.setClientId(paypalRecurringBilling.getClientId());
+							recurringBillingHistory.setObsStatus(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
+							recurringBillingHistory.setObsDescription("Payment Failed in OBS, Reason: "+ description);
+							this.recurringBillingHistoryRepository.save(recurringBillingHistory);
+						}
+					}	
+					
+					break;
+					
+				case RecurringPaymentTransactionTypeConstants.SUBSCR_EOT:
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_EXPIRED:
+				case RecurringPaymentTransactionTypeConstants.SUBSCR_CANCELLED:
+					
+					String profileId = request.getParameter(RecurringPaymentTransactionTypeConstants.SUBSCRID);
+					PaypalRecurringBilling billing = this.paymentGatewayRecurringWritePlatformService.getRecurringBillingObject(profileId);
+					
+					if(null == billing || null == billing.getOrderId()){
+						
+						recurringBillingHistory.setClientId(0L);
+						recurringBillingHistory.setObsStatus(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
+						recurringBillingHistory.setObsDescription("OrderId Not Found with this SubscriberId:" + profileId);
+						
+					} else{
+						
+						String status = this.paymentGatewayRecurringWritePlatformService.getOrderStatus(billing.getOrderId());
+						
+						this.paymentGatewayRecurringWritePlatformService.updateRecurringBillingTable(profileId);
+						
+						if (null != status && status.equalsIgnoreCase(StatusTypeEnum.ACTIVE.toString())) {		
+							final CommandWrapper commandRequest = new CommandWrapperBuilder().terminateOrder(billing.getOrderId()).build();
+							CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+							recurringBillingHistory.setClientId(billing.getClientId());
+							
+							if (null == result || result.resourceId() <= 0) {
+								recurringBillingHistory.setObsStatus(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
+								recurringBillingHistory.setObsDescription("order Terminate Action Failed...");
+							}else{
+								recurringBillingHistory.setObsStatus(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUCCESS);
+								recurringBillingHistory.setObsDescription("Order Termination Completed...");
+							}
+						}
+					}
+					
+					this.recurringBillingHistoryRepository.save(recurringBillingHistory);
+					
+					break;
+					
+				case RecurringPaymentTransactionTypeConstants.SUBSCR_FAILED:
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILED:
+				case RecurringPaymentTransactionTypeConstants.SUBSCR_MODIFY:
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SKIPPED:
+					
+					recurringBillingHistory.setClientId(0L);
+					recurringBillingHistory.setObsStatus(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_UNKNOWN);
+					recurringBillingHistory.setObsDescription("UnDeveloped Request types");
+					this.recurringBillingHistoryRepository.save(recurringBillingHistory);
+					break;
+				
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUSPENDED:
+				case RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_SUSPENDED_DUE_TO_MAX_FAILED_PAYMENT:
+					
+					String profileId1 = request.getParameter(RecurringPaymentTransactionTypeConstants.SUBSCRID);
+					this.paymentGatewayRecurringWritePlatformService.disConnectOrder(profileId1, recurringBillingHistory);
+					
+					break;
+				default:
+					
+					break;
+				}
+
+			} else {
+				recurringBillingHistory.setClientId(0L);
+				recurringBillingHistory.setObsStatus(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
+				recurringBillingHistory.setObsDescription("Paypal Verification Failed...");
+				this.recurringBillingHistoryRepository.save(recurringBillingHistory);
+			}
+
+		} catch (JSONException e) {
+			recurringBillingHistory.setClientId(0L);
+			recurringBillingHistory.setObsStatus(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
+			recurringBillingHistory.setObsDescription("JSONException throwing.." + stackTraceToString(e));
+			this.recurringBillingHistoryRepository.save(recurringBillingHistory);
+		} catch (UnsupportedEncodingException e) {
+			recurringBillingHistory.setClientId(0L);
+			recurringBillingHistory.setObsStatus(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
+			recurringBillingHistory.setObsDescription("UnsupportedEncodingException throwing.." + stackTraceToString(e));
+			this.recurringBillingHistoryRepository.save(recurringBillingHistory);
+		} catch (IllegalStateException e) {
+			recurringBillingHistory.setClientId(0L);
+			recurringBillingHistory.setObsStatus(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
+			recurringBillingHistory.setObsDescription("IllegalStateException throwing.." + stackTraceToString(e));
+			this.recurringBillingHistoryRepository.save(recurringBillingHistory);
+		} catch (ClientProtocolException e) {
+			recurringBillingHistory.setClientId(0L);
+			recurringBillingHistory.setObsStatus(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
+			recurringBillingHistory.setObsDescription("ClientProtocolException throwing.." + stackTraceToString(e));
+			this.recurringBillingHistoryRepository.save(recurringBillingHistory);
+		} catch (IOException e) {
+			recurringBillingHistory.setClientId(0L);
+			recurringBillingHistory.setObsStatus(RecurringPaymentTransactionTypeConstants.RECURRING_PAYMENT_FAILURE);
+			recurringBillingHistory.setObsDescription("IOException throwing.." + stackTraceToString(e));
+			this.recurringBillingHistoryRepository.save(recurringBillingHistory);
+		}
 	}
-	 
+	
+	private String stackTraceToString(Throwable e) {
+		
+		StringBuilder sb = new StringBuilder();
+		for (StackTraceElement element : e.getStackTrace()) {
+			sb.append(element.toString());
+			sb.append("\n");
+		}
+		return sb.toString();
+	}
 	 
 }
 

@@ -28,12 +28,14 @@ public class BillingOrderData {
 	private Long invoiceId;
 	
 	
-	public BillingOrderData(final Long orderId,final String durationType,final Date startDate, final Date nextBillableDate){
+	public BillingOrderData(final Long orderId,final String durationType,final Date startDate, final Date nextBillableDate, final Date invoiceTillDate, final String billingAlign){
 		
 		this.orderId = orderId;
 		this.durationType = durationType;
 		this.startDate = startDate;
 		this.nextBillableDate=nextBillableDate;
+		this.invoiceTillDate = invoiceTillDate;
+		this.billingAlign = billingAlign;
 		
 	}
 
@@ -109,6 +111,10 @@ public class BillingOrderData {
 	}
 
 
+
+	public BillingOrderData(Long invoiceId) {
+		this.invoiceId = invoiceId;
+	}
 
 	public Long getClientId() {
 		return clientId;

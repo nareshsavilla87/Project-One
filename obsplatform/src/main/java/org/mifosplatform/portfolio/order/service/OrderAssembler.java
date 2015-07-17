@@ -5,11 +5,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.mifosplatform.billing.discountmaster.exception.DiscountMasterNotFoundException;
 import org.mifosplatform.billing.planprice.data.PriceData;
+import org.mifosplatform.infrastructure.configuration.domain.Configuration;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
@@ -30,16 +36,21 @@ public class OrderAssembler {
 	
 private final OrderDetailsReadPlatformServices orderDetailsReadPlatformServices;
 private final ContractRepository contractRepository;
+private final ConfigurationRepository configurationRepository;
 private final DiscountMasterRepository discountMasterRepository;
+private final ClientRepository clientRepository;
 
 
 @Autowired
 public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPlatformServices,final ContractRepository contractRepository,
-		   final DiscountMasterRepository discountMasterRepository){
+		   final DiscountMasterRepository discountMasterRepository,final ConfigurationRepository configurationRepository,
+		   final ClientRepository clientRepository){
 	
 	this.orderDetailsReadPlatformServices=orderDetailsReadPlatformServices;
 	this.contractRepository=contractRepository;
 	this.discountMasterRepository=discountMasterRepository;
+	this.configurationRepository = configurationRepository;
+	this.clientRepository = clientRepository;
 	
 }
 
@@ -50,12 +61,13 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 		List<PriceData> datas = new ArrayList<PriceData>();
 		Long orderStatus=null;
 		LocalDate endDate = null;
+		BigDecimal discountRate = BigDecimal.ZERO;
         Order order=Order.fromJson(clientId, command);
 			List<ServiceData> details =this.orderDetailsReadPlatformServices.retrieveAllServices(order.getPlanId());
 			datas=this.orderDetailsReadPlatformServices.retrieveAllPrices(order.getPlanId(),order.getBillingFrequency(),clientId);
-			if(datas.isEmpty()){
+			/*if(datas.isEmpty()){
 				datas=this.orderDetailsReadPlatformServices.retrieveDefaultPrices(order.getPlanId(),order.getBillingFrequency(),clientId);
-			}
+			}*/
 			if(datas.isEmpty()){
 				throw new NoRegionalPriceFound();
 			}
@@ -75,8 +87,19 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			endDate = calculateEndDate(startDate,contractData.getSubscriptionType(),contractData.getUnits());
 			
 			order=new Order(order.getClientId(),order.getPlanId(),orderStatus,null,order.getBillingFrequency(),startDate, endDate,
-					order.getContarctPeriod(), serviceDetails, orderprice,order.getbillAlign(),UserActionStatusTypeEnum.ACTIVATION.toString());
+					 order.getContarctPeriod(), serviceDetails, orderprice,order.getbillAlign(),
+					 UserActionStatusTypeEnum.ACTIVATION.toString(),plan.isPrepaid(),order.isAutoRenewal());
 			
+
+	Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
+
+			
+			if(configuration != null && plan.isPrepaid() == 'N'){
+				order.setBillingAlign(configuration.isEnabled()?'Y':'N');
+				if(configuration.isEnabled() && endDate != null){
+				order.setEndDate(endDate.dayOfMonth().withMaximumValue());
+				}
+			}
 			BigDecimal priceforHistory=BigDecimal.ZERO;
 
 			for (PriceData data : datas) {
@@ -85,7 +108,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 
 				//end date is null for rc
 				if (data.getChagreType().equalsIgnoreCase("RC")	&& endDate != null) {
-					billEndDate = endDate;
+					billEndDate = new LocalDate(order.getEndDate());
 				} else if(data.getChagreType().equalsIgnoreCase("NRC")) {
 					billEndDate = billstartDate;
 				}
@@ -102,9 +125,19 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 				order.addOrderDeatils(price);
 				priceforHistory=priceforHistory.add(data.getPrice());
 				
+				Client client=this.clientRepository.findOne(clientId);
+				List<DiscountDetails> discountDetails=discountMaster.getDiscountDetails();
+				for(DiscountDetails discountDetail:discountDetails){
+					if(client.getCategoryType().equals(Long.valueOf(discountDetail.getCategoryType()))){
+						discountRate = discountDetail.getDiscountRate();
+					}else if(discountRate.equals(BigDecimal.ZERO) && Long.valueOf(discountDetail.getCategoryType()).equals(Long.valueOf(0))){
+						discountRate = discountDetail.getDiscountRate();
+					}
+				}
+				
 				//discount Order
 				OrderDiscount orderDiscount=new OrderDiscount(order,price,discountMaster.getId(),discountMaster.getStartDate(),null,discountMaster.getDiscountType(),
-						discountMaster.getDiscountRate());
+						discountRate);
 				//price.addOrderDiscount(orderDiscount);
 				order.addOrderDiscount(orderDiscount);
 			}
@@ -134,6 +167,32 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			 		}
 			 	return contractEndDate;
 			}
-	
 
+	
+	public Order setDatesOnOrderActivation(Order order, LocalDate startDate) {
+		
+		Contract contract = this.contractRepository.findOne(order.getContarctPeriod());
+	    LocalDate endDate = this.calculateEndDate(startDate, contract.getSubscriptionType(), contract.getUnits());
+	    order.setStartDate(startDate);
+	    if(order.getbillAlign() == 'Y' && endDate != null){
+	    	order.setEndDate(endDate.dayOfMonth().withMaximumValue());
+		}else{
+			order.setEndDate(endDate);
+		}
+
+			for (OrderPrice orderPrice: order.getPrice()) {
+				LocalDate billstartDate = startDate;
+				
+				orderPrice.setBillStartDate(billstartDate);
+				//end date is null for rc
+				if (orderPrice.getChargeType().equalsIgnoreCase("RC")	&& endDate != null) {
+					orderPrice.setBillEndDate(new LocalDate(order.getEndDate()));
+				}else if(endDate == null){
+					orderPrice.setBillEndDate(endDate);
+				} else if(orderPrice.getChargeType().equalsIgnoreCase("NRC")) {
+					orderPrice.setBillEndDate(billstartDate);
+				}
+	}
+			return order;
+	}
 }

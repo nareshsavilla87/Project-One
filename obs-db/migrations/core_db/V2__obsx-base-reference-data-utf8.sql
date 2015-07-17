@@ -1,86 +1,4 @@
 ﻿-- currency symbols may not apply through command line on windows so use a different client like mysql workbench
-
-INSERT INTO `ref_loan_transaction_processing_strategy`
-(`id`,`code`,`name`)
-VALUES
-(1, 'mifos-standard-strategy', 'Mifos style'),
-(2, 'heavensfamily-strategy', 'Heavensfamily'),
-(3, 'creocore-strategy', 'Creocore'),
-(4, 'rbi-india-strategy', 'RBI (India)');
-
-INSERT INTO `c_configuration`
-(`name`, `enabled`)
-VALUES 
-('maker-checker', 0);
-
-INSERT INTO `r_enum_value` 
-VALUES 
-('amortization_method_enum',0,'Equal principle payments','Equal principle payments'),
-('amortization_method_enum',1,'Equal installments','Equal installments'),
-('interest_calculated_in_period_enum',0,'Daily','Daily'),
-('interest_calculated_in_period_enum',1,'Same as repayment period','Same as repayment period'),
-('interest_method_enum',0,'Declining Balance','Declining Balance'),
-('interest_method_enum',1,'Flat','Flat'),
-('interest_period_frequency_enum',2,'Per month','Per month'),
-('interest_period_frequency_enum',3,'Per year','Per year'),
-('loan_status_id',100,'Submitted and awaiting approval','Submitted and awaiting approval'),
-('loan_status_id',200,'Approved','Approved'),
-('loan_status_id',300,'Active','Active'),
-('loan_status_id',400,'Withdrawn by client','Withdrawn by client'),
-('loan_status_id',500,'Rejected','Rejected'),
-('loan_status_id',600,'Closed','Closed'),
-('loan_status_id',601,'Written-Off','Written-Off'),
-('loan_status_id',602,'Rescheduled','Rescheduled'),
-('loan_status_id',700,'Overpaid','Overpaid'),
-('loan_transaction_strategy_id',1,'mifos-standard-strategy','Mifos style'),
-('loan_transaction_strategy_id',2,'heavensfamily-strategy','Heavensfamily'),
-('loan_transaction_strategy_id',3,'creocore-strategy','Creocore'),
-('loan_transaction_strategy_id',4,'rbi-india-strategy','RBI (India)'),
-('processing_result_enum',0,'invalid','Invalid'),
-('processing_result_enum',1,'processed','Processed'),
-('processing_result_enum',2,'awaiting.approval','Awaiting Approval'),
-('processing_result_enum',3,'rejected','Rejected'),
-('repayment_period_frequency_enum',0,'Days','Days'),
-('repayment_period_frequency_enum',1,'Weeks','Weeks'),
-('repayment_period_frequency_enum',2,'Months','Months'),
-('term_period_frequency_enum',0,'Days','Days'),
-('term_period_frequency_enum',1,'Weeks','Weeks'),
-('term_period_frequency_enum',2,'Months','Months'),
-('term_period_frequency_enum',3,'Years','Years');
-
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
-VALUES ('transaction_type_enum', '1', 'Disbursement', 'Disbursement');
-
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
-VALUES ('transaction_type_enum', '2', 'Repayment', 'Repayment');
-
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
-VALUES ('transaction_type_enum', '3', 'Contra', 'Contra');
-
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
-VALUES ('transaction_type_enum', '4', 'Waive Interest', 'Waive Interest');
-
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
-VALUES ('transaction_type_enum', '5', 'Repayment At Disbursement', 'Repayment At Disbursement');
-
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
-VALUES ('transaction_type_enum', '6', 'Write-Off', 'Write-Off');
-
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
-VALUES ('transaction_type_enum', '7', 'Marked for Rescheduling', 'Marked for Rescheduling');
-
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
-VALUES ('transaction_type_enum', '8', 'Recovery Repayment', 'Recovery Repayment');
-
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
-VALUES ('transaction_type_enum', '9', 'Waive Charges', 'Waive Charges');
-
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
-VALUES ('transaction_type_enum', '10', 'Apply Charges', 'Apply Charges');
-
-INSERT INTO `r_enum_value` (`enum_name`, `enum_id`, `enum_message_property`, `enum_value`) 
-VALUES ('transaction_type_enum', '11', 'Apply Interest', 'Apply Interest');
-
 INSERT INTO `m_currency`
 (`id`,`code`,`decimal_places`,`display_symbol`,`name`, `internationalized_name_code`)
 VALUES 
@@ -268,11 +186,9 @@ INSERT INTO `m_code`
 (`code_name`, `is_system_defined`) 
 VALUES 
 ('Customer Identifier',1),
-('LoanCollateral',1),
-('LoanPurpose',1),
 ('Gender',1),
-('YesNo',1),
-('GuarantorRelationship',1);
+('YesNo',1);
+
 
 INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
 select mc.id, 'Passport', 1
@@ -293,29 +209,3 @@ INSERT INTO `m_code_value`(`code_id`,`code_value`,`order_position`)
 select mc.id, 'Any Other Id Type', 4
 from m_code mc
 where mc.`code_name` = "Customer Identifier";
-
--- Adding a few Default Guarantor Relationships
-insert into m_code_value (code_id,code_value,order_position) 
-	select id,"Spouse",0 
-	from m_code 
-	where m_code.code_name="GuarantorRelationship";
-
-insert into m_code_value (code_id,code_value,order_position) 
-	select id,"Parent",0 
-	from m_code 
-	where m_code.code_name="GuarantorRelationship";
-
-insert into m_code_value (code_id,code_value,order_position) 
-	select id,"Sibling",0 
-	from m_code 
-	where m_code.code_name="GuarantorRelationship";
-
-insert into m_code_value (code_id,code_value,order_position) 
-	select id,"Business Associate",0 
-	from m_code 
-	where m_code.code_name="GuarantorRelationship";
-
-insert into m_code_value (code_id,code_value,order_position) 
-	select id,"Other",0 
-	from m_code 
-	where m_code.code_name="GuarantorRelationship";

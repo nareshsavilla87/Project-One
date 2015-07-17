@@ -18,6 +18,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.billing.discountmaster.data.DiscountDetailData;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.discountmaster.service.DiscountReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -29,6 +30,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
@@ -58,14 +60,11 @@ public class DiscountMasterAPiResource {
 	private final MCodeReadPlatformService mCodeReadPlatformService;
 
 	@Autowired
-	public DiscountMasterAPiResource(
-			final PlatformSecurityContext context,
-			final DefaultToApiJsonSerializer<DiscountMasterData> toApiJsonSerializer,
-			final ApiRequestParameterHelper apiRequestParameterHelper,
-			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
-			final DiscountReadPlatformService discountReadPlatformService,
-			final PlanReadPlatformService planReadPlatformService,
+	public DiscountMasterAPiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<DiscountMasterData> toApiJsonSerializer,
+			final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,
+			final DiscountReadPlatformService discountReadPlatformService,final PlanReadPlatformService planReadPlatformService,
 			final MCodeReadPlatformService codeReadPlatformService) {
+		
 		this.context = context;
 		this.toApiJsonSerializer = toApiJsonSerializer;
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
@@ -109,8 +108,9 @@ public class DiscountMasterAPiResource {
 
 	private DiscountMasterData handleTemplateData() {
 		final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
-		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue("type");
-		return new DiscountMasterData(statusData, discountTypeData);
+		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
+		final Collection<MCodeData> clientCategoryDatas = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CLIENT_CATEGORY);
+		return new DiscountMasterData(statusData, discountTypeData,clientCategoryDatas);
 	}
 
 	/**
@@ -141,11 +141,15 @@ public class DiscountMasterAPiResource {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		DiscountMasterData discountMasterData = this.discountReadPlatformService.retrieveSingleDiscountDetail(discountId);
+		List<DiscountDetailData> discountDetailDatas = this.discountReadPlatformService.retrieveDiscountdetails(discountId);
+		discountMasterData.setDiscountDetailsData(discountDetailDatas);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		if(settings.isTemplate()){
 		final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
-		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue("type");
+		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
+		final Collection<MCodeData> clientCategoryDatas = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CLIENT_CATEGORY);
 		discountMasterData.setStatusData(statusData);
+		discountMasterData.setclientCategoryData(clientCategoryDatas);
 		discountMasterData.setDiscountTypeData(discountTypeData);
 	    }
 		return this.toApiJsonSerializer.serialize(settings,discountMasterData,RESPONSE_DATA_PARAMETERS);

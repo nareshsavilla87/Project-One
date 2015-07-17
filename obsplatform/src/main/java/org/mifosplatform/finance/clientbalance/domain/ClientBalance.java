@@ -30,8 +30,7 @@ public class ClientBalance {
 
 
 
-	public static ClientBalance create(Long clientId,
-			BigDecimal balanceAmount, char isWalletPayment) {
+	public static ClientBalance create(Long clientId,BigDecimal balanceAmount, char isWalletPayment) {
 		
 		return new ClientBalance(clientId, balanceAmount,isWalletPayment);
 	}
@@ -41,8 +40,10 @@ public class ClientBalance {
 		this.clientId = clientId;
 		if(isWalletPayment == 'Y'){
 			this.walletAmount= balanceAmount;
+			this.balanceAmount=	BigDecimal.ZERO;
 		}else{
 		   this.balanceAmount = balanceAmount;
+		   this.walletAmount= BigDecimal.ZERO;
 		}
 	}
 

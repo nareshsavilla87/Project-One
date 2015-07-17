@@ -11,15 +11,17 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.partner.data.PartnersData;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.VolumeTypeEnumaration;
 import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
-import org.mifosplatform.portfolio.plan.data.BillRuleData;
 import org.mifosplatform.portfolio.plan.data.PlanData;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
 import org.mifosplatform.portfolio.plan.domain.VolumeTypeEnum;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -51,21 +53,18 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 	@Override
 	public List<PlanData> retrievePlanData(final String planType) {
 
-		context.authenticatedUser();
-		 String sql=null;
-		PlanDataMapper mapper = new PlanDataMapper(this.priceReadPlatformService);
-		
+	context.authenticatedUser();
+	String sql=null;
+	PlanDataMapper mapper = new PlanDataMapper(this.priceReadPlatformService);
+	
 		if(planType!=null && PREPAID.equalsIgnoreCase(planType)){
-
-		 sql = "select " + mapper.schema()+" AND pm.is_prepaid ='Y'";
-		 
+			sql = "select " + mapper.schema()+" AND pm.is_prepaid ='Y'";
 		}else if(planType!=null && planType.equalsIgnoreCase(POST_PAID)){
-		
-			sql = "select " + mapper.schema()+" AND pm.is_prepaid ='N'";
+		sql = "select " + mapper.schema()+" AND pm.is_prepaid ='N'";
 		}else{
 			sql = "select " + mapper.schema();
 		}
-
+   
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 	}
 
@@ -74,6 +73,13 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 		
          public PlanDataMapper(final PriceReadPlatformService priceReadPlatformService) {
 			this.priceReadPlatformService=priceReadPlatformService;
+		}
+
+		public String schemaForpartner(Long userId) {
+			return " SELECT pm.id,pm.plan_code AS planCode,pm.plan_description AS planDescription,pm.start_date AS startDate," +
+					" pm.end_date AS endDate,pm.plan_status AS planStatus, pm.is_prepaid AS isprepaid, pm.provision_sys AS provisionSystem" +
+					" FROM b_plan_master pm left outer join b_plan_qualifier pq on pm.id =pq.plan_id left outer join m_office mo on mo.id=pq.partner_id" +
+					" WHERE pm.is_deleted = 'n' and mo.hierarchy like '%' group by pm.id";
 		}
 
 		public String schema() {
@@ -127,16 +133,65 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 			RowMapper<SubscriptionData> {
 
 		public String schema() {
-			return " sb.id as id,sb.contract_period as contractPeriod,sb.contract_duration as units,sb.contract_type as contractType "
+			return " sb.id as id,sb.contract_period as contractPeriod,sb.contract_duration as units,sb.contract_type as contractType,0 as priceId "
 					+ " from b_contract_period sb where is_deleted='N'";
 
 		}
 		
 		public String schemaForPrepaidPlans() {
-			return "  sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType" +
+			
+			/*return "  sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType" +
 					" FROM b_contract_period sb, b_orders o, b_plan_pricing p WHERE sb.is_deleted = 'N' and sb.contract_period=p.duration " +
-					" and o.plan_id = p.plan_id  ";
+					" and o.plan_id = p.plan_id  ";*/
+			/*return "  sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType,"+
+                    " p.id as  priceId,prm.priceregion_code as priceRegionCode, p.plan_id as planId,p.service_code as serviceCode "+
+                    " FROM b_contract_period sb, b_orders o left join b_client_address ca on ca.client_id = o.client_id "+ 
+                    " left join b_state s on s.state_name = ca.state left join b_priceregion_detail pd " +
+                    " on (pd.state_id = s.id or (pd.state_id = 0 and pd.country_id = s.parent_code)) " +
+                    " left join b_priceregion_master prm ON prm.id = pd.priceregion_id "+
+                    " join b_plan_pricing p on p.plan_id = o.plan_id and p.price_region_id = prm.id "+
+                    "  WHERE  sb.is_deleted = 'N' AND sb.contract_period = p.duration AND o.plan_id = p.plan_id  ";*/
+		return " sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType," +
+			   " p.id as  priceId,prm.priceregion_code as priceRegionCode, p.plan_id as planId,p.service_code as serviceCode" +
+			   " FROM b_contract_period sb,b_orders o LEFT JOIN b_client_address ca ON ca.client_id = o.client_id LEFT JOIN b_state s" +
+			   " ON s.state_name = ca.state LEFT JOIN b_priceregion_detail pd " +
+			   " on (pd.state_id = ifnull((SELECT DISTINCT c.id FROM  b_plan_pricing a, b_priceregion_detail b, b_state c," +
+			   " b_client_address d WHERE b.priceregion_id = a.price_region_id AND b.state_id = c.id AND d.state = c.state_name AND " +
+			   " d.address_key = 'PRIMARY' AND d.client_id =o.client_id  and a.plan_id = o.plan_id),0) and pd.country_id = ifnull((SELECT DISTINCT c.id" +
+			   " FROM b_plan_pricing a,b_priceregion_detail b,b_country c, b_state s,b_client_address d" +
+			   " WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
+			   " AND d.client_id =o.client_id and a.plan_id = o.plan_id and  d.state = s.state_name and " +
+			   " (s.id =b.state_id or(b.state_id = 0 and b.country_id = c.id ))), 0)) LEFT JOIN b_priceregion_master prm ON prm.id = pd.priceregion_id" +
+			   " JOIN b_plan_pricing p ON p.plan_id = o.plan_id AND p.price_region_id = prm.id WHERE     sb.is_deleted = 'N' AND sb.contract_period = p.duration" +
+			   " AND o.plan_id = p.plan_id ";	
 
+			/*return " sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType," +
+				   " p.id as  priceId,prm.priceregion_code as priceRegionCode, p.plan_id as planId,p.service_code as serviceCode " +
+				   " FROM b_contract_period sb,b_orders o LEFT JOIN b_client_address ca ON ca.client_id = o.client_id LEFT JOIN b_state s" +
+				   " ON s.state_name = ca.state LEFT JOIN b_priceregion_detail pd on (pd.state_id = ifnull((SELECT DISTINCT c.id FROM  " +
+				   " b_plan_pricing a, b_priceregion_detail b, b_state c, b_client_address d WHERE b.priceregion_id = a.price_region_id AND b.state_id = c.id" +
+				   " AND d.state = c.state_name AND d.address_key = 'PRIMARY' AND d.client_id =o.client_id  and a.plan_id = o.plan_id),0) and pd.country_id = ifnull((SELECT DISTINCT c.id" +
+				   " FROM b_plan_pricing a,b_priceregion_detail b,b_country c, b_state s,b_client_address d " +
+				   " WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
+				   " AND d.client_id =o.client_id and a.plan_id = o.plan_id and  d.state = s.state_name " +
+				   " and (s.id =b.state_id or(b.state_id = 0 and b.country_id = c.id ))), 0)) LEFT JOIN b_priceregion_master prm ON prm.id = pd.priceregion_id " +
+				   " JOIN b_plan_pricing p ON p.plan_id = o.plan_id AND p.price_region_id = prm.id WHERE  sb.is_deleted = 'N' AND sb.contract_period = p.duration" +
+				   " AND o.plan_id = p.plan_id AND o.id = ?" +
+				   " union all" +
+				   " select sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType," +
+				   " p.id as  priceId,prm.priceregion_code as priceRegionCode, p.plan_id as planId,p.service_code as serviceCode " +
+				   " FROM b_contract_period sb, b_orders o left join b_client_address ca on ca.client_id = o.client_id left join b_state s on s.state_name = ca.state left join b_priceregion_detail pd" +
+				   " on (pd.state_id = s.id or (pd.state_id = 0 and pd.country_id =0)) left join b_priceregion_master prm ON prm.id = pd.priceregion_id " +
+				   " join b_plan_pricing p on p.plan_id = o.plan_id and p.price_region_id = prm.id " +
+				   " WHERE  sb.is_deleted = 'N' AND sb.contract_period = p.duration AND o.plan_id = p.plan_id and sb.contract_period not in (SELECT sb.contract_period AS contractPeriod" +
+				   " FROM b_contract_period sb,b_orders o LEFT JOIN b_client_address ca ON ca.client_id = o.client_id LEFT JOIN b_state s ON s.state_name = ca.state" +
+				   " LEFT JOIN b_priceregion_detail pd on (pd.state_id = ifnull((SELECT DISTINCT c.id FROM  b_plan_pricing a, b_priceregion_detail b, b_state c," +
+				   " b_client_address d WHERE b.priceregion_id = a.price_region_id AND b.state_id = c.id " +
+				   " AND d.state = c.state_name AND d.address_key = 'PRIMARY' AND d.client_id =o.client_id  and a.plan_id = o.plan_id),0) and pd.country_id = ifnull((SELECT DISTINCT c.id" +
+				   " FROM b_plan_pricing a,b_priceregion_detail b,b_country c, b_state s,b_client_address d WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
+				   " AND d.client_id =o.client_id and a.plan_id = o.plan_id and  d.state = s.state_name and (s.id =b.state_id or(b.state_id = 0 and b.country_id = c.id ))), 0))" +
+				   " LEFT JOIN b_priceregion_master prm ON prm.id = pd.priceregion_id JOIN b_plan_pricing p ON p.plan_id = o.plan_id AND p.price_region_id = prm.id " +
+				   " WHERE     sb.is_deleted = 'N' AND sb.contract_period = p.duration AND o.plan_id = p.plan_id AND o.id = ?)";       */
 		}
 
 		@Override
@@ -146,7 +201,8 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 			final Long id = rs.getLong("id");
 			final String contractPeriod = rs.getString("contractPeriod");
 			final String subscriptionType = rs.getString("contractType");
-			return new SubscriptionData(id,contractPeriod,subscriptionType);
+			final Long priceId = rs.getLong("priceId");
+			return new SubscriptionData(id,contractPeriod,subscriptionType,priceId);
 		}
 
 	}
@@ -247,7 +303,67 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 				
 		}
 
-		
+		@Override
+		public List<PartnersData> retrieveAvailablePartnersData(Long planId) {
+			
+			try{
+				this.context.authenticatedUser();
+				PlanQulifierMapper mapper=new PlanQulifierMapper();  
+				final String sql="select "+mapper.schema(); 
+				return this.jdbcTemplate.query(sql,mapper,new Object[] {planId});		
+				
+			}catch(EmptyResultDataAccessException dve){
+				return null;
+			}
+			
+			
+		}
 
+		private static final class PlanQulifierMapper implements RowMapper<PartnersData>{
+			
+			public String  schema(){
+				return " o.id as id, o.name as partnerName" +
+					   " FROM m_office o, m_code_value cv" +
+					   " WHERE  o.id  NOT IN (select partner_id from b_plan_qualifier where plan_id = ? ) " +
+					   " and cv.id = o.office_type AND cv.code_value ='Agent'";
+				
+			}
+			
+			public String schemaForPartners() {
+				
+				return "o.id AS id, o.name AS partnerName" +
+						" FROM m_office o, m_code_value cv, b_plan_qualifier pq " +
+						"WHERE cv.id = o.office_type AND cv.code_value = 'Agent' AND o.id =pq.partner_id  and pq.plan_id=?";
+			}
+
+			@Override
+			public PartnersData mapRow(ResultSet rs, int rowNum)
+					throws SQLException {
+				
+				final Long id= rs.getLong("id");
+				final String partnerName = rs.getString("partnerName");
+				return new PartnersData(id,partnerName,null);
+			}
+
+			
+			
+		}
+
+		@Override
+		public List<PartnersData> retrievePartnersData(Long planId) {
+			
+			try{
+				this.context.authenticatedUser();
+				PlanQulifierMapper mapper=new PlanQulifierMapper();  
+				final String sql="select "+mapper.schemaForPartners(); 
+				return this.jdbcTemplate.query(sql,mapper,new Object[] {planId});		
+				
+			}catch(EmptyResultDataAccessException dve){
+				return null;
+			}
+			
+			
+		}
+            
 
 	}

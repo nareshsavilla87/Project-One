@@ -58,14 +58,16 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 			final String durationType = resultSet.getString("durationType");
 			final Date billStartDate = resultSet.getDate("billStartDate");
 			final Date nextBillableDate = resultSet.getDate("nextBillableDate");
+			final Date invoiceTillDate = resultSet.getDate("invoiceTillDate");
+			final String billingAlign =  resultSet.getString("billingAlign");
 			
-			return new BillingOrderData(orderId, durationType, billStartDate,nextBillableDate);
+			return new BillingOrderData(orderId, durationType, billStartDate,nextBillableDate,invoiceTillDate,billingAlign);
 		}
 
 		public String orderIdSchema() {
 			
-			return " distinct os.id as orderId,op.duration_type as durationType,Date_format(IFNULL(op.invoice_tilldate,op.bill_start_date), '%Y-%m-%d') as billStartDate," +
-				    "ifnull(op.next_billable_day,op.bill_start_date) as  nextBillableDate FROM b_orders os "+
+			return " distinct os.id as orderId,op.duration_type as durationType, Date_format(IFNULL(op.invoice_tilldate,op.bill_start_date), '%Y-%m-%d') as billStartDate," +
+				    "ifnull(op.next_billable_day,op.bill_start_date) as  nextBillableDate,os.billing_align as billingAlign,op.invoice_tilldate as invoiceTillDate FROM b_orders os "+
 					" left outer join b_order_price op on os.id = op.order_id"+
 					" WHERE os.client_id = ? and os.order_status=1 AND Date_format(IFNULL(op.next_billable_day, ?), '%Y-%m-%d') <= ? and os.is_deleted = 'N' "+
 					" and Date_format(IFNULL(op.next_billable_day,Date_format(IFNULL(op.bill_start_date, '3099-12-12'),'%Y-%m-%d')), '%Y-%m-%d')" +
@@ -210,6 +212,8 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 		public DiscountMasterData mapRow(ResultSet rs, int rowNum) throws SQLException {
 			
 			final Long discountId = rs.getLong("discountId");
+			final String discountCode = rs.getString("discountCode");
+			final String discountDescription = rs.getString("discountDescription");
 			final Long orderPriceId = rs.getLong("orderPriceId");
 			final Long orderDiscountId = rs.getLong("orderDiscountId");
 			final LocalDate discountStartDate = JdbcSupport.getLocalDate(rs,"discountStartDate");
@@ -218,16 +222,18 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 			final BigDecimal discountRate = rs.getBigDecimal("discountRate");
 			final String isDeleted = rs.getString("isDeleted");
 			
-			return new DiscountMasterData(discountId, orderPriceId,orderDiscountId, 
-					      discountStartDate, discountEndDate,discountType, discountRate, isDeleted);
+			
+			return new DiscountMasterData(discountId, orderPriceId,orderDiscountId,discountStartDate, discountEndDate,
+					             discountType, discountRate, isDeleted,discountCode,discountDescription);
 		}
 
 		public String discountOrderSchema() {
 			
 			return    " od.id AS orderDiscountId,od.orderprice_id AS orderPriceId,od.discount_id AS discountId,od.discount_startdate AS discountStartDate,"
-					+ " od.discount_enddate AS discountEndDate,od.discount_type AS discountType,od.discount_rate AS discountRate,od.is_deleted AS isDeleted "
+					+ " od.discount_enddate AS discountEndDate,od.discount_type AS discountType,od.discount_rate AS discountRate,od.is_deleted AS isDeleted," 
+					+ " dm.discount_code as discountCode,dm.discount_description AS discountDescription"
 					+ " FROM b_orders os inner join b_order_price op on op.order_id = os.id inner join b_order_discount od on od.order_id = os.id and od.orderprice_id=op.id "
-					+ " WHERE od.is_deleted='N' and os.id= ? and op.id= ? ";
+					+ " inner join b_discount_master dm on od.discount_id=dm.id WHERE od.is_deleted='N' and os.id= ? and op.id= ? ";
 
 		}
 	}
@@ -285,9 +291,9 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 		}
 	}
 	 
-	 /* (non-Javadoc)
+	/*  (non-Javadoc)
 	 * @see #retriveExemptionTaxDetails(java.lang.Long)
-	 */
+	 
 	@Override
 		public TaxMappingRateData retriveExemptionTaxDetails(final Long clientId) {
 		 
@@ -308,7 +314,7 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 				final String taxExemption=rs.getString("taxExemption");
 				return new TaxMappingRateData(taxExemption);
 			}
-		}
+		}*/
 		
 	@Override
 	public AgreementData retriveClientOfficeDetails(final Long clientId) {
@@ -369,78 +375,35 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 		}
 	}
 
+	@Override
+	public List<Long> listOfInvoices(Long clientId, Long orderId) {
+		
+		final ListInvoiceMapper invoicemapper = new ListInvoiceMapper();
+		final String sql = "select" + invoicemapper.schema();
+		return this.jdbcTemplate.query(sql, invoicemapper,new Object[] { clientId, orderId});
+		
+	}
+	
+	private static final class ListInvoiceMapper implements RowMapper<Long> {
+
+		@Override
+		public Long  mapRow(ResultSet resultSet, int rowNum) throws SQLException {
+			
+			final Long invoiceId = resultSet.getLong("invoiceId");
+			
+			return invoiceId;
+		}
+
+		public String schema() {
+			
+			return " i.id as invoiceId FROM b_charge c, b_invoice i "+
+					" WHERE c.client_id = ? and c.invoice_id = i.id and c.order_id = ? and c.charge_end_date > now() " +
+					" and c.charge_type = 'RC' order by i.id desc; ";
+		}
+		
+	}
+
 }
 
-
-
-/*@Override
-		public List<OrderPriceData> retrieveInvoiceTillDate(final Long orderId) {
-
-			final OrderPriceMapper orderPriceMapper = new OrderPriceMapper();
-			final String sql = "select " + orderPriceMapper.orderPriceSchema();
-			return this.jdbcTemplate.query(sql, orderPriceMapper,new Object[] { orderId });
-
-		}
-
-		private static final class OrderPriceMapper implements RowMapper<OrderPriceData> {
-
-			@Override
-			public OrderPriceData mapRow(ResultSet rs, int rowNum)throws SQLException {
-				
-				final Long id = rs.getLong("orderPriceId");
-				final Long orderId = rs.getLong("orderId");
-				final Long serviceId = rs.getLong("serviceId");
-				final String chargeCode = rs.getString("chargeCode");
-				final String chargeType = rs.getString("chargeType");
-				final String chargeDuration = rs.getString("chargeDuration");
-				final String durationType = rs.getString("durationType");
-				final Date invoiceTillDate = rs.getDate("invoiceTillDate");
-				final BigDecimal price = rs.getBigDecimal("price");
-				final Long createdbyId = rs.getLong("createdId");
-				final Date createdDate = rs.getDate("createdDate");
-				final Date lastModefiedDate = rs.getDate("lastModefiedDate");
-				final Long lastModefiedId = rs.getLong("lastModefiedId");
-				return new OrderPriceData(id, orderId, serviceId, chargeCode,
-						chargeType, chargeDuration, durationType, invoiceTillDate,
-						price, createdbyId, createdDate, lastModefiedDate,
-						lastModefiedId);
-			}
-
-			public String orderPriceSchema() {
-				return " op.id as orderPriceId,op.order_id as orderId,op.service_id as serviceId,"
-						+ " op.charge_code as chargeCode,op.charge_type as chargeType,op.charge_duration as chargeDuration,"
-						+ " op.duration_type as durationType,op.invoice_tilldate as invoiceTillDate,"
-						+ " op.price as price,op.createdby_id as createdId,op.created_date as createdDate,"
-						+ " op.lastmodified_date lastModefiedDate,op.lastmodifiedby_id as lastModefiedId "
-						+ "FROM b_order_price op WHERE order_id = ? ";
-
-			}
-		}
-		
-		
-		@Override
-		public List<GenerateInvoiceData> retrieveClientsWithOrders(LocalDate processDate) {
-			
-			AppUser user = this.context.authenticatedUser();
-			final OrderMapper mapper = new OrderMapper();
-			final String schema = "Select " + mapper.schema() + " and o.createdby_id = ? ";
-			return this.jdbcTemplate.query(schema, mapper, new Object[]{processDate.toDate(),processDate.toDate(),user.getId()});
-		}
-		
-		 private static final class OrderMapper implements RowMapper<GenerateInvoiceData> {
-				
-				public String schema() {
-					return " o.client_id as clientId, o.next_billable_day as nextBillableDay from b_orders o join m_client c on c.id=o.client_id  and Date_format(IFNULL(o.next_billable_day, ?), '%Y-%m-%d') <= ? ";
-				}
-
-				@Override
-				public GenerateInvoiceData mapRow(ResultSet rs, int rowNum) throws SQLException {
-					
-					final Long clientId = rs.getLong("clientId");
-					final Date nextBillableDay = rs.getDate("nextBillableDay");
-					return new GenerateInvoiceData(clientId, nextBillableDay,null); 
-				}
-				
-			}*/	
 
    

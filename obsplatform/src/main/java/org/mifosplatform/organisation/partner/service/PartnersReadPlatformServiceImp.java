@@ -123,7 +123,7 @@ public PartnersData retrieveSinglePartnerDetails(final Long partnerId) {
 			
 			final String imageKey =rs.getString("imageKey");
 			
-			return new PartnersData(imageKey);		
+			return new PartnersData(null,null,imageKey);		
 			}
 
 	}

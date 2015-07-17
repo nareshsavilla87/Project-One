@@ -26,12 +26,12 @@ import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
@@ -65,23 +65,21 @@ public class OrdersApiResource {
 	  private final OrderReadPlatformService orderReadPlatformService;
 	  private final MCodeReadPlatformService mCodeReadPlatformService;
 	  private final ApiRequestParameterHelper apiRequestParameterHelper;
-	  private final ConfigurationRepository configurationRepository;
 	  private final OrderAddOnsReadPlaformService orderAddOnsReadPlaformService;
 	  private final DefaultToApiJsonSerializer<OrderData> toApiJsonSerializer;
 	  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	  
 
 	  @Autowired
-	   public OrdersApiResource(final PlatformSecurityContext context,final ConfigurationRepository configurationRepository,  
-	   final DefaultToApiJsonSerializer<OrderData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
-	   final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,final OrderReadPlatformService orderReadPlatformService,
-	   final PlanReadPlatformService planReadPlatformService, final MCodeReadPlatformService mCodeReadPlatformService,
-	   final OrderAddOnsReadPlaformService orderAddOnsReadPlaformService) {
+	   public OrdersApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<OrderData> toApiJsonSerializer, 
+	   final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
+	   final OrderReadPlatformService orderReadPlatformService,final PlanReadPlatformService planReadPlatformService, 
+	   final MCodeReadPlatformService mCodeReadPlatformService,final OrderAddOnsReadPlaformService orderAddOnsReadPlaformService) {
+
 
 		        this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
 		        this.planReadPlatformService=planReadPlatformService;
-		        this.configurationRepository=configurationRepository;
 		        this.mCodeReadPlatformService=mCodeReadPlatformService;
 		        this.orderReadPlatformService=orderReadPlatformService;
 		        this.orderAddOnsReadPlaformService=orderAddOnsReadPlaformService;
@@ -104,15 +102,15 @@ public class OrdersApiResource {
 	@Path("template")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String retrieveOrderTemplate(@QueryParam("planId")Long planId,@Context final UriInfo uriInfo) {
+	public String retrieveOrderTemplate(@QueryParam("planId")Long planId,@QueryParam("clientId")Long clientId,@Context final UriInfo uriInfo) {
 	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-	OrderData orderData = handleTemplateRelatedData(planId);
+	OrderData orderData = handleTemplateRelatedData(planId,clientId);
 	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
     return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
 	}
 	
-	private OrderData handleTemplateRelatedData(Long planId) {
-		List<PlanCodeData> planDatas = this.orderReadPlatformService.retrieveAllPlatformData(planId);
+	private OrderData handleTemplateRelatedData(Long planId, Long clientId) {
+		List<PlanCodeData> planDatas = this.orderReadPlatformService.retrieveAllPlatformData(planId,clientId);
 		List<PaytermData> data=new ArrayList<PaytermData>();
 		List<SubscriptionData> contractPeriod=this.planReadPlatformService.retrieveSubscriptionData(null,null);
 		return new OrderData(planDatas,data,contractPeriod,null);
@@ -122,10 +120,10 @@ public class OrdersApiResource {
 	@Path("{planCode}/template")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String getBillingFrequency(@PathParam("planCode") final Long planCode,@Context final UriInfo uriInfo) {
+	public String getBillingFrequency(@PathParam("planCode") final Long planCode,@QueryParam("clientId") final Long clientId,@Context final UriInfo uriInfo) {
 	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-	OrderData orderData = handleTemplateRelatedData(new Long(0));
-	List<PaytermData> datas  = this.orderReadPlatformService.getChargeCodes(planCode);
+	OrderData orderData = handleTemplateRelatedData(new Long(0),null);
+	List<PaytermData> datas  = this.orderReadPlatformService.getChargeCodes(planCode,clientId);
 	if(datas.size()==0){
 		throw new BillingOrderNoRecordsFoundException(planCode);
 	}
@@ -196,7 +194,7 @@ public class OrdersApiResource {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String updateOrder(@PathParam("orderId") final Long orderId, final String apiRequestBodyAsJson) {
-		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateOrder(orderId).withJson(apiRequestBodyAsJson).build();
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().disconnectOrder(orderId).withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}
@@ -238,7 +236,7 @@ public class OrdersApiResource {
 	 @Produces({MediaType.APPLICATION_JSON})
 	 public String retrieveOrderDisconnectDetails(@Context final UriInfo uriInfo) {
 		 context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-	     final Collection<MCodeData> disconnectDetails = this.mCodeReadPlatformService.getCodeValue("Disconnect Reason");
+	     final Collection<MCodeData> disconnectDetails = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_DISCONNECT_REASON);
 	     OrderData orderData = new OrderData(disconnectDetails);
 	     final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	     return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
@@ -342,8 +340,8 @@ public class OrdersApiResource {
     @Produces({MediaType.APPLICATION_JSON})
     public String getOfExtension(@Context final UriInfo uriInfo) {
         context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-        Collection<MCodeData> extensionPeriodDatas=this.mCodeReadPlatformService.getCodeValue("Extension Period");
-		Collection<MCodeData> extensionReasonDatas=this.mCodeReadPlatformService.getCodeValue("Extension Reason");
+        Collection<MCodeData> extensionPeriodDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_EXTENSION_PERIOD);
+		Collection<MCodeData> extensionReasonDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_EXTENSION_REASON);
         OrderData extensionData=new OrderData(extensionPeriodDatas,extensionReasonDatas);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, extensionData, RESPONSE_DATA_PARAMETERS);
@@ -371,7 +369,7 @@ public class OrdersApiResource {
 	  public String getSuspentationReasons(@Context final UriInfo uriInfo) {
 		  
 	        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-			final Collection<MCodeData> reasonDatas=this.mCodeReadPlatformService.getCodeValue("Suspension Reason");
+			final Collection<MCodeData> reasonDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_SUSPENSION_REASON);
 	        final OrderData orderData=new OrderData(null,reasonDatas);
 	        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	        return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);

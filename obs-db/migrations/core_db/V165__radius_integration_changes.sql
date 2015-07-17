@@ -1,3 +1,4 @@
+
 insert ignore into m_code_value values(null,13,'Radius',7);
 SET SQL_SAFE_UPDATES = 0;
 update job set name='RADIUS', display_name='Radius Integration',job_key='1RADIUSJobDetaildefault _ DEFAULT' where name="MIDDLEWARE";
@@ -38,11 +39,11 @@ delete from c_configuration where name='online-paymode';
 
 update c_configuration set name='balance-check' WHERE name='forcible-balance-check';
 update c_configuration set name='cuncerrent-sessions' WHERE name='active-viewers';
-update c_configuration set name='systemadmin-emailId' WHERE name='media-crash-email';
+--update c_configuration set name='systemadmin-emailId' WHERE name='media-crash-email';
 
-insert ignore into c_paymentgateway_conf values(null,'is-paypal',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
-insert ignore into c_paymentgateway_conf values(null,'is-paypal-for-ios',1,'{"clientId":AZqG2RCYDJtB9b1J3Qz-uZIzrg9uFTh_RjV8NaupF3RXoXJVzKhI3kqDvSvm,"secretCode" : "EJURWhCrRD1e580Wpk2gRRs56ZNyGUduwaCtDSAvKv_qpaoN9GePsmIjsndP"}');
+
 insert ignore into `b_eventaction_mapping`(`id`,`event_name`,`action_name`,`process`,`is_deleted`,`is_synchronous`) values (null,'Create Live Event','Active Live Event','workflow_events','N','Y');
+
 
 
 
@@ -72,7 +73,7 @@ END IF;
 
 IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.STATISTICS WHERE
 `TABLE_CATALOG` = 'def' AND `TABLE_SCHEMA` = DATABASE() AND
-`TABLE_NAME` = 'b_client_address' AND `INDEX_NAME` = 'idx_bca_addkey')THEN
+`TABLE_NAME` = 'b_allocation' AND `INDEX_NAME` = 'idx_bca_addkey')THEN
 create index idx_bca_addkey on b_allocation (is_deleted) ;
 END IF;
 
@@ -83,4 +84,3 @@ call CreateIndexclientList();
 Drop procedure IF EXISTS CreateIndexclientList;
 
 SET SQL_SAFE_UPDATES = 1;
-

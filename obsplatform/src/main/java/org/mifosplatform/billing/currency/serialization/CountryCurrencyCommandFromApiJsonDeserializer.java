@@ -31,7 +31,7 @@ public final class CountryCurrencyCommandFromApiJsonDeserializer {
 	 * The parameters supported for this command.
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("country", "currency", "status", "baseCurrency",
-					"conversionRate", "locale"));
+					"conversionRate", "locale", "countryISD"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired

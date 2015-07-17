@@ -17,12 +17,10 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.accounting.closure.data.LoanStatusEnumData;
 import org.mifosplatform.infrastructure.codes.data.CodeValueData;
 import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformService;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
-import org.mifosplatform.infrastructure.configuration.domain.Configuration;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -31,6 +29,7 @@ import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryCollectionData;
 import org.mifosplatform.portfolio.client.data.ClientAccountSummaryData;
+import org.mifosplatform.portfolio.client.data.ClientAdditionalData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.domain.ClientEnumerations;
 import org.mifosplatform.portfolio.client.domain.ClientStatus;
@@ -51,7 +50,6 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
     private final JdbcTemplate jdbcTemplate;
     private final PlatformSecurityContext context;
     private final OfficeReadPlatformService officeReadPlatformService;
-    private final ConfigurationRepository configurationRepository;
 
     // data mappers
     private final PaginationHelper<ClientData> paginationHelper = new PaginationHelper<ClientData>();
@@ -63,11 +61,10 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
     @Autowired
     public ClientReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource,
-            final OfficeReadPlatformService officeReadPlatformService,final ConfigurationRepository configurationRepository,
-            final CodeValueReadPlatformService codeValueReadPlatformService) {
-        this.context = context;
+            final OfficeReadPlatformService officeReadPlatformService,final CodeValueReadPlatformService codeValueReadPlatformService) {
+
+    	this.context = context;
         this.officeReadPlatformService = officeReadPlatformService;
-        this.configurationRepository=configurationRepository;
         this.codeValueReadPlatformService=codeValueReadPlatformService;
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
@@ -87,11 +84,11 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final Long officeId = currentUser.getOffice().getId();
 
-        return ClientData.template(officeId, new LocalDate(), offices,categoryDatas, groupDatas,null);
+        return ClientData.template(officeId, DateUtils.getLocalDateOfTenant(), offices,categoryDatas, groupDatas,null);
     }
 
     @Override
-    @Cacheable(value = "clients", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())")
+   // @Cacheable(value = "clients", key = "T(org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil).getTenant().getTenantIdentifier().concat(#root.target.context.authenticatedUser().getOffice().getHierarchy())")
     public Page<ClientData> retrieveAll(final SearchParameters searchParameters) {
 
         final AppUser currentUser = context.authenticatedUser();
@@ -255,7 +252,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         public ClientMembersOfGroupMapper() { 
             final StringBuilder sqlBuilder = new StringBuilder(200);
 
-            sqlBuilder.append("c.id as id, c.account_no as accountNo,g.group_name as groupName, c.external_id as externalId, ");
+            sqlBuilder.append("c.id as id,c.title as title, c.account_no as accountNo,g.group_name as groupName, c.external_id as externalId, ");
             sqlBuilder.append("c.office_id as officeId, o.name as officeName, ");
             sqlBuilder.append("c.firstname as firstname, c.middlename as middlename, c.lastname as lastname,c.is_indororp as entryType, ");
             sqlBuilder.append("c.fullname as fullname, c.display_name as displayName,c.category_type as categoryType, ");
@@ -278,7 +275,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String accountNo = rs.getString("accountNo");
             final String groupName = rs.getString("groupName");
             final EnumOptionData status = null;
-
+            final String title = rs.getString("title");
             final Long officeId = JdbcSupport.getLong(rs, "officeId");
             final Long id = JdbcSupport.getLong(rs, "id");
             final String firstname = rs.getString("firstname");
@@ -299,7 +296,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
             final String entryType=rs.getString("entryType");
             return ClientData.instance(accountNo,groupName, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
                     externalId, activationDate, imageKey,categoryType,email,phone,homePhoneNumber, null, null,null, null,null,null, null,null,currency,taxExemption,
-                    entryType,null,null,null,null);
+                    entryType,null,null,null,null,title);
         }
     }
 
@@ -311,7 +308,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         	
         	final StringBuilder builder = new StringBuilder(400);
 
-            builder.append(" c.id as id, c.account_no as accountNo,g.group_name as groupName, c.external_id as externalId, c.status_enum as statusEnum, ");
+            builder.append(" c.id as id,c.title as title, c.account_no as accountNo,g.group_name as groupName, c.external_id as externalId, c.status_enum as statusEnum, ");
             builder.append(" c.office_id as officeId, o.name as officeName, ");
             builder.append(" c.firstname as firstname, c.middlename as middlename, c.lastname as lastname,c.is_indororp as entryType, ");
             builder.append(" c.fullname as fullname, c.display_name as displayName,mc.code_value as categoryType, ");
@@ -343,6 +340,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 
             final String accountNo = rs.getString("accountNo");
+            final String title = rs.getString("title");
             final String groupName = rs.getString("groupName");
             final Integer statusEnum = JdbcSupport.getInteger(rs, "statusEnum");
             final EnumOptionData status = ClientEnumerations.status(statusEnum);
@@ -381,7 +379,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
             return ClientData.instance(accountNo,groupName, status, officeId, officeName, id, firstname, middlename, lastname, fullname, displayName,
                     externalId, activationDate, imageKey,categoryType,email,phone,homePhoneNumber, addressNo, street, city, state, country, zipcode,
-                    clientBalance,hwSerial,currency,taxExemption,entryType,walletAmount,userName,clientpassword,parentId);
+                    clientBalance,hwSerial,currency,taxExemption,entryType,walletAmount,userName,clientpassword,parentId,title);
         }
     }
 
@@ -679,7 +677,37 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	    		return new GroupData(id,groupName);
 	    	}
 }
-
+	    
+            private static final class AdditionalClientDataMapper implements RowMapper<ClientAdditionalData>{
+	    	public String schema(){
+	    		return "  a.id as id,a.client_id as clientId,a.job_title as jobTitle,a.gender_id as genderId,a.finance_id as financeId," +
+	    			   "  a.uts_customer_id as utsCustomerId,a.date_of_birth as dob,a.nationality_id as nationalityId,a.age_group_id as ageGroupId," +
+	    			   "  a.id_type as customerIdType,a.id_number as customerIdentification,a.prefere_lan_id as preferLanId," +
+	    			   "  a.prefere_communication_id as preferCommId,a.remarks as remarks" +
+	    			   "  FROM additional_client_fields a where client_id=?";
+	    	}
+	    	
+	    	@Override
+	    	public ClientAdditionalData mapRow(final ResultSet rs,final int rowNum)throws SQLException{
+	    		
+	    		final Long id = rs.getLong("id");
+	    		final Long clientId = rs.getLong("clientId");
+	    		final String financeId = rs.getString("financeId");
+	    		final String utsCustomerId = rs.getString("utsCustomerId");
+	    		final String customerIdentification = rs.getString("customerIdentification");
+	    		final String jobTitle = rs.getString("jobTitle");
+	    		final LocalDate dob = JdbcSupport.getLocalDate(rs,"dob");
+	    		final Long nationalityId = rs.getLong("nationalityId");
+	    		final Long ageGroupId = rs.getLong("ageGroupId");
+	    		final Long customerIdType = rs.getLong("customerIdType");
+	    		final Long preferCommId = rs.getLong("preferCommId");
+	    		final Long preferLanId = rs.getLong("preferLanId");
+	    		final Long genderId = rs.getLong("genderId");
+	    		final String remarks = rs.getString("remarks");
+	    		return new ClientAdditionalData(id,clientId,financeId,utsCustomerId,customerIdentification,jobTitle,dob,nationalityId,ageGroupId,
+	    				customerIdType,preferCommId,preferLanId,genderId,remarks);
+	    	}
+           }
 	    @Override
 	    public ClientData retrieveAllClosureReasons(final String clientClosureReason) {
 	        final List<CodeValueData> closureReasons = new ArrayList<CodeValueData>(
@@ -784,6 +812,18 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 			 return result;
 			 
 		}
+
+		@Override
+		public ClientAdditionalData retrieveClientAdditionalData(Long clientId) {
+	    	try{
+	    		
+	    		final AdditionalClientDataMapper mapper = new AdditionalClientDataMapper();
+	    		final String sql = "select "+mapper.schema();
+	    		return  jdbcTemplate.queryForObject(sql,mapper,new Object[]{clientId});
+	    	}catch(EmptyResultDataAccessException e){
+	    		return null;
+	    	}
+	    }
 		
 }
 		

@@ -45,3 +45,8 @@ END //
 DELIMITER ;
 call configurationValue();
 Drop procedure IF EXISTS configurationValue;
+
+SET @id = (select id from m_code where code_name='Provisioning');
+INSERT IGNORE INTO m_code_value VALUES(null,@id,'CubiWare',8);
+INSERT IGNORE INTO m_code_value VALUES(null,@id,'CMS',9);
+

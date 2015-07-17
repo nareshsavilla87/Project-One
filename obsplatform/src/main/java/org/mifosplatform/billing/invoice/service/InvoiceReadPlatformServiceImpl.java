@@ -49,7 +49,7 @@ public class InvoiceReadPlatformServiceImpl implements InvoiceReadPlatformServic
 
 		public String schema() {
 			return "bi.id as id,bi.invoice_date as invoiceDate,bi.invoice_amount as invoiceAmount,bi.due_amount as dueAmount,bi.bill_id as billId " +
-					" from b_invoice bi where bi.client_id=? and due_amount !=0 ";
+					" from b_invoice bi where bi.client_id=? and due_amount !=0  and bi.invoice_amount > 0 ";
 
 		}
 	
@@ -61,7 +61,7 @@ public class InvoiceReadPlatformServiceImpl implements InvoiceReadPlatformServic
 			Long id = rs.getLong("id");
 			Date invoiceDate=rs.getDate("invoiceDate");
 			BigDecimal invoiceAmount=rs.getBigDecimal("invoiceAmount");
-			Long dueAmount=rs.getLong("dueAmount");
+			BigDecimal dueAmount=rs.getBigDecimal("dueAmount");
 			Long billId=rs.getLong("billId");
 			return new InvoiceData(id, invoiceAmount, dueAmount, invoiceDate,billId);
 

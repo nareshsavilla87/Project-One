@@ -12,7 +12,6 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CascadeType;
 import org.joda.time.LocalDate;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -98,9 +97,9 @@ public class OrderDiscount extends AbstractPersistable<Long> {
 		return orderpriceid;
 	}
 
-	public void updateDates(BigDecimal discountRate, String discountType, LocalDate enddate) {
+	public void updateDates(BigDecimal discountRate, String discountType, LocalDate enddate,LocalDate startDate) {
          
-		  this.discountStartdate=DateUtils.getDateOfTenant();
+		  this.discountStartdate=startDate.toDate();
 		  if(enddate != null){
 		  this.discountEndDate=enddate.toDate();
 		  }

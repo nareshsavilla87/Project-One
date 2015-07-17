@@ -29,6 +29,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.office.exception.CannotUpdateOfficeWithParentOfficeSameAsSelf;
 import org.mifosplatform.organisation.office.exception.RootOfficeParentCannotBeUpdated;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -45,7 +46,7 @@ public class Office extends AbstractPersistable<Long> {
 
 	@OneToMany(fetch = FetchType.EAGER)
     @JoinColumn(name = "parent_id")
-    private final List<Office> children = new LinkedList<Office>();
+    private final List<Office> children = new LinkedList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
@@ -230,7 +231,7 @@ public class Office extends AbstractPersistable<Long> {
     public void generateHierarchy() {
 
         if (parent != null) {
-            this.hierarchy = this.parent.hierarchyOf(this.getId());
+            this.hierarchy = this.parent.hierarchyOf(getId());
         } else {
             this.hierarchy = ".";
         }
@@ -285,8 +286,8 @@ public class Office extends AbstractPersistable<Long> {
 	public static Office fromPartner(final Office parentOffice,final JsonCommand command) {
 
 		final String name = command.stringValueOfParameterNamed("partnerName");
-		final LocalDate openingDate = new LocalDate();
-		final String externalId = "";
+		final LocalDate openingDate = DateUtils.getLocalDateOfTenant();
+		 final String externalId = command.stringValueOfParameterNamed("externalId");
 		final Long officeType = command.longValueOfParameterNamed("officeType");
 		return new Office(parentOffice, name, openingDate, externalId,officeType);
 	}
@@ -294,6 +295,31 @@ public class Office extends AbstractPersistable<Long> {
 	
 	public OfficeAddress getOfficeAddress() {
 		return officeAddress;
+	}
+
+	
+	public void setParent(Office parent) {
+		this.parent = parent;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public void setHierarchy(String hierarchy) {
+		this.hierarchy = hierarchy;
+	}
+
+	public void setOpeningDate(Date openingDate) {
+		this.openingDate = openingDate;
+	}
+
+	public void setOfficeType(Long officeType) {
+		this.officeType = officeType;
+	}
+
+	public void setExternalId(String externalId) {
+		this.externalId = externalId;
 	}
 
 	public void setOfficeAddress(OfficeAddress officeAddress) {

@@ -44,11 +44,34 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 
 	    }
 	@Override
-	public List<PlanCodeData> retrieveAllPlatformData(Long planId) {
+	public List<PlanCodeData> retrieveAllPlatformData(Long planId,Long clientId) {
 		  context.authenticatedUser();
-
-	        String sql = "select s.id as id,s.plan_code as planCode,s.is_prepaid as isPrepaid from b_plan_master s " +
-	        		" where s.plan_status=1 and  s.is_deleted='n'  and s.id !=? ";
+		  String sql = null;
+            if(clientId != null){
+            	/*sql =" SELECT s.id AS id, s.plan_code AS planCode, s.is_prepaid AS isPrepaid" +
+            		 "  FROM b_plan_master s, b_plan_pricing p,b_priceregion_master prd,  b_priceregion_detail pd, b_client_address cd,b_state bs" +
+            		 "  WHERE s.plan_status = 1 AND s.is_deleted = 'n' AND s.id != ?  AND  prd.id = pd.priceregion_id and  p.price_region_id = pd.priceregion_id" +
+            		 "  and (pd.state_id =bs.id or (pd.state_id =0 and (pd.country_id = bs.parent_code or (pd.country_id = 0 and prd.priceregion_code ='Default'))))" +
+            		 "  and s.id=p.plan_id" +
+            		 "  and cd.client_id ="+clientId+" group by s.id";*/
+              
+            	sql="SELECT s.id AS id, s.plan_code AS planCode, s.is_prepaid AS isPrepaid" +
+              	 " FROM b_plan_master s, b_plan_pricing p,b_priceregion_master prd,b_priceregion_detail pd,b_client_address cd,b_state bs" +
+              	 " WHERE  s.plan_status = 1 AND s.is_deleted = 'n' AND s.id != "+planId+"  AND prd.id = pd.priceregion_id AND p.price_region_id = pd.priceregion_id AND " +
+              	 " (pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_state c,b_charge_codes cc,b_client_address d" +
+              	 " WHERE  b.priceregion_id = a.price_region_id AND b.state_id = c.id AND a.price_region_id = b.priceregion_id AND d.state = c.state_name " +
+              	 " AND cc.charge_code = a.charge_code AND cc.charge_code = p.charge_code AND d.address_key = 'PRIMARY' AND d.client_id = "+clientId+" " +
+              	 "  AND a.plan_id != "+planId+" AND a.is_deleted = 'n'),0) AND pd.country_id = ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_country c," +
+              	 " b_charge_codes cc,b_client_address d WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND cc.charge_code = a.charge_code" +
+              	 " AND cc.charge_code = p.charge_code AND a.price_region_id = b.priceregion_id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
+              	 " AND d.client_id = "+clientId+"  AND a.plan_id != ? AND a.is_deleted = 'n'),0)) AND s.id = p.plan_id AND cd.client_id = "+clientId+"  GROUP BY s.id";
+          
+            }else{
+            	sql =  "  select s.id as id,s.plan_code as planCode,s.is_prepaid as isPrepaid " +
+            		   "  from b_plan_master s " +
+    	        	   "  	where s.plan_status=1 and  s.is_deleted='n'  and s.id !=? ";	
+            }
+	        
 	        RowMapper<PlanCodeData> rm = new PeriodMapper();
 	        return this.jdbcTemplate.query(sql, rm, new Object[] {planId});
 	}
@@ -89,7 +112,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	            String paytermtype = rs.getString("payterm_type");
 	            String units = rs.getString("units");
                  String data=units.concat(paytermtype);
-	            return new PaytermData(id,data,null,null);
+	            return new PaytermData(id,data,null,null,null);
 	        }
 	}
 
@@ -128,12 +151,26 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	}
 
 	@Override
-	public List<PaytermData> getChargeCodes(Long planCode) {
+	public List<PaytermData> getChargeCodes(Long planCode,Long clientId) {
 
 		   context.authenticatedUser();
-	        String sql = " SELECT DISTINCT b.billfrequency_code AS billfrequency_code,b.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid" +
+	        String sql = " SELECT DISTINCT b.billfrequency_code AS billfrequencyCode,a.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid,a.price as price" +
 	        		" FROM b_charge_codes b, b_plan_master pm,b_plan_pricing a LEFT JOIN b_contract_period c ON c.contract_period = a.duration" +
 	        		"  WHERE  a.charge_code = b.charge_code AND a.is_deleted = 'n' AND a.plan_id = ? AND pm.id = a.plan_id";
+	      
+	        if(clientId != null){
+	    	  
+		     sql="SELECT DISTINCT b.billfrequency_code AS billfrequencyCode,a.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid,a.price AS price" +
+		   		" FROM b_charge_codes b,b_plan_master pm,b_plan_pricing a LEFT JOIN b_contract_period c ON c.contract_period = a.duration LEFT JOIN b_priceregion_detail pd" +
+		   		" ON pd.priceregion_id = a.price_region_id JOIN b_client_address ca LEFT JOIN b_state s ON ca.state = s.state_name LEFT JOIN b_country con ON ca.country = con.country_name" +
+		   		" WHERE   a.charge_code = b.charge_code AND a.is_deleted = 'n' AND (pd.state_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_state c, b_charge_codes cc," +
+		   		" b_client_address d  WHERE b.priceregion_id = a.price_region_id AND b.state_id = c.id AND a.price_region_id = b.priceregion_id AND d.state = c.state_name " +
+		   		" AND cc.charge_code = a.charge_code AND cc.charge_code = b.charge_code AND d.address_key = 'PRIMARY' AND d.client_id = "+clientId+" " +
+		   		" AND a.plan_id = "+planCode+" and a.is_deleted = 'n'),0) AND pd.country_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_country c, b_charge_codes cc,b_client_address d" +
+		   		" WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND cc.charge_code = a.charge_code AND cc.charge_code = b.charge_code AND a.price_region_id = b.priceregion_id" +
+		   		" AND c.country_name = d.country AND d.address_key = 'PRIMARY' AND d.client_id ="+clientId+" AND a.plan_id ="+planCode+" and a.is_deleted = 'n'),0)) " +
+		   		" AND a.plan_id =?  AND pm.id = a.plan_id group by b.billfrequency_code";
+	        }
 
 
 	        RowMapper<PaytermData> rm = new BillingFreaquencyMapper();
@@ -145,10 +182,11 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	        @Override
 	        public PaytermData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 			  Long id = rs.getLong("id");
-	            String serviceType = rs.getString("billfrequency_code");
+	            String billfrequencyCode = rs.getString("billfrequencyCode");
 	            String duration = rs.getString("duration");
 	            String isPrepaid = rs.getString("isPrepaid");
-	            return new PaytermData(id,serviceType,duration,isPrepaid);
+	            BigDecimal price =rs.getBigDecimal("price");
+	            return new PaytermData(id,billfrequencyCode,duration,isPrepaid,price);
 	}
 	}
 	@Override
@@ -209,7 +247,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 			private static final class ClientOrderMapper implements RowMapper<OrderData> {
 
 			public String clientOrderLookupSchema() {
-			return  " o.id AS id,o.plan_id AS plan_id, o.start_date AS start_date,o.order_status AS order_status,p.plan_code AS plan_code,"
+			return  " o.id AS id,o.plan_id AS plan_id, o.start_date AS start_date,o.order_status AS order_status,o.auto_renew as autoRenew,p.plan_code AS plan_code,"
 				   +" o.end_date AS end_date,co.contract_period as contractPeriod,o.order_no as orderNo,o.user_action AS userAction,o.active_date AS activeDate," +
 					" p.is_prepaid as isprepaid,p.allow_topup as allowTopUp, ifnull(g.group_name, p.plan_code) as groupName,  " +
 					" date_sub(o.next_billable_day,INTERVAL 1 DAY) as invoiceTillDate,(SELECT sum(ol.price) AS price FROM b_order_price ol"
@@ -236,11 +274,12 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
             final String provSys=rs.getString("provSys");
             final String orderNo=rs.getString("orderNo");
             final String groupName=rs.getString("groupName");
+            final String autoRenew=rs.getString("autoRenew");
 			EnumOptionData Enumstatus=OrderStatusEnumaration.OrderStatusType(statusId);
 			String status=Enumstatus.getValue();
 
 			return new OrderData(id, planId, plancode, status, startDate,endDate,price,contractPeriod,isprepaid,allowtopup,userAction,
-					provSys,orderNo,invoiceTillDate,activaDate,groupName);
+					provSys,orderNo,invoiceTillDate,activaDate,groupName,autoRenew);
 			}
 			}
 
@@ -468,11 +507,11 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 
 						try {
 							final ClientActiveOrderMapper mapper = new ClientActiveOrderMapper();
-                          
-							String sql="select "+mapper.activeOrderLookupSchema();
-							
+							String sql=null;
 							if(serialNo !=null){
-								sql="select "+mapper.activeOrderLookupSchemaForAssociation()+" and a.hw_serial_no='"+serialNo+"'";
+								sql="select "+mapper.activeOrderLookupSchemaForAssociation()+"  and a.is_deleted = 'N' and a.hw_serial_no='"+serialNo+"'";
+							}else{
+								sql="select "+mapper.activeOrderLookupSchema();	
 							}
 							return jdbcTemplate.queryForObject(sql, mapper, new Object[] { clientId});
 							} catch (EmptyResultDataAccessException e) {

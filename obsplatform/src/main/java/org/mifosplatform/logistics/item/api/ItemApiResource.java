@@ -32,6 +32,8 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
+import org.mifosplatform.organisation.region.data.RegionData;
+import org.mifosplatform.organisation.region.service.RegionReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -50,18 +52,20 @@ public class ItemApiResource {
 	private final DefaultToApiJsonSerializer<ItemData> toApiJsonSerializer;
 	private final PlatformSecurityContext context;
 	private final ItemReadPlatformService itemReadPlatformService;
+	private final RegionReadPlatformService regionReadPlatformService; 
 	
 	
 	@Autowired
 	public ItemApiResource(final PlatformSecurityContext context,final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService,
 			ApiRequestParameterHelper requestParameterHelper,DefaultToApiJsonSerializer<ItemData> defaultToApiJsonSerializer,
-			final ItemReadPlatformService itemReadPlatformService){
+			final ItemReadPlatformService itemReadPlatformService, final RegionReadPlatformService regionReadPlatformService){
 		
 		this.context = context;
 		this.commandsSourceWritePlatformService=portfolioCommandSourceWritePlatformService;
 		this.apiRequestParameterHelper = requestParameterHelper;
 		this.toApiJsonSerializer = defaultToApiJsonSerializer;
 		this.itemReadPlatformService = itemReadPlatformService;
+		this.regionReadPlatformService = regionReadPlatformService;
 	}
 	
 	@GET
@@ -79,7 +83,8 @@ public class ItemApiResource {
 		final List<EnumOptionData> itemClassdata = this.itemReadPlatformService.retrieveItemClassType();
 		final List<EnumOptionData> unitTypeData = this.itemReadPlatformService.retrieveUnitTypes();
 		final List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();
-		return new ItemData(itemClassdata, unitTypeData, chargeDatas);
+		final List<RegionData> regionDatas = this.regionReadPlatformService.getRegionDetails();
+		return new ItemData(itemClassdata, unitTypeData, chargeDatas, regionDatas);
 	}
 	
 	@POST
@@ -113,15 +118,18 @@ public class ItemApiResource {
 	public String retrieveSingletemData(@PathParam("itemId") final Long itemId, @Context final UriInfo uriInfo) {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		ItemData itemData=this.itemReadPlatformService.retrieveSingleItemDetails(itemId);
+		ItemData itemData=this.itemReadPlatformService.retrieveSingleItemDetails(null, itemId,null, false); // If you pass clientId set to 'true' else 'false'
 		final List<EnumOptionData> itemClassdata = this.itemReadPlatformService.retrieveItemClassType();
 		final List<EnumOptionData> unitTypeData = this.itemReadPlatformService.retrieveUnitTypes();
 		final List<ChargesData> chargeDatas = this.itemReadPlatformService.retrieveChargeCode();
 		final List<ItemData> auditDetails = this.itemReadPlatformService.retrieveAuditDetails(itemId);
+		final List<RegionData> regionDatas = this.regionReadPlatformService.getRegionDetails();
+		final List<ItemData> itemPricesDatas = this.itemReadPlatformService.retrieveItemPrice(itemId);
    		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
    		itemData=new ItemData(itemData,itemClassdata,unitTypeData,chargeDatas,auditDetails);
+   		itemData.setRegionDatas(regionDatas);
+   		itemData.setItemPricesDatas(itemPricesDatas);
    		return this.toApiJsonSerializer.serialize(settings, itemData, RESPONSE_ITEM_DATA_PARAMETERS);
-   		
 	}
 
 	@PUT

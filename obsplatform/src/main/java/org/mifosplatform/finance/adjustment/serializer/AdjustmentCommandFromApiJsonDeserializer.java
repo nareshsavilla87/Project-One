@@ -32,8 +32,7 @@ public class AdjustmentCommandFromApiJsonDeserializer {
 	 * The parameters supported for this command.
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(
-			Arrays.asList("adjustment_date", "adjustment_code", "adjustment_type",
-				    "amount_paid", "bill_id", "external_id", "Remarks", "locale",
+			Arrays.asList("adjustment_date", "adjustment_code", "adjustment_type","isWalletPayment","amount_paid", "bill_id", "external_id", "Remarks", "locale",
 				    "dateFormat"));
 	
 	private final FromJsonHelper fromApiJsonHelper;

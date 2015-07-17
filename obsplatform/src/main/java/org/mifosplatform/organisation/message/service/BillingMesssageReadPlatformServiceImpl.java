@@ -70,11 +70,9 @@ public class BillingMesssageReadPlatformServiceImpl implements
 	private static String parameterValue;
 	private static BillingMesssageReadPlatformService billingMesssageReadPlatformService;
 	private static FileWriter fw;
-	private static ConfigurationRepository globalConfigurationRepository;
 	private static ProvisioningCommandRepository provisioningCommandRepository;
 
 	
-
 	@SuppressWarnings("static-access")
 	@Autowired
 	public BillingMesssageReadPlatformServiceImpl(
@@ -89,7 +87,6 @@ public class BillingMesssageReadPlatformServiceImpl implements
 		this.messageDataRepository = messageDataRepository;
 		this.processRequestRepository = processRequestRepository;
 		this.messageTemplateRepository = messageTemplateRepository;
-		this.globalConfigurationRepository = globalConfigurationRepository;
 		this.provisioningCommandRepository = provisioningCommandRepository;
 	}
 
@@ -172,10 +169,14 @@ public class BillingMesssageReadPlatformServiceImpl implements
 	}
 
 	@Override
-	public List<BillingMessageDataForProcessing> retrieveMessageDataForProcessing() {
+	public List<BillingMessageDataForProcessing> retrieveMessageDataForProcessing(Long id) {
 		
 		final BillingMessageDataForProcessingMapper mapper = new BillingMessageDataForProcessingMapper();
-		final String sql = "select " + mapper.schema();
+		String sql = "select " + mapper.schema();
+		
+		if (id != null) {
+			sql = sql + " and md.id limit " + id;
+		}
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 	}
@@ -184,10 +185,10 @@ public class BillingMesssageReadPlatformServiceImpl implements
 			RowMapper<BillingMessageDataForProcessing> {
 
 		public String schema() {
-
-			return " md.id as id,md.message_to as messageto,md.message_from as messagefrom,md.subject as subject,md.header as header,"
-					+ " md.body as body,md.footer as footer,md.message_type as messageType,md.attachment as attachment from"
-					+ " b_message_data md where md.status='N' ";
+			
+			return " md.id as id,md.message_to as messageto,md.message_from as messagefrom,md.subject as subject,md.header as header," +
+					" md.body as body,md.footer as footer,md.message_type as messageType,md.attachment as attachment " +
+					" from b_message_data md  where md.status='N' ";
 		}
 
 		@Override
@@ -304,7 +305,7 @@ public class BillingMesssageReadPlatformServiceImpl implements
 				
 				Date date = DateUtils.getDateOfTenant();
 				String dateTime = date.getHours() + "" + date.getMinutes() + "" + date.getSeconds();
-				String path = fileUploadLocation + File.separator + "billingMessage_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".log";
+				String path = fileUploadLocation + File.separator + "billingMessage_" + DateUtils.getLocalDateOfTenant().toString().replace("-", "") + "_" + dateTime + ".log";
 				
 				File fileHandler = new File(path.trim());
 				fileHandler.createNewFile();
@@ -469,7 +470,7 @@ public class BillingMesssageReadPlatformServiceImpl implements
 				}
 				LocalTime date=new LocalTime();
 		        String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-				String path = fileUploadLocation + File.separator + "billingMessage_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".log";
+				String path = fileUploadLocation + File.separator + "billingMessage_" + DateUtils.getLocalDateOfTenant().toString().replace("-", "") + "_" + dateTime + ".log";
 				File fileHandler = new File(path.trim());
 				fileHandler.createNewFile();
 				fw = new FileWriter(fileHandler);

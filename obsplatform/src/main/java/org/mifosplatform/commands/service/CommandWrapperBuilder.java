@@ -1368,7 +1368,7 @@ public class CommandWrapperBuilder {
 		this.actionName = "UPDATE";
 		this.entityName = "ORDER";
 		this.entityId = orderId;
-		this.href = "order/template";
+		this.href = "order/disconnect";
 		return this;
 	}
 
@@ -1905,12 +1905,12 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder cancelPayment(Long paymentId) {
+	public CommandWrapperBuilder cancelPayment(final Long paymentId) {
 
 		this.actionName = "CANCEL";
 		this.entityName = "PAYMENT";
 		this.entityId = paymentId;
-		this.href = "/payments/cancelpayment" + this.entityId;
+		this.href = "/payments/cancelpayment/" + this.entityId;
 		return this;
 
 	}
@@ -2528,7 +2528,7 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder cancelBill(Long billId) {
+	public CommandWrapperBuilder cancelBillStatement(Long billId) {
 
 		this.actionName = "DELETE";
 		this.entityName = "BILLMASTER";
@@ -2695,6 +2695,254 @@ public class CommandWrapperBuilder {
 		this.entityName = "TEMPLATE";
 		this.entityId = templateId;
 		this.href = "/templates/" + templateId;
+		return this;
+	}
+
+	public CommandWrapperBuilder cancelVoucherPin(Long id) {
+
+		this.actionName = "CANCEL";
+		this.entityName = "VOUCHER";
+		this.entityId = id;
+		this.href = "/vouchers";
+		return this;
+	}
+
+	public CommandWrapperBuilder updateRadService(final Long radServiceId) {
+
+		this.actionName = "UPDATE";
+		this.entityName = "RADSERVICE";
+		this.entityId = radServiceId;
+		this.href = "/radservice/" + radServiceId;
+		return this;
+	}
+
+	public CommandWrapperBuilder deleteRadService(final Long radServiceId) {
+
+		this.actionName = "DELETE";
+		this.entityName = "RADSERVICE";
+		this.entityId = radServiceId;
+		this.href = "/radservice/" + radServiceId;
+		return this;
+
+	}
+
+	public CommandWrapperBuilder createVendorManagement() {
+		this.actionName = "CREATE";
+		this.entityName = "VENDORMANAGEMENT";
+		this.entityId = null;
+		this.href = "/vendormanagement/template";
+		return this;
+	}
+
+	public CommandWrapperBuilder updateVendorManagement(final Long vendorId) {
+		this.actionName = "UPDATE";
+		this.entityName = "VENDORMANAGEMENT";
+		this.entityId = vendorId;
+		this.href = "/vendormanagement/" + vendorId;
+		return this;
+	}
+
+	public CommandWrapperBuilder deleteVendorManagement(final Long vendorId) {
+		this.actionName = "DELETE";
+		this.entityName = "VENDORMANAGEMENT";
+		this.entityId = vendorId;
+		this.href = "/vendormanagement/" + vendorId;
+		return this;
+	}
+
+	public CommandWrapperBuilder createVendorAgreement() {
+		this.actionName = "CREATE";
+		this.entityName = "VENDORAGREEMENT";
+		this.entityId = null;
+		this.href = "/vendoragreement/template";
+		return this;
+	}
+
+	public CommandWrapperBuilder updateVendorAgreement(final Long vendorAgreementId) {
+		this.actionName = "UPDATE";
+		this.entityName = "VENDORAGREEMENT";
+		this.entityId = vendorAgreementId;
+		this.href = "/vendoragreement/" + vendorAgreementId;
+		return this;
+	}
+
+	public CommandWrapperBuilder createProperty() {
+
+		this.actionName = "CREATE";
+		this.entityName = "PROPERTY";
+		this.entityId = null;
+		this.href = "/property/";
+		return this;
+	}
+
+	public CommandWrapperBuilder deleteProperty(final Long propertyId) {
+
+		this.actionName = "DELETE";
+		this.entityName = "PROPERTY";
+		this.entityId = propertyId;
+		this.href = "/property/" + propertyId;
+		return this;
+	}
+
+	public CommandWrapperBuilder updateProperty(final Long propertyId) {
+
+		this.actionName = "UPDATE";
+		this.entityName = "PROPERTY";
+		this.entityId = propertyId;
+		this.href = "/property/" + propertyId;
+		return this;
+	}
+
+	public CommandWrapperBuilder createClientAdditional(Long clientId) {
+		this.actionName = "CREATE";
+		this.entityName = "CLIENTADDITIONALINFO";
+		this.entityId = clientId;
+		this.href = "/additionalinfo/";
+		return this;
+	}
+
+	public CommandWrapperBuilder updateClientAdditional(Long clientId) {
+		this.actionName = "UPDATE";
+		this.entityName = "CLIENTADDITIONALINFO";
+		this.entityId = clientId;
+		this.href = "/additionalinfo/";
+		return this;
+	}
+
+	public CommandWrapperBuilder createServiceTransfer(final Long clientId) {
+
+	this.actionName = "CREATE";
+	this.entityName = "SERVICETRANSFER";
+	this.entityId = clientId;
+	this.href = "/servicetransfer/"+clientId;
+	return this;
+}
+
+	public CommandWrapperBuilder createFeeMaster() {
+		this.actionName = "CREATE";
+		this.entityName = "FEEMASTER";
+		this.entityId = null;
+		this.href = "/feemaster";
+		return this;
+	}
+
+	public CommandWrapperBuilder updateFeeMaster(Long id) {
+		this.actionName = "UPDATE";
+		this.entityName = "FEEMASTER";
+		this.entityId = id;
+		this.href = "/feemaster/"+id;
+		return this;
+	}
+
+	public CommandWrapperBuilder deleteFeeMaster(Long id) {
+		this.actionName = "DELETE";
+		this.entityName = "FEEMASTER";
+		this.entityId = id;
+		this.href = "/feemaster/"+id;
+		return this;
+	}
+	
+	public CommandWrapperBuilder updateStaticIpAddress() {
+		this.actionName = "UPDATE";
+		this.entityName = "STATICIP";
+		this.href = "ippooling/staticip";
+		return this;
+	}
+
+	public CommandWrapperBuilder updatePlanQualifier(Long planId) {
+		this.actionName = "UPDATE";
+		this.entityName = "PLANQUALIFIER";
+		this.entityId = planId;
+		this.href = "/planqualifier/"+planId;
+		return this;
+	}
+
+	public CommandWrapperBuilder createPropertyMaster() {
+		this.actionName = "CREATE";
+		this.entityName = "PROPERTYMASTER";
+		this.entityId = null;
+		this.href = "/propertycodemaster";
+		return this;
+	}
+
+	public CommandWrapperBuilder disconnectOrder(Long orderId) {
+
+		this.actionName = "DISCONNECT";
+		this.entityName = "ORDER";
+		this.entityId = orderId;
+		this.href = "/orderdisconnect/" + orderId;
+		return this;
+	}
+
+	public CommandWrapperBuilder updatePaypalProfileRecurring() {
+		this.actionName = "UPDATEPAYPALRECURRING";
+		this.entityName = "PAYMENTGATEWAY";
+		this.entityId = null;
+		this.href = "";
+		return this;
+	}
+	public CommandWrapperBuilder updatePropertyMaster(final Long codeId) {
+		this.actionName = "UPDATE";
+		this.entityName = "PROPERTYMASTER";
+		this.entityId = codeId;
+		this.href = "/propertycodemaster/"+codeId;
+		return this;
+	}
+
+	public CommandWrapperBuilder deletePropertyMaster(final Long codeId) {
+		this.actionName = "DELETE";
+		this.entityName = "PROPERTYMASTER";
+		this.entityId = codeId;
+		this.href = "/propertycodemaster/" + codeId;
+		return this;
+	}
+
+
+	public CommandWrapperBuilder deleteRecurringBilling() {
+		this.actionName = "DELETERECURRINGBILLING";
+		this.entityName = "PAYMENTGATEWAY";
+		this.entityId = null;
+		this.href = "";
+		return this;
+	}
+
+	public CommandWrapperBuilder updatePaypalProfileStatus() {
+		this.actionName = "UPDATEPAYPALPROFILESTATUS";
+		this.entityName = "PAYMENTGATEWAY";
+		this.entityId = null;
+		this.href = "";
+		return this;
+	}
+	
+	public CommandWrapperBuilder createRefundAmount(Long depositId) {
+		this.actionName = "CREATE";
+		this.entityName = "REFUND";
+		this.entityId = depositId;
+		this.href = "/refund/" + depositId;
+		return this;
+	}
+	public CommandWrapperBuilder createDeposite() {
+		this.actionName = "CREATE";
+		this.entityName = "DEPOSIT";
+		this.entityId = null;
+		this.href = "";
+		return this;
+	}
+
+	public CommandWrapperBuilder createDeposit(Long clientId) {
+		this.actionName = "CREATE";
+		this.entityName = "DEPOSIT";
+		this.entityId =clientId;
+		this.href = "/deposit/" + clientId;
+		return this;
+	}
+
+	public CommandWrapperBuilder allocateProperty(Long clientId) {
+		
+		this.actionName = "ALLOCATEDEVICE";
+		this.entityName = "PROPERTY";
+		this.entityId = clientId;
+		this.href = "";
 		return this;
 	}
 

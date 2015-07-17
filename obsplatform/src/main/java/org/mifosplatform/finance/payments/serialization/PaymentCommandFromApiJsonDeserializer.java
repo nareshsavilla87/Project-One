@@ -36,7 +36,8 @@ public class PaymentCommandFromApiJsonDeserializer {
 	private final Set<String> supportedParameters = new HashSet<String>(
 			Arrays.asList("id", "clientId", "paymentDate", "paymentCode","amountPaid", "statmentId", "externalId", "dateFormat",
 					"locale", "remarks","receiptNo","chequeNo","chequeDate","bankName","branchName","ispaymentEnable","renewalPeriod",
-					"isChequeSelected","txn_id","cancelRemark","invoiceId","isWalletPayment","isSubscriptionPayment"));
+					"isChequeSelected","txn_id","cancelRemark","invoiceId","isWalletPayment","isSubscriptionPayment",
+					"paymentType","deposit"));
 	
 	private final Set<String> enquireySupportedParameters = new HashSet<String>(
 			Arrays.asList("response", "state", "id", "create_time","intent", "client", "platform", "paypal_sdk_version",
@@ -69,11 +70,11 @@ public class PaymentCommandFromApiJsonDeserializer {
 		
 		final String paymentCode = fromApiJsonHelper.extractStringNamed("paymentCode", element);
 		final BigDecimal amountPaid = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("amountPaid", element);
-		String receiptNo = fromApiJsonHelper.extractStringNamed("receiptNo", element);
+		//String receiptNo = fromApiJsonHelper.extractStringNamed("receiptNo", element);
 		
 		baseDataValidator.reset().parameter("paymentCode").value(paymentCode).notBlank().notExceedingLengthOf(100);
 		baseDataValidator.reset().parameter("amountPaid").value(amountPaid).notBlank().notExceedingLengthOf(100);
-		baseDataValidator.reset().parameter("receiptNo").value(receiptNo).notBlank().notExceedingLengthOf(50);
+		//baseDataValidator.reset().parameter("receiptNo").value(receiptNo).notBlank().notExceedingLengthOf(50);
 		
 		if(fromApiJsonHelper.parameterExists("isChequeSelected", element)){
 			String isChequeSelected = fromApiJsonHelper.extractStringNamed("isChequeSelected", element);

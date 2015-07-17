@@ -52,7 +52,7 @@ public class Address{
 	private String email;
 
 	@Column(name = "is_deleted", nullable = false)
-	private final char deleted='n';
+	private  char deleted='n';
 
 	
 
@@ -156,71 +156,98 @@ public class Address{
 		}
 
 
+	public Long getClientId() {
+		return clientId;
+	}
 
-		public Long getClientId() {
-			return clientId;
-		}
+	public String getAddressNo() {
+		return addressNo;
+	}
 
+	public String getAddressKey() {
+		return addressKey;
+	}
 
+	public String getStreet() {
+		return street;
+	}
 
-		public String getAddressNo() {
-			return addressNo;
-		}
+	public String getCity() {
+		return city;
+	}
 
+	public String getState() {
+		return state;
+	}
 
+	public String getCountry() {
+		return country;
+	}
 
-		public String getAddressKey() {
-			return addressKey;
-		}
+	public String getZip() {
+		return zip;
+	}
 
+	public String getPhone() {
+		return phone;
+	}
 
+	public String getEmail() {
+		return email;
+	}
 
-		public String getStreet() {
-			return street;
-		}
-
-
-
-		public String getCity() {
-			return city;
-		}
-
-
-
-		public String getState() {
-			return state;
-		}
-
-
-
-		public String getCountry() {
-			return country;
-		}
-
-
-
-		public String getZip() {
-			return zip;
-		}
+	public char getDeleted() {
+		return deleted;
+	}
 
 
+	public void setClientId(Long clientId) {
+		this.clientId = clientId;
+	}
 
-		public String getPhone() {
-			return phone;
-		}
+	public void setAddressNo(String addressNo) {
+		this.addressNo = addressNo;
+	}
+
+	public void setAddressKey(String addressKey) {
+		this.addressKey = addressKey;
+	}
+
+	public void setStreet(String street) {
+		this.street = street;
+	}
+
+	public void setCity(String city) {
+		this.city = city;
+	}
+
+	public void setState(String state) {
+		this.state = state;
+	}
+
+	public void setCountry(String country) {
+		this.country = country;
+	}
+
+	public void setZip(String zip) {
+		this.zip = zip;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
 
 
 
-		public String getEmail() {
-			return email;
-		}
+	public void delete() {
 
-
-
-		public char getDeleted() {
-			return deleted;
-		}
-		
+		this.deleted = 'Y';
+				
+	}
 		
 	
 	}

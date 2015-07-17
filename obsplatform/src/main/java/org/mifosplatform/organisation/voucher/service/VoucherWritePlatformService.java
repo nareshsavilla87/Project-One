@@ -18,6 +18,8 @@ public interface VoucherWritePlatformService {
 	CommandProcessingResult updateUpdateVoucherPins(Long entityId, JsonCommand command);
 
 	CommandProcessingResult deleteUpdateVoucherPins(Long entityId, JsonCommand command);
+
+	CommandProcessingResult cancelVoucherPins(Long entityId,JsonCommand command);
 	
 
 	

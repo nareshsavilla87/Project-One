@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.billing.payterms.data.PaytermData;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.plan.data.PlanCodeData;
@@ -50,6 +51,7 @@ public class OrderData {
 	private String groupName;
 	private Long planStatus;
 	private List<OrderAddonsData> orderAddonsDatas;
+	private String autoRenew;
 
 	public OrderData(List<PlanCodeData> allowedtypes,List<PaytermData> paytermData,
 			List<SubscriptionData> contractPeriod, OrderData data) {
@@ -65,7 +67,7 @@ public class OrderData {
 			this.service_code = null;
 			this.startDate = data.getStartDate();
 		}
-		this.startDate=new LocalDate();
+		this.startDate=DateUtils.getLocalDateOfTenant();
 		this.variant = null;
 		this.chargeCode = null;
 		this.paytermdata = paytermData;
@@ -76,14 +78,14 @@ public class OrderData {
 
 	public OrderData(Long id, Long planId, String plancode, String status,LocalDate startDate, LocalDate endDate,
 			double price,String contractPeriod, String isprepaid, String allowtopup,String userAction,
-			String provisioningSys, String orderNo, LocalDate invoiceTillDate, LocalDate activaDate, String groupName) {
+			String provisioningSys, String orderNo, LocalDate invoiceTillDate, LocalDate activaDate, String groupName,String autoRenew) {
 		this.id = id;
 		this.pdid = planId;
 		this.planCode = plancode;
 		this.status = status;
 		this.period = null;
 		this.startDate = startDate;
-		this.currentDate = new LocalDate();
+		this.currentDate = DateUtils.getLocalDateOfTenant();
 		this.endDate = endDate;
 		this.orderPriceId = null;
 		this.service_code = null;
@@ -102,6 +104,7 @@ public class OrderData {
         this.invoiceTilldate=invoiceTillDate;
 		this.activeDate=activaDate;
 		this.groupName=groupName;
+		this.autoRenew=autoRenew;
 
 	}
 

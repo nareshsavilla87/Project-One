@@ -1,5 +1,6 @@
 package org.mifosplatform.billing.chargecode.service;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 
 import java.sql.SQLException;
@@ -174,6 +175,45 @@ public class ChargeCodeReadPlatformServiceImpl implements
 
 			return jdbcTemplate.queryForObject(sql, mapper,
 					new Object[] { chargeCodeId });
+		} catch (EmptyResultDataAccessException accessException) {
+			return null;
+		}
+	}
+
+	private static final class ChargeCodeRecurringMapper implements RowMapper<ChargeCodeData> {
+
+		public String schema() {
+
+			return "  cc.id AS id,c.contract_duration AS contractDuration,c.contract_type AS contractType,cc.duration_type AS chargeType," +
+					" cc.charge_duration AS chargeDuration,p.price AS price FROM b_charge_codes cc, b_plan_pricing p " +
+					" left join b_contract_period c on c.contract_period = p.duration WHERE  p.id = ? AND p.charge_code = cc.charge_code";
+  
+		}
+
+		@Override
+		public ChargeCodeData mapRow(final ResultSet rs, final int rowNum)
+				throws SQLException {
+
+			final Long id = rs.getLong("id");
+			final String contractType = rs.getString("contractType");
+			final BigDecimal price = rs.getBigDecimal("price");
+			final String chargeType = rs.getString("chargeType");
+			final Integer chargeDuration = rs.getInt("chargeDuration");
+			final Integer contractDuration = rs.getInt("contractDuration");
+			ChargeCodeData chargeCodeData = new ChargeCodeData(id,contractType,contractDuration,chargeType,chargeDuration,price);
+			chargeCodeData.setPrice(price);
+			return chargeCodeData;	
+		}
+	}
+	
+	@Override
+	public ChargeCodeData retrieveChargeCodeForRecurring(Long priceId) {
+		try {
+
+			final ChargeCodeRecurringMapper mapper = new ChargeCodeRecurringMapper();
+			final String sql = "select " + mapper.schema();
+			return jdbcTemplate.queryForObject(sql, mapper, new Object[] { priceId});
+		
 		} catch (EmptyResultDataAccessException accessException) {
 			return null;
 		}

@@ -26,7 +26,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
-import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.api.ApiConstants;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -69,18 +68,16 @@ import com.sun.jersey.multipart.FormDataParam;
      	private final PlatformSecurityContext context;
      	private final DataUploadReadPlatformService dataUploadReadPlatformService;
      	private final DefaultToApiJsonSerializer< UploadStatusData> toApiJsonSerializer;
-     	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	
     	@Autowired
 	    public DataUploadApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<UploadStatusData> defaulttoApiJsonSerializerforUploadStatus,
 	            final DataUploadWritePlatformService dataUploadWritePlatformService,final DataUploadRepository dataUploadRepository,
-	            final DataUploadReadPlatformService dataUploadReadPlatformService,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService) {
+	            final DataUploadReadPlatformService dataUploadReadPlatformService) {
 	        
 		 this.context = context;
 		 this.dataUploadRepository=dataUploadRepository;
 		 this.dataUploadReadPlatformService = dataUploadReadPlatformService;
 		 this.dataUploadWritePlatformService=dataUploadWritePlatformService;
-		 this.commandsSourceWritePlatformService=commandsSourceWritePlatformService;
 	     this.toApiJsonSerializer = defaulttoApiJsonSerializerforUploadStatus;
 	      
 
@@ -132,7 +129,8 @@ import com.sun.jersey.multipart.FormDataParam;
 	public String processFile(@PathParam("uploadfileId") final Long uploadfileId, @Context final UriInfo uriInfo) {
 		
 		   final CommandWrapper commandRequest = new CommandWrapperBuilder().updateUploadFile(uploadfileId).build();
-		   final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		   //final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		   final CommandProcessingResult result = this.dataUploadWritePlatformService.processDatauploadFile(uploadfileId);
 		   return this.toApiJsonSerializer.serialize(result);
 	}
 	

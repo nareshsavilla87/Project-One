@@ -155,10 +155,10 @@ public final class ClientDataValidator {
         	baseDataValidator.reset().parameter(ClientApiConstants.emailParamName).value(email).notNull();
         }
         
-        if (isSelfcareEnable) {
+      /*  if (isSelfcareEnable) {
         	final String email = fromApiJsonHelper.extractStringNamed(ClientApiConstants.emailParamName, element);
         	baseDataValidator.reset().parameter(ClientApiConstants.emailParamName).value(email).notNull();
-        }
+        }*/
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

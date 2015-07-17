@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.billing.discountmaster.data.DiscountDetailData;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.discountmaster.service.DiscountReadPlatformService;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -22,8 +23,7 @@ import org.springframework.stereotype.Service;
  * 
  */
 @Service
-public class DiscountReadPlatformServiceImpl implements
-		DiscountReadPlatformService {
+public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformService {
 
 	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
@@ -34,7 +34,9 @@ public class DiscountReadPlatformServiceImpl implements
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see #retrieveAllDiscounts()
 	 */
 	@Override
@@ -44,17 +46,14 @@ public class DiscountReadPlatformServiceImpl implements
 			context.authenticatedUser();
 			final DiscountMapper mapper = new DiscountMapper();
 			final String sql = "select " + mapper.schema();
-
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
-
 		} catch (EmptyResultDataAccessException accessException) {
 			return null;
 		}
 
 	}
 
-	private static final class DiscountMapper implements
-			RowMapper<DiscountMasterData> {
+	private static final class DiscountMapper implements RowMapper<DiscountMasterData> {
 
 		public String schema() {
 			return "ds.id as id, ds.discount_code as discountCode, ds.discount_description as discountDescription,"
@@ -63,9 +62,9 @@ public class DiscountReadPlatformServiceImpl implements
 
 		}
 
+
 		@Override
-		public DiscountMasterData mapRow(final ResultSet resultSet,
-				final int rowNum) throws SQLException {
+		public DiscountMasterData mapRow(final ResultSet resultSet,final int rowNum) throws SQLException {
 
 			final Long id = resultSet.getLong("id");
 			final String discountCode = resultSet.getString("discountCode");
@@ -88,11 +87,44 @@ public class DiscountReadPlatformServiceImpl implements
 			context.authenticatedUser();
 			final DiscountMapper mapper = new DiscountMapper();
 			final String sql = "select " + mapper.schema() + " and ds.id=?";
-
 			return this.jdbcTemplate.queryForObject(sql, mapper,new Object[] { discountId });
 		} catch (EmptyResultDataAccessException accessException) {
 			return null;
 		}
 
 	}
+
+	@Override
+	public List<DiscountDetailData> retrieveDiscountdetails(Long discountId) {
+		try{
+		   this.context.authenticatedUser();
+		   final DiscountDetailsMapper mapper = new DiscountDetailsMapper();
+		   final String sql="select "+mapper.schema();
+		   return this.jdbcTemplate.query(sql, mapper,new Object[] {discountId});
+		}catch(EmptyResultDataAccessException dve){
+			return null;	
+		}
+	}
+	
+	private static final class DiscountDetailsMapper implements RowMapper<DiscountDetailData>{
+
+		public String schema() {
+			return "  dd.id AS id,if(dd.category_type = '0', 'Default', mcv.code_value) AS categoryType,dd.category_type AS categoryTypeId," +
+				   " dd.discount_rate AS discountRate" +
+				   " FROM b_discount_details dd left join m_code_value mcv on mcv.id = dd.category_type" +
+				   " WHERE dd.discount_id = ? AND  dd.is_deleted = 'N' group by dd.id";
+			}
+		
+		@Override
+		public DiscountDetailData mapRow(ResultSet rs, int rowNum) throws SQLException {
+			
+			final Long id = rs.getLong("id");
+			final String categoryType=rs.getString("categoryType");
+			final Long categoryTypeId=rs.getLong("categoryTypeId");
+			final BigDecimal discountRate =rs.getBigDecimal("discountRate");
+			return new DiscountDetailData(id,categoryType,categoryTypeId,discountRate);
+		}
+		
+	}
+
 }

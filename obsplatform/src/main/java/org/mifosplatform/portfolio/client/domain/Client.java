@@ -73,6 +73,9 @@ public final class Client extends AbstractPersistable<Long> {
 
     @Column(name = "firstname", length = 50)
     private String firstname;
+    
+    @Column(name = "title", length = 50)
+    private String title;
 
     @Column(name = "middlename", length = 50)
     private String middlename;
@@ -159,6 +162,7 @@ public final class Client extends AbstractPersistable<Long> {
         final String fullname = command.stringValueOfParameterNamed(ClientApiConstants.fullnameParamName);
         final Long categoryType=command.longValueOfParameterNamed(ClientApiConstants.clientCategoryParamName);
         final String phone = command.stringValueOfParameterNamed(ClientApiConstants.phoneParamName);
+        final String title = command.stringValueOfParameterNamed(ClientApiConstants.titleParamName);
         final String homePhoneNumber = command.stringValueOfParameterNamed(ClientApiConstants.homePhoneNumberParamName);
 	    String email = command.stringValueOfParameterNamed(ClientApiConstants.emailParamName);
 	    String login=command.stringValueOfParameterNamed(ClientApiConstants.loginParamName);
@@ -183,11 +187,11 @@ public final class Client extends AbstractPersistable<Long> {
         LocalDate activationDate = null;
         if (active) {
             status = ClientStatus.NEW;
-            activationDate =new LocalDate(); 
+            activationDate = DateUtils.getLocalDateOfTenant(); 
         }
 
         return new Client(status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
-                externalId,categoryType,email,phone,homePhoneNumber,login,password,groupName,entryType);
+                externalId,categoryType,email,phone,homePhoneNumber,login,password,groupName,entryType,title);
     }
 
     protected Client() {
@@ -197,7 +201,7 @@ public final class Client extends AbstractPersistable<Long> {
     private Client(final ClientStatus status, final Office office, final Group clientParentGroup, final String accountNo,
             final String firstname, final String middlename, final String lastname, final String fullname, final LocalDate activationDate,
             final String externalId, final Long categoryType, final String email, final String phone,final String homePhoneNumber,
-            final String login, final String password,final Long groupName,final String entryType) {
+            final String login, final String password,final Long groupName,final String entryType,final String title) {
         
     	if (StringUtils.isBlank(accountNo)) {
             this.accountNumber = new RandomPasswordGenerator(19).generate();
@@ -228,7 +232,7 @@ public final class Client extends AbstractPersistable<Long> {
         } else {
             this.firstname = null;
         }
-
+          this.title = title;
         if (StringUtils.isNotBlank(middlename)) {
             this.middlename = middlename.trim();
         } else {
@@ -328,6 +332,11 @@ public final class Client extends AbstractPersistable<Long> {
     public Map<String, Object> update(final JsonCommand command) {
 
         final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(9);
+        
+        if (command.isChangeInStringParameterNamed(ClientApiConstants.titleParamName, this.title)) {
+            final String newValue = command.stringValueOfParameterNamed(ClientApiConstants.titleParamName);
+            this.title = StringUtils.defaultIfEmpty(newValue, null);
+        }
 
         if (command.isChangeInIntegerParameterNamed(ClientApiConstants.statusParamName, this.status)) {
             final Integer newValue = command.integerValueOfParameterNamed(ClientApiConstants.statusParamName);

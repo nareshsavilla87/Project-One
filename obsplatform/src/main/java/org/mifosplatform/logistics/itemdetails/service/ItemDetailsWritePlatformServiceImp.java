@@ -13,9 +13,11 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
 import org.mifosplatform.logistics.item.domain.ItemRepository;
+import org.mifosplatform.logistics.item.exception.ItemNotFoundException;
 import org.mifosplatform.logistics.itemdetails.data.AllocationHardwareData;
 import org.mifosplatform.logistics.itemdetails.domain.InventoryGrn;
 import org.mifosplatform.logistics.itemdetails.domain.InventoryGrnRepository;
@@ -40,6 +42,8 @@ import org.mifosplatform.portfolio.association.service.HardwareAssociationWritep
 import org.mifosplatform.portfolio.order.exceptions.NoGrnIdFoundException;
 import org.mifosplatform.portfolio.order.service.OrderAssembler;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMapping;
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.provisioning.provisioning.service.ProvisioningWritePlatformService;
 import org.mifosplatform.provisioning.provsionactions.domain.ProvisionActions;
@@ -80,6 +84,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 	private final ProvisioningActionsRepository provisioningActionsRepository;
 	private final ProvisioningWritePlatformService provisioningWritePlatformService;
 	private final ItemDetailsAllocationRepository inventoryItemDetailsAllocationRepository; 
+	private final PropertyDeviceMappingRepository propertyDeviceMappingRepository;
 	private final InventoryTransactionHistoryJpaRepository inventoryTransactionHistoryJpaRepository;
 	private final InventoryItemCommandFromApiJsonDeserializer inventoryItemCommandFromApiJsonDeserializer;
 	private final InventoryItemAllocationCommandFromApiJsonDeserializer inventoryItemAllocationCommandFromApiJsonDeserializer;
@@ -95,7 +100,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			final HardwareAssociationReadplatformService associationReadplatformService,final HardwareAssociationWriteplatformService associationWriteplatformService,
 			final ItemRepository itemRepository,final OrderReadPlatformService orderReadPlatformService,
 			final ProvisioningWritePlatformService provisioningWritePlatformService,final EventValidationReadPlatformService eventValidationReadPlatformService,
-			final ProvisioningActionsRepository provisioningActionsRepository) 
+			final ProvisioningActionsRepository provisioningActionsRepository,final PropertyDeviceMappingRepository propertyDeviceMappingRepository) 
 	{
 		this.inventoryItemDetailsReadPlatformService = inventoryItemDetailsReadPlatformService;
 		this.context=context;
@@ -112,6 +117,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 		this.configurationRepository=configurationRepository;
 		this.associationReadplatformService=associationReadplatformService;
 		this.associationWriteplatformService=associationWriteplatformService;
+		this.propertyDeviceMappingRepository = propertyDeviceMappingRepository;
 		this.itemRepository=itemRepository;
 		this.orderReadPlatformService=orderReadPlatformService;
 		this.provisioningWritePlatformService=provisioningWritePlatformService;
@@ -133,9 +139,12 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			inventoryItemCommandFromApiJsonDeserializer.validateForCreate(command);
 			inventoryItemDetails = ItemDetails.fromJson(command,fromJsonHelper);
 			ItemMaster itemMaster=this.itemRepository.findOne(command.longValueOfParameterNamed("itemMasterId"));
+			if(itemMaster == null){
+				throw new ItemNotFoundException(command.longValueOfParameterNamed("itemMasterId").toString());
+			}
 			if(itemMaster != null) {
 				if(itemMaster.getWarranty() != null){
-					LocalDate warrantyEndDate = new LocalDate().plusMonths(itemMaster.getWarranty().intValue()).minusDays(1);
+					LocalDate warrantyEndDate = DateUtils.getLocalDateOfTenant().plusMonths(itemMaster.getWarranty().intValue()).minusDays(1);
 					inventoryItemDetails.setWarrantyDate(warrantyEndDate);
 				}
 			}
@@ -183,7 +192,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 
 	        logger.error(dve.getMessage(), dve);   	
 	}
-		@Transactional
+		
 		@Override
 		public CommandProcessingResult updateItem(Long id,JsonCommand command)
 		{
@@ -260,7 +269,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 						clientId=oneTimeSale.getClientId();
 						entityId=oneTimeSale.getId();
 
-						InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(new LocalDate().toDate(), 
+						InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(DateUtils.getDateOfTenant(), 
 								oneTimeSale.getId(),"Allocation",inventoryItemDetailsAllocation.getSerialNumber(), inventoryItemDetailsAllocation.getItemMasterId(),
 								inventoryItemDetails.getOfficeId(),inventoryItemDetailsAllocation.getClientId());
 						
@@ -363,10 +372,22 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
         	   OneTimeSale oneTimeSale=this.oneTimeSaleRepository.findOne(inventoryItemDetailsAllocation.getOrderId());
         	   oneTimeSale.setStatus();
         	   this.oneTimeSaleRepository.save(oneTimeSale);
+        	   
+        	   
+  			 Configuration globalConfiguration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+  			 
+  			 if(globalConfiguration.isEnabled()){
+  				 
+  				 PropertyDeviceMapping deviceMapping = this.propertyDeviceMappingRepository.findBySerailNumber(serialNo);
+  				 if(deviceMapping != null){
+  				 deviceMapping.delete();
+  				 this.propertyDeviceMappingRepository.save(deviceMapping);
+  				 }
+  			 }
         	   ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_RELEASE_DEVICE);
                if(provisionActions != null && provisionActions.isEnable() == 'Y'){
    				
-   				this.provisioningWritePlatformService.postDetailsForProvisioning(clientId,ProvisioningApiConstants.REQUEST_RELEASE_DEVICE,
+   				this.provisioningWritePlatformService.postDetailsForProvisioning(clientId,Long.valueOf(0),ProvisioningApiConstants.REQUEST_RELEASE_DEVICE,
    						               provisionActions.getProvisioningSystem(),serialNo);
    			}       	   
         	   return new CommandProcessingResult(command.entityId(),clientId);

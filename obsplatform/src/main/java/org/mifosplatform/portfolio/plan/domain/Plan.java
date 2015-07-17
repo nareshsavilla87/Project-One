@@ -69,6 +69,10 @@ public class Plan{
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "plan", orphanRemoval = true)
 	private Set<PlanDetails> planDetails = new HashSet<PlanDetails>();
 	
+	/*//@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "plan", orphanRemoval = true)
+	private Set<PlanQualifier> planQualifier = new HashSet<PlanQualifier>();*/
+	
 	@Column(name = "provision_sys")
 	private String provisionSystem;
     
@@ -96,6 +100,8 @@ public class Plan{
 	public Set<PlanDetails> getDetails() {
 			return planDetails;
 		}
+
+		
 
 		public String getCode() {
 		return planCode;
@@ -267,6 +273,12 @@ public class Plan{
 	public char getAllowTopup() {
 		return allowTopup;
 	}
+
+/*	public void addPlanQualifierDetails(PlanQualifier planQualifier) {
+		planQualifier.update(this);
+		this.planQualifier.add(planQualifier);
+		
+	}*/
 		
 	}
 

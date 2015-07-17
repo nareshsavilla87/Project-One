@@ -2,6 +2,7 @@ package org.mifosplatform.provisioning.entitlements.service;
 
 import java.util.List;
 
+import org.json.JSONObject;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
 import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -12,6 +13,9 @@ import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
+import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
@@ -19,6 +23,7 @@ import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.mifosplatform.provisioning.processrequest.service.ProcessRequestWriteplatformService;
+import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -32,20 +37,18 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 	private final SelfCareRepository selfCareRepository;
 	private final BillingMessageTemplateRepository billingMessageTemplateRepository;
 	private final BillingMessageRepository messageDataRepository;
-	
+	private final OfficeRepository officeRepository;
 
 	@Autowired
-	public EntitlementWritePlatformServiceImpl(
-			final ProcessRequestWriteplatformService processRequestWriteplatformService,
-			final ProcessRequestRepository entitlementRepository, 
-			final ClientRepository clientRepository,
-			final SelfCareRepository selfCareRepository,
-			final BillingMessageTemplateRepository billingMessageTemplateRepository,
-			final BillingMessageRepository messageDataRepository) {
+	public EntitlementWritePlatformServiceImpl(final ProcessRequestWriteplatformService processRequestWriteplatformService,
+			final ProcessRequestRepository entitlementRepository, final ClientRepository clientRepository,
+			final SelfCareRepository selfCareRepository,final BillingMessageTemplateRepository billingMessageTemplateRepository,
+			final BillingMessageRepository messageDataRepository,final OfficeRepository officeRepository) {
 
 		this.processRequestWriteplatformService = processRequestWriteplatformService;
 		this.entitlementRepository = entitlementRepository;
 		this.clientRepository = clientRepository;
+		this.officeRepository = officeRepository;
 		this.selfCareRepository = selfCareRepository;
 		this.billingMessageTemplateRepository = billingMessageTemplateRepository;
 		this.messageDataRepository = messageDataRepository;
@@ -58,13 +61,25 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 	
 	@Override
 	public CommandProcessingResult create(JsonCommand command) {
+		
 		String authPin = null;
 		String message = null;	
 		String provSystem = command.stringValueOfParameterNamed("provSystem");
 		String requestType = command.stringValueOfParameterNamed("requestType");
+		String  agentResourceId = null;
+		String zebraSubscriberId = null;
+	try {	
 		
-		if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase("Beenius") 
-				&& requestType.equalsIgnoreCase("CLIENT ACTIVATION")){
+		if(command.hasParameter("agentResourceId")){
+			agentResourceId = command.stringValueOfParameterNamed("agentResourceId");
+		}
+		
+		if(command.hasParameter("zebraSubscriberId")){
+			zebraSubscriberId = command.stringValueOfParameterNamed("zebraSubscriberId");
+		}
+		
+		if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase(ProvisioningApiConstants.PROV_BEENIUS) 
+				&& requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CLIENT_ACTIVATION)){
 			
 			authPin = command.stringValueOfParameterNamed("authPin");
 			Long clientId = command.longValueOfParameterNamed("clientId");	
@@ -87,7 +102,7 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 				String Name = client.getLastname();
 				
 				BillingMessageTemplate messageDetails=this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PROVISION_CREDENTIALS);
-				
+				if(messageDetails!=null){
 				String subject=messageDetails.getSubject();
 				String body=messageDetails.getBody();
 				String header=messageDetails.getHeader()+","+"\n"+"\n";
@@ -99,17 +114,42 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 			
 				BillingMessage billingMessage = new BillingMessage(header, body, footer, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_EMAIL_FROM, client.getEmail(),
 						subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
-				
+			
 				this.messageDataRepository.save(billingMessage);
 						
+			}else{
+				throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PROVISION_CREDENTIALS);
 			}
-			
+		 }
 		}
 		
-		if(provSystem != null && requestType !=null && provSystem.equalsIgnoreCase("ZebraOTT") 
-				&& requestType.equalsIgnoreCase("CLIENT ACTIVATION")){
+		if(zebraSubscriberId != null && requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CLIENT_ACTIVATION) &&
+				(!zebraSubscriberId.isEmpty())){
 			
-			String zebraSubscriberId = command.stringValueOfParameterNamed("zebraSubscriberId");
+			Long clientId = command.longValueOfParameterNamed("clientId");	
+			
+			if(clientId !=null && zebraSubscriberId !=null && zebraSubscriberId.length()>0 && clientId>0){
+				
+				Client client = this.clientRepository.findOne(clientId);
+				SelfCare selfcare = this.selfCareRepository.findOneByClientId(clientId);
+				
+				if(client == null){
+					throw new ClientNotFoundException(clientId);
+				}
+				
+				if(selfcare == null){
+					throw new PlatformDataIntegrityException("client does not exist", "client not registered","clientId", "client is null ");
+				}
+				
+				selfcare.setZebraSubscriberId(new Long(zebraSubscriberId));
+				this.selfCareRepository.save(selfcare);
+			  }
+
+			}
+		
+		if(zebraSubscriberId != null && requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_ACTIVATION) &&
+				(!zebraSubscriberId.isEmpty())){
+			
 			Long clientId = command.longValueOfParameterNamed("clientId");	
 			
 			if(clientId !=null && zebraSubscriberId !=null && zebraSubscriberId.length()>0 && clientId>0){
@@ -133,6 +173,25 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		}
 		
 		ProcessRequest processRequest = this.entitlementRepository.findOne(command.entityId());
+		if(requestType !=null && requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CREATE_AGENT)){
+			
+			if(agentResourceId !=null ){
+				List<ProcessRequestDetails> details = processRequest.getProcessRequestDetails();
+				for (ProcessRequestDetails processRequestDetails : details) {
+					Long id = command.longValueOfParameterNamed("prdetailsId");
+					if (processRequestDetails.getId().longValue() == id.longValue()) {
+			    		JSONObject object = new JSONObject(processRequestDetails.getSentMessage());
+			    		Long officeId = object.getLong("agentId");
+			    		 Office office = this.officeRepository.findOne(officeId);
+			    		 office.setExternalId(agentResourceId);
+			    		 this.officeRepository.saveAndFlush(office);
+			    		 break;
+			    	 }
+			     }
+	    	}	
+		}
+		
+		
 		String receiveMessage = command.stringValueOfParameterNamed("receiveMessage");
 		char status;
 		if (receiveMessage.contains("failure :")) {
@@ -168,9 +227,25 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 		this.processRequestWriteplatformService.notifyProcessingDetails(processRequest, status);
 		
 		return new CommandProcessingResult(processRequest.getId());
+		
+	}catch(Exception e){
+		
+		ProcessRequest processRequest = this.entitlementRepository.findOne(command.entityId());
+		
+        List<ProcessRequestDetails> details = processRequest.getProcessRequestDetails();
 
+		 for (ProcessRequestDetails processRequestDetails : details) {
+			Long id = command.longValueOfParameterNamed("prdetailsId");
+			if (processRequestDetails.getId().longValue() == id.longValue()) {
+			   String receiveMessage = command.stringValueOfParameterNamed("receiveMessage");	
+		       processRequestDetails.setReceiveMessage(receiveMessage);
+			}
+		}
+		 processRequest.setProcessStatus('F');
+		 this.entitlementRepository.saveAndFlush(processRequest);
+		return new CommandProcessingResult(Long.valueOf(-1L));
 	}
-
+}
 	/*private boolean checkProcessDetailsUpdated(List<ProcessRequestDetails> details) {
 		boolean flag = true;
 		if (details.get(0).getReceiveMessage().contains("failure : Exce")) {

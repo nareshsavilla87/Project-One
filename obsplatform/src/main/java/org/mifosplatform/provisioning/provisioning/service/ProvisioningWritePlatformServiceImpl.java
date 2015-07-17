@@ -30,9 +30,12 @@ import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundExcepti
 import org.mifosplatform.organisation.ippool.domain.IpPoolManagementDetail;
 import org.mifosplatform.organisation.ippool.domain.IpPoolManagementJpaRepository;
 import org.mifosplatform.organisation.ippool.exception.IpNotAvailableException;
+import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.office.domain.OfficeAdditionalInfo;
+import org.mifosplatform.organisation.office.domain.OfficeRepository;
+import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
 import org.mifosplatform.portfolio.association.exception.PairingNotExistException;
-import org.mifosplatform.portfolio.order.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderLine;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
@@ -40,6 +43,9 @@ import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
+import org.mifosplatform.portfolio.planmapping.domain.PlanMapping;
+import org.mifosplatform.portfolio.planmapping.domain.PlanMappingRepository;
+import org.mifosplatform.portfolio.planmapping.execption.PlanMappingNotExist;
 import org.mifosplatform.portfolio.service.domain.ServiceMaster;
 import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
 import org.mifosplatform.provisioning.preparerequest.data.PrepareRequestData;
@@ -82,6 +88,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	private final IpPoolManagementJpaRepository ipPoolManagementJpaRepository;
 	private final ProvisionHelper provisionHelper;
 	private final PlanRepository planRepository;
+	private final OfficeRepository officeRepository;
+	private final PlanMappingRepository planMappingRepository;
 	private final PrepareRequestReadplatformService prepareRequestReadplatformService;
 	private final ItemDetailsRepository inventoryItemDetailsRepository;
 	private final ProvisioningCommandFromApiJsonDeserializer fromApiJsonDeserializer;
@@ -94,10 +102,10 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			final OrderReadPlatformService orderReadPlatformService,final ProvisioningCommandRepository provisioningCommandRepository,
 			final ServiceParametersRepository parametersRepository,final ProcessRequestRepository processRequestRepository,
 			final OrderRepository orderRepository,final FromJsonHelper fromJsonHelper,final HardwareAssociationRepository associationRepository,
-			final ServiceMasterRepository serviceMasterRepository,final ProvisionHelper provisionHelper,
+			final ServiceMasterRepository serviceMasterRepository,final ProvisionHelper provisionHelper,final OfficeRepository officeRepository,
 			final ProcessRequestReadplatformService processRequestReadplatformService,final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,
 			final ProcessRequestWriteplatformService processRequestWriteplatformService,final PlanRepository planRepository,
-			final PrepareRequestReadplatformService prepareRequestReadplatformService) {
+			final PrepareRequestReadplatformService prepareRequestReadplatformService,final PlanMappingRepository planMappingRepository) {
 
 		this.context = context;
 		this.fromJsonHelper = fromJsonHelper;
@@ -110,7 +118,9 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		this.serviceMasterRepository = serviceMasterRepository;
 		this.serviceParametersRepository = parametersRepository;
 		this.processRequestRepository = processRequestRepository;
+		this.planMappingRepository = planMappingRepository;
 		this.prepareRequestReadplatformService=prepareRequestReadplatformService;
+		this.officeRepository = officeRepository;
 		this.orderReadPlatformService = orderReadPlatformService;
 		this.provisioningCommandRepository = provisioningCommandRepository;
 		this.ipPoolManagementJpaRepository = ipPoolManagementJpaRepository;
@@ -289,7 +299,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		}
 	}
 
-	@Transactional
+	
 	@Override
 	public void updateHardwareDetails(final Long clientId,final String serialNumber,final String oldSerialnumber,final String provSerilaNum,final String oldHardware) {
 		
@@ -325,11 +335,19 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			final Long prepareId,final String groupname,final String serialNo,final Long orderId,final String provisioningSys,Long addonId) {
 
 
-	try {
+	//try {
 		Long commandProcessId=null;
 		String serialNumber = null;
 		HardwareAssociation hardwareAssociation = this.associationRepository.findOneByOrderId(order.getId());
 		Plan plan=this.planRepository.findOne(order.getPlanId());
+		
+		PlanMapping planMapping= this.planMappingRepository.findOneByPlanId(order.getPlanId());
+		
+		
+		
+		if (planMapping == null && plan.getProvisionSystem().equalsIgnoreCase("None")) {
+			throw new PlanMappingNotExist(plan.getPlanCode());
+		}
 		
 		if (hardwareAssociation == null && plan.isHardwareReq() == 'Y') {
 			throw new PairingNotExistException(order.getId());
@@ -374,10 +392,10 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			commandProcessId=commandProcessingResult.resourceId();
 		}
 			return new CommandProcessingResult(commandProcessId);
-		} catch (DataIntegrityViolationException dve) {
-			handleCodeDataIntegrityIssues(null, dve);
-			return new CommandProcessingResult(Long.valueOf(-1));
-		} 
+		//} catch (DataIntegrityViolationException dve) {
+		//	handleCodeDataIntegrityIssues(null, dve);
+			//return new CommandProcessingResult(Long.valueOf(-1));
+	//	} 
 
 	}
 
@@ -387,6 +405,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 
 		try {
 			this.context.authenticatedUser();
+			
 			final ProcessRequest processRequest = this.processRequestRepository.findOne(entityId);
 
 			if (processRequest == null) {
@@ -595,14 +614,29 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	}
 
 	@Override
-	public CommandProcessingResult postDetailsForProvisioning(Long clientId, String requestType,String provisioningSystem,String hardwareId) {
-		Long defaultValue=Long.valueOf(0);
-		ProcessRequest processRequest=new ProcessRequest(defaultValue,clientId,defaultValue, provisioningSystem, requestType,'N','N');
-		 ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(defaultValue,defaultValue,"None","Recieved",
-				 hardwareId,DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),null,null,'N',requestType,null);
-		 processRequest.add(processRequestDetails);
-		 this.processRequestRepository.save(processRequest);
-		return new CommandProcessingResult(processRequest.getId());
+	public CommandProcessingResult postDetailsForProvisioning(Long clientId,Long resourceId, String requestType,String provisioningSystem,String hardwareId) {
+		
 
-	}
+		  Long defaultValue=Long.valueOf(0);
+		  JSONObject jsonObject = new JSONObject();
+		  if(requestType.equalsIgnoreCase(ProvisioningApiConstants.REQUEST_CREATE_AGENT)){
+		   Office office=this.officeRepository.findOne(resourceId);
+		   if(office !=null){
+		      OfficeAdditionalInfo additionalInfo=office.getOfficeAdditionalInfo();
+		           if(additionalInfo != null){
+		               jsonObject.put("agentName", office.getName());
+		               jsonObject.put("agentId", office.getId());
+		               jsonObject.put("agentDescription", additionalInfo.getContactName());
+		           }
+		           resourceId=Long.valueOf(0L);
+		      }
+		  }
+		  
+		  ProcessRequest processRequest=new ProcessRequest(defaultValue,clientId,resourceId, provisioningSystem, requestType,'N','N');
+		   ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(defaultValue,defaultValue,jsonObject.toString(),"Recieved",
+		     hardwareId,DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),null,null,'N',requestType,null);
+		   processRequest.add(processRequestDetails);
+		   this.processRequestRepository.save(processRequest);
+		  return new CommandProcessingResult(processRequest.getId());
+   }
 }

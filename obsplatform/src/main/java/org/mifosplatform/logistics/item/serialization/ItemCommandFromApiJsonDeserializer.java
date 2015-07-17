@@ -18,6 +18,7 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.reflect.TypeToken;
 
@@ -26,7 +27,7 @@ public class ItemCommandFromApiJsonDeserializer {
 	 
 	
 	 	Set<String> supportedParameters = new HashSet<String>(Arrays.asList("itemCode","itemDescription","units","chargeCode","locale","unitPrice","warranty","itemClass",
-	 			"reorderLevel","chargeCode"));
+	 			"reorderLevel","chargeCode", "itemPrices", "regionId", "price", "removeItemPrices"));
 	    private final FromJsonHelper fromApiJsonHelper;
 
 	    @Autowired
@@ -57,7 +58,7 @@ public class ItemCommandFromApiJsonDeserializer {
 	        warranty = w.longValue();
 	        }*/
 	        
-	        final BigDecimal unitPrice = fromApiJsonHelper.extractBigDecimalNamed("unitPrice", element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
+	        final BigDecimal defaultPrice = fromApiJsonHelper.extractBigDecimalNamed("unitPrice", element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
 	        
 	        final BigDecimal warranty1 = fromApiJsonHelper.extractBigDecimalNamed("warranty", element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
 	        final Integer warranty = fromApiJsonHelper.extractIntegerNamed("warranty",element, fromApiJsonHelper.extractLocaleParameter(element.getAsJsonObject()));
@@ -68,8 +69,30 @@ public class ItemCommandFromApiJsonDeserializer {
 	        baseDataValidator.reset().parameter("warranty").value(warranty).notNull().notExceedingLengthOf(2);
 			baseDataValidator.reset().parameter("itemClass").value(itemClass).notBlank();
 			baseDataValidator.reset().parameter("units").value(units).notBlank();
-			baseDataValidator.reset().parameter("unitPrice").value(unitPrice).notNull();
+			//baseDataValidator.reset().parameter("defaultPrice").value(defaultPrice).notNull();
+			
+			final JsonArray itemPricesArray = fromApiJsonHelper.extractJsonArrayNamed("itemPrices", element);
+	        String[] itemPriceRegions = null;
+	        itemPriceRegions = new String[itemPricesArray.size()];
+	        final int itemPricesArraySize = itemPricesArray.size();
+		    baseDataValidator.reset().parameter("itemPrices").value(itemPricesArraySize).integerGreaterThanZero();
+	        if(itemPricesArraySize > 0){
+		    for(int i = 0; i < itemPricesArray.size(); i++){
+		    	itemPriceRegions[i] = itemPricesArray.get(i).toString();
+		    	
+		    }
+	
+			 for (final String itemPriceRegion : itemPriceRegions) {
+				 
+				     final JsonElement attributeElement = fromApiJsonHelper.parse(itemPriceRegion);
+				     final BigDecimal price = fromApiJsonHelper.extractBigDecimalNamed("price", attributeElement, fromApiJsonHelper.extractLocaleParameter(attributeElement.getAsJsonObject()));
+				     baseDataValidator.reset().parameter("price").value(price).notNull().notExceedingLengthOf(22);
+				 
+				     final Long regionId = fromApiJsonHelper.extractLongNamed("regionId", attributeElement);
+				     baseDataValidator.reset().parameter("regionId").value(regionId).notBlank().notExceedingLengthOf(30);
 
+			  }
+	        }
 	        throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	    }
 	    

@@ -1,7 +1,6 @@
 package org.mifosplatform.workflow.eventactionmapping.service;
 
 
-import java.util.Date;
 import java.util.List;
 
 import org.mifosplatform.cms.eventmaster.domain.EventMaster;
@@ -91,7 +90,7 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 					 parsedCommand = this.fromApiJsonHelper.parse(jsonObject);
 					 command = JsonCommand.from(jsonObject,parsedCommand,this.fromApiJsonHelper,"DissconnectOrder",eventActionData.getClientId(), null,
 						null,eventActionData.getClientId(), null, null, null,null, null, null,null);
-					 this.orderWritePlatformService.disconnectOrder(command,	eventActionData.getOrderId());
+					 this.orderWritePlatformService.disconnectOrder(command,eventActionData.getOrderId());
 				 break;
 				
 			case EventActionConstants.ACTION_NEW :
@@ -110,21 +109,8 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 						null,eventActionData.getClientId(), null, null, null,null, null, null,null);
 					result=this.invoiceClient.createInvoiceBill(command);
 					if(result!=null){
-						this.billingMasterApiResourse.printInvoice(result.resourceId(),eventActionData.getClientId());
+						this.billingMasterApiResourse.printInvoice(result.resourceId(),eventActionData.getClientId(),true);
 					}
-						/*JSONObject jsonObj=new JSONObject();
-						jsonObj.put("dateFormat","dd MMMM yyyy");
-						jsonObj.put("locale","en");
-						jsonObj.put("dueDate", dateFormat.format(new Date()));
-						jsonObj.put("message","Statement");
-						parsedCommand = this.fromApiJsonHelper.parse(jsonObj.toString());
-						command = JsonCommand.from(jsonObj.toString(),parsedCommand,this.fromApiJsonHelper,"BILLMASTER",eventActionData.getClientId(), null,
-								null,eventActionData.getClientId(), null, null, null,null, null, null,null);
-			            result = this.billMasterWritePlatformService.createBillMaster(command, command.entityId());
-				           if(result.resourceId() != null){
-				        	  this.billingMasterApiResourse.printInvoice(result.resourceId());
-				        	  this.billingMasterApiResourse.sendBillPathToMsg(result.resourceId());
-				           }*/
 					
 				}catch(Exception exception){
 					
@@ -163,6 +149,25 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 				this.eventMasterRepository.saveAndFlush(eventMaster);
 				
 				break;
+				
+			case EventActionConstants.ACTION_SEND_PAYMENT :
+				try{
+				   this.billingMasterApiResourse.printPayment(eventAction.getResourceId(), eventAction.getClientId(),true);
+				   }	
+				catch(Exception exception){
+					
+				}
+				break;
+
+			case EventActionConstants.ACTION_TOPUP_INVOICE_MAIL :
+
+				try{
+					 this.billingMasterApiResourse.printInvoice(eventActionData.getResourceId(),eventActionData.getClientId(),true);
+					}	
+				catch(Exception exception){
+				}
+			break;		
+
 			
 			default:
 				break;

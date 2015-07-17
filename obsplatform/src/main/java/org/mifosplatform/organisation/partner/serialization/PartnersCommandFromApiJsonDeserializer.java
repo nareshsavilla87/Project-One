@@ -27,9 +27,9 @@ public class PartnersCommandFromApiJsonDeserializer {
 	/*
 	 * The parameters supported for this command.
 	 */
-	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("partnerType", "partnerName","loginName","password","phoneNumber","email",
+	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("partnerType","partnerCode", "partnerName","loginName","password","phoneNumber","email",
 			                            "city","state","country","currency","contactName","roleName","companyLogo","parentId","officeType","repeatPassword",
-			                            "isCollective","creditLimit","locale","officeNumber","userId","roles"));
+			                            "isCollective","creditLimit","locale","officeNumber","userId","roles","externalId"));
 	private final FromJsonHelper fromApiJsonHelper;
 
 	@Autowired
@@ -58,6 +58,7 @@ public class PartnersCommandFromApiJsonDeserializer {
 		final String partnerName = fromApiJsonHelper.extractStringNamed("partnerName", element);
 		baseDataValidator.reset().parameter("partnerName").value(partnerName).notBlank().notExceedingLengthOf(20);
 		
+		
 		final String loginName = fromApiJsonHelper.extractStringNamed("loginName", element);
 		baseDataValidator.reset().parameter("loginName").value(loginName).notBlank().notExceedingLengthOf(20);
 		
@@ -67,11 +68,11 @@ public class PartnersCommandFromApiJsonDeserializer {
         final String repeatPassword = fromApiJsonHelper.extractStringNamed("repeatPassword", element);
         baseDataValidator.reset().parameter("repeatPassword").value(repeatPassword).notBlank().notExceedingLengthOf(60);
         
-        final BigDecimal creditLimit = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("creditLimit", element);
+       // final BigDecimal creditLimit = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("creditLimit", element);
         
-        if(creditLimit != null){
-        baseDataValidator.reset().parameter("creditLimit").value(creditLimit).integerGreaterThanZero();
-        }
+     /*   if(creditLimit != null){
+        baseDataValidator.reset().parameter("creditLimit").value(creditLimit).
+        }*/
         
         final Long parentId = fromApiJsonHelper.extractLongNamed("parentId", element);
         baseDataValidator.reset().parameter("parentId").value(parentId).notBlank();

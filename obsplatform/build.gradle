@@ -6,13 +6,15 @@ gradle clean tomcatrunwar
 buildscript {
   repositories {
      mavenLocal()
-     mavenCentral()
-     mavenRepo(name: 'zt-public-snapshots',
-               url: 'http://repos.zeroturnaround.com/nexus/content/groups/zt-public/')
+     mavenCentral() 
+       maven {
+           url 'http://repos.zeroturnaround.com/nexus/content/groups/zt-public/'
+    }
+                  
     flatDir {
        dirs 'src/main/resources'
     }
-
+    
   }
 
   dependencies {
@@ -80,8 +82,9 @@ repositories {
         url "http://download.java.net/maven/2"
     }
     maven {
-    	url "http://repository.pentaho.org/artifactory/pentaho/"
-    }
+    /*	url "http://repository.pentaho.org/artifactory/pentaho/" */
+      url "http://nexus.pentaho.org/content/repositories/pentaho-public-release-repos/" 
+   }
 }
 
 configurations {
@@ -188,10 +191,10 @@ dependencies {
                 [group: 'com.paypal.sdk', name: 'rest-api-sdk', version: '0.9.0'],
                 [group: 'org.flywaydb', name: 'flyway-core', version: '3.0'],
                 [group: 'me.legrange',name: 'mikrotik', version: '2.0.2'],
-                [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12']
-               
-                
-
+                [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12'],
+                [group: 'com.paypal.sdk',name: 'merchantsdk', version: '2.5.106'],
+                [group: 'net.sf.jasperreports',name: 'jasperreports-fonts', version:'5.6.1']
+                       
  	        )
 
  	 testCompile 'junit:junit:4.11',

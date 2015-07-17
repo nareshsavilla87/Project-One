@@ -4,15 +4,21 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
@@ -31,6 +37,7 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.finance.payments.exception.ReceiptNoDuplicateException;
 import org.mifosplatform.finance.payments.service.PaymentReadPlatformService;
 import org.mifosplatform.finance.payments.service.PaymentWritePlatformService;
+import org.mifosplatform.finance.paymentsgateway.data.RecurringPaymentTransactionTypeConstants;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGateway;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfiguration;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfigurationRepository;
@@ -52,6 +59,7 @@ import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplate;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
+import org.mifosplatform.organisation.message.exception.BillingMessageTemplateNotFoundException;
 import org.mifosplatform.organisation.message.exception.EmailNotFoundException;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
@@ -87,6 +95,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 		private final ClientRepository clientRepository;
 		private final EventActionRepository eventActionRepository;
 		private final ConfigurationRepository configurationRepository;
+		private BillingMessageTemplate messageDetails;
 	   
 	   
 	    @Autowired
@@ -447,7 +456,6 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			
 	            if(paymentStatus.equalsIgnoreCase(ConfigurationConstants.GLOBALPAY_SUCCESS)){
 	            	pgConfigJsonObj.put("status", ConfigurationConstants.PAYMENTGATEWAY_SUCCESS);
-	            	//pgConfigJsonObj.put("status", ConfigurationConstants.PAYMENTGATEWAY_PENDING);
 	    			pgConfigJsonObj.put("error", paymentDesc);
 	            }else if (paymentStatus.equalsIgnoreCase(ConfigurationConstants.GLOBALPAY_PENDING)) {
 	            	pgConfigJsonObj.put("status", ConfigurationConstants.PAYMENTGATEWAY_PENDING);
@@ -686,6 +694,9 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			paymentGateway.setRemarks(requestJson);
 		}else if(status.equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_SUCCESS)){
 			paymentGateway.setStatus(status);
+		}else if(status.equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_COMPLETED)){
+			status = ConfigurationConstants.PAYMENTGATEWAY_SUCCESS;
+			paymentGateway.setStatus(status);
 		}else{
 			paymentGateway.setStatus(status);
 			paymentGateway.setRemarks(error);
@@ -705,7 +716,7 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 	}
 	
 	@Override
-	public String payment(Long clientId, Long id, String txnId, String amount) throws JSONException{
+	public String payment(Long clientId, Long id, String txnId, String amount, String errorDescription) throws JSONException{
 		
 		JSONObject withChanges = new JSONObject();
 		
@@ -730,7 +741,8 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			object.addProperty("remarks", "Payment Done");
 			object.addProperty("paymentCode", paymodeId);
 			
-			if(paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_SUCCESS)){
+			if(paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_SUCCESS) || 
+					paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_COMPLETED)){
 				
 				object.addProperty("paymentDate", formattedDate);
 				
@@ -765,20 +777,30 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				
 			} else if(paymentGateway.getStatus().equalsIgnoreCase(ConfigurationConstants.PAYMENTGATEWAY_PENDING)){
 				
-				EventAction eventAction=new EventAction(DateUtils.getDateOfTenant(), "Create Payment", "PAYMENT", EventActionConstants.EVENT_CREATE_PAYMENT,
-						"/payments/"+clientId, id,object.toString(),null,clientId);	
-				eventAction.updateStatus('P');
-				this.eventActionRepository.save(eventAction);
-				     
+				if(!paymentGateway.getSource().equalsIgnoreCase(RecurringPaymentTransactionTypeConstants.PAYPAL)){
+					
+					EventAction eventAction=new EventAction(DateUtils.getDateOfTenant(), "Create Payment", "PAYMENT", EventActionConstants.EVENT_CREATE_PAYMENT,
+							"/payments/"+clientId, id,object.toString(),null,clientId);	
+					eventAction.updateStatus('P');
+					this.eventActionRepository.save(eventAction);
+				}
+				
 				withChanges.put("Result", ConfigurationConstants.PAYMENTGATEWAY_PENDING);
-				withChanges.put("Description", ConfigurationConstants.PAYMENT_PENDING_DESCRIPTION);	
+				if(null != errorDescription){
+					withChanges.put("Description", errorDescription);	
+				}else{
+					withChanges.put("Description", ConfigurationConstants.PAYMENT_PENDING_DESCRIPTION);	
+				}
+				
 				withChanges.put("Amount", amount);	
 				withChanges.put("ObsPaymentId", "");	
 				withChanges.put("TransactionId", txnId);
 				withChanges.put("pgId", id);
+				
 			}
 			
 			this.paymentGatewayRepository.save(paymentGateway);
+			
 			return withChanges.toString();
 			
 		} catch (ReceiptNoDuplicateException e) {
@@ -839,13 +861,17 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				if(value.equalsIgnoreCase(Result)){
 					Result = object.getString("result");
 					Description = object.getString("response");
+					break;
 				}
 			}
 			
 		}
 	
-		BillingMessageTemplate messageDetails = this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT_RECEIPT);
+		if(null == messageDetails){
+			messageDetails = this.billingMessageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT_RECEIPT);
+		}
 		
+		if(messageDetails !=null){
 		String subject=messageDetails.getSubject();
 		String body=messageDetails.getBody();
 		String header=messageDetails.getHeader();
@@ -869,6 +895,9 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 				subject, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, messageDetails, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 		
 		this.messageDataRepository.save(billingMessage);
+		}else{
+			throw new BillingMessageTemplateNotFoundException(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT_RECEIPT);
+		}
 	}
 	
 	private static String processPostNetellerRequests(String url, String encodePassword, String data, 

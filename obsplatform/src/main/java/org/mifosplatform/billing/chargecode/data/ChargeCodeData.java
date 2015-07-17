@@ -1,5 +1,6 @@
 package org.mifosplatform.billing.chargecode.data;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -13,20 +14,25 @@ public class ChargeCodeData {
 	private String durationType;
 	private Integer taxInclusive;
 	private String billFrequencyCode;
+	private String contractType;
+	private Integer units;
 
 	private List<ChargeCodeData> chargeCodeData;
 	private List<ChargeTypeData> chargeTypeData;
 	private List<DurationTypeData> durationTypeData;
 	private List<BillFrequencyCodeData> billFrequencyCodeData;
+	
+	private BigDecimal price;
+	private Integer contractDuration;
+	private BigDecimal finalAmount;
 
 
 	public ChargeCodeData() {
 	}
 
-	public ChargeCodeData(final List<ChargeCodeData> chargeCodeData,
-			final List<ChargeTypeData> chargeType,
-			final List<DurationTypeData> durationType,
+	public ChargeCodeData(final List<ChargeCodeData> chargeCodeData,final List<ChargeTypeData> chargeType,final List<DurationTypeData> durationType,
 			final List<BillFrequencyCodeData> billFrequencyCodeData) {
+		
 		this.chargeCodeData = chargeCodeData;
 		this.chargeTypeData = chargeType;
 		this.durationTypeData = durationType;
@@ -50,6 +56,32 @@ public class ChargeCodeData {
 		this.durationType = durationType;
 		this.taxInclusive = taxInclusive;
 		this.billFrequencyCode = billFrequencyCode;
+	}
+	
+	public ChargeCodeData(Long id, String chargeCode, String chargeDescription,
+			String chargeType, Integer chargeDuration, String durationType,
+			Integer taxInclusive, String billFrequencyCode,String contractType ,Integer units ) {
+		this.id = id;
+		this.chargeCode = chargeCode;
+		this.chargeDescription = chargeDescription;
+		this.chargeType = chargeType;
+		this.chargeDuration = chargeDuration;
+		this.durationType = durationType;
+		this.taxInclusive = taxInclusive;
+		this.billFrequencyCode = billFrequencyCode;
+		this.contractType = contractType;
+		this.units = units;
+	}
+
+	public ChargeCodeData(Long id, String contractType,Integer contractDuration, String chargeType,Integer chargeDuration, BigDecimal price) {
+             
+		this.id = id;
+		this.contractType = contractType;
+		this.contractDuration = contractDuration;
+		this.chargeType = chargeType;
+		this.chargeDuration = chargeDuration;
+		this.price = price;
+	
 	}
 
 	/**
@@ -196,5 +228,19 @@ public class ChargeCodeData {
 	public void setBillFrequencyCodeData(final List<BillFrequencyCodeData> billFrequencyCodeData) {
 		this.billFrequencyCodeData = billFrequencyCodeData;
 	}
+
+	public BigDecimal getPrice() {
+		return price;
+	}
+
+	public void setPrice(BigDecimal price) {
+		this.price = price;
+	}
+
+	public void setPlanfinalAmount(BigDecimal finalAmount) {
+		this.finalAmount=finalAmount;		
+	}
+	
+	
 
 }

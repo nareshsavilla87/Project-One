@@ -45,7 +45,6 @@ public class EntitlementsData {
 	private Long orderId;
 	private LocalDate startDate;
 	private LocalDate endDate;
-	private StakerData stalkerData;
 	
 	private Long zebraSubscriberId;
 	private BigDecimal itemPrice;
@@ -54,18 +53,28 @@ public class EntitlementsData {
 	private String displayName;
 	private String login;
 	private String password;
-	
+	private String subscriberId;
 	private String selfcareUsername;
 	private String selfcarePassword;
-
-	public EntitlementsData() {
-
+	
+	private String street;
+	private String country;
+	private Long countryId;
+	private String macId;
+	private Long regionId;
+	private Long officeId;
+	private String countryISD;
+	
+	
+	public EntitlementsData(){
+		
 	}
 	
 	//Beenius
 	public EntitlementsData(Long id, Long prdetailsId,String provisioingSystem, Long serviceId, String product,String hardwareId, 
 			String requestType, String itemCode,String itemDescription, Long clientId, String accountNo,String firstName, String lastName,
-			String officeUId, String branch,String regionCode, String regionName, String deviceId,String ipAddress) {
+			String officeUId, String branch,String regionCode, String regionName, String deviceId,String ipAddress, String userName,
+			 String selfcarePassword, Long subscriberId,Long orderId,LocalDate startDate,LocalDate endDate) {
 
 		this.id = id;
 		this.prdetailsId = prdetailsId;
@@ -78,7 +87,9 @@ public class EntitlementsData {
 		this.itemDescription = itemDescription;
 		this.clientId = clientId;
 		this.accountNo = accountNo;
-
+        this.selfcarePassword=selfcarePassword;
+        this.selfcareUsername=userName;
+        this.zebraSubscriberId = subscriberId;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.officeUId = officeUId;
@@ -87,6 +98,9 @@ public class EntitlementsData {
 		this.regionName = regionName;
 		this.deviceId = deviceId;
 		this.ipAddress = ipAddress;
+		this.orderId =orderId;
+		this.startDate = startDate;
+		this.endDate = endDate;
 
 	}
 
@@ -126,7 +140,7 @@ public class EntitlementsData {
 			Long clientId, Long planId, String orderNo, Long orderId,
 			LocalDate startDate, LocalDate endDate, String servicetype,
 			String displayName, String login, String password, String userName, 
-			String userPassword, String firstName, String lastName, String email) {
+			String userPassword, String firstName, String lastName, String email, Long officeId) {
 		
 		this.id = id;
 		this.prdetailsId = prdetailsId;
@@ -144,11 +158,78 @@ public class EntitlementsData {
 		this.displayName = displayName;
 		this.login = login;
 		this.password = password;
-		this.selfcareUsername = userName;
-		this.selfcarePassword = userPassword;
+		this.selfcareUsername=userName;
+		this.selfcarePassword=userPassword;
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.email = email;
+		this.officeId = officeId;
+	}
+
+	//cubiware
+	public EntitlementsData(Long id, Long clientId, String firstName, String lastName, 
+			String phone, String email, String city, String zip, String street, String country, Long countryId,
+			String provisioingSystem, Long serviceId, Long prdetailsId, String product, String macId, 
+			String deviceId, String requestType, Long zebraSubscriberId, Long regionId, String regionName,
+			String selfcareUsername, String selfcarePassword, String countryISD) {
+		
+		this.id = id;
+		this.clientId = clientId;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.phone = phone;
+		this.email = email;
+		this.city = city;
+		this.zip = zip;
+		this.street = street;
+		this.country = country;
+		this.countryId = countryId;
+		this.provisioingSystem = provisioingSystem;
+		this.serviceId = serviceId;
+		this.prdetailsId = prdetailsId;
+		this.product = product;
+		this.macId = macId;
+		this.deviceId = deviceId;
+		this.requestType = requestType;
+		this.zebraSubscriberId = zebraSubscriberId;
+		this.regionId = regionId;
+		this.regionName = regionName;
+		this.selfcareUsername = selfcareUsername;
+		this.selfcarePassword = selfcarePassword;
+		this.countryISD = countryISD;
+		
+	}
+
+	public EntitlementsData(Long id, Long prdetailsId,
+			String provisioingSystem, String product, String macId,
+			String requestType, String itemCode, String itemDescription,
+			Long clientId, String accountNo, String firstName,
+			String lastName, String officeUID, String branch,
+			String regionCode, String regionName, String deviceId,
+			String ipAddress, String username, String password,
+			String subscriberId) {
+		
+		this.id = id;
+		this.clientId = clientId;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.provisioingSystem = provisioingSystem;
+		this.prdetailsId = prdetailsId;
+		this.product = product;
+		this.macId = macId;
+		this.deviceId = deviceId;
+		this.requestType = requestType;
+		this.zebraSubscriberId = new Long(subscriberId);;
+		this.regionCode = regionCode;
+		this.regionName = regionName;
+		this.selfcareUsername = username;
+		this.selfcarePassword = password;
+		this.itemCode = itemCode;
+		this.itemDescription = itemDescription;
+		this.accountNo = accountNo;
+		this.officeUId = officeUID;
+		this.branch = branch;
+		this.ipAddress = ipAddress;
 	}
 
 	public Long getId() {
@@ -263,7 +344,7 @@ public class EntitlementsData {
 	}
 
 	public void setResults(StakerData data) {
-		this.stalkerData=data;
+		this.results=data;
 		
 	}
 
@@ -295,10 +376,6 @@ public class EntitlementsData {
 		return serviceType;
 	}
 
-	public StakerData getStalkerData() {
-		return stalkerData;
-	}
-
 	public Long getZebraSubscriberId() {
 		return zebraSubscriberId;
 	}
@@ -322,6 +399,37 @@ public class EntitlementsData {
 	public String getPassword() {
 		return password;
 	}
-	
-	
+
+	public String getSelfcareUsername() {
+		return selfcareUsername;
+	}
+
+	public String getSelfcarePassword() {
+		return selfcarePassword;
+	}
+
+	public String getSubscriberId() {
+		return subscriberId;
+	}
+
+	public String getStreet() {
+		return street;
+	}
+
+	public String getMacId() {
+		return macId;
+	}
+
+	public Long getRegionId() {
+		return regionId;
+	}
+
+	public Long getOfficeId() {
+		return officeId;
+	}
+
+	public String getCountryISD() {
+		return countryISD;
+	}
+
 }

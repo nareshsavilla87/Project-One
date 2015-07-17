@@ -101,6 +101,7 @@ public class PromotionCodeWritePlatformServiceImpl implements PromotionCodeWrite
 		try {
 
 			this.context.authenticatedUser();
+			this.apiJsonDeserializer.validateForCreate(command.json());
 			PromotionCodeMaster promotionCode = PromotionCodeRetrieveById(id);
 			final Map<String, Object> changes = promotionCode.updatePromotion(command);
 			if (!changes.isEmpty()) {

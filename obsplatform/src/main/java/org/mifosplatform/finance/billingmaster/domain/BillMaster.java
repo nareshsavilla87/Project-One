@@ -68,6 +68,9 @@ public class BillMaster extends AbstractPersistable<Long>{
 	
 	@Column(name = "is_deleted")
 	private char isDeleted;
+	
+	@Column(name = "deposit_refund_amount")
+	private BigDecimal depositRefundAmount;
 
 	
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -83,7 +86,7 @@ public class BillMaster extends AbstractPersistable<Long>{
 			final BigDecimal previousBalance, final BigDecimal chargeAmount,
 			final BigDecimal adjustmentAmount, final BigDecimal taxAmount,
 			final BigDecimal paidAmount, final BigDecimal dueAmount, final String fileName,
-			final String promotionDescription, final Long parentId) {
+			final String promotionDescription, final Long parentId,final BigDecimal depositRefundAmount) {
 
 		this.billNumber = billNumber;
 		this.clientId = clientId;
@@ -101,6 +104,7 @@ public class BillMaster extends AbstractPersistable<Long>{
 		this.fileName = "invoice";
 		this.parentId = parentId;
 		this.isDeleted = 'N';
+		this.depositRefundAmount = depositRefundAmount;
 
 	}
 
@@ -240,6 +244,11 @@ public class BillMaster extends AbstractPersistable<Long>{
    public void delete() {
 		
 		this.isDeleted = 'Y';
+	}
+
+	public void setDepositRefundAmount(final BigDecimal depositRefundAmount) {
+		this.depositRefundAmount = depositRefundAmount;
+
 	}
 	
 }

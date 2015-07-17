@@ -9,7 +9,9 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.billing.chargecode.data.ChargesData;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
 import org.mifosplatform.organisation.office.data.OfficeData;
+import org.mifosplatform.organisation.region.data.RegionData;
 import org.mifosplatform.organisation.staff.data.StaffData;
 
 public class ItemData {
@@ -36,9 +38,15 @@ public class ItemData {
 	private Long usedItems;
 	private Long availableItems;
 	private Long totalItems;
+	private List<RegionData> regionDatas;
+	private Long regionId;
+	private String price;
+	private List<ItemData> itemPricesDatas;
+	private Long reorderLevel;
+	private List<FeeMasterData> feeMasterData;
 	
 	public ItemData(Long id, String itemCode, String itemDesc,String itemClass,String units,   String chargeCode, int warranty, BigDecimal unitPrice,
-			Long usedItems,Long availableItems,Long totalItems) {
+			Long usedItems,Long availableItems,Long totalItems, Long reorderLevel) {
 		
 		this.id=id;
 		this.itemCode=itemCode;
@@ -51,11 +59,11 @@ public class ItemData {
 		this.usedItems=usedItems;
 		this.availableItems=availableItems;
 		this.totalItems=totalItems;
-		
+		this.reorderLevel = reorderLevel;
 	}
 
 	public ItemData(List<ItemData> itemCodeData, ItemData itemData, BigDecimal totalPrice,String quantity, List<DiscountMasterData> discountdata,
-			           List<ChargesData> chargesDatas) {
+			           List<ChargesData> chargesDatas, List<FeeMasterData> feeMasterData) {
 
 		this.itemDatas=itemCodeData;
 		this.id=itemData.getId();
@@ -67,14 +75,15 @@ public class ItemData {
 		this.quantity=quantity;
 		this.chargesData=chargesDatas;
 		this.discountMasterDatas=discountdata;
-		
+		this.feeMasterData = feeMasterData;
 	
 	}
 
-	public ItemData(List<EnumOptionData> itemClassdata,List<EnumOptionData> unitTypeData, List<ChargesData> chargeDatas) {
+	public ItemData(List<EnumOptionData> itemClassdata,List<EnumOptionData> unitTypeData, List<ChargesData> chargeDatas, List<RegionData> regionDatas) {
      this.itemClassData=itemClassdata;
      this.unitData=unitTypeData;
      this.chargesData=chargeDatas;
+     this.regionDatas = regionDatas;
 	}
 
 	public ItemData(ItemData itemData, List<EnumOptionData> itemClassdata,
@@ -91,6 +100,7 @@ public class ItemData {
 		this.unitData=unitTypeData;
 		this.itemClassData=itemClassdata;
 		this.auditDetails=auditDetails;
+		this.reorderLevel = itemData.getReorderLevel();
 	}
 
 	public ItemData(List<ItemData> itemCodes) {
@@ -98,13 +108,14 @@ public class ItemData {
 	}
 
 	public ItemData(Long id, Long itemMasterId, String itemCode,
-			BigDecimal unitPrice, Date changedDate) {
+			BigDecimal unitPrice, Date changedDate, Long regionId) {
 		
 		this.id=id;
 		this.itemMasterId=itemMasterId;
 		this.itemCode=itemCode;
 		this.unitPrice=unitPrice;
 		this.changedDate=new LocalDate(changedDate);
+		this.regionId = regionId;
 	}
 	
 	public ItemData(final Long id, final String itemCode, final String itemDescription, final String chargeCode, final BigDecimal unitPrice) {
@@ -114,6 +125,15 @@ public class ItemData {
 		this.itemDescription=itemDescription;
 		this.chargeCode = chargeCode;
 		this.unitPrice=unitPrice;
+	}
+
+	public ItemData(Long id, Long itemId, Long regionId, String price) {
+		
+		this.id = id;
+		this.itemMasterId = itemId;
+		this.regionId = regionId;
+		this.price = price;
+		
 	}
 
 	public String getChargeCode() {
@@ -185,5 +205,44 @@ public class ItemData {
 		return 	itemDatas;
 	}
 
+	public List<RegionData> getRegionDatas() {
+		return regionDatas;
+	}
+
+	public void setRegionDatas(List<RegionData> regionDatas) {
+		this.regionDatas = regionDatas;
+	}
+
+	public List<ItemData> getItemPricesDatas() {
+		return itemPricesDatas;
+	}
+
+	public void setItemPricesDatas(List<ItemData> itemPricesDatas) {
+		this.itemPricesDatas = itemPricesDatas;
+	}
+
+	public Long getReorderLevel() {
+		return reorderLevel;
+	}
+
+	public void setReorderLevel(Long reorderLevel) {
+		this.reorderLevel = reorderLevel;
+	}
+
+	public void setUnitPrice(BigDecimal itemprice) {
+	    this.unitPrice = itemprice;
+
+	}
+
+	public List<FeeMasterData> getFeeMasterData() {
+		return feeMasterData;
+	}
+
+	public void setFeeMasterData(List<FeeMasterData> feeMasterData) {
+		this.feeMasterData = feeMasterData;
+	}
+
+	
+	
 	
 }

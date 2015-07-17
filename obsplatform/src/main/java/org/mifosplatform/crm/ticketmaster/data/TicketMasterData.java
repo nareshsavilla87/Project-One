@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 
 public class TicketMasterData {
@@ -26,12 +27,14 @@ public class TicketMasterData {
     private String problemDescription;
     private String userName;
     private Integer statusCode;
+    private Integer problemCode;
     private String statusDescription;
 	private LocalDate createdDate;
 	private String attachedFile;
 	private String sourceOfTicket;
 	private Date dueDate;
 	private String resolutionDescription;
+	private String ticketstatus;
 	
   	public TicketMasterData(final List<EnumOptionData> statusType,
 			final List<EnumOptionData> priorityType) {
@@ -44,14 +47,15 @@ public class TicketMasterData {
 		
 		this.problemsDatas = datas;
 		this.usersData = userData;
-		this.ticketDate = new LocalDate();
+		this.ticketDate = DateUtils.getLocalDateOfTenant();
 		this.priorityType = priorityData;
 		this.sourceData = sourceData;
 	}
 
 	public TicketMasterData(final Long id, final String priority, final String status, final Integer assignedTo, 
 			final LocalDate ticketDate, final String lastComment, final String problemDescription, final String userName, 
-			final String sourceOfTicket, final Date dueDate, final String description, final String resolutionDescription) {
+			final String sourceOfTicket, final Date dueDate, final String description, final String resolutionDescription,
+			final Integer problemCode, final Integer statusCode, String ticketstatus) {
 		
 		this.id = id;
 		this.priority = priority;
@@ -65,6 +69,9 @@ public class TicketMasterData {
 		this.dueDate = dueDate;
 		this.statusDescription = description;
 		this.resolutionDescription = resolutionDescription;
+		this.problemCode = problemCode;
+		this.statusCode = statusCode;
+		this.ticketstatus = ticketstatus;
 		
 	}
 
@@ -165,5 +172,15 @@ public class TicketMasterData {
 	public void setUsersData(final List<UsersData> usersData) {
 		this.usersData = usersData;
 	}
+
+	public void setPriorityType(List<EnumOptionData> priorityType) {
+		this.priorityType = priorityType;
+	}
+
+	public void setProblemsDatas(Collection<MCodeData> problemsDatas) {
+		this.problemsDatas = problemsDatas;
+	}
+	
+	
 	
 }

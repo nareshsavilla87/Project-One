@@ -30,8 +30,8 @@ import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfiguration;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfigurationRepository;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.Configuration;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -43,9 +43,13 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.data.AddressData;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.mifosplatform.portfolio.allocation.service.AllocationReadPlatformService;
+import org.mifosplatform.portfolio.client.data.ClientAdditionalData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.client.service.ClientCategoryData;
 import org.mifosplatform.portfolio.client.service.ClientReadPlatformService;
@@ -64,6 +68,7 @@ public class ClientsApiResource {
     private final ClientReadPlatformService clientReadPlatformService;
     private final OfficeReadPlatformService officeReadPlatformService;
     private final ToApiJsonSerializer<ClientData> toApiJsonSerializer;
+    private final ToApiJsonSerializer<ClientAdditionalData> jsonSerializer;
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final AddressReadPlatformService addressReadPlatformService;
@@ -71,6 +76,7 @@ public class ClientsApiResource {
     private final ConfigurationRepository configurationRepository;
     private final PaymentGatewayConfigurationRepository paymentGatewayConfigurationRepository;
     private final SelfCareRepository selfCareRepository;
+    private final MCodeReadPlatformService codeReadPlatformService;
 
     @Autowired
     public ClientsApiResource(final PlatformSecurityContext context, final ClientReadPlatformService readPlatformService,
@@ -78,7 +84,8 @@ public class ClientsApiResource {
             final ApiRequestParameterHelper apiRequestParameterHelper,final AddressReadPlatformService addressReadPlatformService,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,final AllocationReadPlatformService allocationReadPlatformService,
             final ConfigurationRepository configurationRepository, final PaymentGatewayConfigurationRepository gatewayConfigurationRepository,
-            final SelfCareRepository selfCareRepository) {
+            final SelfCareRepository selfCareRepository,final MCodeReadPlatformService mCodeReadPlatformService,
+            final ToApiJsonSerializer<ClientAdditionalData> jsonSerializer) {
         
     	this.context = context;
     	this.paymentGatewayConfigurationRepository=gatewayConfigurationRepository;
@@ -89,8 +96,10 @@ public class ClientsApiResource {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.addressReadPlatformService=addressReadPlatformService;
         this.allocationReadPlatformService=allocationReadPlatformService;
+        this.codeReadPlatformService = mCodeReadPlatformService;
         this.configurationRepository=configurationRepository;
         this.selfCareRepository = selfCareRepository;
+        this.jsonSerializer = jsonSerializer;
     }
     
     /**
@@ -113,6 +122,25 @@ public class ClientsApiResource {
         clientData=handleAddressTemplateData(clientData);
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+    }
+    
+    @GET
+    @Path("additionalinfo/template")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveClientAdditionalInfoTemplate(@Context final UriInfo uriInfo,  @QueryParam("commandParam") final String commandParam) {
+
+         	Collection<MCodeData> genderDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_GENDER);
+         	Collection<MCodeData> nationalityDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_NATIONALITY);
+         	Collection<MCodeData> customeridentificationDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CUSTOMER_IDENTIFIER);
+         	Collection<MCodeData> cummunitcationDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PREFER_COMMUNICATION);
+         	Collection<MCodeData> languagesDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PREFER_LANG);
+         	Collection<MCodeData> ageGroupDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_AGE_GROUP);
+         	ClientAdditionalData  clientAdditionalData = new ClientAdditionalData(genderDatas,nationalityDatas,customeridentificationDatas,cummunitcationDatas,
+         			languagesDatas,ageGroupDatas);
+         
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+        return this.jsonSerializer.serialize(settings, clientAdditionalData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
     }
 
     private ClientData handleAddressTemplateData(final ClientData clientData) {
@@ -147,33 +175,32 @@ public class ClientsApiResource {
 	/**
      * this method is using for getting template data in editing a client
      */
-    @GET
+    @SuppressWarnings("unused")
+	@GET
     @Path("{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
     @Produces({ MediaType.APPLICATION_JSON })
     public String retrieveOne(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
 
         context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
-
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-        final Configuration configurationProperty=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_BALANCE_CHECK);
+         Configuration configurationProperty=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_BALANCE_CHECK);
         ClientData clientData = this.clientReadPlatformService.retrieveOne(clientId);
         String balanceCheck="N";
         if(configurationProperty.isEnabled()){
         	balanceCheck="Y";
         }
-
+         
         if (settings.isTemplate()) {
+        	
             final List<OfficeData> allowedOffices = new ArrayList<OfficeData>(officeReadPlatformService.retrieveAllOfficesForDropdown());
             final Collection<ClientCategoryData> categoryDatas=this.clientReadPlatformService.retrieveClientCategories();
             final Collection<GroupData> groupDatas = this.clientReadPlatformService.retrieveGroupData();
             final List<String> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetails(clientId);
             clientData = ClientData.templateOnTop(clientData, allowedOffices,categoryDatas,groupDatas,allocationDetailsDatas,null);
-     
         }else{
         	final List<String> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetails(clientId);
              clientData = ClientData.templateOnTop(clientData, null,null,null,allocationDetailsDatas,balanceCheck);
-
         }
         
         final SelfCare selfcare = this.selfCareRepository.findOneByClientId(clientId);
@@ -187,6 +214,42 @@ public class ClientsApiResource {
     }
     
     /**
+     * this method is using for getting template data in editing a client
+     */
+	@GET
+    @Path("additionalinfo/{id}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String retrieveClientAdditionalInfo(@PathParam("id") final Long id, @Context final UriInfo uriInfo) {
+
+        context.authenticatedUser().validateHasReadPermission(ClientApiConstants.CLIENT_RESOURCE_NAME);
+        ClientAdditionalData clientAdditionalData = this.clientReadPlatformService.retrieveClientAdditionalData(id);
+        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+         
+        if (settings.isTemplate()) {
+        	
+            	Collection<MCodeData> genderDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_GENDER);
+            	Collection<MCodeData> nationalityDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_NATIONALITY);
+            	Collection<MCodeData> customeridentificationDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CUSTOMER_IDENTIFIER);
+            	Collection<MCodeData> cummunitcationDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PREFER_COMMUNICATION);
+            	Collection<MCodeData> languagesDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_PREFER_LANG);
+            	Collection<MCodeData> ageGroupDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_AGE_GROUP);
+            	if(clientAdditionalData != null){
+            	clientAdditionalData.setAgeGroupDatas(ageGroupDatas);
+            	 clientAdditionalData.setGenderDatas(genderDatas);
+            	 clientAdditionalData.setNationalityDatas(nationalityDatas);
+            	 clientAdditionalData.setCustomeridentificationDatas(customeridentificationDatas);
+            	 clientAdditionalData.setCummunitcationDatas(cummunitcationDatas);
+            	 clientAdditionalData.setLanguagesDatas(languagesDatas);
+            	}else{
+            	  clientAdditionalData = new ClientAdditionalData(genderDatas,nationalityDatas,customeridentificationDatas,cummunitcationDatas,
+            			languagesDatas,ageGroupDatas);
+            	}
+      	  }
+        return this.jsonSerializer.serialize(settings, clientAdditionalData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
+    }
+    
+    /**
      * this method is using for create a new client
      */
     @POST
@@ -194,13 +257,30 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String create(final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() 
-                .createClient() 
-                .withJson(apiRequestBodyAsJson) 
-                .build(); 
-
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createClient().withJson(apiRequestBodyAsJson).build(); 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    }
+    
+    @POST
+    @Path("additionalinfo/{clientId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String createClientAdditionalInfo(@PathParam("clientId") final Long clientId,final String apiRequestBodyAsJson) {
 
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().createClientAdditional(clientId).withJson(apiRequestBodyAsJson).build(); 
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+    }
+    
+    @PUT
+    @Path("additionalinfo/{clientId}")
+    @Consumes({ MediaType.APPLICATION_JSON })
+    @Produces({ MediaType.APPLICATION_JSON })
+    public String updateClientAdditionalInfo(@PathParam("clientId") final Long clientId,final String apiRequestBodyAsJson) {
+
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClientAdditional(clientId).withJson(apiRequestBodyAsJson).build(); 
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toApiJsonSerializer.serialize(result);
     }
 
