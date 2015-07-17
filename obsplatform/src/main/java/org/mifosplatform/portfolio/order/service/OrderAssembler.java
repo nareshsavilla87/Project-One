@@ -61,7 +61,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 		List<PriceData> datas = new ArrayList<PriceData>();
 		Long orderStatus=null;
 		LocalDate endDate = null;
-		BigDecimal discountRate = BigDecimal.ZERO;
+		
         Order order=Order.fromJson(clientId, command);
 			List<ServiceData> details =this.orderDetailsReadPlatformServices.retrieveAllServices(order.getPlanId());
 			datas=this.orderDetailsReadPlatformServices.retrieveAllPrices(order.getPlanId(),order.getBillingFrequency(),clientId);
@@ -125,8 +125,8 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 				order.addOrderDeatils(price);
 				priceforHistory=priceforHistory.add(data.getPrice());
 				
-				Client client=this.clientRepository.findOne(clientId);
-				List<DiscountDetails> discountDetails=discountMaster.getDiscountDetails();
+				//Client client=this.clientRepository.findOne(clientId);
+				/*List<DiscountDetails> discountDetails=discountMaster.getDiscountDetails();
 				for(DiscountDetails discountDetail:discountDetails){
 					if(client.getCategoryType().equals(Long.valueOf(discountDetail.getCategoryType()))){
 						discountRate = discountDetail.getDiscountRate();
@@ -134,10 +134,10 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 						discountRate = discountDetail.getDiscountRate();
 					}
 				}
-				
+				*/
 				//discount Order
 				OrderDiscount orderDiscount=new OrderDiscount(order,price,discountMaster.getId(),discountMaster.getStartDate(),null,discountMaster.getDiscountType(),
-						discountRate);
+						discountMaster.getDiscountRate());
 				//price.addOrderDiscount(orderDiscount);
 				order.addOrderDiscount(orderDiscount);
 			}
