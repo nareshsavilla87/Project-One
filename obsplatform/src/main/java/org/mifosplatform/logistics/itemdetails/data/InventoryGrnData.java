@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.logistics.supplier.data.SupplierData;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -37,7 +38,7 @@ public class InventoryGrnData {
 		this.id=null;
 		this.itemMasterId=null;
 		this.orderdQuantity=null;
-		this.purchaseDate= new LocalDate();
+		this.purchaseDate= DateUtils.getLocalDateOfTenant();
 		this.receivedQuantity=null;
 		this.supplierId=null;
 		
