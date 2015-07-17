@@ -15,6 +15,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationReposi
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
 import org.mifosplatform.logistics.item.domain.ItemRepository;
@@ -206,7 +207,7 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 			 
  			this.orderRepository.save(order);
 				//For Order History
-				OrderHistory orderHistory=new OrderHistory(order.getId(),new LocalDate(),new LocalDate(),resouceId,"DEVICE SWAP",userId,null);
+				OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resouceId,"DEVICE SWAP",userId,null);
 		
 				this.orderHistoryRepository.save(orderHistory);
 		return new CommandProcessingResult(entityId,order.getClientId());	
