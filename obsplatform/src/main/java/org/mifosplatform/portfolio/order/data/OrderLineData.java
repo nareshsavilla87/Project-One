@@ -9,10 +9,11 @@ public class OrderLineData {
 	private final String serviceType;
 	private final Long serviceId;
 	private String isAutoProvision;
+	private String image;
 	
 
 	public OrderLineData(Long id, Long orderId, String serviceCode,String serviceDescription,
-			String serviceType, Long serviceId, String isAutoProvision) {
+			String serviceType, Long serviceId, String isAutoProvision,String image) {
 		
 		this.id=id;
 		this.orderId=orderId;
@@ -21,6 +22,7 @@ public class OrderLineData {
 		this.serviceType=serviceType;
 		this.serviceId=serviceId;
 		this.isAutoProvision=isAutoProvision;
+		this.image=image;
 	}
 
 

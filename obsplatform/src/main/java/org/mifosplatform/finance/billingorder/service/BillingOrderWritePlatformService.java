@@ -16,6 +16,7 @@ public interface BillingOrderWritePlatformService {
 	
 	void updateClientVoucherBalance(BigDecimal amount,Long clientId, boolean isWalletEnable);
 
+
 	void UpdateOfficeCommision(Invoice invoice, Long agreementId);
 
 }
