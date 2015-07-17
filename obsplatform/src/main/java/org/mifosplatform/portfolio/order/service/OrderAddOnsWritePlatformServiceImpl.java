@@ -8,6 +8,7 @@ import org.mifosplatform.finance.billingorder.service.InvoiceClient;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
@@ -108,7 +109,7 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 		}
 		
 		if(order.getNextBillableDay() != null){
-			this.invoiceClient.invoicingSingleClient(order.getClientId(),new LocalDate());
+			this.invoiceClient.invoicingSingleClient(order.getClientId(),DateUtils.getLocalDateOfTenant());
 		}
 		
 		return new CommandProcessingResult(orderId);

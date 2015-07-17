@@ -20,6 +20,7 @@ import org.mifosplatform.infrastructure.codes.service.CodeValueReadPlatformServi
 import org.mifosplatform.infrastructure.core.api.ApiParameterHelper;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -83,7 +84,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 
         final Long officeId = currentUser.getOffice().getId();
 
-        return ClientData.template(officeId, new LocalDate(), offices,categoryDatas, groupDatas,null);
+        return ClientData.template(officeId, DateUtils.getLocalDateOfTenant(), offices,categoryDatas, groupDatas,null);
     }
 
     @Override

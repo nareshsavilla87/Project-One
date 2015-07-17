@@ -305,7 +305,7 @@ public class BillingMesssageReadPlatformServiceImpl implements
 				
 				Date date = DateUtils.getDateOfTenant();
 				String dateTime = date.getHours() + "" + date.getMinutes() + "" + date.getSeconds();
-				String path = fileUploadLocation + File.separator + "billingMessage_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".log";
+				String path = fileUploadLocation + File.separator + "billingMessage_" + DateUtils.getLocalDateOfTenant().toString().replace("-", "") + "_" + dateTime + ".log";
 				
 				File fileHandler = new File(path.trim());
 				fileHandler.createNewFile();
@@ -470,7 +470,7 @@ public class BillingMesssageReadPlatformServiceImpl implements
 				}
 				LocalTime date=new LocalTime();
 		        String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-				String path = fileUploadLocation + File.separator + "billingMessage_" + new LocalDate().toString().replace("-", "") + "_" + dateTime + ".log";
+				String path = fileUploadLocation + File.separator + "billingMessage_" + DateUtils.getLocalDateOfTenant().toString().replace("-", "") + "_" + dateTime + ".log";
 				File fileHandler = new File(path.trim());
 				fileHandler.createNewFile();
 				fw = new FileWriter(fileHandler);
