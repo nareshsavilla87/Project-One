@@ -128,8 +128,9 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 			}
 		OrderPrice orderPrice =this.orderPriceRepository.findOne(addons.getPriceId());
 		List<BillingOrderData> billingOrderDatas = new ArrayList<BillingOrderData>(); 
-		 if(endDate != null){ addonEndDate = endDate.toDate();}
-		 else{addonEndDate = startDate.plusYears(100).toDate();}
+		
+		if(endDate != null){ addonEndDate = endDate.toDate();}
+		 else{addonEndDate = startDate.plusYears(999).toDate();}
 		
 		//if(order.getNextBillableDay() != null){
 			
