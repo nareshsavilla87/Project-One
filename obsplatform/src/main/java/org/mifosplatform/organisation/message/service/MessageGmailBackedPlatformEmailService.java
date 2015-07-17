@@ -309,7 +309,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 			
 			Date date=DateUtils.getDateOfTenant();
 			String dateTime=date.getHours()+""+date.getMinutes();
-		    String fileName="ReportEmail_"+new LocalDate().toString().replace("-","")+"_"+dateTime+".pdf";
+		    String fileName="ReportEmail_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".pdf";
 		    Properties props = new Properties();
 		    props.put("mail.smtp.auth", "true");
 			props.put("mail.smtp.starttls.enable", starttlsValue);

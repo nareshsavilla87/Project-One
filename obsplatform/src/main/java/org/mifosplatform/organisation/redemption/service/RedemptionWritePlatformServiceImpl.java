@@ -173,10 +173,10 @@ public class RedemptionWritePlatformServiceImpl implements
 				this.billingOrderWritePlatformService.updateClientVoucherBalance(pinValue.negate(), clientId, false);
 			}
 			
-			/*  JournalVoucher journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",null,pinValue.doubleValue(),Long.valueOf(0));
-				this.journalvoucherRepository.save(journalVoucher);*/
-
-			JournalVoucher journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",pinValue.doubleValue(),null,clientId);
+			  /*JournalVoucher journalVoucher=new JournalVoucher(resourceId,new Date(),"Redemption",null,pinValue.doubleValue(),Long.valueOf(0));
+				this.journalvoucherRepository.save(journalVoucher);
+*/				
+			JournalVoucher journalVoucher=new JournalVoucher(resourceId,DateUtils.getDateOfTenant(),"Redemption",pinValue.doubleValue(),null,clientId);
 					this.journalvoucherRepository.save(journalVoucher);
 			  
 			voucherDetails.setClientId(clientId);

@@ -435,7 +435,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 
     					 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
     							 Long.valueOf(0), object.toString(), "Recieved",
-    							 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
+    							 null, DateUtils.getDateOfTenant(), null, null, null, 'N', provisionActions.getAction(), null);
 
     					 processRequest.add(processRequestDetails);
     					 this.processRequestRepository.save(processRequest);
