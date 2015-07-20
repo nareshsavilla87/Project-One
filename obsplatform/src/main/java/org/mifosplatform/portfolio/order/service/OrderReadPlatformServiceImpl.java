@@ -539,5 +539,31 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 						 return activeOrdersCount;
 						}
 				}
+
+					/* (non-Java doc)
+					 * @see retrieveCustomerActiveOrders(java.lang.Long)
+					 */
+					@Override
+					public List<OrderData> retrieveCustomerActiveOrders(Long clientId) {
+                        
+						final OrderMapper mapper=new OrderMapper();
+						final String sql="select id  from b_orders where order_status=1 and client_id=?" ;
+						return this.jdbcTemplate.query(sql,mapper,new Object[] { clientId});
+					}
+					
+					private static final class OrderMapper implements RowMapper<OrderData>{
+
+						/* (non-Java doc)
+						 * mapRow(java.sql.ResultSet, int)
+						 */
+						@Override
+						public OrderData mapRow(final ResultSet rs, int rowNum)throws SQLException {
+							
+							 final Long id = rs.getLong("id");
+							
+							return new OrderData(id);
+						}
+						
+					}
 	}
 

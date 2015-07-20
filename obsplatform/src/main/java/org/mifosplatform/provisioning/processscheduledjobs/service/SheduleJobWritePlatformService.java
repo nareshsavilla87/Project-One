@@ -33,5 +33,7 @@ public interface SheduleJobWritePlatformService {
 
 	void processAgingDistribution();
 
+	void processingDisconnectUnpaidCustomers();
+
 	
 }
