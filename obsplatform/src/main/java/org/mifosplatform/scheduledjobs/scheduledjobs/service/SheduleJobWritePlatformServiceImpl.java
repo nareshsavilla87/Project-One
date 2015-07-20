@@ -58,10 +58,8 @@ import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSourc
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService;
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
-import org.mifosplatform.infrastructure.jobs.api.SchedulerJobApiConstants;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.jobs.service.RadiusJobConstants;
-import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundException;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
@@ -261,7 +259,8 @@ try
 	}
 	}
 	private void handleCodeDataIntegrityIssues(Object object, Exception dve) {
-}
+
+	}
 
 @Override
 @CronTarget(jobName = JobName.REQUESTOR)
@@ -546,39 +545,9 @@ try {
                 	}
                 }
               }
-        /*      if("Y".equalsIgnoreCase(data.getIsDisconnectUnpaidCustomers())){
-            	  System.out.println("Processing disconnect Unpaid Customers.......");
-            	   fw.append("Processing disconnect Unpaid Customers....... \r\n");
-            	   sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(SchedulerJobApiConstants.DISCONNET_UNPAID_CUSTOMERS);
-            	   if(sheduleDatas.isEmpty()){
-                 	  fw.append("Disconnect Unpaid Customers ScheduleJobData Empty \r\n");
-                   }
-            	   for (ScheduleJobData scheduleJobData : sheduleDatas){
-                       fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
-                          " ,query="+scheduleJobData.getQuery()+"\r\n");
-                       List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(),data);
-                   
-                    if(clientIds.isEmpty()){
-                      fw.append("no records are available for Disconnect Unpaid Customers \r\n");
-                    }
-                    for(Long clientId:clientIds){
-                  	  
-                      fw.append("processing client id :"+clientId+"\r\n");
-                      List<OrderData> orderDatas = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
-                      	if(orderDatas.isEmpty()){
-                      		fw.append("No Orders are Found for :"+clientId+"\r\n");
-                      	}	
-                      	for (OrderData orderData : orderDatas){
-                      		this.scheduleJob.ProcessDisconnectUnPaidCustomers(orderData,fw,data,clientId);
-                      	}
-                      }
-            	  
-               }
-              }*/
                 fw.append("Auto Exipiry Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
                 fw.flush();
                 fw.close();
-              
               System.out.println("Auto Exipiry Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
               }
  }catch(IOException exception){
@@ -1662,6 +1631,64 @@ public void reportStatmentPdf() {
 			System.out.println(e.getMessage());		
 		}catch (Exception exception) {				
 			System.out.println(exception.getMessage());	
+		}
+	}
+	
+	@Override
+	@CronTarget(jobName = JobName.DISCONNECT_UNPAID_CUSTOMERS)
+	public void processingDisconnectUnpaidCustomers() {
+
+		try {
+			System.out.println("Processing Unpaid Customers Details.......");
+			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.DISCONNECT_UNPAID_CUSTOMERS.toString());
+			if (data != null) {
+				MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+				LocalTime date = new LocalTime(zone);
+				String dateTime = date.getHourOfDay()+"_"+date.getMinuteOfHour() +"_"+ date.getSecondOfMinute();
+				String path = FileUtils.generateLogFileDirectory()+JobName.DISCONNECT_UNPAID_CUSTOMERS.toString()+File.separator
+						     +"UnpaidCustomers_"+DateUtils.getLocalDateOfTenant().toString().replace("-", "")+"_" +dateTime+".log";
+				File fileHandler = new File(path.trim());
+				fileHandler.createNewFile();
+				FileWriter fw = new FileWriter(fileHandler);
+				FileUtils.BILLING_JOB_PATH = fileHandler.getAbsolutePath();
+				fw.append("Processing Unpaid Customers Details....... \r\n");
+				List<ScheduleJobData> sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(data.getBatchName());
+
+				if (!sheduleDatas.isEmpty()) {
+					for (ScheduleJobData scheduleJobData : sheduleDatas) {
+						fw.append("ScheduleJobData id="+ scheduleJobData.getId() + " ,BatchName="+ scheduleJobData.getBatchName() + " ,query="+ scheduleJobData.getQuery() + "\r\n");
+						List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(), data);
+						if (!clientIds.isEmpty()) {
+							for (Long clientId : clientIds) {
+								fw.append("processing Unpaid Customer id :"+ clientId + "\r\n");
+								List<OrderData> orders = this.orderReadPlatformService.retrieveCustomerActiveOrders(clientId);
+								if (!orders.isEmpty()) {
+									for (OrderData order : orders) {
+										this.scheduleJob.ProcessDisconnectUnPaidCustomers(order,fw,clientId);
+									}
+								} else {
+									fw.append("No Orders are Found for :"+ clientId + "\r\n");
+								}
+							}
+						} else {
+							fw.append("no records are available for Disconnect Unpaid Customers \r\n");
+						}
+					}
+				} else {
+					fw.append("Unpaid Customers ScheduleJobData Empty \r\n");
+				}
+				fw.append("Disconnect Unpaid Customers Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + " . \r\n");
+				fw.flush();
+				fw.close();
+				System.out.println("Disconnect Unpaid Customers Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+			}
+		} catch (DataIntegrityViolationException | IOException e) {
+			System.out.println(e);
+			e.printStackTrace();
+		} catch (Exception dve) {
+			System.out.println(dve.getMessage());
+			handleCodeDataIntegrityIssues(null, dve);
 		}
 	}
 

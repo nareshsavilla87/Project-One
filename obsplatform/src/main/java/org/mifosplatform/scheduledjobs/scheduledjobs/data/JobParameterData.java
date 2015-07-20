@@ -88,10 +88,10 @@ public class JobParameterData {
 			} else if (parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_STATUS)) {
 				this.updateStatus = parameter.isDynamic();
 				
-			} else if (parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_IS_DISCONNECT_UNPAIDCUSTOMERS)){
+			} /*else if (parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_IS_DISCONNECT_UNPAIDCUSTOMERS)){
 				this.isDisconnectUnpaidCustomers=parameter.getParamValue();
 				
-			}else {
+			}*/else {
 				this.batchName = parameter.getParamValue();
 				this.defaultValue = parameter.getParamDefaultValue();
 				this.isDynamic = parameter.isDynamic();
