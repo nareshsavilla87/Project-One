@@ -157,6 +157,11 @@ public class OrderData {
 	public OrderData(Collection<MCodeData> disconnectDetails) {
 		this.disconnectDetails=disconnectDetails;
 	}
+	
+	
+	public OrderData(Long orderId) {
+		this.id=orderId;
+	}
 
 	public Long getPlanStatus() {
 		return planStatus;

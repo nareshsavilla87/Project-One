@@ -216,12 +216,11 @@ public void ProcessAutoExipiryDetails(OrderData orderData, FileWriter fw, LocalD
 
 
 /**
- * @param orderData
+ * @param order
  * @param fw
- * @param data
  * @param clientId
  */
-public void ProcessDisconnectUnPaidCustomers(OrderData orderData,FileWriter fw, JobParameterData data, Long clientId) {
+public void ProcessDisconnectUnPaidCustomers(OrderData order,FileWriter fw, Long clientId) {
 	
 	try{
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
@@ -233,8 +232,8 @@ public void ProcessDisconnectUnPaidCustomers(OrderData orderData,FileWriter fw, 
         final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonobject.toString());
         final JsonCommand command = JsonCommand.from(jsonobject.toString(),parsedCommand,this.fromApiJsonHelper,"DissconnectOrder",clientId, null,
                null,clientId, null, null, null,null, null, null,null);
-        this.orderWritePlatformService.disconnectOrder(command, orderData.getId());
-        fw.append("Client Id"+clientId+" With this Orde"+orderData.getId()+" has been disconnected via Payment Due on Dated"+dateFormat.format(DateUtils.getDateOfTenant()));
+        this.orderWritePlatformService.disconnectOrder(command, order.getId());
+        fw.append("Client Id "+clientId+" With this Order "+order.getId()+" has been disconnected via Payment Due on Dated "+dateFormat.format(DateUtils.getDateOfTenant())+ "\r\n");
 		
 	}catch(Exception exception){    
 			 exception.printStackTrace();     

@@ -29,7 +29,7 @@ public class JobDetailData {
 	private Collection<BillRuleData> provisionSysData;
 	private List<Template> templateData;
 
-    public JobDetailData(final Long jobId, final String displayName, String name, final Date nextRunTime, final String initializingError,
+    public JobDetailData(final Long jobId, final String displayName,final String name,final Date nextRunTime, final String initializingError,
             final String cronExpression,final boolean active, final boolean currentlyRunning, final JobDetailHistoryData lastRunHistory, 
             String cronDescription, Long historyId) {
         this.jobId = jobId;

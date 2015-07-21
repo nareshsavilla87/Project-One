@@ -120,18 +120,8 @@ public class InvoiceOneTimeSale {
 		BillingOrderData billingOrderData = new BillingOrderData(oneTimeSaleData.getId(), clientId, DateUtils.getLocalDateOfTenant().toDate(),
 				oneTimeSaleData.getChargeCode(),oneTimeSaleData.getChargeType(),oneTimeSaleData.getTotalPrice(),oneTimeSaleData.getTaxInclusive());
 		
-		Client client=this.clientRepository.findOneWithNotFoundDetection(clientId);
 
 		DiscountMaster discountMaster=this.discountMasterRepository.findOne(oneTimeSaleData.getDiscountId());
-
-		List<DiscountDetails> discountDetails=discountMaster.getDiscountDetails();
-		for(DiscountDetails discountDetail:discountDetails){
-			if(client.getCategoryType().equals(Long.valueOf(discountDetail.getCategoryType()))){
-				discountRate = discountDetail.getDiscountRate();
-			}else if(discountRate.equals(BigDecimal.ZERO) && Long.valueOf(discountDetail.getCategoryType()).equals(Long.valueOf(0))){
-				discountRate = discountDetail.getDiscountRate();
-			}
-		}
 		
 		DiscountMasterData discountMasterData = new DiscountMasterData(discountMaster.getId(), discountMaster.getDiscountCode(),discountMaster.getDiscountDescription(),
 				discountMaster.getDiscountType(),discountRate, null, null,discountAmount);
