@@ -13,6 +13,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
 import org.mifosplatform.logistics.item.domain.ItemRepository;
@@ -139,7 +140,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			}
 			if(itemMaster != null) {
 				if(itemMaster.getWarranty() != null){
-					LocalDate warrantyEndDate = new LocalDate().plusMonths(itemMaster.getWarranty().intValue()).minusDays(1);
+					LocalDate warrantyEndDate = DateUtils.getLocalDateOfTenant().plusMonths(itemMaster.getWarranty().intValue()).minusDays(1);
 					inventoryItemDetails.setWarrantyDate(warrantyEndDate);
 				}
 			}
@@ -264,7 +265,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 						clientId=oneTimeSale.getClientId();
 						entityId=oneTimeSale.getId();
 
-						InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(new LocalDate().toDate(), 
+						InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(DateUtils.getDateOfTenant(), 
 								oneTimeSale.getId(),"Allocation",inventoryItemDetailsAllocation.getSerialNumber(), inventoryItemDetailsAllocation.getItemMasterId(),
 								inventoryItemDetails.getOfficeId(),inventoryItemDetailsAllocation.getClientId());
 						

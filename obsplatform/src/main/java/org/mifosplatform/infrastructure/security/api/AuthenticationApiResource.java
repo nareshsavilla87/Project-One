@@ -81,7 +81,7 @@ public class AuthenticationApiResource {
         System.out.println(tenant.getLicensekey());
         String notificationMessage=null;
         LicenseData licenseData= this.licenseUpdateService.getLicenseDetails(tenant.getLicensekey());
-        int days = Days.daysBetween( new LocalDate(), new LocalDate(licenseData.getKeyDate())).getDays();
+        int days = Days.daysBetween( DateUtils.getLocalDateOfTenant(), new LocalDate(licenseData.getKeyDate())).getDays();
        
         if(days < 7){
         	notificationMessage="License will be exipired on "+new SimpleDateFormat("dd-MMM-yyyy").format(licenseData.getKeyDate())+". Please Update";

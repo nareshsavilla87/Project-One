@@ -438,7 +438,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 		if(chargeCodeDuration > contract.getUnits().intValue()){
 			throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.get(0).getBillFrequencyCode(),"Renewal");
 		}
-		
+
 	  this.eventValidationReadPlatformService.checkForCustomValidations(orderDetails.getClientId(),EventActionConstants.EVENT_ORDER_RENEWAL,command.json(),userId);	
 	  List<OrderPrice>  orderPrices=orderDetails.getPrice();
 	  final Long contractPeriod = command.longValueOfParameterNamed("renewalPeriod");
@@ -446,6 +446,25 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  
 	  Contract contractDetails=this.subscriptionRepository.findOne(contractPeriod);
 	  Plan plan=this.planRepository.findOne(orderDetails.getPlanId());
+	  
+    // chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(orderDetails.getBillingFrequency());
+	  //Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
+	  if(contractDetails == null){
+			throw new ContractNotNullException();
+	  }
+	  LocalDate contractEndDate = this.orderAssembler.calculateEndDate(DateUtils.getLocalDateOfTenant(),
+			  contractDetails.getSubscriptionType(),contractDetails.getUnits());
+	  LocalDate chargeCodeEndDate = this.orderAssembler.calculateEndDate(DateUtils.getLocalDateOfTenant(),
+				chargeCodeMaster.get(0).getDurationType(),chargeCodeMaster.get(0).getChargeDuration().longValue());
+		
+	  if(contractEndDate.toDate().before(chargeCodeEndDate.toDate())){
+		  if(plan.isPrepaid() == 'N' || plan.isPrepaid() == 'n'){
+			  throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.get(0).getBillFrequencyCode(), contractDetails.getSubscriptionPeriod());
+		  }else{
+			  throw new ChargeCodeAndContractPeriodException(chargeCodeMaster.get(0).getBillFrequencyCode(), true);
+		  }
+			
+	  }
 	  
 	  if(orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
 		  
@@ -1192,7 +1211,6 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	
 	  Contract contract = contractRepository.findOne(contractPeriod);
       List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(paytermCode);
-
      if(contract == null){
        throw new ContractNotNullException();
      }

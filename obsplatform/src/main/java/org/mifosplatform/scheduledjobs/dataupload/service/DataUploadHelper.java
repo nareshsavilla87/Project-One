@@ -22,6 +22,7 @@ import org.mifosplatform.finance.payments.data.McodeData;
 import org.mifosplatform.finance.payments.exception.PaymentCodeNotFoundException;
 import org.mifosplatform.finance.payments.service.PaymentReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.scheduledjobs.dataupload.data.MRNErrorData;
 import org.mifosplatform.scheduledjobs.dataupload.domain.DataUpload;
 import org.mifosplatform.scheduledjobs.dataupload.domain.DataUploadRepository;
@@ -346,7 +347,7 @@ public class DataUploadHelper {
 				uploadStatus.setErrorMessage("Processing failed");
 			}
 			
-			uploadStatus.setProcessDate(new LocalDate().toDate());
+			uploadStatus.setProcessDate(DateUtils.getDateOfTenant());
 			this.dataUploadRepository.save(uploadStatus);
 			uploadStatus = null;
 		}catch(Exception  exception){
