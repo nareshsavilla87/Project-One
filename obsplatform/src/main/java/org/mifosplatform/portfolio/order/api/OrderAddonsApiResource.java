@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -86,6 +87,16 @@ public OrderAddonsApiResource(final DefaultToApiJsonSerializer<OrderAddonsData> 
 	OrderAddonsData addonsData =new OrderAddonsData(addonsPriceDatas,contractPeriod);
 	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
     return this.toApiJsonSerializer.serialize(settings, addonsData, RESPONSE_DATA_PARAMETERS);
+	}
+    
+    @DELETE
+	@Path("{orderAddonId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String deleteOrder(@PathParam("orderAddonId") final Long orderAddonId) {
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().disconnectOrderAddon(orderAddonId).build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
 	}
 
 }
