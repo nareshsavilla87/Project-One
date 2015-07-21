@@ -211,4 +211,39 @@ private void handleCodeDataIntegrityIssues(JsonCommand command,DataIntegrityViol
 	
 }
 
+
+@Override
+public CommandProcessingResult disconnectOrderAddon(JsonCommand command,Long entityId) {
+ try{
+	 
+	// this.context.authenticatedUser();
+	 OrderAddons orderAddons = this.addonsRepository.findOne(entityId);
+	 List<ServiceMapping> serviceMapping  =this.serviceMappingRepository.findOneByServiceId(orderAddons.getServiceId());
+	 
+	 if(!serviceMapping.isEmpty()){
+		 if(serviceMapping.get(0).getProvisionSystem().equalsIgnoreCase("None")){
+			 orderAddons.setStatus(StatusTypeEnum.DISCONNECTED.toString());
+		 }else{
+			 Order order=this.orderRepository.findOne(orderAddons.getOrderId());
+			 Plan plan = this.planRepository.findOne(order.getPlanId());
+			 HardwareAssociation association=this.hardwareAssociationRepository.findOneByOrderId(orderAddons.getOrderId());
+			 orderAddons.setStatus(StatusTypeEnum.PENDING.toString());
+				this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order, plan.getPlanCode(), UserActionStatusTypeEnum.ADDON_DISCONNECTION.toString(),
+						Long.valueOf(0), null,association.getSerialNo(),order.getId(), serviceMapping.get(0).getProvisionSystem(),orderAddons.getId());
+		 }
+		 
+		 this.addonsRepository.save(orderAddons);
+		 
+	 }else{
+		  throw new AddonEndDateValidationException(orderAddons.getServiceId().toString());
+	 }
+	 return new CommandProcessingResult(entityId);
+	 
+ }catch(DataIntegrityViolationException dve){
+	 handleCodeDataIntegrityIssues(command, dve);
+	 return new CommandProcessingResult(Long.valueOf(-1));
+ }
+
+}
+
 }
