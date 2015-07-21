@@ -53,7 +53,13 @@ public class UserActionStatusEnumaration {
 		case REACTIVATION:
 			optionData = new EnumOptionData(UserActionStatusTypeEnum.REACTIVATION.getValue().longValue(), codePrefix + UserActionStatusTypeEnum.REACTIVATION.getCode(), "REACTIVATION"); 
 			break;	
-		
+			
+		case ADDON_ACTIVATION:
+			optionData = new EnumOptionData(UserActionStatusTypeEnum.ADDON_ACTIVATION.getValue().longValue(), codePrefix + UserActionStatusTypeEnum.ADDON_ACTIVATION.getCode(), "ADDON_ACTIVATION"); 
+			break;		
+		case ADDON_DISCONNECTION:
+			optionData = new EnumOptionData(UserActionStatusTypeEnum.ADDON_ACTIVATION.getValue().longValue(), codePrefix + UserActionStatusTypeEnum.ADDON_DISCONNECTION.getCode(), "ADDON_DISCONNECTION"); 
+			break;
 		default:
 			optionData = new EnumOptionData(StatusTypeEnum.INVALID.getValue().longValue(), StatusTypeEnum.INVALID.getCode(), "INVALID");
 			break;

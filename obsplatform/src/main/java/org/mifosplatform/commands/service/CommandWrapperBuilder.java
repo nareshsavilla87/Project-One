@@ -2945,6 +2945,14 @@ public class CommandWrapperBuilder {
 		this.href = "";
 		return this;
 	}
+public CommandWrapperBuilder disconnectOrderAddon(Long orderAddonId) {
+	this.actionName = "DISCONNECT";
+	this.entityName = "ORDERADDONS";
+	this.entityId = orderAddonId;
+	this.href = "/orders/addons/" + orderAddonId;
+	return this;
+}
+
 
 }
 
