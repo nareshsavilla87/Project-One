@@ -7,19 +7,21 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import org.joda.time.LocalDate;
-import org.json.JSONException;
 import org.json.JSONObject;
+import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
+import org.mifosplatform.billing.planprice.domain.Price;
+import org.mifosplatform.billing.planprice.domain.PriceRepository;
 import org.mifosplatform.finance.billingorder.service.BillingOrderReadPlatformService;
 import org.mifosplatform.finance.billingorder.service.GenerateBill;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
-import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBillingRepository;
-import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
+import org.mifosplatform.portfolio.contract.domain.Contract;
+import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.data.OrderData;
 import org.mifosplatform.portfolio.order.domain.Order;
@@ -27,6 +29,10 @@ import org.mifosplatform.portfolio.order.domain.OrderPrice;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
+import org.mifosplatform.portfolio.plan.domain.Plan;
+import org.mifosplatform.portfolio.plan.domain.PlanRepository;
+import org.mifosplatform.portfolio.service.domain.ServiceMaster;
+import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,13 +49,16 @@ private final OrderRepository orderRepository;
 private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
 private final FromJsonHelper fromApiJsonHelper;
 private final OrderWritePlatformService orderWritePlatformService;
-private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
+private final PlanRepository planRepository;
+private final ContractRepository contractRepository;
+private final ServiceMasterRepository serviceMasterRepository;
+private final PriceRepository  priceRepository;
 
 @Autowired
 public ScheduleJob(final ClientBalanceRepository clientBalanceRepository,final BillingOrderReadPlatformService billingOrderReadPlatformService,
 final GenerateBill generateBill,final OrderRepository orderRepository,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,
-final FromJsonHelper fromApiJsonHelper,final OrderWritePlatformService orderWritePlatformService,
-final PaypalRecurringBillingRepository paypalRecurringBillingRepository){
+final FromJsonHelper fromApiJsonHelper,final OrderWritePlatformService orderWritePlatformService,final PlanRepository planRepository,
+final ContractRepository contractRepository,final ServiceMasterRepository serviceMasterRepository,final PriceRepository priceRepository){
 
 this.clientBalanceRepository=clientBalanceRepository;
 this.billingOrderReadPlatformService=billingOrderReadPlatformService;
@@ -58,7 +67,10 @@ this.orderRepository=orderRepository;
 this.contractPeriodReadPlatformService=contractPeriodReadPlatformService;
 this.fromApiJsonHelper=fromApiJsonHelper;
 this.orderWritePlatformService=orderWritePlatformService;
-this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
+this.planRepository =planRepository;
+this.priceRepository = priceRepository;
+this.contractRepository = contractRepository;
+this.serviceMasterRepository = serviceMasterRepository;
 
 }
 
@@ -94,7 +106,7 @@ public boolean checkClientBalanceForOrderrenewal(OrderData orderData,Long client
 return isAmountSufficient;
 }
 
-	public void ProcessAutoExipiryDetails(OrderData orderData, FileWriter fw, LocalDate exipirydate, JobParameterData data, Long clientId) {
+public void ProcessAutoExipiryDetails(OrderData orderData, FileWriter fw, LocalDate exipirydate, JobParameterData data, Long clientId) {
 		  
 		 try{
 
@@ -110,9 +122,18 @@ return isAmountSufficient;
 		                         boolean isSufficientAmountForRenewal=this.checkClientBalanceForOrderrenewal(orderData,clientId,orderPrice);
 
 		                          if(isSufficientAmountForRenewal){
+		                        	   Plan plan=this.planRepository.findOne(order.getPlanId());
+		                        	   Contract contract =this.contractRepository.findOne(order.getContarctPeriod());
+		                        	  if(plan.isPrepaid() == 'Y'){
+		                        		  ServiceMaster serviceMaster = this.serviceMasterRepository.findOne(order.getPrice().get(0).getServiceId());
+		                        		  List<Price> prices=this.priceRepository.findOneByPlanAndService(order.getPlanId(),serviceMaster.getServiceCode(),contract.getSubscriptionPeriod(),order.getPrice().get(0).getChargeCode());
+		                        		  if(!prices.isEmpty()){
+		                        		  jsonobject.put("priceId",prices.get(0).getId());
+		                        		  }
+		                        	  }
 		                           
-		                             List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyContractType("Month(s)",1);
-		                             jsonobject.put("renewalPeriod",subscriptionDatas.get(0).getId()); 
+		                             //List<SubscriptionData> subscriptionDatas=this.contractPeriodReadPlatformService.retrieveSubscriptionDatabyContractType("Month(s)",1);
+		                             jsonobject.put("renewalPeriod",order.getContarctPeriod()); 
 		                             jsonobject.put("description","Order Renewal By Scheduler");
 		                             final JsonElement parsedCommand = this.fromApiJsonHelper.parse(jsonobject.toString());
 		                             final JsonCommand command = JsonCommand.from(jsonobject.toString(),parsedCommand,this.fromApiJsonHelper,"RENEWAL",order.getClientId(), null,
@@ -135,7 +156,8 @@ return isAmountSufficient;
 		                              this.orderWritePlatformService.disconnectOrder(command, orderData.getId());
 		                              fw.append("Client Id"+order.getClientId()+" With this Orde"+order.getId()+" has been disconnected via Auto Exipiry on Dated"+exipirydate);
 		                         }
-		                   }else if (orderData.getEndDate().equals(exipirydate) || exipirydate.isAfter(orderData.getEndDate())){
+		                   
+		                     }else if (orderData.getEndDate().equals(exipirydate) || exipirydate.isAfter(orderData.getEndDate())){
 
 		                            SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
 		                            jsonobject.put("disconnectReason","Date Expired");

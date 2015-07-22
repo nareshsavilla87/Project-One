@@ -26,6 +26,7 @@ public class JobParameterData {
 	private String createTicket;
 	private String updateStatus;
 	private String mikrotikApi;
+	private String addonExipiry;
 	
 	public JobParameterData(List<JobParameters> jobParameters) {
               
@@ -86,7 +87,10 @@ public class JobParameterData {
 			       
 		   }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_STATUS)){
 		            this.updateStatus=parameter.isDynamic();
-		   }else{
+		   
+		   }else if(parameter.getParamName().equalsIgnoreCase(JobParametersConstants.PARAM_ADDON_EXIPIRY)){
+	            this.addonExipiry=parameter.getParamValue();
+	       }else{
 				 this.batchName=parameter.getParamValue();
 				 this.defaultValue=parameter.getParamDefaultValue();
 				 this.isDynamic=parameter.isDynamic();
@@ -192,6 +196,14 @@ public class JobParameterData {
 	
 	public String getMikrotikApi() {
 		return mikrotikApi;
+	}
+
+	public String getCreateTicket() {
+		return createTicket;
+	}
+
+	public String getAddonExipiry() {
+		return addonExipiry;
 	}
 
 	

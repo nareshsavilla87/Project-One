@@ -482,14 +482,14 @@ public class GenerateBill {
 	// Generate Invoice Tax
 	public List<InvoiceTaxCommand> generateInvoiceTax(List<TaxMappingRateData> taxMappingRateDatas, BigDecimal price,Long clientId,Integer isTaxInclusive) {
 
-		BigDecimal taxRate = null;
-		BigDecimal taxAmount = null;
+		BigDecimal taxRate = BigDecimal.ZERO;
+		BigDecimal taxAmount = BigDecimal.ZERO;
 		String taxCode = null;
 		
 		List<InvoiceTaxCommand> invoiceTaxCommands = new ArrayList<InvoiceTaxCommand>();
 		InvoiceTaxCommand invoiceTaxCommand = null;
 
-		if (taxMappingRateDatas != null) {
+		if (taxMappingRateDatas != null && !taxMappingRateDatas.isEmpty()) {
 
 			for (TaxMappingRateData taxMappingRateData : taxMappingRateDatas) {
 
@@ -518,6 +518,10 @@ public class GenerateBill {
 				invoiceTaxCommands.add(invoiceTaxCommand);
 			}
 
+		}else{
+			
+			invoiceTaxCommand = new InvoiceTaxCommand(clientId, null, null,taxCode, isTaxInclusive, taxRate, taxAmount,price);
+			invoiceTaxCommands.add(invoiceTaxCommand);
 		}
 		return invoiceTaxCommands;
 
