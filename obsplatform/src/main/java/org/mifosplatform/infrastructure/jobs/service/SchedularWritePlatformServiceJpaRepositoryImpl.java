@@ -7,7 +7,6 @@ import java.util.Map;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.jobs.data.JobDetailDataValidator;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetail;
 import org.mifosplatform.infrastructure.jobs.domain.ScheduledJobDetailRepository;
