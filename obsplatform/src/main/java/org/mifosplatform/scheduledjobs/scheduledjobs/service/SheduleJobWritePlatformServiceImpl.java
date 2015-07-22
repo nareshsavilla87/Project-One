@@ -60,7 +60,6 @@ import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.jobs.service.RadiusJobConstants;
-import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundException;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
@@ -71,7 +70,9 @@ import org.mifosplatform.organisation.message.service.MessagePlatformEmailServic
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.order.data.OrderData;
 import org.mifosplatform.portfolio.order.domain.Order;
+import org.mifosplatform.portfolio.order.domain.OrderAddonsRepository;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
+import org.mifosplatform.portfolio.order.service.OrderAddOnsWritePlatformService;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.provisioning.entitlements.data.ClientEntitlementData;
 import org.mifosplatform.provisioning.entitlements.data.EntitlementsData;
@@ -133,6 +134,7 @@ private final TicketMasterReadPlatformService ticketMasterReadPlatformService;
 private final OrderRepository orderRepository;
 private final MCodeReadPlatformService codeReadPlatformService;
 private final JdbcTemplate jdbcTemplate;
+private final OrderAddOnsWritePlatformService addOnsWritePlatformService;
 private  String ReceiveMessage;
 private final PaymentGatewayRepository paymentGatewayRepository;
 private final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService;
@@ -156,7 +158,7 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
 	   final TenantAwareRoutingDataSource dataSource, final PaymentGatewayRepository paymentGatewayRepository,
 	   final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService,final EventActionRepository eventActionRepository, 
 	   final PaymentGatewayReadPlatformService paymentGatewayReadPlatformService,final ConfigurationRepository configurationRepository,
-	   final EventActionReadPlatformService eventActionReadPlatformService) {
+	   final EventActionReadPlatformService eventActionReadPlatformService,final OrderAddOnsWritePlatformService addOnsWritePlatformService) {
 
 	this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
 	this.invoiceClient = invoiceClient;
@@ -171,6 +173,7 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
 	this.billingMesssageReadPlatformService = billingMesssageReadPlatformService;
 	this.messagePlatformEmailService = messagePlatformEmailService;
 	this.entitlementReadPlatformService = entitlementReadPlatformService;
+	this.addOnsWritePlatformService = addOnsWritePlatformService;
 	this.entitlementWritePlatformService = entitlementWritePlatformService;
 	this.actionDetailsReadPlatformService = actionDetailsReadPlatformService;
 	this.actiondetailsWritePlatformService = actiondetailsWritePlatformService;
@@ -223,7 +226,7 @@ try
 						" ,query="+sql+"\r\n");
 				
 				List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(sql,data);
-				
+
 				if(clientIds.isEmpty()){
 					fw.append("Invoicing clients are not found \r\n");
 				}
@@ -543,8 +546,22 @@ try {
                 	for (OrderData orderData : orderDatas){
                 		this.scheduleJob.ProcessAutoExipiryDetails(orderData,fw,exipirydate,data,clientId);
                 	}
+                	
+                	
               }
-                fw.append("Auto Exipiry Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
+              
+              if(data.getAddonExipiry().equalsIgnoreCase("Y")){
+               
+            	  fw.append("Processing Order Addons for disconnection..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
+            	  List<Long> addonIds = this.sheduleJobReadPlatformService.retrieveAddonsForDisconnection(DateUtils.getLocalDateOfTenant());
+            	    for(Long addonId:addonIds){
+            	    	 fw.append("Addon Id..."+ addonId+" . \r\n");
+            	    	 this.addOnsWritePlatformService.disconnectOrderAddon(null, addonId);
+            	    }
+            	    fw.append("Order Addons processing is done ..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
+              }
+              fw.append("Auto Exipiry Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
+              
                 fw.flush();
                 fw.close();
               }

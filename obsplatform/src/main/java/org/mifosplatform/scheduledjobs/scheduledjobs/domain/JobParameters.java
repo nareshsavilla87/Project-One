@@ -137,29 +137,26 @@ public class JobParameters extends AbstractPersistable<Long>{
 		    		this.isDynamic="N";
 	    	
 	      }
-	    
-      
-	   
-	   /* if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.jobIsDynamic)){
-	    	if(isDynamic){
-	    	this.isDynamic="Y";
-	    	
-	    	}else
-	    		this.isDynamic="N";
-	    	
-	    } */
 	    	
 	    	final String isAutoRenewalParamName = "isAutoRenewal";
 		    final boolean isAutoRenewal= command.booleanPrimitiveValueOfParameterNamed(isAutoRenewalParamName);
 		    if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.jobisAutoRenewal)){
 		    	if(isAutoRenewal){
-		    	this.isDynamic="Y";
-		    	this.paramValue="Y";
-		    	}else{
+		    		this.isDynamic="Y";
+		    		this.paramValue = "Y";
+		    	}else
 		    		this.isDynamic="N";
-		    	this.paramValue="N";
-		    	}
+		    	    this.paramValue = "N";
 		    }
+		    
+		    final String addonExipiryParamName = "addonExipiry";
+		    final boolean addonExipiry= command.booleanPrimitiveValueOfParameterNamed(addonExipiryParamName);
+		    if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.jobisAddonExipiry)){
+		    	if(addonExipiry){
+		    		this.paramValue = "Y";
+		    	}else
+		    		this.paramValue = "N";
+		    }  
 	    final String messageParamName = "promotionalMessage";
 	    final String promotionalMessage= command.stringValueOfParameterNamed(messageParamName);
 	    if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.jobPromotionalMessage) && promotionalMessage!=null){

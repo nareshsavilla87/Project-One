@@ -2,6 +2,7 @@ package org.mifosplatform.provisioning.processscheduledjobs.service;
 
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.ScheduleJobData;
 
@@ -26,6 +27,8 @@ public interface SheduleJobReadPlatformService {
 	List<ScheduleJobData> retrieveSheduleJobDetails(String paramValue);
 
 	List<Long> getBillIds(String query);
+
+	List<Long> retrieveAddonsForDisconnection(LocalDate processingDate);
 	
 
 }
