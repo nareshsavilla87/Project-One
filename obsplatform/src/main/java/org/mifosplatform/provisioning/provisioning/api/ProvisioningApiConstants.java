@@ -24,6 +24,7 @@ public class ProvisioningApiConstants {
 	public static final String REQUEST_REACTIVATION ="REACTIVATION";
 	public static final String REQUEST_SUSPENTATION ="SUSPENTATION";
 	public static final String REQUEST_ADDON_ACTIVATION="ADDON_ACTIVATION";
+	public static final String REQUEST_ADDON_DISCONNECTION="ADDON_DISCONNECTION";
 	public static final String REQUEST_CLIENT_ACTIVATION="CLIENT ACTIVATION";
 	public static final String REQUEST_CREATE_AGENT="CREATE AGENT";
 	public static final String REQUEST_RELEASE_DEVICE="RELEASE DEVICE";

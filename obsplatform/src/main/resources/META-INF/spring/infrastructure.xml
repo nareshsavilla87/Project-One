@@ -15,7 +15,6 @@
 
     <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="tenantDatabaseUpgradeService">
         <property name="dataSource" ref="tenantAwareDataSource" />
-        <property name="persistenceUnitName" value="jpa-pu" />
         <property name="jpaVendorAdapter">
             <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
                 <property name="database" value="MYSQL" />
