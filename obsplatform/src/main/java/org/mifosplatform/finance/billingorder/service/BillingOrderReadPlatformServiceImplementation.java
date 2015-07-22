@@ -113,10 +113,8 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 			final Long orderStatus = resultSet.getLong("orderStatus");
 			final Integer taxInclusive = resultSet.getInt("taxInclusive");
 			
-			return new BillingOrderData(clientOderId,orderPriceId,planId, clientId, startDate,
-					nextBillableDate, endDate, billingFrequency, chargeCode,
-					chargeType, chargeDuration, durationType, invoiceTillDate,
-					price, billingAlign,billStartDate,billEndDate,orderStatus,taxInclusive);
+			return new BillingOrderData(clientOderId,orderPriceId,planId, clientId, startDate,nextBillableDate, endDate, billingFrequency, chargeCode,
+					chargeType, chargeDuration, durationType, invoiceTillDate,price, billingAlign,billStartDate,billEndDate,orderStatus,taxInclusive);
 		}
 
 		public String billingOrderSchema() {
@@ -286,8 +284,8 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 					+ "co.end_date AS endDate,co.billing_frequency AS billingFrequency,op.charge_code AS chargeCode,op.charge_type AS chargeType,"
 					+ "op.charge_duration AS chargeDuration,op.duration_type AS durationType,op.invoice_tilldate AS invoiceTillDate,op.price AS price,co.order_status as orderStatus,op.tax_inclusive as taxInclusive,"
 					+ "co.billing_align AS billingAlign,op.bill_start_date as billStartDate,Date_format(IFNULL(op.bill_end_date,'3099-12-31'), '%Y-%m-%d') AS billEndDate "
-					+ "FROM b_orders co left JOIN b_order_price op ON co.id = op.order_id"
-					+ " WHERE co.client_id = ? AND co.id = ?"/* AND Date_format(IFNULL(op.invoice_tilldate,now() ),'%Y-%m-%d') >= ? "*/;
+					+ "FROM  b_orders co left JOIN b_order_price op ON co.id = op.order_id"
+					+ " WHERE co.client_id = ? AND co.id = ?  and op.is_addon = 'N'"/* AND Date_format(IFNULL(op.invoice_tilldate,now() ),'%Y-%m-%d') >= ? "*/;
 		}
 	}
 	 

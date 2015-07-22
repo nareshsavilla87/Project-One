@@ -7,6 +7,8 @@ public interface OrderAddOnsWritePlatformService {
 
 	CommandProcessingResult createOrderAddons(JsonCommand command, Long entityId);
 
+	CommandProcessingResult disconnectOrderAddon(JsonCommand command,Long entityId);
+
 	
 
 }

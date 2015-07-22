@@ -13,8 +13,8 @@ public class ChargeCodeAndContractPeriodException extends AbstractPlatformDomain
 		super("error.msg.postpaid.billfrequency.less.than.contractperiod", "Bill Frequency must be less than Contract Period:");
 	}
 	
-	public ChargeCodeAndContractPeriodException(final String chargeCode, final String contractPeriod) {
-		super("error.msg.select.renewal.period.more.than", "Renewal Period should be more than:"+chargeCode, chargeCode);
+	public ChargeCodeAndContractPeriodException(final String chargeCode, final String actionType) {
+		super("error.msg.select."+actionType+".period.more.than", "contract Period should be more than:"+chargeCode, chargeCode);
 	}
 	
 	public ChargeCodeAndContractPeriodException(final String chargeCode, final Boolean contractPeriod) {

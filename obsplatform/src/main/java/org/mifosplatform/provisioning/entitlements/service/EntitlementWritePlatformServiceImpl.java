@@ -71,6 +71,7 @@ public class EntitlementWritePlatformServiceImpl implements EntitlementWritePlat
 	try {	
 		
 		if(command.hasParameter("agentResourceId")){
+			
 			agentResourceId = command.stringValueOfParameterNamed("agentResourceId");
 		}
 		

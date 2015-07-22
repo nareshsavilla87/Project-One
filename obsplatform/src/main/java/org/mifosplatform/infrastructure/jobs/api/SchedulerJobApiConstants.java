@@ -33,6 +33,7 @@ public class SchedulerJobApiConstants {
     public static final String JOB_GENERATE_STATEMENT = "Generate Statment";
     //public static final String JOB_MESSANGER = "Messanger";
     public static final String JOB_AUTO_EXIPIRY= "Auto Exipiry";
+    public static final String JOB_ADDON_EXIPIRY= "addonExipiry";
     public static final String jobReportName = "reportName";
     public static final String jobIsDynamic = "isDynamic";
     public static final String jobProcessdate = "processDate";
@@ -42,6 +43,7 @@ public class SchedulerJobApiConstants {
     public static final String jobExipiryDate= "exipiryDate";
     public static final String jobHistoryId="historyId";
     public static final String jobisAutoRenewal="isAutoRenewal";
+    public static final String jobisAddonExipiry ="addonExipiry";
     public static final String JOB_REPORTEMAIL="Report Email";
     public static final String JOB_EmailId="emailId";
     public static final String JOB_MiddleWare="Radius Integration";
@@ -69,14 +71,14 @@ public class SchedulerJobApiConstants {
             jobRunErrorLogParamName));
 
     public static final Set<String> JOB_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(displayNameParamName,
-            jobActiveStatusParamName, cronExpressionParamName,cronDescriptionParamName,jobIsDynamic,"isAutoRenewal"));
+            jobActiveStatusParamName, cronExpressionParamName,cronDescriptionParamName,jobIsDynamic,"isAutoRenewal",JOB_ADDON_EXIPIRY));
     
     public static final Set<String> JOB_CREATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(displayNameParamName,
             jobActiveStatusParamName, cronExpressionParamName,schedulerJobParamName,cronDescriptionParamName));
     
 
 
-    public static final Set<String> CREATE_REQUEST_JOB_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobProcessdate,jobDueDate,jobPromotionalMessage,
+    public static final Set<String> CREATE_REQUEST_JOB_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobProcessdate,jobDueDate,jobPromotionalMessage,JOB_ADDON_EXIPIRY,
     		jobMessageTemplate,jobExipiryDate,"locale","dateFormat","isDynamic","jobName","reportName","isAutoRenewal","isCreateTicket","isUpdateStatus",schedulerJobParamName,jobReportName,
     		JOB_REPORTEMAIL,JOB_EmailId,JOB_ProvSystem,JOB_URL,JOB_Username,JOB_Password,JOB_MiddleWare,"isDisconnectUnpaidCustomers"));
 
