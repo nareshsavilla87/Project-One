@@ -18,7 +18,8 @@ public enum UserActionStatusTypeEnum {
 	SUSPENTATION(13,"CategoryType.suspension"),
 	REACTIVATION(14,"CategoryType.reactive"),
 	ADDON_ACTIVATION(15,"CategoryType.addon activation"),
-	INVALID(16, "CategoryType.invalid");
+	ADDON_DISCONNECTION(16,"CategoryType.addon disconnected"),
+	INVALID(17, "CategoryType.invalid");
 
 
     private final Integer value;
@@ -84,6 +85,11 @@ public enum UserActionStatusTypeEnum {
 		case 14:
 			actionStatusTypeEnum = UserActionStatusTypeEnum.REACTIVATION;
 			
+		case 15:	
+			actionStatusTypeEnum  = UserActionStatusTypeEnum.ADDON_ACTIVATION;
+		
+		case 16:
+			actionStatusTypeEnum  = UserActionStatusTypeEnum.ADDON_DISCONNECTION;
 		default:
 			actionStatusTypeEnum = UserActionStatusTypeEnum.INVALID;
 			break;

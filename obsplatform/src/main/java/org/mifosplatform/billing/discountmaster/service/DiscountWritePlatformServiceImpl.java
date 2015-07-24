@@ -74,9 +74,9 @@ public class DiscountWritePlatformServiceImpl implements
 			this.context.authenticatedUser();
 			this.apiJsonDeserializer.validateForCreate(command.json());
 			DiscountMaster discountMaster = DiscountMaster.fromJson(command);
-			final JsonArray discountPricesArray = command.arrayOfParameterNamed("discountPrices").getAsJsonArray();
-			discountMaster=assembleDiscountDetails(discountPricesArray,discountMaster); 
-			this.discountMasterRepository.save(discountMaster);
+			/*final JsonArray discountPricesArray = command.arrayOfParameterNamed("discountPrices").getAsJsonArray();
+			//discountMaster=assembleDiscountDetails(discountPricesArray,discountMaster); 
+*/			this.discountMasterRepository.save(discountMaster);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 					        .withEntityId(discountMaster.getId()).build();
 			
@@ -87,7 +87,7 @@ public class DiscountWritePlatformServiceImpl implements
 
 	}
 
-	private DiscountMaster assembleDiscountDetails(JsonArray discountPricesArray, DiscountMaster discountMaster) {
+	/*private DiscountMaster assembleDiscountDetails(JsonArray discountPricesArray, DiscountMaster discountMaster) {
 		
 			String[]  discountPrices = null;
 			discountPrices = new String[discountPricesArray.size()];
@@ -107,7 +107,7 @@ public class DiscountWritePlatformServiceImpl implements
 		}	
 		
 		return discountMaster;
-	}
+	}*/
 
 	private void handleCodeDataIntegrityIssues(final JsonCommand command,final DataIntegrityViolationException dve) {
 		
@@ -144,7 +144,7 @@ public class DiscountWritePlatformServiceImpl implements
 			this.context.authenticatedUser();
 			this.apiJsonDeserializer.validateForCreate(command.json());
 			DiscountMaster discountMaster = discountRetrieveById(entityId);
-			List<DiscountDetails> details=new ArrayList<>(discountMaster.getDiscountDetails());
+		/*//	List<DiscountDetails> details=new ArrayList<>(discountMaster.getDiscountDetails());
 			final JsonArray discountPricesArray = command.arrayOfParameterNamed("discountPrices").getAsJsonArray();
 			    String[] states =null;
 			    states=new String[discountPricesArray.size()];
@@ -174,7 +174,7 @@ public class DiscountWritePlatformServiceImpl implements
 						}
 						
 				  }
-					 discountMaster.getDiscountDetails().removeAll(details);
+					 discountMaster.getDiscountDetails().removeAll(details);*/
 			final Map<String, Object> changes = discountMaster.update(command);
 			this.discountMasterRepository.saveAndFlush(discountMaster);
 			
