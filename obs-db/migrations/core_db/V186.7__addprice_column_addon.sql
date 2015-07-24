@@ -38,4 +38,4 @@ alter TABLE b_orders_addons modify status varchar(50) NOT NULL;
 
 set @id = (select id from job where name ='AUTO_EXPIRY');
 insert ignore into `job_parameters`(`id`,`job_id`,`param_name`,`param_type`,`param_default_value`,`param_value`,`is_dynamic`,`query_values`) values (null,@id,'addonExipiry','COMBO','N','N','N',null);
-;
+
