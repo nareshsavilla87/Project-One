@@ -8,14 +8,11 @@ CREATE OR REPLACE VIEW `v_netact_summary` AS select `v_netact_dtls`.`year_mon` A
 
 CREATE OR REPLACE VIEW `v_netactpln_summary` AS select `net_activedtls_vw`.`year_mon` AS `Month`,`net_activedtls_vw`.`plan` AS `Plan`,`net_activedtls_vw`.`plan_id` AS `plan_id`,sum(`net_activedtls_vw`.`Op_Active`) AS `Op_Bal`,sum(`net_activedtls_vw`.`new`) AS `New`,sum(`net_activedtls_vw`.`rec`) AS `Reconnections`,sum(`net_activedtls_vw`.`ren`) AS `Renewals`,sum(`net_activedtls_vw`.`Op_Pending_add`) AS `Op_Pending_add`,sum(`net_activedtls_vw`.`Pending_add`) AS `Pending_add`,sum(((`net_activedtls_vw`.`new` + `net_activedtls_vw`.`rec`) + `net_activedtls_vw`.`ren`)) AS `NetAdditions`,sum(((`net_activedtls_vw`.`Op_Active` + `net_activedtls_vw`.`new`) + `net_activedtls_vw`.`rec`)) AS `Total`,sum(`net_activedtls_vw`.`Del`) AS `Deletions`,sum(`net_activedtls_vw`.`Pending_del`) AS `Pending_del`,sum(`net_activedtls_vw`.`Cum_Pending`) AS `Cum_Pending`,sum(`net_activedtls_vw`.`Del`) AS `NetSub`,sum((((((`net_activedtls_vw`.`Op_Active` + `net_activedtls_vw`.`new`) + `net_activedtls_vw`.`rec`) + `net_activedtls_vw`.`Op_Pending_add`) + `net_activedtls_vw`.`Pending_add`) - `net_activedtls_vw`.`Del`)) AS `NetBal`,sum(`net_activedtls_vw`.`Cl_Active`) AS `ClosingBal` from `net_activedtls_vw` group by `net_activedtls_vw`.`year_mon`,`net_activedtls_vw`.`plan` order by `net_activedtls_vw`.`month_number`,`net_activedtls_vw`.`plan_id` ;
 
-<<<<<<< HEAD
-=======
 
 insert ignore into m_code_value (id,code_id,code_value,order_position)
 select null,c.id,'Halfyearly',0 from  m_code_value prm, m_code c where c.id=prm.code_id and c.code_name ='Bill Frequency';
 
 insert ignore into m_code_value (id,code_id,code_value,order_position)
-select null,c.id,' 	yearly',0 from  m_code_value prm, m_code c where c.id=prm.code_id and c.code_name ='Bill Frequency';
+select null,c.id,'yearly',0 from  m_code_value prm, m_code c where c.id=prm.code_id and c.code_name ='Bill Frequency';
 
 
->>>>>>> upstream/obsplatform-2.04
