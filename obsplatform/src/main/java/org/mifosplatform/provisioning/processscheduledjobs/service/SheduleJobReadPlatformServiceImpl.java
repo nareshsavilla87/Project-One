@@ -4,6 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.service.DataSourcePerTenantService;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
@@ -50,12 +51,16 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 			}
 
 			@Override
-			public List<Long> getClientIds(String query) {
+			public List<Long> getClientIds(String query,JobParameterData data) {
 				try {
 				
 			        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourcePerTenantService.retrieveDataSource());
 					final ClientIdMapper mapper = new ClientIdMapper();
+					if(data.isDynamic().equalsIgnoreCase("Y")){
 					return jdbcTemplate.query(query, mapper, new Object[] { });
+					}else{
+						return jdbcTemplate.query(query, mapper, new Object[] { data.getProcessDate() });
+					}
 					} catch (EmptyResultDataAccessException e) {
 					return null;
 					}
@@ -259,6 +264,23 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 		public Long mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
 		final Long billId = rs.getLong("billId");
 	       return billId;
+		
+			}
+		}
+
+	@Override
+	public List<Long> retrieveAddonsForDisconnection(LocalDate processingDate) {
+	
+		JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourcePerTenantService.retrieveDataSource());
+		AddonMapper mapper = new AddonMapper();
+		final String sql="select  id from b_orders_addons od where Date_format(od.end_date, '%Y-%m-%d') < ? and od.status='ACTIVE'";
+		return jdbcTemplate.query(sql, mapper, new Object[] { processingDate.toString() });
+	}
+	
+	private static final class AddonMapper implements RowMapper<Long> {
+		@Override
+		public Long mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+		return rs.getLong("id");
 		
 			}
 		}

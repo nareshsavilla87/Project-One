@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 
 public class TicketMasterData {
@@ -45,7 +46,7 @@ public class TicketMasterData {
 		
 		this.problemsDatas = datas;
 		this.usersData = userData;
-		this.ticketDate = new LocalDate();
+		this.ticketDate = DateUtils.getLocalDateOfTenant();
 		this.priorityType = priorityData;
 		this.sourceData = sourceData;
 	}

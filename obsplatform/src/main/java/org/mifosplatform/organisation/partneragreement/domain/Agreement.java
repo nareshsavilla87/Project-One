@@ -20,6 +20,7 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
@@ -163,7 +164,7 @@ public class Agreement extends AbstractAuditableCustom<AppUser, Long> {
 
 		if (this.isDeleted == 'N') {
 			this.isDeleted = 'Y';
-			this.endDate = new Date();
+			this.endDate = DateUtils.getDateOfTenant();
 		}
 	}
 }

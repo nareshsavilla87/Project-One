@@ -29,6 +29,7 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.office.exception.CannotUpdateOfficeWithParentOfficeSameAsSelf;
 import org.mifosplatform.organisation.office.exception.RootOfficeParentCannotBeUpdated;
 import org.springframework.data.jpa.domain.AbstractPersistable;
@@ -285,7 +286,7 @@ public class Office extends AbstractPersistable<Long> {
 	public static Office fromPartner(final Office parentOffice,final JsonCommand command) {
 
 		final String name = command.stringValueOfParameterNamed("partnerName");
-		final LocalDate openingDate = new LocalDate();
+		final LocalDate openingDate = DateUtils.getLocalDateOfTenant();
 		 final String externalId = command.stringValueOfParameterNamed("externalId");
 		final Long officeType = command.longValueOfParameterNamed("officeType");
 		return new Office(parentOffice, name, openingDate, externalId,officeType);

@@ -3,6 +3,7 @@ package org.mifosplatform.portfolio.plan.data;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 
 public class PlanCodeData {
 	private final Long id;
@@ -18,7 +19,7 @@ public class PlanCodeData {
 		this.id=id;
 		this.planCode=planCode;
 		this.availableServices=data;
-		this.starDate=new LocalDate();
+		this.starDate=DateUtils.getLocalDateOfTenant();
 		this.isPrepaid=isPrepaid;
 		this.planDescription=planDescription;
 
