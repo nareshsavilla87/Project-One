@@ -182,6 +182,7 @@ public class ChargeCodeApiResource {
 			@PathParam("clientId") final Long clientId,@QueryParam("contractId")Long contractId,
 			@QueryParam("paytermCode")String paytermCode, @Context final UriInfo uriInfo) {
 
+
 		if(contractId !=null && paytermCode != null){
 			this.orderWritePlatformService.checkingContractPeriodAndBillfrequncyValidation(contractId, paytermCode);
 		}
