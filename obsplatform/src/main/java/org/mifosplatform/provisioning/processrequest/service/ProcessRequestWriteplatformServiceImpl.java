@@ -264,7 +264,20 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
                                 	}
                                 	
 								break;
-								
+                                case ProvisioningApiConstants.REQUEST_ADDON_DISCONNECTION :
+                                	
+                                	 requestDetails=detailsData.getProcessRequestDetails();
+                                	 jsonObject=new JSONObject(requestDetails.get(0).getSentMessage());
+                                	 array=jsonObject.getJSONArray("services");
+                                	for(int i=0;i<array.length();i++){
+                                		JSONObject object=array.getJSONObject(i);
+                                		Long addonId=object.getLong("addonId");
+                                		OrderAddons addons=this.orderAddonsRepository.findOne(addonId);
+                                		addons.setStatus(StatusTypeEnum.DISCONNECTED.toString());
+                                		this.orderAddonsRepository.saveAndFlush(addons);
+                                	}
+                                	
+								break;
                                 case ProvisioningApiConstants.REQUEST_RENEWAL_AE:
                                 	
                                 	if (detailsData.getOrderId() != null && detailsData.getOrderId() > 0) {

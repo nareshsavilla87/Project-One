@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.infrastructure.configuration.data;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,4 +28,6 @@ public class ConfigurationData {
 	public void setClientConfiguration(final String clientConfiguration){
 		this.clientConfiguration = clientConfiguration;
 	}
+
+	
 }
