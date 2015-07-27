@@ -62,6 +62,9 @@ public class Voucher extends AbstractAuditableCustom<AppUser, Long>  {
 	@Column(name = "price_id")
 	private Long priceId;
 	
+	@Column(name = "batch_type")
+	private String batchType;
+	
 	/*@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "randomGenerator", orphanRemoval = true)
 	private List<RandomGeneratorDetails> randomGeneratorDetails = new ArrayList<RandomGeneratorDetails>();*/
@@ -75,7 +78,7 @@ public class Voucher extends AbstractAuditableCustom<AppUser, Long>  {
 
 	public Voucher(final String batchName, final Long length, final String beginWith,
 			final String pinCategory, final Long quantity, final Long serialNo,
-			final String pinType, final String pinValue, final Date date,final Long priceId) {
+			final String pinType, final String pinValue, final Date date,final Long priceId,final String batchType) {
 
 		super();
 		this.batchName = batchName;
@@ -88,6 +91,7 @@ public class Voucher extends AbstractAuditableCustom<AppUser, Long>  {
 		this.pinValue = pinValue;
 		this.priceId = priceId;
 		this.expiryDate = date;
+		this.batchType = batchType;
 		this.isProcessed = 'N';
 
 	}
@@ -115,7 +119,8 @@ public class Voucher extends AbstractAuditableCustom<AppUser, Long>  {
 		    	priceId = (long) 0;
 		    }
 		    final String pinValue=String.valueOf(pinVal);
-		    return new Voucher(batchName,length.longValue(),beginWith,pinCategory,quantity.longValue(),serialNo.longValue(),pinType,pinValue,expiryDate.toDate(),priceId);
+		    final String batchType = command.stringValueOfParameterNamed("batchType");
+		    return new Voucher(batchName,length.longValue(),beginWith,pinCategory,quantity.longValue(),serialNo.longValue(),pinType,pinValue,expiryDate.toDate(),priceId,batchType);
 	}
 
 	public Long getPriceId() {
@@ -186,6 +191,15 @@ public class Voucher extends AbstractAuditableCustom<AppUser, Long>  {
 	public void setOfficeId(Long officeId) {
 		this.officeId = officeId;
 	}
+
+	public String getBatchType() {
+		return batchType;
+	}
+
+	public void setBatchType(String batchType) {
+		this.batchType = batchType;
+	}
+	
 	
 	
 
