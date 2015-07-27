@@ -60,7 +60,8 @@ private static byte[] keyValue=new String("hugoadminhugoadm").getBytes();
     public static void main(String[] args) throws Exception 
     {
 
-            String plainText = "Sapphire Networks=31-07-2015";
+            String plainText = "Sapphire Networks=12-12-2999";
+    	  //String plainText = "Default Demo Tenant=31-07-2999";
             String encryptedText = AESDemo.encrypt(plainText);
             System.out.println(encryptedText);
            // String decordedValue1 = String.format("%040x", encryptedText.getBytes());//new String(Base64.decodeBase64(encryptedText));

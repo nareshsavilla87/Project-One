@@ -61,7 +61,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
               	 " (pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_state c,b_charge_codes cc,b_client_address d" +
               	 " WHERE  b.priceregion_id = a.price_region_id AND b.state_id = c.id AND a.price_region_id = b.priceregion_id AND d.state = c.state_name " +
               	 " AND cc.charge_code = a.charge_code AND cc.charge_code = p.charge_code AND d.address_key = 'PRIMARY' AND d.client_id = "+clientId+" " +
-              	 "  AND a.plan_id != "+planId+" AND a.is_deleted = 'n'),0) AND pd.country_id = ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_country c," +
+              	 "  AND a.plan_id != "+planId+" AND a.is_deleted = 'n'),0) AND pd.country_id in ((SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_country c," +
               	 " b_charge_codes cc,b_client_address d WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND cc.charge_code = a.charge_code" +
               	 " AND cc.charge_code = p.charge_code AND a.price_region_id = b.priceregion_id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
               	 " AND d.client_id = "+clientId+"  AND a.plan_id != ? AND a.is_deleted = 'n'),0)) AND s.id = p.plan_id AND cd.client_id = "+clientId+"  GROUP BY s.id";
@@ -448,8 +448,10 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 					private static final class ClientOrderServiceMapper implements RowMapper<OrderLineData> {
 
 						public String orderServiceLookupSchema() {
-						return " ol.id as id,s.id as serviceId,ol.order_id as orderId,s.service_code as serviceCode,s.is_auto as isAuto,s.service_description as serviceDescription,s.service_type as serviceType,psd.image AS image FROM b_order_line ol, b_service s,b_prov_service_details psd " +
-								" WHERE order_id =? and ol.service_id=s.id and psd.service_id = s.id and ol.is_deleted ='N'";
+						return " ol.id AS id,s.id AS serviceId,ol.order_id AS orderId,s.service_code AS serviceCode,s.is_auto AS isAuto," +
+								" s.service_description AS serviceDescription,s.service_type AS serviceType,psd.image AS image " +
+								" FROM b_order_line ol, b_service s left join b_prov_service_details psd on  psd.service_id = s.id " +
+								" WHERE  order_id = ? AND ol.service_id = s.id AND ol.is_deleted = 'N'";
 						}
 
 						@Override

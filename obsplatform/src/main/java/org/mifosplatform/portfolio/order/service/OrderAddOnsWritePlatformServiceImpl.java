@@ -108,11 +108,14 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 	    Date addonEndDate = null;
 	    LocalDate endDate = this.orderAssembler.calculateEndDate(new LocalDate(startDate),
                 contract.getSubscriptionType(), contract.getUnits());
-	    
+	    if(endDate == null && order.getEndDate() != null){
+	    	throw new AddonEndDateValidationException(orderId);
+	    }
 	    if(order.getEndDate() != null && endDate.isAfter(new LocalDate(order.getEndDate()))){
            throw new AddonEndDateValidationException(orderId);
 	    //	endDate = new LocalDate(order.getEndDate());
-	    }
+	      }
+	    
 	    
 	   
 	    
@@ -124,7 +127,7 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 			if(!"None".equalsIgnoreCase(addons.getProvisionSystem())){
 				
 				this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order, planName, UserActionStatusTypeEnum.ADDON_ACTIVATION.toString(),
-						Long.valueOf(0), null,association.getSerialNo(),orderId, addons.getProvisionSystem(),addons.getId());
+						Long.valueOf(0), null,association!=null?association.getSerialNo():null,orderId, addons.getProvisionSystem(),addons.getId());
 			}
 		OrderPrice orderPrice =this.orderPriceRepository.findOne(addons.getPriceId());
 		List<BillingOrderData> billingOrderDatas = new ArrayList<BillingOrderData>(); 
