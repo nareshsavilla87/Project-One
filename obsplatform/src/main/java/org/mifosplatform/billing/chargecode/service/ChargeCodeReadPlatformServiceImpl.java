@@ -214,6 +214,7 @@ public class ChargeCodeReadPlatformServiceImpl implements
 			final ChargeCodeRecurringMapper mapper = new ChargeCodeRecurringMapper();
 
 			final String sql = "select " + mapper.schema();
+			System.out.println(sql);
 
 			return jdbcTemplate.queryForObject(sql, mapper, new Object[] { planId});
 		

@@ -35,5 +35,8 @@ public interface OrderWritePlatformService {
 
 	CommandProcessingResult reactiveOrder(JsonCommand command, Long entityId);
 
+	void checkingContractPeriodAndBillfrequncyValidation(Long contractId,
+			String paytermCode);
+
 	
 }

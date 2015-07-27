@@ -158,7 +158,6 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 		}
 		return chargeCode;
 	}
-
 	@Override
 	public BigDecimal calculateFinalAmount(ChargeCodeData chargeCodeData,Long clientId,Long priceId) {
 		
@@ -179,6 +178,8 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 		List<InvoiceTaxCommand> invoiceTaxCommands=this.generateBill.calculateDiscountAndTax(billingOrderData, discountMasterData, new LocalDate(discountMaster.getStartDate()),endDate, price.getPrice());
 		if(!invoiceTaxCommands.isEmpty()){
 		finalAmount = invoiceTaxCommands.get(0).getDiscountedAmount();
+		}else {
+			finalAmount= price.getPrice();
 		}
 		if(chargeCode.getTaxInclusive() !=1){
 		for(InvoiceTaxCommand invoiceTaxCommand:invoiceTaxCommands){
@@ -187,7 +188,5 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 		}
 		return finalAmount;
 	}
-
-	
 
 }
