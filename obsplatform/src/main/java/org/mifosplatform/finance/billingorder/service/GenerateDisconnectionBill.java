@@ -90,6 +90,7 @@ public class GenerateDisconnectionBill {
 		
 		if (billingOrderData.getInvoiceTillDate() == null) { //with out invoice direct disconnect order
 			
+			System.out.println("---- RC ----");
 			this.startDate = new LocalDate(billingOrderData.getBillStartDate());
 			this.endDate = disconnectionDate;
 			this.invoiceTillDate = disconnectionDate;
@@ -125,9 +126,10 @@ public class GenerateDisconnectionBill {
 			if(price.compareTo(BigDecimal.ZERO) !=0){
 			   listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
 			}
-				
+			
 		}else { // If Invoice till date not equal to null
 		  
+			System.out.println("---- DC ----");
 		   if(discountMasterData !=null){	
 
 
