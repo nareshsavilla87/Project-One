@@ -61,7 +61,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
               	 " (pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_state c,b_charge_codes cc,b_client_address d" +
               	 " WHERE  b.priceregion_id = a.price_region_id AND b.state_id = c.id AND a.price_region_id = b.priceregion_id AND d.state = c.state_name " +
               	 " AND cc.charge_code = a.charge_code AND cc.charge_code = p.charge_code AND d.address_key = 'PRIMARY' AND d.client_id = "+clientId+" " +
-              	 "  AND a.plan_id != "+planId+" AND a.is_deleted = 'n'),0) AND pd.country_id = ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_country c," +
+              	 "  AND a.plan_id != "+planId+" AND a.is_deleted = 'n'),0) AND pd.country_id in ((SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_country c," +
               	 " b_charge_codes cc,b_client_address d WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND cc.charge_code = a.charge_code" +
               	 " AND cc.charge_code = p.charge_code AND a.price_region_id = b.priceregion_id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
               	 " AND d.client_id = "+clientId+"  AND a.plan_id != ? AND a.is_deleted = 'n'),0)) AND s.id = p.plan_id AND cd.client_id = "+clientId+"  GROUP BY s.id";
