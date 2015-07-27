@@ -489,8 +489,8 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			String existingUserName = selfCare.getUserName();
 			String existingPassword = selfCare.getPassword();
 			
-				/*if(command.parameterExists("userName")){
-					String userName = command.stringValueOfParameterNamed("userName");
+				if(command.parameterExists("userName")){
+					//String userName = command.stringValueOfParameterNamed("userName");
 					selfCare.setUserName(userName);
 				}
 				if(command.parameterExists("currentpassword")){
@@ -503,7 +503,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				
 				
 				this.selfCareRepository.save(selfCare);
-				*/
+			
 				
 				if((userName != null && password != null) && (!userName.isEmpty() && !password.isEmpty()) &&
                 		((existingUserName.equalsIgnoreCase(userName)) && (!existingPassword.equalsIgnoreCase(password)))){				

@@ -8,13 +8,15 @@ import javax.persistence.Entity;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "b_office_address")
+@Table(name = "b_office_address", uniqueConstraints = { @UniqueConstraint(columnNames = { "phone_number" }, name = "phonenumber_org"),
+@UniqueConstraint(columnNames = { "email_id" }, name = "emailid_org")})
 public class OfficeAddress extends AbstractPersistable<Long> {
 
 	/**
