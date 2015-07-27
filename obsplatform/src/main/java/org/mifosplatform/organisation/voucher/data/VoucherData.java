@@ -38,11 +38,14 @@ public class VoucherData {
 	private String status;
 	private Long clientId;
 	private Collection<MCodeData> reasondatas;
+	private String batchType;
+	private String promotionDescription;
 
 	public VoucherData(final String batchName, final Long officeId,
 			final Long length, final String pinCategory, final String pinType, final Long quantity,
 			final String serial, final Date expiryDate, final String beginWith,
-			final String pinValue, final Long id, final String planCode, final String isProcessed, 
+			final String pinValue, final Long id, final String planCode,final String batchType,
+			final String promotionDescription, final String isProcessed, 
 			final String pinNo, final String status, final Long clientId) {
 
 		this.batchName=batchName;
@@ -57,6 +60,8 @@ public class VoucherData {
 		this.pinValue=pinValue;
 		this.id=id;
 		this.planCode=planCode;
+		this.batchType=batchType;
+		this.promotionDescription=promotionDescription;
 		this.isProcessed=isProcessed;
 		this.pinNo = pinNo;
 		this.status = status;
@@ -213,6 +218,25 @@ public class VoucherData {
 	public Collection<OfficeData> getOffices() {
 		return offices;
 	}
+
+	public String getBatchType() {
+		return batchType;
+	}
+
+	public void setBatchType(String batchType) {
+		this.batchType = batchType;
+	}
+
+	public String getPromotionDescription() {
+		return promotionDescription;
+	}
+
+	public void setPromotionDescription(String promotionDescription) {
+		this.promotionDescription = promotionDescription;
+	}
+	
+	
+	
 
 
 }
