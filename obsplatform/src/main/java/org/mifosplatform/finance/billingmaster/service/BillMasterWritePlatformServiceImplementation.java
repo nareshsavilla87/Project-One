@@ -286,7 +286,7 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 		if(realCause.getMessage().contains("plan_code"))
 		throw new PlatformDataIntegrityException("error.msg.data.truncation.issue",
                 "Data truncation: Data too long for column 'plan_code'");
-		
+	
 	}
 	
 }	
