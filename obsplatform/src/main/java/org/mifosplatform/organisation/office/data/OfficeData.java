@@ -30,26 +30,28 @@ public class OfficeData {
     private final Collection<OfficeData> allowedParents;
     private final Collection<CodeValueData> officeTypes;
 
-
+    private final LocalDate date;
+    
     public static OfficeData dropdown(final Long id, final String name, final String nameDecorated) {
     	
-        return new OfficeData(id, name, nameDecorated, null, null, null, null, null, null,null,null,null);
+        return new OfficeData(id, name, nameDecorated, null, null, null, null, null, null,null,null,null,null);
     }
 
     public static OfficeData template(final Collection<OfficeData> parentLookups, final LocalDate defaultOpeningDate, final Collection<CodeValueData> officeTypes) {
     	
-        return new OfficeData(null, null, null, null, defaultOpeningDate, null, null, null, parentLookups,officeTypes,null,null);
+        return new OfficeData(null, null, null, null, defaultOpeningDate, null, null, null, parentLookups,officeTypes,null,null,null);
     }
 
-    public static OfficeData appendedTemplate(final OfficeData office, final Collection<OfficeData> allowedParents, final Collection<CodeValueData> codeValueDatas) {
+    public static OfficeData appendedTemplate(final OfficeData office, final Collection<OfficeData> allowedParents, final Collection<CodeValueData> codeValueDatas,
+    		final LocalDate date) {
     	
         return new OfficeData(office.id, office.name, office.nameDecorated, office.externalId, office.openingDate, office.hierarchy,
-                office.parentId, office.parentName, allowedParents,codeValueDatas,office.officeType,office.balance);
+                office.parentId, office.parentName, allowedParents,codeValueDatas,office.officeType,office.balance, date);
     }
 
     public OfficeData(final Long id, final String name, final String nameDecorated, final String externalId, final LocalDate openingDate,
             final String hierarchy, final Long parentId, final String parentName, final Collection<OfficeData> allowedParents, 
-            final Collection<CodeValueData> codeValueDatas, final String officeType, BigDecimal balance) {
+            final Collection<CodeValueData> codeValueDatas, final String officeType, BigDecimal balance, final LocalDate date) {
     	
         this.id = id;
         this.name = name;
@@ -63,6 +65,7 @@ public class OfficeData {
         this.officeTypes = codeValueDatas;
         this.officeType = officeType;
         this.balance=balance;
+        this.date = date;
         
     }
 

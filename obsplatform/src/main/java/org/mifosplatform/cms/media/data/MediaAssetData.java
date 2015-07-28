@@ -52,6 +52,7 @@ public class MediaAssetData {
 	private String eventCategory;
 	private String mediaCategory;
 	private String contentProviderValue;
+	private LocalDate date;
 	
 public MediaAssetData(final Long mediaId, final String mediaTitle, final String image, final BigDecimal rating,
 		final Long eventId, final String assetTag, final String quality, final String optType, final BigDecimal price){
@@ -414,5 +415,13 @@ public String getContentProviderValue() {
 public void setContentProviderValue(final String contentProviderValue) {
 	this.contentProviderValue = contentProviderValue;
 }
+public LocalDate getDate() {
+	return date;
+}
+public void setDate(LocalDate date) {
+	this.date = date;
+}
+
+
 	
 }

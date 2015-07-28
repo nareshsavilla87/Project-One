@@ -37,6 +37,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
@@ -114,6 +115,7 @@ public class EventMasterApiResource {
 		final Set<String> responseParameters = ApiParameterHelper.extractFieldsForResponseIfProvided(uriInfo.getQueryParameters());
 		responseParameters.addAll(RESPONSE_PARAMETERS);
 		final EventMasterData templetData = handleEventMasterTemplateData(responseParameters);		
+		templetData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	
 		return this.toApiJsonSerializer.serialize(settings, templetData, RESPONSE_PARAMETERS);

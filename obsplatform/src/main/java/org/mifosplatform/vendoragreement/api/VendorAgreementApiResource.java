@@ -122,6 +122,7 @@ public class VendorAgreementApiResource {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
         VendorAgreementData vendor=handleTemplateData(vendorId);
+        vendor.setDate(DateUtils.getLocalDateOfTenantForClient());
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, vendor, RESPONSE_DATA_PARAMETERS);
     }

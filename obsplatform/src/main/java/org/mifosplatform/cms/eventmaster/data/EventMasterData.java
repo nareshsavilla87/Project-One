@@ -46,6 +46,7 @@ public class EventMasterData {
 	private Collection<MCodeData> eventCategeorydata;
 	@SuppressWarnings("unused")
 	private String eventCategory;
+	private LocalDate date;
 	
 	/** Default Constructor */
 	public EventMasterData() {
@@ -418,5 +419,14 @@ public class EventMasterData {
 	public void setEventCategeorydata(final Collection<MCodeData> eventCategeorydata) {
 		this.eventCategeorydata = eventCategeorydata;
 	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+	
 	
 }
