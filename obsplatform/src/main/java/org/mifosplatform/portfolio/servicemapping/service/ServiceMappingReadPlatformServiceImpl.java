@@ -1,5 +1,6 @@
 package org.mifosplatform.portfolio.servicemapping.service;
 
+import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -8,6 +9,7 @@ import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.portfolio.servicemapping.data.ServiceCodeData;
 import org.mifosplatform.portfolio.servicemapping.data.ServiceMappingData;
 import org.mifosplatform.provisioning.provisioning.data.ServiceParameterData;
@@ -35,8 +37,10 @@ public class ServiceMappingReadPlatformServiceImpl implements
 		public String schema() {
 
 			return " ps.id as id, bs.service_code as serviceCode, ps.service_identification as serviceIdentification, bs.status as status,ps.image as image, "
-					+ "ps.category as category,ps.sub_category as subCategory,ps.provision_system as provisionSystem,ps.sort_by as sortBy " +
-					"  from  b_service bs,  b_prov_service_details ps where bs.status='ACTIVE' and ps.service_id=bs.id ";
+					+ "ps.category as category,ps.sub_category as subCategory,ps.provision_system as provisionSystem,ps.sort_by as sortBy," 
+					+ "ps.item_id as itemId,im.item_description as itemDescription,ps.is_hw_req as isHwReq " +
+					"  from b_service bs inner join b_prov_service_details ps on  ps.service_id=bs.id " +
+					"  left join  b_item_master im on ps.item_id=im.id  where  bs.status='ACTIVE' and bs.is_deleted ='N' and ps.is_deleted='n' ";
 
 
 		}
@@ -52,8 +56,11 @@ public class ServiceMappingReadPlatformServiceImpl implements
 			String category = rs.getString("category");
 			String subCategory = rs.getString("subCategory");
 			String provisionSystem = rs.getString("provisionSystem");
-			final String sortBy = rs.getString("sortBy");
-			return new ServiceMappingData(id, serviceCode,serviceIdentification, status, image, category, subCategory,provisionSystem, sortBy);
+		    String sortBy = rs.getString("sortBy");
+			Long itemId = rs.getLong("itemId");
+			String isHwReq = rs.getString("isHwReq");
+			String itemDescription=rs.getString("itemDescription");
+			return new ServiceMappingData(id, serviceCode,serviceIdentification, status, image, category, subCategory,provisionSystem, sortBy,itemId,isHwReq,itemDescription);
 		}
 	}
 
@@ -97,8 +104,9 @@ public class ServiceMappingReadPlatformServiceImpl implements
 		public String schema() {
 
 			return " bs.id as serviceId,bs.service_code as serviceCode, ps.service_identification as serviceIdentification, bs.status as status,"
-					+ "ps.image as image,ps.category as category,ps.sub_category as subCategory,ps.provision_system as provisionSystem ,ps.sort_by as sortBy" +
-					"  from b_service bs, b_prov_service_details ps ";
+					+ "ps.image as image,ps.category as category,ps.sub_category as subCategory,ps.provision_system as provisionSystem ,ps.sort_by as sortBy,"
+					+ "ps.item_id as itemId,im.item_description as itemDescription,ps.is_hw_req as isHwReq from b_service bs inner join b_prov_service_details ps on ps.service_id=bs.id " +
+					  "left join b_item_master im on im.id=ps.item_id";
 
 		}
 
@@ -114,8 +122,11 @@ public class ServiceMappingReadPlatformServiceImpl implements
 			String category = rs.getString("category");
 			String subCategory = rs.getString("subCategory");
 			String provisionSystem = rs.getString("provisionSystem");
-			final String sortBy = rs.getString("sortBy");
-			return new ServiceMappingData(serviceId, serviceCode,serviceIdentification, status, image, category, subCategory, sortBy,provisionSystem);
+		    String sortBy = rs.getString("sortBy");
+			Long itemId = rs.getLong("itemId");
+			String isHwReq = rs.getString("isHwReq");
+			String itemDescription=rs.getString("itemDescription");
+			return new ServiceMappingData(serviceId, serviceCode,serviceIdentification, status, image, category, subCategory, sortBy,provisionSystem,itemId,isHwReq,itemDescription);
 		}
 	}
 
@@ -123,7 +134,7 @@ public class ServiceMappingReadPlatformServiceImpl implements
 
 		ServiceMappingDataByIdRowMapper rowMapper = new ServiceMappingDataByIdRowMapper();
 		String sql = "select" + rowMapper.schema()
-				+ " where ps.service_id=bs.id and ps.id=?";
+				+ " where ps.is_deleted='n' and  ps.id=?";
 		return jdbcTemplate.queryForObject(sql, rowMapper,
 				new Object[] { serviceMappingId });
 	}
@@ -192,4 +203,33 @@ public class ServiceMappingReadPlatformServiceImpl implements
 
 	}
 
+	/* (non-Java doc)
+	 * @see #retrieveItems()
+	 */
+	@Override
+	public List<ItemData> retrieveItems() {
+
+		final ItemDataMaper mapper = new ItemDataMaper();
+		final String sql = "select " + mapper.schema();
+		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+	}
+
+	private static final class ItemDataMaper implements RowMapper<ItemData> {
+
+		public String schema() {
+			return " i.id as id,i.item_code as itemCode,i.item_description as itemDescription from b_item_master i where i.is_deleted='n'";
+		}
+
+		@Override
+		public ItemData mapRow(final ResultSet rs, final int rowNum)throws SQLException {
+			
+			Long id = rs.getLong("id");
+			String itemCode = rs.getString("itemCode");
+			String itemDescription = rs.getString("itemDescription");
+			return new ItemData(id, itemCode, itemDescription, null,BigDecimal.ZERO);
+
+		}
+	}
 }
+
+

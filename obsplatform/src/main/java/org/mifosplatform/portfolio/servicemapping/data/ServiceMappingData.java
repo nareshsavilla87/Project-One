@@ -6,6 +6,7 @@ import java.util.List;
 import org.mifosplatform.finance.payments.data.McodeData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.dataqueries.data.ReportParameterData;
+import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 
 public class ServiceMappingData {
@@ -28,6 +29,10 @@ public class ServiceMappingData {
 	private Collection<MCodeData> provisionSysData;
 	private String provisionSystem;
 	private String sortBy;
+	private List<ItemData> itemsData;
+	private Long itemId;
+	private String itemDescription;
+	private boolean isHwReq;
 	
 	public Collection<McodeData> getCategories() {
 		return categories;
@@ -45,13 +50,9 @@ public class ServiceMappingData {
 		this.subCategories = subCategories;
 	}
 
-
-
-
-	
-
 	public ServiceMappingData(final Long id, final String serviceCode,final String serviceIndentification, final String status,
-			final String image, final String category, final String subCategory,final String sortBy, String provisionSystem) {
+			final String image, final String category, final String subCategory,final String sortBy, String provisionSystem,
+			final Long itemId, final String isHwReq,final String itemDescription) {
 		
 		this.id=id;
 		this.serviceCode=serviceCode;
@@ -62,13 +63,17 @@ public class ServiceMappingData {
 		this.provisionSystem=provisionSystem;
 		this.subCategory=subCategory;
 		this.sortBy = sortBy;
+		this.itemId = itemId;
+		this.itemDescription = itemDescription;
+		this.isHwReq = ("Y".equalsIgnoreCase(isHwReq) ? true : false);
 	}
 	
 	public ServiceMappingData( final List<ServiceMappingData> serviceMappingData,	
 			final List<ServiceCodeData> serviceCodeData, 
 			final List<EnumOptionData> status, 
 			final Collection<ReportParameterData> serviceParameters, 
-			final Collection<McodeData> categories, final Collection<McodeData> subCategories,final Collection<MCodeData> provisionSysData) {
+			final Collection<McodeData> categories, final Collection<McodeData> subCategories,
+			final Collection<MCodeData> provisionSysData, List<ItemData> itemsData) {
 
 		this.serviceMappingData=serviceMappingData;
 		this.serviceCodeData=serviceCodeData;
@@ -77,6 +82,7 @@ public class ServiceMappingData {
 		this.categories=categories;
 		this.provisionSysData=provisionSysData;
 		this.subCategories=subCategories;
+		this.itemsData = itemsData;
 	}
 	
 	public List<ServiceCodeData> getServiceCodeData() {
@@ -144,6 +150,18 @@ public class ServiceMappingData {
 	public void setImage(String image) {
 		this.image = image;
 	}
+	
+	public Long getItemId() {
+		return itemId;
+	}
+
+	public boolean isHwReq() {
+		return isHwReq;
+	}
+
+	public String getItemDescription() {
+		return itemDescription;
+	}
 
 	public void setStatusData(List<EnumOptionData> status) {
 		this.statusData=status;
@@ -154,11 +172,13 @@ public class ServiceMappingData {
 		this.provisionSysData=provisionSysData;
 		
 	}
-	
-	
-	
-	
 
-	
-	
+	public List<ItemData> getItemsData() {
+		return itemsData;
+	}
+
+	public void setItemsData(List<ItemData> itemsData) {
+		this.itemsData = itemsData;
+	}
+
 }

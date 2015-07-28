@@ -26,7 +26,7 @@ public class ServiceMappingCommandFromApiJsonDeserializer {
 
 
 	final private Set<String> supportedParameters = new HashSet<String>(Arrays.asList("serviceId","serviceIdentification","status","image","category",
-			"subCategory","sortBy","locale","provisionSystem"));
+			"subCategory","sortBy","locale","provisionSystem","isHwReq","itemId"));
 
 
 	private final FromJsonHelper fromApiJsonHelper;  
@@ -36,7 +36,7 @@ public class ServiceMappingCommandFromApiJsonDeserializer {
 		this.fromApiJsonHelper = fromApiJsonHelper;
 	}
 
-	 public void validateForCreate(final String json, Boolean isSortValue) {
+	 public void validateForCreate(final String json, Boolean isSortValue,boolean isServiceLevelMap) {
 	        if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
 	        final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -64,6 +64,14 @@ public class ServiceMappingCommandFromApiJsonDeserializer {
 			baseDataValidator.reset().parameter("image").value(image).notBlank();
 
 			baseDataValidator.reset().parameter("provisionSystem").value(provisionSystem).notBlank();
+			
+			if(isServiceLevelMap){
+				final boolean isHwReq = fromApiJsonHelper.extractBooleanNamed("isHwReq", element);
+				if(isHwReq){
+				  final Long itemId = fromApiJsonHelper.extractLongNamed("itemId", element);
+				  baseDataValidator.reset().parameter("itemId").value(itemId).notBlank();
+				}
+			}
 			//baseDataValidator.reset().parameter("subCategory").value(subCategory).notBlank();*/
 		
 

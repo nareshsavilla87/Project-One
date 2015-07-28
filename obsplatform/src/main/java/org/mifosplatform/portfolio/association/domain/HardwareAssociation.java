@@ -32,6 +32,9 @@ public class HardwareAssociation extends AbstractAuditableCustom<AppUser, Long> 
 	@Column(name = "order_id")
 	private Long orderId;
 	
+	@Column(name = "service_id")
+	private Long serviceId;
+	
 	@Column(name = "is_deleted")
 	private String isDeleted="N";
 
@@ -42,13 +45,14 @@ public class HardwareAssociation extends AbstractAuditableCustom<AppUser, Long> 
 	}
 
 
-	public HardwareAssociation(Long clientId, Long planId, String serialNo,Long orderId, String allocationType) {
+	public HardwareAssociation(Long clientId, Long planId, String serialNo,Long orderId, String allocationType,Long serviceId) {
 		
             this.clientId=clientId;
             this.planId=planId;
             this.serialNo=serialNo;
             this.orderId=orderId;
             this.allocationType=allocationType;
+            this.serviceId=serviceId;
 	
 	}
 	

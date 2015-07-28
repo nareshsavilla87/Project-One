@@ -256,7 +256,20 @@ try{
 			List<AllocationDetailsData> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetailsByItemCode(clientId,plan.getPlanCode());
 			if(allocationDetailsDatas.size() == 1 ){
 				this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),allocationDetailsDatas.get(0).getSerialNo(),
-						order.getId(),allocationDetailsDatas.get(0).getAllocationType());
+						order.getId(),allocationDetailsDatas.get(0).getAllocationType(),null);
+			}else{
+			configurationProperty=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SERVICE_DEVICE_MAPPING);
+			   if(configurationProperty !=null&&configurationProperty.isEnabled()){
+				   List<OrderPrice> orderPrices=order.getPrice();
+				   for(OrderPrice service:orderPrices){
+					   
+					   if(allocationDetailsDatas.size() == 1 ){
+							this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),allocationDetailsDatas.get(0).getSerialNo(),
+									order.getId(),allocationDetailsDatas.get(0).getAllocationType(),service.getServiceId());
+						}
+				   }
+			   }
+			
 			}
 		}
 	}

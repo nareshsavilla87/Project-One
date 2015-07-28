@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
@@ -98,12 +99,12 @@ public class ServiceMappingApiResource {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
 		final List<ServiceCodeData> serviceCodeData = this.serviceMappingReadPlatformService.getServiceCode();
-
 		final List<EnumOptionData> status = this.planReadPlatformService.retrieveNewStatus();
 		final Collection<McodeData> categories = this.paymodeReadPlatformService.retrievemCodeDetails("Service Category");
 		final Collection<McodeData> subCategories = this.paymodeReadPlatformService.retrievemCodeDetails("Asset language");
 		final Collection<MCodeData> provisionSysData = this.mCodeReadPlatformService.getCodeValue("Provisioning");
-		final ServiceMappingData serviceMappingData = new ServiceMappingData(null,serviceCodeData, status, null, categories, subCategories,provisionSysData);
+		final List<ItemData> itemsData = this.serviceMappingReadPlatformService.retrieveItems();
+		final ServiceMappingData serviceMappingData = new ServiceMappingData(null,serviceCodeData, status, null, categories, subCategories,provisionSysData,itemsData);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, serviceMappingData, RESPONSE_PARAMETERS);
 	}
@@ -133,12 +134,13 @@ public class ServiceMappingApiResource {
 		final Collection<McodeData> categories = this.paymodeReadPlatformService.retrievemCodeDetails("Service Category");
 		final Collection<McodeData> subCategories = this.paymodeReadPlatformService.retrievemCodeDetails("Asset language");
 		final Collection<MCodeData> provisionSysData = this.mCodeReadPlatformService.getCodeValue("Provisioning");
+		final List<ItemData> itemsData = this.serviceMappingReadPlatformService.retrieveItems();
 		serviceMappingData.setServiceCodeData(this.serviceMappingReadPlatformService.getServiceCode());
-		
 		serviceMappingData.setStatusData(status);
 		serviceMappingData.setCategories(categories);
 		serviceMappingData.setSubCategories(subCategories);
 		serviceMappingData.setProvisionSysData(provisionSysData);
+		serviceMappingData.setItemsData(itemsData);
 		}
 		return this.toApiJsonSerializer.serialize(settings, serviceMappingData, RESPONSE_PARAMETERS);
 	}
