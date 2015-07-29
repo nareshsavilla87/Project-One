@@ -28,8 +28,6 @@ public class DiscountMasterData {
 	private List<EnumOptionData> statusData;
 	private Collection<MCodeData> discountTypeData;
 	private String discountStatus;
-	private Collection<MCodeData> clientCategoryDatas;
-	private List<DiscountDetailData> discountDetailDatas;
 	private LocalDate date;
 
 	public DiscountMasterData(final Long id, final String discountCode,final String discountDescription, final String discountType,
@@ -75,12 +73,10 @@ public class DiscountMasterData {
 		this.discountDescription = discountDescription;
 	}
 
-	public DiscountMasterData(final List<EnumOptionData> statusData,final Collection<MCodeData> discountTypeData, 
-			Collection<MCodeData> clientCategoryDatas) {
+	public DiscountMasterData(final List<EnumOptionData> statusData,final Collection<MCodeData> discountTypeData) {
 		
 		this.statusData = statusData;
 		this.discountTypeData = discountTypeData;
-		this.clientCategoryDatas = clientCategoryDatas;
 
 	}
 
@@ -204,15 +200,7 @@ public class DiscountMasterData {
 		this.discountedChargeAmount = discountedChargeAmount;
 	}
 
-	public void setclientCategoryData(Collection<MCodeData> clientCategoryDatas) {
-
-		this.clientCategoryDatas = clientCategoryDatas;
-	}
-
-	public void setDiscountDetailsData(List<DiscountDetailData> discountDetailDatas) {
-
-		this.discountDetailDatas = discountDetailDatas;
-	}
+	
 
 	public LocalDate getDate() {
 		return date;
