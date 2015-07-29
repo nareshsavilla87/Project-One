@@ -186,7 +186,7 @@ public class VoucherReadPlatformServiceImpl implements
 
 			return new VoucherData(batchName, officeId, null,
 					pinCategory, pinType, null, serial, expiryDate,
-					null, pinValue, id, null, null, pinNo, status, clientId);
+					null, pinValue, id, null, null,null,null, pinNo, status, clientId);
 
 		}
 	}
@@ -364,10 +364,11 @@ public class VoucherReadPlatformServiceImpl implements
 			
 				return "m.id as id, m.batch_name as batchName, m.office_id as officeId, m.length as length,"
 						+ "m.begin_with as beginWith,m.pin_category as pinCategory,m.quantity as quantity,"
-						+ "m.serial_no as serialNo,m.pin_type as pinType,m.pin_value as pinValue,m.expiry_date as expiryDate, "
-						+ "case m.pin_type when 'VALUE' then p.plan_code=null when 'PRODUCT' then p.plan_code end as planCode, "
+						+ "m.serial_no as serialNo,m.pin_type as pinType,m.pin_value as pinValue,m.expiry_date as expiryDate,m.batch_type as batchType, "
+						+ "case m.pin_type when 'VALUE' then p.plan_code=null when 'PRODUCT' then p.plan_code end as planCode,case m.pin_type when 'COUPON' then pr.promotion_description end as promotionDescription, "
 						+ "m.is_processed as isProcessed from b_pin_master m  "
-						+ "left join b_plan_master p on m.pin_value=p.id";
+						+ "left join b_plan_master p on m.pin_value=p.id "
+						+ "left join b_promotion_master pr ON m.pin_value = pr.id";
 
 			}
 
@@ -387,11 +388,13 @@ public class VoucherReadPlatformServiceImpl implements
 				String beginWith = rs.getString("beginWith");
 				String pinValue = rs.getString("pinValue");
 				String planCode = rs.getString("planCode");
+				String batchType = rs.getString("batchType");
+				String promotionDescription = rs.getString("promotionDescription");
 				String isProcessed = rs.getString("isProcessed");
 
 				return new VoucherData(batchName, officeId, length,
 						pinCategory, pinType, quantity, serial, expiryDate,
-						beginWith, pinValue, id, planCode, isProcessed, null, null, null);
+						beginWith, pinValue, id, planCode, batchType,promotionDescription,isProcessed, null, null, null);
 
 			}
 	}

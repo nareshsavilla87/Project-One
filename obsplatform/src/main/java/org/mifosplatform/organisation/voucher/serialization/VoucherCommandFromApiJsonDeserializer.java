@@ -33,7 +33,7 @@ public class VoucherCommandFromApiJsonDeserializer {
 	 */
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "batchName", "length",
 					"beginWith", "pinCategory", "pinType", "quantity","serialNo", "expiryDate", "dateFormat", "pinValue",
-					"pinNO", "locale", "pinExtention","officeId","priceId","status","voucherIds","cancelReason"));
+					"pinNO", "locale", "pinExtention","officeId","priceId","status","voucherIds","cancelReason","batchType"));
 	
 	private final FromJsonHelper fromApiJsonHelper;
 
@@ -91,6 +91,11 @@ public class VoucherCommandFromApiJsonDeserializer {
 			
 				pinValue1 = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("pinValue", element);
 				baseDataValidator.reset().parameter("productValue").value(pinValue1).notNull();
+			}
+			else if(pinType.equalsIgnoreCase("COUPON")){
+				
+				pinValue1 = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("pinValue", element);
+				baseDataValidator.reset().parameter("promotionValue").value(pinValue1).notNull();
 			}
 		}
 

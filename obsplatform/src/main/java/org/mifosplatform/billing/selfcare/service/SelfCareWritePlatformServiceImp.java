@@ -120,7 +120,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			String password = command.stringValueOfParameterNamed("password");
 			boolean mailnotification = command.booleanPrimitiveValueOfParameterNamed("mailNotification");
 			
-			if(null == selfCare.getClientId() || selfCare.getClientId()<1L){
+			if(null == selfCare.getClientId() || selfCare.getClientId()<=0L){
 				throw new PlatformDataIntegrityException("client does not exist", "client not registered","clientId", "client is null ");
 			}
 			
