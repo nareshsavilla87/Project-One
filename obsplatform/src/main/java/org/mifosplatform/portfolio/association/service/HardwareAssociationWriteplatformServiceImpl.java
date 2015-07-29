@@ -53,12 +53,12 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 	}
 	
 	@Override
-	public void createNewHardwareAssociation(Long clientId, Long planId,String serialNo,Long orderId,String allocationType) 
+	public void createNewHardwareAssociation(Long clientId, Long planId,String serialNo,Long orderId,String allocationType,Long serviceId) 
 	{
 	        try{
 	        	
 	        //	this.context.authenticatedUser();
-	        	HardwareAssociation hardwareAssociation=new HardwareAssociation(clientId,planId,serialNo,orderId,allocationType);
+	        	HardwareAssociation hardwareAssociation=new HardwareAssociation(clientId,planId,serialNo,orderId,allocationType,serviceId);
 	        	this.associationRepository.saveAndFlush(hardwareAssociation);
 
 	        }catch(DataIntegrityViolationException exception){

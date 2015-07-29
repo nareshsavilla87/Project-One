@@ -75,5 +75,5 @@ WHERE `INVOICE DATE`  BETWEEN ''${startDate}'' and ''${endDate}''
 GROUP BY `PLAN/ITEAM`,SOURCE,MONTH,`RESELLER ID`,`SHARE TYPE`', 
 core_report=0 WHERE  report_name='Reseller Commission Details';
 
-UPDATE stretchy_report SET core_report=0 WHERE report_category='Table';
+UPDATE stretchy_report SET core_report=0 WHERE report_type='Table';
 
