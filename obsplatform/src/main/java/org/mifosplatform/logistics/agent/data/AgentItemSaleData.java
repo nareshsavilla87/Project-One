@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.billing.chargecode.data.ChargesData;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.organisation.office.data.OfficeData;
@@ -22,6 +23,7 @@ public class AgentItemSaleData {
 	private final BigDecimal chargeAmount;
 	private final BigDecimal invoiceAmount;
 	private final BigDecimal tax;
+	private LocalDate date;
 
 	public static AgentItemSaleData instance(final AgentItemSaleData itemSaleData,final Collection<OfficeData> officeDatas,
 			final List<ItemData> itemDatas, final List<ChargesData> chargesDatas) {
@@ -105,5 +107,15 @@ public class AgentItemSaleData {
 	public List<ChargesData> getChargeDatas() {
 		return chargeDatas;
 	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+	
+	
 
 }

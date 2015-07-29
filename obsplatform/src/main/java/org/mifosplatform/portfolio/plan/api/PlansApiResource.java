@@ -122,9 +122,7 @@ public class PlansApiResource  {
 		context.authenticatedUser().validateHasReadPermission(RESOURCE_NAME_FOR_PERMISSION);
 		PlanData planData=null;
 		planData=handleTemplateData(planData);
-		if(planData != null){
-			planData.setDate(DateUtils.getLocalDateOfTenantForClient());	
-		}
+		
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, planData, RESPONSE_DATA_PARAMETERS);
 	
@@ -158,7 +156,8 @@ public class PlansApiResource  {
 						}
 					}
 		 }
-		 return new PlanData(data, billData, null,status, planData, services,provisionSysData,volumeType);
+		 
+		 return new PlanData(data, billData, null,status, planData, services,provisionSysData,volumeType, DateUtils.getLocalDateOfTenantForClient());
 			
 	}
 

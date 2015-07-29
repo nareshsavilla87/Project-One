@@ -178,5 +178,13 @@ public class TaxMapData {
 
 	}
 
+	public LocalDate getDate() {
+		return date;
+	}
 
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+
+	
 }

@@ -130,6 +130,7 @@ public class TaxMapApiResource {
 		taxMapData.setChargeCodesForTax(chargeCodeData);
 		taxMapData.setTaxTypeData(taxTypeData);
 		taxMapData.setPriceRegionData(priceRegionData);
+		taxMapData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		}
 		return this.apiJsonSerializer.serialize(settings, taxMapData,RESPONSE_TAXMAPPING_PARAMETERS);
 

@@ -154,6 +154,7 @@ public class DiscountMasterAPiResource {
 		discountMasterData.setStatusData(statusData);
 		discountMasterData.setclientCategoryData(clientCategoryDatas);
 		discountMasterData.setDiscountTypeData(discountTypeData);
+		discountMasterData.setDate(DateUtils.getLocalDateOfTenantForClient());
 	    }
 		return this.toApiJsonSerializer.serialize(settings,discountMasterData,RESPONSE_DATA_PARAMETERS);
 	}

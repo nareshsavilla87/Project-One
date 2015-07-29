@@ -146,6 +146,7 @@ public class PromotionCodesApiResource {
 			final List<PeriodData> contractTypedata = contractPeriodReadPlatformService.retrieveAllPlatformPeriod();
 			promotionCodeData.setDiscounTypeData(discountTypeData);
 			promotionCodeData.setContractTypedata(contractTypedata);
+			promotionCodeData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		}
 		return this.toApiJsonSerializer.serialize(settings,promotionCodeData,RESPONSE_DATA_PARAMETERS);
 	}

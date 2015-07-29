@@ -219,6 +219,7 @@ public class VendorAgreementApiResource {
         }
         List<VendorAgreementData> vendorAgreementDetailsData = this.vendorAgreementReadPlatformService.retrieveVendorAgreementDetails(vendorAgreementId);
         vendorAgreeData.setVendorAgreementDetailsData(vendorAgreementDetailsData);
+        vendorAgreeData.setDate(DateUtils.getLocalDateOfTenantForClient());
         
         if (settings.isTemplate()) {
         	final List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();

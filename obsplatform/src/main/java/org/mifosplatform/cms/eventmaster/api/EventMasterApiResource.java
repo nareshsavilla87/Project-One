@@ -170,6 +170,7 @@ public class EventMasterApiResource {
 		event.setSelectedMedia(eventdetails);
 		event.setChargeData(chargeDatas);
 		event.setEventCategeorydata(eventCategeorydata);
+		event.setDate(DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	
 		return this.toApiJsonSerializer.serialize(settings, event, RESPONSE_PARAMETERS);
