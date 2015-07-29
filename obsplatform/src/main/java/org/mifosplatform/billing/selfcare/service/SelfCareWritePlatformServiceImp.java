@@ -489,21 +489,13 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			String existingUserName = selfCare.getUserName();
 			String existingPassword = selfCare.getPassword();
 			
-				if(command.parameterExists("userName")){
-					//String userName = command.stringValueOfParameterNamed("userName");
+				/*if(command.parameterExists("userName")){
+					String userName = command.stringValueOfParameterNamed("userName");
 					selfCare.setUserName(userName);
 				}
-				if(command.parameterExists("currentpassword")){
-					String currentPassword = command.stringValueOfParameterNamed("currentpassword");
-					if(!currentPassword.equalsIgnoreCase(selfCare.getPassword())){
-						throw new SelfcarePasswordNotFoundException(currentPassword);
-						}
-					selfCare.setPassword(password);
-				}
-				
-				
+				selfCare.setPassword(password);
 				this.selfCareRepository.save(selfCare);
-			
+				*/
 				
 				if((userName != null && password != null) && (!userName.isEmpty() && !password.isEmpty()) &&
                 		((existingUserName.equalsIgnoreCase(userName)) && (!existingPassword.equalsIgnoreCase(password)))){				
