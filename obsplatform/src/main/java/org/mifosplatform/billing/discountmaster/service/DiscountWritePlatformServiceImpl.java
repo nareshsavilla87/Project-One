@@ -1,12 +1,7 @@
 package org.mifosplatform.billing.discountmaster.service;
 
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-import org.mifosplatform.billing.discountmaster.domain.DiscountDetailRepository;
-import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.mifosplatform.billing.discountmaster.exception.DiscountMasterNotFoundException;
@@ -24,9 +19,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-
 /**
  * @author hugo
  * 
@@ -40,7 +32,6 @@ public class DiscountWritePlatformServiceImpl implements
 	private final DiscountCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final DiscountMasterRepository discountMasterRepository;
 	private final FromJsonHelper fromApiJsonHelper;
-	private final DiscountDetailRepository discountDetailRepository;
 	/**
 	 * @param context
 	 * @param apiJsonDeserializer
@@ -48,14 +39,12 @@ public class DiscountWritePlatformServiceImpl implements
 	 */
 	@Autowired
 	public DiscountWritePlatformServiceImpl(final PlatformSecurityContext context,final DiscountCommandFromApiJsonDeserializer apiJsonDeserializer,
-			final DiscountMasterRepository discountMasterRepository,final FromJsonHelper fromApiJsonHelper,
-			final DiscountDetailRepository detailRepository) {
+			final DiscountMasterRepository discountMasterRepository,final FromJsonHelper fromApiJsonHelper) {
 		
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.fromApiJsonHelper = fromApiJsonHelper;
 		this.discountMasterRepository = discountMasterRepository;
-		this.discountDetailRepository = detailRepository;
 		
 	}
 
