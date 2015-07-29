@@ -52,9 +52,7 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 	@Column(name = "is_delete")
 	private char isDelete = 'N';
 	
-	/*@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "discountMaster", orphanRemoval = true)
-	private List<DiscountDetails> discountDetails = new ArrayList<DiscountDetails>();*/
+	
 
 	public DiscountMaster() {
 		// TODO Auto-generated constructor stub
@@ -220,10 +218,7 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 			this.discountCode = this.discountCode + "_" + this.getId();
 		}
 
-		/*for (DiscountDetails discountDetails : this.discountDetails) {
-			discountDetails.delete();
-		}*/
-
+		
 	}
 
 	
@@ -231,15 +226,7 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 		return isDelete;
 	}
 
-	/*public List<DiscountDetails> getDiscountDetails() {
-		return discountDetails;
-	}
 	
-	public void addDetails(DiscountDetails discountDetail) {
-		discountDetail.update(this);
-		this.discountDetails.add(discountDetail);
-
-	}*/
 
 	
 }
