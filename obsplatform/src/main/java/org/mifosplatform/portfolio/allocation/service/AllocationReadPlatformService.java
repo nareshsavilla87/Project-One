@@ -14,5 +14,7 @@ public interface AllocationReadPlatformService {
 
 	AllocationDetailsData getDisconnectedHardwareItemDetails(Long orderId,Long clientId);
 
+	List<AllocationDetailsData> retrieveHardWareDetailsByServiceMap(Long clientId, Long serviceId);
+
 
 }

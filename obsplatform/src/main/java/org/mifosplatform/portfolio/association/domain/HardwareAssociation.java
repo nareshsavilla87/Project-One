@@ -114,6 +114,10 @@ public class HardwareAssociation extends AbstractAuditableCustom<AppUser, Long> 
 	public Long getOrderId() {
 		return orderId;
 	}
+	
+	public Long getServiceId() {
+		return serviceId;
+	}
 
 
 	public String getIsDeleted() {

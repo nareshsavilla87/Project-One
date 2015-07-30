@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
 import org.mifosplatform.portfolio.association.data.AssociationData;
 import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -99,7 +100,7 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			public String schema() {
 				return " o.id AS id, o.plan_id AS planId,hm.item_code as itemCode  FROM b_orders o,b_hw_plan_mapping hm, b_plan_master p  WHERE NOT EXISTS  (SELECT *FROM b_association a" +
 						" WHERE  a.order_id=o.id  AND a.client_id = o.client_id  AND a.is_deleted = 'N') AND o.client_id =? AND hm.plan_code = p.plan_code" +
-						" AND o.plan_id = p.id and hm.item_code=?  and o.id =(select max(id) from b_orders where client_id=o.client_id )";
+						" AND o.plan_id = p.id and p.is_hw_req='Y' and hm.item_code=?  and o.id =(select max(id) from b_orders where client_id=o.client_id )";
 
 
 			}
@@ -339,5 +340,49 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 
 				}
 			}
+		/* (non-Javadoc)
+		 * @see #retrieveClientAllocatedPlanByServiceMap(java.lang.Long, java.lang.Long)
+		 */
+		@Override
+		public List<AllocationDetailsData> retrieveClientAllocatedPlanByServiceMap(Long clientId, Long itemId) {
+			
+			try {
+				
+				final serviceLevelMapper mapper = new serviceLevelMapper();
+				final String sql = "SELECT " + mapper.schema();
+				return jdbcTemplate.query(sql, mapper, new Object[] {clientId,itemId});
+				} catch (EmptyResultDataAccessException e) {
+				   return null;
+				}
+			
+		}
+			private static final class serviceLevelMapper implements RowMapper<AllocationDetailsData> {
+
+				public String schema() {
+
+				return " o.id as orderId psd.service_id as serviceId,'ALLOT' as allocationType,id.serial_no AS serialNo,i.item_description AS itemDescription,"+
+                        " o.plan_id AS planId FROM b_item_master i,b_item_detail id,b_prov_service_details psd,b_orders o,b_order_line ol,"+
+                        " WHERE NOT EXISTS( SELECT * FROM  b_association a WHERE a.order_id = o.id AND a.client_id = o.client_id "+
+                        " AND psd.service_id = a.service_id AND a.is_deleted = 'N') "+
+                        " AND i.id = id.item_master_id AND psd.item_id = id.item_master_id AND psd.is_hw_req = 'Y' AND o.id=ol.order_id "+
+                        " AND ol.service_id = psd.service_id AND id.is_deleted = 'N' AND o.id=(select max(id) from b_orders where client_id=id.client_id and client_id=o.client_id) " +
+                        " And  id.client_id = ? AND psd.item_id= ?  ";
+				}
+				
+			
+
+				@Override
+				public AllocationDetailsData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
+
+				final Long serviceId = rs.getLong("serviceId");	
+				final Long orderId = rs.getLong("orderId");
+				final String allocationType = rs.getString("allocationType");	
+				final String serialNum = rs.getString("serialNo");
+				final String itemDescription = rs.getString("itemDescription");
+				final Long planId = rs.getLong("planId");
+				
+				return new AllocationDetailsData(serviceId,planId,orderId,allocationType,serialNum,itemDescription);
+				}
+		}
 		
 }

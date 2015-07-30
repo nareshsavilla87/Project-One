@@ -109,7 +109,7 @@ public class OwnedHardwareWritePlatformServiceImp implements OwnedHardwareWriteP
 		    
 		        if(!allocationDetailsDatas.isEmpty()){
 		    				this.hardwareAssociationWriteplatformService.createNewHardwareAssociation(ownedHardware.getClientId(),
-		    						allocationDetailsDatas.get(0).getPlanId(),ownedHardware.getSerialNumber(),allocationDetailsDatas.get(0).getorderId(),"OWNED");
+		    						allocationDetailsDatas.get(0).getPlanId(),ownedHardware.getSerialNumber(),allocationDetailsDatas.get(0).getorderId(),"OWNED",null);
 		       }
 		    }
 		

@@ -4,7 +4,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
@@ -195,6 +194,50 @@ public class AllocationReadPlatformServiceImpl implements AllocationReadPlatform
 							}
 
 					}
+
+
+					/* (non-Javadoc)
+					 * @see #retrieveHardWareDetailsByServiceMap(java.lang.Long, java.lang.Long)
+					 */
+					@Override
+					public List<AllocationDetailsData> retrieveHardWareDetailsByServiceMap(Long clientId, Long serviceId) {
+						
+						try {
+							
+							final HardwareServiceMapper mapper = new HardwareServiceMapper();
+							final String sql = "select " + mapper.schema();
+							return jdbcTemplate.query(sql, mapper, new Object[] {clientId,serviceId});
+							
+							} catch (EmptyResultDataAccessException e) {
+							   return null;
+							}
+						
+					}
+					
+					private static final class HardwareServiceMapper implements RowMapper<AllocationDetailsData> {
+
+						public String schema() {
+
+						return " id.id AS id,'ALLOT' as allocationType,id.serial_no AS serialNo,i.item_description AS itemDescription "+ 
+								" FROM b_item_master i INNER JOIN b_item_detail id ON i.id=id.item_master_id AND id.is_deleted='N' "+
+								" INNER JOIN b_prov_service_details psd ON psd.item_id=id.item_master_id AND psd.is_hw_req='Y' "+
+								" WHERE  id.client_id =? and psd.service_id=? ";
+						}
+						
+					
+
+						@Override
+						public AllocationDetailsData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
+
+						final Long id = rs.getLong("id");
+						final String serialNum = rs.getString("serialNo");
+						final String itemDescription = rs.getString("itemDescription");
+						final String allocationType = rs.getString("allocationType");	
+						
+						return new AllocationDetailsData(id, itemDescription, serialNum, null,null,allocationType,null,null);
+						}
+				}
+
 			
 
 	

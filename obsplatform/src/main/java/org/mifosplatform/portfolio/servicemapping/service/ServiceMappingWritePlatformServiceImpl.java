@@ -101,14 +101,14 @@ public class ServiceMappingWritePlatformServiceImpl implements ServiceMappingWri
 		final Throwable realCause = dve.getMostSpecificCause();
 		if (realCause.getMessage().contains("serviceCode")) {
 			final String name = command.stringValueOfParameterNamed("serviceId");
-			throw new PlatformDataIntegrityException("error.msg.service.mapping.duplicate", "A code with name '" + name + "' already exists");
+			throw new PlatformDataIntegrityException("error.msg.service.mapping.duplicate", "A code with name '" + name + "' already exists","serviceId");
 			// throw new
 			// PlatformDataIntegrityException("error.msg.code.duplicate.name",
 			// "A code with name '" + name + "' already exists");
 		}else	if (realCause.getMessage().contains("service_identification_uq")) {
 			final String name = command.stringValueOfParameterNamed("serviceId");
 			final String serviceIdentification = command.stringValueOfParameterNamed("serviceIdentification");
-			throw new PlatformDataIntegrityException("error.msg.service.already.mapped.with.serviceIdentification", "A code with name '" + name + "' already mapped with '" + serviceIdentification + "'");
+			throw new PlatformDataIntegrityException("error.msg.service.already.mapped.with.serviceIdentification", "A code with name '" + name + "' already mapped with '" + serviceIdentification + "'","serviceIdentification");
 			
 		}
 		

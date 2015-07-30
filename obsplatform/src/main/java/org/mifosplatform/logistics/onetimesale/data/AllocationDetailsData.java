@@ -4,14 +4,17 @@ import org.joda.time.LocalDate;
 
 public class AllocationDetailsData {
 
-	private final Long id;
-	private final String itemDescription;
-	private final String serialNo;
-	private final LocalDate allocationDate;
-	private final Long itemDetailId;
-	private final String allocationType;
+	private Long id;
+	private String itemDescription;
+	private String serialNo;
+	private LocalDate allocationDate;
+	private Long itemDetailId;
+	private String allocationType;
 	private String quality;
 	private String hardwareStatus;
+	private Long orderId;
+	private Long serviceId;
+	private Long planId;
 	
 
 	public AllocationDetailsData(final Long id, final String itemDescription,
@@ -38,6 +41,24 @@ public class AllocationDetailsData {
 		this.allocationType=null;
 		this.quality = null;
 
+	}
+
+	/**
+	 * @param serviceId
+	 * @param planId
+	 * @param allocationType
+	 * @param serialNum
+	 * @param itemDescription
+	 */
+	public AllocationDetailsData(final Long serviceId, final Long planId,final Long orderId,
+			final String allocationType, final String serialNum, final String itemDescription) {
+		
+		this.serviceId = serviceId;
+		this.planId = planId;
+		this.orderId = orderId;
+		this.allocationType = allocationType;
+		this.serialNo = serialNum;
+		this.itemDescription = itemDescription;
 	}
 
 	public Long getId() {
@@ -80,6 +101,27 @@ public class AllocationDetailsData {
 
 	public void setHardwareStatus(String hardwareStatus) {
 		this.hardwareStatus = hardwareStatus;
+	}
+
+	/**
+	 * @return the orderId
+	 */
+	public Long getOrderId() {
+		return orderId;
+	}
+
+	/**
+	 * @return the serviceId
+	 */
+	public Long getServiceId() {
+		return serviceId;
+	}
+
+	/**
+	 * @return the planId
+	 */
+	public Long getPlanId() {
+		return planId;
 	}
 	
 	

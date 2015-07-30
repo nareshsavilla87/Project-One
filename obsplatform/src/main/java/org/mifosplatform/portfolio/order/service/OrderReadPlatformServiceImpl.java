@@ -448,8 +448,9 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 					private static final class ClientOrderServiceMapper implements RowMapper<OrderLineData> {
 
 						public String orderServiceLookupSchema() {
-						return " ol.id as id,s.id as serviceId,ol.order_id as orderId,s.service_code as serviceCode,s.is_auto as isAuto,s.service_description as serviceDescription,s.service_type as serviceType,psd.image AS image FROM b_order_line ol, b_service s,b_prov_service_details psd " +
-								" WHERE order_id =? and ol.service_id=s.id and psd.service_id = s.id and ol.is_deleted ='N'";
+						return " ol.id as id,s.id as serviceId,ol.order_id as orderId,s.service_code as serviceCode,s.is_auto as isAuto,s.service_description as serviceDescription,s.service_type as serviceType,psd.image AS image FROM b_order_line ol inner join b_service s " +
+								" on ol.service_id=s.id left join b_prov_service_details psd on psd.service_id = s.id" +
+								" WHERE order_id =?  and ol.is_deleted ='N'";
 						}
 
 						@Override

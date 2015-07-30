@@ -77,7 +77,7 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 			Order order=this.orderRepository.findOne(orderId);
 			String provisionNum = command.stringValueOfParameterNamed("provisionNum");
 			String allocationType = command.stringValueOfParameterNamed("allocationType");
-			HardwareAssociation hardwareAssociation = new HardwareAssociation(command.entityId(), order.getPlanId(), provisionNum, orderId,allocationType);
+			HardwareAssociation hardwareAssociation = new HardwareAssociation(command.entityId(), order.getPlanId(), provisionNum, orderId,allocationType,null);
 			//Check for Custome_Validation
 			this.eventValidationReadPlatformService.checkForCustomValidations(hardwareAssociation.getClientId(),"Pairing", command.json(),userId);
 			this.associationRepository.saveAndFlush(hardwareAssociation);

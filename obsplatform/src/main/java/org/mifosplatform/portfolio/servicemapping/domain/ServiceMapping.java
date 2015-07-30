@@ -85,7 +85,7 @@ public class ServiceMapping extends AbstractPersistable<Long> {
 		final String provisionSystem=command.stringValueOfParameterNamed("provisionSystem");
 		if(isServiceLevelMap){
 			isHwReq =command.booleanPrimitiveValueOfParameterNamed("isHwReq");
-		  if(command.hasParameter("itemId")){
+		  if(isHwReq&&command.hasParameter("itemId")){
 			 itemId = command.longValueOfParameterNamed("itemId");
 		   }
 		}
@@ -198,7 +198,7 @@ public class ServiceMapping extends AbstractPersistable<Long> {
 		if(isServiceLevelMap){
 			final boolean isHwReqParamName =command.booleanPrimitiveValueOfParameterNamed("isHwReq");
 		     this.isHwReq=isHwReqParamName?'Y':'N';
-			  if(command.hasParameter("itemId")){
+			  if(isHwReqParamName&&command.hasParameter("itemId")){
 					final String itemParamName = "itemId";
 					if (command.isChangeInLongParameterNamed(itemParamName,this.itemId)) {
 						final Long newValue = command.longValueOfParameterNamed(itemParamName);
@@ -206,6 +206,8 @@ public class ServiceMapping extends AbstractPersistable<Long> {
 						this.itemId = newValue;
 					}
 				     
+			   }else{
+			       this.itemId=null;
 			   }
 			}
 
