@@ -22,6 +22,7 @@ public class PaymentData {
 	private Date transactionDate;
 	private BigDecimal debitAmount;
 	private List<PaymentData> depositDatas;
+	private LocalDate date;
 	
 	public PaymentData(final Collection<McodeData> data,final List<PaymentData> depositDatas){
 		this.data= data;
@@ -115,6 +116,16 @@ public class PaymentData {
 
 	public void setAvailAmount(BigDecimal availAmount) {
 		this.availAmount = availAmount;
+	}
+
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 	
 	

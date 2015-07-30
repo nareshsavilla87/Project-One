@@ -39,6 +39,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
@@ -181,6 +182,7 @@ public class TicketMasterApiResource {
 			}else{
 				final Collection<MCodeData> sourceData = codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TICKET_SOURCE);
 				final TicketMasterData templateData = handleTicketTemplateData(sourceData);
+				templateData.setDate(DateUtils.getLocalDateOfTenantForClient());
 				return this.toApiJsonSerializer.serialize(settings, templateData, RESPONSE_PARAMETERS);
 			}
 		}

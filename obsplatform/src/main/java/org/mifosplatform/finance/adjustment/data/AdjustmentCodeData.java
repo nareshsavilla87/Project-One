@@ -3,12 +3,14 @@ package org.mifosplatform.finance.adjustment.data;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.billing.discountmaster.data.DiscountValues;
 
 public class AdjustmentCodeData {
 
 	private final List<AdjustmentData> data;
 	private List<DiscountValues> discountOptions;
+	private LocalDate date;
 
 	public AdjustmentCodeData(final List<AdjustmentData> data) {
 		this.data=data;
@@ -28,5 +30,13 @@ public class AdjustmentCodeData {
 		return discountOptions;
 	}
 
+	public LocalDate getDate() {
+		return date;
+	}
 
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+
+	
 }
