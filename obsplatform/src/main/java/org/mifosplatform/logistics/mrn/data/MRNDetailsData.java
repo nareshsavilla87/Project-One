@@ -31,6 +31,7 @@ public class MRNDetailsData {
 	private List<String> serialNumber;
 	private Long fromOfficeNum;
 	private Long toOfficeNum;
+	private LocalDate date;
 	
 	
 	public MRNDetailsData(final String id, final LocalDate requestedDate, final String fromOffice, final String toOffice, final Long orderdQuantity, 
@@ -228,7 +229,18 @@ public class MRNDetailsData {
 
 	public void setToOfficeNum(Long toOfficeNum) {
 		this.toOfficeNum = toOfficeNum;
+	}
+
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	} 
+	
 	
 	
 }

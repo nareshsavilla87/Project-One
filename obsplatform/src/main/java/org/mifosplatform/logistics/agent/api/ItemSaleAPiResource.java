@@ -24,6 +24,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.agent.data.AgentItemSaleData;
 import org.mifosplatform.logistics.agent.service.ItemSaleReadPlatformService;
@@ -86,6 +87,9 @@ public String retrieveTemplateData(@Context final UriInfo uriInfo){
 	this.context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 	AgentItemSaleData  itemSaleData=null;
     itemSaleData=handleAgentTemplateData(itemSaleData);
+    if(itemSaleData != null){
+    	itemSaleData.setDate(DateUtils.getLocalDateOfTenantForClient());
+    }
 	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	return this.toApiJsonSerializer.serialize(settings, itemSaleData, RESPONSE_AGENT_DATA_PARAMETERS);
 	

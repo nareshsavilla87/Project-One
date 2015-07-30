@@ -122,6 +122,7 @@ public class VendorAgreementApiResource {
 
         context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
         VendorAgreementData vendor=handleTemplateData(vendorId);
+        vendor.setDate(DateUtils.getLocalDateOfTenantForClient());
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, vendor, RESPONSE_DATA_PARAMETERS);
     }
@@ -218,6 +219,7 @@ public class VendorAgreementApiResource {
         }
         List<VendorAgreementData> vendorAgreementDetailsData = this.vendorAgreementReadPlatformService.retrieveVendorAgreementDetails(vendorAgreementId);
         vendorAgreeData.setVendorAgreementDetailsData(vendorAgreementDetailsData);
+        vendorAgreeData.setDate(DateUtils.getLocalDateOfTenantForClient());
         
         if (settings.isTemplate()) {
         	final List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();

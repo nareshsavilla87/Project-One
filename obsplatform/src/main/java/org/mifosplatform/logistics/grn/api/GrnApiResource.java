@@ -26,6 +26,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.grn.service.GrnReadPlatformService;
@@ -138,6 +139,7 @@ public class GrnApiResource {
 		 Collection<OfficeData> officeData = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
 		 List<ItemData> itemData = this.itemReadPlatformService.retrieveAllItems();
 		 InventoryGrnData inventoryGrnData =  new InventoryGrnData(itemData,officeData,supplierData);
+		 inventoryGrnData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		 final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializerForGrn.serialize(settings, inventoryGrnData, RESPONSE_DATA_GRN_DETAILS_PARAMETERS);
 	}

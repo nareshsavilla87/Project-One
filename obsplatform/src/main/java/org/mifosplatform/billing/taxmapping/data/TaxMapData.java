@@ -23,6 +23,7 @@ public class TaxMapData {
 	private String taxRegion;
 	private Long taxRegionId;
 	private List<PriceRegionData> priceRegionData;
+	private LocalDate date;
 
 	public TaxMapData() {
 	}
@@ -51,10 +52,12 @@ public class TaxMapData {
 	}
 
 	public TaxMapData(final Collection<MCodeData> taxTypeData,
-			final List<PriceRegionData> priceRegionData,final String chargeCode) {
+			final List<PriceRegionData> priceRegionData,final String chargeCode,
+			LocalDate date) {
 		this.priceRegionData = priceRegionData;
 		this.taxTypeData = taxTypeData;
 		this.chargeCode = chargeCode;
+		this.date = date;
 	}
 
 	/**
@@ -175,5 +178,13 @@ public class TaxMapData {
 
 	}
 
+	public LocalDate getDate() {
+		return date;
+	}
 
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+
+	
 }

@@ -25,6 +25,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.agent.service.ItemSaleReadPlatformService;
@@ -114,6 +115,7 @@ public class MRNDetailsApiResource {
 		final Collection<OfficeData> officeData = this.officeReadPlatformService.retrieveAllOfficesForDropdown();
 		final Collection<ItemData> itemMasterData = this.oneTimeSaleReadPlatformService.retrieveItemData();
 		final MRNDetailsData mrnDetailsData = new MRNDetailsData(officeData,itemMasterData);
+		mrnDetailsData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return apiJsonSerializer.serialize(settings,mrnDetailsData,RESPONSE_PARAMETERS);
 	}
@@ -143,6 +145,7 @@ public class MRNDetailsApiResource {
 		final Collection<MRNDetailsData> mrnIds = mrnDetailsReadPlatformService.retriveMrnIds();
 		final List<MRNDetailsData> itemsaleIds = agentReadPlatformService.retriveItemsaleIds();
 		final MRNDetailsData mrnDetailsData = new MRNDetailsData(mrnIds,itemsaleIds);
+		mrnDetailsData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return apiJsonSerializer.serialize(settings,mrnDetailsData,RESPONSE_PARAMETERS);
 	}

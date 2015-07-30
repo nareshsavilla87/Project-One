@@ -71,7 +71,7 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             final String officeType = resultSet.getString("officeType");
             final BigDecimal balance =resultSet.getBigDecimal("balance");
 
-            return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, null, null, officeType,balance);
+            return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, null, null, officeType,balance,null);
         }
     }
 

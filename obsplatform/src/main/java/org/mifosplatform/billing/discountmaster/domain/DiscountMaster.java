@@ -225,7 +225,7 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 		discountDetail.update(this);
 		this.discountDetails.add(discountDetail);
 
-
+		
 	}
 
 	
