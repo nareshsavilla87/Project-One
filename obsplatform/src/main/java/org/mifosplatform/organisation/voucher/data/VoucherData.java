@@ -94,12 +94,12 @@ public class VoucherData {
 		
 	}
 
-	public VoucherData(String pinType, String pinValue, Date expiryDate) {
+	public VoucherData(String pinType, String pinValue, Date expiryDate, LocalDate date) {
 		
 		this.pinType = pinType;
 		this.pinValue = pinValue;
 		this.expiryDate = new LocalDate(expiryDate);
-		
+		this.date = date;
 	}
 
 	public VoucherData(Long id,String batchName) {
