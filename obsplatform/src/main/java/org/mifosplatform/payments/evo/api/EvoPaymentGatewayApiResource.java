@@ -76,7 +76,7 @@ public class EvoPaymentGatewayApiResource {
 	    	 return this.jsonSerializer.serialize(jsonObj);
 		}catch (Exception e) {
 		       // return e.getMessage();
-			throw new PlatformDataIntegrityException(e.getMessage(),e.getLocalizedMessage(),"length",e.getStackTrace().getClass());
+			throw new PlatformDataIntegrityException(e.getMessage(),e.getLocalizedMessage(),"amount",e.getStackTrace().getClass());
 	    }
 	}
 
