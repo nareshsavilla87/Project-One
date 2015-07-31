@@ -71,32 +71,13 @@ public final class DiscountCommandFromApiJsonDeserializer {
 		final String discountType = fromApiJsonHelper.extractStringNamed("discountType", element);
 		baseDataValidator.reset().parameter("discountType").value(discountType).notBlank();
 		
-	/*	final Integer discountRate = fromApiJsonHelper.extractIntegerWithLocaleNamed("discountRate", element);
-		baseDataValidator.reset().parameter("discountRate").value(discountRate).notNull();*/
+		final Integer discountRate = fromApiJsonHelper.extractIntegerWithLocaleNamed("discountRate", element);
+		baseDataValidator.reset().parameter("discountRate").value(discountRate).notNull();
 		
 		final String discountStatus = fromApiJsonHelper.extractStringNamed("discountStatus",element);
 		baseDataValidator.reset().parameter("discountStatus").value(discountStatus).notBlank();
 		
-		//final JsonArray discountPricesArray = fromApiJsonHelper.extractJsonArrayNamed("discountPrices", element);
-      //  String[] discountPrices = null;
-       // discountPrices = new String[discountPricesArray.size()];
-       // final int itemPricesArraySize = discountPricesArray.size();
-	  //  baseDataValidator.reset().parameter("discountPrices").value(itemPricesArraySize).integerGreaterThanZero();
-        
-	  /*  if(itemPricesArraySize > 0){
-	    for(int i = 0; i < discountPricesArray.size(); i++){
-	    	discountPrices[i] = discountPricesArray.get(i).toString();
-	    }
-	    for (final String discountPrice : discountPrices) {
-	    	
-	    	final JsonElement attributeElement = fromApiJsonHelper.parse(discountPrice);
-	    	final BigDecimal price = fromApiJsonHelper.extractBigDecimalNamed("discountRate", attributeElement, fromApiJsonHelper.extractLocaleParameter(attributeElement.getAsJsonObject()));
-	    	baseDataValidator.reset().parameter("discountRate").value(price).notNull();
-	    	
-	    	final Long categoryId = fromApiJsonHelper.extractLongNamed("categoryId", attributeElement);
-	    	baseDataValidator.reset().parameter("categoryId").value(categoryId).notNull();
-		  }
-        }*/
+		
 
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	}

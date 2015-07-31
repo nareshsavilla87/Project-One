@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.mifosplatform.billing.discountmaster.domain.DiscountDetailRepository;
 import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
@@ -48,15 +47,13 @@ public class DiscountWritePlatformServiceImpl implements
 	 */
 	@Autowired
 	public DiscountWritePlatformServiceImpl(final PlatformSecurityContext context,final DiscountCommandFromApiJsonDeserializer apiJsonDeserializer,
-			final DiscountMasterRepository discountMasterRepository,final FromJsonHelper fromApiJsonHelper,
-			final DiscountDetailRepository detailRepository) {
+			final DiscountMasterRepository discountMasterRepository,final FromJsonHelper fromApiJsonHelper,final DiscountDetailRepository discountDetailRepository) {
 		
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.fromApiJsonHelper = fromApiJsonHelper;
 		this.discountMasterRepository = discountMasterRepository;
-		this.discountDetailRepository = detailRepository;
-		
+		this.discountDetailRepository = discountDetailRepository;
 	}
 
 	/*
@@ -175,6 +172,7 @@ public class DiscountWritePlatformServiceImpl implements
 						
 				  }
 					 discountMaster.getDiscountDetails().removeAll(details);
+
 			final Map<String, Object> changes = discountMaster.update(command);
 			this.discountMasterRepository.saveAndFlush(discountMaster);
 			

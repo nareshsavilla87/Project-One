@@ -14,3 +14,5 @@ END //
 DELIMITER ;
 call addVoucherBatchType();
 Drop procedure IF EXISTS addVoucherBatchType;
+
+alter table b_client_register modify generate_key varchar(100) NOT NULL;
