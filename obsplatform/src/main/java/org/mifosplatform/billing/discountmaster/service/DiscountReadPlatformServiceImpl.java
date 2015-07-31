@@ -94,6 +94,39 @@ public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformServ
 
 	}
 
+	@Override
+	public List<DiscountDetailData> retrieveDiscountdetails(Long discountId) {
+		try{
+		   this.context.authenticatedUser();
+		   final DiscountDetailsMapper mapper = new DiscountDetailsMapper();
+		   final String sql="select "+mapper.schema();
+		   return this.jdbcTemplate.query(sql, mapper,new Object[] {discountId});
+		}catch(EmptyResultDataAccessException dve){
+			return null;	
+		}
+	}
+	
+	private static final class DiscountDetailsMapper implements RowMapper<DiscountDetailData>{
+
+		public String schema() {
+			return "  dd.id AS id,if(dd.category_type = '0', 'Default', mcv.code_value) AS categoryType,dd.category_type AS categoryTypeId," +
+				   " dd.discount_rate AS discountRate" +
+				   " FROM b_discount_details dd left join m_code_value mcv on mcv.id = dd.category_type" +
+				   " WHERE dd.discount_id = ? AND  dd.is_deleted = 'N' group by dd.id";
+			}
+		
+		@Override
+		public DiscountDetailData mapRow(ResultSet rs, int rowNum) throws SQLException {
+			
+			final Long id = rs.getLong("id");
+			final String categoryType=rs.getString("categoryType");
+			final Long categoryTypeId=rs.getLong("categoryTypeId");
+			final BigDecimal discountRate =rs.getBigDecimal("discountRate");
+			return new DiscountDetailData(id,categoryType,categoryTypeId,discountRate);
+		}
+		
+	}
+
 	
 
 }

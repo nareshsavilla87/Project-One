@@ -18,6 +18,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.billing.discountmaster.data.DiscountDetailData;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.discountmaster.service.DiscountReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -142,6 +143,7 @@ public class DiscountMasterAPiResource {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		DiscountMasterData discountMasterData = this.discountReadPlatformService.retrieveSingleDiscountDetail(discountId);
 		List<DiscountDetailData> discountDetailDatas = this.discountReadPlatformService.retrieveDiscountdetails(discountId);
+		discountMasterData.setDiscountDetailsData(discountDetailDatas);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		if(settings.isTemplate()){
 		final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
