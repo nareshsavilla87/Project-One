@@ -1,5 +1,6 @@
 package org.mifosplatform.organisation.partner.data;
 
+import java.io.File;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +45,7 @@ public class PartnersData {
 	private String contactName;
 	private Long userId;
 	private String imageKey;
+	private String companyLogo;
 	
 	
 	public PartnersData(List<String> countryData, List<String> statesData,
@@ -64,7 +66,8 @@ public class PartnersData {
 	public PartnersData(final Long officeId,final Long additionalinfoId,final String partnerName, final BigDecimal creditLimit, 
 			final String currency,final Long parentId, final String parentName, final String officeType,final LocalDate openingDate, 
 			final String loginName,final String city, final String state,final String country, final String email, final String phoneNumber,
-			final String isCollective,final BigDecimal balanceAmount,final String officeNumber,final String contactName,final Long userId) {
+			final String isCollective,final BigDecimal balanceAmount,final String officeNumber,final String contactName,final Long userId,
+			final String companyLogo) {
 		
 		this.id = additionalinfoId;
 		this.officeId = officeId;
@@ -86,6 +89,7 @@ public class PartnersData {
 		this.officeNumber = officeNumber;
 		this.contactName = contactName;
 		this.userId = userId;
+		this.companyLogo = companyLogo !=null ? new File(companyLogo).getName() : companyLogo;
 
 	}
 
@@ -253,6 +257,10 @@ public class PartnersData {
 
 	public boolean imageKeyExists() {
 		return StringUtils.isNotBlank(this.imageKey);
+	}
+	
+	public String getCompanyLogo() {
+		return companyLogo;
 	}
 
 }

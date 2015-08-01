@@ -40,4 +40,6 @@ public interface OrderWritePlatformService {
 	void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode);
 
 	
+
+	
 }
