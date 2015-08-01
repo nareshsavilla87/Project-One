@@ -207,6 +207,11 @@ public class DiscountMasterData {
 		this.discountDetailDatas = discountDetailDatas;
 	}
 
+	public void setclientCategoryData(Collection<MCodeData> clientCategoryDatas) {
+
+		this.clientCategoryDatas = clientCategoryDatas;
+	}
+
 
 	
 

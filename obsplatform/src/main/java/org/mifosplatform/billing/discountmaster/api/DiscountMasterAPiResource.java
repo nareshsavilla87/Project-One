@@ -148,7 +148,9 @@ public class DiscountMasterAPiResource {
 		if(settings.isTemplate()){
 		final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
 		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
+		final Collection<MCodeData> clientCategoryDatas = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CLIENT_CATEGORY);
 		discountMasterData.setStatusData(statusData);
+		discountMasterData.setclientCategoryData(clientCategoryDatas);
 		discountMasterData.setDiscountTypeData(discountTypeData);
 	    }
 		return this.toApiJsonSerializer.serialize(settings,discountMasterData,RESPONSE_DATA_PARAMETERS);
