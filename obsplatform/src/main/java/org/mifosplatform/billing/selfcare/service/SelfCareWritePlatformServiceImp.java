@@ -338,6 +338,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				}
 				 
 				if (registerSelfcareMessageDetails != null) {
+					
 					String subject = registerSelfcareMessageDetails.getSubject();
 					String body = registerSelfcareMessageDetails.getBody();
 					String header = registerSelfcareMessageDetails.getHeader() + ",";
