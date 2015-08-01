@@ -26,9 +26,9 @@ public class DiscountMasterData {
 	private BigDecimal discountAmount;
 	private BigDecimal discountedChargeAmount;
 	private List<EnumOptionData> statusData;
+	private Collection<MCodeData> clientCategoryDatas;
 	private Collection<MCodeData> discountTypeData;
 	private String discountStatus;
-	private Collection<MCodeData> clientCategoryDatas;
 	private List<DiscountDetailData> discountDetailDatas;
 
 	public DiscountMasterData(final Long id, final String discountCode,final String discountDescription, final String discountType,
@@ -203,14 +203,16 @@ public class DiscountMasterData {
 		this.discountedChargeAmount = discountedChargeAmount;
 	}
 
+	public void setDiscountDetailsData(List<DiscountDetailData> discountDetailDatas) {
+		this.discountDetailDatas = discountDetailDatas;
+	}
+
 	public void setclientCategoryData(Collection<MCodeData> clientCategoryDatas) {
 
 		this.clientCategoryDatas = clientCategoryDatas;
 	}
 
-	public void setDiscountDetailsData(List<DiscountDetailData> discountDetailDatas) {
 
-		this.discountDetailDatas = discountDetailDatas;
-	}
+	
 
 }

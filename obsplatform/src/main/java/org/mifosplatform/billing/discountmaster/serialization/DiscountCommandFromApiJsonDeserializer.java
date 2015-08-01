@@ -77,13 +77,14 @@ public final class DiscountCommandFromApiJsonDeserializer {
 		final String discountStatus = fromApiJsonHelper.extractStringNamed("discountStatus",element);
 		baseDataValidator.reset().parameter("discountStatus").value(discountStatus).notBlank();
 		
-		//final JsonArray discountPricesArray = fromApiJsonHelper.extractJsonArrayNamed("discountPrices", element);
-      //  String[] discountPrices = null;
-       // discountPrices = new String[discountPricesArray.size()];
-       // final int itemPricesArraySize = discountPricesArray.size();
-	  //  baseDataValidator.reset().parameter("discountPrices").value(itemPricesArraySize).integerGreaterThanZero();
+
+		final JsonArray discountPricesArray = fromApiJsonHelper.extractJsonArrayNamed("discountPrices", element);
+        String[] discountPrices = null;
+      discountPrices = new String[discountPricesArray.size()];
+       final int itemPricesArraySize = discountPricesArray.size();
+	   baseDataValidator.reset().parameter("discountPrices").value(itemPricesArraySize).integerGreaterThanZero();
         
-	  /*  if(itemPricesArraySize > 0){
+	   if(itemPricesArraySize > 0){
 	    for(int i = 0; i < discountPricesArray.size(); i++){
 	    	discountPrices[i] = discountPricesArray.get(i).toString();
 	    }
@@ -96,7 +97,8 @@ public final class DiscountCommandFromApiJsonDeserializer {
 	    	final Long categoryId = fromApiJsonHelper.extractLongNamed("categoryId", attributeElement);
 	    	baseDataValidator.reset().parameter("categoryId").value(categoryId).notNull();
 		  }
-        }*/
+        }
+
 
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	}
