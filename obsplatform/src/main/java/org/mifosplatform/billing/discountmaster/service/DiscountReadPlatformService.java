@@ -18,4 +18,5 @@ public interface DiscountReadPlatformService {
 	List<DiscountDetailData> retrieveDiscountdetails(Long discountId);
 
 
+
 }

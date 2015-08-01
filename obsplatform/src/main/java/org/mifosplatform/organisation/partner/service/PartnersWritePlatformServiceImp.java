@@ -190,7 +190,15 @@ public class PartnersWritePlatformServiceImp implements PartnersWritePlatformSer
 	        	 final String externalId=command.stringValueOfParameterNamed("externalId");
 	            throw new PlatformDataIntegrityException("error.msg.office or partner.duplicate.externalId", "office or partner with externalId `" + externalId + "` already exists",
 	                    "externalId", externalId);
-	        }
+	        }else if(realCause.getMessage().contains("phonenumber_org")) {
+	        	 final String phoneNumber=command.stringValueOfParameterNamed("phoneNumber");
+		            throw new PlatformDataIntegrityException("error.msg.office or partner.duplicate.phoneNumber", "office or partner with phoneNumber `" + phoneNumber + "` already exists",
+		                    "phoneNumber", phoneNumber);
+		        }else if(realCause.getMessage().contains("emailid_org")) {
+		        	 final String email=command.stringValueOfParameterNamed("email");
+			            throw new PlatformDataIntegrityException("error.msg.office or partner.duplicate.email", "office or partner with email `" + email + "` already exists",
+			                    "email", email);
+			        }
 		
 		throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue",
 				"Unknown data integrity issue with resource: " + realCause.getMessage());
