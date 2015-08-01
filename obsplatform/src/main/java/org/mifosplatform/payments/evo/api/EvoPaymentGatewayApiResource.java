@@ -59,5 +59,25 @@ public class EvoPaymentGatewayApiResource {
 			throw new PlatformDataIntegrityException(e.getMessage(),e.getLocalizedMessage(),"length",e.getStackTrace().getClass());
 	    }
 	}
+	
+	@POST
+	@Path("/amount")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String amountCal(final String apiRequestBodyAsJson){
+	     try{
+	    	 context.authenticatedUser();
+	    	 JSONObject jsonData  = new JSONObject(apiRequestBodyAsJson);
+	    	 double amount = jsonData.getDouble("amount");
+	    	 
+	    	 JSONObject jsonObj = new JSONObject();
+	    	 jsonObj.put("amount", amount*100);
+	    	 
+	    	 return this.jsonSerializer.serialize(jsonObj);
+		}catch (Exception e) {
+		       // return e.getMessage();
+			throw new PlatformDataIntegrityException(e.getMessage(),e.getLocalizedMessage(),"amount",e.getStackTrace().getClass());
+	    }
+	}
 
 }
