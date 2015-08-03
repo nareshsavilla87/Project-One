@@ -1,4 +1,5 @@
 
+
 public class TestStringd {
 
 	
@@ -8,8 +9,7 @@ public class TestStringd {
 	if(str.toLowerCase().matches("now()".toLowerCase())){
 		str=str.replace("now()", "hi");
 	}
-	System.out.println(str);
 	}
-
+    
 
 }

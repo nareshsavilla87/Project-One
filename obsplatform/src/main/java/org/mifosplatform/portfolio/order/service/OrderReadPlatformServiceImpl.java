@@ -61,7 +61,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
               	 " (pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_state c,b_charge_codes cc,b_client_address d" +
               	 " WHERE  b.priceregion_id = a.price_region_id AND b.state_id = c.id AND a.price_region_id = b.priceregion_id AND d.state = c.state_name " +
               	 " AND cc.charge_code = a.charge_code AND cc.charge_code = p.charge_code AND d.address_key = 'PRIMARY' AND d.client_id = "+clientId+" " +
-              	 "  AND a.plan_id != "+planId+" AND a.is_deleted = 'n'),0) AND pd.country_id = ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_country c," +
+              	 "  AND a.plan_id != "+planId+" AND a.is_deleted = 'n'),0) AND pd.country_id in ((SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_country c," +
               	 " b_charge_codes cc,b_client_address d WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND cc.charge_code = a.charge_code" +
               	 " AND cc.charge_code = p.charge_code AND a.price_region_id = b.priceregion_id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
               	 " AND d.client_id = "+clientId+"  AND a.plan_id != ? AND a.is_deleted = 'n'),0)) AND s.id = p.plan_id AND cd.client_id = "+clientId+"  GROUP BY s.id";
@@ -438,8 +438,8 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 						
 						try {
 							final ClientOrderServiceMapper mapper = new ClientOrderServiceMapper();
-							final String sql = "select " + mapper.orderServiceLookupSchema();
-							return jdbcTemplate.query(sql, mapper, new Object[] { orderId});
+							final String sql = "SELECT " + mapper.orderServiceLookupSchema();
+							return jdbcTemplate.query(sql, mapper, new Object[] { orderId,orderId,orderId,orderId});
 							} catch (EmptyResultDataAccessException e) {
 							return null;
 							}
@@ -448,9 +448,41 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 					private static final class ClientOrderServiceMapper implements RowMapper<OrderLineData> {
 
 						public String orderServiceLookupSchema() {
-						return " ol.id as id,s.id as serviceId,ol.order_id as orderId,s.service_code as serviceCode,s.is_auto as isAuto,s.service_description as serviceDescription,s.service_type as serviceType,psd.image AS image FROM b_order_line ol inner join b_service s " +
-								" on ol.service_id=s.id left join b_prov_service_details psd on psd.service_id = s.id" +
-								" WHERE order_id =?  and ol.is_deleted ='N'";
+
+						return /*" ol.id AS id,s.id AS serviceId,ol.order_id AS orderId,s.service_code AS serviceCode,s.is_auto AS isAuto," +
+								" s.service_description AS serviceDescription,s.service_type AS serviceType,psd.image AS image " +
+								" FROM b_order_line ol, b_service s left join b_prov_service_details psd on  psd.service_id = s.id " +
+								" WHERE  order_id = ? AND ol.service_id = s.id AND ol.is_deleted = 'N'";*/
+								" ol.id AS id,s.id AS serviceId,o.plan_id as planId,ol.order_id AS orderId,s.service_code AS serviceCode,s.is_auto AS isAuto,"+
+								" s.service_description AS serviceDescription,s.service_type AS serviceType,psd.image AS image,"+
+								" ass.allocationType AS allocationType,ass.serialNo AS serialNo,ass.itemId as itemId "+
+								" FROM b_orders o JOIN b_order_line ol ON o.id=ol.order_id "+
+								" JOIN b_service s ON ol.service_id = s.id AND ol.is_deleted ='N' "+
+								" LEFT JOIN b_prov_service_details psd ON  psd.service_id = s.id AND psd.is_deleted='n' "+
+								" LEFT JOIN "+
+								" (SELECT pa.order_id as orderId,pa.plan_id AS planId,pa.service_id AS serviceId,"+
+								" pa.allocation_type AS allocationType,pa.hw_serial_no AS serialNo,i.id AS itemId "+ 
+								" FROM b_association pa, b_order_line ol,b_plan_master p,b_item_detail id,b_item_master i,b_onetime_sale os "+ /*plan level */
+								" WHERE pa.order_id=ol.order_id AND id.serial_no = pa.hw_serial_no AND pa.plan_id=p.id "+
+								" AND id.item_master_id = i.id AND os.item_id =i.id AND os.client_id = pa.client_id  "+
+								" AND pa.is_deleted='N' AND pa.order_id = ? AND pa.service_id IS NULL"+ 
+								" UNION " +
+								" SELECT pa.order_id as orderId,pa.plan_id AS planId,pa.service_id as serviceId,"+
+								" pa.allocation_type AS allocationType,pa.hw_serial_no AS serialNo,i.id AS itemId "+   
+								" FROM b_association pa, b_order_line ol,b_plan_master p,b_owned_hardware o,b_item_master i "+ /*own hardware */
+								" WHERE pa.order_id=ol.order_id AND o.serial_number = pa.hw_serial_no AND pa.plan_id=p.id "+
+								" AND o.item_type=i.id AND pa.is_deleted='N' AND pa.service_id IS NULL AND pa.order_id = ? "+
+								" UNION "+
+								" SELECT sa.order_id as orderId,sa.plan_id AS planId,sa.service_id as serviceId,"+
+								" sa.allocation_type AS allocationType,sa.hw_serial_no AS serialNo,i.id AS itemId "+   
+								" FROM b_association sa, b_order_line ol,b_plan_master p,b_item_detail id,b_item_master i,b_onetime_sale os "+ /*service level */
+								" WHERE sa.order_id=ol.order_id AND id.serial_no = sa.hw_serial_no AND sa.plan_id=p.id "+
+								" AND id.item_master_id = i.id AND os.item_id =i.id AND os.client_id = sa.client_id "+  
+								" AND sa.is_deleted='N' AND sa.service_id=ol.service_id  AND sa.service_id IS NOT NULL "+
+								" AND sa.order_id = ?  GROUP BY sa.service_id) AS ass "+
+								" ON ass.orderId=ol.order_id AND ifnull(ass.serviceId=ol.service_id,o.plan_id=ass.planId) "+
+								" WHERE ol.order_id = ?  GROUP BY ol.service_id";
+
 						}
 
 						@Override
@@ -464,7 +496,10 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 						final Long serviceId=rs.getLong("serviceId");
 						final String isAutoProvision=rs.getString("isAuto");
 						final String image=rs.getString("image");
-						return new OrderLineData(id,orderId,serviceCode,serviceDescription,serviceType,serviceId,isAutoProvision,image);
+						final String serialNo=rs.getString("serialNo");
+						final String allocationType=rs.getString("allocationType");
+						final Long itemId = rs.getLong("itemId");
+						return new OrderLineData(id,orderId,serviceCode,serviceDescription,serviceType,serviceId,isAutoProvision,image,serialNo,allocationType,itemId);
 						}
 				}
 

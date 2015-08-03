@@ -279,6 +279,7 @@ public AssociationData retrieveSingleDetails(Long id) {
 				final Long saleId=rs.getLong("saleId");
 				final Long itemId=rs.getLong("itemId");
 				final String allocationType =rs.getString("allocationType");
+	
 				return  new AssociationData(orderId,planCode,provNum,id,planId,clientId,serialNum,itemCode,saleId,itemId,allocationType);
 
 			}
@@ -360,13 +361,13 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 
 				public String schema() {
 
-				return " o.id as orderId psd.service_id as serviceId,'ALLOT' as allocationType,id.serial_no AS serialNo,i.item_description AS itemDescription,"+
-                        " o.plan_id AS planId FROM b_item_master i,b_item_detail id,b_prov_service_details psd,b_orders o,b_order_line ol,"+
+				return " o.id as orderId, psd.service_id as serviceId,'ALLOT' as allocationType,id.serial_no AS serialNo,i.item_description AS itemDescription,"+
+                        " o.plan_id AS planId FROM b_item_master i,b_item_detail id,b_prov_service_details psd,b_orders o,b_order_line ol"+
                         " WHERE NOT EXISTS( SELECT * FROM  b_association a WHERE a.order_id = o.id AND a.client_id = o.client_id "+
                         " AND psd.service_id = a.service_id AND a.is_deleted = 'N') "+
                         " AND i.id = id.item_master_id AND psd.item_id = id.item_master_id AND psd.is_hw_req = 'Y' AND o.id=ol.order_id "+
                         " AND ol.service_id = psd.service_id AND id.is_deleted = 'N' AND o.id=(select max(id) from b_orders where client_id=id.client_id and client_id=o.client_id) " +
-                        " And  id.client_id = ? AND psd.item_id= ?  ";
+                        " And  id.client_id = ? AND psd.item_id= ? group by serviceId ";
 				}
 				
 			

@@ -1046,7 +1046,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 				}else{
 					 //Check For HardwareAssociation
 					  AssociationData associationData=this.hardwareAssociationReadplatformService.retrieveSingleDetails(entityId);
-					  	if(associationData ==null){
+					  	if(associationData == null){
 					  		throw new HardwareDetailsNotFoundException(entityId.toString());
 					  	}
 					  	order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());

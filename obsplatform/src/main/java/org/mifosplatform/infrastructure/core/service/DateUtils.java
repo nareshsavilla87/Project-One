@@ -45,9 +45,11 @@ public class DateUtils {
     public static LocalDate parseLocalDate(final String stringDate, final String pattern) {
 
         try {
+        	
             DateTimeFormatter dateStringFormat = DateTimeFormat.forPattern(pattern);
             DateTime dateTime = dateStringFormat.parseDateTime(stringDate);
             return dateTime.toLocalDate();
+            
         } catch (IllegalArgumentException e) {
             List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
             ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.pattern", "The parameter date ("
@@ -59,6 +61,7 @@ public class DateUtils {
     }
 
     public static String formatToSqlDate(final Date date) {
+    	
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         final String formattedSqlDate = df.format(date);
         return formattedSqlDate;

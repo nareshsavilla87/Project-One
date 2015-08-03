@@ -15,6 +15,7 @@ public class AllocationDetailsData {
 	private Long orderId;
 	private Long serviceId;
 	private Long planId;
+	private Long clientId;
 	
 
 	public AllocationDetailsData(final Long id, final String itemDescription,
@@ -35,11 +36,6 @@ public class AllocationDetailsData {
 
 		this.id = id;
 		this.serialNo = serialNum;
-		this.itemDescription = null;
-		this.allocationDate = null;
-		this.itemDetailId = null;
-		this.allocationType=null;
-		this.quality = null;
 
 	}
 
@@ -59,6 +55,25 @@ public class AllocationDetailsData {
 		this.allocationType = allocationType;
 		this.serialNo = serialNum;
 		this.itemDescription = itemDescription;
+	}
+
+	/**
+	 * @param id
+	 * @param serviceId
+	 * @param planId
+	 * @param orderId
+	 * @param serialNum
+	 * @param clientId
+	 */
+	public AllocationDetailsData(final Long id, final Long serviceId, final Long planId,
+			                   final Long orderId, final String serialNum, final Long clientId) {
+		
+		this.id = id;
+		this.serviceId = serviceId;
+		this.planId = planId;
+		this.orderId = orderId;
+		this.serialNo = serialNum;
+		this.clientId = clientId;
 	}
 
 	public Long getId() {
@@ -123,7 +138,12 @@ public class AllocationDetailsData {
 	public Long getPlanId() {
 		return planId;
 	}
-	
-	
+
+	/**
+	 * @return the clientId
+	 */
+	public Long getClientId() {
+		return clientId;
+	}
 	
 }

@@ -34,22 +34,22 @@ public class AllocationReadPlatformServiceImpl implements AllocationReadPlatform
 
 	
 	@Override
-	public AllocationDetailsData getTheHardwareItemDetails(final Long orderId) {
+	public List<AllocationDetailsData> getTheHardwareItemDetails(final Long orderId) {
 		try {
 			
 			final ClientOrderMapper mapper = new ClientOrderMapper();
 			 String sql =null;
 			
-				  sql = " Select * from ( select a.id AS id,a.order_id AS orderId,id.provisioning_serialno AS serialNum,a.client_id AS clientId" +
+				  sql = " Select * from ( select a.id AS id,a.order_id AS orderId,a.plan_id as planId,a.service_id as serviceId,id.provisioning_serialno AS serialNum,a.client_id AS clientId" +
 				  		" FROM b_association a, b_item_detail id WHERE a.order_id =? and id.serial_no=a.hw_serial_no and a.is_deleted='N'" +
 				  		" and allocation_type='ALLOT'" +
 				  		" union all" +
-				  		" select a.id AS id,a.order_id AS orderId,o.provisioning_serial_number AS serialNum,a.client_id AS clientId" +
+				  		" select a.id AS id,a.order_id AS orderId,a.plan_id as planId,a.service_id as serviceId,o.provisioning_serial_number AS serialNum,a.client_id AS clientId" +
 				  		" FROM b_association a, b_owned_hardware o WHERE a.order_id =?  AND o.serial_number = a.hw_serial_no " +
-				  		" AND a.is_deleted = 'N' and o.is_deleted = 'N' and allocation_type='OWNED') a limit 1";
+				  		" AND a.is_deleted = 'N' and o.is_deleted = 'N' and allocation_type='OWNED') a ";
 				  		
 				  
-			return jdbcTemplate.queryForObject(sql, mapper, new Object[] {  orderId,orderId });
+			return jdbcTemplate.query(sql, mapper, new Object[] {  orderId,orderId });
 			} catch (EmptyResultDataAccessException e) {
 			return null;
 			}
@@ -83,14 +83,15 @@ public class AllocationReadPlatformServiceImpl implements AllocationReadPlatform
 			@Override
 			public AllocationDetailsData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
-			final Long id = rs.getLong("id");
+		    final Long id = rs.getLong("id");	
+			final Long serviceId = rs.getLong("serviceId");
 			final Long orderId = rs.getLong("orderId");
+			final Long planId = rs.getLong("planId");
 			final String serialNum = rs.getString("serialNum");
-			final Long clientId = rs.getLong("clientId");	
-		
+			final Long clientId = rs.getLong("clientId");
 			
-			return new AllocationDetailsData(id,orderId,serialNum,clientId);
-			}
+			return new AllocationDetailsData(id,serviceId,planId,orderId,serialNum,clientId);
+			  }
 			}
 
 			@Override

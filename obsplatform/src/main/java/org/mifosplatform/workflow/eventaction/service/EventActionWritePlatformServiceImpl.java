@@ -245,8 +245,8 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				       
 				    case EventActionConstants.ACTION_ACTIVE : 
 				    	
-				          AssociationData associationData=this.hardwareAssociationReadplatformService.retrieveSingleDetails(actionProcedureData.getOrderId());
-				          		if(associationData ==null){
+				         AssociationData associationData=this.hardwareAssociationReadplatformService.retrieveSingleDetails(actionProcedureData.getOrderId());
+				          		if(associationData == null){
 				          			throw new HardwareDetailsNotFoundException(actionProcedureData.getOrderId().toString());
 				          		}
 				          		jsonObject.put("renewalPeriod",subscriptionDatas.get(0).getId());	
