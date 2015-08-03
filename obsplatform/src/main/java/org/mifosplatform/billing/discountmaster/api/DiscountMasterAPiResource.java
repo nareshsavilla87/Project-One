@@ -107,6 +107,7 @@ public class DiscountMasterAPiResource {
 	}
 
 	private DiscountMasterData handleTemplateData() {
+		
 		final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
 		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
 		final Collection<MCodeData> clientCategoryDatas = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CLIENT_CATEGORY);

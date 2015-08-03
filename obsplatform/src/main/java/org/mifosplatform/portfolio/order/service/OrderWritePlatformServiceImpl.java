@@ -253,8 +253,10 @@ try{
 	if(configurationProperty.isEnabled()){
 		
 		if(plan.isHardwareReq() == 'Y'){
+			
 			List<AllocationDetailsData> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetailsByItemCode(clientId,plan.getPlanCode());
 			if(allocationDetailsDatas.size() == 1 ){
+				
 				this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),allocationDetailsDatas.get(0).getSerialNo(),
 						order.getId(),allocationDetailsDatas.get(0).getAllocationType(),null);
 			}else if(allocationDetailsDatas.isEmpty()){//plan and hardware mapping not exist's

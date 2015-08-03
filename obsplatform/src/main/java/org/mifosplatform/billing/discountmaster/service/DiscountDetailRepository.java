@@ -1,5 +1,7 @@
-package org.mifosplatform.billing.discountmaster.domain;
+package org.mifosplatform.billing.discountmaster.service;
 
+import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
+import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

@@ -483,6 +483,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 								" ON ass.orderId=ol.order_id AND ifnull(ass.serviceId=ol.service_id,o.plan_id=ass.planId) "+
 								" WHERE ol.order_id = ?  GROUP BY ol.service_id";
 
+
 						}
 
 						@Override
