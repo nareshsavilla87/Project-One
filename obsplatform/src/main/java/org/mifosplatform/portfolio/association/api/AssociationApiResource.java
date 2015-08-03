@@ -94,7 +94,7 @@ public class AssociationApiResource {
 	    planDatas.add(data);
 		associationData.addHardwareDatas(HardwareDatas);
 		associationData.addPlanDatas(planDatas);
-		data.addEnumValuesDatas(enumValuesDatas);
+		associationData.addEnumValuesDatas(enumValuesDatas);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, associationData, RESPONSE_DATA_PARAMETERS);
  		}catch(NullPointerException n){
