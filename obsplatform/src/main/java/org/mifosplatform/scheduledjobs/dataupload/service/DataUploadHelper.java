@@ -36,6 +36,8 @@ import org.mifosplatform.scheduledjobs.dataupload.domain.DataUploadRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import antlr.StringUtils;
+
 import com.google.gson.Gson;
 
 
@@ -465,7 +467,7 @@ public class DataUploadHelper {
 
 	public String buildjsonForPropertyCodeMaster(String[] currentLineData, ArrayList<MRNErrorData> errorData, int i) {
 		
-		if(currentLineData.length>=3){
+		 if(currentLineData.length>=3){
 			final HashMap<String, String> map = new HashMap<>();
 		    final Collection<MCodeData> propertyCodeTypesList =this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.PROPERTY_CODE_TYPE);
 			if(!propertyCodeTypesList.isEmpty()){
@@ -493,3 +495,5 @@ public class DataUploadHelper {
 	}
 
 }
+	
+	
