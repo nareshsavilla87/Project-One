@@ -20,6 +20,8 @@ import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifosplatform.billing.selfcare.domain.SelfCare;
+import org.mifosplatform.billing.selfcare.domain.SelfCareTemporary;
+import org.mifosplatform.billing.selfcare.domain.SelfCareTemporaryRepository;
 import org.mifosplatform.billing.selfcare.service.SelfCareRepository;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -127,6 +129,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final ProcessRequestRepository processRequestRepository;
     private final PropertyMasterRepository propertyMasterRepository;
     private final PropertyHistoryRepository propertyHistoryRepository;
+    private final SelfCareTemporaryRepository selfCareTemporaryRepository;
     
    
 
@@ -142,7 +145,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final SelfCareRepository selfCareRepository,final PortfolioCommandSourceWritePlatformService  portfolioCommandSourceWritePlatformService,
             final ProvisioningActionsRepository provisioningActionsRepository,final PrepareRequestReadplatformService prepareRequestReadplatformService,
             final ProcessRequestRepository processRequestRepository,final ClientAdditionalFieldsRepository clientAdditionalFieldsRepository,
-            final PropertyMasterRepository propertyMasterRepository, final PropertyHistoryRepository propertyHistoryRepository) {
+            final PropertyMasterRepository propertyMasterRepository, final PropertyHistoryRepository propertyHistoryRepository,
+            final SelfCareTemporaryRepository selfCareTemporaryRepository) {
     	
         this.context = context;
         this.ProvisioningWritePlatformService=ProvisioningWritePlatformService;
@@ -161,6 +165,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.orderRepository=orderRepository;
         this.clientRepository = clientRepository;
         this.addressRepository=addressRepository;
+        this.selfCareTemporaryRepository = selfCareTemporaryRepository;
         this.officeRepository = officeRepository;
         this.provisioningActionsRepository=provisioningActionsRepository;
         this.selfCareRepository=selfCareRepository;
@@ -213,7 +218,11 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             		 selfCare.setIsDeleted(true);
             		 this.selfCareRepository.save(selfCare);
             	 }
-
+               final SelfCareTemporary selfCareTemporary  =this.selfCareTemporaryRepository.findOneByEmailId(client.getEmail());
+               if(selfCareTemporary !=null){
+            	   selfCareTemporary.delete();
+            	   this.selfCareTemporaryRepository.save(selfCareTemporary);
+               }
             }
             
             

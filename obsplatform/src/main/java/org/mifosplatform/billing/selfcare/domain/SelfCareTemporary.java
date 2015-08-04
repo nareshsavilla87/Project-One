@@ -95,6 +95,12 @@ public class SelfCareTemporary extends AbstractAuditableCustom<AppUser, Long>{
 	public void setPaymentData(String paymentData) {
 		this.paymentData = paymentData;
 	}
+
+	public void delete() {
+         this.generatedKey = "del_"+getId()+"_"+this.getGeneratedKey();
+         this.userName = "del_"+getId()+"_"+this.userName;
+		
+	}
 	
 	
 	

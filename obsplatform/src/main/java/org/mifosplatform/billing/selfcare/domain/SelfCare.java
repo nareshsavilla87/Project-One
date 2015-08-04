@@ -111,6 +111,9 @@ public class SelfCare extends AbstractPersistable<Long>{
 	}
 	public void setIsDeleted(Boolean isDeleted) {
 		this.isDeleted = isDeleted;
+		this.uniqueReference ="DEL_"+getId()+"_"+this.uniqueReference;
+		this.userName = "DEL_"+getId()+"_"+this.userName;
+		
 	}
 	public String getStatus() {
 		return status;
