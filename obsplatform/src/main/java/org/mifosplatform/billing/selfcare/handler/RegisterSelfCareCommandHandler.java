@@ -21,6 +21,7 @@ public class RegisterSelfCareCommandHandler implements NewCommandSourceHandler{
 	@Transactional
 	@Override
 	public CommandProcessingResult processCommand(JsonCommand command) {
+		
 		return selfCareWritePlatformService.registerSelfCare(command);
 	}
 
