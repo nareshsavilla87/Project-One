@@ -73,13 +73,15 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 			context.authenticatedUser();
 			final Long userId=getUserId();
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
+			Long serviceId=null;
 			Long orderId = command.longValueOfParameterNamed("orderId");
 			Order order=this.orderRepository.findOne(orderId);
 			String provisionNum = command.stringValueOfParameterNamed("provisionNum");
 			String allocationType = command.stringValueOfParameterNamed("allocationType");
-			
-			
-			HardwareAssociation hardwareAssociation = new HardwareAssociation(command.entityId(), order.getPlanId(), provisionNum, orderId,allocationType,null);
+			if(command.hasParameter("serviceId")){
+				 serviceId=command.longValueOfParameterNamed("serviceId");
+			}
+			HardwareAssociation hardwareAssociation = new HardwareAssociation(command.entityId(), order.getPlanId(), provisionNum, orderId,allocationType,serviceId);
 			//Check for Custome_Validation
 			this.eventValidationReadPlatformService.checkForCustomValidations(hardwareAssociation.getClientId(),"Pairing", command.json(),userId);
 			this.associationRepository.saveAndFlush(hardwareAssociation);

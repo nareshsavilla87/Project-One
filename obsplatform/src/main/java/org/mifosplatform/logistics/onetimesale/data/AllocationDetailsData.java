@@ -69,7 +69,7 @@ public class AllocationDetailsData {
 			                   final Long orderId, final String serialNum, final Long clientId) {
 		
 		this.id = id;
-		this.serviceId = serviceId;
+		this.serviceId = Long.valueOf(0).equals(serviceId) ? null: serviceId;
 		this.planId = planId;
 		this.orderId = orderId;
 		this.serialNo = serialNum;
