@@ -228,6 +228,7 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 		
 	}
 
+
 	public char getIsDelete() {
 		return isDelete;
 	}

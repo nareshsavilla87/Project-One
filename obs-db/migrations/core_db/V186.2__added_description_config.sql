@@ -31,7 +31,7 @@ DELIMITER ;
 call moduleTodescription();
 Drop procedure IF EXISTS moduleTodescription;
 
-
+set sql_safe_updates=0;
 Update c_configuration set module='General',description='It Enables the featuer in General to use the application / form with approval process' where name='maker-checker';
 Update c_configuration set module='General',description='Application api will have ability to perform beter when deployed in aws' where name='amazon-S3';
 Update c_configuration set module='Client',description='Used in mobile app to check the client balace while we retrive data' where name='balance-check';

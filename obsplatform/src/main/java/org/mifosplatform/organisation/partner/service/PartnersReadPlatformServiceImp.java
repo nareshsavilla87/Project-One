@@ -52,7 +52,7 @@ private static final class PartnerMapper implements RowMapper<PartnersData> {
 					+ "o.id as officeId,o.parent_id as parentId,o.external_id AS externalId,o.opening_date AS openingDate,parent.id AS parentId,"
 					+ "parent.name AS parentName,c.code_value as officeType,  a.contact_name as contactName, ad.city as city, ad.state as state,"
 					+ "ad.country as country,ad.email_id as email,ad.phone_number as phoneNumber,ad.office_number as officeNumber,au.id as userId,au.username as loginName,"
-					+ "IFNULL(ob.balance_amount,0) as balanceAmount from m_office o left join m_office AS parent on parent.id = o.parent_id " 
+					+ "IFNULL(ob.balance_amount,0) as balanceAmount,ad.company_logo as companyLogo from m_office o left join m_office AS parent on parent.id = o.parent_id " 
 					+ "inner join m_office_additional_info a ON o.id=a.office_id  inner join b_office_address ad on o.id = ad.office_id "
 					+ "inner join m_appuser au on o.id=au.office_id left join m_office_balance ob ON ob.office_id=o.id "
 					+ "left join m_code_value c on c.id = o.office_type ";
@@ -82,9 +82,10 @@ private static final class PartnerMapper implements RowMapper<PartnersData> {
 	final BigDecimal balanceAmount =rs.getBigDecimal("balanceAmount");
 	final Long userId = rs.getLong("userId");
 	final String contactName =rs.getString("contactName");
+	final String companyLogo = rs.getString("companyLogo");
 	
 	return new PartnersData(officeId,id,partnerName,creditLimit,currency,parentId,parentName,officeType,
-			     openingDate,loginName,city,state,country,email,phoneNumber,isCollective,balanceAmount,officeNumber,contactName,userId);
+			     openingDate,loginName,city,state,country,email,phoneNumber,isCollective,balanceAmount,officeNumber,contactName,userId,companyLogo);
 	
 
 	}
