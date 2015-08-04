@@ -1,7 +1,11 @@
 package org.mifosplatform.billing.discountmaster.service;
 
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
+import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.mifosplatform.billing.discountmaster.exception.DiscountMasterNotFoundException;
@@ -19,6 +23,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+
 /**
  * @author hugo
  * 
@@ -32,6 +39,7 @@ public class DiscountWritePlatformServiceImpl implements
 	private final DiscountCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final DiscountMasterRepository discountMasterRepository;
 	private final FromJsonHelper fromApiJsonHelper;
+	private final DiscountDetailRepository discountDetailRepository;
 	/**
 	 * @param context
 	 * @param apiJsonDeserializer
@@ -39,13 +47,13 @@ public class DiscountWritePlatformServiceImpl implements
 	 */
 	@Autowired
 	public DiscountWritePlatformServiceImpl(final PlatformSecurityContext context,final DiscountCommandFromApiJsonDeserializer apiJsonDeserializer,
-			final DiscountMasterRepository discountMasterRepository,final FromJsonHelper fromApiJsonHelper) {
+			final DiscountMasterRepository discountMasterRepository,final FromJsonHelper fromApiJsonHelper,final DiscountDetailRepository discountDetailRepository) {
 		
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.fromApiJsonHelper = fromApiJsonHelper;
 		this.discountMasterRepository = discountMasterRepository;
-		
+		this.discountDetailRepository = discountDetailRepository;
 	}
 
 	/*
@@ -63,6 +71,8 @@ public class DiscountWritePlatformServiceImpl implements
 			this.context.authenticatedUser();
 			this.apiJsonDeserializer.validateForCreate(command.json());
 			DiscountMaster discountMaster = DiscountMaster.fromJson(command);
+			final JsonArray discountPricesArray = command.arrayOfParameterNamed("discountPrices").getAsJsonArray();
+			discountMaster=assembleDiscountDetails(discountPricesArray,discountMaster); 
 			this.discountMasterRepository.save(discountMaster);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId())
 					        .withEntityId(discountMaster.getId()).build();
@@ -74,7 +84,27 @@ public class DiscountWritePlatformServiceImpl implements
 
 	}
 
-	
+	private DiscountMaster assembleDiscountDetails(JsonArray discountPricesArray, DiscountMaster discountMaster) {
+		
+			String[]  discountPrices = null;
+			discountPrices = new String[discountPricesArray.size()];
+			if(discountPricesArray.size() > 0){
+				for(int i = 0; i < discountPricesArray.size(); i++){
+					discountPrices[i] = discountPricesArray.get(i).toString();
+				}
+		
+			for (final String discountPrice : discountPrices) {
+				final JsonElement element = fromApiJsonHelper.parse(discountPrice);
+				final String categoryId = fromApiJsonHelper.extractStringNamed("categoryId", element);
+				final BigDecimal discountRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("discountRate", element);
+				DiscountDetails discountDetails = new DiscountDetails(categoryId, discountRate);
+				discountMaster.addDetails(discountDetails);
+				
+			}	 
+		}	
+		
+		return discountMaster;
+	}
 
 	private void handleCodeDataIntegrityIssues(final JsonCommand command,final DataIntegrityViolationException dve) {
 		
@@ -111,6 +141,38 @@ public class DiscountWritePlatformServiceImpl implements
 			this.context.authenticatedUser();
 			this.apiJsonDeserializer.validateForCreate(command.json());
 			DiscountMaster discountMaster = discountRetrieveById(entityId);
+			List<DiscountDetails> details=new ArrayList<>(discountMaster.getDiscountDetails());
+			final JsonArray discountPricesArray = command.arrayOfParameterNamed("discountPrices").getAsJsonArray();
+			    String[] states =null;
+			    states=new String[discountPricesArray.size()];
+			    for(int i=0; i<discountPricesArray.size();i++){
+			    	states[i] =discountPricesArray.get(i).toString();
+			    }
+				 for (String discountPrice : states) {
+					  
+					 final JsonElement element = fromApiJsonHelper.parse(discountPrice);
+						final String categoryId = fromApiJsonHelper.extractStringNamed("categoryId", element);
+						final Long id = fromApiJsonHelper.extractLongNamed("id", element);
+						final BigDecimal discountRate = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("discountRate", element);
+						if(id != null){
+						DiscountDetails discountDetails =this.discountDetailRepository.findOne(id);
+						
+						if(discountDetails != null){
+							discountDetails.setCategoryType(categoryId);
+							discountDetails.setDiscountRate(discountRate);
+							this.discountDetailRepository.saveAndFlush(discountDetails);
+							if(details.contains(discountDetails)){
+							   details.remove(discountDetails);
+							}
+						}
+						}else {
+							DiscountDetails newDetails = new DiscountDetails(categoryId, discountRate);
+							discountMaster.addDetails(newDetails);
+						}
+						
+				  }
+					 discountMaster.getDiscountDetails().removeAll(details);
+
 			final Map<String, Object> changes = discountMaster.update(command);
 			this.discountMasterRepository.saveAndFlush(discountMaster);
 			
