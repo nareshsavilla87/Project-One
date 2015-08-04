@@ -228,7 +228,6 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 		
 	}
 
-	
 	public char getIsDelete() {
 		return isDelete;
 	}
@@ -236,12 +235,7 @@ public class DiscountMaster extends AbstractPersistable<Long> {
 	public List<DiscountDetails> getDiscountDetails() {
 		return discountDetails;
 	}
-	
-	/*public void addDetails(DiscountDetails discountDetail) {
-		discountDetail.update(this);
-		this.discountDetails.add(discountDetail);
 
-	}*/
 
 	
 }

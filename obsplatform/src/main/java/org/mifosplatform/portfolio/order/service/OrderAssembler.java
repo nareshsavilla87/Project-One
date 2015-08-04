@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.mifosplatform.billing.discountmaster.exception.DiscountMasterNotFoundException;
@@ -13,6 +14,8 @@ import org.mifosplatform.infrastructure.configuration.domain.Configuration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
@@ -35,16 +38,19 @@ private final OrderDetailsReadPlatformServices orderDetailsReadPlatformServices;
 private final ContractRepository contractRepository;
 private final ConfigurationRepository configurationRepository;
 private final DiscountMasterRepository discountMasterRepository;
+private final ClientRepository clientRepository;
 
 
 @Autowired
 public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPlatformServices,final ContractRepository contractRepository,
-		   final DiscountMasterRepository discountMasterRepository,final ConfigurationRepository configurationRepository){
+		   final DiscountMasterRepository discountMasterRepository,final ConfigurationRepository configurationRepository,
+		   final ClientRepository clientRepository){
 	
 	this.orderDetailsReadPlatformServices=orderDetailsReadPlatformServices;
 	this.contractRepository=contractRepository;
 	this.discountMasterRepository=discountMasterRepository;
 	this.configurationRepository = configurationRepository;
+	this.clientRepository = clientRepository;
 	
 }
 
@@ -55,6 +61,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 		List<PriceData> datas = new ArrayList<PriceData>();
 		Long orderStatus=null;
 		LocalDate endDate = null;
+		BigDecimal discountRate=BigDecimal.ZERO;
 		
         Order order=Order.fromJson(clientId, command);
 			List<ServiceData> details =this.orderDetailsReadPlatformServices.retrieveAllServices(order.getPlanId());
@@ -118,9 +125,8 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			    data.getChargeDuration(), data.getDurationType(),billstartDate.toDate(), billEndDate,data.isTaxInclusive());
 				order.addOrderDeatils(price);
 				priceforHistory=priceforHistory.add(data.getPrice());
-				
-				//Client client=this.clientRepository.findOne(clientId);
-				/*List<DiscountDetails> discountDetails=discountMaster.getDiscountDetails();
+				Client client=this.clientRepository.findOne(clientId);
+				List<DiscountDetails> discountDetails=discountMaster.getDiscountDetails();
 				for(DiscountDetails discountDetail:discountDetails){
 					if(client.getCategoryType().equals(Long.valueOf(discountDetail.getCategoryType()))){
 						discountRate = discountDetail.getDiscountRate();
@@ -128,10 +134,10 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 						discountRate = discountDetail.getDiscountRate();
 					}
 				}
-				*/
+				
 				//discount Order
 				OrderDiscount orderDiscount=new OrderDiscount(order,price,discountMaster.getId(),discountMaster.getStartDate(),null,discountMaster.getDiscountType(),
-						discountMaster.getDiscountRate());
+						discountRate);
 				//price.addOrderDiscount(orderDiscount);
 				order.addOrderDiscount(orderDiscount);
 			}

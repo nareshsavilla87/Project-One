@@ -18,6 +18,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.billing.discountmaster.data.DiscountDetailData;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.discountmaster.service.DiscountReadPlatformService;
 import org.mifosplatform.commands.domain.CommandWrapper;
@@ -111,7 +112,8 @@ public class DiscountMasterAPiResource {
 		
 		final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
 		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
-		return new DiscountMasterData(statusData, discountTypeData);
+		final Collection<MCodeData> clientCategoryDatas = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CLIENT_CATEGORY);
+		return new DiscountMasterData(statusData, discountTypeData,clientCategoryDatas);
 	}
 
 	/**
@@ -142,11 +144,15 @@ public class DiscountMasterAPiResource {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		DiscountMasterData discountMasterData = this.discountReadPlatformService.retrieveSingleDiscountDetail(discountId);
+		List<DiscountDetailData> discountDetailDatas = this.discountReadPlatformService.retrieveDiscountdetails(discountId);
+		discountMasterData.setDiscountDetailsData(discountDetailDatas);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		if(settings.isTemplate()){
 		final List<EnumOptionData> statusData = this.planReadPlatformService.retrieveNewStatus();
 		final Collection<MCodeData> discountTypeData = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
+		final Collection<MCodeData> clientCategoryDatas = mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_CLIENT_CATEGORY);
 		discountMasterData.setStatusData(statusData);
+		discountMasterData.setclientCategoryData(clientCategoryDatas);
 		discountMasterData.setDiscountTypeData(discountTypeData);
 		discountMasterData.setDate(DateUtils.getLocalDateOfTenantForClient());
 	    }
