@@ -42,8 +42,11 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 		try {
 			this.context.authenticatedUser();
 			final PropertyMapper mapper = new PropertyMapper();	
+			/*StringBuilder sqlBuilder = new StringBuilder(200);
+			sqlBuilder.append("select ");*/
 			StringBuilder sqlBuilder = new StringBuilder(200);
-			sqlBuilder.append("select ");
+			sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+			
 			sqlBuilder.append( mapper.schema() +" where pd.is_deleted='N' ");
 			String sqlSearch = searchPropertyDetails.getSqlSearch();
 			String extraCriteria = "";
@@ -63,8 +66,8 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 		   if (searchPropertyDetails.isOffset()) {
 		            sqlBuilder.append(" offset ").append(searchPropertyDetails.getOffset());
 		        }
-
-	    	return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(), new Object[] {}, mapper);
+		   final String sqlCountRows = "SELECT FOUND_ROWS()";
+	    	return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows,sqlBuilder.toString(), new Object[] {}, mapper);
 			    
 		} catch (EmptyResultDataAccessException accessException) {
 			return null;
@@ -325,8 +328,12 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 		try {
 			context.authenticatedUser();
 			final PropertyMasterMapper mapper = new PropertyMasterMapper();	
-			StringBuilder sqlBuilder = new StringBuilder(200);
+			/*StringBuilder sqlBuilder = new StringBuilder(200);
 			sqlBuilder.append("select ");
+			*/
+			StringBuilder sqlBuilder = new StringBuilder(200);
+			sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
+			
 			sqlBuilder.append( mapper.schema());
 			String sqlSearch = searchPropertyDetails.getSqlSearch();
 			String extraCriteria = "";
@@ -345,8 +352,8 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 		   if (searchPropertyDetails.isOffset()) {
 		            sqlBuilder.append(" offset ").append(searchPropertyDetails.getOffset());
 		        }
-
-	    	return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(), new Object[] {}, mapper);
+		   	final String sqlCountRows = "SELECT FOUND_ROWS()";
+	    	return this.paginationHelper.fetchPage(this.jdbcTemplate, sqlCountRows,sqlBuilder.toString(), new Object[] {}, mapper);
 			    
 		  } catch (EmptyResultDataAccessException accessException) {
 			return null;

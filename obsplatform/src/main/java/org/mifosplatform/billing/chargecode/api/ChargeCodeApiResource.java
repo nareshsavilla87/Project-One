@@ -188,6 +188,7 @@ public class ChargeCodeApiResource {
 			 
 		}
 
+
 		if(contractId !=null && paytermCode != null){
 			this.orderWritePlatformService.checkingContractPeriodAndBillfrequncyValidation(contractId, paytermCode);
 		}
