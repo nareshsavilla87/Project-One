@@ -26,7 +26,7 @@ select
                                     2) AS op_bal
                     from
                         (b_invoice biop
-                        left join b_payments bpop ON (((biop.client_id = bpop.client_id) and bpop.payment_date < any (select fdm.date_value))))
+				left join b_payments bpop ON (((biop.client_id = bpop.client_id) and bpop.payment_date < any (select fdm.date_value from dim_date fdm))))
                     where
                         ((biop.invoice_date < fdm.date_value) and (biop.client_id = c.id))),
                 0)
@@ -38,7 +38,7 @@ select
                         (ifnull(sum(bicl.invoice_amount), 0) - ifnull(sum(bpcl.amount_paid), 0)) AS cl_bal
                     from
                         (b_invoice bicl
-                        left join b_payments bpcl ON (((bicl.client_id = bpcl.client_id) and bpcl.payment_date <= any (select ldm.date_value))))
+				left join b_payments bpcl ON (((bicl.client_id = bpcl.client_id) and bpcl.payment_date <= any (select ldm.date_value from dim_date ldm))))
                     where
                         ((bicl.invoice_date <= ldm.date_value) and (bicl.client_id = c.id))),
                 2)
@@ -49,6 +49,7 @@ from
     join dim_date fdm ON (((fdm.year_month_number = dt.year_month_number) and (fdm.is_first_day_in_month = 'Yes'))))
     join dim_date ldm ON (((dt.year_month_number = ldm.year_month_number) and (ldm.is_last_day_in_month = 'Yes'))))
     join b_invoice bi ON (((c.id = bi.client_id) and (bi.invoice_date = dt.date_value))))
-    left join b_payments bp ON (((c.id = bp.client_id) and (dt.year_month_number = concat(year(bp.payment_date), '-', month(bp.payment_date))))))
+    left join b_payments bp ON (((c.id = bp.client_id) and (dt.year_month_number = concat(year(bp.payment_date), '-',
+ month(bp.payment_date))))))
 group by bi.client_id , dt.year_month_abbreviation
 order by c.id , dt.year4 , dt.month_number
