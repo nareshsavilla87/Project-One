@@ -1236,24 +1236,39 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			}  
   }
   
+  /*private void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode){
+
+	  
+	  Contract contract = contractRepository.findOne(contractPeriod);
+		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(paytermCode);
+		Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
+		if(contract == null){
+			throw new ContractNotNullException();
+		}
+		if(chargeCodeDuration > contract.getUnits().intValue()){
+			throw new ChargeCodeAndContractPeriodException();
+		}
+		
+  }*/
   @Override
   public void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode){
 	  
 	  Contract contract = contractRepository.findOne(contractPeriod);
-      List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(paytermCode);
-     if(contract == null){
-       throw new ContractNotNullException();
-     }
-  
-     LocalDate contractEndDate = this.orderAssembler.calculateEndDate(DateUtils.getLocalDateOfTenant(),
-     contract.getSubscriptionType(),contract.getUnits());
-     LocalDate chargeCodeEndDate = this.orderAssembler.calculateEndDate(DateUtils.getLocalDateOfTenant(),
-    chargeCodeMaster.get(0).getDurationType(),chargeCodeMaster.get(0).getChargeDuration().longValue());
-     
-     if(contractEndDate !=null && chargeCodeEndDate !=null){
-    	 if(contractEndDate.toDate().before(chargeCodeEndDate.toDate()) ){
-    		 throw new ChargeCodeAndContractPeriodException();
-     }
+		List<ChargeCodeMaster> chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(paytermCode);
+		//Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
+		if(contract == null){
+			throw new ContractNotNullException();
+		}
+		LocalDate contractEndDate = this.orderAssembler.calculateEndDate(DateUtils.getLocalDateOfTenant(),
+				contract.getSubscriptionType(),contract.getUnits());
+		LocalDate chargeCodeEndDate = this.orderAssembler.calculateEndDate(DateUtils.getLocalDateOfTenant(),
+				chargeCodeMaster.get(0).getDurationType(),chargeCodeMaster.get(0).getChargeDuration().longValue());
+		if(contractEndDate.toDate().before(chargeCodeEndDate.toDate()) ){
+			throw new ChargeCodeAndContractPeriodException();
+		}
+		
   }
-     }
-}
+
+
+ }
+

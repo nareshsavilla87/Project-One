@@ -194,6 +194,13 @@ public class Office extends AbstractPersistable<Long> {
             actualChanges.put(externalIdParamName, newValue);
             this.externalId = StringUtils.defaultIfEmpty(newValue, null);
         }
+        
+        final String partnernameParamName = "partnerName";
+        if (command.isChangeInStringParameterNamed(partnernameParamName, this.name)) {
+            final String newValue = command.stringValueOfParameterNamed(partnernameParamName);
+            actualChanges.put(partnernameParamName, newValue);
+            this.name = newValue;
+        }
 
         return actualChanges;
     }

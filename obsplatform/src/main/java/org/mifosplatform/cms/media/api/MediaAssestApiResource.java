@@ -105,7 +105,7 @@ public class MediaAssestApiResource {
          	  noOfPages = this.mediaAssetReadPlatformService.retrieveNoofPages(queryFOrPages);
          	  for(final MediaAssetData assetData:data){
          		  
-         		 // List<MediaLocationData> locationData=this.mediaAssetReadPlatformService.retrievemediaAssetLocationdata(assetData.getMediaId());
+         		  //List<MediaLocationData> locationData=this.mediaAssetReadPlatformService.retrievemediaAssetLocationdata(assetData.getMediaId());
          	  }
          	  
          	  //data.add(new MediaAssetData(noOfPages,pageNum));
