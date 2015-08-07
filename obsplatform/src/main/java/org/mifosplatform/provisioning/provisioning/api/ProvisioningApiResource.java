@@ -300,5 +300,24 @@ public class ProvisioningApiResource {
 				.logCommandSource(commandRequest);
 		return this.toApiJsonSerializer.serialize(result);
 	}
+		
+	@GET
+	@Path("client/{clientId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveProcessClientRequest(@Context final UriInfo uriInfo, @PathParam("clientId") final Long clientId) {
+
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		//final ProcessRequestData provisioning = this.provisioningReadPlatformService.getProcessRequestClientData(clientId);
+		final List<ProcessRequestData> provisioning = this.provisioningReadPlatformService.getProcessRequestClientData(clientId);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializerProcessRequest.serialize(settings, provisioning, RESPONSE_DATA_PARAMETERS);
+	}
+
+	
+	
+	
+	
+	
 
 }
