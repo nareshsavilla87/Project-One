@@ -75,7 +75,7 @@ and current_balance >0 and DATE_ADD(invoice_date,INTERVAL 7 DAY) <=NOW()
 order by  client_id,year_mon,date', 'Disconnect Unpaid Customers', '0', '0');
 
 
-INSERT IGNORE INTO job VALUES(NULL, 'DISCONNECT_UNPAID_CUSTOMERS', 'Disconnect Unpaid Customers', '0 0 12 1 1/1 ? *', 'First Day at Midnight of Every Month',
+INSERT IGNORE INTO job VALUES(NULL, 'DISCONNECT_UNPAID_CUSTOMERS', 'Disconnect Unpaid Customers', '0 0 0 1 1/1 ? *', 'First Day at Midnight of Every Month',
  now(), '5', NULL, now(), NULL, 'DISCONNECT_UNPAID_CUSTOMERSJobDetaildefault _ DEFAULT', NULL, '0', '0', '1', '0', '0', '1');
 
 SET @ID=(select id from job where name='DISCONNECT_UNPAID_CUSTOMERS');
