@@ -29,8 +29,12 @@ public interface ProvisioningReadPlatformService {
 	//Long getHardwareDetails(String oldHardWare, Long clientId, String name);
 
 	List<ProcessRequestData> getProcessRequestData(String orderNo);
+	
+	List<ProcessRequestData> getProcessRequestClientData(Long clientId);
 
 	ProcessRequestData getProcessRequestIDData(Long id);
+	
+	//ProcessRequestData getProcessRequestClientData(Long clientId);
 
 	Collection<MCodeData> retrieveVlanDetails(String string);
 }
