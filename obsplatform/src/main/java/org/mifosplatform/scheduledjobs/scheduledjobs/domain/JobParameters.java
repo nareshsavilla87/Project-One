@@ -103,12 +103,10 @@ public class JobParameters extends AbstractPersistable<Long>{
 
 	public void update(JsonCommand command) {
 		
-		SimpleDateFormat simpleDateFormat =
-		        new SimpleDateFormat("dd MMMMM yyyy", new Locale("en"));
+		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMMMM yyyy", new Locale("en"));
         final String processDateParam= "processDate";
 	    final LocalDate processDate = command.localDateValueOfParameterNamed(processDateParam);
 	    if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.jobProcessdate) && processDate !=null){
-
 			String date = simpleDateFormat.format(processDate.toDate());
 			this.paramValue=date;
 	   }

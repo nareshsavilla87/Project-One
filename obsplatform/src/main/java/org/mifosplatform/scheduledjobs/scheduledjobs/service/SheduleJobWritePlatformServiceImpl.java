@@ -420,7 +420,7 @@ try {
 						DateTimeFormatter formatter1 = DateTimeFormat.forPattern("dd MMMM yyyy");
 						String formattedDate ;
 							if(data.isDynamic().equalsIgnoreCase("Y")){
-								formattedDate = formatter1.print(DateUtils.getLocalDateOfTenant());	
+								formattedDate = formatter1.print(DateUtils.getLocalDateOfTenant().plusDays(7));	
 							}else{
 								formattedDate = formatter1.print(data.getDueDate());
 							}
