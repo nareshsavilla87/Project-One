@@ -28,6 +28,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.data.AppUserData;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
@@ -90,6 +91,7 @@ public class UserChatApiResource{
 	        	 }
 	           }
 	           UserChatData data=new UserChatData(userChatDatas,userDatas);
+	           data.setDate(DateUtils.getLocalDateOfTenantForClient());
 	        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	        return this.toApiJsonSerializer.serialize(settings, data, USER_CHAT_DATA_PARAMETERS);
 		    }

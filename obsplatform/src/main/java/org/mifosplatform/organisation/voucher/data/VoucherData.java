@@ -40,6 +40,7 @@ public class VoucherData {
 	private Collection<MCodeData> reasondatas;
 	private String batchType;
 	private String promotionDescription;
+	private LocalDate date;
 
 	public VoucherData(final String batchName, final Long officeId,
 			final Long length, final String pinCategory, final String pinType, final Long quantity,
@@ -93,12 +94,12 @@ public class VoucherData {
 		
 	}
 
-	public VoucherData(String pinType, String pinValue, Date expiryDate) {
+	public VoucherData(String pinType, String pinValue, Date expiryDate, LocalDate date) {
 		
 		this.pinType = pinType;
 		this.pinValue = pinValue;
 		this.expiryDate = new LocalDate(expiryDate);
-		
+		this.date = date;
 	}
 
 	public VoucherData(Long id,String batchName) {
@@ -234,9 +235,14 @@ public class VoucherData {
 	public void setPromotionDescription(String promotionDescription) {
 		this.promotionDescription = promotionDescription;
 	}
-	
-	
-	
 
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+	
 
 }

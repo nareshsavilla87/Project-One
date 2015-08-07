@@ -88,6 +88,7 @@ final public class ClientData implements Comparable<ClientData> {
     private final String title;
     private final String parentId;
 	private ClientAdditionalData clientAdditionalData;
+	private LocalDate date;
    
 
     public static ClientData template(final Long officeId, final LocalDate joinedDate, final Collection<OfficeData> officeOptions,
@@ -388,6 +389,14 @@ final public class ClientData implements Comparable<ClientData> {
 	public void setClientAdditionalData(ClientAdditionalData clientAdditionalData) {
 
 		  this.clientAdditionalData = clientAdditionalData;
+	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 	
 	

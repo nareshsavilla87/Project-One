@@ -35,6 +35,7 @@ public class TicketMasterData {
 	private Date dueDate;
 	private String resolutionDescription;
 	private String ticketstatus;
+	private LocalDate date;
 	
   	public TicketMasterData(final List<EnumOptionData> statusType,
 			final List<EnumOptionData> priorityType) {
@@ -179,6 +180,14 @@ public class TicketMasterData {
 
 	public void setProblemsDatas(Collection<MCodeData> problemsDatas) {
 		this.problemsDatas = problemsDatas;
+	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 	
 	

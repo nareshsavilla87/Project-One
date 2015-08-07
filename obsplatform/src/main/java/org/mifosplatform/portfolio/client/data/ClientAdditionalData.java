@@ -27,6 +27,7 @@ public class ClientAdditionalData {
 	private Collection<MCodeData> cummunitcationDatas;
 	private Collection<MCodeData> languagesDatas;
 	private  Collection<MCodeData> ageGroupDatas;
+	private LocalDate date;
 	
 	
 
@@ -214,6 +215,16 @@ public class ClientAdditionalData {
 
 	public void setAgeGroupDatas(Collection<MCodeData> ageGroupDatas) {
 		this.ageGroupDatas = ageGroupDatas;
+	}
+
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 	
 	

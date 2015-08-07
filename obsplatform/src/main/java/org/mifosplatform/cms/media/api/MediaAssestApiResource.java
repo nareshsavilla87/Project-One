@@ -35,6 +35,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.data.MediaEnumoptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
@@ -105,7 +106,7 @@ public class MediaAssestApiResource {
          	  noOfPages = this.mediaAssetReadPlatformService.retrieveNoofPages(queryFOrPages);
          	  for(final MediaAssetData assetData:data){
          		  
-         		 // List<MediaLocationData> locationData=this.mediaAssetReadPlatformService.retrievemediaAssetLocationdata(assetData.getMediaId());
+         		  //List<MediaLocationData> locationData=this.mediaAssetReadPlatformService.retrievemediaAssetLocationdata(assetData.getMediaId());
          	  }
          	  
          	  //data.add(new MediaAssetData(noOfPages,pageNum));
@@ -192,6 +193,7 @@ public class MediaAssestApiResource {
 	public String retrieveMediaAssestTemplatedata(@Context final UriInfo uriInfo) {
     	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
         final MediaAssetData assetData = handleMediaAssestTemplateData();
+        assetData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, assetData, RESPONSE_DATA_PARAMETERS);
     }

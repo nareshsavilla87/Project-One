@@ -316,7 +316,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			
 			final JsonObject paymentobject = new JsonObject();
 			final Map<String, Object> changes = new HashMap<String, Object>();
-			final ClientBalance clientBalance = clientBalanceRepository.findByClientId(paypalEnquirey.getClientId());
+			 ClientBalance clientBalance = clientBalanceRepository.findByClientId(paypalEnquirey.getClientId());
 			
 			final PaypalEnquirey paypalEnquireyUpdate = this.paypalEnquireyRepository.findOne(paypalEnquirey.getId());
 			
@@ -332,7 +332,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 				this.paypalEnquireyRepository.save(paypalexceptionupdate);
 				changes.put("paymentId", new Long(-1));
 				changes.put("paymentStatus", "Fail");
-				changes.put("totalBalance", clientBalance.getBalanceAmount());
+				changes.put("totalBalance", clientBalance == null?0:clientBalance.getBalanceAmount());
 				changes.put("paypalException", e.getMessage());
 				return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(paypalEnquirey.getId()).with(changes).build();
 			} 
@@ -358,7 +358,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 						paypalEnquirey.getClientId(),null, null, null, null, null, null, null, null,null,null);
 
 				final CommandProcessingResult result = createPayment(comm);
-
+				 clientBalance =clientBalanceRepository.findByClientId(paypalEnquirey.getClientId());
 				if (result.resourceId() != null) {
 					final int i = new Long(0).compareTo(result.resourceId());
 					if (i == -1) {

@@ -18,6 +18,7 @@ public class OrderAddonsData {
 	private final BigDecimal price;
 	private final List<AddonsPriceData> addonsPriceDatas;
 	private final List<SubscriptionData> contractPeriods;
+	private LocalDate date;
 
 	public OrderAddonsData(List<AddonsPriceData> addonsPriceDatas,List<SubscriptionData> contractPeriods) {
 		
@@ -84,6 +85,14 @@ public class OrderAddonsData {
 
 	public List<SubscriptionData> getContractPeriods() {
 		return contractPeriods;
+	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 	
 	

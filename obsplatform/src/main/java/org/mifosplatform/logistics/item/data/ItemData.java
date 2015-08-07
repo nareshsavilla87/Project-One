@@ -44,6 +44,7 @@ public class ItemData {
 	private List<ItemData> itemPricesDatas;
 	private Long reorderLevel;
 	private List<FeeMasterData> feeMasterData;
+	private LocalDate date;
 	
 	public ItemData(Long id, String itemCode, String itemDesc,String itemClass,String units,   String chargeCode, int warranty, BigDecimal unitPrice,
 			Long usedItems,Long availableItems,Long totalItems, Long reorderLevel) {
@@ -240,6 +241,14 @@ public class ItemData {
 
 	public void setFeeMasterData(List<FeeMasterData> feeMasterData) {
 		this.feeMasterData = feeMasterData;
+	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 
 	

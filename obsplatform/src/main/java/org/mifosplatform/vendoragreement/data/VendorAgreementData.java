@@ -62,6 +62,7 @@ public class VendorAgreementData {
     private Long vendorAgreementId;
 	private Long contentCodeId;
 	private String regionName;
+	private LocalDate date;
     
     
 	public VendorAgreementData(List<PriceRegionData> priceRegionData,
@@ -316,6 +317,14 @@ public class VendorAgreementData {
 
 	public String getRegionName() {
 		return regionName;
+	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 
 	

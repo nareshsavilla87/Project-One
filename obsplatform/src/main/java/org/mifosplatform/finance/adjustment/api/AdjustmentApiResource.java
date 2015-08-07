@@ -25,6 +25,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -89,6 +90,7 @@ public class AdjustmentApiResource {
     	
         final List<AdjustmentData> data=this.readPlatformService.retrieveAllAdjustmentsCodes();
         final AdjustmentCodeData datas=new AdjustmentCodeData(data);
+        datas.setDate(DateUtils.getLocalDateOfTenantForClient());
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, datas, RESPONSE_DATA_PARAMETERS);
     }

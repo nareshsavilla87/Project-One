@@ -30,6 +30,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
@@ -105,6 +106,7 @@ public class OrdersApiResource {
 	public String retrieveOrderTemplate(@QueryParam("planId")Long planId,@QueryParam("clientId")Long clientId,@Context final UriInfo uriInfo) {
 	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 	OrderData orderData = handleTemplateRelatedData(planId,clientId);
+	orderData.setDate(DateUtils.getLocalDateOfTenantForClient());
 	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
     return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
 	}
@@ -173,6 +175,7 @@ public class OrdersApiResource {
 	        final List<OrderAddonsData> orderAddonsDatas = this.orderAddOnsReadPlaformService.retrieveAllOrderAddons(orderId);
 	        final List<OrderHistoryData> historyDatas = this.orderReadPlatformService.retrieveOrderHistoryDetails(orderDetailsData.getOrderNo());
 	        orderDetailsData=new OrderData(priceDatas,historyDatas,orderDetailsData,services,discountDatas,orderAddonsDatas);
+	        orderDetailsData.setDate(DateUtils.getLocalDateOfTenantForClient());
 	        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	        return this.toApiJsonSerializer.serialize(settings, orderDetailsData, RESPONSE_DATA_PARAMETERS);
 	    }
@@ -238,6 +241,7 @@ public class OrdersApiResource {
 		 context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 	     final Collection<MCodeData> disconnectDetails = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_DISCONNECT_REASON);
 	     OrderData orderData = new OrderData(disconnectDetails);
+	     orderData.setDate(DateUtils.getLocalDateOfTenantForClient());
 	     final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	     return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
 	 }
@@ -371,6 +375,7 @@ public class OrdersApiResource {
 	        context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 			final Collection<MCodeData> reasonDatas=this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_SUSPENSION_REASON);
 	        final OrderData orderData=new OrderData(null,reasonDatas);
+	        orderData.setDate(DateUtils.getLocalDateOfTenantForClient());
 	        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	        return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
 	    }

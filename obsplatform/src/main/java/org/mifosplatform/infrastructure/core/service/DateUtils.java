@@ -66,4 +66,8 @@ public class DateUtils {
         final String formattedSqlDate = df.format(date);
         return formattedSqlDate;
     }
+    
+    public static LocalDate getLocalDateOfTenantForClient() {
+    	return getLocalDateOfTenant();
+    }
 }

@@ -39,6 +39,7 @@ import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.exception.UnrecognizedQueryParamException;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.data.AddressData;
@@ -120,6 +121,7 @@ public class ClientsApiResource {
         final Configuration configurationProperty=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_LOGIN);
         clientData.setConfigurationProperty(configurationProperty);
         clientData=handleAddressTemplateData(clientData);
+        clientData.setDate(DateUtils.getLocalDateOfTenantForClient());
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, clientData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
     }
@@ -138,7 +140,8 @@ public class ClientsApiResource {
          	Collection<MCodeData> ageGroupDatas = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_AGE_GROUP);
          	ClientAdditionalData  clientAdditionalData = new ClientAdditionalData(genderDatas,nationalityDatas,customeridentificationDatas,cummunitcationDatas,
          			languagesDatas,ageGroupDatas);
-         
+         	clientAdditionalData.setDate(DateUtils.getLocalDateOfTenantForClient());
+         	
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.jsonSerializer.serialize(settings, clientAdditionalData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);
     }
@@ -202,7 +205,7 @@ public class ClientsApiResource {
         	final List<String> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetails(clientId);
              clientData = ClientData.templateOnTop(clientData, null,null,null,allocationDetailsDatas,balanceCheck);
         }
-        
+        clientData.setDate(DateUtils.getLocalDateOfTenantForClient());
         final SelfCare selfcare = this.selfCareRepository.findOneByClientId(clientId);
         clientData.setSelfcare(selfcare);
         final PaymentGatewayConfiguration paypalconfigurationProperty=this.paymentGatewayConfigurationRepository.findOneByName(ConfigurationConstants.PAYMENTGATEWAY_IS_PAYPAL_CHECK);
@@ -241,9 +244,11 @@ public class ClientsApiResource {
             	 clientAdditionalData.setCustomeridentificationDatas(customeridentificationDatas);
             	 clientAdditionalData.setCummunitcationDatas(cummunitcationDatas);
             	 clientAdditionalData.setLanguagesDatas(languagesDatas);
+            	 clientAdditionalData.setDate(DateUtils.getLocalDateOfTenantForClient());
             	}else{
             	  clientAdditionalData = new ClientAdditionalData(genderDatas,nationalityDatas,customeridentificationDatas,cummunitcationDatas,
             			languagesDatas,ageGroupDatas);
+            	  clientAdditionalData.setDate(DateUtils.getLocalDateOfTenantForClient());
             	}
       	  }
         return this.jsonSerializer.serialize(settings, clientAdditionalData, ClientApiConstants.CLIENT_RESPONSE_DATA_PARAMETERS);

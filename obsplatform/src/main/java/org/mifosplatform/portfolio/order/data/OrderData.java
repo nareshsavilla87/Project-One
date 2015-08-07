@@ -52,6 +52,7 @@ public class OrderData {
 	private Long planStatus;
 	private List<OrderAddonsData> orderAddonsDatas;
 	private String autoRenew;
+	private LocalDate date;
 
 	public OrderData(List<PlanCodeData> allowedtypes,List<PaytermData> paytermData,
 			List<SubscriptionData> contractPeriod, OrderData data) {
@@ -344,6 +345,14 @@ public class OrderData {
 	public void setplanType(String planType) {
 	this.isPrepaid=planType;
 		
+	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 
 	

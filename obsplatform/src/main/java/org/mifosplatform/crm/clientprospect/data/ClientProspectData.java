@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 
 /**
@@ -40,6 +41,7 @@ public class ClientProspectData {
 	private List<String> countryData, stateData, cityData;
 	private String statusRemark;
 	private String zipCode;
+	private LocalDate date;
 
 	public ClientProspectData() {
 
@@ -366,6 +368,14 @@ public class ClientProspectData {
 
 	public Long getPreferredPlanInt() {
 		return preferredPlanInt;
+	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 	
 	

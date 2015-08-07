@@ -23,6 +23,7 @@ public class EventOrderData {
 	private List<EnumOptionData> optType;
 	private Collection<MCodeData> codes;
 	private List<ClientTypeData> clientType;
+	private LocalDate date;
 
 	public EventOrderData(Long orderid, LocalDate bookedDate, String eventName,
 			BigDecimal bookedPrice, String chargeCode, String status) {
@@ -79,4 +80,13 @@ public class EventOrderData {
 		return status;
 	}
 
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+	
+	
 }

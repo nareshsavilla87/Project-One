@@ -103,6 +103,7 @@ public class PaymentsApiResource {
 		final Collection<McodeData> data = this.readPlatformService.retrievemCodeDetails("Payment Mode");
 		final List<PaymentData> depositDatas = this.readPlatformService.retrieveDepositDetails(clientId);
 		final PaymentData paymentData=new PaymentData(data, depositDatas);
+		paymentData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, paymentData,RESPONSE_DATA_PARAMETERS);
 

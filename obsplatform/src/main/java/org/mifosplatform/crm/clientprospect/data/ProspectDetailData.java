@@ -3,6 +3,8 @@ package org.mifosplatform.crm.clientprospect.data;
 import java.util.Collection;
 import java.util.List;
 
+import org.joda.time.LocalDate;
+
 public class ProspectDetailData {
 
 	private Long id;
@@ -11,6 +13,7 @@ public class ProspectDetailData {
 	private String nextTime;
 	private String notes;
 	private String assignedTo;
+	private LocalDate date;
 
 	private Collection<ProspectDetailAssignedToData> assignedToData;
 	private Collection<ProspectDetailCallStatus> callStatusData;
@@ -125,4 +128,13 @@ public class ProspectDetailData {
 		this.prospectDetailData = prospectDetailData;
 	}
 
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+
+	
 }

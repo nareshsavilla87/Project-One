@@ -44,6 +44,7 @@ public class OneTimeSaleData {
 	private String saleType;
 	private LocalDate warrantyDate;
 	private String propertyCode;
+	private LocalDate date;
 	
 	public OneTimeSaleData(final List<ItemData> itemData, final List<DiscountMasterData> discountData,
 			final Collection<OfficeData> officesData, final Collection<SubscriptionData> contractPeriods) {
@@ -406,5 +407,14 @@ public class OneTimeSaleData {
 	public void setUnitPrice(BigDecimal unitPrice) {
 		this.unitPrice = unitPrice;
 	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+	
 	
 }

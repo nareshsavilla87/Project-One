@@ -19,6 +19,7 @@ public class OwnedHardwareData {
 	private String itemType;
 	private List<ItemData> itemDatas;
 	private List<OwnedHardwareData> ownedHardwareDatas;
+	private LocalDate date;
 	
 	public OwnedHardwareData() {
 		
@@ -85,6 +86,16 @@ public class OwnedHardwareData {
 	}
 	public void setItemType(String itemType) {
 		this.itemType = itemType;
+	}
+
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 	
 	

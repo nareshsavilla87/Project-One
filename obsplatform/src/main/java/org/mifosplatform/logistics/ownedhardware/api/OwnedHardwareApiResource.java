@@ -24,6 +24,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.logistics.ownedhardware.data.OwnedHardwareData;
@@ -93,6 +94,7 @@ public class OwnedHardwareApiResource {
 		this.context.authenticatedUser().validateHasReadPermission(resourceType);
 		List<ItemData> itemCodes = ownedHardwareReadPlatformService.retriveTemplate();
 		ItemData itemCode = new ItemData(itemCodes);
+		itemCode.setDate(DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.apiJsonSerializerForItemCode.serialize(settings,itemCode,SUPPORTED_RESPONSE_PARAMETERS_ITEMCODE);
 	}
@@ -128,6 +130,7 @@ public class OwnedHardwareApiResource {
 		List<ItemData> itemCodes = ownedHardwareReadPlatformService.retriveTemplate();
 		List<OwnedHardwareData> ownedHardwareDatas = ownedHardwareReadPlatformService.retriveSingleOwnedHardwareData(id);
 		OwnedHardwareData ss=new OwnedHardwareData(itemCodes,ownedHardwareDatas);
+		ss.setDate(DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.apiJsonSerializer.serialize(settings,ss,SUPPORTED_RESPONSE_PARAMETERS);
 	}

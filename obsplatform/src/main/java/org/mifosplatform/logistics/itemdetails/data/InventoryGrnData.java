@@ -33,6 +33,7 @@ public class InventoryGrnData {
 	private String officeName;
 	private String purchaseNo;
 	private Long officeId;
+	private LocalDate date;
 	
 	public InventoryGrnData(){
 		this.id=null;
@@ -270,6 +271,14 @@ public class InventoryGrnData {
 	 */
 	public void setSupplierName(String supplierName) {
 		this.supplierName = supplierName;
+	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 
 	
