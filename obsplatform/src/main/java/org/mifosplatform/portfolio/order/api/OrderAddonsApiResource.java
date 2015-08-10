@@ -24,6 +24,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.addons.data.AddonsPriceData;
 import org.mifosplatform.portfolio.addons.service.AddonServiceReadPlatformService;
@@ -85,6 +86,7 @@ public OrderAddonsApiResource(final DefaultToApiJsonSerializer<OrderAddonsData> 
 	List<AddonsPriceData> addonsPriceDatas =this.addonServiceReadPlatformService.retrievePlanAddonDetails(planId,chargeCode);
 	List<SubscriptionData> contractPeriod=this.planReadPlatformService.retrieveSubscriptionData(null,null);
 	OrderAddonsData addonsData =new OrderAddonsData(addonsPriceDatas,contractPeriod);
+	addonsData.setDate(DateUtils.getLocalDateOfTenantForClient());
 	final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
     return this.toApiJsonSerializer.serialize(settings, addonsData, RESPONSE_DATA_PARAMETERS);
 	}

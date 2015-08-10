@@ -31,6 +31,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.logistics.item.exception.NoItemRegionalPriceFound;
@@ -121,6 +122,7 @@ public class OneTimeSalesApiResource {
 		
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		OneTimeSaleData data = handleTemplateRelatedData();
+		data.setDate(DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, data,RESPONSE_DATA_PARAMETERS);
 	}

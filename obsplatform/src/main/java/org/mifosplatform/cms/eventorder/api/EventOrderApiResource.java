@@ -32,6 +32,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
@@ -97,6 +98,7 @@ public class EventOrderApiResource {
 			final Collection<MCodeData> codes = this.codeReadPlatformService.getCodeValue(CodeNameConstants.CODE_MEDIAFORMAT);
 			final List<ClientTypeData> clientType = this.eventPricingReadService.clientType();
 			final EventOrderData data = new EventOrderData(devices,events,optType,codes,clientType);
+			data.setDate(DateUtils.getLocalDateOfTenantForClient());
 			final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 	        return this.toApiJsonSerializer.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
 		}

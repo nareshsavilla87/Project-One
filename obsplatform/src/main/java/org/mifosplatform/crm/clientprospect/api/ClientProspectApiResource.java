@@ -35,6 +35,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
@@ -160,6 +161,7 @@ public class ClientProspectApiResource {
 		//clientProspectData.setCountryData(countryData);
 		//clientProspectData.setStateData(statesData);
 		clientProspectData.setCityData(citiesData);
+		clientProspectData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.apiJsonSerializer.serialize(settings, clientProspectData, PROSPECT_RESPONSE_DATA_PARAMETER);
 	}
@@ -206,7 +208,8 @@ public class ClientProspectApiResource {
 		clientData.setCountryData(countryData);
 		clientData.setStateData(statesData);
 		clientData.setCityData(citiesData);
-
+		clientData.setDate(DateUtils.getLocalDateOfTenantForClient());
+		
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.apiJsonSerializerString.serialize(settings, clientData, PROSPECT_RESPONSE_DATA_PARAMETER);
 	}
@@ -303,6 +306,7 @@ public class ClientProspectApiResource {
 		
 		clientProspectData.setCallStatusData(callStatusData);
 		clientProspectData.setAssignedToData(assignedToData);
+		clientProspectData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.apiJsonSerializerForProspectDetail.serialize(settings, clientProspectData, PROSPECTDETAIL_RESPONSE_DATA_PARAMETER);

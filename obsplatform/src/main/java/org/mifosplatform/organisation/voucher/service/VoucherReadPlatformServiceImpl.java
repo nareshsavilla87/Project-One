@@ -11,10 +11,12 @@ import java.util.List;
 
 import javax.ws.rs.core.StreamingOutput;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.crm.ticketmaster.data.ClientTicketData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -337,8 +339,8 @@ public class VoucherReadPlatformServiceImpl implements
 			String pinValue = rs.getString("pinValue");
 			Date expiryDate = rs.getDate("expiryDate");
 			String pinType = rs.getString("pinType");
-
-			return new VoucherData(pinType,pinValue,expiryDate);
+			LocalDate date = DateUtils.getLocalDateOfTenantForClient();
+			return new VoucherData(pinType,pinValue,expiryDate, date);
 		}
 	}
 	

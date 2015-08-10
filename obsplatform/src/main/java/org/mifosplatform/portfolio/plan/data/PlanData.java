@@ -41,9 +41,11 @@ public class PlanData {
 	//private Integer planCount = 0;
 	private List<PlanData> data = null;
 	private int planCount;
+	private LocalDate date;
 	
 	public PlanData(Collection<ServiceData> data, List<BillRuleData> billData,List<SubscriptionData> contractPeriod, List<EnumOptionData> status,
-			PlanData datas, Collection<ServiceData> selectedservice,Collection<MCodeData> provisionSysData, List<EnumOptionData> volumeType) {
+			PlanData datas, Collection<ServiceData> selectedservice,Collection<MCodeData> provisionSysData, List<EnumOptionData> volumeType,
+			LocalDate date) {
 	
 		if(datas!=null){
 		this.id = datas.getId();
@@ -75,7 +77,7 @@ public class PlanData {
 		this.datas = datas;
 		//this.datas = null;
 		this.volumeTypes=volumeType;
-
+		this.date = date;
 	}
 
 	
@@ -344,6 +346,16 @@ public class PlanData {
 	public void setPlanCount(int size) {
 		this.planCount=size;
 		
+	}
+
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 	
 	

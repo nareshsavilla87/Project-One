@@ -28,6 +28,7 @@ import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
@@ -84,7 +85,7 @@ public class TaxMapApiResource {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final Collection<MCodeData> taxTypeData = this.mCodeReadPlatformService.getCodeValue(CodeNameConstants.CODE_TYPE);
 		final List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
-		final TaxMapData taxMapData=new TaxMapData(taxTypeData,priceRegionData,chargeCode);
+		final TaxMapData taxMapData=new TaxMapData(taxTypeData,priceRegionData,chargeCode, DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.apiJsonSerializer.serialize(settings, taxMapData,RESPONSE_TAXMAPPING_PARAMETERS);
 	}
@@ -129,6 +130,7 @@ public class TaxMapApiResource {
 		taxMapData.setChargeCodesForTax(chargeCodeData);
 		taxMapData.setTaxTypeData(taxTypeData);
 		taxMapData.setPriceRegionData(priceRegionData);
+		taxMapData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		}
 		return this.apiJsonSerializer.serialize(settings, taxMapData,RESPONSE_TAXMAPPING_PARAMETERS);
 

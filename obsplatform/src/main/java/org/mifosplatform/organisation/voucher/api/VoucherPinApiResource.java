@@ -30,6 +30,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
@@ -137,6 +138,7 @@ public class VoucherPinApiResource {
 		final List<EnumOptionData> pinTypeData = this.readPlatformService.pinType();	
 		final Collection<OfficeData> offices = this.officeReadPlatformService.retrieveAllOffices();
 		final VoucherData voucherData = new VoucherData(pinCategoryData, pinTypeData, offices);
+		voucherData.setDate(DateUtils.getLocalDateOfTenantForClient());
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		
 		return this.toApiJsonSerializer.serialize(settings, voucherData, RESPONSE_PARAMETERS);

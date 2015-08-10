@@ -15,6 +15,8 @@ public class UserChatData {
 	private List<UserChatData> userChatDatas;
 	private Collection<AppUserData> appUserDatas;
 	private final Boolean isRead;
+	private LocalDate date;
+	
 	public UserChatData(Long id, String userName, LocalDate messageDate,
 			String message, String createdByUser,Boolean isRead) {
            
@@ -50,6 +52,12 @@ public class UserChatData {
 	}
 	public String getCreatedByUser() {
 		return createdByUser;
+	}
+	public LocalDate getDate() {
+		return date;
+	}
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 
 	

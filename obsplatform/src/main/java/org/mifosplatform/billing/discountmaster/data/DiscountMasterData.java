@@ -29,6 +29,7 @@ public class DiscountMasterData {
 	private Collection<MCodeData> clientCategoryDatas;
 	private Collection<MCodeData> discountTypeData;
 	private String discountStatus;
+	private LocalDate date;
 	private List<DiscountDetailData> discountDetailDatas;
 
 	public DiscountMasterData(final Long id, final String discountCode,final String discountDescription, final String discountType,
@@ -213,6 +214,16 @@ public class DiscountMasterData {
 	}
 
 
+	
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+	
 	
 
 }

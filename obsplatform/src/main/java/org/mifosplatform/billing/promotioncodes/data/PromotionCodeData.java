@@ -24,6 +24,7 @@ public class PromotionCodeData {
 	private BigDecimal discountRate;
 	private Collection<MCodeData> discountTypeData;
 	private List<PeriodData> contractTypedata;
+	private LocalDate date;
 
 	public PromotionCodeData(Long id, String promotionCode,
 			String promotionDescription, String durationType, Long duration,
@@ -98,5 +99,15 @@ public class PromotionCodeData {
 	public void setContractTypedata(final List<PeriodData> contractTypedata) {
 		this.contractTypedata = contractTypedata;
 	}
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+	public void setDate(LocalDate date) {
+		this.date = date;
+	}
+	
+	
 
 }

@@ -28,6 +28,7 @@ public class AgreementData {
 	private Long sourceId;
 	private Long chargeId;
 	private BigDecimal commisionAmount;
+	private LocalDate date;
 
 
 	public AgreementData(Collection<MCodeData> shareTypes,Collection<MCodeData> sourceData, 
@@ -159,6 +160,16 @@ public class AgreementData {
 
 	public BigDecimal getCommisionAmount() {
 		return commisionAmount;
+	}
+
+
+	public LocalDate getDate() {
+		return date;
+	}
+
+
+	public void setDate(LocalDate date) {
+		this.date = date;
 	}
 
 	
