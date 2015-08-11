@@ -1,3 +1,6 @@
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 /**
  *
  * Java program which demonstrate that we can not override static method in Java.
@@ -25,7 +28,11 @@ public class StaticDemo {
     	 rev +=s.charAt(i);
      }
     System.out.println(rev);
+   
     } 
+    
+    
+   
  
 }
 
