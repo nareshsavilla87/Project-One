@@ -14,7 +14,7 @@ public class CityNotFoundException extends AbstractPlatformResourceNotFoundExcep
 	private static final long serialVersionUID = 1L;
 
 	public CityNotFoundException(final String id) {
-        super("error.msg.city.not.found", "City with this id"+id+"not exist",id);
+        super("error.msg.city.not.found", "City with this id " +id+" not exist",id);
         
     }
 
