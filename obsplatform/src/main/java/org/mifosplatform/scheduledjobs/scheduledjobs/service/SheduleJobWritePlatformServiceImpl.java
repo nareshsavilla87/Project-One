@@ -365,7 +365,7 @@ public void processSimulator() {
 				jsonobject.put("assignedTo", userId);
 				jsonobject.put("priority",priorityData.get(0).getValue());
 				jsonobject.put("problemCode", problemsData.iterator().next().getId());
-				this.ticketMasterApiResource.createTicketMaster(processRequest.getClientId(), jsonobject.toString());
+				this.ticketMasterApiResource.processCreateTicket(processRequest.getClientId(), jsonobject.toString());
 			}
 		}
 	}
@@ -419,7 +419,7 @@ try {
 						DateTimeFormatter formatter1 = DateTimeFormat.forPattern("dd MMMM yyyy");
 						String formattedDate ;
 							if(data.isDynamic().equalsIgnoreCase("Y")){
-								formattedDate = formatter1.print(DateUtils.getLocalDateOfTenant());	
+								formattedDate = formatter1.print(DateUtils.getLocalDateOfTenant().plusDays(7));	
 							}else{
 								formattedDate = formatter1.print(data.getDueDate());
 							}

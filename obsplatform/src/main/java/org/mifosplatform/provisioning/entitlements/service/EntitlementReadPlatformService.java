@@ -21,5 +21,7 @@ public interface EntitlementReadPlatformService {
 	List<EntitlementsData> getZebraOTTProcessingData(Long no, String provisioningSystem);
 
 	List<EntitlementsData> getCubiWareProcessingData(Long no, String provisioningSystem);
+
+	//List<EntitlementsData> getProcessingData(Long id,String provisioningSys,String serviceType, Long clientId);
 	
 }
