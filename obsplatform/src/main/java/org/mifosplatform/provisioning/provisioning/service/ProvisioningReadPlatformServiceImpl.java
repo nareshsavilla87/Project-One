@@ -282,6 +282,8 @@ public class ProvisioningReadPlatformServiceImpl implements ProvisioningReadPlat
 
 		return this.jdbcTemplate.query(sql, mapper, new Object[] { orderNo });
 	}
+	
+	
 
 	private static final class ProcessRequestMapper implements
 			RowMapper<ProcessRequestData> {
@@ -297,8 +299,7 @@ public class ProvisioningReadPlatformServiceImpl implements ProvisioningReadPlat
 
 			return " p.id as id,p.client_id as clientId, p.order_id as orderId,p.order_id as orderNo,p.request_type as requestType,p.is_processed as isProcessed, "
 					+ " pr.hardware_id as hardwareId, pr.receive_message as receiveMessage, pr.sent_message as sentMessage "
-					+ " from b_process_request p inner join b_process_request_detail pr on pr.processrequest_id=p.id where"
-					+ " p.order_id=? group by p.id ";
+					+ " from b_process_request p inner join b_process_request_detail pr on pr.processrequest_id=p.id where";
 		}
 
 		@Override
@@ -317,6 +318,7 @@ public class ProvisioningReadPlatformServiceImpl implements ProvisioningReadPlat
 					hardwareId, receiveMessage, sentMessage, isProcessed,
 					orderNo);
 		}
+				
 	}
 
 	@Override
@@ -326,11 +328,25 @@ public class ProvisioningReadPlatformServiceImpl implements ProvisioningReadPlat
 
 		ProcessRequestMapper mapper = new ProcessRequestMapper();
 
-		String sql = "select " + mapper.schemaForId();
+		String sql = "select " + mapper.schemaForId()+" p.order_id= ? group by p.id";
+		 
 
 		return this.jdbcTemplate.queryForObject(sql, mapper,
 				new Object[] { id });
 	}
+	@Override
+	public List<ProcessRequestData> getProcessRequestClientData(Long clientId) {
+
+		context.authenticatedUser();
+
+		ProcessRequestMapper mapper = new ProcessRequestMapper();
+
+		String sql = "select " + mapper.schemaForId() + " p.client_id = ? and p.order_id=0 group by p.id;";
+		
+		return this.jdbcTemplate.query(sql, mapper, new Object[] {clientId  });
+
+	}
+
 
 	@Override
 	public Collection<MCodeData> retrieveVlanDetails(String string) {
@@ -370,4 +386,5 @@ public class ProvisioningReadPlatformServiceImpl implements ProvisioningReadPlat
 
 		return codeDatas;
 	}
+	
 }

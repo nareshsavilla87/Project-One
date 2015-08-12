@@ -170,6 +170,7 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 			ticketMaster.setCreatedbyId(created);
 			this.repository.saveAndFlush(ticketMaster);
 			final TicketDetail details = TicketDetail.fromJson(command);
+			details.setAttachments(command.stringValueOfParameterNamed("fileLocation"));
 			details.setTicketId(ticketMaster.getId());
 			details.setCreatedbyId(created);
 			this.detailsRepository.saveAndFlush(details);
