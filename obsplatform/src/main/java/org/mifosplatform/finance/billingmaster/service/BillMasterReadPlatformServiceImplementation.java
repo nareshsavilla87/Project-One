@@ -79,16 +79,19 @@ public class BillMasterReadPlatformServiceImplementation implements
 		final FinancialInvoiceTransactionsMapper financialTransactionsMapper = new FinancialInvoiceTransactionsMapper();
 		StringBuilder sqlBuilder = new StringBuilder(200);
 	        sqlBuilder.append("select ");
-	        sqlBuilder.append(financialTransactionsMapper.financialTransactionsSchema() + " order by  transDate desc ");
+	        sqlBuilder.append(financialTransactionsMapper.financialTransactionsSchema());
 	        String sqlSearch = searchTransactionHistory.getSqlSearch();
 	        String extraCriteria = "";
 		    if (sqlSearch != null) {
 		    	sqlSearch=sqlSearch.trim();
-		    	extraCriteria = "and (v.transType like '%"+sqlSearch+"%' OR "
-		    				+ " v.transDate like '%"+sqlSearch+"%')" ;
+		    	extraCriteria = " and (v.transType like '%"+sqlSearch+"%' OR "
+		    				+ " v.transDate like '%"+sqlSearch+"%' OR v.tran_type like '%"+sqlSearch+"%' OR "
+		    				+" v.dr_amt like '%"+sqlSearch+"%' OR v.cr_amt like '%"+sqlSearch+"%' )" ;
 		    }
 		    
 	        sqlBuilder.append(extraCriteria);
+	        
+	        sqlBuilder.append(" order by  transDate desc ");
 	        
 	        if (searchTransactionHistory.isLimited()) {
 	            sqlBuilder.append(" limit ").append(searchTransactionHistory.getLimit());
@@ -215,10 +218,32 @@ public class BillMasterReadPlatformServiceImplementation implements
 	}
 
 	@Override
-	public List<FinancialTransactionsData> retrieveStatments(final Long clientId) {
+	public Page<FinancialTransactionsData> retrieveStatments(SearchSqlQuery searchCodes,Long clientId) {
 		final BillStatmentMapper mapper = new BillStatmentMapper();
 		final String sql = "select " + mapper.billStatemnetSchema() + " and b.is_deleted='N'";
-		return this.jdbcTemplate.query(sql, mapper, new Object[] { clientId });
+		
+		StringBuilder sqlBuilder = new StringBuilder(200);
+		sqlBuilder.append(sql);
+		String sqlSearch=searchCodes.getSqlSearch();
+		  String extraCriteria = "";
+		    if (sqlSearch != null) {
+		    	sqlSearch=sqlSearch.trim();
+		    	extraCriteria = "  and (b.Due_amount like '%"+sqlSearch+"%' or b.bill_date like '%"+sqlSearch+"%' " +
+		    						" or b.due_date like '%"+sqlSearch+"%' )"; 
+		    }
+		    
+		    sqlBuilder.append(extraCriteria);
+		
+		if (searchCodes.isLimited()) {
+            sqlBuilder.append(" limit ").append(searchCodes.getLimit());
+        }
+        if (searchCodes.isOffset()) {
+            sqlBuilder.append(" offset ").append(searchCodes.getOffset());
+        }
+
+		//return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+		return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(),
+	            new Object[] {clientId}, mapper);
 
 	}
 
