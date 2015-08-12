@@ -85,7 +85,7 @@ public class BillMasterReadPlatformServiceImplementation implements
 		    if (sqlSearch != null) {
 		    	sqlSearch=sqlSearch.trim();
 		    	extraCriteria = " and (v.transType like '%"+sqlSearch+"%' OR "
-		    				+ " v.transDate like '%"+sqlSearch+"%' OR v.tran_type like '%"+sqlSearch+"%' OR "
+		    				+ " DATE_FORMAT(v.transDate,'%d-%M-%Y') like '%"+sqlSearch+"%' OR v.tran_type like '%"+sqlSearch+"%' OR "
 		    				+" v.dr_amt like '%"+sqlSearch+"%' OR v.cr_amt like '%"+sqlSearch+"%' )" ;
 		    }
 		    
@@ -228,8 +228,8 @@ public class BillMasterReadPlatformServiceImplementation implements
 		  String extraCriteria = "";
 		    if (sqlSearch != null) {
 		    	sqlSearch=sqlSearch.trim();
-		    	extraCriteria = "  and (b.Due_amount like '%"+sqlSearch+"%' or b.bill_date like '%"+sqlSearch+"%' " +
-		    						" or b.due_date like '%"+sqlSearch+"%' )"; 
+		    	extraCriteria = "  and (b.Due_amount like '%"+sqlSearch+"%' or DATE_FORMAT(b.bill_date,'%d-%M-%Y') like '%"+sqlSearch+"%' " +
+		    						" or DATE_FORMAT(b.due_date,'%d-%M-%Y') like '%"+sqlSearch+"%' )"; 
 		    }
 		    
 		    sqlBuilder.append(extraCriteria);
