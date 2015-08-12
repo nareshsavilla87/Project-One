@@ -40,7 +40,6 @@ import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationWriteplatformService;
 import org.mifosplatform.portfolio.order.exceptions.NoGrnIdFoundException;
-import org.mifosplatform.portfolio.order.service.OrderAssembler;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.property.domain.PropertyDeviceMapping;
 import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
@@ -284,13 +283,24 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 								ItemMaster itemMaster=this.itemRepository.findOne(inventoryItemDetails.getItemMasterId());
 								List<HardwareAssociationData> allocationDetailsDatas=this.associationReadplatformService.retrieveClientAllocatedPlan(oneTimeSale.getClientId(),itemMaster.getItemCode());						    		   
 								if(!allocationDetailsDatas.isEmpty()){
-									
 									this.associationWriteplatformService.createNewHardwareAssociation(oneTimeSale.getClientId(),
 											allocationDetailsDatas.get(0).getPlanId(),inventoryItemDetails.getSerialNumber(),
-											allocationDetailsDatas.get(0).getorderId(),"ALLOT");
-						    		   }	
+											allocationDetailsDatas.get(0).getorderId(),"ALLOT",null);
+								  }else{
+									  configurationProperty=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SERVICE_DEVICE_MAPPING);
+									  if(configurationProperty !=null&&configurationProperty.isEnabled()){
+											   List<AllocationDetailsData> allocationDetails=this.associationReadplatformService.retrieveClientAllocatedPlanByServiceMap(clientId,itemMaster.getId());
+											   if(!allocationDetails.isEmpty()){
+												   for(AllocationDetailsData allocationDetail: allocationDetails){
+												     this.associationWriteplatformService.createNewHardwareAssociation(clientId,allocationDetail.getPlanId(),allocationDetail.getSerialNo(),
+															allocationDetail.getOrderId(),allocationDetail.getAllocationType(),allocationDetail.getServiceId());
+												  }
+											   }
+										   }
+									   }
+								  }
 						    	}	
-					}
+					
 					return new CommandProcessingResult(entityId,clientId);
 			
 			}catch(DataIntegrityViolationException dve){

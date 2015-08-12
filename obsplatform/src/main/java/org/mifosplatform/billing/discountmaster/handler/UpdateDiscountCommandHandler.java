@@ -28,7 +28,6 @@ public class UpdateDiscountCommandHandler implements NewCommandSourceHandler {
 	@Override
 	public CommandProcessingResult processCommand(final JsonCommand command) {
 
-		return this.writePlatformService.updateDiscount(command.entityId(),
-				command);
+		return this.writePlatformService.updateDiscount(command.entityId(),command);
 	}
 }

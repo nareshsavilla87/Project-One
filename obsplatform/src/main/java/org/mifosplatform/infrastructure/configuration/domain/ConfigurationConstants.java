@@ -45,6 +45,7 @@ public class ConfigurationConstants {
 	public static final String CONFIG_PROPERTY_SMS= "sms-configuration";
 	public static final String CONFIG_IS_REDEMPTION = "is-redemption";
 	public static final String CONFIG_FREERADIUS_REST = "freeradius_rest";
+	public static final String CONFIG_IS_SERVICE_DEVICE_MAPPING= "service-device-mapping";
 	
 
 	public static final String ENABLED = "enabled";

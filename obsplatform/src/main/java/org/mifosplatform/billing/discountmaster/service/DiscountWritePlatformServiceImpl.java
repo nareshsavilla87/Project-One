@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.mifosplatform.billing.discountmaster.domain.DiscountDetailRepository;
 import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
@@ -31,8 +32,7 @@ import com.google.gson.JsonElement;
  * 
  */
 @Service
-public class DiscountWritePlatformServiceImpl implements
-		DiscountWritePlatformService {
+public class DiscountWritePlatformServiceImpl implements DiscountWritePlatformService {
 
 	private final static Logger LOGGER = LoggerFactory.getLogger(DiscountWritePlatformServiceImpl.class);
 	private final PlatformSecurityContext context;

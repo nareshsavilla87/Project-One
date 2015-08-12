@@ -6,14 +6,18 @@ import java.util.Map;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import org.apache.commons.lang.StringUtils;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "b_prov_service_details")
+@Table(name = "b_prov_service_details", uniqueConstraints = {@UniqueConstraint(name = "serviceCode", columnNames = { "service_id" }),
+		@UniqueConstraint(name = "service_identification_uq", columnNames = { "service_id", "service_identification"})})
 public class ServiceMapping extends AbstractPersistable<Long> {
+	
+	private static final long serialVersionUID = 3356227259773271027L;
 
 	@Column(name = "service_id")
 	private Long serviceId;
@@ -33,7 +37,6 @@ public class ServiceMapping extends AbstractPersistable<Long> {
 	@Column(name = "sub_category")
 	private String subCategory;
 	
-	
 
 	@Column(name = "is_deleted")
 	private String isDeleted = "n";
@@ -43,14 +46,19 @@ public class ServiceMapping extends AbstractPersistable<Long> {
 
 	@Column(name = "sort_by")
 	private Integer sortBy;
-
+	
+	@Column(name = "is_hw_req", nullable = false)
+	private char isHwReq='N';
+	
+	@Column(name = "item_id",nullable = true)
+	private Long itemId;
 
 
 	public ServiceMapping() {
 	}
 
 	public ServiceMapping(final Long serviceId, final String serviceUrl,final String status, final String image, final String category,
-			final String subCategory,final String provisionSystem) {
+			final String subCategory,final String provisionSystem,final Long itemId,final boolean isHwReq) {
 
 		this.serviceId = serviceId;
 		this.serviceIdentification = serviceUrl;
@@ -59,11 +67,15 @@ public class ServiceMapping extends AbstractPersistable<Long> {
 		this.category = category;
 		this.subCategory = subCategory;
 		this.provisionSystem=provisionSystem;
+		this.itemId= itemId;
+		this.isHwReq=isHwReq?'Y':'N';
 
 	}
 
-	public static ServiceMapping fromJson(JsonCommand command) {
+	public static ServiceMapping fromJson(JsonCommand command, boolean isServiceLevelMap) {
 		
+		Long itemId=null;
+		boolean isHwReq=false;
 		final Long serviceId = command.longValueOfParameterNamed("serviceId");
 		final String serviceIdentification = command.stringValueOfParameterNamed("serviceIdentification");
 		final String status = command.stringValueOfParameterNamed("status");
@@ -71,7 +83,13 @@ public class ServiceMapping extends AbstractPersistable<Long> {
 		final String category = command.stringValueOfParameterNamed("category");
 		final String subcategory = command.stringValueOfParameterNamed("subCategory");
 		final String provisionSystem=command.stringValueOfParameterNamed("provisionSystem");
-		return new ServiceMapping(serviceId, serviceIdentification, status,image, category, subcategory,provisionSystem);
+		if(isServiceLevelMap){
+			isHwReq =command.booleanPrimitiveValueOfParameterNamed("isHwReq");
+		  if(isHwReq&&command.hasParameter("itemId")){
+			 itemId = command.longValueOfParameterNamed("itemId");
+		   }
+		}
+		return new ServiceMapping(serviceId, serviceIdentification, status,image, category,subcategory,provisionSystem,itemId,isHwReq);
 
 	}
 
@@ -108,8 +126,16 @@ public class ServiceMapping extends AbstractPersistable<Long> {
 	public String getIsDeleted() {
 		return isDeleted;
 	}
+	
+	public Integer getSortBy() {
+		return sortBy;
+	}
 
-	public Map<String, Object> update(JsonCommand command) {
+	public void setSortBy(Integer sortBy) {
+		this.sortBy = sortBy;
+	}
+
+	public Map<String, Object> update(JsonCommand command, boolean isServiceLevelMap) {
 
 		final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
 		
@@ -168,16 +194,26 @@ public class ServiceMapping extends AbstractPersistable<Long> {
 			actualChanges.put(provisionSystemParamName, newValue);
 			this.provisionSystem = StringUtils.defaultIfEmpty(newValue, null);
 		}
+		
+		if(isServiceLevelMap){
+			final boolean isHwReqParamName =command.booleanPrimitiveValueOfParameterNamed("isHwReq");
+		     this.isHwReq=isHwReqParamName?'Y':'N';
+			  if(isHwReqParamName&&command.hasParameter("itemId")){
+					final String itemParamName = "itemId";
+					if (command.isChangeInLongParameterNamed(itemParamName,this.itemId)) {
+						final Long newValue = command.longValueOfParameterNamed(itemParamName);
+						actualChanges.put(itemParamName, newValue);
+						this.itemId = newValue;
+					}
+				     
+			   }else{
+			       this.itemId=null;
+			   }
+			}
 
 		return actualChanges;
 
 	}
 	
-	public Integer getSortBy() {
-		return sortBy;
-	}
 
-	public void setSortBy(Integer sortBy) {
-		this.sortBy = sortBy;
-	}
 }

@@ -86,13 +86,12 @@ public class AssociationApiResource {
  			
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		AssociationData associationData = this.associationReadplatformService.retrieveSingleDetails(id);
-		List<AssociationData> HardwareDatas = this.associationReadplatformService.retrieveHardwareData(clientId);
-		List<AssociationData> planDatas= this.associationReadplatformService.retrieveplanData(clientId);
 		Collection<EnumValuesData> enumValuesDatas=this.enumReadplaformService.getEnumValues(EnumValuesConstants.ENUMVALUE_PROPERTY_DEVICE_SWAP);
+	    List<AssociationData> HardwareDatas = this.associationReadplatformService.retrieveHardwareData(clientId);
+		List<AssociationData> planDatas= this.associationReadplatformService.retrieveplanData(clientId);
 		HardwareDatas.add(new AssociationData(associationData.getSerialNum(),associationData.getProvisionNumber(),associationData.getAllocationType()));
 		AssociationData data=new AssociationData(associationData.getPlanId(),associationData.getPlanCode(),associationData.getOrderId());
 	    planDatas.add(data);
-		
 		associationData.addHardwareDatas(HardwareDatas);
 		associationData.addPlanDatas(planDatas);
 		associationData.addEnumValuesDatas(enumValuesDatas);

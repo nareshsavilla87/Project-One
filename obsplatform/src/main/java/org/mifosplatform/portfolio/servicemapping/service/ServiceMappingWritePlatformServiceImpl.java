@@ -3,6 +3,9 @@ package org.mifosplatform.portfolio.servicemapping.service;
 import java.util.Map;
 
 import org.mifosplatform.infrastructure.codes.exception.CodeNotFoundException;
+import org.mifosplatform.infrastructure.configuration.domain.Configuration;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -24,18 +27,21 @@ public class ServiceMappingWritePlatformServiceImpl implements ServiceMappingWri
 	
 	private static final Logger LOGGER = (Logger) LoggerFactory.getLogger(ServiceMappingWritePlatformServiceImpl.class);	
 	
-	private PlatformSecurityContext platformSecurityContext;
-	private ServiceMappingRepository serviceMappingRepository; 
-	private ServiceMappingCommandFromApiJsonDeserializer serviceMappingCommandFromApiJsonDeserializer;
+	private final PlatformSecurityContext platformSecurityContext;
+	private final ServiceMappingRepository serviceMappingRepository; 
+	private final ServiceMappingCommandFromApiJsonDeserializer serviceMappingCommandFromApiJsonDeserializer;
+	private final ConfigurationRepository globalConfigurationRepository;
 //	private ServiceMappingReadPlatformService serviceMappingReadPlatformService; 
 	
 	@Autowired
 	public ServiceMappingWritePlatformServiceImpl(final PlatformSecurityContext platformSecurityContext, 
 			final ServiceMappingRepository serviceMappingRepository, 
-			final ServiceMappingCommandFromApiJsonDeserializer serviceMappingCommandFromApiJsonDeserializer) {
+			final ServiceMappingCommandFromApiJsonDeserializer serviceMappingCommandFromApiJsonDeserializer,
+			final ConfigurationRepository globalConfigurationRepository) {
 		this.platformSecurityContext = platformSecurityContext;
 		this.serviceMappingRepository = serviceMappingRepository;
 		this.serviceMappingCommandFromApiJsonDeserializer = serviceMappingCommandFromApiJsonDeserializer;
+		this.globalConfigurationRepository = globalConfigurationRepository;
 	//	this.serviceMappingReadPlatformService = serviceMappingReadPlatformService;
 	}
 	
@@ -45,8 +51,9 @@ public class ServiceMappingWritePlatformServiceImpl implements ServiceMappingWri
 		
 		try{
 			platformSecurityContext.authenticatedUser();
-			serviceMappingCommandFromApiJsonDeserializer.validateForCreate(command.json(), command.hasParameter("sortBy"));
-			final ServiceMapping serviceMapping = ServiceMapping.fromJson(command);
+			Configuration property = this.globalConfigurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SERVICE_DEVICE_MAPPING);
+			this.serviceMappingCommandFromApiJsonDeserializer.validateForCreate(command.json(), command.hasParameter("sortBy"),property !=null ? property.isEnabled():false);
+			final ServiceMapping serviceMapping = ServiceMapping.fromJson(command,property !=null ? property.isEnabled():false);
 			serviceMappingRepository.save(serviceMapping);
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(serviceMapping.getId()).build();
 		}catch(DataIntegrityViolationException dve){
@@ -62,16 +69,17 @@ public class ServiceMappingWritePlatformServiceImpl implements ServiceMappingWri
 
 			this.platformSecurityContext.authenticatedUser();
 			Map<String, Object> changes = null;
-			this.serviceMappingCommandFromApiJsonDeserializer.validateForCreate(command.json(), command.hasParameter("sortBy"));
+			Configuration property = this.globalConfigurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SERVICE_DEVICE_MAPPING);
+			this.serviceMappingCommandFromApiJsonDeserializer.validateForCreate(command.json(),command.hasParameter("sortBy"),property !=null ? property.isEnabled():false);
 			final ServiceMapping serviceMapping = retrieveServiceMappingById(serviceMapId);
 			
 			if(command.hasParameter("sortBy")){
 				serviceMapping.setSortBy(command.integerValueOfParameterNamed("sortBy"));
 				this.serviceMappingRepository.save(serviceMapping);
 			}else{
-				changes = serviceMapping.update(command);
+				changes = serviceMapping.update(command,property !=null ? property.isEnabled():false);
 				if (!changes.isEmpty()) {
-					this.serviceMappingRepository.save(serviceMapping);
+					this.serviceMappingRepository.saveAndFlush(serviceMapping);
 				}
 			}
 			
@@ -91,14 +99,19 @@ public class ServiceMappingWritePlatformServiceImpl implements ServiceMappingWri
 			DataIntegrityViolationException dve) {
 
 		final Throwable realCause = dve.getMostSpecificCause();
-		if (realCause.getMessage().contains("service_code_key")) {
+		if (realCause.getMessage().contains("serviceCode")) {
 			final String name = command.stringValueOfParameterNamed("serviceId");
-			throw new PlatformDataIntegrityException("error.msg.service.mapping.duplicate", "A code with name '" + name + "' already exists");
+			throw new PlatformDataIntegrityException("error.msg.service.mapping.duplicate", "A code with name '" + name + "' already exists","serviceId");
 			// throw new
 			// PlatformDataIntegrityException("error.msg.code.duplicate.name",
 			// "A code with name '" + name + "' already exists");
+		}else	if (realCause.getMessage().contains("service_identification_uq")) {
+			final String name = command.stringValueOfParameterNamed("serviceId");
+			final String serviceIdentification = command.stringValueOfParameterNamed("serviceIdentification");
+			throw new PlatformDataIntegrityException("error.msg.service.already.mapped.with.serviceIdentification", "A code with name '" + name + "' already mapped with '" + serviceIdentification + "'","serviceIdentification");
+			
 		}
-
+		
 		LOGGER.error(dve.getMessage(), dve);
 		throw new PlatformDataIntegrityException("error.msg.cund.unknown.data.integrity.issue",
 				"Unknown data integrity issue with resource: " + realCause.getMessage());

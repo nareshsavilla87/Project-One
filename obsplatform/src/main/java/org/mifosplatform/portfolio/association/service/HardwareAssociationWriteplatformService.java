@@ -5,7 +5,7 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface HardwareAssociationWriteplatformService {
 
-	void createNewHardwareAssociation(Long clientId, Long id, String serialNo, Long orderId, String allocationType);
+	void createNewHardwareAssociation(Long clientId, Long planId, String serialNo, Long orderId, String allocationType,Long ServiceId);
 
 	CommandProcessingResult createAssociation(JsonCommand command);
 

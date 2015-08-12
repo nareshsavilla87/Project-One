@@ -258,7 +258,20 @@ try{
 			if(allocationDetailsDatas.size() == 1 ){
 				
 				this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),allocationDetailsDatas.get(0).getSerialNo(),
-						order.getId(),allocationDetailsDatas.get(0).getAllocationType());
+						order.getId(),allocationDetailsDatas.get(0).getAllocationType(),null);
+			}else if(allocationDetailsDatas.isEmpty()){//plan and hardware mapping not exist's
+			configurationProperty=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SERVICE_DEVICE_MAPPING);
+			   if(configurationProperty !=null&&configurationProperty.isEnabled()){
+				   List<OrderLine> orderServices=order.getServices();
+				   for(OrderLine service:orderServices){
+					   List<AllocationDetailsData> allocationDetails=this.allocationReadPlatformService.retrieveHardWareDetailsByServiceMap(clientId,service.getServiceId());
+					   if(allocationDetails.size() == 1 ){
+							this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),allocationDetails.get(0).getSerialNo(),
+									order.getId(),allocationDetails.get(0).getAllocationType(),service.getServiceId());
+						}
+				   }
+			   }
+			
 			}
 		}
 	}
@@ -1035,7 +1048,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 				}else{
 					 //Check For HardwareAssociation
 					  AssociationData associationData=this.hardwareAssociationReadplatformService.retrieveSingleDetails(entityId);
-					  	if(associationData ==null){
+					  	if(associationData == null){
 					  		throw new HardwareDetailsNotFoundException(entityId.toString());
 					  	}
 					  	order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());

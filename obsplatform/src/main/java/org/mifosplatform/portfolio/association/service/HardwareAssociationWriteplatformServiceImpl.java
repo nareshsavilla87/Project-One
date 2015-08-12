@@ -53,12 +53,12 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 	}
 	
 	@Override
-	public void createNewHardwareAssociation(Long clientId, Long planId,String serialNo,Long orderId,String allocationType) 
+	public void createNewHardwareAssociation(Long clientId, Long planId,String serialNo,Long orderId,String allocationType,Long serviceId) 
 	{
 	        try{
 	        	
 	        //	this.context.authenticatedUser();
-	        	HardwareAssociation hardwareAssociation=new HardwareAssociation(clientId,planId,serialNo,orderId,allocationType);
+	        	HardwareAssociation hardwareAssociation=new HardwareAssociation(clientId,planId,serialNo,orderId,allocationType,serviceId);
 	        	this.associationRepository.saveAndFlush(hardwareAssociation);
 
 	        }catch(DataIntegrityViolationException exception){
@@ -73,11 +73,15 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 			context.authenticatedUser();
 			final Long userId=getUserId();
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
+			Long serviceId=null;
 			Long orderId = command.longValueOfParameterNamed("orderId");
 			Order order=this.orderRepository.findOne(orderId);
 			String provisionNum = command.stringValueOfParameterNamed("provisionNum");
 			String allocationType = command.stringValueOfParameterNamed("allocationType");
-			HardwareAssociation hardwareAssociation = new HardwareAssociation(command.entityId(), order.getPlanId(), provisionNum, orderId,allocationType);
+			if(command.hasParameter("serviceId")){
+				 serviceId=command.longValueOfParameterNamed("serviceId");
+			}
+			HardwareAssociation hardwareAssociation = new HardwareAssociation(command.entityId(), order.getPlanId(), provisionNum, orderId,allocationType,serviceId);
 			//Check for Custome_Validation
 			this.eventValidationReadPlatformService.checkForCustomValidations(hardwareAssociation.getClientId(),"Pairing", command.json(),userId);
 			this.associationRepository.saveAndFlush(hardwareAssociation);
