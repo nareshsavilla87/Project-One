@@ -28,7 +28,7 @@ public class StaticDemo {
     	 rev +=s.charAt(i);
      }
     System.out.println(rev);
-   
+
     } 
     
     
