@@ -366,7 +366,7 @@ public void processSimulator() {
 				jsonobject.put("assignedTo", userId);
 				jsonobject.put("priority",priorityData.get(0).getValue());
 				jsonobject.put("problemCode", problemsData.iterator().next().getId());
-				this.ticketMasterApiResource.createTicketMaster(processRequest.getClientId(), jsonobject.toString());
+				this.ticketMasterApiResource.processCreateTicket(processRequest.getClientId(), jsonobject.toString());
 			}
 		}
 	}

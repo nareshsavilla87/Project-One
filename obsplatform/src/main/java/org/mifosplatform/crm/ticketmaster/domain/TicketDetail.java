@@ -108,5 +108,11 @@ public class TicketDetail {
 	public Long getCreatedbyId() {
 		return createdbyId;
 	}
+
+	public void setAttachments(String attachments) {
+		this.attachments = attachments;
+	}
+	
+	
 	
 }
