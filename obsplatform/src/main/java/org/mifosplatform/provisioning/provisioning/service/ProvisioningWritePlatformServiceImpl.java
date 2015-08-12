@@ -243,9 +243,9 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			final Long subnet = command.longValueOfParameterNamed("subnet");
 			
 			final ItemDetails inventoryItemDetails = this.inventoryItemDetailsRepository.getInventoryItemDetailBySerialNum(macId);
-			final HardwareAssociation hardwareAssociation = this.associationRepository.findOneByOrderId(orderId);
+			final List<HardwareAssociation> hardwareAssociation = this.associationRepository.findOneByOrderId(orderId);
 			
-			if (hardwareAssociation == null || inventoryItemDetails == null) {
+			if (hardwareAssociation.isEmpty() || inventoryItemDetails == null) {
 				throw new PairingNotExistException(orderId);
 			}
 
@@ -338,27 +338,26 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	//try {
 		Long commandProcessId=null;
 		String serialNumber = null;
-		HardwareAssociation hardwareAssociation = this.associationRepository.findOneByOrderId(order.getId());
+		List<HardwareAssociation> hardwareAssociation = this.associationRepository.findOneByOrderId(order.getId());
 		Plan plan=this.planRepository.findOne(order.getPlanId());
 		
 		PlanMapping planMapping= this.planMappingRepository.findOneByPlanId(order.getPlanId());
-		
 		
 		
 		if (planMapping == null && plan.getProvisionSystem().equalsIgnoreCase("None")) {
 			throw new PlanMappingNotExist(plan.getPlanCode());
 		}
 		
-		if (hardwareAssociation == null && plan.isHardwareReq() == 'Y') {
+		if (hardwareAssociation.isEmpty() && plan.isHardwareReq() == 'Y') {
 			throw new PairingNotExistException(order.getId());
-		}else if (hardwareAssociation != null) {
-			serialNumber = hardwareAssociation.getSerialNo();
+		}else if (hardwareAssociation.size() ==1) {
+			serialNumber = hardwareAssociation.get(0).getSerialNo();
 		}
 		List<ServiceParameters> parameters = this.serviceParametersRepository.findDataByOrderId(orderId);
 			
 		if (!parameters.isEmpty()) {	
 			ItemDetails inventoryItemDetails =null;	
-			if("ALLOT".equalsIgnoreCase(hardwareAssociation.getAllocationType())){	
+			if("ALLOT".equalsIgnoreCase(hardwareAssociation.get(0).getAllocationType())){	
 				inventoryItemDetails = this.inventoryItemDetailsRepository.getInventoryItemDetailBySerialNum(serialNumber);	 
 				if (inventoryItemDetails == null) { 
 					throw new PairingNotExistException(order.getId());		 
