@@ -17,7 +17,7 @@ JpaSpecificationExecutor<HardwareAssociation>{
     List<HardwareAssociation> findOneByserialNo(@Param("serialNum") String serialNum);
 	
 	@Query("from HardwareAssociation association where association.orderId =:orderId and association.isDeleted='N'")
-    HardwareAssociation findOneByOrderId(@Param("orderId")Long orderId);
+	List<HardwareAssociation> findOneByOrderId(@Param("orderId")Long orderId);
 	
 	@Query("from HardwareAssociation association where association.orderId =:orderId and association.clientId =:clientId and association.isDeleted='N'")
 	HardwareAssociation findOneByOrderAndClient(@Param("orderId")Long orderId,@Param("clientId")Long clientId);

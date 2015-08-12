@@ -284,12 +284,57 @@ try{
 			    	String HardWareId=null;
 			    	JSONObject jsonObject = new JSONObject();
 			    	JSONArray newServiceArray = new JSONArray();
+			    	//JSONArray serviceArray = new JSONArray();
 			    	processRequest=new ProcessRequest(requestData.getRequestId(),order.getClientId(), order.getId(),
 			    		    requestData.getProvisioningSystem(),requestType,'N','N');
 			    		 
 			        if(planMapping != null){
 			    		 jsonObject.put("planIdentification", planMapping.getPlanIdentification());
 			    	 }
+			        /*
+			        if(requestData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.CHANGE_PLAN.toString())){
+						 Order oldOrder=this.orderRepository.findOldOrderByOrderNO(order.getOrderNo());
+						 List<OrderLine> orderdetails=oldOrder.getServices();
+						 planMapping= this.planMappingRepository.findOneByPlanId(oldOrder.getPlanId());
+						 if(planMapping != null){
+							 jsonObject.put("oldPlanIdentification", planMapping.getPlanIdentification());
+						 }
+						 
+						 for(OrderLine orderLine:orderdetails){
+							 
+							 JSONObject oldsubjson = new JSONObject();
+							 List<ServiceMapping> provisionServiceDetails=this.provisionServiceDetailsRepository.findOneByServiceId(orderLine.getServiceId());
+							 ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId());
+							 if(!provisionServiceDetails.isEmpty()){
+								 oldsubjson.put("oldServiceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+							 }
+							 oldsubjson.put("oldServiceType", service.getServiceType());
+							 serviceArray.add(oldsubjson);
+						 }
+						 jsonObject.put("oldServices", new Gson().toJson(serviceArray));
+					 }
+			        */ if(requestType.equalsIgnoreCase(UserActionStatusTypeEnum.ADDON_ACTIVATION.toString())){
+						 List<OrderAddons> orderAddons=this.orderAddonsRepository.findAddonsByOrderId(requestData.getOrderId());
+						 for(OrderAddons orderAddon:orderAddons){
+							 List<ServiceMapping> provisionServiceDetails=this.provisionServiceDetailsRepository.findOneByServiceId(orderAddon.getServiceId());
+							 	ServiceMaster service=this.serviceMasterRepository.findOne(orderAddon.getServiceId());
+							 	 JSONObject subjson = new JSONObject();
+								 subjson.put("serviceName", service.getServiceCode());
+								 subjson.put("serviceType", service.getServiceType());
+								 subjson.put("addonId", requestData.getAddonId());
+								 if(!provisionServiceDetails.isEmpty()){
+									 subjson.put("serviceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+								 }
+								 if(!detailsData.isEmpty()){
+									 for (AllocationDetailsData detail:detailsData){
+										 if(detail.getServiceId().equals(orderAddon.getServiceId())){
+										      subjson.put("serialNo",detail.getSerialNo());
+										      break;}
+									 }
+								 }
+								 newServiceArray.add(subjson.toString());	 
+						 }
+					 }else{
 			    	 for(OrderLine orderLine:orderLineData){
 						 List<ServiceMapping> provisionServiceDetails=this.provisionServiceDetailsRepository.findOneByServiceId(orderLine.getServiceId());
 					 	 ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId());
@@ -308,7 +353,8 @@ try{
 							 }
 						 }
 						 newServiceArray.add(subjson.toString());	 
-					 }
+					   }
+					}
 			    	 jsonObject.put("services", new Gson().toJson(newServiceArray));
 			    	 
 			    	 ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(orderLineData.get(0).getId(),

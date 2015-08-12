@@ -119,7 +119,7 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 	    
 	   
 	    
-	    HardwareAssociation association=this.hardwareAssociationRepository.findOneByOrderId(orderId);
+	   List<HardwareAssociation> association=this.hardwareAssociationRepository.findOneByOrderId(orderId);
 		for (JsonElement jsonElement : addonServices) {
 			OrderAddons addons=assembleOrderAddons(jsonElement,fromJsonHelper,order,startDate,endDate,contractId);
 			this.addonsRepository.saveAndFlush(addons);
@@ -127,7 +127,7 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 			if(!"None".equalsIgnoreCase(addons.getProvisionSystem())){
 				
 				this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order, planName, UserActionStatusTypeEnum.ADDON_ACTIVATION.toString(),
-						Long.valueOf(0), null,association!=null?association.getSerialNo():null,orderId, addons.getProvisionSystem(),addons.getId());
+						Long.valueOf(0), null,association.isEmpty()?null:association.get(0).getSerialNo(),orderId, addons.getProvisionSystem(),addons.getId());
 			}
 		OrderPrice orderPrice =this.orderPriceRepository.findOne(addons.getPriceId());
 		List<BillingOrderData> billingOrderDatas = new ArrayList<BillingOrderData>(); 
@@ -229,10 +229,10 @@ public CommandProcessingResult disconnectOrderAddon(JsonCommand command,Long ent
 		 }else{
 			 Order order=this.orderRepository.findOne(orderAddons.getOrderId());
 			 Plan plan = this.planRepository.findOne(order.getPlanId());
-			 HardwareAssociation association=this.hardwareAssociationRepository.findOneByOrderId(orderAddons.getOrderId());
+			 List<HardwareAssociation> association=this.hardwareAssociationRepository.findOneByOrderId(orderAddons.getOrderId());
 			 orderAddons.setStatus(StatusTypeEnum.PENDING.toString());
 				this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order, plan.getPlanCode(), UserActionStatusTypeEnum.ADDON_DISCONNECTION.toString(),
-						Long.valueOf(0), null,association.getSerialNo(),order.getId(), serviceMapping.get(0).getProvisionSystem(),orderAddons.getId());
+						Long.valueOf(0), null,association.get(0).getSerialNo(),order.getId(), serviceMapping.get(0).getProvisionSystem(),orderAddons.getId());
 		 }
 		 
 		 this.addonsRepository.save(orderAddons);
