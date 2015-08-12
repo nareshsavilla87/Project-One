@@ -58,7 +58,7 @@ public class ServiceMasterWritePlatformServiceImpl  implements ServiceMasterWrit
 		        final ServiceMaster master = retrieveCodeBy(id);
 		        final Map<String, Object> changes = master.update(command);
 	            if (!changes.isEmpty()) {
-	                this.serviceMasterRepository.save(master);
+	                this.serviceMasterRepository.saveAndFlush(master);
 	            }
 	            
          return new CommandProcessingResultBuilder() //
