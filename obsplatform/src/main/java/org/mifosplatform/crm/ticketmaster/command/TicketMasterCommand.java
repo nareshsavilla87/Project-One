@@ -19,6 +19,7 @@ public class TicketMasterCommand {
 	private final Integer statusCode;
 	private Integer problemCodeId;
 	
+	
 	public TicketMasterCommand(final Long clientId, final String priority,
 								final String description, final String problemCode, final String status,
 								final String resolutionDescription, final Integer assignedTo, final LocalDate ticketDate,
@@ -74,6 +75,7 @@ public class TicketMasterCommand {
 		this.status = "CLOSED";
 		this.resolutionDescription = resolutionDescription;
 	}
+	
 	public Long getId() {
 		return id;
 	}

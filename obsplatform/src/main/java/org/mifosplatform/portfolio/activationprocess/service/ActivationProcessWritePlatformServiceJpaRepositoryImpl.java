@@ -48,6 +48,7 @@ import org.mifosplatform.logistics.itemdetails.exception.SerialNumberNotFoundExc
 import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleWritePlatformService;
 import org.mifosplatform.logistics.ownedhardware.service.OwnedHardwareWritePlatformService;
 import org.mifosplatform.organisation.address.data.AddressData;
+import org.mifosplatform.organisation.address.exception.CityNotFoundException;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
 import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateRepository;
@@ -59,6 +60,8 @@ import org.mifosplatform.portfolio.client.service.ClientWritePlatformService;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
+import org.mifosplatform.portfolio.plan.domain.Plan;
+import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,6 +95,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 	private final ChargeCodeRepository chargeCodeRepository;
 	private final SelfCareRepository selfCareRepository;
 	private final ContractRepository contractRepository;
+	private final PlanRepository planRepository;
 	
 	
     @Autowired
@@ -104,7 +108,8 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
     		final CodeValueRepository codeValueRepository,final ItemRepository itemRepository,final PriceRepository priceRepository,
     		final BillingMessageTemplateRepository billingMessageTemplateRepository,final MessagePlatformEmailService messagePlatformEmailService,
     		final BillingMessageRepository messageDataRepository,final ClientIdentifierWritePlatformService clientIdentifierWritePlatformService,
-    		final ChargeCodeRepository chargeCodeRepository,final SelfCareRepository selfCareRepository,final ContractRepository contractRepository) {
+    		final ChargeCodeRepository chargeCodeRepository,final SelfCareRepository selfCareRepository,final ContractRepository contractRepository,
+    		final PlanRepository planRepository) {
 
         
     	this.context = context;
@@ -126,6 +131,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
         this.selfCareRepository = selfCareRepository;
         this.codeValueRepository = codeValueRepository;
         this.clientIdentifierWritePlatformService = clientIdentifierWritePlatformService;
+        this.planRepository = planRepository;
     }
 
     private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
@@ -272,6 +278,9 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				String zipCode = command.stringValueOfParameterNamed("zipCode");
 				// client creation
 				AddressData addressData = this.addressReadPlatformService.retrieveAdressBy(city);
+				if(addressData == null){
+					throw new CityNotFoundException(city);
+				}
 				CodeValue codeValue=this.codeValueRepository.findOneByCodeValue("Normal");
 				JSONObject clientcreation = new JSONObject();
 				clientcreation.put("officeId", new Long(1));
@@ -445,7 +454,17 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 						Long planCode = command.longValueOfParameterNamed("planCode");
 						Contract contract =this.contractRepository.findOneByContractId(contractPeriod);
 						List<Price> prices=this.priceRepository.findChargeCodeByPlanAndContract(planCode,contractPeriod);
-						
+								Plan planName = this.planRepository.findOne(planCode);
+								if(planName == null || planName.isDeleted() == 'Y' ){
+									
+									throw new PlatformDataIntegrityException("error.msg.order.id.not.exist",
+											"Plan doesn't exit with this id " + planCode, "plan code not exist");
+								}
+								Contract contractId = this.contractRepository.findOneByContractId(contractPeriod);
+								if(contractId == null){
+									throw new PlatformDataIntegrityException("error.msg.contractperiod.not.exist",
+											"Contract Period doesn't exit with this contractPeriod " + contractPeriod, "Contract Period not exist");
+								}
 						if(!prices.isEmpty()){
 							ChargeCodeMaster chargeCodeMaster = this.chargeCodeRepository.findOneByChargeCode(prices.get(0).getChargeCode());	
 						if(chargeCodeMaster != null){
@@ -482,6 +501,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				Configuration isRedemptionconfiguration = configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_REDEMPTION);
 				
 				if (isRedemptionconfiguration != null && isRedemptionconfiguration.isEnabled()) {
+
 					
 					JSONObject redemptionJson = new JSONObject();
 					redemptionJson.put("clientId", resultClient.getClientId());
