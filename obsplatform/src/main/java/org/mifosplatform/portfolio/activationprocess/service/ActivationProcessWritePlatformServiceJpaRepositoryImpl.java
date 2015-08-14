@@ -456,12 +456,12 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 					if(planName == null || planName.isDeleted() == 'Y' ){
 						
 						throw new PlatformDataIntegrityException("error.msg.order.id.not.exist",
-								"Plan doesn't exit with this id " + planCode, "plan code not exist");
+								"Plan doesn't exist with this id " + planCode, "plan code not exist");
 					}
 					Contract contractId = this.contractRepository.findOneByContractId(contractPeriod);
 					if(contractId == null){
 						throw new PlatformDataIntegrityException("error.msg.contractperiod.not.exist",
-								"Contract Period doesn't exit with this contractPeriod " + contractPeriod, "Contract Period not exist");
+								"Contract Period doesn't exist with this contractPeriod " + contractPeriod, "Contract Period not exist");
 					}
 					
 					if(!prices.isEmpty()){
@@ -469,6 +469,9 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 					if(chargeCodeMaster != null){
 					 	paytermCode = chargeCodeMaster.getBillFrequencyCode();
 					}
+					}else if(prices.isEmpty()){
+						throw new PlatformDataIntegrityException("error.msg.prices.not.exist",
+								"Plan Price is not define with this Duration " + contractPeriod, "Plan Price is not define with this Duration");
 					}
 					if(contract != null){
 					contractPeriod = contract.getId().toString();	
