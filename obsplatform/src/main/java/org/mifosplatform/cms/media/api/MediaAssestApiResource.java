@@ -116,7 +116,7 @@ public class MediaAssestApiResource {
         	  
 		     data = this.mediaAssetReadPlatformService.retrievemediaAssetdatabyNewRealease(pageNo);
 		     final String query = " SELECT count(0) FROM b_media_asset m INNER JOIN b_mod_detail ed ON ed.media_id = m.id"
-		    		 +" INNER JOIN b_mod_master em  ON em.id = ed.event_id where m.release_date <= adddate(now(),INTERVAL -3 MONTH)"
+		    		 +" INNER JOIN b_mod_master em  ON em.id = ed.event_id where m.release_date <= adddate('"+DateUtils.getDateTimeOfTenant()+"',INTERVAL -3 MONTH)"
 		    		 +" group by m.id  having count(distinct ed.event_id) >=1 ";
 	          noOfPages=this.mediaAssetReadPlatformService.retrieveNoofPages(query);
 	        // data.add(new MediaAssetData(noOfPages,pageNum));

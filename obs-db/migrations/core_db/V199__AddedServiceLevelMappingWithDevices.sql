@@ -20,6 +20,8 @@ DELIMITER ;
 call provServiceDetails();
 DROP procedure IF EXISTS provServiceDetails;
 
+DELETE prv1 FROM b_prov_service_details prv1, b_prov_service_details prv2 WHERE prv1.id < prv2.id AND prv1.service_id = prv2.service_id;
+
 DROP procedure IF EXISTS provServiceDetailsUniques;
 DELIMITER //
 CREATE procedure provServiceDetailsUniques() 

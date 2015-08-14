@@ -11,6 +11,7 @@ import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -396,7 +397,7 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 		public String schema() {
 			
 			return " i.id as invoiceId FROM b_charge c, b_invoice i "+
-					" WHERE c.client_id = ? and c.invoice_id = i.id and c.order_id = ? and c.charge_end_date > now() " +
+					" WHERE c.client_id = ? and c.invoice_id = i.id and c.order_id = ? and c.charge_end_date > '"+DateUtils.getDateTimeOfTenant()+"' " +
 					" and c.charge_type = 'RC' order by i.id desc; ";
 		}
 		

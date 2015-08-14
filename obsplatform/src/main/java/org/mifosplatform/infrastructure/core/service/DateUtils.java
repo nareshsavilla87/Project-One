@@ -70,4 +70,20 @@ public class DateUtils {
     public static LocalDate getLocalDateOfTenantForClient() {
     	return getLocalDateOfTenant();
     }
+    
+    public static DateTime getDateTimeOfTenant() {
+
+    	DateTime today = new DateTime();
+
+        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+
+        if (tenant != null) {
+            final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+            if (zone != null) {
+                today = new DateTime(zone);
+            }
+        }
+
+        return today;
+    }
 }
