@@ -11,7 +11,8 @@ package org.mifosplatform.infrastructure.core.exception;
  */
 public abstract class AbstractPlatformDomainRuleException extends RuntimeException {
 
-    private final String globalisationMessageCode;
+	private static final long serialVersionUID = 1L;
+	private final String globalisationMessageCode;
     private final String defaultUserMessage;
     private final Object[] defaultUserMessageArgs;
 

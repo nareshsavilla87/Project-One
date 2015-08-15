@@ -340,18 +340,20 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		String serialNumber = null;
 		List<HardwareAssociation> hardwareAssociation = this.associationRepository.findOneByOrderId(order.getId());
 		Plan plan=this.planRepository.findOne(order.getPlanId());
-		
 		PlanMapping planMapping= this.planMappingRepository.findOneByPlanId(order.getPlanId());
-		
 		
 		if (planMapping == null && plan.getProvisionSystem().equalsIgnoreCase("None")) {
 			throw new PlanMappingNotExist(plan.getPlanCode());
 		}
-		
 		if (hardwareAssociation.isEmpty() && plan.isHardwareReq() == 'Y') {
-			throw new PairingNotExistException(order.getId());
-		}else if (hardwareAssociation.size() ==1) {
+			throw new PairingNotExistException(order.getId(),plan.getPlanCode());
+		}
+		else if (hardwareAssociation.size()==1) {
 			serialNumber = hardwareAssociation.get(0).getSerialNo();
+		}
+		else if (hardwareAssociation.size()>1) {
+			if(hardwareAssociation.size()!=order.getServices().size())
+			 throw new PairingNotExistException(plan.getPlanCode());
 		}
 		List<ServiceParameters> parameters = this.serviceParametersRepository.findDataByOrderId(orderId);
 			
@@ -391,10 +393,6 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			commandProcessId=commandProcessingResult.resourceId();
 		}
 			return new CommandProcessingResult(commandProcessId);
-		//} catch (DataIntegrityViolationException dve) {
-		//	handleCodeDataIntegrityIssues(null, dve);
-			//return new CommandProcessingResult(Long.valueOf(-1));
-	//	} 
 
 	}
 

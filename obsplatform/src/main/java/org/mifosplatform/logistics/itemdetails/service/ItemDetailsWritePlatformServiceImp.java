@@ -373,7 +373,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
         	   		throw new ActivePlansFoundException();
         	   	}
         	   
-        	   	List<AssociationData> associationDatas=this.associationReadplatformService.retrieveClientAssociationDetails(clientId);
+        	   	List<AssociationData> associationDatas=this.associationReadplatformService.retrieveClientAssociationDetails(clientId,serialNo);
         	   	for(AssociationData associationData:associationDatas ){
         	   		this.associationWriteplatformService.deAssociationHardware(associationData.getId());
         	   	}

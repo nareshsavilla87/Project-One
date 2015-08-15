@@ -73,7 +73,6 @@ import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.order.exceptions.NoOrdersFoundException;
 import org.mifosplatform.portfolio.order.exceptions.OrderNotFoundException;
-import org.mifosplatform.portfolio.order.exceptions.SchedulerOrderFoundException;
 import org.mifosplatform.portfolio.order.serialization.OrderCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanDetails;
@@ -827,11 +826,12 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 	 this.orderRepository.save(newOrder);
 	 
 	Plan plan=this.planRepository.findOne(newOrder.getPlanId());
-	HardwareAssociation association=this.associationRepository.findOneByOrderAndClient(order.getId(),order.getClientId());
+	List<HardwareAssociation> associations=this.associationRepository.findOneByOrderAndClient(order.getId(),order.getClientId());
 		
-		if(association != null){
+		if(!associations.isEmpty()){
+		  for(HardwareAssociation association:associations)	
 			association.delete();
-			this.associationRepository.save(association);
+			this.associationRepository.save(associations);
 		}
 		Long processResuiltId=new Long(0);
 		

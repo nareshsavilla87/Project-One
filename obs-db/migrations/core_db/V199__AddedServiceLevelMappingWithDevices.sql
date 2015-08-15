@@ -20,6 +20,8 @@ DELIMITER ;
 call provServiceDetails();
 DROP procedure IF EXISTS provServiceDetails;
 
+DELETE prv1 FROM b_prov_service_details prv1, b_prov_service_details prv2 WHERE prv1.id < prv2.id AND prv1.service_id = prv2.service_id;
+
 DROP procedure IF EXISTS provServiceDetailsUniques;
 DELIMITER //
 CREATE procedure provServiceDetailsUniques() 
@@ -32,7 +34,7 @@ END IF;
 IF NOT EXISTS ( SELECT * FROM INFORMATION_SCHEMA.STATISTICS WHERE
 `TABLE_CATALOG` = 'def' AND `TABLE_SCHEMA` = DATABASE() AND
 `TABLE_NAME` = 'b_prov_service_details' AND `INDEX_NAME` = 'serviceCode' )THEN
-ALTER TABLE b_prov_service_details ADD UNIQUE  `serviceCode` (`service_id` ASC),
+ALTER INGORE TABLE b_prov_service_details ADD UNIQUE  `serviceCode` (`service_id` ASC),
 ADD UNIQUE INDEX `service_identification_uq` (`service_id` ASC, `service_identification` ASC);
 END IF;
 END //
