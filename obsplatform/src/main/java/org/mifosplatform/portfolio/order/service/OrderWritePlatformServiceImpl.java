@@ -829,9 +829,10 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 	List<HardwareAssociation> associations=this.associationRepository.findOneByOrderAndClient(order.getId(),order.getClientId());
 		
 		if(!associations.isEmpty()){
-		  for(HardwareAssociation association:associations)	
+		  for(HardwareAssociation association:associations)	{
 			association.delete();
-			this.associationRepository.save(associations);
+			this.associationRepository.saveAndFlush(association);
+		  }
 		}
 		Long processResuiltId=new Long(0);
 		
