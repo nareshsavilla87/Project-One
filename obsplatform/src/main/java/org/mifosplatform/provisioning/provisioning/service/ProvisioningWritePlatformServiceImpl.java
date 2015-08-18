@@ -19,6 +19,7 @@ import net.sf.json.JSONObject;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
@@ -105,7 +106,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			final ServiceMasterRepository serviceMasterRepository,final ProvisionHelper provisionHelper,final OfficeRepository officeRepository,
 			final ProcessRequestReadplatformService processRequestReadplatformService,final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,
 			final ProcessRequestWriteplatformService processRequestWriteplatformService,final PlanRepository planRepository,
-			final PrepareRequestReadplatformService prepareRequestReadplatformService,final PlanMappingRepository planMappingRepository) {
+			final PrepareRequestReadplatformService prepareRequestReadplatformService,final PlanMappingRepository planMappingRepository,
+			final ConfigurationRepository configurationRepository) {
 
 		this.context = context;
 		this.fromJsonHelper = fromJsonHelper;
@@ -341,6 +343,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		List<HardwareAssociation> hardwareAssociation = this.associationRepository.findOneByOrderId(order.getId());
 		Plan plan=this.planRepository.findOne(order.getPlanId());
 		PlanMapping planMapping= this.planMappingRepository.findOneByPlanId(order.getPlanId());
+		//Configuration configProperty = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SERVICE_DEVICE_MAPPING);
 		
 		if (planMapping == null && plan.getProvisionSystem().equalsIgnoreCase("None")) {
 			throw new PlanMappingNotExist(plan.getPlanCode());
@@ -348,10 +351,9 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		if (hardwareAssociation.isEmpty() && plan.isHardwareReq() == 'Y') {
 			throw new PairingNotExistException(order.getId(),plan.getPlanCode());
 		}
-		else if (hardwareAssociation.size()==1) {
-			serialNumber = hardwareAssociation.get(0).getSerialNo();
-		}
-		else if (hardwareAssociation.size()>1) {
+		else if(1==hardwareAssociation.size()&&hardwareAssociation.get(0).getServiceId()==null){ //Plan level map exist's
+			 serialNumber = hardwareAssociation.get(0).getSerialNo();
+		}else{
 			if(hardwareAssociation.size()!=order.getServices().size())
 			 throw new PairingNotExistException(plan.getPlanCode());
 		}
