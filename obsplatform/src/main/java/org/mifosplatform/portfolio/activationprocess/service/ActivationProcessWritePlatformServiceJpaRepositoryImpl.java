@@ -469,6 +469,9 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 							ChargeCodeMaster chargeCodeMaster = this.chargeCodeRepository.findOneByChargeCode(prices.get(0).getChargeCode());	
 						if(chargeCodeMaster != null){
 						 	paytermCode = chargeCodeMaster.getBillFrequencyCode();
+						}else if(prices.isEmpty()){
+							throw new PlatformDataIntegrityException("error.msg.prices.not.exist",
+									"Plan Price is not define with this Duration " + contractPeriod, "Plan Price is not define with this Duration");
 						}
 						}
 						if(contract != null){
