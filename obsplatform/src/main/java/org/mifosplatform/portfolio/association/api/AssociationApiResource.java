@@ -71,7 +71,7 @@ public class AssociationApiResource {
 	public String retrieveAssociationDetails(@PathParam("clientId") final Long clientId,@Context final UriInfo uriInfo) {
  		 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		List<AssociationData> associationDatas = this.associationReadplatformService.retrieveClientAssociationDetails(clientId);
+		List<AssociationData> associationDatas = this.associationReadplatformService.retrieveClientAssociationDetails(clientId,null);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(settings, associationDatas, RESPONSE_DATA_PARAMETERS);
 	}

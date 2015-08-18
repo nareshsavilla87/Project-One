@@ -21,6 +21,7 @@ public class DeAllocateItemCommandHandler implements NewCommandSourceHandler{
 	
 	@Override
 	public CommandProcessingResult processCommand(JsonCommand command) {
+		
 		return inventoryItemDetailsWritePlatformService.deAllocateHardware(command);
 	}
 
