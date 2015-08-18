@@ -106,9 +106,8 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			}
 
 			@Override
-			public HardwareAssociationData mapRow(final ResultSet rs,
-					@SuppressWarnings("unused") final int rowNum)
-					throws SQLException {
+			public HardwareAssociationData mapRow(final ResultSet rs, final int rowNum)throws SQLException {
+				
 				Long id = rs.getLong("id");
 				Long planId = rs.getLong("planId");
 				Long orderId=rs.getLong("id");
@@ -120,12 +119,15 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			}
 		}
 		@Override
-		public List<AssociationData> retrieveClientAssociationDetails(Long clientId) {
+		public List<AssociationData> retrieveClientAssociationDetails(Long clientId,String serialNo) {
             try
             {
 
           	  HarderwareAssociationMapper mapper = new HarderwareAssociationMapper();
 			  String sql = "select " + mapper.schema();
+			  if(serialNo !=null){
+				 sql = sql + " and a.hw_serial_no="+"'"+serialNo+"'";
+			  }
 			   return this.jdbcTemplate.query(sql, mapper, new Object[] {clientId});
 
 		    }catch(EmptyResultDataAccessException accessException){
@@ -142,9 +144,8 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			}
 
 			@Override
-			public AssociationData mapRow(final ResultSet rs,
-					@SuppressWarnings("unused") final int rowNum)
-					throws SQLException {
+			public AssociationData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
+				
 				Long id= rs.getLong("id");
 				Long orderId = rs.getLong("orderId");
 				String planCode = rs.getString("planCode");

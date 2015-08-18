@@ -16,22 +16,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AllocationReadPlatformServiceImpl implements AllocationReadPlatformService {
-	
-	
-	    private final JdbcTemplate jdbcTemplate;
-	    @SuppressWarnings("unused")
-		private final PlatformSecurityContext context;
-	    
-	    @Autowired
-	    public AllocationReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource)
-	    {
-	        this.context = context;
-	        this.jdbcTemplate = new JdbcTemplate(dataSource);
-	       
-	     
 
-	    }
+	private final JdbcTemplate jdbcTemplate;
+	@SuppressWarnings("unused")
+	private final PlatformSecurityContext context;
 
+	@Autowired
+	public AllocationReadPlatformServiceImpl(final PlatformSecurityContext context,final TenantAwareRoutingDataSource dataSource) {
+		this.context = context;
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+
+	}
 	
 	@Override
 	public List<AllocationDetailsData> getTheHardwareItemDetails(final Long orderId) {
@@ -125,7 +120,7 @@ public class AllocationReadPlatformServiceImpl implements AllocationReadPlatform
 				
 
 					@Override
-					public AllocationDetailsData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+					public AllocationDetailsData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
 					final Long id = rs.getLong("id");
 					final String serialNum = rs.getString("serialNo");
@@ -193,7 +188,6 @@ public class AllocationReadPlatformServiceImpl implements AllocationReadPlatform
 							} catch (EmptyResultDataAccessException e) {
 							return null;
 							}
-
 					}
 
 
@@ -239,7 +233,22 @@ public class AllocationReadPlatformServiceImpl implements AllocationReadPlatform
 						}
 				}
 
-			
-
+					/* (non-Javadoc)
+					 * @see  getDisconnectedOrderHardwareDetails(java.lang.Long, java.lang.Long)
+					 */
+					@Override
+					public AllocationDetailsData getDisconnectedOrderHardwareDetails(Long orderId, Long serviceId,Long clientId) {
+						
+	                      try {
+							
+							final ClientOrderMapper mapper = new ClientOrderMapper();
+							final String sql=" SELECT  a.id AS id,a.order_id AS orderId,a.service_id as serviceId,a.plan_id as planId,a.client_id AS clientId,i.provisioning_serialno AS serialNum "+
+                                              " FROM  b_association a, b_item_detail i WHERE a.order_id = ? AND a.service_id = ? AND a.hw_serial_no = i.serial_no " +
+                                              " AND a.id = (SELECT MAX(id) FROM  b_association a WHERE a.client_id = ?)";
+							return jdbcTemplate.queryForObject(sql, mapper, new Object[] { orderId,orderId,clientId });
+							} catch (EmptyResultDataAccessException e) {
+							return null;
+							}
+					}
 	
 }

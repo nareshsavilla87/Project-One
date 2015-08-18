@@ -66,7 +66,7 @@ public class HardwareSwappingApiResource {
 		public String retrieveHardwareAllocationData(@QueryParam("clientId") final Long clientId,@Context final UriInfo uriInfo) {
 	 		 
 	    	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-			final List<AssociationData> associationDatas = this.associationReadplatformService.retrieveClientAssociationDetails(clientId);
+			final List<AssociationData> associationDatas = this.associationReadplatformService.retrieveClientAssociationDetails(clientId,null);
 			final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 			return this.toApiJsonSerializer.serialize(settings, associationDatas, RESPONSE_DATA_PARAMETERS);
 		}
