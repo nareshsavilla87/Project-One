@@ -61,7 +61,7 @@ public class ActivationProcessApiResource {
         final CommandWrapper commandRequest = new CommandWrapperBuilder().selfRegistrationProcess().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
+        logger.info("result: "+result);
         return this.toApiJsonSerializer.serialize(result);
     }
 
