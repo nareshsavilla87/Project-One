@@ -526,7 +526,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	
 				    	headerMessage = template.getHeader().replaceAll("<CustomerName>", orderData.getFirstName() + " " + orderData.getLastName());
 				    	bodyMessage = template.getBody().replaceAll("<Amount>", resourceId);
-				    	bodyMessage = bodyMessage.replaceAll("<Payment Date>", dateFormat.format(new Date()));
+				    	bodyMessage = bodyMessage.replaceAll("<Payment Date>", dateFormat.format(DateUtils.getDateOfTenant()));
 				    	
 				    	footerMessage = template.getFooter().replaceAll("<Reseller Name>", orderData.getOfficeName());
 				    	footerMessage = footerMessage.replaceAll("<Contact Name>", orderData.getOfficeEmail());
@@ -570,7 +570,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	
 				    	headerMessage = template.getHeader().replaceAll("<CustomerName>", orderData.getFirstName() + " " + orderData.getLastName());
 				    	bodyMessage = template.getBody().replaceAll("<Service name>", orderData.getPlanName());
-				    	bodyMessage = bodyMessage.replaceAll("<Disconnection Date>", dateFormat.format(new Date()));
+				    	bodyMessage = bodyMessage.replaceAll("<Disconnection Date>", dateFormat.format(DateUtils.getDateOfTenant()));
 				    	
 				    	footerMessage = template.getFooter().replaceAll("<Reseller Name>", orderData.getOfficeName());
 				    	footerMessage = footerMessage.replaceAll("<Contact Name>", orderData.getOfficeEmail());
@@ -652,7 +652,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 								template = getTemplate(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_PAYMENT);
 						    	
 						    	bodyMessage = template.getBody().replaceAll("<Amount>", resourceId);
-						    	bodyMessage = bodyMessage.replaceAll("<Payment Date>", dateFormat.format(new Date()));
+						    	bodyMessage = bodyMessage.replaceAll("<Payment Date>", dateFormat.format(DateUtils.getDateOfTenant()));
 						    	
 						    	billingMessage = new BillingMessage(null, bodyMessage, null, 
 						    			orderData.getOfficeEmail(), orderData.getClientPhone(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
@@ -686,7 +686,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 								template = getTemplate(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NOTIFY_ORDERTERMINATION);
 						    	
 								bodyMessage = template.getBody().replaceAll("<Service name>", orderData.getPlanName());
-								bodyMessage = bodyMessage.replaceAll("<Disconnection Date>", dateFormat.format(new Date()));
+								bodyMessage = bodyMessage.replaceAll("<Disconnection Date>", dateFormat.format(DateUtils.getDateOfTenant()));
 						    	
 						    	billingMessage = new BillingMessage(null, bodyMessage, null, 
 						    			orderData.getOfficeEmail(), orderData.getClientPhone(), template.getSubject(), BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, 
