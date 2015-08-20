@@ -17,9 +17,12 @@ CREATE TABLE IF NOT EXISTS `c_paymentgateway_conf` (
 
 INSERT IGNORE INTO b_message_template(template_description,subject,header,body,footer,message_type) values ('CREATE USER','OBS User Creation','Dear <PARAM1>','OBS User Account has been successfully created .You can login using the following credentials. \n userName : <PARAM2> , \n password : <PARAM3> .','Thankyou','E');
 
-INSERT IGNORE INTO c_paymentgateway_conf VALUES (null,'korta',0,'');
-INSERT IGNORE INTO c_paymentgateway_conf VALUES (null,'dalpay',0,'');
-INSERT IGNORE INTO c_paymentgateway_conf VALUES (null,'paypal',0,'');
+INSERT IGNORE INTO c_paymentgateway_conf VALUES (null,'korta',0,'{}');
+INSERT IGNORE INTO c_paymentgateway_conf VALUES (null,'globalpay',0,'{}');
+INSERT IGNORE INTO c_paymentgateway_conf VALUES (null,'paypal',0,'{}');
+INSERT IGNORE INTO c_paymentgateway_conf VALUES (null,'internalPayment',0,'');
+INSERT IGNORE INTO c_paymentgateway_conf VALUES (null,'evo',0,'{}');
+INSERT IGNORE INTO c_paymentgateway_conf VALUES (null,'2checkout',0,'{}');
 
 Drop procedure IF EXISTS alterprospectemail; 
 DELIMITER //
