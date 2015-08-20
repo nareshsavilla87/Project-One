@@ -345,16 +345,17 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		PlanMapping planMapping= this.planMappingRepository.findOneByPlanId(order.getPlanId());
 		//Configuration configProperty = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SERVICE_DEVICE_MAPPING);
 		
-		if (planMapping == null && plan.getProvisionSystem().equalsIgnoreCase("None")) {
+		if (planMapping == null && "None".equalsIgnoreCase(plan.getProvisionSystem())) {
 			throw new PlanMappingNotExist(plan.getPlanCode());
 		}
-		if (hardwareAssociation.isEmpty() && plan.isHardwareReq() == 'Y') {
+		if (hardwareAssociation.isEmpty() && 'Y'==plan.isHardwareReq()) {
 			throw new PairingNotExistException(order.getId(),plan.getPlanCode());
 		}
 		else if(1==hardwareAssociation.size()&&hardwareAssociation.get(0).getServiceId()==null){ //Plan level map exist's
 			 serialNumber = hardwareAssociation.get(0).getSerialNo();
-		}else{
-			if(hardwareAssociation.size()!=order.getServices().size())
+		}
+		else{
+			if(hardwareAssociation.size()!=order.getServices().size()) //service level map
 			 throw new PairingNotExistException(plan.getPlanCode());
 		}
 		List<ServiceParameters> parameters = this.serviceParametersRepository.findDataByOrderId(orderId);

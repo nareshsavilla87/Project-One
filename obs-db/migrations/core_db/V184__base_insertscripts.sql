@@ -95,6 +95,11 @@ insert ignore into `b_provisioning_actions`(`id`,`provision_type`,`action`,`prov
  delete from c_configuration where name='Forcible Balance Check';
 insert ignore into c_configuration VALUES (null,'balance-check',0,null);
 
+-- Content Provider in codes
+INSERT IGNORE INTO m_code VALUES(NULL,'Content Provider',0,'While creating the media assest we may need to know to which conent provider this assest belongs to');
+SET @ID=(select id from m_code where code_name='Content Provider');
+INSERT IGNORE INTO m_code_value VALUES (NULL,@ID,'Netflix',0),(NULL,@ID,'HBO',1);
+
 -- Price Region 
 /*insert ignore into b_priceregion_master (id,priceregion_code,priceregion_name,createdby_id,created_date,is_deleted) 
  VALUES (null,'Default','Default Region',null,null,'N');
