@@ -11,11 +11,12 @@ public class OrderLineData {
 	private String isAutoProvision;
 	private String image;
 	private String serialNo;
+	private Long associateId;
 	private String allocationType;
 	private Long itemId;
 
 	public OrderLineData(Long id, Long orderId, String serviceCode,String serviceDescription, String serviceType, Long serviceId,
-			String isAutoProvision, String image, String serialNo,String allocationType, Long itemId) {
+			String isAutoProvision, String image,Long associateId, String serialNo,String allocationType, Long itemId) {
 
 		this.id = id;
 		this.orderId = orderId;
@@ -25,9 +26,10 @@ public class OrderLineData {
 		this.serviceId = serviceId;
 		this.isAutoProvision = isAutoProvision;
 		this.image = image;
+		this.associateId = associateId.equals(Long.valueOf(0)) ? null:associateId;
 		this.serialNo = serialNo;
 		this.allocationType = allocationType;
-		this.itemId = itemId;
+		this.itemId = itemId.equals(Long.valueOf(0)) ? null : itemId;
 	}
 
 	public Long getId() {
@@ -60,6 +62,10 @@ public class OrderLineData {
 
 	public String getImage() {
 		return image;
+	}
+
+	public Long getAssociateId() {
+		return associateId;
 	}
 
 	public String getSerialNo() {

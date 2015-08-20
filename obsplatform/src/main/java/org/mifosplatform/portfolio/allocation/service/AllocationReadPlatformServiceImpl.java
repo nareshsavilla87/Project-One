@@ -244,8 +244,8 @@ public class AllocationReadPlatformServiceImpl implements AllocationReadPlatform
 							final ClientOrderMapper mapper = new ClientOrderMapper();
 							final String sql=" SELECT  a.id AS id,a.order_id AS orderId,a.service_id as serviceId,a.plan_id as planId,a.client_id AS clientId,i.provisioning_serialno AS serialNum "+
                                               " FROM  b_association a, b_item_detail i WHERE a.order_id = ? AND a.service_id = ? AND a.hw_serial_no = i.serial_no " +
-                                              " AND a.id = (SELECT MAX(id) FROM  b_association a WHERE a.client_id = ?)";
-							return jdbcTemplate.queryForObject(sql, mapper, new Object[] { orderId,orderId,clientId });
+                                              " AND a.id = (SELECT MAX(id) FROM  b_association a WHERE a.client_id = ? AND a.service_id = ? AND a.is_deleted = 'Y')";
+							return jdbcTemplate.queryForObject(sql, mapper, new Object[] { orderId,serviceId,clientId,serviceId });
 							} catch (EmptyResultDataAccessException e) {
 							return null;
 							}
