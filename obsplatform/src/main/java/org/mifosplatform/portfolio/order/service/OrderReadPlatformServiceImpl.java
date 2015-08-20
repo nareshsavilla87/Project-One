@@ -10,6 +10,7 @@ import org.mifosplatform.billing.payterms.data.PaytermData;
 import org.mifosplatform.billing.planprice.service.PriceReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.order.data.OrderData;
@@ -428,7 +429,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 					public String checkRetrackInterval(final Long entityId) {
 						
 						 final OSDMapper1 rm = new OSDMapper1();
-						 final String sql= "select if (max(created_date) < date_sub(now(),INTERVAL 1 HOUR) , 'yes','no') as type" +
+						 final String sql= "select if (max(created_date) < date_sub('"+DateUtils.getDateTimeOfTenant()+"',INTERVAL 1 HOUR) , 'yes','no') as type" +
 						 		" from b_orders_history where transaction_type in ('ACTIVATION','DISCONNECTION','RECONNECTION')" +
 						 		" and order_id=?";
 						 return jdbcTemplate.queryForObject(sql, rm , new Object[]{entityId});
