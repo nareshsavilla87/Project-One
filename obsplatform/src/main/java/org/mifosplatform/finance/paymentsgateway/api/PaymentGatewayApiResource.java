@@ -777,7 +777,7 @@ public class PaymentGatewayApiResource {
 			String requestParameters = this.paymentGatewayRecurringWritePlatformService.getRequestParameters(request);
 			
 			recurringBillingHistory.setTransactionData(requestParameters);
-			recurringBillingHistory.setTransactionDate(new Date());
+			recurringBillingHistory.setTransactionDate(DateUtils.getDateOfTenant());
 			recurringBillingHistory.setSource(RecurringPaymentTransactionTypeConstants.PAYPAL);
 			recurringBillingHistory.setTransactionStatus(verifiyMessage);
 			recurringBillingHistory.setTransactionCategory(txnType);

@@ -14,6 +14,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.ippool.data.IpGeneration;
 import org.mifosplatform.organisation.ippool.data.IpPoolManagementData;
@@ -336,7 +337,7 @@ public class IpPoolManagementWritePlatformServiceImpl implements
 		final ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0), clientId, Long.valueOf(0), 
 				"Radius", "STATIC_IP", 'N', 'N');
 		final ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0), Long.valueOf(0),
-				command.json(), "Recieved", "", new Date(), null, 
+				command.json(), "Recieved", "", DateUtils.getDateOfTenant(), null, 
 				null,null, 'N',"STATIC_IP","");
 
   		processRequest.add(processRequestDetails);

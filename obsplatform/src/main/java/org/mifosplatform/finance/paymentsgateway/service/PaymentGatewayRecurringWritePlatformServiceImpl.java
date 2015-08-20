@@ -490,7 +490,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 		BigDecimal amount = new BigDecimal(request.getParameter(RecurringPaymentTransactionTypeConstants.MCGROSS));
 		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
-		String date = dateFormat.format(new Date());
+		String date = dateFormat.format(DateUtils.getDateOfTenant());
 		
 		JsonObject jsonObj = new JsonObject();
 		jsonObj.addProperty("paymentDate", date);
@@ -867,7 +867,7 @@ public class PaymentGatewayRecurringWritePlatformServiceImpl implements PaymentG
 		
 		SimpleDateFormat dateFormat = new SimpleDateFormat("dd MMMM yyyy");
 		
-		String date = dateFormat.format(new Date());
+		String date = dateFormat.format(DateUtils.getDateOfTenant());
 		
 		JSONObject object = new JSONObject();
 		

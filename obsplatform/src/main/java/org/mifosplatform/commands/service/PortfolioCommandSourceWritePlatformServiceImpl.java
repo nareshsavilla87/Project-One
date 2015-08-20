@@ -15,6 +15,7 @@ import org.mifosplatform.commands.exception.RollbackTransactionAsCommandIsNotApp
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -119,7 +120,7 @@ public class PortfolioCommandSourceWritePlatformServiceImpl implements
 		
 	    final CommandSource commandSourceInput = validateMakerCheckerTransaction(makerCheckerId);
 	    final AppUser maker = this.context.authenticatedUser();
-	    commandSourceInput.markAsRejected(maker, DateTime.now());
+	    commandSourceInput.markAsRejected(maker, DateUtils.getDateTimeOfTenant());
 	    this.commandSourceRepository.save(commandSourceInput);
 	    return makerCheckerId ;
 	    

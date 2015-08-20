@@ -13,6 +13,7 @@ import org.mifosplatform.infrastructure.configuration.data.LicenseData;
 import org.mifosplatform.infrastructure.configuration.exception.InvalidLicenseKeyException;
 import org.mifosplatform.infrastructure.configuration.exception.LicenseKeyNotFoundException;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.TenantDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -56,7 +57,7 @@ public boolean checkIfKeyIsValid(String licenseKey, MifosPlatformTenant tenant) 
 	 boolean isValid=false;
 	try {
 		LicenseData licenseData=this.getLicenseDetails(licenseKey);
-         if(licenseData.getKeyDate().after(new Date()) && tenant.getName().equalsIgnoreCase(licenseData.getClientName())){
+         if(licenseData.getKeyDate().after(DateUtils.getDateOfTenant()) && tenant.getName().equalsIgnoreCase(licenseData.getClientName())){
         	 isValid = true;
          }
          return isValid;

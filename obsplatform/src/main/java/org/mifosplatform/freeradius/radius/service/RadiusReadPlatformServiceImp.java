@@ -37,6 +37,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConsta
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.configuration.exception.ConfigurationPropertyNotFoundException;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.portfolio.order.domain.RadServiceTemp;
@@ -227,7 +228,7 @@ public class RadiusReadPlatformServiceImp implements RadiusReadPlatformService {
 
 					 ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(Long.valueOf(0),
 							 Long.valueOf(0), jsonData, "Recieved",
-							 null, new Date(), null, null, null, 'N', provisionActions.getAction(), null);
+							 null, DateUtils.getDateOfTenant(), null, null, null, 'N', provisionActions.getAction(), null);
 
 					 processRequest.add(processRequestDetails);
 					 this.processRequestRepository.save(processRequest);

@@ -8,6 +8,7 @@ import javax.persistence.Table;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.useradministration.domain.AppUser;
 
 @Entity
@@ -49,7 +50,7 @@ public class PropertyDeviceMapping  extends AbstractAuditableCustom<AppUser, Lon
 		final String propertyCode = command.stringValueOfParameterNamed("propertCode");
         final String serialNumber = command.stringValueOfParameterNamed("serialNumber");
         
-        return new PropertyDeviceMapping(clientId,propertyCode,serialNumber,new Date());
+        return new PropertyDeviceMapping(clientId,propertyCode,serialNumber,DateUtils.getDateOfTenant());
 	
 	
 	}

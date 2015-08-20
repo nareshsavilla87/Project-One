@@ -18,6 +18,7 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.DateTime;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -82,7 +83,7 @@ public class CommandSource extends AbstractPersistable<Long> {
 
     public static CommandSource fullEntryFrom(final CommandWrapper wrapper, final JsonCommand command, final AppUser maker) {
         return new CommandSource(wrapper.actionName(), wrapper.entityName(), wrapper.getHref(), command.entityId(), command.subentityId(),
-                command.json(), maker, DateTime.now());
+                command.json(), maker, DateUtils.getDateTimeOfTenant());
     }
 
     protected CommandSource() {

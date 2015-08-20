@@ -19,6 +19,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +65,7 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 		CommandSource commandSourceResult = null;
 		if (command.commandId() != null) {
 			commandSourceResult = this.commandSourceRepository.findOne(command.commandId());
-			commandSourceResult.markAsChecked(maker, DateTime.now());
+			commandSourceResult.markAsChecked(maker, DateUtils.getDateTimeOfTenant());
 		} else {
 			commandSourceResult = CommandSource.fullEntryFrom(wrapper, command, maker);
 		}
