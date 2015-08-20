@@ -275,13 +275,20 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 	}
 
 	private void handleDataIntegrityIssues(JsonCommand command,DataIntegrityViolationException dve) {
-		 Throwable realCause = dve.getMostSpecificCause();
-		 logger.error(dve.getMessage(), dve);
-	        if (realCause.getMessage().contains("username")){	
-	        	throw new PlatformDataIntegrityException("validation.error.msg.selfcare.duplicate.userName", "User Name: " + command.stringValueOfParameterNamed("userName")+ " already exists", "userName", command.stringValueOfParameterNamed("userName"));
-	        }else if (realCause.getMessage().contains("unique_reference")){
-	        	throw new PlatformDataIntegrityException("validation.error.msg.selfcare.duplicate.email", "email: " + command.stringValueOfParameterNamed("uniqueReference")+ " already exists", "email", command.stringValueOfParameterNamed("uniqueReference"));
-	        }
+		Throwable realCause = dve.getMostSpecificCause();
+		   logger.error(dve.getMessage(), dve);
+		         if (realCause.getMessage().contains("username") && 
+		            command.stringValueOfParameterNamed("uniqueReference").equalsIgnoreCase(command.stringValueOfParameterNamed("userName"))){
+		          throw new PlatformDataIntegrityException("validation.error.msg.selfcare.duplicate.email", "email: " + command.stringValueOfParameterNamed("uniqueReference")+ " already exists", "email", command.stringValueOfParameterNamed("uniqueReference"));
+		          
+		          
+		         }else if (realCause.getMessage().contains("unique_reference")){
+		          throw new PlatformDataIntegrityException("validation.error.msg.selfcare.duplicate.email", "email: " + command.stringValueOfParameterNamed("uniqueReference")+ " already exists", "email", command.stringValueOfParameterNamed("uniqueReference"));
+		          
+		         }else if(realCause.getMessage().contains("username")){
+		          
+		          throw new PlatformDataIntegrityException("validation.error.msg.selfcare.duplicate.userName", "User Name: " + command.stringValueOfParameterNamed("userName")+ " already exists", "userName", command.stringValueOfParameterNamed("userName"));
+		         }
 
 	}
 	

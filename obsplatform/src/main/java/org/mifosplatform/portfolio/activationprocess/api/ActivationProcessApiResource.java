@@ -11,6 +11,8 @@ import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformSer
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.mifosplatform.portfolio.client.data.ClientData;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -22,6 +24,7 @@ public class ActivationProcessApiResource {
 
     private final ToApiJsonSerializer<ClientData> toApiJsonSerializer;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+    private final static Logger logger = LoggerFactory.getLogger(ActivationProcessApiResource.class);
 
     @Autowired
     public ActivationProcessApiResource(final ToApiJsonSerializer<ClientData> toApiJsonSerializer,
@@ -51,11 +54,14 @@ public class ActivationProcessApiResource {
     @Consumes({ MediaType.APPLICATION_JSON }) 
     @Produces({ MediaType.APPLICATION_JSON })
     public String createSelfRegistration(final String apiRequestBodyAsJson) {
+    	
+    	logger.info("selfregistration: "+apiRequestBodyAsJson);
+    	
 
         final CommandWrapper commandRequest = new CommandWrapperBuilder().selfRegistrationProcess().withJson(apiRequestBodyAsJson).build();
 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
+        logger.info("result: "+result);
         return this.toApiJsonSerializer.serialize(result);
     }
 
