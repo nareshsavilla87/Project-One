@@ -321,7 +321,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 				if (resultClient == null) {
 					throw new PlatformDataIntegrityException("error.msg.client.creation.failed", "Client Creation Failed","Client Creation Failed");
 				}
-				
+				logger.info("responseOfClient: "+resultClient);
 				if(passport != null && !passport.equalsIgnoreCase("")){
 					CodeValue passportcodeValue=this.codeValueRepository.findOneByCodeValue("Passport");
 					JSONObject clientIdentifierJson = new JSONObject();
@@ -402,7 +402,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 								throw new PlatformDataIntegrityException("error.msg.client.device.assign.failed", 
 										"Device Assign Failed for ClientId :" + resultClient.getClientId(), "Device Assign Failed");
 							}
-
+							logger.info("responseOfSale: "+resultSale);
 						} else if(deviceAgreementType.equalsIgnoreCase(ConfigurationConstants.CONFIR_PROPERTY_OWN)){
 
 							List<ItemMaster> itemMaster = this.itemRepository.findAll();
@@ -420,6 +420,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 								throw new PlatformDataIntegrityException("error.msg.client.device.assign.failed",
 										"Device Assign Failed for ClientId :" + resultClient.getClientId(), "Device Assign Failed");
 							}
+							logger.info("responseOfOwnHW: "+result);
 						}else {
 							
 						}
@@ -446,7 +447,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 							throw new PlatformDataIntegrityException("error.msg.client.order.creation", "Book Order Failed for ClientId:"	
 									+ resultClient.getClientId(), "Book Order Failed");
 						}
-
+						logger.info("responseOfOrder: "+resultOrder);
 					} else {
 
 						String paytermCode = command.stringValueOfParameterNamed("paytermCode");
@@ -454,22 +455,26 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 						Long planCode = command.longValueOfParameterNamed("planCode");
 						Contract contract =this.contractRepository.findOneByContractId(contractPeriod);
 						List<Price> prices=this.priceRepository.findChargeCodeByPlanAndContract(planCode,contractPeriod);
-								Plan planName = this.planRepository.findOne(planCode);
-								if(planName == null || planName.isDeleted() == 'Y' ){
-									
-									throw new PlatformDataIntegrityException("error.msg.order.id.not.exist",
-											"Plan doesn't exit with this id " + planCode, "plan code not exist");
-								}
-								Contract contractId = this.contractRepository.findOneByContractId(contractPeriod);
-								if(contractId == null){
-									throw new PlatformDataIntegrityException("error.msg.contractperiod.not.exist",
-											"Contract Period doesn't exit with this contractPeriod " + contractPeriod, "Contract Period not exist");
-								}
+						Plan planName = this.planRepository.findOne(planCode);
+						if(planName == null || planName.isDeleted() == 'Y' ){
+							
+							throw new PlatformDataIntegrityException("error.msg.order.id.not.exist",
+									"Plan doesn't exist with this id " + planCode, "plan code not exist");
+						}
+						Contract contractId = this.contractRepository.findOneByContractId(contractPeriod);
+						if(contractId == null){
+							throw new PlatformDataIntegrityException("error.msg.contractperiod.not.exist",
+									"Contract Period doesn't exist with this contractPeriod " + contractPeriod, "Contract Period not exist");
+						}
+						
 						if(!prices.isEmpty()){
 							ChargeCodeMaster chargeCodeMaster = this.chargeCodeRepository.findOneByChargeCode(prices.get(0).getChargeCode());	
 						if(chargeCodeMaster != null){
 						 	paytermCode = chargeCodeMaster.getBillFrequencyCode();
 						}
+						}else if(prices.isEmpty()){
+							throw new PlatformDataIntegrityException("error.msg.prices.not.exist",
+									"Plan Price is not define with this Duration " + contractPeriod, "Plan Price is not define with this Duration");
 						}
 						if(contract != null){
 						contractPeriod = contract.getId().toString();	
@@ -493,7 +498,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 							throw new PlatformDataIntegrityException("error.msg.client.order.creation",
 									"Book Order Failed for ClientId:" + resultClient.getClientId(), "Book Order Failed");
 						}
-
+						logger.info("responseOfOrder: "+resultOrder);
 					} 		
 				}
 				
@@ -512,6 +517,7 @@ public class ActivationProcessWritePlatformServiceJpaRepositoryImpl implements A
 						throw new PlatformDataIntegrityException("error.msg.redemption.creation",
 								"Redemption Failed for ClientId:" + resultClient.getClientId(), "Redemption Failed");
 					}
+					logger.info("responseOfRedemption: "+resultRedemption);
 				}
 				SelfCare selfCare  =this.selfCareRepository.findOneByClientId(resultClient.getClientId());
 				final Map<String, Object> changes = new LinkedHashMap<String, Object>(1);
