@@ -286,7 +286,7 @@ END IF;
 END // 
 DELIMITER ;
 call officeAddr1();
-Drop procedure if exists officeInfo;
+Drop procedure if exists officeAddr1;
 
 Drop procedure if exists officeInfo;
 DELIMITER //

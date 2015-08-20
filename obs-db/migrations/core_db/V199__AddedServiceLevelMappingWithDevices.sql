@@ -21,7 +21,6 @@ call provServiceDetails();
 DROP procedure IF EXISTS provServiceDetails;
 DELIMITER //
 
-
 DELIMITER ;
 DELETE prv1 FROM b_prov_service_details prv1, b_prov_service_details prv2 WHERE prv1.id < prv2.id AND prv1.service_id = prv2.service_id;
 
@@ -55,7 +54,7 @@ Begin
      WHERE COLUMN_NAME = 'service_id'
      AND TABLE_NAME = 'b_association'
      AND TABLE_SCHEMA = DATABASE())THEN
-ALTER TABLE b_association ADD COLUMN service_id BIGINT(20) DEFAULT NULL;
+ALTER TABLE b_association ADD COLUMN service_id BIGINT(20) DEFAULT NULL AFTER `allocation_type`;
 END IF;
 END //
 DELIMITER ;
