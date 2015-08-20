@@ -17,6 +17,7 @@ import org.mifosplatform.cms.eventmaster.domain.OptType;
 import org.mifosplatform.cms.eventmaster.domain.OptTypeEnum;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
@@ -66,7 +67,7 @@ public class EventMasterReadPlatformServiceImpl implements
 	public List<EventMasterData> retrieveEventMasterDataForEventOrders() {
 		try {
 			final EventMasterMapper eventMasterMapper = new EventMasterMapper();
-			final String sql = "SELECT " + eventMasterMapper.eventMasterSchema() + " where  evnt.event_end_date > now() or evnt.event_end_date is null";
+			final String sql = "SELECT " + eventMasterMapper.eventMasterSchema() + " where  evnt.event_end_date > '"+DateUtils.getDateTimeOfTenant()+"' or evnt.event_end_date is null";
 			return jdbcTemplate.query(sql, eventMasterMapper, new Object[] {});
 		} catch (EmptyResultDataAccessException e) {
 			return null;
@@ -77,7 +78,7 @@ public class EventMasterReadPlatformServiceImpl implements
 	public List<EventMasterData> retrieveEventMasterData() {
 		try {
 			final EventMasterMapper eventMasterMapper = new EventMasterMapper();
-			final String sql = "SELECT " + eventMasterMapper.eventMasterSchema() + " where evnt.event_end_date > now() or evnt.event_end_date is null";
+			final String sql = "SELECT " + eventMasterMapper.eventMasterSchema() + " where evnt.event_end_date > '"+DateUtils.getDateTimeOfTenant()+"' or evnt.event_end_date is null";
 			return jdbcTemplate.query(sql, eventMasterMapper, new Object[] {});
 		} catch (EmptyResultDataAccessException e) {
 			return null;

@@ -11,6 +11,7 @@ import java.util.Map;
 import org.joda.time.LocalDate;
 import org.json.JSONObject;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.order.data.SchedulingOrderData;
@@ -123,7 +124,7 @@ public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPl
 	public List<EventActionData> retrieveAllActionsForProccessing() {
 		try{
 			EventActionMapper mapper = new EventActionMapper();
-			String sql = "select " + mapper.schema() + " WHERE a.is_processed = 'N'  and a.trans_date <=now()";
+			String sql = "select " + mapper.schema() + " WHERE a.is_processed = 'N'  and a.trans_date <='"+DateUtils.getDateTimeOfTenant()+"'";
 			return this.jdbcTemplate.query(sql, mapper, new Object[] { });
 		}catch(EmptyResultDataAccessException accessException){
 			return null;	

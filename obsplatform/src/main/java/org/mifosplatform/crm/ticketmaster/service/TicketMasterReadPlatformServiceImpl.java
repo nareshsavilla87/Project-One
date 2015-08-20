@@ -16,6 +16,7 @@ import org.mifosplatform.crm.ticketmaster.domain.PriorityType;
 import org.mifosplatform.crm.ticketmaster.domain.PriorityTypeEnum;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -247,8 +248,8 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 							"(SELECT comments FROM b_ticket_details x WHERE tckt.id = x.ticket_id AND x.id = (SELECT max(id) FROM b_ticket_details y WHERE tckt.id = y.ticket_id)) AS LastComment,"+
 							"(SELECT mcv.code_value FROM m_code_value mcv WHERE mcv.id = tckt.problem_code) AS problemDescription,"+
 							"(SELECT user.username FROM m_appuser user WHERE tckt.assigned_to = user.id) AS assignedTo,"+
-							"CONCAT(TIMESTAMPDIFF(day, tckt.ticket_date, Now()), ' d ', MOD(TIMESTAMPDIFF(hour, tckt.ticket_date, Now()), 24), ' hr ',"+
-							"MOD(TIMESTAMPDIFF(minute, tckt.ticket_date, Now()), 60), ' min ') AS timeElapsed,"+
+							"CONCAT(TIMESTAMPDIFF(day, tckt.ticket_date, '"+DateUtils.getDateTimeOfTenant()+"'), ' d ', MOD(TIMESTAMPDIFF(hour, tckt.ticket_date, '"+DateUtils.getDateTimeOfTenant()+"'), 24), ' hr ',"+
+							"MOD(TIMESTAMPDIFF(minute, tckt.ticket_date, '"+DateUtils.getDateTimeOfTenant()+"'), 60), ' min ') AS timeElapsed,"+
 							"IFNull((SELECT user.username FROM m_appuser user WHERE tckt.lastmodifiedby_id = user.id),'Null') AS closedby_user "+
 							"FROM b_ticket_master tckt left join m_client mct on mct.id = tckt.client_id "+
 							"left join m_office o on o.id = mct.office_id ";
