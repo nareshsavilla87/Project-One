@@ -357,7 +357,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             new File(fileLocation).mkdirs();
         }
 
-        String genaratePdf = fileLocation + File.separator + reportName + ".pdf";
+        String genaratePdf = fileLocation + reportName + ".pdf";
 
         try {
             GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams);

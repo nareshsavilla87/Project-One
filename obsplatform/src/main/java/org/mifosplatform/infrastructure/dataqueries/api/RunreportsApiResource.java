@@ -96,7 +96,7 @@ public class RunreportsApiResource {
 
 			File file = new File(pdfFileName);
 			ResponseBuilder response = Response.ok(file);
-			response.header("Content-Disposition", "attachment; filename=\""+ reportName + "\"");
+			response.header("Content-Disposition", "attachment; filename=\""+ pdfFileName + "\"");
 			response.header("content-Type", "application/pdf");
 			return response.build();
 		}

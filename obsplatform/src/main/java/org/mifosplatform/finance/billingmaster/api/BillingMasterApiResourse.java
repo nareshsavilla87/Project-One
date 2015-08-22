@@ -43,7 +43,6 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
-import org.mifosplatform.portfolio.service.data.ServiceMasterOptionsData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -97,10 +96,14 @@ public class BillingMasterApiResourse {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public String generateBillStatement(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 		
-		final JsonElement parsedCommand = this.fromApiJsonHelper.parse(apiRequestBodyAsJson);
+		final CommandWrapper wrapper = new CommandWrapperBuilder().createStatement(clientId).withJson(apiRequestBodyAsJson).build();
+		final JsonElement parsedCommand = this.fromApiJsonHelper.parse(wrapper.getJson());
         final JsonCommand command = JsonCommand.from(apiRequestBodyAsJson, parsedCommand,this.fromApiJsonHelper,
-        		 						"BILLMASTER", clientId, null, null, clientId, null, null, null, null, null, null, null);
-       	final CommandProcessingResult result = this.billMasterWritePlatformService.createBillMaster(command, command.entityId());
+        		             wrapper.entityName(),wrapper.getEntityId(), 
+        		             wrapper.getSubentityId(), wrapper.getGroupId(), 
+        		             clientId, null, null, null, null, 
+        		             wrapper.getSupportedEntityId(), wrapper.getTransactionId(),null);
+       	final CommandProcessingResult result = this.billMasterWritePlatformService.createBillMaster(command,command.entityId());
 	    return this.toApiJsonSerializer.serialize(result);
 	}
 	
@@ -145,14 +148,8 @@ public class BillingMasterApiResourse {
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response printStatement(@PathParam("billId") final Long billId) {
-		
-		final BillMaster billMaster = this.billMasterRepository.findOne(billId);
-		final String fileName = billMaster.getFileName();
-		if("invoice".equalsIgnoreCase(fileName)){
-			this.billWritePlatformService.generateStatementPdf(billId);
-		 }
-		 final BillMaster updatedBillMaster = this.billMasterRepository.findOne(billId);
-		 final String printFileName = updatedBillMaster.getFileName();
+			
+		 final String printFileName=this.billWritePlatformService.generateStatementPdf(billId);
 		 final File file = new File(printFileName);
 		 final ResponseBuilder response = Response.ok(file);
 		 response.header("Content-Disposition", "attachment; filename=\"" + printFileName + "\"");
