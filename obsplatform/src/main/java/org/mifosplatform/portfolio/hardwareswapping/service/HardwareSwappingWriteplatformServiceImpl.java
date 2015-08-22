@@ -122,6 +122,7 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 		final String provisionNum=command.stringValueOfParameterNamed("provisionNum");
 		
 		//DeAssociate Hardware
+		
 		this.associationWriteplatformService.deAssociationHardware(associationId);
 	    String requstStatus =UserActionStatusTypeEnum.DISCONNECTION.toString();
 	    
