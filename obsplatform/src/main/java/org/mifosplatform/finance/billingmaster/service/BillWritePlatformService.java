@@ -11,7 +11,7 @@ public interface BillWritePlatformService {
 	
 	CommandProcessingResult updateBillMaster(List<BillDetail> billDetails,BillMaster billMaster, BigDecimal previousBal);
 
-	void generateStatementPdf(Long billId);
+	String generateStatementPdf(Long billId);
 
 	String generateInovicePdf(Long billId);
 	

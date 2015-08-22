@@ -40,7 +40,7 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 		}
 
 		@Override
-		public ScheduleJobData mapRow(final ResultSet rs,@SuppressWarnings("unused") final int rowNum)
+		public ScheduleJobData mapRow(final ResultSet rs, final int rowNum)
 				throws SQLException {
 			final Long id = rs.getLong("id");
 			final String batchName = rs.getString("reportName");
@@ -56,22 +56,22 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 				
 			        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourcePerTenantService.retrieveDataSource());
 					final ClientIdMapper mapper = new ClientIdMapper();
-					if(data.isDynamic().equalsIgnoreCase("Y")){
+					if("Y".equalsIgnoreCase(data.isDynamic())){
 						return jdbcTemplate.query(query, mapper, new Object[] { });
-						}else{
-							return jdbcTemplate.query(query, mapper, new Object[] { data.getProcessDate() });
+					  }else{
+						  query=query.toLowerCase().replace("now()","'"+(data.getProcessDate() !=null ? data.getProcessDate() : data.getDueDate()).toString()+"'");
+						  return jdbcTemplate.query(query, mapper, new Object[] {});
 						}
 					} catch (EmptyResultDataAccessException e) {
-					return null;
+					    return null;
 					}
-					}
+				}
 			
 			  private static final class ClientIdMapper implements RowMapper<Long> {
 				@Override
-				public Long mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+				public Long mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 				final Long clientId = rs.getLong("clientId");
 			       return clientId;
-				
 					}
 				}
 			
@@ -95,7 +95,7 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 
 					}
 					@Override
-					public Long mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+					public Long mapRow(final ResultSet rs,  final int rowNum) throws SQLException {
 					final Long id = rs.getLong("id");
 					return id ;
 					}
@@ -144,7 +144,7 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 						}
 
 						@Override
-						public JobParameters mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+						public JobParameters mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 						final Long id = rs.getLong("id");
 						final Long jobId = rs.getLong("jobId");
 						final String paramType = rs.getString("paramType");
@@ -198,9 +198,7 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 		}
 
 		@Override
-		public String mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+		public String mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 			String prepare = "sms_conf(" + id + ")";
 			String message = rs.getString(prepare);
 			return message;
@@ -236,7 +234,7 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 		}
 
 		@Override
-		public ScheduleJobData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+		public ScheduleJobData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
          
 		final Long id = rs.getLong("id");
 		final String batchName = rs.getString("batchName");
@@ -248,23 +246,26 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 	 }
 
 	@Override
-	public List<Long> getBillIds(String query) {
+	public List<Long> getBillIds(String query,JobParameterData data) {
 		try {
 			
 	        JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourcePerTenantService.retrieveDataSource());
 			final BillIdMapper mapper = new BillIdMapper();
-			return jdbcTemplate.query(query, mapper, new Object[] { });
-			} catch (EmptyResultDataAccessException e) {
-			return null;
+			if("Y".equalsIgnoreCase(data.isDynamic())){
+			        return jdbcTemplate.query(query, mapper, new Object[] { });
+			  }else{
+				    query=query.toLowerCase().replace("now()","?");
+					return jdbcTemplate.query(query, mapper, new Object[] { data.getProcessDate() });
+			     }
+		       } catch (EmptyResultDataAccessException e) {
+				return null;
 			}
-			}
+		}
 	
 	  private static final class BillIdMapper implements RowMapper<Long> {
 		@Override
-		public Long mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
-		final Long billId = rs.getLong("billId");
-	       return billId;
-		
+		public Long mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+	               return  rs.getLong("billId");
 			}
 		}
 
@@ -279,7 +280,7 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 	
 	private static final class AddonMapper implements RowMapper<Long> {
 		@Override
-		public Long mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+		public Long mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 		return rs.getLong("id");
 		
 			}
