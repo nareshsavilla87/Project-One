@@ -126,57 +126,63 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 
 	@Transactional
 	@Override
-	public void generateStatementPdf(final Long billId)  {
+	public String generateStatementPdf(final Long billId)  {
 		
 		try {
-			BillMaster billMaster=this.billMasterRepository.findOne(billId);
-			final String fileLocation = FileUtils.MIFOSX_BASE_DIR;
-			/** Recursively create the directory if it does not exist **/
-			if (!new File(fileLocation).isDirectory()) {
-				new File(fileLocation).mkdirs();
+			BillMaster billMaster = this.billMasterRepository.findOne(billId);
+
+			if ("invoice".equalsIgnoreCase(billMaster.getFileName())) {
+				final String fileLocation = FileUtils.MIFOSX_BASE_DIR;
+				/** Recursively create the directory if it does not exist **/
+				if (!new File(fileLocation).isDirectory()) {
+					new File(fileLocation).mkdirs();
+				}
+				final String statementDetailsLocation = fileLocation+ File.separator +"StatementPdfFiles";
+				if (!new File(statementDetailsLocation).isDirectory()) {
+					new File(statementDetailsLocation).mkdirs();
+				}
+				final String printStatementLocation = statementDetailsLocation+ File.separator + "Bill_" + billMaster.getId()+".pdf";
+				final String jpath = fileLocation + File.separator + "jasper";
+				final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
+				final String jfilepath = jpath + File.separator + "Statement_"+ tenant + ".jasper";
+				File destinationFile = new File(jfilepath);
+				if (!destinationFile.exists()) {
+					File sourceFile = new File(this.getClass().getClassLoader().getResource("Files/Statement.jasper").getFile());
+					FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
+				}
+				final Connection connection = this.dataSource.getConnection();
+				Map<String, Object> parameters = new HashMap<String, Object>();
+				final Integer id = Integer.valueOf(billMaster.getId().toString());
+				parameters.put("param1", id);
+				parameters.put("SUBREPORT_DIR", jpath + "" + File.separator);
+				final JasperPrint jasperPrint = JasperFillManager.fillReport(jfilepath, parameters, connection);
+				JasperExportManager.exportReportToPdfFile(jasperPrint,printStatementLocation);
+				billMaster.setFileName(printStatementLocation);
+				this.billMasterRepository.save(billMaster);
+				connection.close();
+				System.out.println("Filling report successfully...");
 			}
-			final String statementDetailsLocation = fileLocation + File.separator + "StatementPdfFiles"; 
-			if (!new File(statementDetailsLocation).isDirectory()) {
-				new File(statementDetailsLocation).mkdirs();
-			}
-			final String printStatementLocation = statementDetailsLocation + File.separator + "Bill_" + billMaster.getId() + ".pdf";
-			final String jpath = fileLocation+File.separator+"jasper"; 
-			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-			final String jfilepath =jpath+File.separator+"Statement_"+tenant+".jasper";
-			File destinationFile=new File(jfilepath);
-		      if(!destinationFile.exists()){
-		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Files/Statement.jasper").getFile());
-		    	FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
-		       }
-			final Connection connection = this.dataSource.getConnection();
-			Map<String, Object> parameters = new HashMap<String, Object>();
-			final Integer id = Integer.valueOf(billMaster.getId().toString());
-			parameters.put("param1", id);
-			parameters.put("SUBREPORT_DIR",jpath+""+File.separator);
-			final JasperPrint jasperPrint = JasperFillManager.fillReport(jfilepath, parameters, connection);
-			JasperExportManager.exportReportToPdfFile(jasperPrint, printStatementLocation);
-			billMaster.setFileName(printStatementLocation);
-			this.billMasterRepository.save(billMaster);
-			connection.close();
-			System.out.println("Filling report successfully...");
-			
+			return billMaster.getFileName();
 		} catch (final DataIntegrityViolationException ex) {
-			
-			 LOGGER.error("Filling report failed..." + ex.getLocalizedMessage());
-			 System.out.println("Filling report failed...");
-			 ex.printStackTrace();
-		
-		} catch (final JRException  | JRRuntimeException e) {
-			
+
+			LOGGER.error("Filling report failed..." + ex.getLocalizedMessage());
+			System.out.println("Filling report failed...");
+			ex.printStackTrace();
+			return null;
+
+		} catch (final JRException | JRRuntimeException e) {
+
 			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 			e.printStackTrace();
-		
+			return null;
+
 		} catch (final Exception e) {
-			
+
 			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 			e.printStackTrace();
+			return null;
 		}
 	}
 
@@ -193,7 +199,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		if (!new File(InvoiceDetailsLocation).isDirectory()) {
 			 new File(InvoiceDetailsLocation).mkdirs();
 		}
-		final String printInvoiceLocation = InvoiceDetailsLocation +File.separator + "Invoice_" + invoiceId + ".pdf";
+		final String printInvoiceLocation = InvoiceDetailsLocation +File.separator + "Invoice_"+invoiceId+".pdf";
 		final Integer id = Integer.valueOf(invoiceId.toString());
 		try {
 			
@@ -242,7 +248,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		if (!new File(PaymentDetailsLocation).isDirectory()) {
 			 new File(PaymentDetailsLocation).mkdirs();
 		}
-		final String printPaymentLocation = PaymentDetailsLocation +File.separator + "Payment_" + paymentId + ".pdf";
+		final String printPaymentLocation = PaymentDetailsLocation +File.separator + "Payment_"+paymentId +".pdf";
 		final Integer id = Integer.valueOf(paymentId.toString());
 		try {
 			

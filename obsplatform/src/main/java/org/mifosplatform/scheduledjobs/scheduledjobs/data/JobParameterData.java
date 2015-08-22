@@ -131,15 +131,8 @@ public class JobParameterData {
 		return processDate;
 	}
 
-
-
 	public String getIsAutoRenewal() {
 		return isAutoRenewal;
-	}
-
-	public String getIsDynamic() {
-
-		return isDynamic;
 	}
 
 	public LocalDate getExipiryDate() {
