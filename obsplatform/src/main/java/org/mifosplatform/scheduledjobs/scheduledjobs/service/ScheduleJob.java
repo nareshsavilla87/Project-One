@@ -121,7 +121,7 @@ return isAmountSufficient;
 */}
 
 
-public void ProcessAutoExipiryDetails(OrderData orderData, FileWriter fw, LocalDate exipirydate, JobParameterData data, Long clientId) {
+public void ProcessAutoExipiryDetails(OrderData orderData, FileWriter fw, LocalDate exipirydate, JobParameterData data, Long clientId, boolean isSufficientAmountForRenewal) {
 		  
 		 try{
 
@@ -133,9 +133,9 @@ public void ProcessAutoExipiryDetails(OrderData orderData, FileWriter fw, LocalD
 		                     if(data.getIsAutoRenewal().equalsIgnoreCase("Y")){
 		                      
 		                            Order order=this.orderRepository.findOne(orderData.getId());
-		                            List<OrderPrice> orderPrice=order.getPrice();
+		                           // List<OrderPrice> orderPrice=order.getPrice();
 		                            if(order.isAutoRenewal() == 'Y'){
-		                            	boolean isSufficientAmountForRenewal=this.checkClientBalanceForOrderrenewal(orderData,clientId,orderPrice);   	
+		                            	//boolean isSufficientAmountForRenewal=this.checkClientBalanceForOrderrenewal(orderData,clientId,orderPrice);   	
 
 		                          if(isSufficientAmountForRenewal){
 		                           Plan plan=this.planRepository.findOne(order.getPlanId());
