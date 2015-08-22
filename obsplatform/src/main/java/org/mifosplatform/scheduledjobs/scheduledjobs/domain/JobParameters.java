@@ -118,10 +118,17 @@ public class JobParameters extends AbstractPersistable<Long>{
 	      }
 	    
 	    final String duedateParamName = "dueDate";
+	    final String isDynamicParam = "isDynamic";
+	    final boolean isDynamicDate= command.booleanPrimitiveValueOfParameterNamed(isDynamicParam);
 	    final LocalDate duedate = command.localDateValueOfParameterNamed(duedateParamName);
 	    if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.jobDueDate) && duedate!=null){
 	    	String date = simpleDateFormat.format(duedate.toDate());
 	    	this.paramValue=date;
+	    	if(isDynamicDate){
+	    		this.isDynamic="Y";
+	    	}else{
+	    		this.isDynamic="N";
+	    	}
 	      }
 	    
 	    final String reportNameParamName = "reportName";
@@ -220,7 +227,7 @@ public class JobParameters extends AbstractPersistable<Long>{
 	    		this.isDynamic="N";
 	        }
 	    
-	    final String isDisconnectUnpaidCustomersParamName = "isDisconnectUnpaidCustomers";
+	  /*  final String isDisconnectUnpaidCustomersParamName = "isDisconnectUnpaidCustomers";
 	    final boolean isDisconnectUnpaidCustomers= command.booleanPrimitiveValueOfParameterNamed(isDisconnectUnpaidCustomersParamName);
 	    if(this.paramName.equalsIgnoreCase(SchedulerJobApiConstants.jobisDisconnectUnpaidCustomers)){
 	    	if(isDisconnectUnpaidCustomers){
@@ -230,7 +237,7 @@ public class JobParameters extends AbstractPersistable<Long>{
 	    		this.isDynamic="N";
 	    	this.paramValue="N";
 	    	}
-	    }
+	    }*/
 	    
 	}
 

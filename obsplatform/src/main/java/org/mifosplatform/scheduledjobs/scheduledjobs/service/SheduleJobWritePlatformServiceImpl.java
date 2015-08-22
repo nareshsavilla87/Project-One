@@ -214,48 +214,38 @@ try
 			FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
 			List<ScheduleJobData> sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(data.getBatchName());
 
-			if(sheduleDatas.isEmpty()){
-				fw.append("ScheduleJobData Empty \r\n");
-			}
-			for (ScheduleJobData scheduleJobData : sheduleDatas) {
-				String sql=scheduleJobData.getQuery();
-				if(data.isDynamic().equalsIgnoreCase("N")){
-						sql=sql.toLowerCase().replace("now()","?");
-				}
-				
-				fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
-						" ,query="+sql+"\r\n");
-				
-				List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(sql,data);
-
-				if(clientIds.isEmpty()){
-					fw.append("Invoicing clients are not found \r\n");
-				}
-				else{
-					fw.append("Invoicing the clients..... \r\n");
-				}
-
-// Get the Client Ids
-				for (Long clientId : clientIds) {
-					try {
-						if(data.isDynamic().equalsIgnoreCase("Y")){
-							Invoice  invoice=this.invoiceClient.invoicingSingleClient(clientId,DateUtils.getLocalDateOfTenant());	
-							fw.append("ClientId: "+clientId+"\tAmount: "+invoice.getInvoiceAmount().toString()+"\r\n");
-						
-						}else{
-							Invoice invoice=this.invoiceClient.invoicingSingleClient(clientId,data.getProcessDate());
-							fw.append("ClientId: "+clientId+"\tAmount: "+invoice.getInvoiceAmount().toString()+"\r\n");	
+			if(!sheduleDatas.isEmpty()){
+				for (ScheduleJobData scheduleJobData : sheduleDatas) {
+					fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+" ,query="+scheduleJobData.getQuery()+"\r\n");
+					List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(),data);
+					if(!clientIds.isEmpty()){
+						fw.append("Invoicing the clients..... \r\n");
+						for (Long clientId : clientIds) {
+							try {
+								if("Y".equalsIgnoreCase(data.isDynamic())){
+									Invoice  invoice=this.invoiceClient.invoicingSingleClient(clientId,DateUtils.getLocalDateOfTenant());	
+									fw.append("ClientId: "+clientId+"\tAmount: "+invoice.getInvoiceAmount().toString()+"\r\n");
+								
+								}else{
+									Invoice invoice=this.invoiceClient.invoicingSingleClient(clientId,data.getProcessDate());
+									fw.append("ClientId: "+clientId+"\tAmount: "+invoice.getInvoiceAmount().toString()+"\r\n");	
+								}
+							} catch (Exception dve) {
+								handleCodeDataIntegrityIssues(null, dve);
+							}
 						}
-					} catch (Exception dve) {
-						handleCodeDataIntegrityIssues(null, dve);
+					}else{
+						fw.append("Invoicing clients are not found \r\n");
 					}
 				}
+			}else{
+				fw.append("ScheduleJobData Empty \r\n");
 			}
 			fw.append("Invoices are Generated....."+ThreadLocalContextUtil.getTenant().getTenantIdentifier()+"\r\n");
 			fw.flush();
 			fw.close();
-			System.out.println("Invoices are Generated....."+ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 		}
+		System.out.println("Invoices are Generated....."+ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 	}catch(DataIntegrityViolationException exception){
 		exception.printStackTrace();
 	} catch (Exception exception) {	
@@ -401,42 +391,40 @@ try {
 			fw.append("Processing statement Details....... \r\n");
 			List<ScheduleJobData> sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(data.getBatchName());
        
-			if(sheduleDatas.isEmpty()){
+			if(!sheduleDatas.isEmpty()){
+				for(ScheduleJobData scheduleJobData:sheduleDatas){
+					fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+" ,query="+scheduleJobData.getQuery()+"\r\n");
+					List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(),data);
+					if(!clientIds.isEmpty()){
+						fw.append("generate Statements for the clients..... \r\n");
+						for(Long clientId:clientIds){
+							fw.append("processing clientId: "+clientId+ " \r\n");
+							JSONObject jsonobject = new JSONObject();
+							DateTimeFormatter formatter1 = DateTimeFormat.forPattern("dd MMMM yyyy");
+							String formattedDate ;
+								if("Y".equalsIgnoreCase(data.isDynamic())){
+									formattedDate = formatter1.print(DateUtils.getLocalDateOfTenant().plusDays(7));	
+								}else{
+									formattedDate = formatter1.print(data.getDueDate());
+								}
+								jsonobject.put("dueDate",formattedDate);
+								jsonobject.put("locale", "en");
+								jsonobject.put("dateFormat", "dd MMMM YYYY");
+								jsonobject.put("message", data.getPromotionalMessage());
+								fw.append("sending jsonData for Statement Generation is: "+jsonobject.toString()+" . \r\n");
+									try{
+										this.billingMasterApiResourse.generateBillStatement(clientId,	jsonobject.toString()); 
+									}catch(BillingOrderNoRecordsFoundException e){
+										e.getMessage();
+								}
+				           }
+					  }else{
+						fw.append("no records are available for statement generation \r\n");
+					  }
+                   }
+		    	}else{
 				fw.append("ScheduleJobData Empty \r\n");
 			}
-				for(ScheduleJobData scheduleJobData:sheduleDatas){
-					
-					fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
-    			   " ,query="+scheduleJobData.getQuery()+"\r\n");
-					List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(),data);
-
-					if(clientIds.isEmpty()){
-						fw.append("no records are available for statement generation \r\n");
-					}else{
-						fw.append("generate Statements for the clients..... \r\n");
-					}
-					for(Long clientId:clientIds){
-						fw.append("processing clientId: "+clientId+ " \r\n");
-						JSONObject jsonobject = new JSONObject();
-						DateTimeFormatter formatter1 = DateTimeFormat.forPattern("dd MMMM yyyy");
-						String formattedDate ;
-							if(data.isDynamic().equalsIgnoreCase("Y")){
-								formattedDate = formatter1.print(DateUtils.getLocalDateOfTenant().plusDays(7));	
-							}else{
-								formattedDate = formatter1.print(data.getDueDate());
-							}
-							jsonobject.put("dueDate",formattedDate);
-							jsonobject.put("locale", "en");
-							jsonobject.put("dateFormat", "dd MMMM YYYY");
-							jsonobject.put("message", data.getPromotionalMessage());
-							fw.append("sending jsonData for Statement Generation is: "+jsonobject.toString()+" . \r\n");
-								try{
-									this.billingMasterApiResourse.generateBillStatement(clientId,	jsonobject.toString()); 
-								}catch(BillingOrderNoRecordsFoundException e){
-									e.getMessage();
-								}
-					}
-       }
 				fw.append("statement Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
 				fw.flush();
 				fw.close();
@@ -1300,38 +1288,33 @@ public void reportStatmentPdf() {
 	       fw.append("Processing statement pdf files....... \r\n");
 	       List<ScheduleJobData> sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(data.getBatchName());
 	       
-	       if(sheduleDatas.isEmpty()){
+	       if(!sheduleDatas.isEmpty()){
+	    	   for(ScheduleJobData scheduleJobData:sheduleDatas){
+		    	   fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+ ",query="+scheduleJobData.getQuery()+"\r\n");
+		    	   List<Long> billIds = this.sheduleJobReadPlatformService.getBillIds(scheduleJobData.getQuery(),data);
+		    	   if(!billIds.isEmpty()){
+		    		   fw.append("generate statement pdf files for the  statment bills..... \r\n");
+		    		   for(Long billId:billIds){
+			    		   fw.append("processing statement: "+billId+ " \r\n");
+			    		   this.billingMasterApiResourse.printStatement(billId);
+			    	   }
+		    	   }else{
+		    		   fw.append("no records are available for generate statement pdf files \r\n");
+		    	   }
+		       }
+	       }else{
 	    	   fw.append("ScheduleJobData Empty \r\n");
-	       }
-	       
-	       for(ScheduleJobData scheduleJobData:sheduleDatas){
-	    	   fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
-	    			   " ,query="+scheduleJobData.getQuery()+"\r\n");
-	    	   List<Long> billIds = this.sheduleJobReadPlatformService.getBillIds(scheduleJobData.getQuery());
-
-	    	   if(billIds.isEmpty()){
-	    		   fw.append("no records are available for generate statement pdf files \r\n");
-	    	   
-	    	   }else{
-	    		   fw.append("generate statement pdf files for the  statment bills..... \r\n");
-	    	   }
-	    	   for(Long billId:billIds){
-	    		   fw.append("processing statement  billId: "+billId+ " \r\n");
-	    		   this.billingMasterApiResourse.printStatement(billId);
-	    	   }
 	       }
 	       fw.append("statement pdf files Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier()+" . \r\n");
 	       fw.flush();
 	       fw.close();
 		}
-		System.out.println("statement  pdf file Job is Completed..."
-				+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
-		
-		} catch (Exception exception) {  
+		System.out.println("statement  pdf file Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+	 } catch (Exception exception) {  
 		System.out.println(exception.getMessage());
 		exception.printStackTrace();
 		}
-		}
+	}
 
 
 	@Override
@@ -1359,7 +1342,7 @@ public void reportStatmentPdf() {
 				
 				simpleJdbcCall.setProcedureName("p_int_fa");//p --> procedure int --> integration fa --> financial account s/w {p_todt=2014-12-30}
 				
-				if (data.isDynamic().equalsIgnoreCase("Y")) {
+				if ("Y".equalsIgnoreCase(data.isDynamic())) {
 					parameterSource.addValue("p_todt", DateUtils.getLocalDateOfTenant().toString(), Types.DATE);
 				} else {
 					parameterSource.addValue("p_todt", data.getProcessDate().toString(), Types.DATE);
@@ -1373,11 +1356,10 @@ public void reportStatmentPdf() {
 					fw.append("No of records inserted :" + output.values()+ "\r\n");
 					fw.append("Exporting data successfully....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + "\r\n");
 				}
-				
 				fw.flush();
 				fw.close();
-				System.out.println("Exporting data successfully done....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());	
 			}	
+			System.out.println("Exporting data successfully done....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());	
 		} catch (DataIntegrityViolationException e) {		
 			System.out.println(e.getMessage());		
 			e.printStackTrace();				
@@ -1427,7 +1409,7 @@ public void reportStatmentPdf() {
 					fw.flush();
 					fw.close();	
 					System.out.println("Reseller commission processed failed....."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
-				}
+			    }
 			}
 		} catch (DataIntegrityViolationException e) {
 			System.out.println(e.getMessage());
@@ -1677,9 +1659,9 @@ public void reportStatmentPdf() {
 
 				if (!sheduleDatas.isEmpty()) {
 					for (ScheduleJobData scheduleJobData : sheduleDatas) {
-						fw.append("ScheduleJobData id="+ scheduleJobData.getId() + " ,BatchName="+ scheduleJobData.getBatchName() + " ,query="+ scheduleJobData.getQuery() + "\r\n");
-						List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(), data);
-						if (!clientIds.isEmpty()) {
+						 fw.append("ScheduleJobData id="+ scheduleJobData.getId() + " ,BatchName="+ scheduleJobData.getBatchName() + " ,query="+ scheduleJobData.getQuery() + "\r\n");
+						 List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(), data);
+						 if (!clientIds.isEmpty()) {
 							for (Long clientId : clientIds) {
 								fw.append("processing Unpaid Customer id :"+ clientId + "\r\n");
 								List<OrderData> orders = this.orderReadPlatformService.retrieveCustomerActiveOrders(clientId);
@@ -1701,8 +1683,8 @@ public void reportStatmentPdf() {
 				fw.append("Disconnect Unpaid Customers Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + " . \r\n");
 				fw.flush();
 				fw.close();
-				System.out.println("Disconnect Unpaid Customers Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 			}
+			System.out.println("Disconnect Unpaid Customers Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 		} catch (DataIntegrityViolationException | IOException e) {
 			System.out.println(e);
 			e.printStackTrace();

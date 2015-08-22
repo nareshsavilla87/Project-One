@@ -58,7 +58,7 @@ public class SchedulerJobApiConstants {
     public static final String JOB_MESSANGER ="Merge Messages";
     public static final String JOB_EXPORT_DATA ="Export Data";
 	public static final String JOB_RESELLER_COMMISSION ="Reseller Commission";
-	public static final String  jobisDisconnectUnpaidCustomers="isDisconnectUnpaidCustomers";
+	//public static final String  jobisDisconnectUnpaidCustomers="isDisconnectUnpaidCustomers";
 	public static final String  DISCONNET_UNPAID_CUSTOMERS="DisconnectUnpaidCustomers";
 
     public static final Set<String> JOB_DETAIL_RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(jobIdentifierParamName,
