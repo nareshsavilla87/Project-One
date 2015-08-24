@@ -30,7 +30,7 @@ public final class BillMasterCommandFromApiJsonDeserializer {
     /**
      * The parameters supported for this command.
      */
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("locale", "dueDate", "dateFormat", "message"));
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("locale", "dueDate", "dateFormat", "message","batchId"));
     private final FromJsonHelper fromApiJsonHelper;
 
     @Autowired

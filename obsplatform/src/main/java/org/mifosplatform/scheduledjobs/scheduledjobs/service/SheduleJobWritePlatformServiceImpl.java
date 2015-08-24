@@ -16,6 +16,7 @@ import java.util.Map;
 
 import me.legrange.mikrotik.ApiConnection;
 import me.legrange.mikrotik.MikrotikApiException;
+import net.sf.ehcache.search.aggregator.Count;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
@@ -60,6 +61,7 @@ import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService
 import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
 import org.mifosplatform.infrastructure.jobs.service.JobName;
 import org.mifosplatform.infrastructure.jobs.service.RadiusJobConstants;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
@@ -91,6 +93,9 @@ import org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobWri
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.EventActionData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.ScheduleJobData;
+import org.mifosplatform.scheduledjobs.scheduledjobs.domain.BatchHistory;
+import org.mifosplatform.scheduledjobs.scheduledjobs.domain.BatchHistoryRepository;
+import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.workflow.eventaction.domain.EventAction;
 import org.mifosplatform.workflow.eventaction.domain.EventActionRepository;
 import org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
@@ -102,6 +107,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcCall;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonElement;
@@ -143,7 +150,8 @@ private final EventActionRepository eventActionRepository;
 private final PaymentGatewayReadPlatformService paymentGatewayReadPlatformService;
 private final ConfigurationRepository configurationRepository;
 private final EventActionReadPlatformService eventActionReadPlatformService;
-
+private final PlatformSecurityContext context;
+private final BatchHistoryRepository batchHistoryRepository;
 @Autowired
 public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,final FromJsonHelper fromApiJsonHelper,
 	   final BillingMasterApiResourse billingMasterApiResourse,final ProcessRequestRepository processRequestRepository,
@@ -159,7 +167,8 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
 	   final TenantAwareRoutingDataSource dataSource, final PaymentGatewayRepository paymentGatewayRepository,
 	   final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService,final EventActionRepository eventActionRepository, 
 	   final PaymentGatewayReadPlatformService paymentGatewayReadPlatformService,final ConfigurationRepository configurationRepository,
-	   final EventActionReadPlatformService eventActionReadPlatformService,final OrderAddOnsWritePlatformService addOnsWritePlatformService) {
+	   final EventActionReadPlatformService eventActionReadPlatformService,final OrderAddOnsWritePlatformService addOnsWritePlatformService,
+	   final PlatformSecurityContext context,final BatchHistoryRepository batchHistoryRepository) {
 
 	this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
 	this.invoiceClient = invoiceClient;
@@ -191,6 +200,8 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
     this.paymentGatewayReadPlatformService = paymentGatewayReadPlatformService;
     this.configurationRepository = configurationRepository;
 	this.eventActionReadPlatformService = eventActionReadPlatformService;
+	this.context = context;
+	this.batchHistoryRepository = batchHistoryRepository;
 }
 
 
@@ -396,6 +407,8 @@ try {
 					fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+" ,query="+scheduleJobData.getQuery()+"\r\n");
 					List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(),data);
 					if(!clientIds.isEmpty()){
+						String batchId=this.generateBatchId();
+						Integer count=0;
 						fw.append("generate Statements for the clients..... \r\n");
 						for(Long clientId:clientIds){
 							fw.append("processing clientId: "+clientId+ " \r\n");
@@ -411,13 +424,18 @@ try {
 								jsonobject.put("locale", "en");
 								jsonobject.put("dateFormat", "dd MMMM YYYY");
 								jsonobject.put("message", data.getPromotionalMessage());
+								jsonobject.put("batchId", batchId);
 								fw.append("sending jsonData for Statement Generation is: "+jsonobject.toString()+" . \r\n");
 									try{
 										this.billingMasterApiResourse.generateBillStatement(clientId,	jsonobject.toString()); 
 									}catch(BillingOrderNoRecordsFoundException e){
 										e.getMessage();
 								}
+									count++;
 				           }
+						BatchHistory batch = new BatchHistory(DateUtils.getDateOfTenant(),"generate statement", count.toString(), batchId);
+						this.batchHistoryRepository.saveAndFlush(batch);
+						
 					  }else{
 						fw.append("no records are available for statement generation \r\n");
 					  }
@@ -435,6 +453,29 @@ try {
 		exception.printStackTrace();
 		}	
 		}
+
+private String generateBatchId() {
+    
+    //final AppUser user = this.context.authenticatedUser();
+    final Long time = System.currentTimeMillis();
+    final String uniqueVal = String.valueOf(time) +getUserId();
+    final String BatchId = Long.toHexString(Long.parseLong(uniqueVal));
+    return BatchId;
+}
+
+private Long getUserId() {
+	
+	Long userId=null;
+	SecurityContext context = SecurityContextHolder.getContext();
+		if(context.getAuthentication() != null){
+			AppUser appUser=this.context.authenticatedUser();
+			userId=appUser.getId();
+		}else {
+			userId=new Long(0);
+		}
+		
+		return userId;
+}
 
 @Override
 @CronTarget(jobName = JobName.MESSAGE_MERGE)
