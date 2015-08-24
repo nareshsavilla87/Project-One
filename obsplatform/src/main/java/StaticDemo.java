@@ -11,6 +11,9 @@ public class StaticDemo {
      
      System.out.println(1.0/0.0);
         //if we can  override static , this should call method from Child class
+     if('y'=='y'){
+    	 System.out.println("true");
+     }
      
     } 
  

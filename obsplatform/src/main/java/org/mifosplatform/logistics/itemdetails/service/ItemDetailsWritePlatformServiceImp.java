@@ -40,7 +40,6 @@ import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationWriteplatformService;
 import org.mifosplatform.portfolio.order.exceptions.NoGrnIdFoundException;
-import org.mifosplatform.portfolio.order.service.OrderAssembler;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.property.domain.PropertyDeviceMapping;
 import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
@@ -142,17 +141,17 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			inventoryItemCommandFromApiJsonDeserializer.validateForCreate(command);
 			inventoryItemDetails = ItemDetails.fromJson(command,fromJsonHelper);
 			ItemMaster itemMaster=this.itemRepository.findOne(command.longValueOfParameterNamed("itemMasterId"));
+			InventoryGrn inventoryGrn = inventoryGrnRepository.findOne(command.longValueOfParameterNamed("grnId"));
 			if(itemMaster == null){
 				throw new ItemNotFoundException(command.longValueOfParameterNamed("itemMasterId").toString());
 			}
-			if(itemMaster != null) {
+			if(inventoryGrn != null&& inventoryGrn.getItemMasterId().equals(itemMaster.getId())){
+			 if(itemMaster != null) {
 				if(itemMaster.getWarranty() != null){
 					LocalDate warrantyEndDate = DateUtils.getLocalDateOfTenant().plusMonths(itemMaster.getWarranty().intValue()).minusDays(1);
 					inventoryItemDetails.setWarrantyDate(warrantyEndDate);
 				}
-			}
-			InventoryGrn inventoryGrn = inventoryGrnRepository.findOne(inventoryItemDetails.getGrnId());
-
+			 }
 			if(inventoryGrn != null){
 				inventoryItemDetails.setOfficeId(inventoryGrn.getOfficeId());
 				inventoryItemDetails.setLocationId(inventoryGrn.getOfficeId());
@@ -161,22 +160,25 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 					inventoryGrn.setReceivedQuantity(inventoryGrn.getReceivedQuantity()+1);
 					this.inventoryGrnRepository.save(inventoryGrn);
 				
-				}else{
+				}
+				else{
 					throw new OrderQuantityExceedsException(inventoryGrn.getOrderdQuantity());
 				}
 			
-			}else{
-				throw new NoGrnIdFoundException(inventoryItemDetails.getGrnId());
 			}
-			
 			this.inventoryItemDetailsRepository.save(inventoryItemDetails);
 			
+			return new CommandProcessingResultBuilder().withEntityId(inventoryItemDetails.getId()).build();
+			}
+			else{
+				throw new NoGrnIdFoundException(inventoryItemDetails.getGrnId());
+			}
 			//InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(new LocalDate().toDate(), inventoryItemDetails.getId(),"Item Detail",inventoryItemDetails.getSerialNumber(), inventoryItemDetails.getItemMasterId(), inventoryItemDetails.getGrnId(), inventoryGrn.getOfficeId());
 			//InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(new LocalDate().toDate(),inventoryItemDetails.getId(),"Item Detail",inventoryItemDetails.getSerialNumber(),inventoryGrn.getOfficeId(),inventoryItemDetails.getClientId(),inventoryItemDetails.getItemMasterId());
 			//inventoryTransactionHistoryJpaRepository.save(transactionHistory);
 			/*++processRecords;
              processStatus="Processed";*/
-			return new CommandProcessingResultBuilder().withEntityId(inventoryItemDetails.getId()).build();
+			
 			
 		} catch (DataIntegrityViolationException dve){
 			

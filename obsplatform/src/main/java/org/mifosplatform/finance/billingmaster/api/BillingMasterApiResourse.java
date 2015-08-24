@@ -25,6 +25,7 @@ import javax.ws.rs.core.UriInfo;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.finance.billingmaster.domain.BillMaster;
 import org.mifosplatform.finance.billingmaster.domain.BillMasterRepository;
 import org.mifosplatform.finance.billingmaster.service.BillMasterReadPlatformService;
@@ -39,8 +40,10 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSerializationSettings;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
+import org.mifosplatform.portfolio.service.data.ServiceMasterOptionsData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -105,12 +108,13 @@ public class BillingMasterApiResourse {
 	@Path("{clientId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveBillStatements(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
+	public String retrieveBillStatements(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo,
+			@QueryParam("sqlSearch") final String sqlSearch, @QueryParam("limit") final Integer limit,@QueryParam("offset") final Integer offset) {
 		
 		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
-		final List<FinancialTransactionsData> data = this.billMasterReadPlatformService.retrieveStatments(clientId);
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
+		final SearchSqlQuery searchCodes =SearchSqlQuery.forSearch(sqlSearch, offset,limit);
+		final Page<FinancialTransactionsData> data = this.billMasterReadPlatformService.retrieveStatments(searchCodes,clientId);
+		return this.toApiJsonSerializer.serialize(data);
 	}
 	
 	@GET

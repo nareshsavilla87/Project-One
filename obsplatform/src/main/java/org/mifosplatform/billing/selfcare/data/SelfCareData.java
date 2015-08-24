@@ -8,6 +8,7 @@ import org.mifosplatform.finance.financialtransaction.data.FinancialTransactions
 import org.mifosplatform.finance.payments.data.PaymentData;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfiguration;
 import org.mifosplatform.infrastructure.configuration.domain.Configuration;
+import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.organisation.address.data.AddressData;
 import org.mifosplatform.portfolio.client.data.ClientData;
 import org.mifosplatform.portfolio.order.data.OrderData;
@@ -26,7 +27,7 @@ private Long clientId;
 	private ClientBalanceData clientBalanceData;
 	private List<AddressData> addressData;
 	private List<OrderData> clientOrdersData;
-	private List<FinancialTransactionsData> statementsData;
+	private Page<FinancialTransactionsData> statementsData;
 	private List<PaymentData> paymentsData;
 	private List<TicketMasterData> ticketMastersData;
 	private PaymentGatewayConfiguration paypalConfigData;
@@ -118,7 +119,7 @@ private Long clientId;
 	public void setDetails(ClientData clientsData,
 			ClientBalanceData balanceData, List<AddressData> addressData,
 			List<OrderData> clientOrdersData,
-			List<FinancialTransactionsData> statementsData,
+			Page<FinancialTransactionsData> statementsData,
 			List<PaymentData> paymentsData,
 			List<TicketMasterData> ticketMastersData,
 			Long loginHistoryId) {

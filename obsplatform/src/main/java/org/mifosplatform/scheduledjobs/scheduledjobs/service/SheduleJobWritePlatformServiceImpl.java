@@ -71,6 +71,7 @@ import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.order.data.OrderData;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderAddonsRepository;
+import org.mifosplatform.portfolio.order.domain.OrderPrice;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.order.service.OrderAddOnsWritePlatformService;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
@@ -365,7 +366,7 @@ public void processSimulator() {
 				jsonobject.put("assignedTo", userId);
 				jsonobject.put("priority",priorityData.get(0).getValue());
 				jsonobject.put("problemCode", problemsData.iterator().next().getId());
-				this.ticketMasterApiResource.createTicketMaster(processRequest.getClientId(), jsonobject.toString());
+				this.ticketMasterApiResource.processCreateTicket(processRequest.getClientId(), jsonobject.toString());
 			}
 		}
 	}
@@ -419,7 +420,7 @@ try {
 						DateTimeFormatter formatter1 = DateTimeFormat.forPattern("dd MMMM yyyy");
 						String formattedDate ;
 							if(data.isDynamic().equalsIgnoreCase("Y")){
-								formattedDate = formatter1.print(DateUtils.getLocalDateOfTenant());	
+								formattedDate = formatter1.print(DateUtils.getLocalDateOfTenant().plusDays(7));	
 							}else{
 								formattedDate = formatter1.print(data.getDueDate());
 							}
@@ -537,14 +538,17 @@ try {
                 fw.append("no records are available for Auto Expiry \r\n");
               }
               for(Long clientId:clientIds){
-            	  
+            	
                 fw.append("processing client id :"+clientId+"\r\n");
                 List<OrderData> orderDatas = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
                 	if(orderDatas.isEmpty()){
                 		fw.append("No Orders are Found for :"+clientId+"\r\n");
                 	}	
                 	for (OrderData orderData : orderDatas){
-                		this.scheduleJob.ProcessAutoExipiryDetails(orderData,fw,exipirydate,data,clientId);
+                		Order order=this.orderRepository.findOne(orderData.getId());
+                        List<OrderPrice> orderPrice=order.getPrice();
+                		boolean isSufficientAmountForRenewal=this.scheduleJob.checkClientBalanceForOrderrenewal(orderData,clientId,orderPrice);
+                		this.scheduleJob.ProcessAutoExipiryDetails(orderData,fw,exipirydate,data,clientId, isSufficientAmountForRenewal);
                 	}
                 	
                 	
