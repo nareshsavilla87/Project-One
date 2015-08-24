@@ -349,10 +349,10 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 							inventoryItemDetails.setAvailable();
 							this.inventoryItemDetailsRepository.save(inventoryItemDetails);
 					     
-						/*	InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(new LocalDate().toDate(), 
+							InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(new LocalDate().toDate(), 
 					  			inventoryItemDetailsAllocation.getOrderId(),"De Allocation",inventoryItemDetailsAllocation.getSerialNumber(), inventoryItemDetailsAllocation.getItemMasterId(),
 								inventoryItemDetailsAllocation.getClientId(),inventoryItemDetails.getOfficeId());
-							inventoryTransactionHistoryJpaRepository.save(transactionHistory);*/
+							inventoryTransactionHistoryJpaRepository.save(transactionHistory);
 					   
 						}
 						
