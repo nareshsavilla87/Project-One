@@ -37,7 +37,10 @@ insert ignore into m_permission values(null,'client&orders','DISCONNECT_ORDERADD
 alter TABLE b_orders_addons modify status varchar(50) NOT NULL;
 
 
-set @id = (select id from job where name ='Auto Exipiry');
+set @id = (select id from job where name ='AUTO_EXIPIRY' OR display_name='AUTO EXIPIRY');
 
 insert ignore into `job_parameters`(`id`,`job_id`,`param_name`,`param_type`,`param_default_value`,`param_value`,`is_dynamic`,`query_values`) values (null,@id,'addonExipiry','COMBO','N','N','N',null);
+
+ALTER TABLE `m_client` ADD COLUMN `title` `title` VARCHAR(15) NULL DEFAULT NULL ;
+
 
