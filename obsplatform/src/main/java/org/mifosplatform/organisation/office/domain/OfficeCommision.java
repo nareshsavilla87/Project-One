@@ -10,6 +10,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import org.joda.time.DateTime;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
@@ -67,7 +68,7 @@ public class OfficeCommision extends AbstractPersistable<Long> {
 		this.shareAmount = data.getShareAmount();
 		this.commisionSource = data.getSource();
 		this.commisionAmount = data.getCommisionAmount();
-		this.createdDate = new DateTime().toDate();
+		this.createdDate = DateUtils.getDateTimeOfTenant().toDate();
 				
 	}
 
