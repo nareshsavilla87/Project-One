@@ -2,9 +2,9 @@ package org.mifosplatform.portfolio.property.data;
 
 public class PropertyDeviceMappingData {
 
-	final Long id;
-	final String serialNumber;
-	final String propertycode;
+	Long id;
+	String serialNumber;
+	String propertycode;
 	
 	public PropertyDeviceMappingData(Long id, String serialNumber,String propertyCode) {
 		
@@ -25,6 +25,15 @@ public class PropertyDeviceMappingData {
 	public String getPropertycode() {
 		return propertycode;
 	}
+
+	public void setSerialNumber(String serialNumber) {
+		this.serialNumber = serialNumber;
+	}
+
+	public void setPropertycode(String propertycode) {
+		this.propertycode = propertycode;
+	}
+	
 	
 	
 

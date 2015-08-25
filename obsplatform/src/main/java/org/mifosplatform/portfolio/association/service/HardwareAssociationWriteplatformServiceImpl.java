@@ -159,7 +159,7 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
              this.eventValidationReadPlatformService.checkForCustomValidations(association.getClientId(),"UnPairing", jsonObject.toString(),getUserId());
              
     		   association.delete();
-    		   this.associationRepository.save(association);
+    		   this.associationRepository.saveAndFlush(association);
     		   return new CommandProcessingResult(association.getId(),association.getClientId());
     		   
 		} catch (DataIntegrityViolationException dve) {

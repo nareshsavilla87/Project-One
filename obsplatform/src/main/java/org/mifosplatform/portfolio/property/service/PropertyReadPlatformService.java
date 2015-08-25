@@ -33,5 +33,7 @@ public interface PropertyReadPlatformService {
 	List<PropertyDeviceMappingData> retrievePropertyDeviceMappingData(Long clienId);
 
 	List<String> retrieveclientProperties(Long clientId);
+	
+	List<PropertyDeviceMappingData> retrievePropertyDeviceMappingData(String serialNumber);
 
 }

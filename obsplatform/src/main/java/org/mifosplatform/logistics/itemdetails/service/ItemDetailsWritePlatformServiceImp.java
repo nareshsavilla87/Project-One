@@ -341,10 +341,10 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 						if(allocationDetailsData!=null){
 							inventoryItemDetailsAllocation =this.inventoryItemDetailsAllocationRepository.findOne(allocationDetailsData.getId());
 							inventoryItemDetailsAllocation.deAllocate();
-							this.inventoryItemDetailsAllocationRepository.save(inventoryItemDetailsAllocation);
+							this.inventoryItemDetailsAllocationRepository.saveAndFlush(inventoryItemDetailsAllocation);
 							ItemDetails inventoryItemDetails=this.inventoryItemDetailsRepository.findOne(allocationDetailsData.getItemDetailId());
 							inventoryItemDetails.setAvailable();
-							this.inventoryItemDetailsRepository.save(inventoryItemDetails);
+							this.inventoryItemDetailsRepository.saveAndFlush(inventoryItemDetails);
 					     
 						/*	InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(new LocalDate().toDate(), 
 					  			inventoryItemDetailsAllocation.getOrderId(),"De Allocation",inventoryItemDetailsAllocation.getSerialNumber(), inventoryItemDetailsAllocation.getItemMasterId(),

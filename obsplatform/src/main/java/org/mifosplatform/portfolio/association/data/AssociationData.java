@@ -39,6 +39,17 @@ public class AssociationData {
 		this.planData = planDatas;
 	}
 
+	public AssociationData(Long id,Long clientId,Long orderId, Long planId, String serialNum, String allocationType, Long serviceId) {
+		
+		this.id = id;
+		this.clientId = clientId;
+		this.orderId = orderId;
+		this.planId = planId;
+		this.serialNum = serialNum;
+		this.allocationType = allocationType;
+		this.serviceId = Long.valueOf(0).equals(serviceId) ? null : serviceId;
+	}
+	
 	public AssociationData(Long orderId, String planCode,String provisionNumber, Long id, Long planId, Long clientId,
 			String serialNum, String itemCode, Long saleId, Long itemId,String allocationType) {
 		
