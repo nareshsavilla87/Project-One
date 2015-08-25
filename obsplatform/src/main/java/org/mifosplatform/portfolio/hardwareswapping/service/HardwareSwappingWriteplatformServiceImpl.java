@@ -40,7 +40,6 @@ import org.mifosplatform.portfolio.order.domain.OrderHistory;
 import org.mifosplatform.portfolio.order.domain.OrderHistoryRepository;
 import org.mifosplatform.portfolio.order.domain.OrderLine;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
-import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.mifosplatform.portfolio.planmapping.domain.PlanMapping;
@@ -60,8 +59,6 @@ import org.mifosplatform.portfolio.servicemapping.domain.ServiceMappingRepositor
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
-import org.mifosplatform.provisioning.processrequest.service.ProcessRequestWriteplatformService;
-import org.mifosplatform.provisioning.provisioning.service.ProvisioningWritePlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,7 +87,6 @@ public class HardwareSwappingWriteplatformServiceImpl implements HardwareSwappin
 	private final OwnedHardwareJpaRepository hardwareJpaRepository;
 	private final HardwareAssociationReadplatformService associationReadplatformService;
 	private final ItemRepository itemRepository;
-	private final ProvisioningWritePlatformService provisioningWritePlatformService;
 	private final ItemDetailsRepository itemDetailsRepository;
 	private final PropertyDeviceMappingRepository propertyDeviceMappingRepository;
 	private final HardwareSwappingReadplatformService hardwareSwappingReadplatformService;
@@ -106,7 +102,7 @@ public class HardwareSwappingWriteplatformServiceImpl implements HardwareSwappin
 	@Autowired
 	public HardwareSwappingWriteplatformServiceImpl(final PlatformSecurityContext context,final HardwareAssociationWriteplatformService associationWriteplatformService,
 			final ItemDetailsWritePlatformService inventoryItemDetailsWritePlatformService,final OrderRepository orderRepository,final PlanRepository planRepository,
-			final ProvisioningWritePlatformService provisioningWritePlatformService,final HardwareSwappingCommandFromApiJsonDeserializer apiJsonDeserializer,
+			final HardwareSwappingCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,final OrderHistoryRepository orderHistoryRepository,
 			final ConfigurationRepository configurationRepository,final OwnedHardwareJpaRepository hardwareJpaRepository,
 			final HardwareAssociationReadplatformService associationReadplatformService,final ItemRepository itemRepository,
@@ -130,7 +126,6 @@ public class HardwareSwappingWriteplatformServiceImpl implements HardwareSwappin
 		this.hardwareJpaRepository=hardwareJpaRepository;
 		this.associationReadplatformService=associationReadplatformService;
 		this.itemRepository=itemRepository;
-		this.provisioningWritePlatformService = provisioningWritePlatformService;
 		this.itemDetailsRepository = itemDetailsRepository;
 		this.hardwareSwappingReadplatformService = hardwareSwappingReadplatformService;
 		this.propertyHistoryRepository = propertyHistoryRepository;
@@ -175,14 +170,14 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 		List<AssociationData> associationData = this.hardwareSwappingReadplatformService.retrievingAllAssociations(entityId,serialNo,Long.valueOf(0));
 		LinkedHashSet<Long> associationOrderList = new  LinkedHashSet<Long>();
 		
+		//DeAssociate Hardware
 		for(AssociationData association : associationData){
 			
-			//DeAssociate Hardware
 			this.associationWriteplatformService.deAssociationHardware(association.getId());
 			associationOrderList.add(association.getOrderId());
 		}
 	    
-	    //geting new serial number itemdetails data 
+	    //getting new serial number item details data 
 	    ItemDetails newSerailNoItemData = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(provisionNum);
 	    if(newSerailNoItemData == null){
 	    	throw new SerialNumberNotFoundException(provisionNum);
@@ -231,8 +226,7 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 		String provisionSystem="None";
 		
 			JSONObject jsonObj = new JSONObject();
-			 JSONArray jsonArray = new JSONArray();
-			 
+			JSONArray jsonArray = new JSONArray();
 			 
 			//for Reassociation With New SerialNumber
 			for(AssociationData association : associationData){
@@ -243,6 +237,8 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 						provisionNum,association.getOrderId(),"ALLOT",association.getServiceId());
 				}
 			}
+			
+			//PrePair Provisioning Request
 			for(Long orderId : associationOrderList){
 				final Order order=this.orderRepository.findOne(orderId);
 				
@@ -305,7 +301,7 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 				}
 			}
 		
-			//geting old serial number itemdetails data 
+			//getting old serial number item details data 
 			ItemDetails oldSerailNoItemData = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(serialNo);
 			 LocalDate oldWarrantyDate = new LocalDate(oldSerailNoItemData.getWarrantyDate());
 				oldSerailNoItemData.setWarrantyDate(newWarrantyDate);

@@ -348,7 +348,10 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		if (planMapping == null && "None".equalsIgnoreCase(plan.getProvisionSystem())) {
 			throw new PlanMappingNotExist(plan.getPlanCode());
 		}
-		if (hardwareAssociation.isEmpty() && 'Y'==plan.isHardwareReq()) {
+		if (hardwareAssociation.isEmpty()) {
+			throw new PairingNotExistException(order.getId());
+		}
+		else if ('Y'==plan.isHardwareReq()&&hardwareAssociation.isEmpty()) {
 			throw new PairingNotExistException(order.getId(),plan.getPlanCode());
 		}
 		else if(1==hardwareAssociation.size()&&hardwareAssociation.get(0).getServiceId()==null){ //Plan level map exist's
