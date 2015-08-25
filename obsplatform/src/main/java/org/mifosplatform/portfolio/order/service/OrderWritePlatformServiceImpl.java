@@ -78,6 +78,7 @@ import org.mifosplatform.portfolio.order.serialization.OrderCommandFromApiJsonDe
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanDetails;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
+import org.mifosplatform.portfolio.plan.exceptions.PlanNotFundException;
 import org.mifosplatform.portfolio.service.domain.ServiceMaster;
 import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
 import org.mifosplatform.provisioning.preparerequest.domain.PrepareRequest;
@@ -221,7 +222,7 @@ try{
 	//Check for Custome_Validation
 	this.eventValidationReadPlatformService.checkForCustomValidations(clientId,EventActionConstants.EVENT_CREATE_ORDER,command.json(),userId);
 	
-	Plan plan = this.planRepository.findOne(command.longValueOfParameterNamed("planCode"));
+	Plan plan = this.findOneWithNotFoundDetection(command.longValueOfParameterNamed("planCode"));
 	Order order=this.orderAssembler.assembleOrderDetails(command,clientId,plan);
 	this.orderRepository.save(order);
 	
@@ -342,7 +343,7 @@ try{
 	Order order = this.orderRepository.findOne(orderId);
 	List<OrderLine> orderline = order.getServices();
 	List<OrderPrice> orderPrices=order.getPrice();
-	Plan plan=this.planRepository.findOne(order.getPlanId());
+	Plan plan=this.findOneWithNotFoundDetection(order.getPlanId());
 		if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
 			List<Long> prepareIds=this.prepareRequestReadplatformService.getPrepareRequestDetails(orderId);
 			if(prepareIds.isEmpty()){
@@ -384,7 +385,7 @@ try{
     	for(OrderPrice price:orderPrices){
     		price.updateDates(disconnectionDate);
     	}
-    	final Plan plan = this.planRepository.findOne(order.getPlanId());
+    	final Plan plan = this.findOneWithNotFoundDetection(order.getPlanId());
     	Long orderStatus = null;
     		if("None".equalsIgnoreCase(plan.getProvisionSystem())){
     			orderStatus = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.DISCONNECTED).getId();
@@ -461,7 +462,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 	  final String description=command.stringValueOfParameterNamed("description");
 	  
 	  Contract contractDetails=this.subscriptionRepository.findOne(contractPeriod);
-	  Plan plan=this.planRepository.findOne(orderDetails.getPlanId());
+	  Plan plan=this.findOneWithNotFoundDetection(orderDetails.getPlanId());
 	  
     // chargeCodeMaster = chargeCodeRepository.findOneByBillFrequency(orderDetails.getBillingFrequency());
 	  //Integer chargeCodeDuration = chargeCodeMaster.get(0).getChargeDuration();
@@ -646,7 +647,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 			}
 		}
 		
-		Plan plan=this.planRepository.findOne(order.getPlanId());
+		Plan plan=this.findOneWithNotFoundDetection(order.getPlanId());
 		String requstStatus = UserActionStatusTypeEnum.RECONNECTION.toString().toString();
 		Long processingResultId=Long.valueOf(0);
 		
@@ -703,10 +704,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 					requstStatus = UserActionStatusTypeEnum.MESSAGE.toString();
 					message = command.stringValueOfParameterNamed("message");
 				}
-				final Plan plan = this.planRepository.findOne(order.getPlanId());
-				if (plan == null) {
-					throw new NoOrdersFoundException(command.entityId());
-				}
+				final Plan plan = this.findOneWithNotFoundDetection(order.getPlanId());
 				Long resourceId = Long.valueOf(0);
 				if (requstStatus != null && plan!=null) {
 					
@@ -813,7 +811,7 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 	 newOrder.setuserAction(UserActionStatusTypeEnum.CHANGE_PLAN.toString());
 	 this.orderRepository.save(newOrder);
 	 
-	Plan plan=this.planRepository.findOne(newOrder.getPlanId());
+	Plan plan=this.findOneWithNotFoundDetection(newOrder.getPlanId());
 	HardwareAssociation association=this.associationRepository.findOneByOrderAndClient(order.getId(),order.getClientId());
 		
 		if(association != null){
@@ -1010,7 +1008,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			String[] periodData=extensionperiod.split(" ");
 			LocalDate endDate=this.orderAssembler.calculateEndDate(newStartdate,periodData[1], new Long(periodData[0]));
 			List<OrderPrice>  orderPrices=order.getPrice();
-			Plan plan=this.planRepository.findOne(order.getPlanId());
+			Plan plan=this.findOneWithNotFoundDetection(order.getPlanId());
 					if(order.getStatus().intValue() == StatusTypeEnum.ACTIVE.getValue()){
 						order.setEndDate(endDate);
 							for(OrderPrice orderprice:orderPrices){
@@ -1084,7 +1082,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			}
 			
 			Long orderStatus=null;
-			Plan plan=this.planRepository.findOne(order.getPlanId());
+			Plan plan=this.findOneWithNotFoundDetection(order.getPlanId());
 
 			if(plan.getProvisionSystem().equalsIgnoreCase("None")){
 				orderStatus = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.TERMINATED).getId();
@@ -1134,7 +1132,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	    		  	order.setStatus(enumDomainService.getEnumId());
 					
 					
-				    final Plan plan=this.planRepository.findOne(order.getPlanId());
+				    final Plan plan=this.findOneWithNotFoundDetection(order.getPlanId());
 				     if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
 				    	 final Long pendingId=this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.PENDING.toString()).getEnumId();	
 				    		order.setStatus(pendingId);
@@ -1183,7 +1181,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		 }
 		 
 		 final Long pendingId = this.enumDomainServiceRepository.findOneByEnumMessageProperty(StatusTypeEnum.PENDING.toString()).getEnumId();	
-		 final Plan plan = this.planRepository.findOne(order.getPlanId());
+		 final Plan plan = this.findOneWithNotFoundDetection(order.getPlanId());
 
 		 if(!"None".equalsIgnoreCase(plan.getProvisionSystem())){
 		    	order.setStatus(pendingId);
@@ -1268,7 +1266,17 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		}
 		
   }
+  
+	private Plan findOneWithNotFoundDetection(final Long planId) {
 
+		Plan plan = this.planRepository.findPlanCheckDeletedStatus(planId);
+
+		if (plan == null) {
+			throw new PlanNotFundException(planId);
+		}
+
+		return plan;
+	}
 
  }
 
