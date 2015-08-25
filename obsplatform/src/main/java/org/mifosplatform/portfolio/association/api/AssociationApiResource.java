@@ -147,4 +147,23 @@ public class AssociationApiResource {
 		 final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 		  return this.toApiJsonSerializer.serialize(result);
 	}
+	
+	@GET
+	@Path("{clientId}/serialNum/{serialNumber}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveAssociationWithSerialNum(@PathParam("clientId") final Long clientId,@PathParam("serialNumber") final String serialNumber, @Context final UriInfo uriInfo) {
+ 		 
+		try{
+ 			
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		AssociationData associationData = this.associationReadplatformService.retrieveAssociationsDetailsWithSerialNum(clientId,serialNumber);
+		Collection<EnumValuesData> enumValuesDatas=this.enumReadplaformService.getEnumValues(EnumValuesConstants.ENUMVALUE_PROPERTY_DEVICE_SWAP);
+		associationData.addEnumValuesDatas(enumValuesDatas);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializer.serialize(settings, associationData, RESPONSE_DATA_PARAMETERS);
+ 		}catch(NullPointerException n){
+ 			return null;
+ 		}
+	}
 }

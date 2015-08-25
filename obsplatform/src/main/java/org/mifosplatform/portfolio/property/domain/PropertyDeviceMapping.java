@@ -81,6 +81,12 @@ public class PropertyDeviceMapping  extends AbstractAuditableCustom<AppUser, Lon
 		this.serialNumber =this.serialNumber+"_Y"; 
 		
 	}
+
+	public String getPropertyCode() {
+		return propertyCode;
+	}
+	
+	
 	
 	
 	

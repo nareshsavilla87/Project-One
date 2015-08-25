@@ -1,5 +1,6 @@
 package org.mifosplatform.portfolio.hardwareswapping.service;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.codehaus.jettison.json.JSONArray;
@@ -24,24 +25,42 @@ import org.mifosplatform.logistics.itemdetails.domain.ItemDetailsAllocation;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetailsRepository;
 import org.mifosplatform.logistics.itemdetails.exception.SerialNumberNotFoundException;
 import org.mifosplatform.logistics.itemdetails.service.ItemDetailsWritePlatformService;
+import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
 import org.mifosplatform.logistics.ownedhardware.data.OwnedHardware;
 import org.mifosplatform.logistics.ownedhardware.domain.OwnedHardwareJpaRepository;
+import org.mifosplatform.portfolio.allocation.service.AllocationReadPlatformService;
+import org.mifosplatform.portfolio.association.data.AssociationData;
 import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationWriteplatformService;
 import org.mifosplatform.portfolio.hardwareswapping.exception.WarrantyEndDateExpireException;
 import org.mifosplatform.portfolio.hardwareswapping.serialization.HardwareSwappingCommandFromApiJsonDeserializer;
-import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderHistory;
 import org.mifosplatform.portfolio.order.domain.OrderHistoryRepository;
+import org.mifosplatform.portfolio.order.domain.OrderLine;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
-import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
+import org.mifosplatform.portfolio.planmapping.domain.PlanMapping;
+import org.mifosplatform.portfolio.planmapping.domain.PlanMappingRepository;
+import org.mifosplatform.portfolio.property.data.PropertyDeviceMappingData;
 import org.mifosplatform.portfolio.property.domain.PropertyDeviceMapping;
 import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyMaster;
+import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyTransactionHistory;
+import org.mifosplatform.portfolio.property.service.PropertyReadPlatformService;
+import org.mifosplatform.portfolio.service.domain.ServiceMaster;
+import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
+import org.mifosplatform.portfolio.servicemapping.domain.ServiceMapping;
+import org.mifosplatform.portfolio.servicemapping.domain.ServiceMappingRepository;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
+import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
+import org.mifosplatform.provisioning.processrequest.service.ProcessRequestWriteplatformService;
 import org.mifosplatform.provisioning.provisioning.service.ProvisioningWritePlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -74,6 +93,15 @@ public class HardwareSwappingWriteplatformServiceImpl implements HardwareSwappin
 	private final ProvisioningWritePlatformService provisioningWritePlatformService;
 	private final ItemDetailsRepository itemDetailsRepository;
 	private final PropertyDeviceMappingRepository propertyDeviceMappingRepository;
+	private final HardwareSwappingReadplatformService hardwareSwappingReadplatformService;
+	private final PropertyHistoryRepository propertyHistoryRepository;
+	private final ProcessRequestRepository processRequestRepository;
+	private final PlanMappingRepository planMappingRepository;
+	private final ServiceMappingRepository serviceMappingRepository;
+	private final ServiceMasterRepository serviceMasterRepository;
+	private final AllocationReadPlatformService allocationReadPlatformService;
+	private final PropertyReadPlatformService propertyReadPlatformService;
+	private final PropertyMasterRepository propertyMasterRepository;
 	  
 	@Autowired
 	public HardwareSwappingWriteplatformServiceImpl(final PlatformSecurityContext context,final HardwareAssociationWriteplatformService associationWriteplatformService,
@@ -82,7 +110,12 @@ public class HardwareSwappingWriteplatformServiceImpl implements HardwareSwappin
 			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService,final OrderHistoryRepository orderHistoryRepository,
 			final ConfigurationRepository configurationRepository,final OwnedHardwareJpaRepository hardwareJpaRepository,
 			final HardwareAssociationReadplatformService associationReadplatformService,final ItemRepository itemRepository,
-			final ItemDetailsRepository itemDetailsRepository,final PropertyDeviceMappingRepository propertyDeviceMappingRepository) {
+			final ItemDetailsRepository itemDetailsRepository,final PropertyDeviceMappingRepository propertyDeviceMappingRepository,
+			final HardwareSwappingReadplatformService hardwareSwappingReadplatformService,final PropertyHistoryRepository propertyHistoryRepository,
+			final ProcessRequestRepository processRequestRepository,final PlanMappingRepository planMappingRepository,
+			final ServiceMappingRepository serviceMappingRepository,final ServiceMasterRepository serviceMasterRepository,
+			final AllocationReadPlatformService allocationReadPlatformService,final PropertyReadPlatformService propertyReadPlatformService,
+			final PropertyMasterRepository propertyMasterRepository) {
  
 		this.context=context;
 		this.associationWriteplatformService=associationWriteplatformService;
@@ -99,6 +132,15 @@ public class HardwareSwappingWriteplatformServiceImpl implements HardwareSwappin
 		this.itemRepository=itemRepository;
 		this.provisioningWritePlatformService = provisioningWritePlatformService;
 		this.itemDetailsRepository = itemDetailsRepository;
+		this.hardwareSwappingReadplatformService = hardwareSwappingReadplatformService;
+		this.propertyHistoryRepository = propertyHistoryRepository;
+		this.processRequestRepository = processRequestRepository;
+		this.planMappingRepository = planMappingRepository;
+		this.serviceMappingRepository = serviceMappingRepository;
+		this.serviceMasterRepository = serviceMasterRepository;
+		this.allocationReadPlatformService = allocationReadPlatformService;
+		this.propertyReadPlatformService = propertyReadPlatformService;
+		this.propertyMasterRepository = propertyMasterRepository;
 
 	}
 	
@@ -114,17 +156,31 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 	try{
 		final Long userId=this.context.authenticatedUser().getId();
 		this.fromApiJsonDeserializer.validateForCreate(command.json());
-		final Long associationId=command.longValueOfParameterNamed("associationId");
 		final String serialNo=command.stringValueOfParameterNamed("serialNo");
-		final Long orderId=command.longValueOfParameterNamed("orderId");
 		final String deviceAgrementType=command.stringValueOfParameterNamed("deviceAgrementType");
 		final Long saleId=command.longValueOfParameterNamed("saleId");
 		final String provisionNum=command.stringValueOfParameterNamed("provisionNum");
 		
-		//DeAssociate Hardware
+		if(this.hardwareSwappingReadplatformService.retrieveingDisconnectionOrders(serialNo)){
+			throw new PlatformDataIntegrityException("error.msg.serialNumber.unpaire.already.discon.orders", 
+					"Disconnection Orders already Associated with this serialNumber `" + serialNo
+                    + "` Please unpaire first", "Disconnection Orders Already Associated with this serialNumber", serialNo);
+		}
 		
-		this.associationWriteplatformService.deAssociationHardware(associationId);
-	    String requstStatus =UserActionStatusTypeEnum.DISCONNECTION.toString();
+		if(this.hardwareSwappingReadplatformService.retrieveingPendingOrders(serialNo)){
+			throw new PlatformDataIntegrityException("error.msg.serialNumber.pend.orders.request.alreadysent", 
+					"Please wait until pending state orders to be active", "Provisioning Request was sent to activation ", serialNo);
+		}
+		
+		List<AssociationData> associationData = this.hardwareSwappingReadplatformService.retrievingAllAssociations(entityId,serialNo,Long.valueOf(0));
+		LinkedHashSet<Long> associationOrderList = new  LinkedHashSet<Long>();
+		
+		for(AssociationData association : associationData){
+			
+			//DeAssociate Hardware
+			this.associationWriteplatformService.deAssociationHardware(association.getId());
+			associationOrderList.add(association.getOrderId());
+		}
 	    
 	    //geting new serial number itemdetails data 
 	    ItemDetails newSerailNoItemData = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(provisionNum);
@@ -132,12 +188,6 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 	    	throw new SerialNumberNotFoundException(provisionNum);
 	    }
 	    LocalDate newWarrantyDate = new LocalDate(newSerailNoItemData.getWarrantyDate());
-	    
-        final Order order=this.orderRepository.findOne(orderId);
-		final Plan plan=this.planRepository.findOne(order.getPlanId());
-		
-	//	Configuration configurationProperty=this.globalConfigurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_DEVICE_AGREMENT_TYPE);
-		
 		
 		if(deviceAgrementType.equalsIgnoreCase(ConfigurationConstants.CONFIR_PROPERTY_OWN)){
 			
@@ -177,17 +227,84 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 			CommandWrapper commandWrapper = new CommandWrapperBuilder().allocateHardware().withJson(allocation1.toString()).build();
 			this.commandSourceWritePlatformService.logCommandSource(commandWrapper);
 		}
-			//for Reassociation With New SerialNumber
 		Long resouceId=Long.valueOf(0);
+		String provisionSystem="None";
 		
-			if(!plan.getProvisionSystem().equalsIgnoreCase("None")){
-			requstStatus =UserActionStatusTypeEnum.DEVICE_SWAP.toString();
-			order.setStatus( OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
-				CommandProcessingResult commandProcessingResult=	this.provisioningWritePlatformService.postOrderDetailsForProvisioning(order,plan.getPlanCode(),UserActionStatusTypeEnum.DEVICE_SWAP.toString(),
-							Long.valueOf(0),null,serialNo,order.getId(),plan.getProvisionSystem(),null);
-				resouceId=commandProcessingResult.resourceId();
+			JSONObject jsonObj = new JSONObject();
+			 JSONArray jsonArray = new JSONArray();
+			 
+			 
+			//for Reassociation With New SerialNumber
+			for(AssociationData association : associationData){
+				
+				List<AssociationData> existingAssociations = this.hardwareSwappingReadplatformService.retrievingAllAssociations(entityId,provisionNum,association.getOrderId());
+				if(existingAssociations.isEmpty()){		
+					this.associationWriteplatformService.createNewHardwareAssociation(entityId,association.getPlanId(),
+						provisionNum,association.getOrderId(),"ALLOT",association.getServiceId());
+				}
 			}
-			
+			for(Long orderId : associationOrderList){
+				final Order order=this.orderRepository.findOne(orderId);
+				
+				String orderNo = order.getOrderNo();
+				if(orderNo != null){
+					orderNo = orderNo.replaceFirst("^0*", "");
+				}
+				//For Order History
+				OrderHistory orderHistory=new OrderHistory(Long.valueOf(orderNo),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resouceId,"DEVICE SWAP",userId,null);
+				this.orderHistoryRepository.saveAndFlush(orderHistory);
+				
+				 final Plan plan  = this.planRepository.findOne(order.getPlanId());
+				if(plan.isHardwareReq() == 'Y' && !plan.getProvisionSystem().equalsIgnoreCase("None")){
+					provisionSystem = plan.getProvisionSystem();
+					List<AllocationDetailsData> detailsData=this.allocationReadPlatformService.getTheHardwareItemDetails(orderId,provisionNum);
+					PlanMapping planMapping= this.planMappingRepository.findOneByPlanId(order.getPlanId());
+					List<OrderLine> orderLineData=order.getServices();
+
+					JSONObject innerJsonObj = new JSONObject();
+					JSONArray innerJsonArray = new JSONArray();
+					if(planMapping != null){
+						 innerJsonObj.put("planIdentification", planMapping.getPlanIdentification());
+						 
+					 }
+					if(!detailsData.isEmpty()&&1==detailsData.size()&&detailsData.get(0).getServiceId()==null){ //plan level map
+						
+						 for(OrderLine orderLine:orderLineData){
+							 
+							 List<ServiceMapping> serviceMappingDetails=this.serviceMappingRepository.findOneByServiceId(orderLine.getServiceId());
+						 		ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId());
+						 		JSONObject subjson = new JSONObject();
+							 if(!serviceMappingDetails.isEmpty()){
+								 subjson.put("serviceName", service.getServiceCode());
+								 subjson.put("serviceIdentification", serviceMappingDetails.get(0).getServiceIdentification());
+							 }
+							 innerJsonArray.put(subjson);
+						 }
+						
+					}else if(!detailsData.isEmpty()){
+						for(OrderLine orderLine:orderLineData){
+							
+							for (AllocationDetailsData detail : detailsData) {
+								if (detail.getServiceId().equals(orderLine.getServiceId())) {
+									List<ServiceMapping> serviceMappingDetails=this.serviceMappingRepository.findOneByServiceId(orderLine.getServiceId());
+									ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId());
+									JSONObject subjson = new JSONObject();
+									if(!serviceMappingDetails.isEmpty()){
+										subjson.put("serviceName", service.getServiceCode());
+										subjson.put("serviceIdentification", serviceMappingDetails.get(0).getServiceIdentification());
+									}
+									innerJsonArray.put(subjson);
+									break;
+								}
+							}
+						}
+					}
+					innerJsonObj.put("services" ,innerJsonArray);
+					jsonArray.put(innerJsonObj);
+					 
+				}
+			}
+		
 			//geting old serial number itemdetails data 
 			ItemDetails oldSerailNoItemData = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(serialNo);
 			 LocalDate oldWarrantyDate = new LocalDate(oldSerailNoItemData.getWarrantyDate());
@@ -201,17 +318,30 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 			 
 			 if(globalConfiguration.isEnabled()){
 				 
-				 PropertyDeviceMapping deviceMapping = this.propertyDeviceMappingRepository.findBySerailNumber(serialNo);
-				 deviceMapping.setSerialNumber(provisionNum);
-				 this.propertyDeviceMappingRepository.save(deviceMapping);
+				 List<PropertyDeviceMappingData> deviceMapping = this.propertyReadPlatformService.retrievePropertyDeviceMappingData(serialNo);
+				 for (PropertyDeviceMappingData mappingdata : deviceMapping){
+					 PropertyDeviceMapping propertyDeviceMapping = this.propertyDeviceMappingRepository.findOne(mappingdata.getId());
+					 PropertyMaster propertyMaster = this.propertyMasterRepository.findoneByPropertyCode(mappingdata.getPropertycode());
+					 propertyDeviceMapping.setSerialNumber(provisionNum);
+					 this.propertyDeviceMappingRepository.save(propertyDeviceMapping);
+					 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),"DEVICE SWAP",entityId,propertyDeviceMapping.getPropertyCode());
+					 this.propertyHistoryRepository.save(propertyHistory);
+				 }
 			 }
 			 
- 			this.orderRepository.save(order);
-				//For Order History
-				OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),resouceId,"DEVICE SWAP",userId,null);
-		
-				this.orderHistoryRepository.save(orderHistory);
-		return new CommandProcessingResult(entityId,order.getClientId());	
+			 jsonObj.put("clientId", entityId);
+			 jsonObj.put("OldHWId", oldSerailNoItemData.getProvisioningSerialNumber());
+			 jsonObj.put("NewHWId", newSerailNoItemData.getProvisioningSerialNumber());
+			 jsonObj.put("plans", jsonArray);
+			 
+			 ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0),entityId,Long.valueOf(0), provisionSystem, "DEVICE SWAP",'N','N');
+			   ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(Long.valueOf(0),Long.valueOf(0),jsonObj.toString(),"Recieved",
+			     provisionNum,DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),null,null,'N',"DEVICE SWAP",null);
+			   processRequest.add(processRequestDetails);
+			   this.processRequestRepository.save(processRequest);
+ 			
+				
+		return new CommandProcessingResult(entityId);	
 		
 	   }catch(final WarrantyEndDateExpireException e){
 		   Object[] obj = e.getDefaultUserMessageArgs();

@@ -29,12 +29,24 @@ public class AllocationReadPlatformServiceImpl implements AllocationReadPlatform
 	}
 	
 	@Override
-	public List<AllocationDetailsData> getTheHardwareItemDetails(final Long orderId) {
+	public List<AllocationDetailsData> getTheHardwareItemDetails(final Long orderId,final String serialNumber) {
 		try {
 			
 			final ClientOrderMapper mapper = new ClientOrderMapper();
 			 String sql =null;
-			
+			if(serialNumber!=null){
+				  sql = " Select * from ( select a.id AS id,a.order_id AS orderId,a.plan_id as planId,a.service_id as serviceId,id.provisioning_serialno AS serialNum,a.client_id AS clientId" +
+					  		" FROM b_association a, b_item_detail id WHERE a.order_id =? and id.serial_no=a.hw_serial_no and a.is_deleted='N' and a.hw_serial_no=? " +
+					  		" and allocation_type='ALLOT'" +
+					  		" union all" +
+					  		" select a.id AS id,a.order_id AS orderId,a.plan_id as planId,a.service_id as serviceId,o.provisioning_serial_number AS serialNum,a.client_id AS clientId" +
+					  		" FROM b_association a, b_owned_hardware o WHERE a.order_id =?  AND o.serial_number = a.hw_serial_no and  a.hw_serial_no=? " +
+					  		" AND a.is_deleted = 'N' and o.is_deleted = 'N' and allocation_type='OWNED') a ";
+					  		
+					  
+				return jdbcTemplate.query(sql, mapper, new Object[] {  orderId,serialNumber,orderId,serialNumber});
+				
+			}else{
 				  sql = " Select * from ( select a.id AS id,a.order_id AS orderId,a.plan_id as planId,a.service_id as serviceId,id.provisioning_serialno AS serialNum,a.client_id AS clientId" +
 				  		" FROM b_association a, b_item_detail id WHERE a.order_id =? and id.serial_no=a.hw_serial_no and a.is_deleted='N'" +
 				  		" and allocation_type='ALLOT'" +
@@ -45,6 +57,7 @@ public class AllocationReadPlatformServiceImpl implements AllocationReadPlatform
 				  		
 				  
 			return jdbcTemplate.query(sql, mapper, new Object[] {  orderId,orderId });
+			}
 			} catch (EmptyResultDataAccessException e) {
 			return null;
 			}
