@@ -1,5 +1,7 @@
 package org.mifosplatform.payments.evo.api;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -7,6 +9,7 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
+import org.apache.commons.codec.binary.Hex;
 import org.json.JSONObject;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.ToApiJsonSerializer;
@@ -69,9 +72,24 @@ public class EvoPaymentGatewayApiResource {
 	    	 context.authenticatedUser();
 	    	 JSONObject jsonData  = new JSONObject(apiRequestBodyAsJson);
 	    	 double amount = jsonData.getDouble("amount");
+	    	 Long clientId = jsonData.getLong("clientId");
+	    	 String merchantId = jsonData.getString("merchantId");
+	    	 String currencyType = jsonData.getString("currencyType");
+	    	 
+	    	 
+	    	// String data = "*174*pg_57966*100*GBP";
+	    	 
+	    	 String HmacKey = "f]7C8bW[c!4ET9x?5j)XH=6e2Fo*Gw(3";
 	    	 
 	    	 JSONObject jsonObj = new JSONObject();
 	    	 jsonObj.put("amount", amount*100);
+	    	 
+	    	 String data = "*"+clientId+"*"+merchantId+"*"+jsonObj.getInt("amount")+"*"+currencyType; 
+	    	
+	    	 Mac sha256_HMAC = Mac.getInstance("HmacSHA256");
+	    	 SecretKeySpec secret_key = new SecretKeySpec(HmacKey.getBytes("UTF-8"), "HmacSHA256");
+	    	 sha256_HMAC.init(secret_key);
+	    	 jsonObj.put("macValue", Hex.encodeHexString(sha256_HMAC.doFinal(data.getBytes("UTF-8"))));
 	    	 
 	    	 return this.jsonSerializer.serialize(jsonObj);
 		}catch (Exception e) {
