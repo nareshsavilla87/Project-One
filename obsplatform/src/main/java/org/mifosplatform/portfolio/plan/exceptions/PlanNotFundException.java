@@ -14,7 +14,7 @@ public class PlanNotFundException extends AbstractPlatformResourceNotFoundExcept
 	}
 
 	public PlanNotFundException(Long planId) {
-		super("error.msg.plan.with.id.not.exists","Charge Code already exists with same plan");
+		super("error.msg.plan.with.id.not.exists","Plan was alreay deleted");
 
 	}
 
