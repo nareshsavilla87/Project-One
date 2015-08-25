@@ -297,6 +297,128 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 
 	@Transactional
 	@Override
+	/*public CommandProcessingResult paypalEnquirey(final JsonCommand command) {
+
+		try{
+			context.authenticatedUser();
+			this.fromApiJsonDeserializer.validateForpaypalEnquirey(command.json());
+					
+			final JSONObject obj=new JSONObject(command.json()).getJSONObject("response");
+			final SimpleDateFormat pattern= new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss");	
+			
+			final String state=obj.getString("state");
+			final String paymentid=obj.getString("id");
+			final String create_time=obj.getString("create_time");
+			final Date date= pattern.parse(create_time);
+			
+			final PaypalEnquirey  paypalEnquirey = new PaypalEnquirey(command.entityId(),state,paymentid,date);			
+			this.paypalEnquireyRepository.save(paypalEnquirey);
+			
+			final JsonObject paymentobject = new JsonObject();
+			final Map<String, Object> changes = new HashMap<String, Object>();
+			 ClientBalance clientBalance = clientBalanceRepository.findByClientId(paypalEnquirey.getClientId());
+			
+			final PaypalEnquirey paypalEnquireyUpdate = this.paypalEnquireyRepository.findOne(paypalEnquirey.getId());
+			
+			try{
+				
+				 sendingDataToPaypal(paypalEnquirey.getId());
+				 
+			}catch (PayPalRESTException e) {
+				
+				final PaypalEnquirey paypalexceptionupdate=this.paypalEnquireyRepository.findOne(paypalEnquirey.getId());
+				paypalexceptionupdate.setDescription(e.getLocalizedMessage());
+				paypalexceptionupdate.setStatus("Fail");
+				this.paypalEnquireyRepository.save(paypalexceptionupdate);
+				changes.put("paymentId", new Long(-1));
+				changes.put("paymentStatus", "Fail");
+				changes.put("totalBalance", clientBalance == null?0:clientBalance.getBalanceAmount());
+				changes.put("paypalException", e.getMessage());
+				return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(paypalEnquirey.getId()).with(changes).build();
+			} 
+			 
+			final String remarks=paypalEnquireyUpdate.getPayerEmailId()!=null?paypalEnquireyUpdate.getPayerEmailId():" "+
+			                          paypalEnquireyUpdate.getCardNumber()!=null?paypalEnquireyUpdate.getCardNumber():" ";
+				
+			    final String paymentdate = new SimpleDateFormat("dd MMMM yyyy").format(paypalEnquireyUpdate.getPaymentDate());
+				
+				paymentobject.addProperty("txn_id", paypalEnquireyUpdate.getPaymentId());
+				paymentobject.addProperty("dateFormat", "dd MMMM yyyy");
+				paymentobject.addProperty("locale", "en");
+				paymentobject.addProperty("paymentDate", paymentdate);
+				paymentobject.addProperty("amountPaid", paypalEnquireyUpdate.getTotalAmount());
+				paymentobject.addProperty("isChequeSelected", "no");
+				paymentobject.addProperty("receiptNo", paypalEnquireyUpdate.getPaymentId());
+				paymentobject.addProperty("remarks", remarks);
+				paymentobject.addProperty("paymentCode", 27);
+				final String entityName = "PAYMENT";
+				
+				final JsonElement element1 = fromApiJsonHelper.parse(paymentobject.toString());
+				JsonCommand comm = new JsonCommand(null,paymentobject.toString(), element1,fromApiJsonHelper, entityName, 
+						paypalEnquirey.getClientId(),null, null, null, null, null, null, null, null,null,null);
+
+				final CommandProcessingResult result = createPayment(comm);
+				 clientBalance =clientBalanceRepository.findByClientId(paypalEnquirey.getClientId());
+				if (result.resourceId() != null) {
+					final int i = new Long(0).compareTo(result.resourceId());
+					if (i == -1) {
+						paypalEnquireyUpdate.setStatus("Success");
+						paypalEnquireyUpdate.setObsPaymentId(result.resourceId());
+						changes.put("paymentId", result.resourceId());
+						changes.put("paymentStatus", "Success");
+						changes.put("totalBalance",clientBalance.getBalanceAmount());
+						changes.put("paypalException", "");
+						changes.put("Errordescription", "");
+
+					} else {
+						paypalEnquireyUpdate.setStatus("Fail");
+						paypalEnquireyUpdate.setObsPaymentId(result.resourceId());
+						changes.put("paymentId", result.resourceId());
+						changes.put("paymentStatus", "Fail");
+						changes.put("totalBalance",clientBalance.getBalanceAmount());
+						changes.put("paypalException", "");
+						changes.put("Errordescription", "Payment Error");
+					}
+				} else {
+					paypalEnquireyUpdate.setStatus("Failure");
+					changes.put("paymentId", "");
+					changes.put("paymentStatus", "Failure");
+					changes.put("totalBalance",clientBalance.getBalanceAmount());
+					changes.put("paypalException", "");
+					changes.put("Errordescription", "Payment Not Processed");
+				}
+				
+				this.paypalEnquireyRepository.save(paypalEnquireyUpdate);
+			
+	        return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(paypalEnquirey.getId()).with(changes).build();
+	        
+		} catch (ParseException e) {
+			
+			return new CommandProcessingResultBuilder().withResourceIdAsString(e.getMessage()).build();
+			
+		} catch (JSONException e) {
+			
+			return new CommandProcessingResultBuilder().withResourceIdAsString(e.getMessage()).build();
+			
+		} catch (IOException e) {
+			
+			return new CommandProcessingResultBuilder().withResourceIdAsString(e.getMessage()).build();
+			
+		} catch (DataIntegrityViolationException dve){
+			
+			try {
+				final JSONObject obj=new JSONObject(command.json()).getJSONObject("response");
+				final String paymentid=obj.getString("id");
+				DataIntegrityIssues(command, dve, paymentid);
+				return CommandProcessingResult.empty();
+			} catch (JSONException e) {
+				return CommandProcessingResult.empty();
+			}
+			
+		}
+		
+		
+	}*/
 	public CommandProcessingResult paypalEnquirey(final JsonCommand command) {
 
 		try{
@@ -419,6 +541,8 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 		
 		
 	}
+	
+	
 
 	private void sendingDataToPaypal(final Long paypalEnquireyId) throws PayPalRESTException, IOException, JSONException {
 		

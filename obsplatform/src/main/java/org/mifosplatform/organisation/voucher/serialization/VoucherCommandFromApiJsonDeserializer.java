@@ -62,8 +62,8 @@ public class VoucherCommandFromApiJsonDeserializer {
 		final String batchName = fromApiJsonHelper.extractStringNamed("batchName", element);
 		baseDataValidator.reset().parameter("batchName").value(batchName).notBlank();
 
-		final BigDecimal length1 = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("length", element);
-	    baseDataValidator.reset().parameter("length").value(length1).notNull();
+		final BigDecimal length = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("length", element);
+	    baseDataValidator.reset().parameter("length").value(length).notNull().notLessThanMin(1);
 	    
 	    final String beginWith = fromApiJsonHelper.extractStringNamed("beginWith", element);
 		baseDataValidator.reset().parameter("beginWith").value(beginWith).notBlank();
@@ -71,48 +71,45 @@ public class VoucherCommandFromApiJsonDeserializer {
 		final String pinCategory = fromApiJsonHelper.extractStringNamed("pinCategory", element);
 		baseDataValidator.reset().parameter("pinCategory").value(pinCategory).notBlank();
 		
-		final BigDecimal Quantity1 = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("quantity", element);
-	    baseDataValidator.reset().parameter("quantity").value(Quantity1).notNull();
+		final BigDecimal quantity = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("quantity", element);
+	    baseDataValidator.reset().parameter("quantity").value(quantity).notNull().notLessThanMin(1);
 	    
-		final Long Serial1 = fromApiJsonHelper.extractLongNamed("serialNo", element);
-	    baseDataValidator.reset().parameter("serialNo").value(Serial1).notNull().inMinMaxRange(0, 18);
+		final Long serialNo = fromApiJsonHelper.extractLongNamed("serialNo", element);
+	    baseDataValidator.reset().parameter("serialNo").value(serialNo).notNull().inMinMaxRange(0, 18);
 		
 		final String pinType = fromApiJsonHelper.extractStringNamed("pinType",element);
 		baseDataValidator.reset().parameter("pinType").value(pinType).notBlank();
 
-		BigDecimal pinValue1 = null ;
+		BigDecimal pinValue = null ;
 
 		if(pinType != null){
 			if(pinType.equalsIgnoreCase("VALUE")){
-				pinValue1 = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("pinValue", element);
-				baseDataValidator.reset().parameter("pinValue").value(pinValue1).notNull();
+				pinValue = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("pinValue", element);
+				baseDataValidator.reset().parameter("pinValue").value(pinValue).notNull();
 			}
 			else if(pinType.equalsIgnoreCase("PRODUCT")){
 			
-				pinValue1 = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("pinValue", element);
-				baseDataValidator.reset().parameter("productValue").value(pinValue1).notNull();
+				pinValue = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("pinValue", element);
+				baseDataValidator.reset().parameter("productValue").value(pinValue).notNull();
 			}
 			else if(pinType.equalsIgnoreCase("COUPON")){
 				
-				pinValue1 = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("pinValue", element);
-				baseDataValidator.reset().parameter("promotionValue").value(pinValue1).notNull();
+				pinValue = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("pinValue", element);
+				baseDataValidator.reset().parameter("promotionValue").value(pinValue).notNull();
 			}
 		}
 
 	  
-		final LocalDate ExpiryDate = fromApiJsonHelper.extractLocalDateNamed(
-				"expiryDate", element);
-		baseDataValidator.reset().parameter("expiryDate").value(ExpiryDate)
-				.notBlank();
+		final LocalDate ExpiryDate = fromApiJsonHelper.extractLocalDateNamed("expiryDate", element);
+		baseDataValidator.reset().parameter("expiryDate").value(ExpiryDate).notBlank();
 		
-		if (!(Serial1 == null || Quantity1 == null || length1 == null
-				|| pinValue1 == null  /*|| pinExtention == null*/)) {
+		if (null!=serialNo && null!=quantity && null!=length && null!=pinValue) {
 
-			if (!(Serial1.longValue() < 0 || Quantity1.longValue() < 0 || length1.longValue() < 0 || pinValue1.longValue() < 0)) {
+			if (serialNo.longValue() > 0 && quantity.longValue() > 0 && length.longValue() > 0 && pinValue.longValue() > 0) {
 
 				String minSerialSeries = "";
 				String maxSerialSeries = "";
-				for (int x = 0; x < Serial1.longValue(); x++) {
+				for (int x = 0; x < serialNo.longValue(); x++) {
 					if (x == 0) {
 						minSerialSeries += "1";
 						maxSerialSeries += "9";
@@ -123,11 +120,11 @@ public class VoucherCommandFromApiJsonDeserializer {
 
 				BigDecimal minNo = new BigDecimal(minSerialSeries);//Long.parseLong(minSerialSeries);
 				BigDecimal maxNo = new BigDecimal(maxSerialSeries);//Long.parseLong(maxSerialSeries);
-				baseDataValidator.reset().parameter("quantity").value(Quantity1.longValue()).
+				baseDataValidator.reset().parameter("quantity").value(quantity.longValue()).
 				inMinAndMaxAmountRange(minNo, maxNo);
 
-				baseDataValidator.reset().parameter("beginWith").value(beginWith.length()).notGreaterThanMax(length1);
-				baseDataValidator.reset().parameter("pinValue").value(pinValue1.longValue()).inMinMaxRange(1, 1000000000);
+				baseDataValidator.reset().parameter("beginWith").value(beginWith.length()).notGreaterThanMax(length);
+				baseDataValidator.reset().parameter("pinValue").value(pinValue.longValue()).inMinMaxRange(1, 1000000000);
 			}
 		}
 		

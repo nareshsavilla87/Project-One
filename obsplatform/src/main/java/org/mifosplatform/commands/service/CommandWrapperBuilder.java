@@ -5,10 +5,7 @@
  */
 package org.mifosplatform.commands.service;
 
-import javax.ws.rs.core.Response.ResponseBuilder;
-
 import org.mifosplatform.commands.domain.CommandWrapper;
-import org.mifosplatform.crm.ticketmaster.command.TicketMasterCommand;
 
 public class CommandWrapperBuilder {
 
@@ -1222,11 +1219,11 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
-	public CommandWrapperBuilder createBill(Long clientId) {
+	public CommandWrapperBuilder createStatement(Long clientId) {
 		this.actionName = "CREATE";
 		this.entityName = "BILLMASTER";
 		this.entityId = clientId;
-		this.href = "/billmaster/template";
+		this.href = "/billmaster/"+clientId;
 		return this;
 	}
 

@@ -24,7 +24,7 @@ public interface SheduleJobReadPlatformService {
 	
 	List<ScheduleJobData> retrieveSheduleJobDetails(String paramValue);
 
-	List<Long> getBillIds(String query);
+	List<Long> getBillIds(String query, JobParameterData data);
 
 	List<Long> retrieveAddonsForDisconnection(LocalDate processingDate);
 	

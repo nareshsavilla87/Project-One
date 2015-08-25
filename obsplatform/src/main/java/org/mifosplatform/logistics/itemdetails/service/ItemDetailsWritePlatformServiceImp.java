@@ -87,6 +87,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 	private final InventoryTransactionHistoryJpaRepository inventoryTransactionHistoryJpaRepository;
 	private final InventoryItemCommandFromApiJsonDeserializer inventoryItemCommandFromApiJsonDeserializer;
 	private final InventoryItemAllocationCommandFromApiJsonDeserializer inventoryItemAllocationCommandFromApiJsonDeserializer;
+	private final ItemDetailsAllocationRepository allocationRepository;
 	
 	@Autowired
 	public ItemDetailsWritePlatformServiceImp(final ItemDetailsReadPlatformService inventoryItemDetailsReadPlatformService, 
@@ -99,7 +100,8 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			final HardwareAssociationReadplatformService associationReadplatformService,final HardwareAssociationWriteplatformService associationWriteplatformService,
 			final ItemRepository itemRepository,final OrderReadPlatformService orderReadPlatformService,
 			final ProvisioningWritePlatformService provisioningWritePlatformService,final EventValidationReadPlatformService eventValidationReadPlatformService,
-			final ProvisioningActionsRepository provisioningActionsRepository,final PropertyDeviceMappingRepository propertyDeviceMappingRepository) 
+			final ProvisioningActionsRepository provisioningActionsRepository,final PropertyDeviceMappingRepository propertyDeviceMappingRepository, 
+			final ItemDetailsAllocationRepository allocationRepository) 
 	{
 		this.inventoryItemDetailsReadPlatformService = inventoryItemDetailsReadPlatformService;
 		this.context=context;
@@ -121,6 +123,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 		this.orderReadPlatformService=orderReadPlatformService;
 		this.provisioningWritePlatformService=provisioningWritePlatformService;
 		this.eventValidationReadPlatformService=eventValidationReadPlatformService;
+		this.allocationRepository = allocationRepository;
 		
 	}
 	
@@ -346,10 +349,10 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 							inventoryItemDetails.setAvailable();
 							this.inventoryItemDetailsRepository.saveAndFlush(inventoryItemDetails);
 					     
-						/*	InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(new LocalDate().toDate(), 
+							InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(new LocalDate().toDate(), 
 					  			inventoryItemDetailsAllocation.getOrderId(),"De Allocation",inventoryItemDetailsAllocation.getSerialNumber(), inventoryItemDetailsAllocation.getItemMasterId(),
 								inventoryItemDetailsAllocation.getClientId(),inventoryItemDetails.getOfficeId());
-							inventoryTransactionHistoryJpaRepository.save(transactionHistory);*/
+							inventoryTransactionHistoryJpaRepository.save(transactionHistory);
 					   
 						}
 						
@@ -382,10 +385,12 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
         	   	}
         	   
         	   ItemDetailsAllocation inventoryItemDetailsAllocation=this.deAllocateHardware(serialNo, clientId);
-        	   OneTimeSale oneTimeSale=this.oneTimeSaleRepository.findOne(inventoryItemDetailsAllocation.getOrderId());
-        	   oneTimeSale.setStatus();
-        	   this.oneTimeSaleRepository.save(oneTimeSale);
-        	   
+        	   List<ItemDetailsAllocation> allocations=this.allocationRepository.findRemainingAllocatedDevice(clientId,inventoryItemDetailsAllocation.getOrderId());
+        	   if(allocations.isEmpty()){
+        	      OneTimeSale oneTimeSale=this.oneTimeSaleRepository.findOne(inventoryItemDetailsAllocation.getOrderId());
+        	      oneTimeSale.setStatus();
+        	      this.oneTimeSaleRepository.save(oneTimeSale);
+        	   }
         	   
   			 Configuration globalConfiguration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
   			 
@@ -393,9 +398,11 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
   				 
   				 PropertyDeviceMapping deviceMapping = this.propertyDeviceMappingRepository.findBySerailNumber(serialNo);
   				 if(deviceMapping != null){
+
   				 deviceMapping.delete();
   				 this.propertyDeviceMappingRepository.save(deviceMapping);
   				 }
+
   			 }
         	   ProvisionActions provisionActions=this.provisioningActionsRepository.findOneByProvisionType(ProvisioningApiConstants.PROV_EVENT_RELEASE_DEVICE);
                if(provisionActions != null && provisionActions.isEnable() == 'Y'){

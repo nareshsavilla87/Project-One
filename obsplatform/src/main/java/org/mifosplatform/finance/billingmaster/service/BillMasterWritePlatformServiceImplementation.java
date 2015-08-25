@@ -114,8 +114,9 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 		final BigDecimal depositRefundAmount = BigDecimal.ZERO;
 		final LocalDate dueDate = command.localDateValueOfParameterNamed("dueDate");
 		final String message = command.stringValueOfParameterNamed("message");
+		final String batchid = command.stringValueOfParameterNamed("batchId");
 		BillMaster  billMaster = new BillMaster(clientId, clientId,billDate.toDate(), null, null, dueDate.toDate(),previousBalance, 
-				                    chargeAmount, adjustmentAmount, taxAmount, paidAmount, dueAmount,null, message, parentId,depositRefundAmount);
+				                    chargeAmount, adjustmentAmount, taxAmount, paidAmount, dueAmount,null, message, parentId,depositRefundAmount, batchid);
 		
 		List<BillDetail> listOfBillingDetail = new ArrayList<BillDetail>();
 		
