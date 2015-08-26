@@ -42,7 +42,7 @@ public final class ClientDataValidator {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    public void validateForCreate(final String json, boolean isSelfcareEnable) {
+    public void validateForCreate(final String json, boolean isSelfcareEnable,boolean isPropertyCodeEnable) {
 
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
@@ -158,6 +158,12 @@ public final class ClientDataValidator {
         if (isSelfcareEnable) {
         	final String email = fromApiJsonHelper.extractStringNamed(ClientApiConstants.emailParamName, element);
         	baseDataValidator.reset().parameter(ClientApiConstants.emailParamName).value(email).notNull();
+        }
+        
+        if (isPropertyCodeEnable) {
+        	final String addressNo = fromApiJsonHelper.extractStringNamed(ClientApiConstants.addressNoParamName, element);
+        	if(addressNo == null)
+        		dataValidationErrors.add(ApiParameterError.parameterError("error.msg.propertycode.not.null","Property Code can not be null", "propertyCode",addressNo));
         }
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
