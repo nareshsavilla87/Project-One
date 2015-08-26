@@ -296,12 +296,17 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         try {
             context.authenticatedUser();
              Configuration configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
+             
+             Configuration propertyConfiguration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+             boolean isPropertyConfiguration = false;
             
             if(configuration == null){
             	throw new ConfigurationPropertyNotFoundException(ConfigurationConstants.CONFIG_IS_SELFCAREUSER);
             }
             
-            this.fromApiJsonDeserializer.validateForCreate(command.json(),configuration.isEnabled());
+            isPropertyConfiguration = (propertyConfiguration == null) ? false : propertyConfiguration.isEnabled();
+            
+            this.fromApiJsonDeserializer.validateForCreate(command.json(),configuration.isEnabled(),isPropertyConfiguration);
             final Long officeId = command.longValueOfParameterNamed(ClientApiConstants.officeIdParamName);
             final Office clientOffice = this.officeRepository.findOne(officeId);
 
@@ -310,7 +315,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final Long groupId = command.longValueOfParameterNamed(ClientApiConstants.groupIdParamName);
             final Group clientParentGroup = null;
             PropertyMaster propertyMaster=null;
-           Configuration propertyConfiguration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
+           
 			if(propertyConfiguration != null && propertyConfiguration.isEnabled()) {		
 				 propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(command.stringValueOfParameterNamed("addressNo"));
 				if(propertyMaster != null && propertyMaster.getClientId() != null ){
