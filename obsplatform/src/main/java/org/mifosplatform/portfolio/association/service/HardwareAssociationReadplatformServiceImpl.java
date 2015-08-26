@@ -185,9 +185,8 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			}
 			
 			@Override
-			public AssociationData mapRow(final ResultSet rs,
-					@SuppressWarnings("unused") final int rowNum)
-					throws SQLException {
+			public AssociationData mapRow(final ResultSet rs,final int rowNum)throws SQLException {
+				
 				final String serialNum = rs.getString("serialNum");				
 				final String provisionNumber = rs.getString("provisionNum");
 				final String allocationType =rs.getString("allocationType");
@@ -216,9 +215,8 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			}
 
 			@Override
-			public AssociationData mapRow(final ResultSet rs,
-					@SuppressWarnings("unused") final int rowNum)
-					throws SQLException {
+			public AssociationData mapRow(final ResultSet rs,final int rowNum)throws SQLException {
+				
 				Long planId= rs.getLong("id");
 				String planCode = rs.getString("planCode");
 			    Long id=rs.getLong("orderId");
@@ -408,7 +406,8 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 						" bi.item_master_id as itemMasterId  from " +
 						" b_item_detail bi " +
 						" JOIN b_onetime_sale os ON os.item_id=bi.item_master_id AND os.client_id = bi.client_id " +
-						" AND os.is_deleted='N' ";
+						" AND os.is_deleted='N' " +
+						" JOIN b_allocation  ba ON ba.serial_no=bi.serial_no AND ba.order_id=os.id AND ba.client_id=os.client_id ";
 				}
 				
 			
