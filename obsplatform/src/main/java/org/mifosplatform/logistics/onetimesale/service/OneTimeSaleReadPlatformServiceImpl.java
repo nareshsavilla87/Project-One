@@ -89,10 +89,10 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 			
 			return "o.id AS id,i.item_code AS itemCode, i.item_class as itemClass, a.serial_no as serialNo,o.sale_date as saleDate,o.charge_code AS chargeCode," +
 					"pdm.property_code as propertyCode,o.quantity as quantity,o.total_price as totalPrice,o.hardware_allocated as hardwareAllocated,o.units as units,o.device_mode as saleType,id.warranty_date as warrantyDate "
-					+ "  FROM b_item_master i,b_onetime_sale o" +
-					" left join b_allocation a on a.order_id=o.id and a.is_deleted = 'N' " +
+					+ "  FROM b_item_master i JOIN b_onetime_sale o ON i.id=o.item_id and o.is_deleted='N' " +
+					" LEFT JOIN b_allocation a ON a.order_id=o.id and a.is_deleted = 'N' " +
 					" LEFT JOIN b_propertydevice_mapping pdm ON pdm.serial_number = a.serial_no" +
-					" left join   b_item_detail id ON id.serial_no = a.serial_no AND id.is_deleted = 'N'  ";
+					" LEFT JOIN b_item_detail id ON id.serial_no = a.serial_no AND id.is_deleted = 'N'  ";
 
 		}
 
