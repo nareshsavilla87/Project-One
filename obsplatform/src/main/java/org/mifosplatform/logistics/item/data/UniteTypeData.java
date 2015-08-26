@@ -28,6 +28,10 @@ public class UniteTypeData {
 		case DAYS:
 			optionData = new EnumOptionData(UnitEnumType.DAYS.getValue().longValue(), codePrefix + UnitEnumType.DAYS.getCode(), "DAYS");
 			break;
+			
+		case ACCESSORIES:
+			optionData = new EnumOptionData(UnitEnumType.ACCESSORIES.getValue().longValue(), codePrefix + UnitEnumType.ACCESSORIES.getCode(), "ACCESSORIES");
+			break;
 				
 		default:
 			optionData = new EnumOptionData(UnitEnumType.INVALID.getValue().longValue(), UnitEnumType.INVALID.getCode(), "INVALID");
