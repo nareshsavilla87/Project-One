@@ -57,7 +57,8 @@ public class ItemReadPlatformServiceImpl implements ItemReadPlatformService{
 		final EnumOptionData pieces = UniteTypeData.UnitClassType(UnitEnumType.PIECES);
 		final EnumOptionData hours = UniteTypeData.UnitClassType(UnitEnumType.HOURS);
 		final EnumOptionData days = UniteTypeData.UnitClassType(UnitEnumType.DAYS);
-		final List<EnumOptionData> categotyType = Arrays.asList(meters, pieces, hours, days);
+		final EnumOptionData accessories = UniteTypeData.UnitClassType(UnitEnumType.ACCESSORIES);
+		final List<EnumOptionData> categotyType = Arrays.asList(meters, pieces, hours, days, accessories);
 		return categotyType;
 	}
 
