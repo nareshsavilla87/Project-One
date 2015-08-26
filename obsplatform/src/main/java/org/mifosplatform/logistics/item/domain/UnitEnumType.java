@@ -5,6 +5,7 @@ public enum UnitEnumType {
 		PIECES(2, "CategoryType.pieces"),
         HOURS(3, "CategoryType.hours"),
         DAYS(4, "CategoryType.days"),
+        ACCESSORIES(5, "CategoryType.accessories"),
 		INVALID(4, "CategoryType.invalid");
 
 
@@ -41,6 +42,10 @@ public enum UnitEnumType {
 				
 			case 4:
 				enumType = UnitEnumType.DAYS;
+				break;
+				
+			case 5:
+				enumType = UnitEnumType.ACCESSORIES;
 				break;
 				
 			default:
