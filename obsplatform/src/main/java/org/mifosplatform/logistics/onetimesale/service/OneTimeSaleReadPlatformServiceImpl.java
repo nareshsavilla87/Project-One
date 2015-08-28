@@ -88,7 +88,8 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 		public String schema() {
 			
 			return "o.id AS id,i.item_code AS itemCode, i.item_class as itemClass, a.serial_no as serialNo,o.sale_date as saleDate,o.charge_code AS chargeCode," +
-					"pdm.property_code as propertyCode,o.quantity as quantity,o.total_price as totalPrice,o.hardware_allocated as hardwareAllocated,o.units as units,o.device_mode as saleType,id.warranty_date as warrantyDate "
+					"pdm.property_code as propertyCode,o.quantity as quantity,o.total_price as totalPrice,o.hardware_allocated as hardwareAllocated," +
+					"o.units as units,o.device_mode as saleType,id.warranty_date as warrantyDate "
 					+ "  FROM b_item_master i,b_onetime_sale o" +
 					" left join b_allocation a on a.order_id=o.id and a.is_deleted = 'N' " +
 					" LEFT JOIN b_propertydevice_mapping pdm ON pdm.serial_number = a.serial_no" +
