@@ -17,6 +17,7 @@ public class OwnedHardwareData {
 	private LocalDate allocationDate;
 	private String status;
 	private String itemType;
+	private String propertyCode;
 	private List<ItemData> itemDatas;
 	private List<OwnedHardwareData> ownedHardwareDatas;
 	private LocalDate date;
@@ -26,7 +27,9 @@ public class OwnedHardwareData {
 	}
 	
 	
-	public OwnedHardwareData(Long id, Long clientId, String serialNumber, String provisioningSerialNumber, LocalDate allocationDate, String status, String itemType){
+	public OwnedHardwareData(Long id, Long clientId, String serialNumber, String provisioningSerialNumber, LocalDate allocationDate, String status,
+			String itemType, String propertyCode){
+		
 		this.id = id;
 		this.clientId = clientId;
 		this.serialNumber = serialNumber;
@@ -34,6 +37,7 @@ public class OwnedHardwareData {
 		this.allocationDate = allocationDate;
 		this.status = status;
 		this.itemType = itemType;
+		this.propertyCode = propertyCode;
 	}
 	
 	
