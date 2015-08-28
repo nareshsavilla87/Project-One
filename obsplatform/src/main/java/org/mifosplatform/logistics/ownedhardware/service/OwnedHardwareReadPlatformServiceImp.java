@@ -61,15 +61,20 @@ public class OwnedHardwareReadPlatformServiceImp implements	OwnedHardwareReadPla
 				String status = rs.getString("status");
 				LocalDate allocationDate = JdbcSupport.getLocalDate(rs,"allocationDate");
 				String itemType = rs.getString("itemType");
-			return new OwnedHardwareData(id, clientId, serialNumber, provisioningSerialNumber, allocationDate, status, itemType);
+				String propertyCode = rs.getString("propertyCode");
+			return new OwnedHardwareData(id, clientId, serialNumber, provisioningSerialNumber, allocationDate, status, itemType,propertyCode);
 		}
 		
 		public String schema(){
-			String sql = "oh.id as id, oh.client_id as clientId, oh.serial_number as serialNumber, oh.provisioning_serial_number as provisioningSerialNumber, oh.allocated_date as allocationDate, oh.status as status, im.item_description as itemType from b_owned_hardware oh left outer join b_item_master im on oh.item_type=im.id";
+			String sql = "oh.id as id, oh.client_id as clientId, oh.serial_number as serialNumber, oh.provisioning_serial_number as provisioningSerialNumber," +
+					" oh.allocated_date as allocationDate, oh.status as status, im.item_description as itemType, pdm.property_code as propertyCode" +
+					" from b_owned_hardware oh left outer " +
+					" join b_item_master im on oh.item_type=im.id" +
+					" LEFT JOIN b_propertydevice_mapping pdm ON pdm.serial_number = oh.serial_number and pdm.is_deleted = 'N'";
 			return sql;
 		}
 		public String schemaForSingleRecord(){
-			String sql = "oh.id as id, oh.client_id as clientId, oh.serial_number as serialNumber, oh.provisioning_serial_number as provisioningSerialNumber, oh.allocated_date as allocationDate, oh.status as status, oh.item_type as itemType from b_owned_hardware oh";
+			String sql = "oh.id as id, oh.client_id as clientId, oh.serial_number as serialNumber, 0 as propertyCode,oh.provisioning_serial_number as provisioningSerialNumber, oh.allocated_date as allocationDate, oh.status as status, oh.item_type as itemType from b_owned_hardware oh";
 			return sql;
 		}
 	}
