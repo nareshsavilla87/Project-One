@@ -175,7 +175,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	                    			 oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
 	                    			 this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
 	                    			 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_FREE,
-	                    					 address.getClientId(),oldPropertyMaster.getPropertyCode());
+	                    					 null,oldPropertyMaster.getPropertyCode());
 	                    			 this.propertyHistoryRepository.save(propertyHistory);
 	                    			 changes = address.update(command);
 		                        	 this.addressRepository.saveAndFlush(address);
