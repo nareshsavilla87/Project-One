@@ -300,3 +300,62 @@ FROM
  order by t.clientId,t.transactionDate' WHERE report_name='Collection Date Wise Details';
 
 
+UPDATE stretchy_report SET report_sql='select
+    DATE_FORMAT(pay.payment_date,''%Y-%m-%d'') AS Day,
+    TRUNCATE(sum(ifnull(pay.amount_paid, 0)),2) AS Collection
+FROM
+    m_office off
+      JOIN
+    m_client clnt ON off.id = clnt.office_id
+      JOIN
+    b_payments pay ON clnt.id = pay.client_id AND pay.is_deleted=0
+      JOIN 
+   m_code_value mcv ON mcv.id=pay.paymode_id
+   WHERE (off.id = ''${officeId}'' or -1 = ''${officeId}'') AND (pay.paymode_id = ''${paymode_id}'' or -1 = ''${paymode_id}'' )
+  AND pay.payment_date between ''${startDate}'' AND ''${endDate}''
+  GROUP BY Day ORDER BY Day' WHERE report_name='Collection Day Wise chart';
+
+UPDATE stretchy_report SET report_sql='select
+    DATE_FORMAT(pay.payment_date,''%Y-%m-%d'') AS Day,
+    TRUNCATE(sum(ifnull(pay.amount_paid, 0)),2) AS Collection
+FROM
+    m_office off
+      JOIN
+    m_client clnt ON off.id = clnt.office_id
+      JOIN
+    b_payments pay ON clnt.id = pay.client_id AND pay.is_deleted=0
+      JOIN 
+   m_code_value mcv ON mcv.id=pay.paymode_id
+   WHERE (off.id = ''${officeId}'' or -1 = ''${officeId}'') AND (pay.paymode_id = ''${paymode_id}'' or -1 = ''${paymode_id}'' )
+  AND pay.payment_date between ''${startDate}'' AND ''${endDate}''
+  GROUP BY Day ORDER BY Day' WHERE report_name='Collection Day Wise Summary';
+
+
+UPDATE stretchy_report SET report_sql='SELECT 
+     off.name AS BRANCH,
+     Year(pay.payment_date) AS YEAR,
+     monthname(pay.payment_date) AS Month,
+    TRUNCATE(sum(ifnull(pay.amount_paid, 0)),2) AS Collection
+from
+    m_office off
+        join
+    m_client clnt ON off.id = clnt.office_id
+        join
+    b_payments pay ON clnt.id = pay.client_id AND pay.is_deleted=0
+ where (off.id = ''${officeId}'' or -1 = ''${officeId}'') GROUP BY  Month ORDER BY Year(pay.payment_date)'
+WHERE report_name='Collection Month Wise Summary';
+
+UPDATE stretchy_report SET report_sql='SELECT 
+     monthname(pay.payment_date) AS Month,
+    TRUNCATE(sum(ifnull(pay.amount_paid, 0)),2) AS Collection
+from
+    m_office off
+        join
+    m_client clnt ON off.id = clnt.office_id
+        join
+    b_payments pay ON clnt.id = pay.client_id AND pay.is_deleted=0
+ where (off.id = ''${officeId}'' or -1 = ''${officeId}'') GROUP BY  Month ORDER BY Year(pay.payment_date)'
+WHERE report_name='Collection Month Wise chart'; 
+
+
+
