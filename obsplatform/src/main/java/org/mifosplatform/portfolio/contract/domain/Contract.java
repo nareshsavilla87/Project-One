@@ -13,7 +13,8 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
-@Table(name = "b_contract_period",uniqueConstraints = @UniqueConstraint(name = "contract_period_key", columnNames = { "contract_period" }))
+@Table(name = "b_contract_period",uniqueConstraints ={ @UniqueConstraint(name = "contract_period_key", columnNames = { "contract_period" }),
+		@UniqueConstraint(name="dur_uni_code",columnNames = {"contract_duration","contract_type"}) })
 public class Contract extends AbstractPersistable<Long> {
 
 	/**
@@ -61,6 +62,7 @@ public class Contract extends AbstractPersistable<Long> {
 
 	public void delete() {
 		    this.subscriptionPeriod=this.getId()+"_DEL_"+this.subscriptionPeriod;
+		    this.subscriptionType=this.getId()+"_DEL_"+this.subscriptionType;
 			this.deleted = 'Y';
 	}
 	public static Contract fromJson(final JsonCommand command) {

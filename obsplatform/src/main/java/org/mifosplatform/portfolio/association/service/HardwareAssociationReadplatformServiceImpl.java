@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
 import org.mifosplatform.portfolio.association.data.AssociationData;
 import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
@@ -20,17 +21,18 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class HardwareAssociationReadplatformServiceImpl implements HardwareAssociationReadplatformService{
 	
-	
+	 private final PlatformSecurityContext context;
 	 private final JdbcTemplate jdbcTemplate;
 	 private final ConfigurationRepository configurationRepository;
 	
 	  
 	    @Autowired
 	    public HardwareAssociationReadplatformServiceImpl(final ConfigurationRepository configurationRepository, 
-	    		final TenantAwareRoutingDataSource dataSource)
+	    		final TenantAwareRoutingDataSource dataSource,final PlatformSecurityContext context)
 	    {
 	        this.jdbcTemplate = new JdbcTemplate(dataSource);
 	        this.configurationRepository=configurationRepository;
+	        this.context=context;
 	    }
 
 		/*@Override
@@ -183,9 +185,8 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			}
 			
 			@Override
-			public AssociationData mapRow(final ResultSet rs,
-					@SuppressWarnings("unused") final int rowNum)
-					throws SQLException {
+			public AssociationData mapRow(final ResultSet rs,final int rowNum)throws SQLException {
+				
 				final String serialNum = rs.getString("serialNum");				
 				final String provisionNumber = rs.getString("provisionNum");
 				final String allocationType =rs.getString("allocationType");
@@ -214,9 +215,8 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			}
 
 			@Override
-			public AssociationData mapRow(final ResultSet rs,
-					@SuppressWarnings("unused") final int rowNum)
-					throws SQLException {
+			public AssociationData mapRow(final ResultSet rs,final int rowNum)throws SQLException {
+				
 				Long planId= rs.getLong("id");
 				String planCode = rs.getString("planCode");
 			    Long id=rs.getLong("orderId");
@@ -384,6 +384,43 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 				final Long planId = rs.getLong("planId");
 				
 				return new AllocationDetailsData(serviceId,planId,orderId,allocationType,serialNum,itemDescription);
+				}
+		}
+			
+			
+			@Override
+			public AssociationData retrieveAssociationsDetailsWithSerialNum( Long clientId, String serialNumber) {
+				
+				this.context.authenticatedUser();
+				AssociationDataMapper mapper = new AssociationDataMapper();
+				String sql = "select "+mapper.schema()+" where os.client_id = ? and bi.serial_no = ? ";
+				
+				return this.jdbcTemplate.queryForObject(sql, mapper,new Object[]{clientId,serialNumber});
+			}
+			
+			private static final class AssociationDataMapper implements RowMapper<AssociationData> {
+
+				public String schema() {
+
+				return " os.id AS saleId,os.office_id AS officeId,bi.serial_no as serialNumber, " +
+						" bi.item_master_id as itemMasterId  from " +
+						" b_item_detail bi " +
+						" JOIN b_onetime_sale os ON os.item_id=bi.item_master_id AND os.client_id = bi.client_id " +
+						" AND os.is_deleted='N' " +
+						" JOIN b_allocation  ba ON ba.serial_no=bi.serial_no AND ba.order_id=os.id AND ba.client_id=os.client_id ";
+				}
+				
+			
+
+				@Override
+				public AssociationData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
+
+				final Long saleId = rs.getLong("saleId");
+				final Long officeId = rs.getLong("officeId");
+				final String serialNum = rs.getString("serialNumber");
+				final Long itemMasterId = rs.getLong("itemMasterId");
+				
+				return new AssociationData(null,null,null,null,null,officeId,serialNum,null,saleId,itemMasterId,null);
 				}
 		}
 		

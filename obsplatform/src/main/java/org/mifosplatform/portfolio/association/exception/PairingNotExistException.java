@@ -13,14 +13,14 @@ public class PairingNotExistException extends AbstractPlatformDomainRuleExceptio
 	}
 
 	public PairingNotExistException(Long orderId, String planName) {
-		super("error.msg.hardware.device.for.is.not.available.for.pairing",
-				"Hardware Device for " + planName+ " is not available for pairing", planName);
+		super("error.msg.hardware.device.with.pairing.is.not.available",
+				"Hardware Device with " + planName+ " pairing is not available ", planName);
 
 	}
 
 	public PairingNotExistException(String planName) {
-		super("error.msg.all.hardware.device.for.is.not.available.for.pairing.So Change.Plan.not.Worked",
-				"All Hardware Device for "+ planName+ " is not available for pairing,So Change Plan not Worked",
+		super("error.msg.all.hardware.device.for.is.not.available.for.pairing",
+				"All Hardware Device for "+ planName+ " is not available for pairing",
 				planName);
 	}
 }

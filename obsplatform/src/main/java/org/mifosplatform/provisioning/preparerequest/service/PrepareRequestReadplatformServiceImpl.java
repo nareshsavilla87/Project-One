@@ -159,7 +159,7 @@ try{
 	ProcessRequest processRequest=null;
 	Long processResultId=Long.valueOf(0);
 	Order order=this.orderRepository.findOne(requestData.getOrderId());
-	List<AllocationDetailsData> detailsData=this.allocationReadPlatformService.getTheHardwareItemDetails(requestData.getOrderId());
+	List<AllocationDetailsData> detailsData=this.allocationReadPlatformService.getTheHardwareItemDetails(requestData.getOrderId(),null);
 	requestType=requestData.getRequestType();
 	PlanMapping planMapping= this.planMappingRepository.findOneByPlanId(order.getPlanId());
 	List<OrderLine> orderLineData=order.getServices();
@@ -215,12 +215,12 @@ try{
 		 }
 
 		 JSONArray newServiceArray = new JSONArray();
-		 if(requestData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.DEVICE_SWAP.toString())){
+		/* if(requestData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.DEVICE_SWAP.toString())){
 			 AllocationDetailsData allocationDetailsData=this.allocationReadPlatformService.getDisconnectedHardwareItemDetails(requestData.getOrderId(),requestData.getClientId());
 			 jsonObject.put("clientId", order.getClientId());
 			 jsonObject.put("OldHWId", allocationDetailsData.getSerialNo());
 			 jsonObject.put("NewHWId", HardWareId);
-		 }
+		 }*/
 		 if(requestType.equalsIgnoreCase(UserActionStatusTypeEnum.ADDON_ACTIVATION.toString())){
 			 
 			 List<OrderAddons> orderAddons=this.orderAddonsRepository.findAddonsByOrderId(requestData.getOrderId());

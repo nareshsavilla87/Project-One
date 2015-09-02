@@ -6,7 +6,7 @@ import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
 
 public interface AllocationReadPlatformService {
 
-	List<AllocationDetailsData> getTheHardwareItemDetails(Long orderId);
+	List<AllocationDetailsData> getTheHardwareItemDetails(Long orderId,String serialNumber);
 
 	List<AllocationDetailsData> retrieveHardWareDetailsByItemCode(Long clientId, String itemCode);
 

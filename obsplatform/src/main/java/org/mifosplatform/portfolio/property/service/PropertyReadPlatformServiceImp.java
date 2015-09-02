@@ -444,6 +444,22 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			return null;
 		}
      }
+
+	@Override
+	public List<PropertyDeviceMappingData> retrievePropertyDeviceMappingData(String serialNumber) {
+		
+		try {	
+				context.authenticatedUser();
+				final PropertyDeviceMapper mapper = new PropertyDeviceMapper();
+				
+				final String sql = "select pd.id as id,pd.serial_number as serialnumber,pd.property_code as propertyCode " +
+						" from b_propertydevice_mapping pd where pd.serial_number =? and pd.is_deleted = 'N'";
+				
+				return this.jdbcTemplate.query(sql, mapper, new Object[] {serialNumber});
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
 	
 	
 }
