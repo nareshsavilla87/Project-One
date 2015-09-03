@@ -149,7 +149,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	             final String addressType=command.stringValueOfParameterNamed(ADDRESSTYPE);
 	             
 	             
-	             if(addressDatas.size()==1 && addressType.equalsIgnoreCase("BILLING")){
+	             if(addressType.equalsIgnoreCase("BILLING")){
 	            	 
 	            	 final Address  newAddress=Address.fromJson(clientId, command);
                	     this.addressRepository.save(newAddress);
