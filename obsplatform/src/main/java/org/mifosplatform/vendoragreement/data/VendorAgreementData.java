@@ -63,6 +63,7 @@ public class VendorAgreementData {
 	private Long contentCodeId;
 	private String regionName;
 	private LocalDate date;
+	private BigDecimal contentSellPrice;
     
     
 	public VendorAgreementData(List<PriceRegionData> priceRegionData,
@@ -124,7 +125,7 @@ public class VendorAgreementData {
 
 	public VendorAgreementData(Long id, Long vendorAgreementId,
 			Long contentCodeId, String loyaltyType, BigDecimal loyaltyShare,
-			Long priceRegion, BigDecimal contentCost, String contentCode, String regionName) {
+			Long priceRegion, BigDecimal contentCost, String contentCode, String regionName, BigDecimal contentSellPrice) {
 		
 		this.id = id;
 		this.vendorAgreementId = vendorAgreementId;
@@ -135,7 +136,7 @@ public class VendorAgreementData {
 		this.loyaltyShare = loyaltyShare;
 		this.priceRegion = priceRegion;
 		this.contentCost = contentCost;
-		
+		this.contentSellPrice = contentSellPrice;
 	}
 
 	public String getFileName() {
