@@ -20,6 +20,7 @@ import org.mifosplatform.infrastructure.core.data.DataValidatorBuilder;
 import org.mifosplatform.infrastructure.core.exception.InvalidJsonException;
 import org.mifosplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.portfolio.client.api.ClientApiConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -36,7 +37,7 @@ public final class OfficeCommandFromApiJsonDeserializer {
      * The parameters supported for this command.
      */
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("name", "parentId", "openingDate", "externalId",
-            "locale", "dateFormat", "officeType"));
+            "locale", "dateFormat", "officeType","officeNumber","phoneNumber","email","city","state","country"));
 
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -74,6 +75,25 @@ public final class OfficeCommandFromApiJsonDeserializer {
             final Long parentId = fromApiJsonHelper.extractLongNamed("parentId", element);
             baseDataValidator.reset().parameter("parentId").value(parentId).notNull().integerGreaterThanZero();
         }
+        
+        final String email = fromApiJsonHelper.extractStringNamed("email", element);
+        baseDataValidator.reset().parameter("email").value(email).notBlank();
+        
+        if(email!=null){
+        	final Boolean isValid = email.matches(ClientApiConstants.EMAIL_REGEX);
+        	if(!isValid)
+        	dataValidationErrors.add(ApiParameterError.parameterError("error.invalid.email.address","Invalid Email Address", "email",email));
+        
+        } 
+        
+		final String city = fromApiJsonHelper.extractStringNamed("city", element);
+		baseDataValidator.reset().parameter("city").value(city).notBlank().notExceedingLengthOf(100);
+		
+		final String state = fromApiJsonHelper.extractStringNamed("state", element);
+		baseDataValidator.reset().parameter("state").value(state).notBlank().notExceedingLengthOf(100);
+		
+		final String country = fromApiJsonHelper.extractStringNamed("country", element);
+		baseDataValidator.reset().parameter("country").value(country).notBlank().notExceedingLengthOf(100);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
@@ -117,6 +137,25 @@ public final class OfficeCommandFromApiJsonDeserializer {
             final Long parentId = fromApiJsonHelper.extractLongNamed("parentId", element);
             baseDataValidator.reset().parameter("parentId").value(parentId).notNull().integerGreaterThanZero();
         }
+        
+        final String email = fromApiJsonHelper.extractStringNamed("email", element);
+        baseDataValidator.reset().parameter("email").value(email).notBlank();
+        
+        if(email!=null){
+        	final Boolean isValid = email.matches(ClientApiConstants.EMAIL_REGEX);
+        	if(!isValid)
+        	dataValidationErrors.add(ApiParameterError.parameterError("error.invalid.email.address","Invalid Email Address", "email",email));
+        
+        } 
+        
+		final String city = fromApiJsonHelper.extractStringNamed("city", element);
+		baseDataValidator.reset().parameter("city").value(city).notBlank().notExceedingLengthOf(100);
+		
+		final String state = fromApiJsonHelper.extractStringNamed("state", element);
+		baseDataValidator.reset().parameter("state").value(state).notBlank().notExceedingLengthOf(100);
+		
+		final String country = fromApiJsonHelper.extractStringNamed("country", element);
+		baseDataValidator.reset().parameter("country").value(country).notBlank().notExceedingLengthOf(100);
 
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }

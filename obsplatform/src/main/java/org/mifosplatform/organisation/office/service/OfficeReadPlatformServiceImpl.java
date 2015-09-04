@@ -52,9 +52,10 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             return "o.id AS id,o.name AS name,"
             	       +NAMEDECORATEDBASEON_HIERARCHY+
             	       "AS nameDecorated,o.external_id AS externalId,o.opening_date AS openingDate,o.hierarchy AS hierarchy," +
-            	       "parent.id AS parentId,parent.name AS parentName,c.code_value as officeType, ifnull(b.balance_amount,0 )as balance" +
+            	       "parent.id AS parentId,parent.name AS parentName,c.code_value as officeType, ifnull(b.balance_amount,0 )as balance, " +
+            	       "od.state as state,od.city as city,od.country as country,od.phone_number as phoneNumber,od.office_number as officeNumber,od.email_id as email " +
             	       " FROM m_office o LEFT JOIN m_office AS parent ON parent.id = o.parent_id  join m_code_value c on c.id=o.office_type and c.code_value='Office' " +
-            	       " Left join m_office_balance b on o.id = b.office_id ";
+            	       " Left join m_office_balance b on o.id = b.office_id  Left join b_office_address od ON o.id = od.office_id  ";
         }
 
         @Override
@@ -70,8 +71,14 @@ public class OfficeReadPlatformServiceImpl implements OfficeReadPlatformService 
             final String parentName = resultSet.getString("parentName");
             final String officeType = resultSet.getString("officeType");
             final BigDecimal balance =resultSet.getBigDecimal("balance");
+            final String city =resultSet.getString("city");
+        	final String state =resultSet.getString("state");
+        	final String country =resultSet.getString("country");
+        	final String email =resultSet.getString("email");
+        	final String phoneNumber =resultSet.getString("phoneNumber");
+        	final String officeNumber =resultSet.getString("officeNumber");
 
-            return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, null, null, officeType,balance);
+            return new OfficeData(id, name, nameDecorated, externalId, openingDate, hierarchy, parentId, parentName, null, null, officeType,balance,city,state,country,email,phoneNumber,officeNumber);
         }
     }
 
