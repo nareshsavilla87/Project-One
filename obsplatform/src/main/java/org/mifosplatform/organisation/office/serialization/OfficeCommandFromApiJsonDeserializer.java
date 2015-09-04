@@ -76,9 +76,6 @@ public final class OfficeCommandFromApiJsonDeserializer {
             baseDataValidator.reset().parameter("parentId").value(parentId).notNull().integerGreaterThanZero();
         }
         
-        final String phone = fromApiJsonHelper.extractStringNamed("phoneNumber", element);
-        baseDataValidator.reset().parameter("phoneNumber").value(phone).notBlank().notExceedingLengthOf(30);
-        
         final String email = fromApiJsonHelper.extractStringNamed("email", element);
         baseDataValidator.reset().parameter("email").value(email).notBlank();
         
@@ -140,9 +137,6 @@ public final class OfficeCommandFromApiJsonDeserializer {
             final Long parentId = fromApiJsonHelper.extractLongNamed("parentId", element);
             baseDataValidator.reset().parameter("parentId").value(parentId).notNull().integerGreaterThanZero();
         }
-        
-        final String phone = fromApiJsonHelper.extractStringNamed("phoneNumber", element);
-        baseDataValidator.reset().parameter("phoneNumber").value(phone).notBlank().notExceedingLengthOf(30);
         
         final String email = fromApiJsonHelper.extractStringNamed("email", element);
         baseDataValidator.reset().parameter("email").value(email).notBlank();
