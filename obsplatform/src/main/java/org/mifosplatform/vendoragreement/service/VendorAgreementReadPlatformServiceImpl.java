@@ -107,7 +107,7 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 		public String schema() {
 			return " bvad.id AS id,bvad.vendor_agmt_id AS vendorAgreementId,if(va.content_type = 'Package',pm.plan_code,s.service_code) as contentCode," +
 				   " bvad.content_code AS contentCodeId,bvad.loyalty_type AS loyaltyType,bvad.loyalty_share AS loyaltyShare, bvad.price_region AS priceRegionId," +
-				   " rm.priceregion_name as regionName,bvad.content_cost AS contentCost" +
+				   " rm.priceregion_name as regionName,bvad.content_cost AS contentCost, bvad.content_sellprice AS contentSellPrice" +
 				   " FROM  b_vendor_agreement va, b_vendor_agmt_detail bvad" +
 				   " left join b_plan_master pm on pm.id = bvad.content_code " +
 				   " left join b_service s on s.id = bvad.content_code" +
@@ -129,8 +129,8 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 			Long priceRegionId = rs.getLong("priceRegionId");
 			String regionName = rs.getString("regionName");
 			BigDecimal contentCost = rs.getBigDecimal("contentCost");
-			
-			return new VendorAgreementData(id, vendorAgreementId, contentCodeId, loyaltyType, loyaltyShare, priceRegionId, contentCost,contentCode,regionName);
+			BigDecimal contentSellPrice = rs.getBigDecimal("contentSellPrice");
+			return new VendorAgreementData(id, vendorAgreementId, contentCodeId, loyaltyType, loyaltyShare, priceRegionId, contentCost,contentCode,regionName, contentSellPrice);
 			
 		}
 	}
