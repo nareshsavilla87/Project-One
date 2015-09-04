@@ -98,8 +98,9 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 				final BigDecimal loyaltyShare = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("loyaltyShare", element);
 				final Long priceRegion = fromApiJsonHelper.extractLongNamed("priceRegion", element);
 				final BigDecimal contentCost = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("contentCost", element);
+				final BigDecimal contentSellPrice = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("contentSellPrice", element);
 				
-				final VendorAgreementDetail vendorDetail = new VendorAgreementDetail(contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost);
+				final VendorAgreementDetail vendorDetail = new VendorAgreementDetail(contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost, contentSellPrice);
 				vendor.addVendorDetails(vendorDetail);
 			}		 
 			
@@ -162,6 +163,7 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 			final Long priceRegion = fromApiJsonHelper.extractLongNamed("priceRegion", element);
 			final BigDecimal loyaltyShare = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("loyaltyShare", element);
 			final BigDecimal contentCost = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("contentCost", element);
+			final BigDecimal contentSellPrice = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("contentSellPrice", element);
 			
 			if(vendorDetailId != null){
 				
@@ -175,6 +177,7 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 				vendordetail.setLoyaltyShare(loyaltyShare);
 				vendordetail.setPriceRegion(priceRegion);
 				vendordetail.setContentCost(contentCost);
+				vendordetail.setContentSellPrice(contentSellPrice);
 				/*if("NONE".equalsIgnoreCase(loyaltyType)){
 					vendordetail.setContentCost(contentCost);
 				}else{
@@ -184,7 +187,7 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
  				
 			}else{
 				validationForStartAndEndDate(vendorCheck, agreementStartDate, contentCode);
-				final VendorAgreementDetail vendordetail = new VendorAgreementDetail(contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost);
+				final VendorAgreementDetail vendordetail = new VendorAgreementDetail(contentCode, loyaltyType, loyaltyShare, priceRegion, contentCost, contentSellPrice);
 				vendor.addVendorDetails(vendordetail);
 			}
 
