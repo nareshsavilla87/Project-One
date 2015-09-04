@@ -8,6 +8,7 @@ package org.mifosplatform.organisation.office.api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -33,6 +34,7 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
 import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.office.service.OfficeReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,13 +62,15 @@ public class OfficesApiResource {
     private final ApiRequestParameterHelper apiRequestParameterHelper;
     private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
     private final CodeValueReadPlatformService codeValueReadPlatformService;
+    private final AddressReadPlatformService addressReadPlatformService;
     public static final String OFFICE_TYPE="Office Type";
 
     @Autowired
     public OfficesApiResource(final PlatformSecurityContext context, final OfficeReadPlatformService readPlatformService,
             final DefaultToApiJsonSerializer<OfficeData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
             final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-            final CodeValueReadPlatformService codeValueReadPlatformService, final DefaultToApiJsonSerializer<FinancialTransactionsData> toFinancialTransactionApiJsonSerializer) {
+            final CodeValueReadPlatformService codeValueReadPlatformService, final DefaultToApiJsonSerializer<FinancialTransactionsData> toFinancialTransactionApiJsonSerializer,
+            final AddressReadPlatformService addressReadPlatformService) {
         this.context = context;
         this.readPlatformService = readPlatformService;
         this.toApiJsonSerializer = toApiJsonSerializer;
@@ -74,6 +78,7 @@ public class OfficesApiResource {
         this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
         this.codeValueReadPlatformService = codeValueReadPlatformService;
         this.toFinancialTransactionApiJsonSerializer = toFinancialTransactionApiJsonSerializer;
+        this.addressReadPlatformService = addressReadPlatformService;
     }
 
     @GET
@@ -97,8 +102,8 @@ public class OfficesApiResource {
         OfficeData office = this.readPlatformService.retrieveNewOfficeTemplate();
         final Collection<OfficeData> allowedParents = this.readPlatformService.retrieveAllOfficesForDropdown();
         final Collection<CodeValueData> officeTypes=this.codeValueReadPlatformService.retrieveCodeValuesByCode(OFFICE_TYPE);
-        
         office = OfficeData.appendedTemplate(office, allowedParents,officeTypes, DateUtils.getLocalDateOfTenantForClient());
+        office.setCitiesData(this.addressReadPlatformService.retrieveCityDetails());
 
         final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
         return this.toApiJsonSerializer.serialize(settings, office, RESPONSE_DATA_PARAMETERS);
@@ -134,7 +139,11 @@ public class OfficesApiResource {
         if (settings.isTemplate()) {
             final Collection<OfficeData> allowedParents = this.readPlatformService.retrieveAllowedParents(officeId);
             final Collection<CodeValueData> codeValueDatas=this.codeValueReadPlatformService.retrieveCodeValuesByCode(OFFICE_TYPE);
+            
             office = OfficeData.appendedTemplate(office, allowedParents,codeValueDatas, DateUtils.getLocalDateOfTenantForClient());
+            office.setCountryData(this.addressReadPlatformService.retrieveCountryDetails());
+        	office.setCitiesData(this.addressReadPlatformService.retrieveCityDetails());
+        	office.setStatesData(this.addressReadPlatformService.retrieveStateDetails());
         }
 
         return this.toApiJsonSerializer.serialize(settings, office, RESPONSE_DATA_PARAMETERS);

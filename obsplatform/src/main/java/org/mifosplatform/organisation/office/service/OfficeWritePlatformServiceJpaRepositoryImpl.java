@@ -18,6 +18,8 @@ import org.mifosplatform.organisation.monetary.domain.ApplicationCurrencyReposit
 import org.mifosplatform.organisation.monetary.domain.MonetaryCurrency;
 import org.mifosplatform.organisation.monetary.domain.Money;
 import org.mifosplatform.organisation.office.domain.Office;
+import org.mifosplatform.organisation.office.domain.OfficeAddress;
+import org.mifosplatform.organisation.office.domain.OfficeAddressRepository;
 import org.mifosplatform.organisation.office.domain.OfficeRepository;
 import org.mifosplatform.organisation.office.domain.OfficeTransaction;
 import org.mifosplatform.organisation.office.domain.OfficeTransactionRepository;
@@ -43,13 +45,14 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
     private final OfficeRepository officeRepository;
     private final OfficeTransactionRepository officeTransactionRepository;
     private final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository;
+    private final OfficeAddressRepository addressRepository;
 
     @Autowired
     public OfficeWritePlatformServiceJpaRepositoryImpl(final PlatformSecurityContext context,
             final OfficeCommandFromApiJsonDeserializer fromApiJsonDeserializer,
             final OfficeTransactionCommandFromApiJsonDeserializer moneyTransferCommandFromApiJsonDeserializer,
             final OfficeRepository officeRepository, final OfficeTransactionRepository officeMonetaryTransferRepository,
-            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository) {
+            final ApplicationCurrencyRepositoryWrapper applicationCurrencyRepository,final OfficeAddressRepository addressRepository) {
     	
         this.context = context;
         this.fromApiJsonDeserializer = fromApiJsonDeserializer;
@@ -57,6 +60,7 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
         this.officeRepository = officeRepository;
         this.officeTransactionRepository = officeMonetaryTransferRepository;
         this.applicationCurrencyRepository = applicationCurrencyRepository;
+        this.addressRepository = addressRepository;
     }
 
     @Transactional
@@ -75,6 +79,9 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
 
             final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, parentId);
             final Office office = Office.fromJson(parent, command);
+            
+            OfficeAddress address =OfficeAddress.fromJson(command,office);
+            office.setOfficeAddress(address);
 
             // pre save to generate id for use in office hierarchy
             this.officeRepository.save(office);
@@ -116,6 +123,13 @@ public class OfficeWritePlatformServiceJpaRepositoryImpl implements OfficeWriteP
                 final Office parent = validateUserPriviledgeOnOfficeAndRetrieve(currentUser, parentId);
                 office.update(parent);
             }
+            
+            //update officeAddress
+            final  OfficeAddress officeAddress  = this.addressRepository.findOneWithPartnerId(office);
+            final Map<String, Object> addressChanges = officeAddress.update(command);
+            if(!addressChanges.isEmpty()){
+            	office.setOfficeAddress(officeAddress);
+ 		    }
 
             if (!changes.isEmpty()) {
                 this.officeRepository.saveAndFlush(office);
