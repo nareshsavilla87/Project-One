@@ -14,8 +14,6 @@ import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.billingorder.domain.InvoiceTax;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
-import org.mifosplatform.portfolio.client.domain.Client;
-import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,19 +23,14 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 	private final GenerateBill generateBill;
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final InvoiceRepository invoiceRepository;
-	//private final DiscountMasterRepository discountMasterRepository;
-	private final ClientRepositoryWrapper clientRepository;
-
-
 
 	@Autowired
 	public GenerateBillingOrderServiceImplementation(final GenerateBill generateBill,final BillingOrderReadPlatformService billingOrderReadPlatformService,
-			final InvoiceRepository invoiceRepository,final ClientRepositoryWrapper clientRepository) {
+			final InvoiceRepository invoiceRepository) {
 	
 		this.generateBill = generateBill;
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.invoiceRepository = invoiceRepository;
-		this.clientRepository = clientRepository;
 	
 	}
 
@@ -140,10 +133,10 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 		BigDecimal totalChargeAmount = BigDecimal.ZERO;
 		BigDecimal netTaxAmount = BigDecimal.ZERO;
 
-		Client client=this.clientRepository.findOneWithNotFoundDetection(billingOrderCommands.get(0).getClientId());
+		//Client client=this.clientRepository.findOneWithNotFoundDetection(billingOrderCommands.get(0).getClientId());
         
-		Invoice invoice = new Invoice(billingOrderCommands.get(0).getClientId(),DateUtils.getLocalDateOfTenant().toDate(), invoiceAmount, invoiceAmount,
-				netTaxAmount, "active");
+		Invoice invoice = new Invoice(billingOrderCommands.get(0).getClientId(),DateUtils.getLocalDateOfTenant().toDate(), 
+				                      invoiceAmount, invoiceAmount,netTaxAmount, "active");
 
 		for (BillingOrderCommand billingOrderCommand : billingOrderCommands) {
 			
@@ -159,7 +152,6 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 			    netChargeAmount = billingOrderCommand.getPrice().subtract(discountAmount);
 
 			}
-			
 
 			List<InvoiceTaxCommand> invoiceTaxCommands = billingOrderCommand.getListOfTax();
 
@@ -168,9 +160,7 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 					discountCode,billingOrderCommand.getPrice(), discountAmount,netChargeAmount, billingOrderCommand.getStartDate(),
 					billingOrderCommand.getEndDate());
 
-			// client TaxExemption
-
-			if (('N'==client.getTaxExemption()) && (invoiceTaxCommands != null && !invoiceTaxCommands.isEmpty())) {
+			if (!invoiceTaxCommands.isEmpty()) {
 
 				for (InvoiceTaxCommand invoiceTaxCommand : invoiceTaxCommands) {
 
@@ -228,19 +218,19 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 		BigDecimal invoiceAmount = BigDecimal.ZERO;
 		BigDecimal totalChargeAmount = BigDecimal.ZERO;
 		BigDecimal netTaxAmount = BigDecimal.ZERO;
-
 		Invoice invoice=null;
 		
-		Client client=this.clientRepository.findOneWithNotFoundDetection(billingOrderCommands.get(0).getClientId());
+		//Client client=this.clientRepository.findOneWithNotFoundDetection(billingOrderCommands.get(0).getClientId());
 		
 		if (newInvoice != null) {
            
 			invoice=newInvoice;
 			
 		} else {
-			invoice = new Invoice(billingOrderCommands.get(0).getClientId(),DateUtils.getLocalDateOfTenant().toDate(), invoiceAmount,
-					invoiceAmount, netTaxAmount, "active");
+			invoice = new Invoice(billingOrderCommands.get(0).getClientId(),DateUtils.getLocalDateOfTenant().toDate(), 
+					  invoiceAmount,invoiceAmount, netTaxAmount, "active");
 		}
+		
 		for (BillingOrderCommand billingOrderCommand : billingOrderCommands) {
 
 			BigDecimal netChargeTaxAmount = BigDecimal.ZERO;
@@ -262,8 +252,7 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 					billingOrderCommand.getChargeType(), discountCode,billingOrderCommand.getPrice(), discountAmount,
 					netChargeAmount, billingOrderCommand.getStartDate(),billingOrderCommand.getEndDate());
 
-			// client TaxExemption
-			if (('N'==client.getTaxExemption()) && (invoiceTaxCommands != null && !invoiceTaxCommands.isEmpty())) {
+			if (!invoiceTaxCommands.isEmpty()) {
 
 					for (InvoiceTaxCommand invoiceTaxCommand : invoiceTaxCommands) {
 
