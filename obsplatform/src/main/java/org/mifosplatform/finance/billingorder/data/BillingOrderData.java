@@ -26,6 +26,7 @@ public class BillingOrderData {
 	private Long orderId;
 	private Integer taxInclusive;
 	private Long invoiceId;
+	private boolean taxExemption;
 	
 	
 	public BillingOrderData(final Long orderId,final String durationType,final Date startDate, final Date nextBillableDate, final Date invoiceTillDate, final String billingAlign){
@@ -44,7 +45,7 @@ public class BillingOrderData {
 			final String chargeCode,final String chargeType,final Integer chargeDuration,
 			final String durationType,final Date invoiceTillDate,final BigDecimal price,
 			final String billingAlign,final Date billStartDate,final Date billEndDate,
-			final Long orderstatus,final Integer taxInclusive) {
+			final Long orderstatus,final Integer taxInclusive,final String taxExemption) {
 		
 		this.clientOrderId = clientOrderId;
 		this.OderPriceId = OderPriceId;
@@ -65,6 +66,7 @@ public class BillingOrderData {
 		this.billEndDate = billEndDate;
 		this.orderstatus=orderstatus;
 		this.taxInclusive = taxInclusive;
+		this.taxExemption = "Y".equalsIgnoreCase(taxExemption) ? true : false;
 
 	}
 	
@@ -106,10 +108,9 @@ public class BillingOrderData {
 		this.billEndDate=billEndDate;
 		this.orderstatus=orderStatus;
 		this.taxInclusive=taxInclusive;
-		this.setInvoiceId(invoiceId);
+		this.invoiceId=invoiceId;
 		
 	}
-
 
 
 	public BillingOrderData(Long invoiceId) {
@@ -119,72 +120,95 @@ public class BillingOrderData {
 	public Long getClientId() {
 		return clientId;
 	}
+
 	public void setClientId(Long clientId) {
 		this.clientId = clientId;
 	}
+
 	public Date getStartDate() {
 		return startDate;
 	}
+
 	public void setStartDate(Date startDate) {
 		this.startDate = startDate;
 	}
+
 	public Date getNextBillableDate() {
 		return nextBillableDate;
 	}
+
 	public void setNextBillableDate(Date nextBillableDate) {
 		this.nextBillableDate = nextBillableDate;
 	}
+
 	public Date getEndDate() {
 		return endDate;
 	}
+
 	public void setEndDate(Date endDate) {
 		this.endDate = endDate;
 	}
+
 	public String getBillingFrequency() {
 		return billingFrequency;
 	}
+
 	public void setBillingFrequency(String billingFrequency) {
 		this.billingFrequency = billingFrequency;
 	}
+
 	public String getChargeCode() {
 		return chargeCode;
 	}
+
 	public void setChargeCode(String chargeCode) {
 		this.chargeCode = chargeCode;
 	}
+
 	public String getChargeType() {
 		return chargeType;
 	}
+
 	public void setChargeType(String chargeType) {
 		this.chargeType = chargeType;
 	}
+
 	public Integer getChargeDuration() {
 		return chargeDuration;
 	}
+
 	public void setChargeDuration(Integer chargeDuration) {
 		this.chargeDuration = chargeDuration;
 	}
+
 	public String getDurationType() {
 		return durationType;
 	}
+
 	public void setDurationType(String durationType) {
 		this.durationType = durationType;
 	}
+
 	public Date getInvoiceTillDate() {
 		return invoiceTillDate;
 	}
+
 	public void setInvoiceTillDate(Date invoiceTillDate) {
 		this.invoiceTillDate = invoiceTillDate;
 	}
+
 	public BigDecimal getPrice() {
 		return price;
 	}
+
 	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
+
 	public String getBillingAlign() {
 		return billingAlign;
 	}
+
 	public void setBillingAlign(String billingAlign) {
 		this.billingAlign = billingAlign;
 	}
@@ -204,7 +228,6 @@ public class BillingOrderData {
 	public void setOderPriceId(Long oderPriceId) {
 		OderPriceId = oderPriceId;
 	}
-
 
 	public Long getPlanId() {
 		return planId;
@@ -249,11 +272,21 @@ public class BillingOrderData {
 	public void setTaxInclusive(Integer taxInclusive) {
 		this.taxInclusive = taxInclusive;
 	}
+
 	public Long getInvoiceId() {
 		return invoiceId;
 	}
+
 	public void setInvoiceId(Long invoiceId) {
 		this.invoiceId = invoiceId;
 	}
-	
+
+	public boolean isTaxExemption() {
+		return taxExemption;
+	}
+
+	public void setTaxExemption(boolean taxExemption) {
+		this.taxExemption = taxExemption;
+	}
+
 }
