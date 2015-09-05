@@ -17,10 +17,11 @@ import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderServic
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.order.domain.Order;
@@ -63,7 +64,8 @@ public class OrderAddOnsWritePlatformServiceImpl implements OrderAddOnsWritePlat
 	private final GenerateBillingOrderService generateBillingOrderService;
 	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
 	private final PlanRepository planRepository;
-	private  final ChargeCodeRepository chargeCodeRepository;
+	private final ChargeCodeRepository chargeCodeRepository;
+	private final ClientRepositoryWrapper clientRepository;
 	
 @Autowired
  public OrderAddOnsWritePlatformServiceImpl(final PlatformSecurityContext context,final OrderAddOnsCommandFromApiJsonDeserializer fromApiJsonDeserializer,
@@ -71,7 +73,8 @@ public class OrderAddOnsWritePlatformServiceImpl implements OrderAddOnsWritePlat
 		 final ServiceMappingRepository serviceMappingRepository,final OrderAddonsRepository addonsRepository,final PlanRepository  planRepository,
 		 final ProvisioningWritePlatformService provisioningWritePlatformService,final HardwareAssociationRepository associationRepository,
 		 final OrderPriceRepository orderPriceRepository,final GenerateBillingOrderService generateBillingOrderService,
-		 final BillingOrderWritePlatformService billingOrderWritePlatformService,final ChargeCodeRepository chargeCodeRepository){
+		 final BillingOrderWritePlatformService billingOrderWritePlatformService,final ChargeCodeRepository chargeCodeRepository,
+		 final ClientRepositoryWrapper clientRepository){
 		
 	this.context=context;
 	this.fromJsonHelper=fromJsonHelper;
@@ -88,6 +91,7 @@ public class OrderAddOnsWritePlatformServiceImpl implements OrderAddOnsWritePlat
 	this.billingOrderWritePlatformService = billingOrderWritePlatformService;
 	this.generateBillingOrderService = generateBillingOrderService;
 	this.chargeCodeRepository = chargeCodeRepository;
+	this.clientRepository = clientRepository;
 	
 }
 
@@ -116,7 +120,7 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 	    }
 	    
 	   
-	    
+	    Client client=this.clientRepository.findOneWithNotFoundDetection(order.getClientId());
 	    HardwareAssociation association=this.hardwareAssociationRepository.findOneByOrderId(orderId);
 		for (JsonElement jsonElement : addonServices) {
 			OrderAddons addons=assembleOrderAddons(jsonElement,fromJsonHelper,order,startDate,endDate,contractId);
@@ -137,7 +141,7 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 			billingOrderDatas.add(new BillingOrderData(orderId,addons.getPriceId(),order.getPlanId(),order.getClientId(),startDate.toDate(),
 					orderPrice.getNextBillableDay(),addonEndDate,"",orderPrice.getChargeCode(),orderPrice.getChargeType(),Integer.valueOf(orderPrice.getChargeDuration()),
 					orderPrice.getDurationType(),orderPrice.getInvoiceTillDate(),orderPrice.getPrice(),"N",orderPrice.getBillStartDate(),addonEndDate,
-					order.getStatus(),orderPrice.isTaxInclusive()?1:0));
+					order.getStatus(),orderPrice.isTaxInclusive()?1:0,String.valueOf(client.getTaxExemption())));
 			
 			List<BillingOrderCommand> billingOrderCommands = this.generateBillingOrderService.generatebillingOrder(billingOrderDatas);
 			Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
