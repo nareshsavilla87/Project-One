@@ -22,8 +22,6 @@ public interface BillingOrderReadPlatformService {
 
 	List<BillingOrderData> getReverseBillingOrderData(Long clientId,LocalDate disconnectionDate, Long orderId);
 
-	//TaxMappingRateData retriveExemptionTaxDetails(Long clientId);
-
 	AgreementData retriveClientOfficeDetails(Long clientId);
 
 	AgreementData retrieveOfficeChargesCommission(Long id);
