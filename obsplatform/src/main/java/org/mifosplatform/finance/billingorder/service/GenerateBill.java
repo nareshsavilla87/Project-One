@@ -457,12 +457,15 @@ public class GenerateBill {
 		if (this.isDiscountApplicable(startDate, discountMasterData, endDate)) {
 			
 			discountMasterData = this.calculateDiscount(discountMasterData,price);
-			// Tax is calculated on netChages..
-			listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());
+			
+			// Tax is calculated on netChages..whenever customer has tax exemption false
+			if(!billingOrderData.isTaxExemption())
+			    listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());
 
 		} else {
-			// Tax is calculated on charges ..
-			listOfTaxes = this.calculateTax(billingOrderData, price);
+			// Tax is calculated on charges ..whenever customer has tax exemption false
+			if(!billingOrderData.isTaxExemption())
+			    listOfTaxes = this.calculateTax(billingOrderData, price);
 		}
 
 		return listOfTaxes;
