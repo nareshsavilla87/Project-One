@@ -133,7 +133,7 @@ public class MediaDeviceReadPlatformServiceImpl implements MediaDeviceReadPlatfo
 			final Long id = rs.getLong("id");
 			final String planCode = rs.getString("planCode");
 			final String planDescription = rs.getString("planDescription");
-			return new PlanData(id, planCode, planDescription);
+			return new PlanData(id, planCode, planDescription, null);
 		}
 	}
 	
@@ -158,7 +158,7 @@ public class MediaDeviceReadPlatformServiceImpl implements MediaDeviceReadPlatfo
 			final Long id = rs.getLong("id");
 			final String planCode = rs.getString("planCode");
 			final String planDescription = rs.getString("planDescription");
-			return new PlanData(id, planCode, planDescription);
+			return new PlanData(id, planCode, planDescription, null);
 		}
 	}
 	

@@ -288,5 +288,17 @@ public class VendorAgreementApiResource {
 		return response.build();
 		
 	}
+    
+    @GET
+	@Path("duration/{planId}") /** planId*/
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrievePlanDurationData(@PathParam("planId") final Long planId,@Context final UriInfo uriInfo) {
+
+		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
+		List<VendorAgreementData> agreementData = this.vendorAgreementReadPlatformService.retrievePlanDurationData(planId);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializer.serialize(settings, agreementData,RESPONSE_DATA_PARAMETERS);
+	}
 
 }
