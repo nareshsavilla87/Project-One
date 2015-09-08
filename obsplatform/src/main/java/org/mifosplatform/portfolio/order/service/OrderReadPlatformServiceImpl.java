@@ -55,7 +55,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
             		 "  and s.id=p.plan_id" +
             		 "  and cd.client_id ="+clientId+" group by s.id";*/
               
-            	sql="SELECT s.id AS id, s.plan_code AS planCode, s.is_prepaid AS isPrepaid" +
+            	sql="SELECT s.id AS id, s.plan_code AS planCode, s.plan_description as planDescription, s.is_prepaid AS isPrepaid" +
               	 " FROM b_plan_master s, b_plan_pricing p,b_priceregion_master prd,b_priceregion_detail pd,b_client_address cd,b_state bs" +
               	 " WHERE  s.plan_status = 1 AND s.is_deleted = 'n' AND s.id != "+planId+"  AND prd.id = pd.priceregion_id AND p.price_region_id = pd.priceregion_id AND " +
               	 " (pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_state c,b_charge_codes cc,b_client_address d" +
@@ -67,7 +67,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
               	 " AND d.client_id = "+clientId+"  AND a.plan_id != ? AND a.is_deleted = 'n'),0)) AND s.id = p.plan_id AND cd.client_id = "+clientId+"  GROUP BY s.id";
           
             }else{
-            	sql =  "  select s.id as id,s.plan_code as planCode,s.is_prepaid as isPrepaid " +
+            	sql =  "  select s.id as id,s.plan_code as planCode,s.plan_description as planDescription,s.is_prepaid as isPrepaid " +
             		   "  from b_plan_master s " +
     	        	   "  	where s.plan_status=1 and  s.is_deleted='n'  and s.id !=? ";	
             }
@@ -83,9 +83,10 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 
 	        Long id = rs.getLong("id");
 	            String planCode = rs.getString("planCode");
+	            String planDescription =rs.getString("planDescription");
 	            String isPrepaid = rs.getString("isPrepaid");
 	            List<ServiceData> services= priceReadPlatformService.retrieveServiceDetails(id);
-	            return new PlanCodeData(id,planCode,services,isPrepaid,null);
+	            return new PlanCodeData(id,planCode,services,isPrepaid,planDescription);
 
 	        }
 
