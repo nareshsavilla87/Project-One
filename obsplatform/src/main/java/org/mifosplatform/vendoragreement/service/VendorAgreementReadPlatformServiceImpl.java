@@ -174,7 +174,7 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 	private static final class PlanDetailsMapper implements RowMapper<PlanData> {
 
 		public String schema() {
-			return "   da.id AS id,da.plan_code AS planCode,da.plan_description  AS planDescription" +
+			return "   da.id AS id,da.plan_code AS planCode,da.plan_description  AS planDescription, da.is_prepaid as isPrepaid" +
 					" FROM  b_plan_master da where  da.id not in (SELECT vgd.content_code FROM b_vendor_agmt_detail vgd, b_vendor_agreement vg " +
 					" where vgd.content_code = da.id  and vg.id = vgd.vendor_agmt_id and vg.content_type ='Package' and vg.vendor_id !=?) and da.is_deleted = 'N'";
 
@@ -188,7 +188,8 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 			Long id = rs.getLong("id");
 			String planCode = rs.getString("planCode");
 			String planDescription = rs.getString("planDescription");
-			return new PlanData(id,planCode,planDescription);
+			String isPrepaid = rs.getString("isPrepaid");
+			return new PlanData(id,planCode,planDescription, isPrepaid);
 
 		}
 	}
@@ -220,6 +221,34 @@ public class VendorAgreementReadPlatformServiceImpl implements VendorAgreementRe
 		
 
 	}
+
+	@Override
+	public List<VendorAgreementData> retrievePlanDurationData(Long planId) {
+		try {
+			context.authenticatedUser();
+			String sql;
+			RetrievePlanDuration mapper = new RetrievePlanDuration();
+			sql = "select bp.id as id,bp.price_region_id as priceRegionId,bp.duration as duration" +
+					" from b_plan_pricing bp where plan_id = ? group by bp.duration";
+
+			return this.jdbcTemplate.query(sql, mapper, new Object[] { planId });
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
 	
+	private static final class RetrievePlanDuration implements RowMapper<VendorAgreementData> {
+
+		@Override
+		public VendorAgreementData mapRow(final ResultSet rs, final int rowNum)
+				throws SQLException {
+			
+			Long id = rs.getLong("id");
+			Long priceRegionId = rs.getLong("priceRegionId");
+			String duration = rs.getString("duration");
+			
+			return new VendorAgreementData(id ,priceRegionId ,duration);
+		}
+	}
 
 }
