@@ -44,6 +44,9 @@ public class OneTimeSaleData {
 	private String saleType;
 	private LocalDate warrantyDate;
 	private String propertyCode;
+	private Long itemDetailId;
+	private String provserialnumber;
+	private String quality;
 	
 	public OneTimeSaleData(final List<ItemData> itemData, final List<DiscountMasterData> discountData,
 			final Collection<OfficeData> officesData, final Collection<SubscriptionData> contractPeriods) {
@@ -58,7 +61,7 @@ public class OneTimeSaleData {
 
 	public OneTimeSaleData(Long id, LocalDate saleDate, String itemCode,
 			String chargeCode, String quantity, BigDecimal totalPrice,String hardwareAllocated,String itemClass, String serialNo,
-			String units,String saleType,LocalDate warrantyDate, String propertyCode) {
+			String units,String saleType,LocalDate warrantyDate, String propertyCode,Long itemDetailId,String provserialnumber,String quality) {
 		this.id=id;
 		this.saleDate=saleDate;
 		this.itemCode=itemCode;
@@ -73,6 +76,9 @@ public class OneTimeSaleData {
 		this.saleType = saleType;
 		this.warrantyDate = warrantyDate;
 		this.propertyCode = propertyCode;
+		this.itemDetailId = itemDetailId;
+		this.provserialnumber = provserialnumber;
+		this.quality = quality;
 	}
 
 
