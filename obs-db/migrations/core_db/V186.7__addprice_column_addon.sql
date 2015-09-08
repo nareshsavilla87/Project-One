@@ -41,6 +41,21 @@ set @id = (select id from job where name ='AUTO_EXIPIRY' OR display_name='AUTO E
 
 insert ignore into `job_parameters`(`id`,`job_id`,`param_name`,`param_type`,`param_default_value`,`param_value`,`is_dynamic`,`query_values`) values (null,@id,'addonExipiry','COMBO','N','N','N',null);
 
-ALTER TABLE `m_client` ADD COLUMN `title` `title` VARCHAR(15) NULL DEFAULT NULL ;
+Drop procedure IF EXISTS addTitleInMClient;
+DELIMITER //
+create procedure addTitleInMClient() 
+Begin
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME = 'title'
+     and TABLE_NAME = 'm_client'
+     and TABLE_SCHEMA = DATABASE())THEN
+alter  table m_client add column `title` VARCHAR(15) DEFAULT NULL;
+
+END IF;
+END //
+DELIMITER ;
+call addTitleInMClient();
+Drop procedure IF EXISTS addTitleInMClient;
 
 
