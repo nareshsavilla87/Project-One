@@ -34,7 +34,7 @@ public class HardwareAssociation extends AbstractAuditableCustom<AppUser, Long> 
 	
 	@Column(name = "is_deleted")
 	private String isDeleted="N";
-
+	
 	
 	 public HardwareAssociation() {
 		// TODO Auto-generated constructor stub

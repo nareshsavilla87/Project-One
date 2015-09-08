@@ -306,7 +306,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		final Long activeorders = this.orderReadPlatformService.retrieveClientActiveOrderDetails(clientId, oldSerialnumber);
 		
 		if (activeorders != 0) {
-			throw new ActivePlansFoundException(serialNumber);
+			throw new ActivePlansFoundException(oldSerialnumber);
 		}
 		// Update in Association table if Exist
 		final List<HardwareAssociation> hardwareAssociations = this.associationRepository.findOneByserialNo(oldSerialnumber);

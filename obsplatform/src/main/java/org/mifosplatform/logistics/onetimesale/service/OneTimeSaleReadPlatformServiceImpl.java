@@ -88,8 +88,8 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 		public String schema() {
 			
 			return "o.id AS id,i.item_code AS itemCode, i.item_class as itemClass, a.serial_no as serialNo,o.sale_date as saleDate,o.charge_code AS chargeCode," +
-					" pdm.property_code as propertyCode,o.quantity as quantity,o.total_price as totalPrice,o.hardware_allocated as hardwareAllocated,o.units as units,o.device_mode as saleType,id.warranty_date as warrantyDate "
-					+ "  FROM b_item_master i JOIN b_onetime_sale o ON i.id=o.item_id and o.is_deleted='N' " +
+					" pdm.property_code as propertyCode,o.quantity as quantity,o.total_price as totalPrice,o.hardware_allocated as hardwareAllocated,o.units as units,o.device_mode as saleType,id.warranty_date as warrantyDate, "
+					+ " id.id as itemDetailId,id.provisioning_serialno as provserialnumber,id.quality as quality FROM b_item_master i JOIN b_onetime_sale o ON i.id=o.item_id and o.is_deleted='N' " +
 					" LEFT JOIN b_allocation a ON a.order_id=o.id and a.is_deleted = 'N' " +
 					" LEFT JOIN b_propertydevice_mapping pdm ON pdm.serial_number = a.serial_no" +
 					" LEFT JOIN b_item_detail id ON id.serial_no = a.serial_no AND id.is_deleted = 'N'  ";
@@ -112,7 +112,10 @@ public class OneTimeSaleReadPlatformServiceImpl implements	OneTimeSaleReadPlatfo
 			final String propertyCode =rs.getString("propertyCode");
 			final String saleType = rs.getString("saleType");
 			final LocalDate warrantyDate = JdbcSupport.getLocalDate(rs, "warrantyDate");
-			return new OneTimeSaleData(id, saleDate, itemCode, chargeCode,quantity, totalPrice,haardwareAllocated,itemClass,serialNo,units,saleType,warrantyDate,propertyCode);
+			final Long itemDetailId = rs.getLong("itemDetailId");
+			final String provserialnumber = rs.getString("provserialnumber");
+			final String quality = rs.getString("quality");
+			return new OneTimeSaleData(id, saleDate, itemCode, chargeCode,quantity, totalPrice,haardwareAllocated,itemClass,serialNo,units,saleType,warrantyDate,propertyCode,itemDetailId,provserialnumber,quality);
 
 		}
 
