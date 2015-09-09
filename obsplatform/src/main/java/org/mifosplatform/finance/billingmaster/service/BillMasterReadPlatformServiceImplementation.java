@@ -3,11 +3,11 @@ package org.mifosplatform.finance.billingmaster.service;
 import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Date;
 import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
-import org.mifosplatform.finance.billingmaster.service.BillMasterReadPlatformService;
 import org.mifosplatform.finance.billingorder.data.BillDetailsData;
 import org.mifosplatform.finance.financialtransaction.data.FinancialTransactionsData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -15,6 +15,7 @@ import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.scheduledjobs.scheduledjobs.data.BatchHistoryData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -376,6 +377,11 @@ public class BillMasterReadPlatformServiceImplementation implements
 						+" bd.Amount as amoount FROM b_bill_master b, b_bill_details bd where  b.id = bd.Bill_id and b.id =?";
 
 			}
+
+			public String schema() {
+				// TODO Auto-generated method stub
+				return null;
+			}
 		}
 		
 		@Override
@@ -435,6 +441,56 @@ public class BillMasterReadPlatformServiceImplementation implements
 			builder.append(" and date_format(transDate,'%Y-%m-%d') between '" + startDate + "' and '" + endDate + "' order by transDate asc");
 			final FinancialTypeMapper mapper = new FinancialTypeMapper();
 			return jdbcTemplate.query(builder.toString(), mapper, new Object[]{});
+		}
+		
+		@Override
+		public List<BatchHistoryData> retriveStatementDetailsForBill(){
+			
+			final StatementDetailsMapper mapper = new StatementDetailsMapper();
+
+			final String sql = "Select " + mapper.schema();
+
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
+		}
+		private static final class StatementDetailsMapper implements
+		RowMapper<BatchHistoryData> {
+
+		public String schema() {
+		return "id as id, transaction_date as transactiondate, transaction_type as transactiontype, count_value as countvalue,"
+				+ "batch_id as batchid from b_batch_history";
+		}
+
+		@Override
+		public BatchHistoryData mapRow(final ResultSet rs, final int rowNum)
+			throws SQLException {
+
+		final Long id = rs.getLong("id");
+		final Date transactionDate = rs.getDate("transactiondate");
+		final String transactionType = rs.getString("transactiontype");
+		final String countValue = rs.getString("countvalue");
+		final String batchId = rs.getString("batchid");
+
+		return new BatchHistoryData(id, transactionDate, transactionType,countValue, batchId);
+		}
+		}
+
+		@Override
+		public List<Long> retriveStatementsIdsByBatchId(String batchId) {
+			
+			final BillIdMapper mapper = new BillIdMapper();
+
+			final String sql = "Select id as id  from b_bill_master where batch_id = ? ";
+
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {batchId});
+		}
+		
+		private static final class BillIdMapper implements RowMapper<Long> {
+
+		@Override
+		public Long mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+			
+				return rs.getLong("id");
+		  }
 		}
 
 }
