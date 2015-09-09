@@ -1,111 +1,71 @@
 package org.mifosplatform.scheduledjobs.scheduledjobs.service;
 
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.sql.Types;
-import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import me.legrange.mikrotik.ApiConnection;
-import me.legrange.mikrotik.MikrotikApiException;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.joda.time.DateTimeZone;
-import org.joda.time.LocalDate;
-import org.joda.time.LocalTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.mifosplatform.crm.ticketmaster.api.TicketMasterApiResource;
-import org.mifosplatform.crm.ticketmaster.service.TicketMasterReadPlatformService;
-import org.mifosplatform.finance.billingmaster.api.BillingMasterApiResourse;
-import org.mifosplatform.finance.billingorder.domain.Invoice;
-import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
-import org.mifosplatform.finance.billingorder.service.InvoiceClient;
-import org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayData;
-import org.mifosplatform.finance.paymentsgateway.domain.PaymentGateway;
-import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayRepository;
-import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayReadPlatformService;
-import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayWritePlatformService;
-import org.mifosplatform.infrastructure.configuration.domain.Configuration;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
-import org.mifosplatform.infrastructure.core.api.JsonCommand;
-import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
-import org.mifosplatform.infrastructure.core.data.EnumOptionData;
-import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
-import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
-import org.mifosplatform.infrastructure.core.service.FileUtils;
-import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
-import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
-import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService;
-import org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
-import org.mifosplatform.infrastructure.jobs.service.JobName;
-import org.mifosplatform.infrastructure.jobs.service.RadiusJobConstants;
-import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
-import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
-import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
-import org.mifosplatform.organisation.message.data.BillingMessageDataForProcessing;
-import org.mifosplatform.organisation.message.service.BillingMessageDataWritePlatformService;
-import org.mifosplatform.organisation.message.service.BillingMesssageReadPlatformService;
-import org.mifosplatform.organisation.message.service.MessagePlatformEmailService;
-import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
-import org.mifosplatform.portfolio.order.data.OrderData;
-import org.mifosplatform.portfolio.order.domain.Order;
-import org.mifosplatform.portfolio.order.domain.OrderAddonsRepository;
-import org.mifosplatform.portfolio.order.domain.OrderPrice;
-import org.mifosplatform.portfolio.order.domain.OrderRepository;
-import org.mifosplatform.portfolio.order.service.OrderAddOnsWritePlatformService;
-import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
-import org.mifosplatform.provisioning.entitlements.data.ClientEntitlementData;
-import org.mifosplatform.provisioning.entitlements.data.EntitlementsData;
-import org.mifosplatform.provisioning.entitlements.service.EntitlementReadPlatformService;
-import org.mifosplatform.provisioning.entitlements.service.EntitlementWritePlatformService;
-import org.mifosplatform.provisioning.preparerequest.data.PrepareRequestData;
-import org.mifosplatform.provisioning.preparerequest.service.PrepareRequestReadplatformService;
-import org.mifosplatform.provisioning.processrequest.data.ProcessingDetailsData;
-import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
-import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
-import org.mifosplatform.provisioning.processrequest.service.ProcessRequestReadplatformService;
-import org.mifosplatform.provisioning.processrequest.service.ProcessRequestWriteplatformService;
-import org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobReadPlatformService;
-import org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobWritePlatformService;
-import org.mifosplatform.scheduledjobs.scheduledjobs.data.EventActionData;
-import org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
-import org.mifosplatform.scheduledjobs.scheduledjobs.data.ScheduleJobData;
-import org.mifosplatform.workflow.eventaction.domain.EventAction;
-import org.mifosplatform.workflow.eventaction.domain.EventActionRepository;
-import org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
-import org.mifosplatform.workflow.eventaction.service.EventActionConstants;
-import org.mifosplatform.workflow.eventaction.service.EventActionReadPlatformService;
-import org.mifosplatform.workflow.eventaction.service.ProcessEventActionService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcCall;
-import org.springframework.stereotype.Service;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import src.main.java.org.mifosplatform.crm.ticketmaster.api.TicketMasterApiResource;
+import src.main.java.org.mifosplatform.crm.ticketmaster.service.TicketMasterReadPlatformService;
+import src.main.java.org.mifosplatform.finance.billingmaster.api.BillingMasterApiResourse;
+import src.main.java.org.mifosplatform.finance.billingorder.domain.Invoice;
+import src.main.java.org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
+import src.main.java.org.mifosplatform.finance.billingorder.service.InvoiceClient;
+import src.main.java.org.mifosplatform.finance.paymentsgateway.data.PaymentGatewayData;
+import src.main.java.org.mifosplatform.finance.paymentsgateway.domain.PaymentGateway;
+import src.main.java.org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayRepository;
+import src.main.java.org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayReadPlatformService;
+import src.main.java.org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayWritePlatformService;
+import src.main.java.org.mifosplatform.finance.usagecharges.data.UsageChargesData;
+import src.main.java.org.mifosplatform.finance.usagecharges.service.UsageChargesWritePlatformService;
+import src.main.java.org.mifosplatform.infrastructure.configuration.domain.Configuration;
+import src.main.java.org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
+import src.main.java.org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
+import src.main.java.org.mifosplatform.infrastructure.core.api.JsonCommand;
+import src.main.java.org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import src.main.java.org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import src.main.java.org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
+import src.main.java.org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import src.main.java.org.mifosplatform.infrastructure.core.service.DateUtils;
+import src.main.java.org.mifosplatform.infrastructure.core.service.FileUtils;
+import src.main.java.org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import src.main.java.org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
+import src.main.java.org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService;
+import src.main.java.org.mifosplatform.infrastructure.jobs.annotation.CronTarget;
+import src.main.java.org.mifosplatform.infrastructure.jobs.service.JobName;
+import src.main.java.org.mifosplatform.infrastructure.jobs.service.RadiusJobConstants;
+import src.main.java.org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import src.main.java.org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import src.main.java.org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
+import src.main.java.org.mifosplatform.organisation.message.data.BillingMessageDataForProcessing;
+import src.main.java.org.mifosplatform.organisation.message.service.BillingMessageDataWritePlatformService;
+import src.main.java.org.mifosplatform.organisation.message.service.BillingMesssageReadPlatformService;
+import src.main.java.org.mifosplatform.organisation.message.service.MessagePlatformEmailService;
+import src.main.java.org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
+import src.main.java.org.mifosplatform.portfolio.order.data.OrderData;
+import src.main.java.org.mifosplatform.portfolio.order.domain.Order;
+import src.main.java.org.mifosplatform.portfolio.order.domain.OrderPrice;
+import src.main.java.org.mifosplatform.portfolio.order.domain.OrderRepository;
+import src.main.java.org.mifosplatform.portfolio.order.service.OrderAddOnsWritePlatformService;
+import src.main.java.org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
+import src.main.java.org.mifosplatform.provisioning.entitlements.data.ClientEntitlementData;
+import src.main.java.org.mifosplatform.provisioning.entitlements.data.EntitlementsData;
+import src.main.java.org.mifosplatform.provisioning.entitlements.service.EntitlementReadPlatformService;
+import src.main.java.org.mifosplatform.provisioning.entitlements.service.EntitlementWritePlatformService;
+import src.main.java.org.mifosplatform.provisioning.preparerequest.data.PrepareRequestData;
+import src.main.java.org.mifosplatform.provisioning.preparerequest.service.PrepareRequestReadplatformService;
+import src.main.java.org.mifosplatform.provisioning.processrequest.data.ProcessingDetailsData;
+import src.main.java.org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
+import src.main.java.org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
+import src.main.java.org.mifosplatform.provisioning.processrequest.service.ProcessRequestReadplatformService;
+import src.main.java.org.mifosplatform.provisioning.processrequest.service.ProcessRequestWriteplatformService;
+import src.main.java.org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobReadPlatformService;
+import src.main.java.org.mifosplatform.provisioning.processscheduledjobs.service.SheduleJobWritePlatformService;
+import src.main.java.org.mifosplatform.scheduledjobs.scheduledjobs.data.EventActionData;
+import src.main.java.org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData;
+import src.main.java.org.mifosplatform.scheduledjobs.scheduledjobs.data.ScheduleJobData;
+import src.main.java.org.mifosplatform.workflow.eventaction.domain.EventAction;
+import src.main.java.org.mifosplatform.workflow.eventaction.domain.EventActionRepository;
+import src.main.java.org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
+import src.main.java.org.mifosplatform.workflow.eventaction.service.EventActionConstants;
+import src.main.java.org.mifosplatform.workflow.eventaction.service.EventActionReadPlatformService;
+import src.main.java.org.mifosplatform.workflow.eventaction.service.ProcessEventActionService;
 
 @Service
 public class SheduleJobWritePlatformServiceImpl implements SheduleJobWritePlatformService {
@@ -143,6 +103,7 @@ private final EventActionRepository eventActionRepository;
 private final PaymentGatewayReadPlatformService paymentGatewayReadPlatformService;
 private final ConfigurationRepository configurationRepository;
 private final EventActionReadPlatformService eventActionReadPlatformService;
+private final UsageChargesWritePlatformService usageChargesWritePlatformService;
 
 @Autowired
 public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,final FromJsonHelper fromApiJsonHelper,
@@ -159,7 +120,8 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
 	   final TenantAwareRoutingDataSource dataSource, final PaymentGatewayRepository paymentGatewayRepository,
 	   final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService,final EventActionRepository eventActionRepository, 
 	   final PaymentGatewayReadPlatformService paymentGatewayReadPlatformService,final ConfigurationRepository configurationRepository,
-	   final EventActionReadPlatformService eventActionReadPlatformService,final OrderAddOnsWritePlatformService addOnsWritePlatformService) {
+	   final EventActionReadPlatformService eventActionReadPlatformService,final OrderAddOnsWritePlatformService addOnsWritePlatformService,
+	   final UsageChargesWritePlatformService usageChargesWritePlatformService) {
 
 	this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
 	this.invoiceClient = invoiceClient;
@@ -191,6 +153,7 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
     this.paymentGatewayReadPlatformService = paymentGatewayReadPlatformService;
     this.configurationRepository = configurationRepository;
 	this.eventActionReadPlatformService = eventActionReadPlatformService;
+	this.usageChargesWritePlatformService = usageChargesWritePlatformService;
 }
 
 
@@ -1660,7 +1623,7 @@ public void reportStatmentPdf() {
 				if (!sheduleDatas.isEmpty()) {
 					for (ScheduleJobData scheduleJobData : sheduleDatas) {
 						 fw.append("ScheduleJobData id="+ scheduleJobData.getId() + " ,BatchName="+ scheduleJobData.getBatchName() + " ,query="+ scheduleJobData.getQuery() + "\r\n");
-						 List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(), data);
+						 List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(),data);
 						 if (!clientIds.isEmpty()) {
 							for (Long clientId : clientIds) {
 								fw.append("processing Unpaid Customer id :"+ clientId + "\r\n");
@@ -1685,6 +1648,58 @@ public void reportStatmentPdf() {
 				fw.close();
 			}
 			System.out.println("Disconnect Unpaid Customers Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+		} catch (DataIntegrityViolationException | IOException e) {
+			System.out.println(e);
+			e.printStackTrace();
+		} catch (Exception dve) {
+			System.out.println(dve.getMessage());
+			handleCodeDataIntegrityIssues(null, dve);
+		}
+	}
+	
+	
+	@Override
+	@CronTarget(jobName = JobName.USAGE_CHARGES)
+	public void processingCustomerUsageCharges() {
+
+		try {
+			System.out.println("Processing Customers Usage Charges.......");
+			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.USAGE_CHARGES.toString());
+			if (data != null) {
+				MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+				LocalTime date = new LocalTime(zone);
+				String dateTime = date.getHourOfDay()+"_"+date.getMinuteOfHour() +"_"+ date.getSecondOfMinute();
+				String path = FileUtils.generateLogFileDirectory()+JobName.USAGE_CHARGES.toString()+File.separator
+						     +"CDR_"+DateUtils.getLocalDateOfTenant().toString().replace("-", "")+"_" +dateTime+".log";
+				File fileHandler = new File(path.trim());
+				fileHandler.createNewFile();
+				FileWriter fw = new FileWriter(fileHandler);
+				FileUtils.BILLING_JOB_PATH = fileHandler.getAbsolutePath();
+				fw.append("Processing Customers Usage Charges....... \r\n");
+				List<ScheduleJobData> sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(data.getBatchName());
+
+				if (!sheduleDatas.isEmpty()) {
+					for (ScheduleJobData scheduleJobData : sheduleDatas) {
+						 fw.append("ScheduleJobData id="+ scheduleJobData.getId() + " ,BatchName="+ scheduleJobData.getBatchName() + " ,query="+ scheduleJobData.getQuery() + "\r\n");
+						 List<UsageChargesData> customerDatas = this.sheduleJobReadPlatformService.getCustomerUsageDataByNumber(scheduleJobData.getQuery(), data);
+						 if (!customerDatas.isEmpty()) {
+							for (UsageChargesData customerData : customerDatas) {
+								fw.append("processing Customer Id :"+ customerData.getClientId() + "\r\n");
+								this.usageChargesWritePlatformService.processCustomerUsageRawData(customerData);
+							}
+						} else {
+							fw.append("no records are available for processing Usage Charges \r\n");
+						}
+					}
+				} else {
+					fw.append("Usage Charges ScheduleJobData Empty \r\n");
+				}
+				fw.append("Usage Charges Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + " . \r\n");
+				fw.flush();
+				fw.close();
+			}
+			System.out.println("Usage Charges Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
 		} catch (DataIntegrityViolationException | IOException e) {
 			System.out.println(e);
 			e.printStackTrace();

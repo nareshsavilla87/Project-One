@@ -14,6 +14,7 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
+import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -65,5 +66,39 @@ public class DateUtils {
         final DateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         final String formattedSqlDate = df.format(date);
         return formattedSqlDate;
+    }
+
+    public static DateTime parseLocalDateTime(final String stringDate, final String pattern) {
+
+        try {
+        	
+            DateTimeFormatter dateStringFormat = DateTimeFormat.forPattern(pattern);
+            DateTime dateTime = dateStringFormat.parseDateTime(stringDate);
+            return dateTime;
+            
+        } catch (IllegalArgumentException e) {
+            List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+            ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.pattern", "The parameter date ("
+                    + stringDate + ") is invalid w.r.t. pattern " + pattern, "date", stringDate, pattern);
+            dataValidationErrors.add(error);
+            throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist", "Validation errors exist.",
+                    dataValidationErrors);
+        }
+    }
+    
+    public static LocalDateTime getLocalDateTimeOfTenant() {
+
+        LocalDateTime today = new LocalDateTime();
+
+        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+
+        if (tenant != null) {
+            final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+            if (zone != null) {
+                today = new LocalDateTime(zone);
+            }
+        }
+
+        return today;
     }
 }

@@ -1,3 +1,5 @@
+import java.text.ParseException;
+
 
 /**
  *
@@ -8,7 +10,7 @@
  */
 public class StaticDemo {
  
-    public static void main(String args[]) {
+    public static void main(String args[]) throws ParseException {
      try{
    int i=1;
    int j=0;
@@ -26,7 +28,6 @@ public class StaticDemo {
     	 rev +=s.charAt(i);
      }
     System.out.println(rev);
-
     } 
  
 }

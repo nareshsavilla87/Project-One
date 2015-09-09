@@ -1285,42 +1285,48 @@ public class CommandWrapper {
 		
 		}
 
-		public boolean isFeeMasterResource() {
-			 return this.entityName.equalsIgnoreCase("FEEMASTER");
-		}
+	public boolean isFeeMasterResource() {
+		return this.entityName.equalsIgnoreCase("FEEMASTER");
+	}
 
-		public boolean isPlanQualifier() {
-			 return this.entityName.equalsIgnoreCase("PLANQUALIFIER");
-		}
-		public boolean isStaticIp() {
-			return  this.entityName.equalsIgnoreCase("STATICIP");
-		}
+	public boolean isPlanQualifier() {
+		return this.entityName.equalsIgnoreCase("PLANQUALIFIER");
+	}
 
-		public boolean isPropertyMasterResource() {
-			return  this.entityName.equalsIgnoreCase("PROPERTYMASTER");
-		}
+	public boolean isStaticIp() {
+		return this.entityName.equalsIgnoreCase("STATICIP");
+	}
 
-		public boolean isUpdatePaypalProfile() {
-			return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILE");
-		}
+	public boolean isPropertyMasterResource() {
+		return this.entityName.equalsIgnoreCase("PROPERTYMASTER");
+	}
 
-		public boolean isUpdatePaypalProfileStatus() {
-			return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILESTATUS");
-		}
+	public boolean isUpdatePaypalProfile() {
+		return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILE");
+	}
 
-		public boolean isdeleteRecurringBilling() {
-			return this.actionName.equalsIgnoreCase("DELETERECURRINGBILLING");
-		}
+	public boolean isUpdatePaypalProfileStatus() {
+		return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILESTATUS");
+	}
 
-		public boolean isAllocateDevice() {
-			return this.actionName.equalsIgnoreCase("ALLOCATEDEVICE");
-		}
-		public boolean isRefund() {
-			return  this.entityName.equalsIgnoreCase("REFUND");
-		}
+	public boolean isdeleteRecurringBilling() {
+		return this.actionName.equalsIgnoreCase("DELETERECURRINGBILLING");
+	}
 
-		public boolean isDeposit() {
-			return  this.entityName.equalsIgnoreCase("DEPOSIT");
-		}
-		
+	public boolean isAllocateDevice() {
+		return this.actionName.equalsIgnoreCase("ALLOCATEDEVICE");
+	}
+
+	public boolean isRefund() {
+		return this.entityName.equalsIgnoreCase("REFUND");
+	}
+
+	public boolean isDeposit() {
+		return this.entityName.equalsIgnoreCase("DEPOSIT");
+	}
+
+	public boolean isUsageCharge() {
+		return this.entityName.equalsIgnoreCase("CHARGES");
+	}
+
 }
