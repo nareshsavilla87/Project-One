@@ -70,10 +70,7 @@ public class ItemDetails extends AbstractAuditableCustom<AppUser, Long>{
 	
 	@Column(name = "is_deleted")
 	private char isDeleted;
-
-
-
-
+	
 	public ItemDetails(){}
 	
 	

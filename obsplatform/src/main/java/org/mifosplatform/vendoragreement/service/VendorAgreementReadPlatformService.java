@@ -26,5 +26,7 @@ public interface VendorAgreementReadPlatformService {
 	List<PlanData> retrievePlans(Long agId);
 
 	List<ServiceData> retrieveServices(Long agId);
+	
+	List<VendorAgreementData> retrievePlanDurationData(Long planId);
 
 }

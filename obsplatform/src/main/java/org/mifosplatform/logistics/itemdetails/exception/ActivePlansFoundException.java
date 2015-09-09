@@ -11,7 +11,7 @@ public class ActivePlansFoundException extends AbstractPlatformDomainRuleExcepti
 
 	public ActivePlansFoundException(String errorCode) {
 		
-		 super(errorCode, errorCode,errorCode);
+		super("error.msg.active.plans.found.for.client", "Actvie plans found for this serial Number ",errorCode);
 	}
 
 	public ActivePlansFoundException(Long clientId) {

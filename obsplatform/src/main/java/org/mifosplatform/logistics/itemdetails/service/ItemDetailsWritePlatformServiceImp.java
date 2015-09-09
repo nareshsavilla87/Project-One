@@ -197,7 +197,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 
 	        logger.error(dve.getMessage(), dve);   	
 	}
-		
+		@Transactional
 		@Override
 		public CommandProcessingResult updateItem(Long id,JsonCommand command)
 		{
@@ -208,13 +208,23 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 	        	ItemDetails inventoryItemDetails=ItemretrieveById(id);
 	        	final String oldHardware =inventoryItemDetails.getProvisioningSerialNumber();
 	        	final String oldSerilaNumber =inventoryItemDetails.getSerialNumber();
-	        	final Map<String, Object> changes = inventoryItemDetails.update(command);  
+	        	final Map<String, Object> changes = inventoryItemDetails.update(command); 
 	        	
+	        	if(!oldSerilaNumber.equalsIgnoreCase(inventoryItemDetails.getSerialNumber()) &&inventoryItemDetails.getClientId()!=null){
+	        		
+	        		ItemDetailsAllocation allocationData = this.inventoryItemDetailsAllocationRepository.findAllocatedDevicesBySerialNum(inventoryItemDetails.getClientId(),oldSerilaNumber);
+		        		if(allocationData != null){
+		        			allocationData.setSerialNumber(inventoryItemDetails.getSerialNumber());
+		        			this.inventoryItemDetailsAllocationRepository.saveAndFlush(allocationData);
+		        		}
+	        	}
+
 	        	if(!changes.isEmpty()){
-	            this.inventoryItemDetailsRepository.saveAndFlush(inventoryItemDetails);
+	        		this.inventoryItemDetailsRepository.saveAndFlush(inventoryItemDetails);
 	        	}
 	        	
-	        	if(!oldHardware.equalsIgnoreCase(inventoryItemDetails.getProvisioningSerialNumber())&&inventoryItemDetails.getClientId()!=null){
+	        	if((!oldHardware.equalsIgnoreCase(inventoryItemDetails.getProvisioningSerialNumber()) || !oldSerilaNumber.equalsIgnoreCase(inventoryItemDetails.getSerialNumber())) 
+	        				&&inventoryItemDetails.getClientId()!=null){
 	          	  
 	        		this.provisioningWritePlatformService.updateHardwareDetails(inventoryItemDetails.getClientId(),inventoryItemDetails.getSerialNumber(),oldSerilaNumber,
 	        				inventoryItemDetails .getProvisioningSerialNumber(),oldHardware);
