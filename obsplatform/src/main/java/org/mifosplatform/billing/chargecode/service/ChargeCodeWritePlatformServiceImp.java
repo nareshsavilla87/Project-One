@@ -26,6 +26,8 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.client.domain.Client;
+import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,10 +50,12 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 	private final DiscountMasterRepository discountMasterRepository;
 	private final PriceRepository priceRepository;
     private final GenerateBill generateBill;
+    private final ClientRepositoryWrapper clientRepository;
+    
 	@Autowired
 	public ChargeCodeWritePlatformServiceImp(final PlatformSecurityContext context,final ChargeCodeRepository chargeCodeRepository,
 			final ChargeCodeCommandFromApiJsonDeserializer apiJsonDeserializer,final DiscountMasterRepository discountMasterRepository,
-			final PriceRepository priceRepository,final GenerateBill generateBill) {
+			final PriceRepository priceRepository,final GenerateBill generateBill,final ClientRepositoryWrapper clientRepository) {
 		
 		this.context = context;
 		this.chargeCodeRepository = chargeCodeRepository;
@@ -59,6 +63,7 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 		this.discountMasterRepository = discountMasterRepository;
 		this.priceRepository = priceRepository;
 		this.generateBill = generateBill;
+		this.clientRepository = clientRepository;
 
 	}
 
@@ -168,9 +173,10 @@ public class ChargeCodeWritePlatformServiceImp implements ChargeCodeWritePlatfor
 		DiscountMaster discountMaster = this.discountMasterRepository.findOne(price.getDiscountId());
 		LocalDate endDate=new LocalDate(discountMaster.getStartDate()).plusMonths(1);
 		ChargeCodeMaster chargeCode = this.chargeCodeRepository.findOne(chargeCodeData.getId());
+		Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
 		BillingOrderData billingOrderData = new BillingOrderData(defaultValue,defaultValue,defaultValue,clientId,discountMaster.getStartDate(),
 				defaultDate,defaultDate,chargeCodeData.getBillFrequencyCode(),chargeCode.getChargeCode(),chargeCode.getChargeType(),chargeCode.getChargeDuration(),
-				chargeCode.getChargeType(),defaultDate,price.getPrice(),"",discountMaster.getStartDate(),defaultDate,defaultValue,chargeCode.getTaxInclusive()); 
+				chargeCode.getChargeType(),defaultDate,price.getPrice(),"",discountMaster.getStartDate(),defaultDate,defaultValue,chargeCode.getTaxInclusive(),String.valueOf(client.getTaxExemption())); 
 		
 		DiscountMasterData discountMasterData = new DiscountMasterData(discountMaster.getId(),defaultValue,defaultValue,new LocalDate(discountMaster.getStartDate()),
 							DateUtils.getLocalDateOfTenant(),discountMaster.getDiscountType(),discountMaster.getDiscountRate(),"N",discountMaster.getDiscountCode(),discountMaster.getDiscountDescription());

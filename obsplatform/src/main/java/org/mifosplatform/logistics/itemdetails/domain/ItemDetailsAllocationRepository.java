@@ -11,5 +11,8 @@ public interface ItemDetailsAllocationRepository extends JpaRepository<ItemDetai
 
 	@Query("from ItemDetailsAllocation allocations where allocations.clientId =:clientId and allocations.orderId =:orderId and allocations.status='allocated'")
 	List<ItemDetailsAllocation> findRemainingAllocatedDevice(@Param("clientId") Long clientId,	@Param("orderId")Long orderId);
-
+	
+	@Query("from ItemDetailsAllocation allocations where allocations.clientId =:clientId and allocations.serialNumber =:serialNumber and allocations.isDeleted='N'")
+	ItemDetailsAllocation findAllocatedDevicesBySerialNum(@Param("clientId") Long clientId,@Param("serialNumber")String serialNumber);
+	
 }

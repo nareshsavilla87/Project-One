@@ -139,29 +139,35 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 
 	@Override
 	public CommandProcessingResult updateAddress(final Long clientId,final JsonCommand command) {
+		
 		try
 		{
 			  context.authenticatedUser();
-	            
 	             Map<String, Object> changes =new HashMap<String, Object>();
 	             final List<AddressData> addressDatas =this.addressReadPlatformService.retrieveClientAddressDetails(clientId);
-	                
 	             final String addressType=command.stringValueOfParameterNamed(ADDRESSTYPE);
+	             Configuration  configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
 	             
-	             
-	             if(addressDatas.size()==1 && addressType.equalsIgnoreCase("BILLING")){
+	             if("BILLING".equalsIgnoreCase(addressType)){
 	            	 
 	            	 final Address  newAddress=Address.fromJson(clientId, command);
-               	     this.addressRepository.save(newAddress);
-	            	 
-	             }
-	                     for(AddressData addressData:addressDatas){
+               	     this.addressRepository.saveAndFlush(newAddress);
+               	     if(configuration!=null&&configuration.isEnabled()){
+               	    	 PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newAddress.getAddressNo());
+               	    	 propertyMaster.setClientId(clientId);
+            			 propertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
+                		 this.propertyMasterRepository.saveAndFlush(propertyMaster);
+               	    	 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_ALLOCATE,
+               	    			newAddress.getClientId(),propertyMaster.getPropertyCode());
+            		     this.propertyHistoryRepository.save(propertyHistory);
+               	     }
+	              }
+	              else{
+	                  for(AddressData addressData:addressDatas){
 	                    	 
-	                    	  if(addressData.getAddressType().equalsIgnoreCase(addressType))
+	                    	  if("PRIMARY".equalsIgnoreCase(addressData.getAddressType()))
 	                    	  {
 	                    		  final Address address = retrieveAddressBy(addressData.getAddressId());  
-	                    		  //for property code updation with client details
-	                    		  Configuration  configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
 	                    		  if(configuration != null && configuration.isEnabled()) {		
 	                    		  final String newPropertyCode=command.stringValueOfParameterNamed("addressNo");
 	                    		  PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(newPropertyCode);
@@ -175,7 +181,7 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	                    			 oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
 	                    			 this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
 	                    			 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),CodeNameConstants.CODE_PROPERTY_FREE,
-	                    					 address.getClientId(),oldPropertyMaster.getPropertyCode());
+	                    					 null,oldPropertyMaster.getPropertyCode());
 	                    			 this.propertyHistoryRepository.save(propertyHistory);
 	                    			 changes = address.update(command);
 		                        	 this.addressRepository.saveAndFlush(address);
@@ -201,9 +207,10 @@ public class AddressWritePlatformServiceImpl implements AddressWritePlatformServ
 	                    		}else{
 	                    		   changes = address.update(command);
 	                        		this.addressRepository.saveAndFlush(address);
-	                    	  }
-	                    	  }
-         }
+	                    	   }
+	                    }
+            }
+	    }
          return new CommandProcessingResultBuilder() 
          .withCommandId(command.commandId()) 
          .withEntityId(clientId) 

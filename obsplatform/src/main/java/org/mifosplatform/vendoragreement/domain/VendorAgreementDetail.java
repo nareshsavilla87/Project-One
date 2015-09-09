@@ -29,6 +29,9 @@ public class VendorAgreementDetail extends AbstractPersistable<Long> {
 	@Column(name = "content_cost")
 	private BigDecimal contentCost;
 	
+	@Column(name = "content_sellprice")
+	private BigDecimal contentSellPrice;
+	
 	@ManyToOne
     @JoinColumn(name="vendor_agmt_id")
 	private VendorAgreement vendor;
@@ -36,20 +39,25 @@ public class VendorAgreementDetail extends AbstractPersistable<Long> {
 	@Column(name = "is_deleted")
 	private String isDeleted="N";
 	
+	@Column(name = "duration_id")
+	private Long durationId;
+	
 	public VendorAgreementDetail(){
 	}
 
 	public VendorAgreementDetail(String contentCode, String loyaltyType,
-			BigDecimal loyaltyShare, Long priceRegion, BigDecimal contentCost) {
+			BigDecimal loyaltyShare, Long priceRegion, BigDecimal contentCost, 
+			BigDecimal contentSellPrice, Long durationId) {
 		
 		this.contentCode = contentCode;
 		this.loyaltyType = loyaltyType;
 		this.loyaltyShare = loyaltyShare;
 		this.priceRegion = priceRegion;
 		this.contentCost = contentCost;
-		
+		this.contentSellPrice = contentSellPrice;
+		this.durationId = durationId;
 	}
-
+	
 	public VendorAgreement getMediaAsset() {
 		return vendor;
 	}
@@ -113,6 +121,22 @@ public class VendorAgreementDetail extends AbstractPersistable<Long> {
 
 	public void setIsDeleted(String isDeleted) {
 		this.isDeleted = isDeleted;
+	}
+
+	public BigDecimal getContentSellPrice() {
+		return contentSellPrice;
+	}
+
+	public void setContentSellPrice(BigDecimal contentSellPrice) {
+		this.contentSellPrice = contentSellPrice;
+	}
+
+	public Long getDurationId() {
+		return durationId;
+	}
+
+	public void setDurationId(Long durationId) {
+		this.durationId = durationId;
 	}
 	
 	

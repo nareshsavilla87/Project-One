@@ -135,10 +135,11 @@ public class PlanData {
 		this.data = datas;
 	}
 
-	public PlanData(Long id, String planCode, String planDescription) {
+	public PlanData(Long id, String planCode, String planDescription, String isPrepaid) {
               this.id=id;
               this.planCode=planCode;
               this.planDescription=planDescription;
+              this.isPrepaid = isPrepaid;
 	}
 
 	public String getProvisionSystem() {
