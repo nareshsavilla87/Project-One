@@ -64,7 +64,7 @@ public class UsageChargesApiResource {
 	@POST
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String createUsageRawData(final String apiRequestBodyAsJson) {
+	public String createCdrRawData(final String apiRequestBodyAsJson) {
 		
 		final CommandWrapper wrapperRequest = new CommandWrapperBuilder().createUsageChargesRawData().withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(wrapperRequest);

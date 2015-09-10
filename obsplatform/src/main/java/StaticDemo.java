@@ -1,4 +1,5 @@
 import java.text.ParseException;
+import java.util.Locale;
 
 
 /**
@@ -28,6 +29,8 @@ public class StaticDemo {
     	 rev +=s.charAt(i);
      }
     System.out.println(rev);
+    System.out.println(Locale.UK);
+   
     } 
  
 }

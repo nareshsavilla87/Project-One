@@ -4,6 +4,8 @@ package org.mifosplatform.finance.usagecharges.service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
+import org.mifosplatform.finance.billingorder.data.BillingOrderData;
 import org.mifosplatform.finance.usagecharges.data.UsageChargesData;
 import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
 import org.mifosplatform.finance.usagecharges.domain.UsageChargeRepository;
@@ -38,8 +40,7 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 	private final UsageChargeRepository usageChargeRepository;
 
 	@Autowired
-	public UsageChargesWritePlatformServiceImpl(
-			final PlatformSecurityContext context,
+	public UsageChargesWritePlatformServiceImpl(final PlatformSecurityContext context,
 			final UsageChargesCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final UsageChargesReadPlatformService usageChargesReadPlatformService,
 			final UsageRaWDataRepository usageRawDataRepository,
@@ -105,7 +106,7 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 				this.usageChargeRepository.save(charge);
 			}
 		} catch (DataIntegrityViolationException dve) {
-			LOGGER.error(dve.getMessage(), dve);
+			LOGGER.error("usage rawData process failed........\r\n" +dve.getMessage());
 		}
 
 	}
@@ -120,6 +121,15 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 		throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue",
 				"Unknown data integrity issue with resource: "+ dve.getMessage());
 
+	}
+
+	/* (non-Javadoc)
+	 * @see #checkOrderUsageCharges(Long, BillingOrderData)
+	 */
+	@Override
+	public BillingOrderCommand checkOrderUsageCharges(Long clientId,BillingOrderData billingOrderData) {
+		
+		return null;
 	}
 }
 	
