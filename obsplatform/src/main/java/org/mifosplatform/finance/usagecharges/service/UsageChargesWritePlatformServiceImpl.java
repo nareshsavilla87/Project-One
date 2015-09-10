@@ -129,6 +129,9 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 	@Override
 	public BillingOrderCommand checkOrderUsageCharges(Long clientId,BillingOrderData billingOrderData) {
 		
+		
+		
+		
 		return null;
 	}
 }
