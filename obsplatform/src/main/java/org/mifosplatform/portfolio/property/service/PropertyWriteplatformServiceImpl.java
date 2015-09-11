@@ -410,6 +410,13 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
         	this.context.authenticatedUser();
         	PropertyDeviceMapping propertyDeviceMapping = PropertyDeviceMapping.fromJson(entityId,command);
         	this.propertyDeviceMappingRepository.save(propertyDeviceMapping);
+        	
+        	PropertyMaster propertyMaster = this.propertyMasterRepository.findoneByPropertyCode(propertyDeviceMapping.getPropertyCode());
+        	if(propertyMaster != null){
+        		PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_MAPPED,entityId,propertyMaster.getPropertyCode());
+        		this.propertyHistoryRepository.save(propertyHistory);
+        	}
+			
         	return new CommandProcessingResult(propertyDeviceMapping.getId());
         }catch(DataIntegrityViolationException dve){
         	handleCodeDataIntegrityIssues(command, dve);
