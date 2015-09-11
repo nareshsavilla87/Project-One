@@ -80,10 +80,31 @@ public class DateUtils {
         if (tenant != null) {
             final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
             if (zone != null) {
+            	
                 today = new DateTime(zone);
+
             }
         }
 
         return today;
     }
+
+	public static DateTime parseLocalDateTime(final String stringDate,final String pattern) {
+
+		try {
+
+			DateTimeFormatter dateStringFormat = DateTimeFormat.forPattern(pattern);
+			DateTime dateTime = dateStringFormat.parseDateTime(stringDate);
+			return dateTime;
+
+		} catch (IllegalArgumentException e) {
+			List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+			ApiParameterError error = ApiParameterError.parameterError("validation.msg.invalid.date.pattern","The parameter date (" 
+			  + stringDate + ") is invalid w.r.t. pattern " + pattern, "date",stringDate, pattern);
+			dataValidationErrors.add(error);
+			throw new PlatformApiDataValidationException("validation.msg.validation.errors.exist","Validation errors exist.", 
+					dataValidationErrors);
+		}
+	}
+
 }

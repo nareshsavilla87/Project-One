@@ -181,8 +181,9 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 
 		public String schema() {
 			return  " ph.id as Id,ph.ref_id as refId,ph.transaction_date as transactionDate,ph.property_code as propertyCode ,ph.ref_desc as description," +
-                     " ph.client_id as clientId,if((ph.client_id is null),'VACANT','OCCUPIED') as status, mc.display_name as displayName "+
-                     " from b_property_history ph join  b_property_defination pd on ph.ref_id = pd.id left join m_client mc on ph.client_id=mc.id  ";
+                     " ph.client_id as clientId,(CASE WHEN ph.client_id is null THEN 'VACANT' WHEN ph.ref_desc='Mapped' THEN 'MAPPED' WHEN ph.ref_desc='UnMapped' THEN 'UNMAPPED' ELSE 'OCCUPIED' END) as status, mc.display_name as displayName, " +
+                     " trim('_Y' from pdm.serial_number) as serialNumber from b_property_history ph join  b_property_defination pd on ph.ref_id = pd.id left join m_client mc on ph.client_id=mc.id  " +
+                     " left join b_propertydevice_mapping pdm ON ph.client_id = pdm.client_id  ";
 
 		}
 
@@ -197,8 +198,9 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final String clientId = rs.getString("clientId");
 			final LocalDate transactionDate=JdbcSupport.getLocalDate(rs,"transactionDate");
 			final String clientName = rs.getString("displayName");
+			final String serialNumber = rs.getString("serialNumber");
 			
-			return new PropertyDefinationData(Id,refId,description,propertyCode,status,clientId,transactionDate,clientName);
+			return new PropertyDefinationData(Id,refId,description,propertyCode,status,clientId,transactionDate,clientName,serialNumber);
 			
 		}
 

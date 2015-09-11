@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.finance.usagecharges.data.UsageChargesData;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
 import org.mifosplatform.infrastructure.core.service.DataSourcePerTenantService;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
@@ -285,7 +286,40 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 		
 			}
 		}
-		
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see getCustomerUsageDataByNumber(String,
+	 * org.mifosplatform.scheduledjobs.scheduledjobs.data.JobParameterData)
+	 */
+	@Override
+	public List<UsageChargesData> getCustomerUsageDataByNumber(final String query, JobParameterData data) {
+
+		try {
+
+			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourcePerTenantService.retrieveDataSource());
+			final UsageChargesMapper mapper = new UsageChargesMapper();
+			return jdbcTemplate.query(query, mapper, new Object[] {});
+
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	private static final class UsageChargesMapper implements RowMapper<UsageChargesData> {
+
+		@Override
+		public UsageChargesData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+
+			final Long clientId = rs.getLong("clientId");
+			final String number = rs.getString("number");
+			
+			return new UsageChargesData(clientId,number);
+
+		}
+	}
+
 	}
 
 

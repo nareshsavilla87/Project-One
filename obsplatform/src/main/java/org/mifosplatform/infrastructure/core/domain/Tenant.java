@@ -15,10 +15,13 @@ public class Tenant {
     private final String schemaUsername;
     private final String schemaPassword;
     private final String timezoneId;
+    private final String localeName;
     
 
     public Tenant(final Long id, final String name, final String schemaName, final String schemaServer,
-            final String schemaServerPort, final String schemaUsername, final String schemaPassword, String timezoneId) {
+            final String schemaServerPort, final String schemaUsername, final String schemaPassword, 
+            final String timezoneId,final String localeName) {
+    	
         this.id = id;
         this.name = name;
         this.schemaName = schemaName;
@@ -27,6 +30,7 @@ public class Tenant {
         this.schemaUsername = schemaUsername;
         this.schemaPassword = schemaPassword;
         this.timezoneId = timezoneId;
+        this.localeName = localeName;
         
     }
 
@@ -61,5 +65,9 @@ public class Tenant {
     public String getTimezoneId() {
         return timezoneId;
     }
+
+	public String getLocaleName() {
+		return localeName;
+	}
       
 }

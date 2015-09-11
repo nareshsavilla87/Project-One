@@ -37,6 +37,7 @@ public class PropertyDefinationData {
 	private String referenceValue;
 	private String floorDesc;
 	private String parcelDesc;
+	private String serialNumber;
 	
 	public PropertyDefinationData(final Long id, final Long propertyTypeId,final String propertyType, final String propertyCode,
 			final String unitCode, final String floor, final String buildingCode,final String parcel, final String precinct, 
@@ -71,7 +72,7 @@ public class PropertyDefinationData {
 	}
 
 	public PropertyDefinationData(final Long id, final Long refId, final String description,final String propertyCode, 
-			final String status, final String clientId,final LocalDate transactionDate, final String clientName) {
+			final String status, final String clientId,final LocalDate transactionDate, final String clientName,final String serialNumber) {
 		
 		this.id = id;
 		this.refId = refId;
@@ -81,6 +82,7 @@ public class PropertyDefinationData {
 		this.clientId = clientId;
 		this.transactionDate = transactionDate;
 		this.clientName = clientName;
+		this.serialNumber = serialNumber;
 
 	}
 	
