@@ -74,6 +74,11 @@ public class PropertyDeviceMapping  extends AbstractAuditableCustom<AppUser, Lon
 	public void setIsDeleted(char isDeleted) {
 		this.isDeleted = isDeleted;
 	}
+	
+
+	public String getPropertyCode() {
+		return propertyCode;
+	}
 
 	public void delete() {
 		this.isDeleted = 'Y';
