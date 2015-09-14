@@ -184,7 +184,6 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 			netTaxAmount = netTaxAmount.add(netChargeTaxAmount);
 			totalChargeAmount = totalChargeAmount.add(netChargeAmount);
 			invoice.addCharges(charge);
-
 		}
 
 		invoiceAmount = totalChargeAmount.add(netTaxAmount);

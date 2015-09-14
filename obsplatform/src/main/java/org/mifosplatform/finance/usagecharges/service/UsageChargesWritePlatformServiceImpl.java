@@ -2,10 +2,15 @@
 package org.mifosplatform.finance.usagecharges.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
+import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
+import org.mifosplatform.finance.billingorder.service.GenerateBill;
 import org.mifosplatform.finance.usagecharges.data.UsageChargesData;
 import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
 import org.mifosplatform.finance.usagecharges.domain.UsageChargeRepository;
@@ -38,19 +43,22 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 	private final UsageChargesReadPlatformService usageChargesReadPlatformService;
 	private final UsageRaWDataRepository usageRawDataRepository;
 	private final UsageChargeRepository usageChargeRepository;
+	private final GenerateBill generateBill;
 
 	@Autowired
 	public UsageChargesWritePlatformServiceImpl(final PlatformSecurityContext context,
 			final UsageChargesCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final UsageChargesReadPlatformService usageChargesReadPlatformService,
 			final UsageRaWDataRepository usageRawDataRepository,
-			final UsageChargeRepository usageChargeRepository) {
+			final UsageChargeRepository usageChargeRepository,
+			final GenerateBill generateBill) {
 
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.usageChargesReadPlatformService = usageChargesReadPlatformService;
 		this.usageRawDataRepository = usageRawDataRepository;
 		this.usageChargeRepository = usageChargeRepository;
+		this.generateBill = generateBill;
 
 	}
 
@@ -94,7 +102,7 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 			List<UsageRaw> rawDatas = this.usageRawDataRepository.findUsageRawDataByCustomerId(customerData.getClientId(),customerData.getNumber());
 
 			if (rawDatas.size() != 0) {
-				UsageCharge charge = new UsageCharge(customerData.getClientId(),customerData.getNumber(),DateUtils.getLocalDateTimeOfTenant(), totalCost,totalDuration);
+				UsageCharge charge = new UsageCharge(customerData.getClientId(),customerData.getNumber(),DateUtils.getDateTimeOfTenant(), totalCost,totalDuration);
 				
 				for (UsageRaw rawData : rawDatas) {
 					totalDuration = totalDuration.add(rawData.getDuration());
@@ -127,13 +135,57 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 	 * @see #checkOrderUsageCharges(Long, BillingOrderData)
 	 */
 	@Override
-	public BillingOrderCommand checkOrderUsageCharges(Long clientId,BillingOrderData billingOrderData) {
+	public BillingOrderCommand checkOrderUsageCharges(Long clientId,Long orderId,List<BillingOrderData> products) {
 		
+	 BigDecimal chargeAmount=BigDecimal.ZERO; 
+	 LocalDate chargeStartDate = null;
+	 LocalDate chargeEndDate = null;
+	 BillingOrderCommand billingOrderCommand=null;
+	 BillingOrderData billingOrderData=null;
+	 List<InvoiceTaxCommand> listOfTaxes = new ArrayList<InvoiceTaxCommand>();
+	 if(products.size() !=0){
+		  billingOrderData=products.get(0);
+	 }
+	 
+	 List<UsageChargesData>	cdrDatas = this.usageChargesReadPlatformService.retrieveOrderCdrData(clientId,orderId);
+	 
+	 if(!cdrDatas.isEmpty()){
+		 
+		 for(UsageChargesData cdrData:cdrDatas){
+			   chargeAmount = chargeAmount.add(cdrData.getTotalCost());
+		      if(chargeStartDate == null || chargeEndDate == null){
+		    	  chargeStartDate = cdrData.getChargeDate();
+		    	  chargeEndDate = cdrData.getChargeDate();
+		      }else if(chargeStartDate.toDate().after(cdrData.getChargeDate().toDate())){
+		    	  chargeStartDate = cdrData.getChargeDate();
+		      }else if(chargeEndDate.toDate().before(cdrData.getChargeDate().toDate())){
+		    	  chargeEndDate = cdrData.getChargeDate();
+		      }
+		 }
+		 
+		 chargeAmount = chargeAmount.setScale(Integer.parseInt(this.generateBill.roundingDecimal()),RoundingMode.HALF_UP);
+		 
+         billingOrderCommand= new BillingOrderCommand(orderId,billingOrderData.getOderPriceId(),
+        		    clientId, chargeStartDate.toDate(),chargeEndDate.plusDays(1).toDate(),chargeEndDate.toDate(),
+        		    billingOrderData.getBillingFrequency(),billingOrderData.getChargeCode(),"UC",
+					billingOrderData.getChargeDuration(),billingOrderData.getDurationType(),chargeEndDate.toDate(),
+					chargeAmount, billingOrderData.getBillingFrequency(), listOfTaxes,billingOrderData.getStartDate(), 
+					billingOrderData.getEndDate(),null, billingOrderData.getTaxInclusive(),cdrDatas);
+		 
+	   }
 		
-		
-		
-		return null;
+		return billingOrderCommand;
 	}
+
+	/* (non-Javadoc)
+	 * @see UpdateChargeId(java.lang.Long)
+	 */
+	@Override
+	public void UpdateChargeId(Long chargeId) {
+		
+		
+	}
+	
 }
 	
 

@@ -14,7 +14,6 @@ import java.util.List;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.LocalDate;
-import org.joda.time.LocalDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.infrastructure.core.data.ApiParameterError;
@@ -67,6 +66,25 @@ public class DateUtils {
         final String formattedSqlDate = df.format(date);
         return formattedSqlDate;
     }
+    
+    
+    public static DateTime getDateTimeOfTenant() {
+
+    	DateTime today = new DateTime();
+
+        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+
+        if (tenant != null) {
+            final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+            if (zone != null) {
+            	
+                today = new DateTime(zone);
+
+            }
+        }
+
+        return today;
+    }
 
     public static DateTime parseLocalDateTime(final String stringDate, final String pattern) {
 
@@ -85,20 +103,5 @@ public class DateUtils {
                     dataValidationErrors);
         }
     }
-    
-    public static LocalDateTime getLocalDateTimeOfTenant() {
-
-        LocalDateTime today = new LocalDateTime();
-
-        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
-
-        if (tenant != null) {
-            final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
-            if (zone != null) {
-                today = new LocalDateTime(zone);
-            }
-        }
-
-        return today;
-    }
+  
 }

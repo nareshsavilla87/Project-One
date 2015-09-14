@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
  * @author Ranjith
  *
  */
-public interface UsageChargeRepository extends JpaRepository<UsageCharge, Long>,JpaSpecificationExecutor<UsageCharge> {
+public interface UsageChargeRepository extends JpaRepository<UsageCharge, Long>,
+    JpaSpecificationExecutor<UsageCharge> {
 
 }

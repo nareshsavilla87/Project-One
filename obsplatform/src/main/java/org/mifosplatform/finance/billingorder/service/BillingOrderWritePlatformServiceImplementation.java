@@ -63,7 +63,7 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		for (BillingOrderCommand billingOrderCommand : commands) {
 			
 			clientOrder = this.orderRepository.findOne(billingOrderCommand.getClientOrderId());
-				if (clientOrder != null) {
+				if (clientOrder != null && (billingOrderCommand.getCdrData().isEmpty())) {
 					
 						clientOrder.setNextBillableDay(billingOrderCommand.getNextBillableDate());
 						List<OrderPrice> orderPrices = clientOrder.getPrice();
@@ -102,22 +102,11 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 				balance=clientBalance.getBalanceAmount().add(amount);
 				clientBalance.setBalanceAmount(balance);
 			}
-			
 
 		}
 
 		this.clientBalanceRepository.saveAndFlush(clientBalance);
 		
-
-		/*final Client client = this.clientRepository.findOne(clientId);
-		final OfficeAdditionalInfo officeAdditionalInfo = this.infoRepository.findoneByoffice(client.getOffice());
-		if (officeAdditionalInfo != null) {
-			if (officeAdditionalInfo.getIsCollective()) {
-				
-				this.updatePartnerBalance(client.getOffice(), invoice);
-			}
-		}
-*/
 	}
 	
 	
@@ -148,7 +137,6 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		final OfficeAdditionalInfo officeAdditionalInfo = this.infoRepository.findoneByoffice(client.getOffice());
 		if (officeAdditionalInfo != null) {
 			if (officeAdditionalInfo.getIsCollective()) {
-				System.out.println(officeAdditionalInfo.getIsCollective());
 				this.updatePartnerBalance(client.getOffice(), amount);
 
 			}

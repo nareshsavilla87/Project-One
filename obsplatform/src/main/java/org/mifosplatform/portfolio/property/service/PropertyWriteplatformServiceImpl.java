@@ -18,6 +18,7 @@ import org.mifosplatform.finance.billingorder.service.BillingOrderReadPlatformSe
 import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
 import org.mifosplatform.finance.billingorder.service.GenerateBill;
 import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderService;
+import org.mifosplatform.finance.usagecharges.data.UsageChargesData;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
@@ -280,6 +281,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			// call one time invoice
 			List<BillingOrderCommand> billingOrderCommands = new ArrayList<BillingOrderCommand>();
 			List<InvoiceTaxCommand> listOfTaxes = new ArrayList<InvoiceTaxCommand>();
+			List<UsageChargesData> cdrData = new ArrayList<UsageChargesData>();
 			ChargeCodeMaster chargeCodeMaster = this.chargeCodeRepository.findOneByChargeCode(chargeCode);
 			if (chargeCode !=null && !StringUtils.isEmpty(chargeCode)) {
 				listOfTaxes = this.calculateTax(clientId, shiftChargeAmount,chargeCodeMaster);
@@ -287,7 +289,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 						clientId, DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),
 						chargeCodeMaster.getBillFrequencyCode(), chargeCode,chargeCodeMaster.getChargeType(),chargeCodeMaster.getChargeDuration(), "",
 						DateUtils.getDateOfTenant(), shiftChargeAmount, "N",listOfTaxes, DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(), null,
-						chargeCodeMaster.getTaxInclusive());
+						chargeCodeMaster.getTaxInclusive(),cdrData);
 
 				billingOrderCommands.add(billingOrderCommand);
 				// Invoice calling

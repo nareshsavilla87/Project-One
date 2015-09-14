@@ -130,12 +130,12 @@ public class InvoiceClient {
 		List<BillingOrderCommand> billingOrderCommands = this.generateBillingOrderService.generatebillingOrder(products);
 		
 		//Check order usage charges
-		/*BillingOrderCommand  billingOrderCommand = this.usageChargesWritePlatformService.checkOrderUsageCharges(clientId,billingOrderData);
+		BillingOrderCommand  billingOrderCommand = this.usageChargesWritePlatformService.checkOrderUsageCharges(clientId,billingOrderData.getOrderId(),products);
 		  
 		 if(billingOrderCommand !=null){
 			      billingOrderCommands.add(billingOrderCommand);
 		  }
-*/
+
 		Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_SINGLE_INVOICE_FOR_MULTI_ORDERS);
 	
 		if(configuration!=null&&configuration.isEnabled()){

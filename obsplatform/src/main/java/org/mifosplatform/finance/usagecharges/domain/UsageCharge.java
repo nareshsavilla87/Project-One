@@ -15,7 +15,7 @@ import javax.persistence.TemporalType;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.joda.time.LocalDateTime;
+import org.joda.time.DateTime;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.useradministration.domain.AppUser;
 
@@ -57,7 +57,7 @@ public class UsageCharge extends AbstractAuditableCustom<AppUser, Long> {
 
 	}
 
-	public UsageCharge(Long clientId,String number, LocalDateTime date, BigDecimal totalCost,BigDecimal totalDuration) {
+	public UsageCharge(Long clientId,String number, DateTime date, BigDecimal totalCost,BigDecimal totalDuration) {
 
 		this.clientId = clientId;
 		this.number = number;
