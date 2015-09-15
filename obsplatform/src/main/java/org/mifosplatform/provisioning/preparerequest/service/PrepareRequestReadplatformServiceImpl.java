@@ -99,7 +99,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 			}
 
 			@Override
-			public PrepareRequestData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+			public PrepareRequestData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
 
 			final Long id = rs.getLong("id");
 			final Long clientId = rs.getLong("clientId");

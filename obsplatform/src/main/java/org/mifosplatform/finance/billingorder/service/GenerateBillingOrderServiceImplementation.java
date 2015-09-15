@@ -13,6 +13,7 @@ import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.billingorder.domain.InvoiceTax;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
+import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -181,6 +182,14 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 					}
 				  }
 			}
+			//added usage charges
+		    if(!billingOrderCommand.getCdrData().isEmpty()){
+		    	
+			  for(UsageCharge usageCharge:billingOrderCommand.getCdrData()){
+			          charge.addUsageCharges(usageCharge);
+			  }
+		    }
+		    
 			netTaxAmount = netTaxAmount.add(netChargeTaxAmount);
 			totalChargeAmount = totalChargeAmount.add(netChargeAmount);
 			invoice.addCharges(charge);

@@ -3,8 +3,9 @@ package org.mifosplatform.finance.billingorder.commands;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
-import org.mifosplatform.finance.usagecharges.data.UsageChargesData;
+import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
 
 
 
@@ -29,12 +30,12 @@ public class BillingOrderCommand {
 	private final Date billEndDate;
 	private final DiscountMasterData discountMasterData;
 	private final Integer taxInclusive;
-	private final List<UsageChargesData> cdrData;
+	private final List<UsageCharge> cdrData;
 
 	public BillingOrderCommand(Long clientOrderId, Long oderPriceId,Long clientId, Date startDate, Date nextBillableDate, Date endDate,
 			String billingFrequency, String chargeCode, String chargeType,Integer chargeDuration, String durationType, Date invoiceTillDate,
 			BigDecimal price, String billingAlign,final List<InvoiceTaxCommand> listOfTax, final Date billStartDate,final Date billEndDate,
-			final DiscountMasterData discountMasterData, final Integer taxInclusive, final List<UsageChargesData> cdrData) {
+			final DiscountMasterData discountMasterData, final Integer taxInclusive, final List<UsageCharge> cdrData) {
 		
 		this.clientOrderId = clientOrderId;
 		this.orderPriceId = (oderPriceId != null) ? oderPriceId : new Long(0);
@@ -134,7 +135,7 @@ public class BillingOrderCommand {
 		return taxInclusive;
 	}
 
-	public List<UsageChargesData> getCdrData() {
+	public List<UsageCharge> getCdrData() {
 		return cdrData;
 	}
 

@@ -14,7 +14,7 @@ import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
-import org.mifosplatform.finance.usagecharges.data.UsageChargesData;
+import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
 import org.mifosplatform.infrastructure.configuration.domain.Configuration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
@@ -438,7 +438,7 @@ public class GenerateDisconnectionBill {
 			List<InvoiceTaxCommand> listOfTaxes,DiscountMasterData discountMasterData) {
 
 		 BigDecimal price = billPrice.setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
-		 List<UsageChargesData> cdrData=new ArrayList<UsageChargesData>();
+		 List<UsageCharge> cdrData=new ArrayList<UsageCharge>();
 		
 		return new BillingOrderCommand(billingOrderData.getClientOrderId(),
 				billingOrderData.getOderPriceId(),

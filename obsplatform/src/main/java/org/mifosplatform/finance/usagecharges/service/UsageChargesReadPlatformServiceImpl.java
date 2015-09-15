@@ -65,7 +65,7 @@ public class UsageChargesReadPlatformServiceImpl implements UsageChargesReadPlat
 		public String schema() {
 			
 			return " uc.id As id,number AS number,charge_date AS chargeDate,total_cost AS totalCost, total_duration AS totalDuration  FROM b_usage_charge uc,b_association a " 
-					+" WHERE uc.number = hw_serial_no AND uc.client_id = a.client_id "
+					+" WHERE uc.number = a.hw_serial_no AND uc.client_id = a.client_id "
                     +" AND uc.charge_id is null AND uc.client_id = ? AND a.order_id = ? ";
 		}
      

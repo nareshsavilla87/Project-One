@@ -20,7 +20,5 @@ public interface UsageChargesWritePlatformService {
 	void processCustomerUsageRawData(UsageChargesData customerData);
 
 	BillingOrderCommand checkOrderUsageCharges(Long clientId,Long orderId, List<BillingOrderData> products);
-	
-	void UpdateChargeId(Long chargeId);
 
 }

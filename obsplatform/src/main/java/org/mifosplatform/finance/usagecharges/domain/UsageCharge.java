@@ -8,6 +8,8 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -16,6 +18,8 @@ import javax.persistence.TemporalType;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
+import org.mifosplatform.finance.billingorder.domain.BillingOrder;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.useradministration.domain.AppUser;
 
@@ -45,13 +49,15 @@ public class UsageCharge extends AbstractAuditableCustom<AppUser, Long> {
 	@Column(name = "total_cost")
 	private BigDecimal totalCost;
 
-	@Column(name = "charge_id", nullable=true,updatable=true)
-	private Long chargeId;
+	@ManyToOne
+	@JoinColumn(name = "charge_id", insertable = true, updatable = true, nullable = true, unique = true)
+	private BillingOrder usageCharge;
 	
 	//Here CascadeType set to merge only bcz handling of JPA/Hibernate: detached entity passed to persist execption(persistenceexception)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade=CascadeType.MERGE, mappedBy = "usageCharge", orphanRemoval = true)  
 	private List<UsageRaw> usageRawData = new ArrayList<UsageRaw>();
+	
 
 	public UsageCharge() {
 
@@ -75,8 +81,8 @@ public class UsageCharge extends AbstractAuditableCustom<AppUser, Long> {
 		return number;
 	}
 
-	public Date getChargeDate() {
-		return chargeDate;
+	public LocalDate getChargeDate() {
+		return new LocalDate(chargeDate);
 	}
 
 	public BigDecimal getTotalDuration() {
@@ -98,10 +104,6 @@ public class UsageCharge extends AbstractAuditableCustom<AppUser, Long> {
 		this.totalCost = totalCost;
 	}
 
-	public Long getChargeId() {
-		return chargeId;
-	}
-
 	public List<UsageRaw> getUsageRawData() {
 		return usageRawData;
 	}
@@ -109,6 +111,12 @@ public class UsageCharge extends AbstractAuditableCustom<AppUser, Long> {
 	public void addUsageRaw(UsageRaw usageRawData) {
 		usageRawData.update(this);
 		this.usageRawData.add(usageRawData);
+
+	}
+
+	public void update(BillingOrder charge) {
+
+		this.usageCharge = charge;
 
 	}
 

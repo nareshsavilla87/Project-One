@@ -23,6 +23,8 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.association.domain.AssociationRepository;
+import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,24 +42,24 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 	private final static Logger LOGGER = LoggerFactory.getLogger(UsageChargesWritePlatformServiceImpl.class);
 	private final PlatformSecurityContext context;
 	private final UsageChargesCommandFromApiJsonDeserializer apiJsonDeserializer;
-	private final UsageChargesReadPlatformService usageChargesReadPlatformService;
 	private final UsageRaWDataRepository usageRawDataRepository;
 	private final UsageChargeRepository usageChargeRepository;
+	private final AssociationRepository associationRepository;
 	private final GenerateBill generateBill;
 
 	@Autowired
 	public UsageChargesWritePlatformServiceImpl(final PlatformSecurityContext context,
 			final UsageChargesCommandFromApiJsonDeserializer apiJsonDeserializer,
-			final UsageChargesReadPlatformService usageChargesReadPlatformService,
 			final UsageRaWDataRepository usageRawDataRepository,
 			final UsageChargeRepository usageChargeRepository,
+			final AssociationRepository associationRepository,
 			final GenerateBill generateBill) {
 
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
-		this.usageChargesReadPlatformService = usageChargesReadPlatformService;
 		this.usageRawDataRepository = usageRawDataRepository;
 		this.usageChargeRepository = usageChargeRepository;
+		this.associationRepository = associationRepository;
 		this.generateBill = generateBill;
 
 	}
@@ -143,23 +145,30 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 	 BillingOrderCommand billingOrderCommand=null;
 	 BillingOrderData billingOrderData=null;
 	 List<InvoiceTaxCommand> listOfTaxes = new ArrayList<InvoiceTaxCommand>();
+	 List<UsageCharge> usageCharges = new ArrayList<UsageCharge>();
+	 
 	 if(products.size() !=0){
 		  billingOrderData=products.get(0);
 	 }
 	 
-	 List<UsageChargesData>	cdrDatas = this.usageChargesReadPlatformService.retrieveOrderCdrData(clientId,orderId);
+	 List<HardwareAssociation> associations = this.associationRepository.findOrderAssocaitions(orderId);
 	 
-	 if(!cdrDatas.isEmpty()){
+	 if(!associations.isEmpty()){
 		 
-		 for(UsageChargesData cdrData:cdrDatas){
-			   chargeAmount = chargeAmount.add(cdrData.getTotalCost());
+		 usageCharges = this.usageChargeRepository.findCustomerUsageCharges(clientId,associations.get(0).getSerialNo());
+	 }
+	 
+	 if(!usageCharges.isEmpty()){
+		 
+		 for(UsageCharge usageCharge:usageCharges){
+			   chargeAmount = chargeAmount.add(usageCharge.getTotalCost());
 		      if(chargeStartDate == null || chargeEndDate == null){
-		    	  chargeStartDate = cdrData.getChargeDate();
-		    	  chargeEndDate = cdrData.getChargeDate();
-		      }else if(chargeStartDate.toDate().after(cdrData.getChargeDate().toDate())){
-		    	  chargeStartDate = cdrData.getChargeDate();
-		      }else if(chargeEndDate.toDate().before(cdrData.getChargeDate().toDate())){
-		    	  chargeEndDate = cdrData.getChargeDate();
+		    	  chargeStartDate = usageCharge.getChargeDate();
+		    	  chargeEndDate = usageCharge.getChargeDate();
+		      }else if(chargeStartDate.toDate().after(usageCharge.getChargeDate().toDate())){
+		    	  chargeStartDate = usageCharge.getChargeDate();
+		      }else if(chargeEndDate.toDate().before(usageCharge.getChargeDate().toDate())){
+		    	  chargeEndDate = usageCharge.getChargeDate();
 		      }
 		 }
 		 
@@ -170,21 +179,13 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
         		    billingOrderData.getBillingFrequency(),billingOrderData.getChargeCode(),"UC",
 					billingOrderData.getChargeDuration(),billingOrderData.getDurationType(),chargeEndDate.toDate(),
 					chargeAmount, billingOrderData.getBillingFrequency(), listOfTaxes,billingOrderData.getStartDate(), 
-					billingOrderData.getEndDate(),null, billingOrderData.getTaxInclusive(),cdrDatas);
+					billingOrderData.getEndDate(),null, billingOrderData.getTaxInclusive(),usageCharges);
 		 
 	   }
 		
 		return billingOrderCommand;
 	}
 
-	/* (non-Javadoc)
-	 * @see UpdateChargeId(java.lang.Long)
-	 */
-	@Override
-	public void UpdateChargeId(Long chargeId) {
-		
-		
-	}
 	
 }
 	
