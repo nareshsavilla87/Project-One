@@ -2952,7 +2952,6 @@ public class CommandWrapperBuilder {
 		this.href = "/orders/addons/" + orderAddonId;
 		return this;
 	}
-
 	public CommandWrapperBuilder renewalOrderWithClient(Long clientId) {
 		this.actionName = "RENEWALWITHCLIENT";
 		this.entityName = "ORDER";

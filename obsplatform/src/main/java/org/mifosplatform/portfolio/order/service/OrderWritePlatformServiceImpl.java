@@ -5,9 +5,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.LocalDate;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.planprice.domain.Price;
@@ -55,6 +55,7 @@ import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
+import org.mifosplatform.portfolio.order.data.OrderData;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.UserActionStatusEnumaration;
 import org.mifosplatform.portfolio.order.domain.Order;
@@ -1317,6 +1318,38 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	}
 
 		
+
+	@Override
+	public CommandProcessingResult renewalOrderWithClient(JsonCommand command, Long clientId) {
+
+	  try{	
+		this.context.authenticatedUser();
+		Long planId = command.longValueOfParameterNamed("planId");
+		List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
+		if(orderIds.isEmpty()){
+			throw new NoOrdersFoundException(clientId,planId);
+		}
+		CommandProcessingResult result = null;
+		for(Long id : orderIds){
+			
+			JSONObject renewalJson = new JSONObject();
+			renewalJson.put("renewalPeriod", command.stringValueOfParameterNamed("duration"));
+			renewalJson.put("priceId", 0);
+			renewalJson.put("description", "Order renewal with clientId and planId");
+			final JsonElement element = fromJsonHelper.parse(renewalJson.toString());
+			JsonCommand renewalCommand = new JsonCommand(null,renewalJson.toString(), element, fromJsonHelper,
+					null, null, null, null, null, null, null, null, null, null, 
+					null, null);
+			result = this.renewalClientOrder(renewalCommand,id);
+		}
+		return result;
+	  }catch(DataIntegrityViolationException dve){
+			handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		} catch (JSONException e) {
+  			return new CommandProcessingResult(Long.valueOf(-1));
+  		}
+	}
 
  }
 

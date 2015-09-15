@@ -45,6 +45,8 @@ public interface OrderReadPlatformService {
 	List<Long> retrieveOrderActiveAndDisconnectionIds(Long clientId,Long planId);
 
 	List<OrderData> retrieveCustomerActiveOrders(Long clientId);
+	
+	List<Long> retrieveOrderActiveAndDisconnectionIds(Long clientId,Long planId);
 
 
 }
