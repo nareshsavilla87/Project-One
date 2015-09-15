@@ -35,6 +35,9 @@ public class PrepareRequest extends AbstractAuditableCustom<AppUser, Long>{
 	@Column(name = "plan_name")
 	private String planCode;
 	
+	@Column(name = "is_notify")
+	private char isNotify;
+	
 	
 	 public  PrepareRequest() {
 		// TODO Auto-generated constructor stub
@@ -146,12 +149,17 @@ public class PrepareRequest extends AbstractAuditableCustom<AppUser, Long>{
 		this.isProvisioning='C';
 		
 	}
-	
-	
 
-		
-	 
-	 
+
+	public char getIsNotify() {
+		return isNotify;
+	}
+
+
+	public void setIsNotify(char isNotify) {
+		this.isNotify = isNotify;
+	}
+	
 			
 	}
  
