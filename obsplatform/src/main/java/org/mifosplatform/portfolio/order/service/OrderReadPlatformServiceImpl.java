@@ -568,5 +568,23 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 						}
 						
 					}
+					
+					@Override
+					public List<Long> retrieveOrderActiveAndDisconnectionIds(Long clientId,Long planId) {
+                        
+						final OrderIdMapper mapper=new OrderIdMapper();
+						final String sql="select id from b_orders o where o.order_status in (1,3) and o.client_id=? and o.plan_id =? " ;
+						return this.jdbcTemplate.query(sql,mapper,new Object[] { clientId,planId});
+					}
+					
+					private static final class OrderIdMapper implements RowMapper<Long>{
+
+						@Override
+						public Long mapRow(final ResultSet rs, int rowNum)throws SQLException {
+							
+							return rs.getLong("id");
+						}
+						
+					}
 	}
 

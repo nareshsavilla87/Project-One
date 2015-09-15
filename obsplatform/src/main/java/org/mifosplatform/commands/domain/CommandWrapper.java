@@ -1323,4 +1323,8 @@ public class CommandWrapper {
 			return  this.entityName.equalsIgnoreCase("DEPOSIT");
 		}
 		
+		public boolean isRenewOrderWithClient() {
+			  return this.actionName.equalsIgnoreCase("RENEWALWITHCLIENT") && this.entityName.equalsIgnoreCase("ORDER");
+		}
+		
 }

@@ -39,6 +39,7 @@ public interface OrderWritePlatformService {
 	
 	void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode);
 
+	CommandProcessingResult renewalOrderWithClient(JsonCommand command,Long clientId);
 	
 
 	
