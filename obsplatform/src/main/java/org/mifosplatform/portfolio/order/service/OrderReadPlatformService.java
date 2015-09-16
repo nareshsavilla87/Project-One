@@ -41,8 +41,12 @@ public interface OrderReadPlatformService {
 	List<OrderDiscountData> retrieveOrderDiscountDetails(Long orderId);
 
 	Long retrieveClientActiveOrderDetails(Long clientId, String serialNo);
+	
+	List<Long> retrieveOrderActiveAndDisconnectionIds(Long clientId,Long planId);
 
 	List<OrderData> retrieveCustomerActiveOrders(Long clientId);
+	
+	List<Long> retrieveOrderActiveAndDisconnectionIds(Long clientId,Long planId);
 
 
 }
