@@ -112,6 +112,19 @@ public class ConfigurationConstants {
     //Encryption key config
 	public static final String AES_ENCRYPTION_KEY = "key-value";
 	public static final String PAYPAL_MAX_FAILED_COUNT = "paypal-max-failed-count";
+	
+	public static final String CUBIWARE_CONFIG_PROPERTY = "cubiware-configuration";
+	public static final String CUBIWARE_SUBSCRIBERID = "subscriberId";
+	public static final String CUBIWARE_ENCODED_PASSWORD = "encodedPassword";
+	public static final String CUBIWARE_URL_NAME = "url";
+	public static final String CUBIWARE_ACCESS_TOKEN = "accessToken";
+	public static final String CUBIWARE_CUSTOMER_URL = "customers";
+	public static final String CUBIWARE_DEVICE_URL = "devices";
+	public static final String CUBIWARE_AUTHORIZATION = "Authorization";
+	public static final String CUBIWARE_BASIC_NAME = "Basic ";
+	public static final String CUBIWARE_XML_DEVICE_DATA = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<device>" + "<customer-id></customer-id>" + "</device>";
+	
+	
 }
 
 

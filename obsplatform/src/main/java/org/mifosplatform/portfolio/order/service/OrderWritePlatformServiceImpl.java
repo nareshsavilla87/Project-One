@@ -35,6 +35,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
@@ -102,6 +103,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.google.gson.JsonElement;
+
 
 
 @Service
@@ -145,6 +148,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
 	private final ContractRepository contractRepository;
 	private final InvoiceClient invoiceClient;
+	private final FromJsonHelper fromJsonHelper;
     
 
     @Autowired
@@ -163,7 +167,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		    final EventActionRepository eventActionRepository,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,final InvoiceClient invoiceClient,
 		    final HardwareAssociationRepository associationRepository,final ProvisioningWritePlatformService provisioningWritePlatformService,
 		    final PaymentFollowupRepository paymentFollowupRepository,final PriceRepository priceRepository,final ChargeCodeRepository chargeCodeRepository,
-		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,final PaypalRecurringBillingRepository paypalRecurringBillingRepository) {
+		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,final PaypalRecurringBillingRepository paypalRecurringBillingRepository,
+		    final FromJsonHelper fromJsonHelper) {
 		    
 
 		this.context = context;
@@ -204,6 +209,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
 		this.contractRepository = contractRepository;
 		this.invoiceClient = invoiceClient;
+		this.fromJsonHelper = fromJsonHelper;
 
 
 	}
@@ -1260,6 +1266,38 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		}
 		}
   }
+  
+  @Override
+	public CommandProcessingResult renewalOrderWithClient(JsonCommand command, Long clientId) {
+
+	  try{	
+		this.context.authenticatedUser();
+		Long planId = command.longValueOfParameterNamed("planId");
+		List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
+		if(orderIds.isEmpty()){
+			throw new NoOrdersFoundException(clientId,planId);
+		}
+		CommandProcessingResult result = null;
+		for(Long id : orderIds){
+			
+			JSONObject renewalJson = new JSONObject();
+			renewalJson.put("renewalPeriod", command.stringValueOfParameterNamed("duration"));
+			renewalJson.put("priceId", 0);
+			renewalJson.put("description", "Order renewal with clientId and planId");
+			final JsonElement element = fromJsonHelper.parse(renewalJson.toString());
+			JsonCommand renewalCommand = new JsonCommand(null,renewalJson.toString(), element, fromJsonHelper,
+					null, null, null, null, null, null, null, null, null, null, 
+					null, null);
+			result = this.renewalClientOrder(renewalCommand,id);
+		}
+		return result;
+	  }catch(DataIntegrityViolationException dve){
+			handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		} catch (JSONException e) {
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+	}
 
 
  }

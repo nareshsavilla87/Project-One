@@ -10,6 +10,8 @@ import net.sf.json.JSONObject;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.service.DataSourcePerTenantService;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
+import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
+import org.mifosplatform.organisation.message.service.BillingMessageTemplateWritePlatformService;
 import org.mifosplatform.portfolio.allocation.service.AllocationReadPlatformService;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.domain.Order;
@@ -53,6 +55,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 	  private final OrderAddonsRepository orderAddonsRepository;
 	  public final static String PROVISIONGSYS_COMVENIENT="Comvenient";
 	  private final PlanMappingRepository planMappingRepository;
+	  private final BillingMessageTemplateWritePlatformService billingMessageTemplateWritePlatformService;
 	
 
 	    @Autowired
@@ -60,7 +63,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 	    		final ServiceMasterRepository serviceMasterRepository,final ProcessRequestRepository processRequestRepository,
 	    		final AllocationReadPlatformService allocationReadPlatformService,final PrepareRequsetRepository prepareRequsetRepository,
 	    		final ServiceMappingRepository provisionServiceDetailsRepository,final PlanMappingRepository planMappingRepository,
-	    		final OrderAddonsRepository orderAddonsRepository) {
+	    		final OrderAddonsRepository orderAddonsRepository,final BillingMessageTemplateWritePlatformService billingMessageTemplateWritePlatformService) {
 	            
 	    	    
 	    	    this.orderRepository=orderRepository;
@@ -72,6 +75,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 	            this.allocationReadPlatformService=allocationReadPlatformService;
 	            this.provisionServiceDetailsRepository=provisionServiceDetailsRepository;
 	            this.planMappingRepository=planMappingRepository;
+	            this.billingMessageTemplateWritePlatformService=billingMessageTemplateWritePlatformService;
 	        
 	    }
 
@@ -144,7 +148,171 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 				
 			}
 
- @Override
+			@Override
+			public CommandProcessingResult processingClientDetails(PrepareRequestData requestData) {
+				
+				String errorMessage = null;
+				PrepareRequest prepareRequest = this.prepareRequsetRepository.findOne(requestData.getRequestId());
+				
+				try { 
+					String requestType = null;
+					ProcessRequest processRequest = null;
+					Long processResultId = Long.valueOf(0);
+					Order order = this.orderRepository.findOne(requestData.getOrderId());
+					AllocationDetailsData detailsData = this.allocationReadPlatformService.getTheHardwareItemDetails(requestData.getOrderId());
+					requestType = requestData.getRequestType();
+					PlanMapping planMapping = this.planMappingRepository.findOneByPlanId(order.getPlanId());
+
+					if ((requestData.getIshardwareReq().equalsIgnoreCase("Y") && detailsData == null) || planMapping == null) {
+						String status = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
+						if (prepareRequest != null) {
+							prepareRequest.setStatus(status);
+							this.prepareRequsetRepository.save(prepareRequest);
+						}
+
+						if (planMapping == null) {
+							errorMessage = "Plan Mapping Not Found For this Plan, planId="+ order.getPlanId() + ", orderId=" + order.getId();
+						} else {
+							errorMessage = "Hardware Mapping Not Found For this Order, orderId=" + order.getId() + ", planId=" + order.getPlanId();
+						}
+
+						// Update Order Status
+						order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
+						this.orderRepository.saveAndFlush(order);
+
+					} else {
+						String HardWareId = null;
+						if (detailsData != null) {
+							HardWareId = detailsData.getSerialNo();
+						}
+						processRequest = new ProcessRequest(requestData.getRequestId(), order.getClientId(), order.getId(),
+								requestData.getProvisioningSystem(), requestType, 'N', 'N');
+						List<OrderLine> orderLineData = order.getServices();
+						JSONObject jsonObject = new JSONObject();
+
+						if (planMapping != null) {
+							jsonObject.put("planIdentification", planMapping.getPlanIdentification());
+						}
+
+						JSONArray serviceArray = new JSONArray();
+						if (requestData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.CHANGE_PLAN.toString())) {
+							Order oldOrder = this.orderRepository.findOldOrderByOrderNO(order.getOrderNo());
+							List<OrderLine> orderdetails = oldOrder.getServices();
+							planMapping = this.planMappingRepository.findOneByPlanId(oldOrder.getPlanId());
+
+							if (planMapping != null) {
+								jsonObject.put("oldPlanIdentification", planMapping.getPlanIdentification());
+							} else {
+								errorMessage = "Plan Mapping Not Found For the Old Plan, planId="+ order.getPlanId() + ", orderId=" + order.getId();
+							}
+
+							for (OrderLine orderLine : orderdetails) {
+
+								JSONObject oldsubjson = new JSONObject();
+								List<ServiceMapping> provisionServiceDetails = this.provisionServiceDetailsRepository.findOneByServiceId(orderLine.getServiceId());
+
+								ServiceMaster service = this.serviceMasterRepository.findOne(orderLine.getServiceId());
+								if (!provisionServiceDetails.isEmpty()) {
+									oldsubjson.put("oldServiceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+								}
+								oldsubjson.put("oldServiceType", service.getServiceType());
+								serviceArray.add(oldsubjson);
+							}
+							jsonObject.put("oldServices", new Gson().toJson(serviceArray));
+						}
+
+						JSONArray newServiceArray = new JSONArray();
+						if (requestData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.DEVICE_SWAP.toString())) {
+							AllocationDetailsData allocationDetailsData = this.allocationReadPlatformService
+									.getDisconnectedHardwareItemDetails(requestData.getOrderId(), requestData.getClientId());
+							jsonObject.put("clientId", order.getClientId());
+							jsonObject.put("OldHWId", allocationDetailsData.getSerialNo());
+							jsonObject.put("NewHWId", HardWareId);
+						}
+						if (requestType.equalsIgnoreCase(UserActionStatusTypeEnum.ADDON_ACTIVATION.toString())) {
+
+							List<OrderAddons> orderAddons = this.orderAddonsRepository.findAddonsByOrderId(requestData.getOrderId());
+							
+							for (OrderAddons orderAddon : orderAddons) {
+
+								List<ServiceMapping> provisionServiceDetails = this.provisionServiceDetailsRepository
+										.findOneByServiceId(orderAddon.getServiceId());
+								ServiceMaster service = this.serviceMasterRepository.findOne(orderAddon.getServiceId());
+								JSONObject subjson = new JSONObject();
+								subjson.put("serviceName", service.getServiceCode());
+								subjson.put("addonId", requestData.getAddonId());
+								if (!provisionServiceDetails.isEmpty()) {
+									subjson.put("serviceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+								}
+								subjson.put("serviceType", service.getServiceType());
+								newServiceArray.add(subjson.toString());
+							}
+						} else {
+							for (OrderLine orderLine : orderLineData) {
+								List<ServiceMapping> provisionServiceDetails = this.provisionServiceDetailsRepository
+										.findOneByServiceId(orderLine.getServiceId());
+								ServiceMaster service = this.serviceMasterRepository.findOne(orderLine.getServiceId());
+								JSONObject subjson = new JSONObject();
+								subjson.put("serviceName", service.getServiceCode());
+								if (!provisionServiceDetails.isEmpty()) {
+									subjson.put("serviceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
+								}
+								subjson.put("serviceType", service.getServiceType());
+								newServiceArray.add(subjson.toString());
+							}
+						}
+						jsonObject.put("services", new Gson().toJson(newServiceArray));
+						ProcessRequestDetails processRequestDetails = new ProcessRequestDetails(orderLineData.get(0).getId(), 
+								orderLineData.get(0).getServiceId(), jsonObject.toString(), "Recieved", HardWareId, order.getStartDate(),
+								order.getEndDate(), null, null, 'N', requestType, null);
+						processRequest.add(processRequestDetails);
+						this.processRequestRepository.save(processRequest);
+						String status = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getValue().toString();
+						processResultId = processRequest.getId();
+						if (prepareRequest != null) {
+							prepareRequest.setIsProvisioning('Y');
+							prepareRequest.setStatus(status);
+							this.prepareRequsetRepository.save(prepareRequest);
+						}
+					}
+					/*
+					 * if(requestData.getProvisioningSystem().equalsIgnoreCase("None")){
+					 * order.setStatus(new Long(1)); this.orderRepository.save(order); }
+					 */
+					if(null != errorMessage && null != prepareRequest && prepareRequest.getIsNotify() == 'N') { 
+						this.billingMessageTemplateWritePlatformService.processEmailNotification(order.getClientId(), 
+								order.getId(), errorMessage, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PENDING_REQUEST);
+						prepareRequest.setIsNotify('Y');
+						this.prepareRequsetRepository.save(prepareRequest);
+					}
+					return new CommandProcessingResult(processResultId);
+
+				} catch (Exception exception) {
+					String className = exception.getClass().getSimpleName();
+					errorMessage = " Throwing " + className + " Exception , Reason: " + stackTraceToString(exception);
+					if (prepareRequest != null && prepareRequest.getIsNotify() == 'N') {
+						prepareRequest.setIsProvisioning('N');
+						prepareRequest.setStatus("Pending");
+						prepareRequest.setIsNotify('Y');
+						this.billingMessageTemplateWritePlatformService.processEmailNotification(prepareRequest.getClientId(), 
+								prepareRequest.getOrderId(), errorMessage, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PENDING_REQUEST);
+						this.prepareRequsetRepository.save(prepareRequest);
+					}
+					exception.printStackTrace();
+					return new CommandProcessingResult(Long.valueOf(-1));
+				}
+			}
+			
+			public String stackTraceToString(Throwable e) {
+				StringBuilder sb = new StringBuilder();
+				for (StackTraceElement element : e.getStackTrace()) {
+					sb.append(element.toString());
+					sb.append("\n");
+				}
+				return sb.toString();
+			}
+			
+/* @Override
  public CommandProcessingResult processingClientDetails(PrepareRequestData requestData) {
 	
 PrepareRequest prepareRequest=this.prepareRequsetRepository.findOne(requestData.getRequestId());
@@ -257,10 +425,10 @@ try{
 			 this.prepareRequsetRepository.save(prepareRequest);
 		 }
 	 }
-	/* if(requestData.getProvisioningSystem().equalsIgnoreCase("None")){
+	 if(requestData.getProvisioningSystem().equalsIgnoreCase("None")){
 		 order.setStatus(new Long(1));
 		 this.orderRepository.save(order);
-	 }*/
+	 }
 	 return new CommandProcessingResult(processResultId);	
  
 	 }catch(Exception exception){
@@ -272,7 +440,7 @@ try{
 	 exception.printStackTrace();
 	 return new CommandProcessingResult(Long.valueOf(-1));
  }
- }
+ }*/
 
  @Override
  public List<Long> getPrepareRequestDetails(Long id) {
