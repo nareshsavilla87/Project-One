@@ -33,7 +33,7 @@ public final class OrderCommandFromApiJsonDeserializer {
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("planCode","locale","dateFormat","start_date","paytermCode",
     		"contractPeriod","billAlign","price","description","renewalPeriod","disconnectReason","isPrepaid","disconnectionDate","ispaymentEnable",
     		"paymentCode","amountPaid","paymentDate","receiptNo","promoId","startDate","isNewplan","suspensionDate","suspensionReason",
-    		"suspensionDescription","status","actionType","priceId","autoRenew"));
+    		"suspensionDescription","status","actionType","priceId","autoRenew","planId","duration"));
     private final Set<String> retracksupportedParameters = new HashSet<String>(Arrays.asList("commandName","message","orderId"));
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -184,6 +184,24 @@ public final class OrderCommandFromApiJsonDeserializer {
         baseDataValidator.reset().parameter("suspensionReason").value(suspensionReason).notBlank();
         
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
+		
+	}
+	
+	public void validateForOrderRenewalWithClient(final String json) {
+		
+		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+		
+		final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+		fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedParameters);
+		final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("orderrenewal");
+		final JsonElement element = fromApiJsonHelper.parse(json);
+		final String planId=fromApiJsonHelper.extractStringNamed("planId", element);
+		baseDataValidator.reset().parameter("planId").value(planId).notBlank().validateforNumeric();
+		final String duration = fromApiJsonHelper.extractStringNamed("duration", element);
+		baseDataValidator.reset().parameter("duration").value(duration).notBlank().validateforNumeric();
+		
+		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 		
 	}
 }
