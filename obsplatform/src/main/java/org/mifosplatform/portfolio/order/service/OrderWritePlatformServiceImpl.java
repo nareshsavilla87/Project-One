@@ -1284,39 +1284,6 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	
 		return plan;
 	}
-	
-  @Override
-	public CommandProcessingResult renewalOrderWithClient(JsonCommand command, Long clientId) {
-
-	  try{	
-		this.context.authenticatedUser();
-		Long planId = command.longValueOfParameterNamed("planId");
-		List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
-		if(orderIds.isEmpty()){
-			throw new NoOrdersFoundException(clientId,planId);
-		}
-		CommandProcessingResult result = null;
-		for(Long id : orderIds){
-			
-			JSONObject renewalJson = new JSONObject();
-			renewalJson.put("renewalPeriod", command.stringValueOfParameterNamed("duration"));
-			renewalJson.put("priceId", 0);
-			renewalJson.put("description", "Order renewal with clientId and planId");
-			final JsonElement element = fromJsonHelper.parse(renewalJson.toString());
-			JsonCommand renewalCommand = new JsonCommand(null,renewalJson.toString(), element, fromJsonHelper,
-					null, null, null, null, null, null, null, null, null, null, 
-					null, null);
-			result = this.renewalClientOrder(renewalCommand,id);
-		}
-		return result;
-	  }catch(DataIntegrityViolationException dve){
-			handleCodeDataIntegrityIssues(command, dve);
-			return new CommandProcessingResult(Long.valueOf(-1));
-		} catch (JSONException e) {
-			return new CommandProcessingResult(Long.valueOf(-1));
-		}
-	}
-
 		
 
 	@Override
