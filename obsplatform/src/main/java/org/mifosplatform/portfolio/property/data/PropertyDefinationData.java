@@ -72,7 +72,7 @@ public class PropertyDefinationData {
 	}
 
 	public PropertyDefinationData(final Long id, final Long refId, final String description,final String propertyCode, 
-			final String status, final String clientId,final LocalDate transactionDate, final String clientName,final String serialNumber) {
+			final String status, final String clientId,final LocalDate transactionDate, final String clientName) {
 		
 		this.id = id;
 		this.refId = refId;
@@ -82,7 +82,7 @@ public class PropertyDefinationData {
 		this.clientId = clientId;
 		this.transactionDate = transactionDate;
 		this.clientName = clientName;
-		this.serialNumber = serialNumber;
+		//this.serialNumber = serialNumber;
 
 	}
 	
