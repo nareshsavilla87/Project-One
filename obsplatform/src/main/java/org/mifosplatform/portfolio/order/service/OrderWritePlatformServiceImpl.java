@@ -1284,13 +1284,13 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	
 		return plan;
 	}
-		
-
-	@Override
+	
+  @Override
 	public CommandProcessingResult renewalOrderWithClient(JsonCommand command, Long clientId) {
 
 	  try{	
 		this.context.authenticatedUser();
+		this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
 		Long planId = command.longValueOfParameterNamed("planId");
 		List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
 		if(orderIds.isEmpty()){
@@ -1314,9 +1314,10 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		} catch (JSONException e) {
-  			return new CommandProcessingResult(Long.valueOf(-1));
-  		}
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
 	}
+		
 
  }
 

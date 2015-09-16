@@ -573,7 +573,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 					public List<Long> retrieveOrderActiveAndDisconnectionIds(Long clientId,Long planId) {
                         
 						final OrderIdMapper mapper=new OrderIdMapper();
-						final String sql="select id from b_orders o where o.order_status in (1,3) and o.client_id=? and o.plan_id =? " ;
+						final String sql="select id from b_orders o where o.order_status in (1,3) and o.client_id=? and o.plan_id =? and o.is_deleted = 'N'" ;
 						return this.jdbcTemplate.query(sql,mapper,new Object[] { clientId,planId});
 					}
 					
