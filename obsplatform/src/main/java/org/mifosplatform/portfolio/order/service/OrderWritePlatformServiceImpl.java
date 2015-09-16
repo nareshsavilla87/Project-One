@@ -1290,6 +1290,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 
 	  try{	
 		this.context.authenticatedUser();
+		this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
 		Long planId = command.longValueOfParameterNamed("planId");
 		List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
 		if(orderIds.isEmpty()){
