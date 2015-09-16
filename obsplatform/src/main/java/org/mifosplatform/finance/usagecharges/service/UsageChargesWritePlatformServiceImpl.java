@@ -91,7 +91,9 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see processCustomerUsageRawData(java.lang.Long)
+	 * @see processCustomerUsageRawData(Long)
+	 * Here Transactional annotation help to handling of 
+	 * JPA/Hibernate: detached entity passed to persist execption(persistenceexception)
 	 */
 	@Transactional
 	@Override

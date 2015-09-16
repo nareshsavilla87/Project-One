@@ -9,14 +9,17 @@ import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
 import org.mifosplatform.finance.billingorder.domain.BillingOrder;
+import org.mifosplatform.finance.billingorder.domain.BillingOrderRepository;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.billingorder.domain.InvoiceTax;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
+import org.mifosplatform.finance.usagecharges.service.UsageChargesWritePlatformService;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class GenerateBillingOrderServiceImplementation implements GenerateBillingOrderService {
@@ -24,14 +27,19 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 	private final GenerateBill generateBill;
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final InvoiceRepository invoiceRepository;
+	private final UsageChargesWritePlatformService usageBill;
+	private final BillingOrderRepository chargeRepository;
 
 	@Autowired
 	public GenerateBillingOrderServiceImplementation(final GenerateBill generateBill,final BillingOrderReadPlatformService billingOrderReadPlatformService,
-			final InvoiceRepository invoiceRepository) {
+			final InvoiceRepository invoiceRepository,final UsageChargesWritePlatformService usageBill,
+			final BillingOrderRepository chargeRepository) {
 	
 		this.generateBill = generateBill;
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.invoiceRepository = invoiceRepository;
+		this.usageBill = usageBill;
+		this.chargeRepository = chargeRepository;
 	
 	}
 
@@ -64,15 +72,15 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 					billingOrderCommand = generateBill.getOneTimeBill(billingOrderData, discountMasterData);
 					billingOrderCommands.add(billingOrderCommand);
 
-				} else if (generateBill.isChargeTypeRC(billingOrderData)) {
-
-					System.out.println("---- RC ----");
-					// monthly
+				} else if (generateBill.isChargeTypeRC(billingOrderData)){
+					
+				 	 System.out.println("---- RC ---");
 					if (billingOrderData.getDurationType().equalsIgnoreCase("month(s)")) {
 						 if (billingOrderData.getBillingAlign().equalsIgnoreCase("N")) {
 
 							billingOrderCommand = generateBill.getMonthyBill(billingOrderData, discountMasterData);
 							billingOrderCommands.add(billingOrderCommand);
+							
 
 						} else if (billingOrderData.getBillingAlign().equalsIgnoreCase("Y")) {
 
@@ -117,6 +125,12 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 						billingOrderCommands.add(billingOrderCommand);
 
 					}
+				}else if(generateBill.isChargeTypeUC(billingOrderData)){
+					
+					System.out.println("---- UC ---");
+					
+					billingOrderCommand = this.usageChargesWritePlatformService.checkOrderUsageCharges(billingOrderData.getClientId(),billingOrderData.getOrderId());
+					
 				}
 
 			}
@@ -127,6 +141,7 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 		return billingOrderCommands;
 	}
 
+	@Transactional
 	@Override
 	public Invoice generateInvoice(List<BillingOrderCommand> billingOrderCommands) {
 
@@ -186,10 +201,11 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 		    if(!billingOrderCommand.getCdrData().isEmpty()){
 		    	
 			  for(UsageCharge usageCharge:billingOrderCommand.getCdrData()){
+				  
 			          charge.addUsageCharges(usageCharge);
 			  }
+			  this.chargeRepository.save(charge);
 		    }
-		    
 			netTaxAmount = netTaxAmount.add(netChargeTaxAmount);
 			totalChargeAmount = totalChargeAmount.add(netChargeAmount);
 			invoice.addCharges(charge);
@@ -227,8 +243,6 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 		BigDecimal totalChargeAmount = BigDecimal.ZERO;
 		BigDecimal netTaxAmount = BigDecimal.ZERO;
 		Invoice invoice=null;
-		
-		//Client client=this.clientRepository.findOneWithNotFoundDetection(billingOrderCommands.get(0).getClientId());
 		
 		if (newInvoice != null) {
            

@@ -72,7 +72,7 @@ public class BillingOrder  extends AbstractPersistable<Long>{
 	private List<InvoiceTax> chargeTaxs = new ArrayList<InvoiceTax>();
 	
 	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(cascade = CascadeType.ALL, mappedBy = "usageCharge", orphanRemoval = true)
+	@OneToMany(cascade = CascadeType.MERGE, mappedBy = "cdrCharge", orphanRemoval = true)
 	private List<UsageCharge> usageCharges = new ArrayList<UsageCharge>();
 	
 
@@ -208,9 +208,9 @@ public class BillingOrder  extends AbstractPersistable<Long>{
 
 	}
 	
-	public void addUsageCharges(UsageCharge usageCharge) {
-		usageCharge.update(this);
-		this.usageCharges.add(usageCharge);
+	public void addUsageCharges(UsageCharge usageCharges) {
+		usageCharges.update(this);
+		this.usageCharges.add(usageCharges);
 	}
 
 }

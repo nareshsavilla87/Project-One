@@ -50,8 +50,8 @@ public class UsageCharge extends AbstractAuditableCustom<AppUser, Long> {
 	private BigDecimal totalCost;
 
 	@ManyToOne
-	@JoinColumn(name = "charge_id", insertable = true, updatable = true, nullable = true, unique = true)
-	private BillingOrder usageCharge;
+	@JoinColumn(name = "charge_id", insertable = true, updatable = true, nullable = true, unique = true,referencedColumnName="id")
+	private BillingOrder cdrCharge;
 	
 	//Here CascadeType set to merge only bcz handling of JPA/Hibernate: detached entity passed to persist execption(persistenceexception)
 	@LazyCollection(LazyCollectionOption.FALSE)
@@ -114,9 +114,8 @@ public class UsageCharge extends AbstractAuditableCustom<AppUser, Long> {
 
 	}
 
-	public void update(BillingOrder charge) {
-
-		this.usageCharge = charge;
+	public void update(BillingOrder cdrCharge) {
+		this.cdrCharge = cdrCharge;
 
 	}
 

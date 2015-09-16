@@ -169,7 +169,7 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 
 			return " tm.id AS id,tm.charge_code AS chargeCode,tm.tax_code AS taxCode,tm.start_date AS startDate,tm.type AS type,tm.rate AS rate" +
 					" FROM b_state S,b_tax_mapping_rate tm,b_priceregion_detail pd,b_priceregion_master prm,b_client_address CA WHERE  pd.priceregion_id = tm.tax_region_id" +
-					" AND prm.id = pd.priceregion_id AND CA.state = S.state_name";
+					" AND prm.id = pd.priceregion_id AND CA.state = S.state_name AND CA.address_key='PRIMARY' ";
 		}
 
 	}
