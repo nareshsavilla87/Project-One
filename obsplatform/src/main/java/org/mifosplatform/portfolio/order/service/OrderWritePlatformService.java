@@ -38,7 +38,10 @@ public interface OrderWritePlatformService {
 	void processNotifyMessages(String eventName, Long clientId, String orderId);
 	
 	void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode);
+	
+	CommandProcessingResult renewalOrderWithClient(JsonCommand command,Long clientId);
 
+	CommandProcessingResult renewalOrderWithClient(JsonCommand command,Long clientId);
 	
 
 	
