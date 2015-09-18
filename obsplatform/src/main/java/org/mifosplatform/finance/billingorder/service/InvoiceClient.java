@@ -33,12 +33,14 @@ public class InvoiceClient {
 	private final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final ConfigurationRepository configurationRepository;
 	private final InvoiceRepository invoiceRepository;
+	private final UsageChargesWritePlatformService usageChargesWritePlatformService;
 	
 
 	@Autowired
 	InvoiceClient(final BillingOrderReadPlatformService billingOrderReadPlatformService,final GenerateBillingOrderService generateBillingOrderService,
 			final BillingOrderWritePlatformService billingOrderWritePlatformService,final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer,
-		    final ConfigurationRepository configurationRepository,final InvoiceRepository invoiceRepository) {
+		    final ConfigurationRepository configurationRepository,final InvoiceRepository invoiceRepository,
+		    final UsageChargesWritePlatformService usageChargesWritePlatformService) {
 
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.generateBillingOrderService = generateBillingOrderService;
@@ -46,6 +48,7 @@ public class InvoiceClient {
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.configurationRepository = configurationRepository;
 		this.invoiceRepository = invoiceRepository;
+		this.usageChargesWritePlatformService = usageChargesWritePlatformService;
 	
 	}
 	
@@ -108,6 +111,7 @@ public class InvoiceClient {
 			if (configuration!=null&&configuration.isEnabled()) {
 				
 				this.invoiceRepository.save(invoiceData.getInvoice());
+				
 				// Update Client Balance
 				this.billingOrderWritePlatformService.updateClientBalance(invoiceData.getInvoice().getInvoiceAmount(), clientId, false);
 			} 
@@ -145,9 +149,11 @@ public class InvoiceClient {
 			Invoice singleInvoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
 
 			// Update order-price
-			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
-
+			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands,processDate);
 			System.out.println("---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
+			
+			//Update Usage charges
+			this.usageChargesWritePlatformService.updateUsageCharges(billingOrderCommands,singleInvoice);
 
 			// Update Client Balance
 			this.billingOrderWritePlatformService.updateClientBalance(singleInvoice.getInvoiceAmount(), clientId, false);
@@ -158,7 +164,6 @@ public class InvoiceClient {
 
 	public Invoice onTopUpAutoRenewalInvoice(Long orderId, Long clientId,LocalDate processDate) {
 
-
 		// Get qualified order complete details
 		List<BillingOrderData> products = this.billingOrderReadPlatformService.retrieveBillingOrderData(clientId, processDate,orderId);
 
@@ -168,7 +173,7 @@ public class InvoiceClient {
 		Invoice  invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
 
 		// Update order-price
-		this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
+		this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands,processDate);
 		System.out.println("Top-Up:---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
 
 		// Update Client Balance

@@ -12,10 +12,9 @@ import org.springframework.data.repository.query.Param;
  * @author Ranjith
  *
  */
-public interface UsageChargeRepository extends JpaRepository<UsageCharge, Long>,
-    JpaSpecificationExecutor<UsageCharge> {
+public interface UsageChargeRepository extends JpaRepository<UsageCharge, Long>,JpaSpecificationExecutor<UsageCharge> {
 
-	@Query("from UsageCharge usageCharge where usageCharge.clientId =:clientId and usageCharge.number =:number and usageCharge.cdrCharge is null")
+	@Query("from UsageCharge usageCharge where usageCharge.clientId =:clientId and usageCharge.number =:number and usageCharge.chargeId is null")
 	List<UsageCharge> findCustomerUsageCharges(@Param("clientId") Long clientId,@Param("number") String number);
 
 }

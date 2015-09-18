@@ -152,7 +152,7 @@ public class BillingMasterApiResourse {
 		 final String printFileName=this.billWritePlatformService.generateStatementPdf(billId);
 		 final File file = new File(printFileName);
 		 final ResponseBuilder response = Response.ok(file);
-		 response.header("Content-Disposition", "attachment; filename=\"" + printFileName + "\"");
+		 response.header("Content-Disposition", "attachment; filename=\"" +file.getName()+ "\"");
 		 response.header("Content-Type", "application/pdf");
 		 return response.build();
 	}
@@ -179,13 +179,13 @@ public class BillingMasterApiResourse {
 	@Produces({ MediaType.APPLICATION_JSON })
 	public Response printInvoice(@PathParam("invoiceId") final Long invoiceId, @PathParam("clientId") final Long clientId,@DefaultValue("true")@QueryParam("email") final boolean email) {
 		
-		 String printFileName=this.billWritePlatformService.generateInovicePdf(invoiceId);
+		 String printFileName=this.billWritePlatformService.generateInovicePdf(invoiceId); /*"/usr/share/tomcat7/.obs/InvoicePdfFiles/176_2015-09-18.pdf" */
 		 final File file = new File(printFileName);
 		 if(email){
 		 this.billWritePlatformService.sendPdfToEmail(printFileName,clientId,BillingMessageTemplateConstants.MESSAGE_TEMPLATE_INVOICE);
 		 }
 		 final ResponseBuilder response = Response.ok(file);
-		 response.header("Content-Disposition", "attachment; filename=\"" + printFileName + "\"");
+		 response.header("Content-Disposition", "attachment; filename=\"" +file.getName()+ "\"");
 		 response.header("Content-Type", "application/pdf");
 		 return response.build();
 	}
@@ -202,7 +202,7 @@ public class BillingMasterApiResourse {
 		   this.billWritePlatformService.sendPdfToEmail(printFileName,clientId,BillingMessageTemplateConstants.MESSAGE_TEMPLATE_PAYMENT);
 		 }
 		 final ResponseBuilder response = Response.ok(file);
-		 response.header("Content-Disposition", "attachment; filename=\"" + printFileName + "\"");
+		 response.header("Content-Disposition", "attachment; filename=\"" +file.getName()+ "\"");
 		 response.header("Content-Type", "application/pdf");
 		 return response.build();
 	}

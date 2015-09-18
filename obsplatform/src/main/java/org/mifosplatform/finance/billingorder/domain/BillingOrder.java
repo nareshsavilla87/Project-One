@@ -15,7 +15,6 @@ import javax.persistence.Table;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
 import org.springframework.data.jpa.domain.AbstractPersistable;
 
 @Entity
@@ -71,9 +70,9 @@ public class BillingOrder  extends AbstractPersistable<Long>{
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "charge", orphanRemoval = true)
 	private List<InvoiceTax> chargeTaxs = new ArrayList<InvoiceTax>();
 	
-	@LazyCollection(LazyCollectionOption.FALSE)
-	@OneToMany(cascade = CascadeType.MERGE, mappedBy = "cdrCharge", orphanRemoval = true)
-	private List<UsageCharge> usageCharges = new ArrayList<UsageCharge>();
+/*	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "cdrCharge", orphanRemoval = true)
+	private List<UsageCharge> usageCharges = new ArrayList<UsageCharge>();*/
 	
 
 	public BillingOrder() {
@@ -208,9 +207,9 @@ public class BillingOrder  extends AbstractPersistable<Long>{
 
 	}
 	
-	public void addUsageCharges(UsageCharge usageCharges) {
-		usageCharges.update(this);
-		this.usageCharges.add(usageCharges);
-	}
+	/*public void addUsageCharges(UsageCharge usageCharge) {
+		usageCharge.update(this);
+		this.usageCharges.add(usageCharge);
+	}*/
 
 }

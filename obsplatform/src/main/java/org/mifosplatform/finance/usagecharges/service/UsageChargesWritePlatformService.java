@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
+import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.usagecharges.data.UsageChargesData;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
@@ -19,6 +20,8 @@ public interface UsageChargesWritePlatformService {
 
 	void processCustomerUsageRawData(UsageChargesData customerData);
 
-	BillingOrderCommand checkOrderUsageCharges(Long clientId,Long orderId, List<BillingOrderData> products);
+	BillingOrderCommand checkOrderUsageCharges(BillingOrderData billingOrderData);
+
+	void updateUsageCharges(List<BillingOrderCommand> billingOrderCommands,Invoice singleInvoice);
 
 }

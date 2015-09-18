@@ -15,7 +15,7 @@ public class BillingOrderCommand {
 	private final Long orderPriceId;
 	private final Long clientId;
 	private final Date startDate;
-	private final Date nextBillableDate;
+	private  Date nextBillableDate;
 	private final Date endDate;
 	private final String billingFrequency;
 	private final String chargeCode;
@@ -137,6 +137,11 @@ public class BillingOrderCommand {
 
 	public List<UsageCharge> getCdrData() {
 		return cdrData;
+	}
+
+	public void setNextBillableDate(Date date) {
+		this.nextBillableDate = date;
+		
 	}
 
 	

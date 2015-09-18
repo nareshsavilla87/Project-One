@@ -22,6 +22,7 @@ import org.mifosplatform.finance.billingmaster.domain.BillMasterRepository;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
@@ -145,7 +146,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				if (!new File(statementDetailsLocation).isDirectory()) {
 					new File(statementDetailsLocation).mkdirs();
 				}
-				final String printStatementLocation = statementDetailsLocation+ File.separator + "Bill_" + billMaster.getId()+".pdf";
+				final String printStatementLocation = statementDetailsLocation+ File.separator +billMaster.getClientId()+"_"+DateUtils.getLocalDateOfTenant()+".pdf";
 				final String jpath = fileLocation + File.separator + "jasper";
 				final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 				final String jfilepath = jpath + File.separator + "Statement_"+ tenant.getTenantIdentifier() + ".jasper";
@@ -204,7 +205,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		if (!new File(InvoiceDetailsLocation).isDirectory()) {
 			 new File(InvoiceDetailsLocation).mkdirs();
 		}
-		final String printInvoiceLocation = InvoiceDetailsLocation +File.separator + "Invoice_"+invoiceId+".pdf";
+		final String printInvoiceLocation = InvoiceDetailsLocation +File.separator +invoiceId+"_"+DateUtils.getLocalDateOfTenant()+".pdf";
 		final Integer id = Integer.valueOf(invoiceId.toString());
 		try {
 			
@@ -254,7 +255,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		if (!new File(PaymentDetailsLocation).isDirectory()) {
 			 new File(PaymentDetailsLocation).mkdirs();
 		}
-		final String printPaymentLocation = PaymentDetailsLocation +File.separator + "Payment_"+paymentId +".pdf";
+		final String printPaymentLocation = PaymentDetailsLocation +File.separator +paymentId+"_"+DateUtils.getLocalDateOfTenant()+".pdf";
 		final Integer id = Integer.valueOf(paymentId.toString());
 		try {
 			

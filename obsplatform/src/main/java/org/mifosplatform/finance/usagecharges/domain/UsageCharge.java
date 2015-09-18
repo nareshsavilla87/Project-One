@@ -8,8 +8,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
@@ -19,7 +17,6 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-import org.mifosplatform.finance.billingorder.domain.BillingOrder;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.useradministration.domain.AppUser;
 
@@ -48,16 +45,19 @@ public class UsageCharge extends AbstractAuditableCustom<AppUser, Long> {
 
 	@Column(name = "total_cost")
 	private BigDecimal totalCost;
-
-	@ManyToOne
-	@JoinColumn(name = "charge_id", insertable = true, updatable = true, nullable = true, unique = true,referencedColumnName="id")
-	private BillingOrder cdrCharge;
 	
-	//Here CascadeType set to merge only bcz handling of JPA/Hibernate: detached entity passed to persist execption(persistenceexception)
+	@Column(name = "charge_id")
+	private Long chargeId;
+	
+	//Here CascadeType set to merge only bcz handling of JPA/Hibernate: 
+	//detached entity passed to persist execption(persistenceexception)
 	@LazyCollection(LazyCollectionOption.FALSE)
 	@OneToMany(cascade=CascadeType.MERGE, mappedBy = "usageCharge", orphanRemoval = true)  
 	private List<UsageRaw> usageRawData = new ArrayList<UsageRaw>();
-	
+
+	/*@ManyToOne
+	@JoinColumn(name = "charge_id", insertable = true, updatable = true, nullable = true)
+	private BillingOrder cdrCharge;*/
 
 	public UsageCharge() {
 
@@ -114,8 +114,9 @@ public class UsageCharge extends AbstractAuditableCustom<AppUser, Long> {
 
 	}
 
-	public void update(BillingOrder cdrCharge) {
-		this.cdrCharge = cdrCharge;
+	public void setChargeId(Long chargeId) {
+
+		this.chargeId = chargeId;
 
 	}
 
