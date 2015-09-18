@@ -199,7 +199,7 @@ public final class OrderCommandFromApiJsonDeserializer {
 		final String planId=fromApiJsonHelper.extractStringNamed("planId", element);
 		baseDataValidator.reset().parameter("planId").value(planId).notBlank().validateforNumeric();
 		final String duration = fromApiJsonHelper.extractStringNamed("duration", element);
-		baseDataValidator.reset().parameter("duration").value(duration).notBlank().validateforNumeric();
+		baseDataValidator.reset().parameter("duration").value(duration).notBlank();
 		
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 		

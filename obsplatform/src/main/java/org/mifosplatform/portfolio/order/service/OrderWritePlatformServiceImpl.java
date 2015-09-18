@@ -1274,6 +1274,8 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		this.context.authenticatedUser();
 		this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
 		Long planId = command.longValueOfParameterNamed("planId");
+		String contractPeriod = command.stringValueOfParameterNamed("duration");
+		Contract contract =this.contractRepository.findOneByContractId(contractPeriod);
 		List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
 		if(orderIds.isEmpty()){
 			throw new NoOrdersFoundException(clientId,planId);
@@ -1282,9 +1284,9 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		for(Long id : orderIds){
 			
 			JSONObject renewalJson = new JSONObject();
-			renewalJson.put("renewalPeriod", command.stringValueOfParameterNamed("duration"));
+			renewalJson.put("renewalPeriod", contract.getId());
 			renewalJson.put("priceId", 0);
-			renewalJson.put("description", "Order renewal with clientId and planId");
+			renewalJson.put("description", "Order renewal with clientId="+clientId+" and planId="+planId);
 			final JsonElement element = fromJsonHelper.parse(renewalJson.toString());
 			JsonCommand renewalCommand = new JsonCommand(null,renewalJson.toString(), element, fromJsonHelper,
 					null, null, null, null, null, null, null, null, null, null, 
