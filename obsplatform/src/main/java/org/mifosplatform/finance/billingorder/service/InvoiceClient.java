@@ -149,11 +149,11 @@ public class InvoiceClient {
 			Invoice singleInvoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
 
 			// Update order-price
-			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands,processDate);
+			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
 			System.out.println("---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
 			
 			//Update Usage charges
-			this.usageChargesWritePlatformService.updateUsageCharges(billingOrderCommands,singleInvoice);
+			//this.usageChargesWritePlatformService.updateUsageCharges(billingOrderCommands,singleInvoice);
 
 			// Update Client Balance
 			this.billingOrderWritePlatformService.updateClientBalance(singleInvoice.getInvoiceAmount(), clientId, false);
