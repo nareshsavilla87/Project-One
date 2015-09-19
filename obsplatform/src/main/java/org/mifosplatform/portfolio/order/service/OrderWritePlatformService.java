@@ -41,6 +41,4 @@ public interface OrderWritePlatformService {
 	
 	CommandProcessingResult renewalOrderWithClient(JsonCommand command,Long clientId);
 	
-
-	
 }

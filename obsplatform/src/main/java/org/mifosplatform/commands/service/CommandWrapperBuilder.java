@@ -2945,21 +2945,34 @@ public class CommandWrapperBuilder {
 		this.href = "";
 		return this;
 	}
+
 	public CommandWrapperBuilder disconnectOrderAddon(Long orderAddonId) {
+
 		this.actionName = "DISCONNECT";
 		this.entityName = "ORDERADDONS";
 		this.entityId = orderAddonId;
 		this.href = "/orders/addons/" + orderAddonId;
 		return this;
 	}
+
 	public CommandWrapperBuilder renewalOrderWithClient(Long clientId) {
+		
 		this.actionName = "RENEWALWITHCLIENT";
 		this.entityName = "ORDER";
 		this.entityId = clientId;
 		this.href = "/orderRenewal/" +clientId;
 		return this;
 	}
+	
 
+	public CommandWrapperBuilder createUsageChargesRawData() {
+		
+		this.actionName = "CREATE";
+		this.entityName = "CHARGES";
+		this.entityId = null;
+		this.href = "/charges";
+		return this;
+	}
 }
 
 

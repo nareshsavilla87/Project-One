@@ -139,7 +139,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final OrderCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final ContractRepository subscriptionRepository;
 	private final ConfigurationRepository configurationRepository;
-	private final OrderDiscountRepository orderDiscountRepository;
 	private final PromotionCodeRepository promotionCodeRepository;
 	private final HardwareAssociationReadplatformService hardwareAssociationReadplatformService;
 	private final ChargeCodeRepository chargeCodeRepository;
@@ -180,7 +179,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.serviceMasterRepository=serviceMasterRepository;
 		this.fromApiJsonDeserializer=fromApiJsonDeserializer;
 		this.configurationRepository=configurationRepository;
-		this.orderDiscountRepository=orderDiscountRepository;
 		this.prepareRequsetRepository=prepareRequsetRepository;
 		this.orderReadPlatformService = orderReadPlatformService;
 		this.paymentFollowupRepository=paymentFollowupRepository;

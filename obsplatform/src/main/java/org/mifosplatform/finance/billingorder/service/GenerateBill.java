@@ -13,6 +13,7 @@ import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
+import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
 import org.mifosplatform.infrastructure.configuration.domain.Configuration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
@@ -634,17 +635,16 @@ public class GenerateBill {
 	// create billing order command
 	public BillingOrderCommand createBillingOrderCommand(BillingOrderData billingOrderData, LocalDate chargeStartDate,LocalDate chargeEndDate, LocalDate invoiceTillDate,
 			LocalDate nextBillableDate, BigDecimal billPrice,List<InvoiceTaxCommand> listOfTaxes,DiscountMasterData discountMasterData) {
-		
 		         
 		      BigDecimal price = billPrice.setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
-		
-
-		return new BillingOrderCommand(billingOrderData.getClientOrderId(),billingOrderData.getOderPriceId(),
+		      List<UsageCharge> cdrData=new ArrayList<>();//usageCharges
+		      
+		 return new BillingOrderCommand(billingOrderData.getClientOrderId(),billingOrderData.getOderPriceId(),
 				billingOrderData.getClientId(), chargeStartDate.toDate(),nextBillableDate.toDate(), chargeEndDate.toDate(),
 				billingOrderData.getBillingFrequency(),billingOrderData.getChargeCode(),billingOrderData.getChargeType(),
 				billingOrderData.getChargeDuration(),billingOrderData.getDurationType(), invoiceTillDate.toDate(),
 				price, billingOrderData.getBillingAlign(), listOfTaxes,billingOrderData.getStartDate(), billingOrderData.getEndDate(),
-				discountMasterData, billingOrderData.getTaxInclusive());
+				discountMasterData, billingOrderData.getTaxInclusive(),cdrData);
 	}
 
 	

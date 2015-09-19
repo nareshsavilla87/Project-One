@@ -9,14 +9,13 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 
 public interface BillingOrderWritePlatformService {
 
-	//List<BillingOrder> createBillingProduct(List<BillingOrderCommand> billingOrderCommands);
+	
 	CommandProcessingResult updateBillingOrder(List<BillingOrderCommand> billingOrderCommands);
 	
 	void updateClientBalance(BigDecimal value,Long clientId, boolean isWalletEnable);
 	
 	void updateClientVoucherBalance(BigDecimal amount,Long clientId, boolean isWalletEnable);
 
-
 	void UpdateOfficeCommision(Invoice invoice, Long agreementId);
-
+	
 }

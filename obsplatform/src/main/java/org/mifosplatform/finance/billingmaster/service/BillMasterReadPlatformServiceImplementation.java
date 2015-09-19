@@ -7,14 +7,12 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
-import org.mifosplatform.finance.billingmaster.service.BillMasterReadPlatformService;
 import org.mifosplatform.finance.billingorder.data.BillDetailsData;
 import org.mifosplatform.finance.financialtransaction.data.FinancialTransactionsData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -22,21 +20,17 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class BillMasterReadPlatformServiceImplementation implements
-		BillMasterReadPlatformService {
+public class BillMasterReadPlatformServiceImplementation implements BillMasterReadPlatformService {
 	
-	private final PlatformSecurityContext context;
 	private final JdbcTemplate jdbcTemplate;
 	private final PaginationHelper<FinancialTransactionsData> paginationHelper = new PaginationHelper<FinancialTransactionsData>();
+	private final PaginationHelper<BillDetailsData> pagination = new PaginationHelper<BillDetailsData>();
+
 
 	@Autowired
-	public BillMasterReadPlatformServiceImplementation(
-			final PlatformSecurityContext context,
-			final TenantAwareRoutingDataSource dataSource) {
+	public BillMasterReadPlatformServiceImplementation(final TenantAwareRoutingDataSource dataSource) {
 
-		this.context = context;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
-
 	}
 
 	@Override
@@ -132,62 +126,6 @@ public class BillMasterReadPlatformServiceImplementation implements
 	}
 
 	@Override
-	public BillDetailsData retrievebillDetails(final Long clientId) {
-
-		final BillMapper mapper = new BillMapper();
-		final String sql = "select " + mapper.billSchema() + " and b.id =" + clientId;
-
-	    return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] {  });
-	}
-
-	private static final class BillMapper implements RowMapper<BillDetailsData> {
-
-        public String billSchema() {
-            return " b.*,c.*, mc.*,ca.line_1 as addr1,ca.line_2 as addr2,ca.city as offCity,ca.state as offSate,ca.country as offCountry,"
-            	+"ca.zip as offZip,ca.phone_number as offPhnNum,ca.email_id as email,ca.company_logo as companyLogo  FROM b_bill_master b,"
-            		+"b_company_address_detail ca,m_client mc LEFT JOIN  b_client_address c  ON c.client_id = mc.id WHERE b.client_id = mc.id";
-        }
-
-        @Override
-        public BillDetailsData mapRow(final ResultSet resultSet, final int rowNum) throws SQLException {
-
-            final Long id = resultSet.getLong("id");
-            final Long clientId = resultSet.getLong("Client_id");
-            final String addrNo = resultSet.getString("address_no");
-            final String clientName = resultSet.getString("display_name");
-            final String billPeriod = resultSet.getString("bill_Period");
-            final String street = resultSet.getString("street");
-            final String zip = resultSet.getString("zip"); 
-            final String city = resultSet.getString("country");
-            final String state = resultSet.getString("state");
-            final String country = resultSet.getString("country");
-            final String addr1 = resultSet.getString("addr1");
-            final String addr2 = resultSet.getString("addr2");
-            final String offCity = resultSet.getString("offCity");
-            final String offState = resultSet.getString("offSate");
-            final String offCountry = resultSet.getString("offCountry");
-            final String offZip = resultSet.getString("offZip");
-            final String phnNum = resultSet.getString("offPhnNum");
-            final String emailId = resultSet.getString("email");
-            final String companyLogo = resultSet.getString("companyLogo");
-            final Double previousBal = resultSet.getDouble("Previous_balance");
-            final Double chargeAmount = resultSet.getDouble("Charges_amount");
-            final Double adjustmentAmount = resultSet.getDouble("Adjustment_amount");
-            final Double taxAmount = resultSet.getDouble("Tax_amount");
-            final Double paidAmount = resultSet.getDouble("Paid_amount");
-            final Double adjustAndPayment = resultSet.getDouble("Due_amount");
-            final String message = resultSet.getString("Promotion_description");
-            final LocalDate billDate = JdbcSupport.getLocalDate(resultSet, "Bill_date");
-            final LocalDate dueDate = JdbcSupport.getLocalDate(resultSet, "Due_date");
-
-            return new BillDetailsData(id, clientId, addrNo, clientName, billPeriod, street, zip, city,
-            		state, country, previousBal, chargeAmount, adjustmentAmount, taxAmount, 
-            		paidAmount, adjustAndPayment, billDate, dueDate, message, addr1, addr2, 
-            		offCity, offState, offCountry, offZip, phnNum, emailId, companyLogo);
-			}
-
-	}
-	@Override
 
 	public List<FinancialTransactionsData> getFinancialTransactionData(final Long id) {
 
@@ -218,10 +156,10 @@ public class BillMasterReadPlatformServiceImplementation implements
 	}
 
 	@Override
-	public Page<FinancialTransactionsData> retrieveStatments(SearchSqlQuery searchCodes,Long clientId) {
+	public Page<BillDetailsData> retrieveStatments(SearchSqlQuery searchCodes,Long clientId) {
+		
 		final BillStatmentMapper mapper = new BillStatmentMapper();
 		final String sql = "select " + mapper.billStatemnetSchema() + " and b.is_deleted='N'";
-		
 		StringBuilder sqlBuilder = new StringBuilder(200);
 		sqlBuilder.append(sql);
 		String sqlSearch=searchCodes.getSqlSearch();
@@ -242,26 +180,26 @@ public class BillMasterReadPlatformServiceImplementation implements
         }
 
 		//return this.jdbcTemplate.query(sql, mapper, new Object[] {});
-		return this.paginationHelper.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(),
+		return this.pagination.fetchPage(this.jdbcTemplate, "SELECT FOUND_ROWS()",sqlBuilder.toString(),
 	            new Object[] {clientId}, mapper);
 
 	}
 
-	private static final class BillStatmentMapper implements
-				RowMapper<FinancialTransactionsData> {
+	private static final class BillStatmentMapper implements RowMapper<BillDetailsData> {
 
 		@Override
-		public FinancialTransactionsData mapRow(final ResultSet resultSet, final int rowNum)
-					throws SQLException {
+		public BillDetailsData mapRow(final ResultSet resultSet, final int rowNum)  throws SQLException {
+			
 			final Long id = resultSet.getLong("id");
 			final BigDecimal amount = resultSet.getBigDecimal("dueAmount");
 			final LocalDate billDate = JdbcSupport.getLocalDate(resultSet, "billDate");
 			final LocalDate dueDate = JdbcSupport.getLocalDate(resultSet, "dueDate");
 
-			return new FinancialTransactionsData(id,billDate,dueDate,amount);
+			return new BillDetailsData(id,billDate,dueDate,amount);
 		}
 
 		public String billStatemnetSchema() {
+			
 			return  "b.id as id,b.bill_date as billDate,b.due_date as dueDate,b.Due_amount as dueAmount from b_bill_master b where b.Client_id=? ";
 
 		}
@@ -346,7 +284,7 @@ public class BillMasterReadPlatformServiceImplementation implements
 			}
 
 		@Override
-		public List<BillDetailsData> retrievegetStatementDetails(final Long billId) {
+		public List<BillDetailsData> retrieveStatementDetails(final Long billId) {
 
 
 			final StatementMapper statementMapper = new StatementMapper();
@@ -364,7 +302,7 @@ public class BillMasterReadPlatformServiceImplementation implements
 				final Long clietId = resultSet.getLong("clietId");
 				final LocalDate dueDate = JdbcSupport.getLocalDate(resultSet, "dueDate");
 				final String transactionType = resultSet.getString("transactionType");
-				final double dueAmount = resultSet.getDouble("dueAmount");
+				final BigDecimal dueAmount = resultSet.getBigDecimal("dueAmount");
 				final BigDecimal amount = resultSet.getBigDecimal("amoount");
 
 				return new BillDetailsData(id, clietId, dueDate, transactionType, dueAmount, amount, null);

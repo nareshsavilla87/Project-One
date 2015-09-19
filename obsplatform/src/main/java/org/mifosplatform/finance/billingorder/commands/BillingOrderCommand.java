@@ -3,7 +3,9 @@ package org.mifosplatform.finance.billingorder.commands;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
+import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
 
 
 
@@ -13,7 +15,7 @@ public class BillingOrderCommand {
 	private final Long orderPriceId;
 	private final Long clientId;
 	private final Date startDate;
-	private final Date nextBillableDate;
+	private  Date nextBillableDate;
 	private final Date endDate;
 	private final String billingFrequency;
 	private final String chargeCode;
@@ -28,11 +30,12 @@ public class BillingOrderCommand {
 	private final Date billEndDate;
 	private final DiscountMasterData discountMasterData;
 	private final Integer taxInclusive;
+	private final List<UsageCharge> cdrData;
 
 	public BillingOrderCommand(Long clientOrderId, Long oderPriceId,Long clientId, Date startDate, Date nextBillableDate, Date endDate,
 			String billingFrequency, String chargeCode, String chargeType,Integer chargeDuration, String durationType, Date invoiceTillDate,
 			BigDecimal price, String billingAlign,final List<InvoiceTaxCommand> listOfTax, final Date billStartDate,final Date billEndDate,
-			final DiscountMasterData discountMasterData, Integer taxInclusive) {
+			final DiscountMasterData discountMasterData, final Integer taxInclusive, final List<UsageCharge> cdrData) {
 		
 		this.clientOrderId = clientOrderId;
 		this.orderPriceId = (oderPriceId != null) ? oderPriceId : new Long(0);
@@ -53,6 +56,7 @@ public class BillingOrderCommand {
 		this.listOfTax = listOfTax;
 		this.discountMasterData = discountMasterData;
 		this.taxInclusive = taxInclusive;
+		this.cdrData = cdrData;
 	}
 
 	public Long getClientId() {
@@ -123,17 +127,22 @@ public class BillingOrderCommand {
 		return billEndDate;
 	}
 
-
-
 	public DiscountMasterData getDiscountMasterData() {
 		return discountMasterData;
 	}
 
-	/**
-	 * @return the taxInclusive
-	 */
 	public Integer getTaxInclusive() {
 		return taxInclusive;
 	}
 
+	public List<UsageCharge> getCdrData() {
+		return cdrData;
+	}
+
+	public void setNextBillableDate(Date date) {
+		this.nextBillableDate = date;
+		
+	}
+
+	
 }
