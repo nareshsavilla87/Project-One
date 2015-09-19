@@ -33,6 +33,7 @@ public class InventoryGrnData {
 	private String officeName;
 	private String purchaseNo;
 	private Long officeId;
+	private Long availableQuantity;
 	
 	public InventoryGrnData(){
 		this.id=null;
@@ -74,7 +75,7 @@ public class InventoryGrnData {
 	}
 	
 	
-	public InventoryGrnData(final Long id,final LocalDate purchaseDate,final Long supplierId,final Long itemMasterId,final Long orderedQuantity,final Long receivedQuantity,final String itemDescription, final String supplierName,final String officeName,final String purchaseNo){
+	public InventoryGrnData(final Long id,final LocalDate purchaseDate,final Long supplierId,final Long itemMasterId,final Long orderedQuantity,final Long receivedQuantity,final String itemDescription, final String supplierName,final String officeName,final String purchaseNo, final Long availableQuantity){
 		this.id=id;
 		this.itemMasterId=itemMasterId;
 		this.orderdQuantity=orderedQuantity;
@@ -86,6 +87,7 @@ public class InventoryGrnData {
 		this.supplierName = supplierName;
 		this.officeName = officeName;
 		this.purchaseNo = purchaseNo;
+		this.availableQuantity = availableQuantity;
 	}
 	
 	public InventoryGrnData(List<ItemData> itemData,Collection<OfficeData> officeData, List<SupplierData> supplierData) {
@@ -100,6 +102,14 @@ public class InventoryGrnData {
 	
 	
 	
+	public InventoryGrnData(Long id, Long itemId,String itemDescription) {
+		
+		this.id = id;
+		this.itemMasterId = itemId;
+		this.itemDescription = itemDescription;
+		
+	}
+
 	public Long getId() {
 		return id;
 	}

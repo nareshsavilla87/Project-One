@@ -18,5 +18,7 @@ public interface GrnReadPlatformService {
 	
 	public Page<InventoryGrnData> retriveGrnDetails(SearchSqlQuery searchGrn);
 	
+	public Collection<InventoryGrnData> retriveGrnIdswithItemId(final Long itemMasterId);
+	
 	
 }
