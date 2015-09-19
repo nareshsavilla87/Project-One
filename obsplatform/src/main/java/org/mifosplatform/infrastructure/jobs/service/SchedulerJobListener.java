@@ -1,7 +1,5 @@
 package org.mifosplatform.infrastructure.jobs.service;
 
-import java.util.Date;
-
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;

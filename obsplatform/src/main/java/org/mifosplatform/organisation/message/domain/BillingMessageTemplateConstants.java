@@ -38,6 +38,8 @@ public class BillingMessageTemplateConstants {
 	public static final String MESSAGE_TEMPLATE_NOTIFY_PAYMENT = "NOTIFY PAYMENT";
 	public static final String MESSAGE_TEMPLATE_NOTIFY_CHANGEPLAN = "NOTIFY CHANGEPLAN";
 	public static final String MESSAGE_TEMPLATE_NOTIFY_ORDERTERMINATION = "NOTIFY ORDER TERMINATION";
+	public static final String MESSAGE_TEMPLATE_PENDING_REQUEST = "PENDING_REQUEST";
+	public static final String MESSAGE_TEMPLATE_RETRACK_ORDER = "RETRACK_ORDER";
 
 	
 	//constants

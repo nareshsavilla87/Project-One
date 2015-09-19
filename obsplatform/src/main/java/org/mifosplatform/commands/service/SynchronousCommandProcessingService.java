@@ -565,6 +565,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 				handler = applicationContext.getBean("orderSuspendCommandHandler",NewCommandSourceHandler.class);
 			}else if (wrapper.isOrderReactive()) {
 				handler = applicationContext.getBean("orderReactiveCommandHandler",NewCommandSourceHandler.class);
+			}else if (wrapper.isRenewOrderWithClient()) {
+				handler = applicationContext.getBean("renewalOrderWithClientCommandHandler",NewCommandSourceHandler.class);
 			}
 		} else if (wrapper.isOrderScheduling()) {
 			if (wrapper.isCreate()) {

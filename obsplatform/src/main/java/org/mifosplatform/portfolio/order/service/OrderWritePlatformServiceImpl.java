@@ -5,9 +5,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.LocalDate;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.planprice.domain.Price;
@@ -35,6 +35,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
@@ -73,7 +74,6 @@ import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.order.exceptions.NoOrdersFoundException;
 import org.mifosplatform.portfolio.order.exceptions.OrderNotFoundException;
-import org.mifosplatform.portfolio.order.exceptions.SchedulerOrderFoundException;
 import org.mifosplatform.portfolio.order.serialization.OrderCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanDetails;
@@ -102,6 +102,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.JsonElement;
 
 
 
@@ -135,7 +137,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final OrderCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final ContractRepository subscriptionRepository;
 	private final ConfigurationRepository configurationRepository;
-	private final OrderDiscountRepository orderDiscountRepository;
 	private final PromotionCodeRepository promotionCodeRepository;
 	private final HardwareAssociationReadplatformService hardwareAssociationReadplatformService;
 	private final ChargeCodeRepository chargeCodeRepository;
@@ -146,6 +147,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
 	private final ContractRepository contractRepository;
 	private final InvoiceClient invoiceClient;
+	private final FromJsonHelper fromJsonHelper;
     
 
     @Autowired
@@ -164,7 +166,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		    final EventActionRepository eventActionRepository,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,final InvoiceClient invoiceClient,
 		    final HardwareAssociationRepository associationRepository,final ProvisioningWritePlatformService provisioningWritePlatformService,
 		    final PaymentFollowupRepository paymentFollowupRepository,final PriceRepository priceRepository,final ChargeCodeRepository chargeCodeRepository,
-		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,final PaypalRecurringBillingRepository paypalRecurringBillingRepository) {
+		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,final PaypalRecurringBillingRepository paypalRecurringBillingRepository,
+		    final FromJsonHelper fromJsonHelper) {
 		    
 
 		this.context = context;
@@ -173,7 +176,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.serviceMasterRepository=serviceMasterRepository;
 		this.fromApiJsonDeserializer=fromApiJsonDeserializer;
 		this.configurationRepository=configurationRepository;
-		this.orderDiscountRepository=orderDiscountRepository;
 		this.prepareRequsetRepository=prepareRequsetRepository;
 		this.orderReadPlatformService = orderReadPlatformService;
 		this.paymentFollowupRepository=paymentFollowupRepository;
@@ -205,6 +207,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
 		this.contractRepository = contractRepository;
 		this.invoiceClient = invoiceClient;
+		this.fromJsonHelper = fromJsonHelper;
 
 
 	}
@@ -1269,14 +1272,47 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
   }
   
 	private Plan findOneWithNotFoundDetection(final Long planId) {
-
+	
 		Plan plan = this.planRepository.findPlanCheckDeletedStatus(planId);
-
+	
 		if (plan == null) {
 			throw new PlanNotFundException(planId);
 		}
-
+	
 		return plan;
+	}
+	
+  @Override
+	public CommandProcessingResult renewalOrderWithClient(JsonCommand command, Long clientId) {
+
+	  try{	
+		this.context.authenticatedUser();
+		this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
+		Long planId = command.longValueOfParameterNamed("planId");
+		List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
+		if(orderIds.isEmpty()){
+			throw new NoOrdersFoundException(clientId,planId);
+		}
+		CommandProcessingResult result = null;
+		for(Long id : orderIds){
+			
+			JSONObject renewalJson = new JSONObject();
+			renewalJson.put("renewalPeriod", command.stringValueOfParameterNamed("duration"));
+			renewalJson.put("priceId", 0);
+			renewalJson.put("description", "Order renewal with clientId and planId");
+			final JsonElement element = fromJsonHelper.parse(renewalJson.toString());
+			JsonCommand renewalCommand = new JsonCommand(null,renewalJson.toString(), element, fromJsonHelper,
+					null, null, null, null, null, null, null, null, null, null, 
+					null, null);
+			result = this.renewalClientOrder(renewalCommand,id);
+		}
+		return result;
+	  }catch(DataIntegrityViolationException dve){
+			handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		} catch (JSONException e) {
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
 	}
 
  }
