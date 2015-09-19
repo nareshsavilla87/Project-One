@@ -5,19 +5,24 @@ import java.math.BigDecimal;
 import java.sql.Connection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JRParameter;
 import net.sf.jasperreports.engine.JRRuntimeException;
 import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 
+import org.apache.commons.lang.LocaleUtils;
 import org.mifosplatform.finance.billingmaster.domain.BillDetail;
 import org.mifosplatform.finance.billingmaster.domain.BillMaster;
 import org.mifosplatform.finance.billingmaster.domain.BillMasterRepository;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.core.service.ThreadLocalContextUtil;
@@ -141,10 +146,10 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				if (!new File(statementDetailsLocation).isDirectory()) {
 					new File(statementDetailsLocation).mkdirs();
 				}
-				final String printStatementLocation = statementDetailsLocation+ File.separator + "Bill_" + billMaster.getId()+".pdf";
+				final String printStatementLocation = statementDetailsLocation+ File.separator +billMaster.getClientId()+"_"+DateUtils.getLocalDateOfTenant()+".pdf";
 				final String jpath = fileLocation + File.separator + "jasper";
-				final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-				final String jfilepath = jpath + File.separator + "Statement_"+ tenant + ".jasper";
+				final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+				final String jfilepath = jpath + File.separator + "Statement_"+ tenant.getTenantIdentifier() + ".jasper";
 				File destinationFile = new File(jfilepath);
 				if (!destinationFile.exists()) {
 					File sourceFile = new File(this.getClass().getClassLoader().getResource("Files/Statement.jasper").getFile());
@@ -155,6 +160,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				final Integer id = Integer.valueOf(billMaster.getId().toString());
 				parameters.put("param1", id);
 				parameters.put("SUBREPORT_DIR", jpath + "" + File.separator);
+				parameters.put(JRParameter.REPORT_LOCALE, getLocale(tenant)); 
 				final JasperPrint jasperPrint = JasperFillManager.fillReport(jfilepath, parameters, connection);
 				JasperExportManager.exportReportToPdfFile(jasperPrint,printStatementLocation);
 				billMaster.setFileName(printStatementLocation);
@@ -165,21 +171,21 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			return billMaster.getFileName();
 		} catch (final DataIntegrityViolationException ex) {
 
-			LOGGER.error("Filling report failed..." + ex.getLocalizedMessage());
+			LOGGER.error("Filling report failed...\r\n" + ex.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 			ex.printStackTrace();
 			return null;
 
 		} catch (final JRException | JRRuntimeException e) {
 
-			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
+			LOGGER.error("Filling report failed...\r\n" + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 			e.printStackTrace();
 			return null;
 
 		} catch (final Exception e) {
 
-			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
+			LOGGER.error("Filling report failed...\r\n" + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 			e.printStackTrace();
 			return null;
@@ -199,13 +205,13 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		if (!new File(InvoiceDetailsLocation).isDirectory()) {
 			 new File(InvoiceDetailsLocation).mkdirs();
 		}
-		final String printInvoiceLocation = InvoiceDetailsLocation +File.separator + "Invoice_"+invoiceId+".pdf";
+		final String printInvoiceLocation = InvoiceDetailsLocation +File.separator +invoiceId+"_"+DateUtils.getLocalDateOfTenant()+".pdf";
 		final Integer id = Integer.valueOf(invoiceId.toString());
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
-			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-			final String jasperfilepath =jpath+File.separator+"Invoicereport_"+tenant+".jasper";
+			final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+			final String jasperfilepath =jpath+File.separator+"Invoicereport_"+tenant.getTenantIdentifier()+".jasper";
 			File destinationFile=new File(jasperfilepath);
 		      if(!destinationFile.exists()){
 		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Files/Invoicereport.jasper").getFile());
@@ -214,21 +220,22 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			final Connection connection = this.dataSource.getConnection();
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("param1", id);
+			parameters.put(JRParameter.REPORT_LOCALE, getLocale(tenant)); 
 		   final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperfilepath, parameters, connection);
 		   JasperExportManager.exportReportToPdfFile(jasperPrint,printInvoiceLocation);
 	       connection.close();
 	       System.out.println("Filling report successfully...");
 	       
 		   }catch (final DataIntegrityViolationException ex) {
-			 LOGGER.error("Filling report failed..." + ex.getLocalizedMessage());
+			 LOGGER.error("Filling report failed...\r\n" + ex.getLocalizedMessage());
 			 System.out.println("Filling report failed...");
 			 ex.printStackTrace();
 		   } catch (final JRException  | JRRuntimeException e) {
-			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
+			LOGGER.error("Filling report failed...\r\n" + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 		 	e.printStackTrace();
 		  } catch (final Exception e) {
-			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
+			LOGGER.error("Filling report failed...\r\n" + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 			e.printStackTrace();
 		}
@@ -248,13 +255,13 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		if (!new File(PaymentDetailsLocation).isDirectory()) {
 			 new File(PaymentDetailsLocation).mkdirs();
 		}
-		final String printPaymentLocation = PaymentDetailsLocation +File.separator + "Payment_"+paymentId +".pdf";
+		final String printPaymentLocation = PaymentDetailsLocation +File.separator +paymentId+"_"+DateUtils.getLocalDateOfTenant()+".pdf";
 		final Integer id = Integer.valueOf(paymentId.toString());
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
-			final String tenant = ThreadLocalContextUtil.getTenant().getTenantIdentifier();
-			final String jasperfilepath =jpath+File.separator+"Paymentreport_"+tenant+".jasper";
+			final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+			final String jasperfilepath =jpath+File.separator+"Paymentreport_"+tenant.getTenantIdentifier()+".jasper";
 			File destinationFile=new File(jasperfilepath);
 		      if(!destinationFile.exists()){
 		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Files/Paymentreport.jasper").getFile());
@@ -263,27 +270,29 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			final Connection connection = this.dataSource.getConnection();
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("param1", id);
+			parameters.put(JRParameter.REPORT_LOCALE, getLocale(tenant));
 		   final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperfilepath, parameters, connection);
 		   JasperExportManager.exportReportToPdfFile(jasperPrint,printPaymentLocation);
 	       connection.close();
 	       System.out.println("Filling report successfully...");
 	       
 		   }catch (final DataIntegrityViolationException ex) {
-			 LOGGER.error("Filling report failed..." + ex.getLocalizedMessage());
+			 LOGGER.error("Filling report failed...\r\n" + ex.getLocalizedMessage());
 			 System.out.println("Filling report failed...");
 			 ex.printStackTrace();
 		   } catch (final JRException  | JRRuntimeException e) {
-			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
+			LOGGER.error("Filling report failed...\r\n" + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 		 	e.printStackTrace();
 		  } catch (final Exception e) {
-			LOGGER.error("Filling report failed..." + e.getLocalizedMessage());
+			LOGGER.error("Filling report failed...\r\n" + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 			e.printStackTrace();
 		}
 		return printPaymentLocation;	
 	}
 	
+
 	@Transactional
 	@Override
 	public void sendPdfToEmail(final String printFileName, final Long clientId,final String templateName) {
@@ -305,5 +314,19 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	    	throw new BillingMessageTemplateNotFoundException(templateName);
 	    }
 	  }
+	
+	/**
+	 * @param tenant
+	 * @return Locale 
+	 */
+	 public Locale getLocale(MifosPlatformTenant tenant) {
+
+		Locale locale = LocaleUtils.toLocale(tenant.getLocaleName());
+		if (locale == null) {
+			locale = Locale.getDefault();
+		}
+		return locale;
+	}
+	
 	}
 

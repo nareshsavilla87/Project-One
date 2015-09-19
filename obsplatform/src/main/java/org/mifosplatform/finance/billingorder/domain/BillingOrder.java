@@ -21,6 +21,11 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 @Table(name = "b_charge")
 public class BillingOrder  extends AbstractPersistable<Long>{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Column(name = "client_id")
 	private Long clientId;
 
@@ -53,9 +58,6 @@ public class BillingOrder  extends AbstractPersistable<Long>{
 
 	@Column(name = "charge_end_date")
 	private Date entDate;
-
-/*	@Column(name = "invoice_id")
-	private Long invoiceId;*/
 	
 	@Column(name="bill_id")
 	private Long billId;
@@ -68,6 +70,9 @@ public class BillingOrder  extends AbstractPersistable<Long>{
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "charge", orphanRemoval = true)
 	private List<InvoiceTax> chargeTaxs = new ArrayList<InvoiceTax>();
 	
+/*	@LazyCollection(LazyCollectionOption.FALSE)
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "cdrCharge", orphanRemoval = true)
+	private List<UsageCharge> usageCharges = new ArrayList<UsageCharge>();*/
 	
 
 	public BillingOrder() {
@@ -182,14 +187,6 @@ public class BillingOrder  extends AbstractPersistable<Long>{
 		this.entDate = entDate;
 	}
 
-/*	public Long getInvoiceId() {
-		return invoiceId;
-	}
-
-	public void setInvoiceId(Long invoiceId) {
-		this.invoiceId = invoiceId;
-	}*/
-
 	public void updateBillId(Long billId) {
 		this.billId=billId;
 		
@@ -209,5 +206,10 @@ public class BillingOrder  extends AbstractPersistable<Long>{
 		this.chargeTaxs.add(chargeTaxs);
 
 	}
+	
+	/*public void addUsageCharges(UsageCharge usageCharge) {
+		usageCharge.update(this);
+		this.usageCharges.add(usageCharge);
+	}*/
 
 }

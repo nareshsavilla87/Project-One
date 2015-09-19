@@ -667,12 +667,12 @@ public class CommandWrapper {
 
 
 		public boolean isCreateBillingMessage() {
-			// TODO Auto-generated method stub
+		
 			 return this.actionName.equalsIgnoreCase("CREATE") && this.entityName.equalsIgnoreCase("BILLINGMESSAGE");
 		}
 
 		public boolean isCreateMessageData() {
-			// TODO Auto-generated method stub
+			
 			return this.actionName.equalsIgnoreCase("CREATEDATA") && this.entityName.equalsIgnoreCase("BILLINGMESSAGE");
 		}
 
@@ -682,7 +682,7 @@ public class CommandWrapper {
 		}
 
 		public boolean isUpdateBillingMessage() {
-			// TODO Auto-generated method stub
+		
 			return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("BILLINGMESSAGE");
 		}
 
@@ -706,7 +706,7 @@ public class CommandWrapper {
 		}
 
 		public boolean isDeleteBillingMessage() {
-			// TODO Auto-generated method stub
+		
 			return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("BILLINGMESSAGE");
 		}
 		
@@ -1285,45 +1285,52 @@ public class CommandWrapper {
 		
 		}
 
-		public boolean isFeeMasterResource() {
-			 return this.entityName.equalsIgnoreCase("FEEMASTER");
-		}
+	public boolean isFeeMasterResource() {
+		return this.entityName.equalsIgnoreCase("FEEMASTER");
+	}
 
-		public boolean isPlanQualifier() {
-			 return this.entityName.equalsIgnoreCase("PLANQUALIFIER");
-		}
-		public boolean isStaticIp() {
-			return  this.entityName.equalsIgnoreCase("STATICIP");
-		}
+	public boolean isPlanQualifier() {
+		return this.entityName.equalsIgnoreCase("PLANQUALIFIER");
+	}
 
-		public boolean isPropertyMasterResource() {
-			return  this.entityName.equalsIgnoreCase("PROPERTYMASTER");
-		}
+	public boolean isStaticIp() {
+		return this.entityName.equalsIgnoreCase("STATICIP");
+	}
 
-		public boolean isUpdatePaypalProfile() {
-			return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILE");
-		}
+	public boolean isPropertyMasterResource() {
+		return this.entityName.equalsIgnoreCase("PROPERTYMASTER");
+	}
 
-		public boolean isUpdatePaypalProfileStatus() {
-			return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILESTATUS");
-		}
+	public boolean isUpdatePaypalProfile() {
+		return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILE");
+	}
 
-		public boolean isdeleteRecurringBilling() {
-			return this.actionName.equalsIgnoreCase("DELETERECURRINGBILLING");
-		}
+	public boolean isUpdatePaypalProfileStatus() {
+		return this.actionName.equalsIgnoreCase("UPDATEPAYPALPROFILESTATUS");
+	}
 
-		public boolean isAllocateDevice() {
-			return this.actionName.equalsIgnoreCase("ALLOCATEDEVICE");
-		}
-		public boolean isRefund() {
-			return  this.entityName.equalsIgnoreCase("REFUND");
-		}
+	public boolean isdeleteRecurringBilling() {
+		return this.actionName.equalsIgnoreCase("DELETERECURRINGBILLING");
+	}
 
-		public boolean isDeposit() {
-			return  this.entityName.equalsIgnoreCase("DEPOSIT");
-		}
-		
-		public boolean isRenewOrderWithClient() {
-			  return this.actionName.equalsIgnoreCase("RENEWALWITHCLIENT") && this.entityName.equalsIgnoreCase("ORDER");
-		}
+	public boolean isAllocateDevice() {
+		return this.actionName.equalsIgnoreCase("ALLOCATEDEVICE");
+	}
+
+	public boolean isRefund() {
+		return this.entityName.equalsIgnoreCase("REFUND");
+	}
+
+	public boolean isDeposit() {
+		return this.entityName.equalsIgnoreCase("DEPOSIT");
+	}
+
+	public boolean isUsageCharge() {
+		return this.entityName.equalsIgnoreCase("CHARGES");
+	}
+
+	public boolean isRenewOrderWithClient() {
+		return this.actionName.equalsIgnoreCase("RENEWALWITHCLIENT") && this.entityName.equalsIgnoreCase("ORDER");
+	}
+
 }

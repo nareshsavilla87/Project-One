@@ -3,6 +3,7 @@ package org.mifosplatform.billing.selfcare.data;
 import java.util.List;
 
 import org.mifosplatform.crm.ticketmaster.data.TicketMasterData;
+import org.mifosplatform.finance.billingorder.data.BillDetailsData;
 import org.mifosplatform.finance.clientbalance.data.ClientBalanceData;
 import org.mifosplatform.finance.financialtransaction.data.FinancialTransactionsData;
 import org.mifosplatform.finance.payments.data.PaymentData;
@@ -27,7 +28,7 @@ private Long clientId;
 	private ClientBalanceData clientBalanceData;
 	private List<AddressData> addressData;
 	private List<OrderData> clientOrdersData;
-	private Page<FinancialTransactionsData> statementsData;
+	private Page<BillDetailsData> statementsData;
 	private List<PaymentData> paymentsData;
 	private List<TicketMasterData> ticketMastersData;
 	private PaymentGatewayConfiguration paypalConfigData;
@@ -119,7 +120,7 @@ private Long clientId;
 	public void setDetails(ClientData clientsData,
 			ClientBalanceData balanceData, List<AddressData> addressData,
 			List<OrderData> clientOrdersData,
-			Page<FinancialTransactionsData> statementsData,
+			Page<BillDetailsData> statementsData,
 			List<PaymentData> paymentsData,
 			List<TicketMasterData> ticketMastersData,
 			Long loginHistoryId) {
