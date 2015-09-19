@@ -385,7 +385,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	}
 
 	// Tax Calculation
-	private List<InvoiceTaxCommand> calculateTax(final Long clientId,BigDecimal billPrice, ChargeCodeMaster chargeCodeMaster) {
+	public List<InvoiceTaxCommand> calculateTax(final Long clientId,BigDecimal billPrice, ChargeCodeMaster chargeCodeMaster) {
 		// Get State level taxes
 		List<TaxMappingRateData> taxMappingRateDatas = this.billingOrderReadPlatformService.retrieveTaxMappingData(clientId,chargeCodeMaster.getChargeCode());
 		if (taxMappingRateDatas.isEmpty()) {
@@ -487,6 +487,13 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
         	this.context.authenticatedUser();
         	PropertyDeviceMapping propertyDeviceMapping = PropertyDeviceMapping.fromJson(entityId,command);
         	this.propertyDeviceMappingRepository.save(propertyDeviceMapping);
+        	
+        	/*PropertyMaster propertyMaster = this.propertyMasterRepository.findoneByPropertyCode(propertyDeviceMapping.getPropertyCode());
+        	if(propertyMaster != null){
+        		PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_MAPPED,entityId,propertyMaster.getPropertyCode());
+        		this.propertyHistoryRepository.save(propertyHistory);
+        	}*/
+			
         	return new CommandProcessingResult(propertyDeviceMapping.getId());
         }catch(DataIntegrityViolationException dve){
         	handleCodeDataIntegrityIssues(command, dve);
