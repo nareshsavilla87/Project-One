@@ -2,12 +2,12 @@ Drop procedure IF EXISTS removeForeignKey;
 DELIMITER //
 create procedure removeForeignKey() 
 Begin
-  IF NOT EXISTS (
-     SELECT * FROM information_schema.COLUMNS
-     WHERE TABLE_NAME = 'b_allocation'
-     and TABLE_SCHEMA = DATABASE())THEN
-ALTER TABLE b_allocation DROP FOREIGN KEY `fk_idtls_srno` ;
+  IF  EXISTS (
+     SELECT * FROM information_schema. KEY_COLUMN_USAGE
+     WHERE TABLE_SCHEMA = DATABASE() and TABLE_NAME ='b_allocation'
+     and COLUMN_NAME ='serial_no' and CONSTRAINT_NAME = 'fk_idtls_srno')THEN
 
+ALTER TABLE b_allocation DROP FOREIGN KEY `fk_idtls_srno` ;
 END IF;
 END //
 DELIMITER ;

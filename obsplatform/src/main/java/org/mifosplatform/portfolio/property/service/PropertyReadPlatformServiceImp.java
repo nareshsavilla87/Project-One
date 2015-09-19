@@ -199,7 +199,7 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final String clientName = rs.getString("displayName");
 			//final String serialNumber = rs.getString("serialNumber");
 			
-			return new PropertyDefinationData(Id,refId,description,propertyCode,status,clientId,transactionDate,clientName,null);
+			return new PropertyDefinationData(Id,refId,description,propertyCode,status,clientId,transactionDate,clientName);
 			
 		}
 

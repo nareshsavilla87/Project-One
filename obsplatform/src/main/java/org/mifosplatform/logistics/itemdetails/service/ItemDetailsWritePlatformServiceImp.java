@@ -419,13 +419,13 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
   				 PropertyDeviceMapping deviceMapping = this.propertyDeviceMappingRepository.findBySerailNumber(serialNo);
   				 if(deviceMapping != null){
 
-				 PropertyMaster propertyMaster = this.propertyMasterRepository.findoneByPropertyCode(deviceMapping.getPropertyCode());
+				// PropertyMaster propertyMaster = this.propertyMasterRepository.findoneByPropertyCode(deviceMapping.getPropertyCode());
   				 deviceMapping.delete();
   				 this.propertyDeviceMappingRepository.save(deviceMapping);
-  				   if(propertyMaster != null){
+  				   /*if(propertyMaster != null){
   					 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_UNMAPPED,clientId,propertyMaster.getPropertyCode());
   				 	this.propertyHistoryRepository.save(propertyHistory);
-  				   }
+  				   }*/
   				 }
 
   			 }

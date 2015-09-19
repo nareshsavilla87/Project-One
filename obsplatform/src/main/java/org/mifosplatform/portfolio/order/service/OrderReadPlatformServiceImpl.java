@@ -604,7 +604,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 							return new OrderData(id);
 						}
 					}
-					
+
 					@Override
 					public List<Long> retrieveOrderActiveAndDisconnectionIds(Long clientId,Long planId) {
                         

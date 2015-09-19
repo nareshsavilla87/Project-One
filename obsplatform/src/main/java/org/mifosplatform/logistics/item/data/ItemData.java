@@ -1,6 +1,7 @@
 package org.mifosplatform.logistics.item.data;
 
 import java.math.BigDecimal;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -8,6 +9,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.billing.chargecode.data.ChargesData;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
+import org.mifosplatform.logistics.itemdetails.data.InventoryGrnData;
 import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
 import org.mifosplatform.organisation.region.data.RegionData;
 
@@ -42,6 +44,7 @@ public class ItemData {
 	private Long reorderLevel;
 	private List<FeeMasterData> feeMasterData;
 	private LocalDate date;
+	private Collection<InventoryGrnData> grnData;
 	
 	public ItemData(Long id, String itemCode, String itemDesc,String itemClass,String units,   String chargeCode, int warranty, BigDecimal unitPrice,
 			Long usedItems,Long availableItems,Long totalItems, Long reorderLevel) {
@@ -246,6 +249,14 @@ public class ItemData {
 
 	public void setDate(LocalDate date) {
 		this.date = date;
+	}
+		
+	public Collection<InventoryGrnData> getGrnData() {
+		return grnData;
+	}
+
+	public void setGrnData(Collection<InventoryGrnData> grnData) {
+		this.grnData = grnData;
 	}
 
 	
