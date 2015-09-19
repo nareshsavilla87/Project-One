@@ -1,31 +1,22 @@
 package org.mifosplatform.finance.depositandrefund.service;
 
 import java.math.BigDecimal;
-import java.math.MathContext;
-import java.util.List;
 
-import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalance;
 import org.mifosplatform.finance.clientbalance.domain.ClientBalanceRepository;
 import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefund;
 import org.mifosplatform.finance.depositandrefund.domain.DepositAndRefundRepository;
 import org.mifosplatform.finance.depositandrefund.exception.ItemQualityAndStatusException;
 import org.mifosplatform.finance.depositandrefund.serialization.DepositeCommandFromApiJsonDeserializer;
-import org.mifosplatform.finance.payments.domain.Payment;
 import org.mifosplatform.finance.payments.domain.PaypalEnquireyRepository;
 import org.mifosplatform.finance.payments.exception.ReceiptNoDuplicateException;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
-import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
-import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundException;
-import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
 import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleReadPlatformService;
-import org.mifosplatform.organisation.office.domain.Office;
 import org.mifosplatform.organisation.partner.domain.PartnerBalanceRepository;
-import org.mifosplatform.organisation.partner.domain.OfficeControlBalance;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

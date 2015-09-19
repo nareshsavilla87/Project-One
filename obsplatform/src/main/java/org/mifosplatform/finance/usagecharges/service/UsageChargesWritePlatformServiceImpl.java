@@ -2,10 +2,17 @@
 package org.mifosplatform.finance.usagecharges.service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
+import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
+import org.mifosplatform.finance.billingorder.domain.BillingOrder;
+import org.mifosplatform.finance.billingorder.domain.Invoice;
+import org.mifosplatform.finance.billingorder.service.GenerateBill;
 import org.mifosplatform.finance.usagecharges.data.UsageChargesData;
 import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
 import org.mifosplatform.finance.usagecharges.domain.UsageChargeRepository;
@@ -18,6 +25,8 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
+import org.mifosplatform.portfolio.association.domain.HardwareAssociation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,22 +44,25 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 	private final static Logger LOGGER = LoggerFactory.getLogger(UsageChargesWritePlatformServiceImpl.class);
 	private final PlatformSecurityContext context;
 	private final UsageChargesCommandFromApiJsonDeserializer apiJsonDeserializer;
-	private final UsageChargesReadPlatformService usageChargesReadPlatformService;
 	private final UsageRaWDataRepository usageRawDataRepository;
 	private final UsageChargeRepository usageChargeRepository;
+	private final HardwareAssociationRepository associationRepository;
+	private final GenerateBill generateBill;
 
 	@Autowired
 	public UsageChargesWritePlatformServiceImpl(final PlatformSecurityContext context,
 			final UsageChargesCommandFromApiJsonDeserializer apiJsonDeserializer,
-			final UsageChargesReadPlatformService usageChargesReadPlatformService,
 			final UsageRaWDataRepository usageRawDataRepository,
-			final UsageChargeRepository usageChargeRepository) {
+			final UsageChargeRepository usageChargeRepository,
+			final HardwareAssociationRepository associationRepository,
+			final GenerateBill generateBill) {
 
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
-		this.usageChargesReadPlatformService = usageChargesReadPlatformService;
 		this.usageRawDataRepository = usageRawDataRepository;
 		this.usageChargeRepository = usageChargeRepository;
+		this.associationRepository = associationRepository;
+		this.generateBill = generateBill;
 
 	}
 
@@ -81,7 +93,9 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 	/*
 	 * (non-Javadoc)
 	 * 
-	 * @see processCustomerUsageRawData(java.lang.Long)
+	 * @see processCustomerUsageRawData(Long)
+	 * Here Transactional annotation help to handling of 
+	 * JPA/Hibernate: detached entity passed to persist execption(persistenceexception)
 	 */
 	@Transactional
 	@Override
@@ -94,16 +108,17 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 			List<UsageRaw> rawDatas = this.usageRawDataRepository.findUsageRawDataByCustomerId(customerData.getClientId(),customerData.getNumber());
 
 			if (rawDatas.size() != 0) {
-				UsageCharge charge = new UsageCharge(customerData.getClientId(),customerData.getNumber(),DateUtils.getDateTimeOfTenant(), totalCost,totalDuration);
+
+				UsageCharge chargeData = new UsageCharge(customerData.getClientId(),customerData.getNumber(),DateUtils.getDateTimeOfTenant(), totalCost,totalDuration);
 				
 				for (UsageRaw rawData : rawDatas) {
 					totalDuration = totalDuration.add(rawData.getDuration());
 					totalCost = totalCost.add(rawData.getCost());
-					charge.addUsageRaw(rawData);
+					chargeData.addUsageRaw(rawData);
 				}
-				charge.setTotalDuration(totalDuration);
-				charge.setTotalCost(totalCost);
-				this.usageChargeRepository.save(charge);
+				chargeData.setTotalDuration(totalDuration);
+				chargeData.setTotalCost(totalCost);
+				this.usageChargeRepository.save(chargeData);
 			}
 		} catch (DataIntegrityViolationException dve) {
 			LOGGER.error("usage rawData process failed........\r\n" +dve.getMessage());
@@ -127,13 +142,77 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 	 * @see #checkOrderUsageCharges(Long, BillingOrderData)
 	 */
 	@Override
-	public BillingOrderCommand checkOrderUsageCharges(Long clientId,BillingOrderData billingOrderData) {
+	public BillingOrderCommand checkOrderUsageCharges(BillingOrderData billingOrderData) {
 		
+	 BigDecimal chargeAmount=BigDecimal.ZERO; 
+	 LocalDate chargeStartDate = null;
+	 LocalDate chargeEndDate = null;
+	 BillingOrderCommand billingOrderCommand=null;
+	 List<InvoiceTaxCommand> listOfTaxes = new ArrayList<InvoiceTaxCommand>();
+	 List<UsageCharge> usageCharges = new ArrayList<UsageCharge>();
+	 
+	 List<HardwareAssociation> associations = this.associationRepository.findOneByOrderId(billingOrderData.getClientOrderId());
+	 
+	 if(!associations.isEmpty()){
+		 
+		 usageCharges = this.usageChargeRepository.findCustomerUsageCharges(billingOrderData.getClientId(),associations.get(0).getSerialNo());
+	 }
+	 
+	 if(!usageCharges.isEmpty()){
+		 
+		 for(UsageCharge usageCharge:usageCharges){
+			   chargeAmount = chargeAmount.add(usageCharge.getTotalCost());
+		      if(chargeStartDate == null || chargeEndDate == null){
+		    	  chargeStartDate = usageCharge.getChargeDate();
+		    	  chargeEndDate = usageCharge.getChargeDate();
+		      }else if(chargeStartDate.toDate().after(usageCharge.getChargeDate().toDate())){
+		    	  chargeStartDate = usageCharge.getChargeDate();
+		      }else if(chargeEndDate.toDate().before(usageCharge.getChargeDate().toDate())){
+		    	  chargeEndDate = usageCharge.getChargeDate();
+		      }
+		 }
+		 
+		 chargeAmount = chargeAmount.setScale(Integer.parseInt(this.generateBill.roundingDecimal()),RoundingMode.HALF_UP);
+		 
+         billingOrderCommand= new BillingOrderCommand(billingOrderData.getClientOrderId(),billingOrderData.getOderPriceId(),
+        		 billingOrderData.getClientId(), chargeStartDate.toDate(),chargeEndDate.plusDays(1).toDate(),chargeEndDate.toDate(),
+        		    billingOrderData.getBillingFrequency(),billingOrderData.getChargeCode(),billingOrderData.getChargeType(),
+					billingOrderData.getChargeDuration(),billingOrderData.getDurationType(),chargeEndDate.toDate(),
+					chargeAmount, billingOrderData.getBillingFrequency(), listOfTaxes,billingOrderData.getStartDate(), 
+					billingOrderData.getEndDate(),null, billingOrderData.getTaxInclusive(),usageCharges);
+		 
+	   }
 		
-		
-		
-		return null;
+		return billingOrderCommand;
 	}
+
+	/* (non-Javadoc)
+	 * @see updateUsageCharges(List,Invoice)
+	 */
+	@Override
+	public void updateUsageCharges(List<BillingOrderCommand> commands,Invoice invoice) {
+
+		List<BillingOrder> charges = invoice.getCharges();
+		for (BillingOrderCommand billingOrderCommand : commands) {
+
+			if ("UC".equalsIgnoreCase(billingOrderCommand.getChargeType()) && !billingOrderCommand.getCdrData().isEmpty()) {
+
+				for (BillingOrder charge : charges) {
+					if (charge.getOrderlineId().equals(billingOrderCommand.getOrderPriceId())) {
+						for (UsageCharge usage : billingOrderCommand.getCdrData()) {
+							usage.setChargeId(charge.getId());
+						}
+						this.usageChargeRepository.save(billingOrderCommand.getCdrData());
+					}
+
+				}
+
+			}
+
+		}
+		
+	}
+	
 }
 	
 

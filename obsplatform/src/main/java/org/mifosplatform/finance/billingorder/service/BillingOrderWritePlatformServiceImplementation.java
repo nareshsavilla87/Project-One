@@ -3,6 +3,7 @@ package org.mifosplatform.finance.billingorder.service;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.joda.time.LocalDate;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.domain.BillingOrder;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
@@ -54,8 +55,8 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.officeCommisionRepository = officeCommisionRepository;
 	}
-
-
+	
+	
 	@Override
 	public CommandProcessingResult updateBillingOrder(List<BillingOrderCommand> commands) {
 		Order clientOrder = null;
@@ -63,7 +64,7 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		for (BillingOrderCommand billingOrderCommand : commands) {
 			
 			clientOrder = this.orderRepository.findOne(billingOrderCommand.getClientOrderId());
-				if (clientOrder != null) {
+				if (clientOrder != null && !"UC".equalsIgnoreCase(billingOrderCommand.getChargeType())) {
 					
 						clientOrder.setNextBillableDay(billingOrderCommand.getNextBillableDate());
 						List<OrderPrice> orderPrices = clientOrder.getPrice();
@@ -77,6 +78,38 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 						
 						}
 					}
+				}
+				this.orderRepository.saveAndFlush(clientOrder);
+		}
+	
+		return new CommandProcessingResult(Long.valueOf(clientOrder.getId()));
+	}
+
+
+	@Override
+	public CommandProcessingResult updateBillingOrder(List<BillingOrderCommand> commands,LocalDate processDate) {
+		Order clientOrder = null;
+		
+		for (BillingOrderCommand billingOrderCommand : commands) {
+			
+			clientOrder = this.orderRepository.findOne(billingOrderCommand.getClientOrderId());
+				if (clientOrder != null && !"UC".equalsIgnoreCase(billingOrderCommand.getChargeType())) {
+					
+						clientOrder.setNextBillableDay(billingOrderCommand.getNextBillableDate());
+						List<OrderPrice> orderPrices = clientOrder.getPrice();
+						
+						for (OrderPrice orderPriceData : orderPrices) {
+							
+						    if(billingOrderCommand.getOrderPriceId().equals(orderPriceData.getId())){
+						    	
+							orderPriceData.setInvoiceTillDate(billingOrderCommand.getInvoiceTillDate());
+							orderPriceData.setNextBillableDay(billingOrderCommand.getNextBillableDate());
+						
+						}
+					}
+				}else if("UC".equalsIgnoreCase(billingOrderCommand.getChargeType())){
+					billingOrderCommand.setNextBillableDate(processDate.plusDays(2).toDate());
+				
 				}
 				this.orderRepository.saveAndFlush(clientOrder);
 		}
@@ -102,22 +135,11 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 				balance=clientBalance.getBalanceAmount().add(amount);
 				clientBalance.setBalanceAmount(balance);
 			}
-			
 
 		}
 
 		this.clientBalanceRepository.saveAndFlush(clientBalance);
 		
-
-		/*final Client client = this.clientRepository.findOne(clientId);
-		final OfficeAdditionalInfo officeAdditionalInfo = this.infoRepository.findoneByoffice(client.getOffice());
-		if (officeAdditionalInfo != null) {
-			if (officeAdditionalInfo.getIsCollective()) {
-				
-				this.updatePartnerBalance(client.getOffice(), invoice);
-			}
-		}
-*/
 	}
 	
 	
@@ -148,7 +170,6 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		final OfficeAdditionalInfo officeAdditionalInfo = this.infoRepository.findoneByoffice(client.getOffice());
 		if (officeAdditionalInfo != null) {
 			if (officeAdditionalInfo.getIsCollective()) {
-				System.out.println(officeAdditionalInfo.getIsCollective());
 				this.updatePartnerBalance(client.getOffice(), amount);
 
 			}

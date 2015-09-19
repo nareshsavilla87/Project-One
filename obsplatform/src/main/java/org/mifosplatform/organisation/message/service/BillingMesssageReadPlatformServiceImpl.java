@@ -15,7 +15,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.joda.time.LocalDate;
 import org.joda.time.LocalTime;
 import org.mifosplatform.cms.media.domain.MediaTypeEnumaration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;

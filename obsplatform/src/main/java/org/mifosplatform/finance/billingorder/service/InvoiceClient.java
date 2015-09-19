@@ -34,6 +34,7 @@ public class InvoiceClient {
 	private final ConfigurationRepository configurationRepository;
 	private final InvoiceRepository invoiceRepository;
 	private final UsageChargesWritePlatformService usageChargesWritePlatformService;
+	
 
 	@Autowired
 	InvoiceClient(final BillingOrderReadPlatformService billingOrderReadPlatformService,final GenerateBillingOrderService generateBillingOrderService,
@@ -48,9 +49,11 @@ public class InvoiceClient {
 		this.configurationRepository = configurationRepository;
 		this.invoiceRepository = invoiceRepository;
 		this.usageChargesWritePlatformService = usageChargesWritePlatformService;
+	
 	}
 	
 	public CommandProcessingResult createInvoiceBill(JsonCommand command) {
+		
 		try {
 			// validation not written
 			this.apiJsonDeserializer.validateForCreate(command.json());
@@ -75,48 +78,47 @@ public class InvoiceClient {
 		// Get list of qualified orders of customer
 		List<BillingOrderData> billingOrderDatas = billingOrderReadPlatformService.retrieveOrderIds(clientId, processDate);
 		
-		if (billingOrderDatas.size() == 0) {
-			throw new BillingOrderNoRecordsFoundException();
-		}
-		Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PRORATA_WITH_NEXT_BILLING_CYCLE);
-
-		for (BillingOrderData billingOrderData : billingOrderDatas) {
-
-			nextBillableDate = billingOrderData.getNextBillableDate();
-			  if (configuration != null&& configuration.isEnabled() && (billingOrderData.getInvoiceTillDate() == null && "Y".equalsIgnoreCase(billingOrderData.getBillingAlign()))) {
-				     LocalDate alignEndDate = new LocalDate(nextBillableDate).dayOfMonth().withMaximumValue();
-				      if (!processDate.toDate().after(alignEndDate.toDate())) {
-					        processDate = alignEndDate.plusDays(2);
-				       }
-			     } else {
-				      processDate = initialProcessDate;
-			   }
-			  while (processDate.toDate().after(nextBillableDate) || processDate.toDate().compareTo(nextBillableDate) == 0) {
-
-				invoiceData = invoiceServices(billingOrderData, clientId,processDate,invoice);
-
-				if (invoiceData != null) {
-					invoiceAmount = invoiceAmount.add(invoiceData.getInvoiceAmount());
-					nextBillableDate = invoiceData.getNextBillableDay();
-					invoice=invoiceData.getInvoice();
+		if (billingOrderDatas.size() != 0) {
+			
+			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PRORATA_WITH_NEXT_BILLING_CYCLE);
+			
+			for (BillingOrderData billingOrderData : billingOrderDatas) {
+				
+				nextBillableDate = billingOrderData.getNextBillableDate();
+				
+				if (configuration != null&& configuration.isEnabled() && (billingOrderData.getInvoiceTillDate() == null && "Y".equalsIgnoreCase(billingOrderData.getBillingAlign()))) {
+					   LocalDate alignEndDate = new LocalDate(nextBillableDate).dayOfMonth().withMaximumValue();
+					  if (!processDate.toDate().after(alignEndDate.toDate())) 
+						     processDate = alignEndDate.plusDays(2);
+				} 
+				else {
+					processDate = initialProcessDate;
+				}
+				while (processDate.toDate().after(nextBillableDate) || processDate.toDate().compareTo(nextBillableDate) == 0) {
+					
+					invoiceData = invoiceServices(billingOrderData, clientId,processDate,invoice);
+					
+					if (invoiceData != null) {
+						invoiceAmount = invoiceAmount.add(invoiceData.getInvoiceAmount());
+						nextBillableDate = invoiceData.getNextBillableDay();
+						invoice=invoiceData.getInvoice();
+					}
 				}
 			}
-		}
-		
-		configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_SINGLE_INVOICE_FOR_MULTI_ORDERS);
-		
-		if (invoiceData != null) {
-
+			
+			configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_SINGLE_INVOICE_FOR_MULTI_ORDERS);
+			
 			if (configuration!=null&&configuration.isEnabled()) {
 				
 				this.invoiceRepository.save(invoiceData.getInvoice());
+				
 				// Update Client Balance
 				this.billingOrderWritePlatformService.updateClientBalance(invoiceData.getInvoice().getInvoiceAmount(), clientId, false);
+			} 
+			
 				return invoiceData.getInvoice();
-			} else {
-				return invoiceData.getInvoice();
-			}
-		} else {
+		}
+		else {
 			throw new BillingOrderNoRecordsFoundException();
 		}
 
@@ -128,14 +130,7 @@ public class InvoiceClient {
 		List<BillingOrderData> products = this.billingOrderReadPlatformService.retrieveBillingOrderData(clientId, processDate,billingOrderData.getOrderId());
 
 		List<BillingOrderCommand> billingOrderCommands = this.generateBillingOrderService.generatebillingOrder(products);
-		
-		//Check order usage charges
-		/*BillingOrderCommand  billingOrderCommand = this.usageChargesWritePlatformService.checkOrderUsageCharges(clientId,billingOrderData);
 		  
-		 if(billingOrderCommand !=null){
-			      billingOrderCommands.add(billingOrderCommand);
-		  }
-*/
 		Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_SINGLE_INVOICE_FOR_MULTI_ORDERS);
 	
 		if(configuration!=null&&configuration.isEnabled()){
@@ -155,8 +150,10 @@ public class InvoiceClient {
 
 			// Update order-price
 			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
-
 			System.out.println("---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
+			
+			//Update Usage charges
+			//this.usageChargesWritePlatformService.updateUsageCharges(billingOrderCommands,singleInvoice);
 
 			// Update Client Balance
 			this.billingOrderWritePlatformService.updateClientBalance(singleInvoice.getInvoiceAmount(), clientId, false);
@@ -167,7 +164,6 @@ public class InvoiceClient {
 
 	public Invoice onTopUpAutoRenewalInvoice(Long orderId, Long clientId,LocalDate processDate) {
 
-
 		// Get qualified order complete details
 		List<BillingOrderData> products = this.billingOrderReadPlatformService.retrieveBillingOrderData(clientId, processDate,orderId);
 
@@ -177,7 +173,7 @@ public class InvoiceClient {
 		Invoice  invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
 
 		// Update order-price
-		this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
+		this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands,processDate);
 		System.out.println("Top-Up:---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
 
 		// Update Client Balance

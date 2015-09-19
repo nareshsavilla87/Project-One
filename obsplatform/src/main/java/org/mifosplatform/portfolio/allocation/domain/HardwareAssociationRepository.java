@@ -11,8 +11,6 @@ import org.springframework.data.repository.query.Param;
 public interface HardwareAssociationRepository  extends JpaRepository<HardwareAssociation, Long>,
 JpaSpecificationExecutor<HardwareAssociation>{
 
-	//HardwareAssociation findOneByOrderId(Long orderId);
-	
 	@Query("from HardwareAssociation association where association.serialNo =:serialNum and association.isDeleted='N'")
     List<HardwareAssociation> findOneByserialNo(@Param("serialNum") String serialNum);
 	

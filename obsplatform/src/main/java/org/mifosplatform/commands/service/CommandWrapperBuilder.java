@@ -2947,7 +2947,7 @@ public class CommandWrapperBuilder {
 	}
 
 	public CommandWrapperBuilder disconnectOrderAddon(Long orderAddonId) {
-		
+
 		this.actionName = "DISCONNECT";
 		this.entityName = "ORDERADDONS";
 		this.entityId = orderAddonId;
@@ -2955,6 +2955,15 @@ public class CommandWrapperBuilder {
 		return this;
 	}
 
+	public CommandWrapperBuilder renewalOrderWithClient(Long clientId) {
+		
+		this.actionName = "RENEWALWITHCLIENT";
+		this.entityName = "ORDER";
+		this.entityId = clientId;
+		this.href = "/orderRenewal/" +clientId;
+		return this;
+	}
+	
 
 	public CommandWrapperBuilder createUsageChargesRawData() {
 		
@@ -2964,7 +2973,6 @@ public class CommandWrapperBuilder {
 		this.href = "/charges";
 		return this;
 	}
-
 }
 
 
