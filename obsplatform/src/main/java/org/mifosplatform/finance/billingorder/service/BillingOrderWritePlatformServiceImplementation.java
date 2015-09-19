@@ -3,7 +3,6 @@ package org.mifosplatform.finance.billingorder.service;
 import java.math.BigDecimal;
 import java.util.List;
 
-import org.joda.time.LocalDate;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.domain.BillingOrder;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
@@ -85,37 +84,6 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		return new CommandProcessingResult(Long.valueOf(clientOrder.getId()));
 	}
 
-
-	@Override
-	public CommandProcessingResult updateBillingOrder(List<BillingOrderCommand> commands,LocalDate processDate) {
-		Order clientOrder = null;
-		
-		for (BillingOrderCommand billingOrderCommand : commands) {
-			
-			clientOrder = this.orderRepository.findOne(billingOrderCommand.getClientOrderId());
-				if (clientOrder != null && !"UC".equalsIgnoreCase(billingOrderCommand.getChargeType())) {
-					
-						clientOrder.setNextBillableDay(billingOrderCommand.getNextBillableDate());
-						List<OrderPrice> orderPrices = clientOrder.getPrice();
-						
-						for (OrderPrice orderPriceData : orderPrices) {
-							
-						    if(billingOrderCommand.getOrderPriceId().equals(orderPriceData.getId())){
-						    	
-							orderPriceData.setInvoiceTillDate(billingOrderCommand.getInvoiceTillDate());
-							orderPriceData.setNextBillableDay(billingOrderCommand.getNextBillableDate());
-						
-						}
-					}
-				}else if("UC".equalsIgnoreCase(billingOrderCommand.getChargeType())){
-					billingOrderCommand.setNextBillableDate(processDate.plusDays(2).toDate());
-				
-				}
-				this.orderRepository.saveAndFlush(clientOrder);
-		}
-	
-		return new CommandProcessingResult(Long.valueOf(clientOrder.getId()));
-	}
 
 	@Override
 	public void updateClientVoucherBalance(BigDecimal amount,Long clientId,boolean isWalletEnable) {
