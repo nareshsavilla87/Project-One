@@ -1336,6 +1336,5 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		}
 	}
 
-		
  }
 

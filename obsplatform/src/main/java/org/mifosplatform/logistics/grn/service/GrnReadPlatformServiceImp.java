@@ -81,7 +81,7 @@ public Page<InventoryGrnData> retriveGrnDetails(SearchSqlQuery searchGrn) {
 		String sql = "SQL_CALC_FOUND_ROWS g.id as id, f.name as officeName, g.purchase_date as purchaseDate, "
 				+ "g.supplier_id as supplierId, g.item_master_id as itemMasterId, g.orderd_quantity as orderdQuantity, "
 				+ "g.received_quantity as receivedQuantity, g.po_no as purchaseNo, im.item_description as itemDescription, "
-				+ "s.supplier_description as supplierDescription "
+				+ "s.supplier_description as supplierDescription, (select count(id) from b_item_detail id where id.grn_id = g.id and status = 'Available') as availableQuantity "
 				+ "from b_grn g left outer join m_office f on g.office_id=f.id "
 				+ "left outer join b_item_master im on g.item_master_id = im.id "
 				+ "left outer join b_supplier s on g.supplier_id=s.id ";
@@ -167,7 +167,8 @@ public Page<InventoryGrnData> retriveGrnDetails(SearchSqlQuery searchGrn) {
 			String itemDescription = rs.getString("itemDescription");
 			String supplierName = rs.getString("supplierDescription");
 			String officeName = rs.getString("officeName");
-			return new InventoryGrnData(id,purchaseDate,supplierId,itemMasterId,orderedQuantity,receivedQuantity,itemDescription,supplierName,officeName,purchaseNo);
+			Long availableQuantity = rs.getLong("availableQuantity");
+			return new InventoryGrnData(id,purchaseDate,supplierId,itemMasterId,orderedQuantity,receivedQuantity,itemDescription,supplierName,officeName,purchaseNo, availableQuantity);
 			
 		}
 		
@@ -206,6 +207,27 @@ public Page<InventoryGrnData> retriveGrnDetails(SearchSqlQuery searchGrn) {
 		}
 		
 	}
+	
+	@Override
+	public Collection<InventoryGrnData> retriveGrnIdswithItemId(final Long itemId) {
+		GrnIdswithItemMapper rowMapper = new GrnIdswithItemMapper();
+		String sql = "SELECT bg.id as id,bm.id as itemId," +
+				"bm.item_description as itemDescription " +
+				" FROM b_grn bg,b_item_master bm WHERE bg.item_master_id = bm.id and bm.id = "+itemId;
+		return jdbcTemplate.query(sql, rowMapper);
+	}
+	
+	private class GrnIdswithItemMapper implements RowMapper<InventoryGrnData>{
 
+		@Override
+		public InventoryGrnData mapRow(ResultSet rs, int rowNum)throws SQLException {
+			
+			final Long id = rs.getLong("id");
+			final Long itemId = rs.getLong("itemId");
+			final String itemDescription = rs.getString("itemDescription");
+			return new InventoryGrnData(id, itemId, itemDescription);
+		}
+		
+	}
 	
 }

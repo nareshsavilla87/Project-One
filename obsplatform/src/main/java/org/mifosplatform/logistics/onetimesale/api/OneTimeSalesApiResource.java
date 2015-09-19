@@ -32,9 +32,11 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.logistics.grn.service.GrnReadPlatformService;
 import org.mifosplatform.logistics.item.data.ItemData;
 import org.mifosplatform.logistics.item.exception.NoItemRegionalPriceFound;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
+import org.mifosplatform.logistics.itemdetails.data.InventoryGrnData;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
 import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleReadPlatformService;
@@ -76,6 +78,7 @@ public class OneTimeSalesApiResource {
 	private final OfficeReadPlatformService officeReadPlatformService;
 	private final ContractPeriodReadPlatformService contractPeriodReadPlatformService;
 	private final ServiceTransferReadPlatformService serviceTransferReadPlatformService;
+	private final GrnReadPlatformService grnReadPlatformService;
 
 	@Autowired
 	public OneTimeSalesApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<OneTimeSaleData> toApiJsonSerializer,
@@ -84,7 +87,7 @@ public class OneTimeSalesApiResource {
 			final ItemReadPlatformService itemReadPlatformService,final DiscountReadPlatformService discountReadPlatformService,
 			final OfficeReadPlatformService officeReadPlatformService,final DefaultToApiJsonSerializer<ItemData> defaultToApiJsonSerializer,
 			final FromJsonHelper fromJsonHelper,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,
-			final ServiceTransferReadPlatformService serviceTransferReadPlatformService) {
+			final ServiceTransferReadPlatformService serviceTransferReadPlatformService, final GrnReadPlatformService grnReadPlatformService) {
 
 		this.context = context;
 		this.fromJsonHelper = fromJsonHelper;
@@ -99,6 +102,7 @@ public class OneTimeSalesApiResource {
 		this.commandSourceWritePlatformService = commandSourceWritePlatformService;
 		this.contractPeriodReadPlatformService = contractPeriodReadPlatformService;
 		this.serviceTransferReadPlatformService = serviceTransferReadPlatformService;
+		this.grnReadPlatformService = grnReadPlatformService;
 	}
 
 	@POST
@@ -165,8 +169,10 @@ public class OneTimeSalesApiResource {
 	    }
 		final List<ChargesData> chargesDatas = this.itemMasterReadPlatformService.retrieveChargeCode();
 		final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId,"Deposit");
+		final Collection<InventoryGrnData> grnData = this.grnReadPlatformService.retriveGrnIdswithItemId(itemId);
 		
 		itemData = new ItemData(itemCodeData, itemData, null, null,discountdata, chargesDatas, feeMasterData);
+		itemData.setGrnData(grnData);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.defaultToApiJsonSerializer.serialize(settings, itemData,RESPONSE_DATA_PARAMETERS);
 	}
