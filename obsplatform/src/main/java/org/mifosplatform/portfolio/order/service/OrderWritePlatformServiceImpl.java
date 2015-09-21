@@ -62,7 +62,6 @@ import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderAddons;
 import org.mifosplatform.portfolio.order.domain.OrderAddonsRepository;
 import org.mifosplatform.portfolio.order.domain.OrderDiscount;
-import org.mifosplatform.portfolio.order.domain.OrderDiscountRepository;
 import org.mifosplatform.portfolio.order.domain.OrderHistory;
 import org.mifosplatform.portfolio.order.domain.OrderHistoryRepository;
 import org.mifosplatform.portfolio.order.domain.OrderLine;
@@ -75,7 +74,6 @@ import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.order.exceptions.NoOrdersFoundException;
 import org.mifosplatform.portfolio.order.exceptions.OrderNotFoundException;
-import org.mifosplatform.portfolio.order.exceptions.SchedulerOrderFoundException;
 import org.mifosplatform.portfolio.order.serialization.OrderCommandFromApiJsonDeserializer;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanDetails;
@@ -139,7 +137,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final OrderCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final ContractRepository subscriptionRepository;
 	private final ConfigurationRepository configurationRepository;
-	private final OrderDiscountRepository orderDiscountRepository;
 	private final PromotionCodeRepository promotionCodeRepository;
 	private final HardwareAssociationReadplatformService hardwareAssociationReadplatformService;
 	private final ChargeCodeRepository chargeCodeRepository;
@@ -165,7 +162,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			final OrderReadPlatformService orderReadPlatformService,final OrderAddonsRepository  addonsRepository,final OrderAssembler orderAssembler,
 		    final ProcessRequestRepository processRequestRepository,final HardwareAssociationReadplatformService hardwareAssociationReadplatformService,
 		    final PrepareRequsetRepository prepareRequsetRepository,final PromotionCodeRepository promotionCodeRepository,final ContractRepository contractRepository, 
-		    final OrderDiscountRepository orderDiscountRepository,  final ClientRepository clientRepository,  final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
+		    final ClientRepository clientRepository,final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
 		    final ActiondetailsWritePlatformService actiondetailsWritePlatformService,final EventValidationReadPlatformService eventValidationReadPlatformService,
 		    final EventActionRepository eventActionRepository,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,final InvoiceClient invoiceClient,
 		    final HardwareAssociationRepository associationRepository,final ProvisioningWritePlatformService provisioningWritePlatformService,
@@ -180,7 +177,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.serviceMasterRepository=serviceMasterRepository;
 		this.fromApiJsonDeserializer=fromApiJsonDeserializer;
 		this.configurationRepository=configurationRepository;
-		this.orderDiscountRepository=orderDiscountRepository;
 		this.prepareRequsetRepository=prepareRequsetRepository;
 		this.orderReadPlatformService = orderReadPlatformService;
 		this.paymentFollowupRepository=paymentFollowupRepository;
@@ -583,7 +579,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
    			
      		 if(plan.isPrepaid() == 'Y' && orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
      			  
-     		    Invoice invoice=this.invoiceClient.onTopUpAutoRenewalInvoice(orderDetails.getId(),orderDetails.getClientId(),newStartdate.plusDays(1));
+     		    Invoice invoice=this.invoiceClient.singleOrderInvoice(orderDetails.getId(),orderDetails.getClientId(),newStartdate.plusDays(1));
      		    
      		    if(invoice!=null){
      		    	List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_TOPUP_INVOICE_MAIL);
