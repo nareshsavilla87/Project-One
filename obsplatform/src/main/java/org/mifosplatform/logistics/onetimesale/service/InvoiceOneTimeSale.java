@@ -89,7 +89,7 @@ public class InvoiceOneTimeSale {
 /**
  * @param clientId
  * @param oneTimeSaleData
- * @param invoice2 
+ * @param invoice 
  * @param wallet 
  *  reverse invoice 
  */
