@@ -241,6 +241,9 @@ public class EntitlementsApiResource {
 		
 		this.context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		List<CubiwareData> data = getDeviceData(clientId);
+		if(null == data){
+			return null;
+		}
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializerForCubiware.serialize(settings, data, RESPONSE_DATA_PARAMETERS);
 	}
