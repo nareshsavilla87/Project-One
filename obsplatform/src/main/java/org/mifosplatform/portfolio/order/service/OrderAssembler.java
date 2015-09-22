@@ -71,8 +71,12 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			}*/
 			if(datas.isEmpty()){
 				throw new NoRegionalPriceFound();
+			}else{
+				//usage charge for plan exists
+				PriceData data=this.orderDetailsReadPlatformServices.retrievePlanUsageServicePrice(order.getPlanId(),clientId);
+				if(data !=null)
+					datas.add(data);
 			}
-			
 			
 			Contract contractData = this.contractRepository.findOne(order.getContarctPeriod());
 			LocalDate startDate=new LocalDate(order.getStartDate());

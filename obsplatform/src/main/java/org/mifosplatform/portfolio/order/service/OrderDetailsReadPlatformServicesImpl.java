@@ -9,6 +9,7 @@ import org.mifosplatform.billing.planprice.data.PriceData;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.portfolio.plan.data.ServiceData;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
@@ -44,9 +45,8 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 		}
 
 		@Override
-		public ServiceData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+		public ServiceData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
+			
 			Long id = rs.getLong("id");
 			String serviceCode = rs.getString("service_code");
 			String serviceType = rs.getString("serviceType");
@@ -70,7 +70,7 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 				     " da.charging_variant AS charging_variant,c.charge_type AS charge_type,c.charge_duration AS charge_duration,c.duration_type AS duration_type," +
 				     " da.discount_id AS discountId,c.tax_inclusive AS taxInclusive,da.price AS price,da.price_region_id,s.id AS stateId,s.parent_code AS countryId," +
 				     " pd.state_id AS regionState,con.country_name,pd.country_id AS regionCountryId" +
-				     " FROM b_plan_pricing da LEFT JOIN b_charge_codes c ON c.charge_code = da.charge_code " +
+				     " FROM b_plan_pricing da LEFT JOIN b_charge_codes c ON c.charge_code = da.charge_code AND  c.charge_type <> 'UC' " +
 				     " LEFT JOIN b_service se ON (da.service_code = se.service_code OR da.service_code = 'None')" +
 				     " LEFT JOIN b_priceregion_detail pd ON pd.priceregion_id = da.price_region_id" +
 				     " JOIN b_client_address ca LEFT JOIN b_state s ON ca.state = s.state_name LEFT JOIN b_country con ON ca.country = con.country_name" +
@@ -100,9 +100,7 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 			}
 
 			@Override
-			public PriceData mapRow(final ResultSet rs,
-					@SuppressWarnings("unused") final int rowNum)
-					throws SQLException {
+			public PriceData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
 
 				Long id = rs.getLong("id");
 				String serviceCode = rs.getString("service_code");
@@ -141,10 +139,35 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 			return this.jdbcTemplate.query(sql, mapper1, new Object[] { clientId });
 		}
 
+		/* (non-Javadoc)
+		 * @see #retrievePlanUsageServicePrice(Long planId, Long clientId)
+		 */
+		@Override
+		public PriceData retrievePlanUsageServicePrice(Long planId,Long clientId) {
+			
+			try{
+			PriceMapper mapper=new PriceMapper();
+			
+			String sql="SELECT da.id AS id, if(da.service_code = 'None', 0, se.id) AS serviceId,da.service_code AS service_code,"+
+				       " da.charge_code AS charge_code, da.charging_variant AS charging_variant,c.charge_type AS charge_type, "+
+				       " c.charge_duration AS charge_duration,c.duration_type AS duration_type, da.discount_id AS discountId,"+
+				       " c.tax_inclusive AS taxInclusive, da.price AS price,da.price_region_id,s.id AS stateId,s.parent_code AS countryId,"+
+				       " pd.state_id AS regionState,con.country_name,pd.country_id AS regionCountryId " +
+				       " FROM b_plan_pricing da LEFT JOIN  b_charge_codes c ON c.charge_code = da.charge_code " +
+				       " LEFT JOIN b_service se ON (da.service_code = se.service_code OR da.service_code = 'None') "+
+				       " LEFT JOIN b_priceregion_detail pd ON pd.priceregion_id = da.price_region_id "+
+				       " JOIN b_client_address ca  LEFT JOIN b_state s ON ca.state = s.state_name " +
+				       " LEFT JOIN  b_country con ON ca.country = con.country_name "+
+				       " WHERE da.is_deleted = 'n' AND ca.address_key = 'PRIMARY' AND charge_type='UC'" +
+				       " AND da.plan_id = ? AND ca.client_id = ? GROUP BY da.id ";
+			
+			return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { planId,clientId });
+	
+		}catch(EmptyResultDataAccessException erd){
+			return null;
+		}
 
-
-		
-
+		}
 	}
 
 
