@@ -35,7 +35,8 @@ public class GenerateDisconnectionBill {
 
 	@Autowired
 	public GenerateDisconnectionBill(final BillingOrderReadPlatformService billingOrderReadPlatformService,
-			                   final ConfigurationRepository globalConfigurationRepository) {
+			  final ConfigurationRepository globalConfigurationRepository) {
+		
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.globalConfigurationRepository = globalConfigurationRepository;
 	}

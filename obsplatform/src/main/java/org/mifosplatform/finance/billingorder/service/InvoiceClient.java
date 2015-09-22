@@ -30,7 +30,7 @@ public class InvoiceClient {
 	private final GenerateBillingOrderService generateBillingOrderService;
 	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
 	private final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer;
-	private final ConfigurationRepository configurationRepository;
+	private final ConfigurationRepository globalConfigurationRepository;
 	private final InvoiceRepository invoiceRepository;
 	
 	
@@ -38,13 +38,13 @@ public class InvoiceClient {
 	@Autowired
 	InvoiceClient(final BillingOrderReadPlatformService billingOrderReadPlatformService,final GenerateBillingOrderService generateBillingOrderService,
 			final BillingOrderWritePlatformService billingOrderWritePlatformService,final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer,
-		    final ConfigurationRepository configurationRepository,final InvoiceRepository invoiceRepository) {
+		    final ConfigurationRepository globalConfigurationRepository,final InvoiceRepository invoiceRepository) {
 
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.generateBillingOrderService = generateBillingOrderService;
 		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
 		this.apiJsonDeserializer = apiJsonDeserializer;
-		this.configurationRepository = configurationRepository;
+		this.globalConfigurationRepository = globalConfigurationRepository;
 		this.invoiceRepository = invoiceRepository;
 		
 	
@@ -78,23 +78,24 @@ public class InvoiceClient {
 		
 		if (billingOrderDatas.size() != 0) {
 			
-			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PRORATA_WITH_NEXT_BILLING_CYCLE);
+			boolean prorataWithNextBillFlag = this.checkInvoiceConfigurations(ConfigurationConstants.CONFIG_PRORATA_WITH_NEXT_BILLING_CYCLE);
+			boolean    singleInvoiceFlag    = this.checkInvoiceConfigurations(ConfigurationConstants.CONFIG_SINGLE_INVOICE_FOR_MULTI_ORDERS);
 			
 			for (BillingOrderData billingOrderData : billingOrderDatas) {
 				
 				nextBillableDate = billingOrderData.getNextBillableDate();
-				
-				if (configuration != null&& configuration.isEnabled() && (billingOrderData.getInvoiceTillDate() == null && "Y".equalsIgnoreCase(billingOrderData.getBillingAlign()))) {
-					   LocalDate alignEndDate = new LocalDate(nextBillableDate).dayOfMonth().withMaximumValue();
-					  if (!processDate.toDate().after(alignEndDate.toDate())) 
-						     processDate = alignEndDate.plusDays(2);
-				} 
-				else {
+
+				if (prorataWithNextBillFlag && ("Y".equalsIgnoreCase(billingOrderData.getBillingAlign())) && billingOrderData.getInvoiceTillDate() == null ) {
+					LocalDate alignEndDate = new LocalDate(nextBillableDate).dayOfMonth().withMaximumValue();
+					if (!processDate.toDate().after(alignEndDate.toDate())) 
+						processDate = alignEndDate.plusDays(2);
+				} else {
+
 					processDate = initialProcessDate;
 				}
 				while (processDate.toDate().after(nextBillableDate) || processDate.toDate().compareTo(nextBillableDate) == 0) {
-					
-					invoiceData = invoiceServices(billingOrderData, clientId,processDate,invoice);
+
+					invoiceData = invoiceServices(billingOrderData,clientId,processDate,invoice,singleInvoiceFlag);
 					
 					if (invoiceData != null) {
 						invoiceAmount = invoiceAmount.add(invoiceData.getInvoiceAmount());
@@ -103,36 +104,31 @@ public class InvoiceClient {
 					}
 				}
 			}
-			
-			configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_SINGLE_INVOICE_FOR_MULTI_ORDERS);
-			
-			if (configuration!=null&&configuration.isEnabled()) {
-				
+
+			if (singleInvoiceFlag) {
+
 				this.invoiceRepository.save(invoiceData.getInvoice());
-				
+
 				// Update Client Balance
-				this.billingOrderWritePlatformService.updateClientBalance(invoiceData.getInvoice().getInvoiceAmount(), clientId, false);
-			} 
+				this.billingOrderWritePlatformService.updateClientBalance(invoiceData.getInvoice().getInvoiceAmount(), clientId,false);
+			}
+			return invoiceData.getInvoice();
 			
-				return invoiceData.getInvoice();
-		}
-		else {
+		} else {
+
 			throw new BillingOrderNoRecordsFoundException();
 		}
-
 	}
 
-	public GenerateInvoiceData invoiceServices(BillingOrderData billingOrderData, Long clientId,LocalDate processDate,Invoice invoice) {
+	public GenerateInvoiceData invoiceServices(BillingOrderData billingOrderData, Long clientId,LocalDate processDate,Invoice invoice,boolean singleInvoiceFlag) {
 
 		// Get qualified order complete details
 		List<BillingOrderData> products = this.billingOrderReadPlatformService.retrieveBillingOrderData(clientId, processDate,billingOrderData.getOrderId());
 
 		List<BillingOrderCommand> billingOrderCommands = this.generateBillingOrderService.generatebillingOrder(products);
-		  
-		Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_SINGLE_INVOICE_FOR_MULTI_ORDERS);
-	
-		if(configuration!=null&&configuration.isEnabled()){
-			
+
+		if(singleInvoiceFlag){
+
 			invoice = this.generateBillingOrderService.generateMultiOrderInvoice(billingOrderCommands,invoice);
 
 			// Update order-price
@@ -157,7 +153,7 @@ public class InvoiceClient {
 		}
 	}
 
-	public Invoice onTopUpAutoRenewalInvoice(Long orderId, Long clientId,LocalDate processDate) {
+	public Invoice singleOrderInvoice(Long orderId, Long clientId,LocalDate processDate) {
 
 		// Get qualified order complete details
 		List<BillingOrderData> products = this.billingOrderReadPlatformService.retrieveBillingOrderData(clientId, processDate,orderId);
@@ -175,5 +171,18 @@ public class InvoiceClient {
 		this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(), clientId, false);
 		
 		return invoice;
-		}
+	
 	}
+	
+	public boolean checkInvoiceConfigurations(final String configName) {
+
+		Configuration configuration = this.globalConfigurationRepository.findOneByName(configName);
+		if (configuration != null && configuration.isEnabled()) {
+			return true;
+		} else {
+			return false;
+		}
+
+	}
+
+}
