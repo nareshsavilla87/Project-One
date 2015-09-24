@@ -12,6 +12,11 @@ import org.mifosplatform.useradministration.domain.AppUser;
 @Table(name = "b_prepare_request")
 public class PrepareRequest extends AbstractAuditableCustom<AppUser, Long>{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+
 	@Column(name = "client_id")
 	private Long clientId;
 
@@ -23,9 +28,7 @@ public class PrepareRequest extends AbstractAuditableCustom<AppUser, Long>{
 
 	@Column(name = "request_type")
 	private String requestType;
-
 	
-
 	@Column(name = "is_provisioning")
 	private char isProvisioning;
 	
@@ -36,11 +39,11 @@ public class PrepareRequest extends AbstractAuditableCustom<AppUser, Long>{
 	private String planCode;
 	
 	@Column(name = "is_notify")
-	private char isNotify;
+	private char isNotify='N';
 	
 	
 	 public  PrepareRequest() {
-		// TODO Auto-generated constructor stub
+		
 	}
 
 
@@ -54,11 +57,7 @@ public class PrepareRequest extends AbstractAuditableCustom<AppUser, Long>{
 		this.planCode=planCode;
 		this.provisioningSystem=provisioningSystem;
 		
-		
-              
 	}
-
-
 
 	public Long getClientId() {
 		return clientId;
@@ -78,9 +77,6 @@ public class PrepareRequest extends AbstractAuditableCustom<AppUser, Long>{
 	public String getRequestType() {
 		return requestType;
 	}
-
-
-	
 
 
 	public char getIsProvisioning() {
