@@ -13,7 +13,6 @@ import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.billingorder.domain.InvoiceTax;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
-import org.mifosplatform.finance.usagecharges.service.UsageChargesWritePlatformService;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,18 +24,15 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 	private final GenerateBill generateBill;
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final InvoiceRepository invoiceRepository;
-	private final UsageChargesWritePlatformService usageBill;
-	
 	
 
 	@Autowired
 	public GenerateBillingOrderServiceImplementation(final GenerateBill generateBill,final BillingOrderReadPlatformService billingOrderReadPlatformService,
-			final InvoiceRepository invoiceRepository,final UsageChargesWritePlatformService usageBill) {
+			final InvoiceRepository invoiceRepository) {
 	
 		this.generateBill = generateBill;
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.invoiceRepository = invoiceRepository;
-		this.usageBill = usageBill;
 	
 	}
 
@@ -125,9 +121,6 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 				}else if(generateBill.isChargeTypeUC(billingOrderData)){
 					
 					System.out.println("---- UC ---");
-					billingOrderCommand = this.usageBill.checkOrderUsageCharges(billingOrderData);
-					if(billingOrderCommand != null)
-					billingOrderCommands.add(billingOrderCommand);
 				}
 
 			}

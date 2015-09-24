@@ -63,7 +63,7 @@ public class BillingOrderWritePlatformServiceImplementation implements BillingOr
 		for (BillingOrderCommand billingOrderCommand : commands) {
 			
 			clientOrder = this.orderRepository.findOne(billingOrderCommand.getClientOrderId());
-				if (clientOrder != null && !"UC".equalsIgnoreCase(billingOrderCommand.getChargeType())) {
+				if (clientOrder != null ) {
 					
 						clientOrder.setNextBillableDay(billingOrderCommand.getNextBillableDate());
 						List<OrderPrice> orderPrices = clientOrder.getPrice();

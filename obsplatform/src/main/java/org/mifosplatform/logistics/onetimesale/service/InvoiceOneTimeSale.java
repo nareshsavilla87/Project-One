@@ -23,7 +23,6 @@ import org.mifosplatform.finance.billingorder.service.GenerateBill;
 import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderService;
 import org.mifosplatform.finance.billingorder.service.GenerateDisconnectionBill;
 import org.mifosplatform.finance.billingorder.service.GenerateReverseBillingOrderService;
-import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
@@ -163,12 +162,11 @@ public class InvoiceOneTimeSale {
 			                      final Long clientId, final BigDecimal ChargeAmount) {
 		
 		List<BillingOrderCommand> billingOrderCommands = new ArrayList<BillingOrderCommand>();
-		 List<UsageCharge> cdrData=new ArrayList<>();
 		List<InvoiceTaxCommand>  listOfTaxes = this.calculateTax(clientId, ChargeAmount,chargeMaster);
 		BillingOrderCommand billingOrderCommand = new BillingOrderCommand(orderId,priceId,clientId, DateUtils.getDateOfTenant(),
 				DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),chargeMaster.getBillFrequencyCode(), chargeMaster.getChargeCode(),
 				chargeMaster.getChargeType(),chargeMaster.getChargeDuration(), "",DateUtils.getDateOfTenant(),ChargeAmount, 
-				"N",listOfTaxes, DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(), null,chargeMaster.getTaxInclusive(),cdrData);
+				"N",listOfTaxes, DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(), null,chargeMaster.getTaxInclusive());
 
 		billingOrderCommands.add(billingOrderCommand);
 		

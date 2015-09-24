@@ -57,13 +57,11 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 
 				if (generateDisconnectionBill.isChargeTypeRC(billingOrderData)) {
 
-
 					// monthly
 					if (billingOrderData.getDurationType().equalsIgnoreCase("month(s)")) {
 
 						billingOrderCommand = generateDisconnectionBill.getReverseMonthyBill(billingOrderData,discountMasterData, disconnectDate);
 						billingOrderCommands.add(billingOrderCommand);
-
 					}
 					// weekly	
 					else if (billingOrderData.getDurationType().equalsIgnoreCase("week(s)")) {

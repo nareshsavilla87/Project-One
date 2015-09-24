@@ -14,11 +14,6 @@ import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
-import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
-import org.mifosplatform.infrastructure.configuration.domain.Configuration;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
-import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
-import org.mifosplatform.infrastructure.configuration.exception.ConfigurationPropertyNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,15 +25,15 @@ import org.springframework.stereotype.Service;
 public class GenerateDisconnectionBill {
 
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
-	private final ConfigurationRepository globalConfigurationRepository;
+	private final GenerateBill generateBill;
 	
 
 	@Autowired
 	public GenerateDisconnectionBill(final BillingOrderReadPlatformService billingOrderReadPlatformService,
-			  final ConfigurationRepository globalConfigurationRepository) {
+			  final GenerateBill generateBill) {
 		
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
-		this.globalConfigurationRepository = globalConfigurationRepository;
+		this.generateBill = generateBill;
 	}
 
 	BigDecimal pricePerMonth=BigDecimal.ZERO;
@@ -112,9 +107,9 @@ public class GenerateDisconnectionBill {
 			}
 			price=netAmount.multiply(new BigDecimal(numberOfDays));
 			
-			if(discountMasterData !=null){
+			if(discountMasterData !=null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0){
 
-		           if(discountMasterData.getDiscountRate() !=null&& (billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
+		           if((billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
 		        		   ||billingOrderData.getBillStartDate().compareTo(discountMasterData.getDiscountStartDate().toDate())==0)){
 
 		    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
@@ -132,11 +127,14 @@ public class GenerateDisconnectionBill {
 		}else { // If Invoice till date not equal to null
 		  
 			System.out.println("---- DC ----");
-		   if(discountMasterData !=null){	
-
-
-           if(discountMasterData.getDiscountRate() !=null&& (billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
-        		   ||billingOrderData.getBillStartDate().compareTo(discountMasterData.getDiscountStartDate().toDate())==0)){
+		   if(discountMasterData != null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0 ){	
+			   
+	        if((discountMasterData.getDiscountStartDate().toDate().after(billingOrderData.getBillStartDate())
+		    		   || discountMasterData.getDiscountStartDate().toDate().equals(billingOrderData.getBillStartDate())) &&
+		    		     (discountMasterData.getDiscountEndDate().toDate().compareTo(
+		    		      this.generateBill.getDiscountEndDateIfNull(discountMasterData, new LocalDate(billingOrderData.getInvoiceTillDate())))==0
+		    		    ||discountMasterData.getDiscountEndDate().toDate().before(
+		    		       this.generateBill.getDiscountEndDateIfNull(discountMasterData, new LocalDate(billingOrderData.getInvoiceTillDate()))))){
 
     		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
     			discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
@@ -233,10 +231,14 @@ public class GenerateDisconnectionBill {
 		}else{//if invoice till date not null or after invoice disconnect order
 			
 
-		  if(discountMasterData!=null){
+		  if(discountMasterData != null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0){
 
-	       if(discountMasterData.getDiscountRate() !=null && (billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
-	        		   ||billingOrderData.getBillStartDate().compareTo(discountMasterData.getDiscountStartDate().toDate())==0)){
+	       if((discountMasterData.getDiscountStartDate().toDate().after(billingOrderData.getBillStartDate())
+	    		   || discountMasterData.getDiscountStartDate().toDate().equals(billingOrderData.getBillStartDate())) &&
+	    		     ( discountMasterData.getDiscountEndDate().toDate().compareTo(
+	    		      this.generateBill.getDiscountEndDateIfNull(discountMasterData, new LocalDate(billingOrderData.getInvoiceTillDate())))==0
+	    		    ||discountMasterData.getDiscountEndDate().toDate().before(
+	    		       this.generateBill.getDiscountEndDateIfNull(discountMasterData, new LocalDate(billingOrderData.getInvoiceTillDate()))))){
 
 		    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
 		    			   discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
@@ -365,9 +367,9 @@ public class GenerateDisconnectionBill {
 					taxRate = taxMappingRateData.getRate();
 					taxCode = taxMappingRateData.getTaxCode();
 					 if(billingOrderData.getTaxInclusive().compareTo(Integer.valueOf(1))==0){  /*(2990 * 11) / (100 + 11)*/
-	                      	 taxAmount=price.multiply(taxRate).divide(new BigDecimal(100).add(taxRate),Integer.parseInt(roundingDecimal()), RoundingMode.HALF_UP);
+	                      	 taxAmount=price.multiply(taxRate).divide(new BigDecimal(100).add(taxRate),Integer.parseInt(this.generateBill.roundingDecimal()), RoundingMode.HALF_UP);
 	                     }else{
-	                    	 taxAmount = price.multiply(taxRate.divide(new BigDecimal(100))).setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
+	                    	 taxAmount = price.multiply(taxRate.divide(new BigDecimal(100))).setScale(Integer.parseInt(this.generateBill.roundingDecimal()),RoundingMode.HALF_UP);
 	                    }
 				} else if("Flat".equalsIgnoreCase(taxMappingRateData.getTaxType())) {
 					
@@ -418,7 +420,7 @@ public class GenerateDisconnectionBill {
 				    	      numberOfDaysPrice = pricePerDay.multiply(new BigDecimal(numberOfDays));
 				      
 					}  
-					taxAmount = numberOfDaysPrice.add(numberOfMonthsPrice).setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
+					taxAmount = numberOfDaysPrice.add(numberOfMonthsPrice).setScale(Integer.parseInt(this.generateBill.roundingDecimal()),RoundingMode.HALF_UP);
 					// taxAmount = taxFlat;
 				}
 				}
@@ -438,8 +440,7 @@ public class GenerateDisconnectionBill {
 			LocalDate chargeEndDate, LocalDate invoiceTillDate,LocalDate nextBillableDate, BigDecimal billPrice,
 			List<InvoiceTaxCommand> listOfTaxes,DiscountMasterData discountMasterData) {
 
-		 BigDecimal price = billPrice.setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
-		 List<UsageCharge> cdrData=new ArrayList<UsageCharge>();
+		 BigDecimal price = billPrice.setScale(Integer.parseInt(this.generateBill.roundingDecimal()),RoundingMode.HALF_UP);
 		
 		return new BillingOrderCommand(billingOrderData.getClientOrderId(),
 				billingOrderData.getOderPriceId(),
@@ -452,24 +453,7 @@ public class GenerateDisconnectionBill {
 				billingOrderData.getDurationType(), invoiceTillDate.toDate(),
 				price, billingOrderData.getBillingAlign(), listOfTaxes,
 				billingOrderData.getStartDate(), billingOrderData.getEndDate(),
-				discountMasterData, billingOrderData.getTaxInclusive(),cdrData);
+				discountMasterData, billingOrderData.getTaxInclusive());
 	}
 	
-	
-	//rounding amount
-		private String roundingDecimal() {
-
-			final Configuration property = this.globalConfigurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_ROUNDING);
-			
-			if (property == null) {
-				throw new ConfigurationPropertyNotFoundException(ConfigurationConstants.CONFIG_PROPERTY_ROUNDING);
-			}if(property.isEnabled()){
-				
-				return property.getValue();
-			}else{  
-				
-				return String.valueOf(2);    
-			}
-			
-		}
 }
