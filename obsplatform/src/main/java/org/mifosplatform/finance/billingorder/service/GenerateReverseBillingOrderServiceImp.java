@@ -14,8 +14,6 @@ import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.billingorder.domain.InvoiceTax;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
-import org.mifosplatform.portfolio.client.domain.Client;
-import org.mifosplatform.portfolio.client.domain.ClientRepositoryWrapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,18 +27,14 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final GenerateDisconnectionBill generateDisconnectionBill;
 	private final InvoiceRepository invoiceRepository;
-	private final ClientRepositoryWrapper clientRepository;
 
-	
 	@Autowired
 	public GenerateReverseBillingOrderServiceImp(final BillingOrderReadPlatformService billingOrderReadPlatformService,
-			final GenerateDisconnectionBill generateDisconnectionBill,final InvoiceRepository invoiceRepository,
-			final ClientRepositoryWrapper clientRepository) {
+			final GenerateDisconnectionBill generateDisconnectionBill,final InvoiceRepository invoiceRepository) {
 
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.generateDisconnectionBill = generateDisconnectionBill;
 		this.invoiceRepository = invoiceRepository;
-		this.clientRepository = clientRepository;
 	}
 
 	@Override
@@ -93,10 +87,10 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 		BigDecimal totalChargeAmount = BigDecimal.ZERO;
 		BigDecimal netTaxAmount = BigDecimal.ZERO;
 		
-		Client client=this.clientRepository.findOneWithNotFoundDetection(billingOrderCommands.get(0).getClientId());
+		//Client client=this.clientRepository.findOneWithNotFoundDetection(billingOrderCommands.get(0).getClientId());
 		
-		Invoice invoice = new Invoice(billingOrderCommands.get(0).getClientId(), DateUtils.getLocalDateOfTenant().toDate(), invoiceAmount, invoiceAmount, 
-				                         netTaxAmount, "active");
+		Invoice invoice = new Invoice(billingOrderCommands.get(0).getClientId(), DateUtils.getLocalDateOfTenant().toDate(), 
+				               invoiceAmount, invoiceAmount,netTaxAmount, "active");
 		
 		for (BillingOrderCommand billingOrderCommand : billingOrderCommands) {
 			
@@ -120,8 +114,7 @@ public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBil
 					billingOrderCommand.getChargeCode(),billingOrderCommand.getChargeType(),discountCode, billingOrderCommand.getPrice().negate(), discountAmount.negate(),
 					netChargeAmount.negate(), billingOrderCommand.getStartDate(), billingOrderCommand.getEndDate());
 
-			//client taxExemption
-			if(('N'==client.getTaxExemption()) && (invoiceTaxCommands !=null && !invoiceTaxCommands.isEmpty())){
+			if(!invoiceTaxCommands.isEmpty()){
 			
 			     for(InvoiceTaxCommand invoiceTaxCommand : invoiceTaxCommands){
 				

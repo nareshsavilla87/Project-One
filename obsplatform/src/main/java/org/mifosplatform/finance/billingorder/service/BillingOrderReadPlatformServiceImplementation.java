@@ -113,18 +113,20 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 			final Date billEndDate = resultSet.getDate("billEndDate");
 			final Long orderStatus = resultSet.getLong("orderStatus");
 			final Integer taxInclusive = resultSet.getInt("taxInclusive");
+			final String taxExemption = resultSet.getString("taxExemption");
 			
 			return new BillingOrderData(clientOderId,orderPriceId,planId, clientId, startDate,nextBillableDate, endDate, billingFrequency, chargeCode,
-					chargeType, chargeDuration, durationType, invoiceTillDate,price, billingAlign,billStartDate,billEndDate,orderStatus,taxInclusive);
+					chargeType, chargeDuration, durationType, invoiceTillDate,price, billingAlign,billStartDate,billEndDate,orderStatus,taxInclusive,taxExemption);
 		}
 
 		public String billingOrderSchema() {
 
 			return " co.id as clientOrderId,op.id AS orderPriceId,co.plan_id as planId,co.client_id AS clientId,co.start_date AS startDate,IFNULL(op.next_billable_day, co.start_date) AS nextBillableDate,"
 					+ "co.end_date AS endDate,co.billing_frequency AS billingFrequency,op.charge_code AS chargeCode,op.charge_type AS chargeType,"
-					+ "op.charge_duration AS chargeDuration,op.duration_type AS durationType,op.invoice_tilldate AS invoiceTillDate,op.price AS price,co.order_status as orderStatus,op.tax_inclusive as taxInclusive, "
+					+ "op.charge_duration AS chargeDuration,op.duration_type AS durationType,op.invoice_tilldate AS invoiceTillDate,op.price AS price,co.order_status as orderStatus," 
+					+ "op.tax_inclusive as taxInclusive,mc.exempt_tax AS taxExemption ,"
 					+ "co.billing_align AS billingAlign,op.bill_start_date as billStartDate,Date_format(IFNULL(op.bill_end_date,'3099-12-31'), '%Y-%m-%d') AS billEndDate "
-					+ "FROM b_orders co left JOIN b_order_price op ON co.id = op.order_id"
+					+ "FROM  m_client mc JOIN b_orders co ON co.client_id=mc.id left JOIN b_order_price op ON co.id = op.order_id"
 					+ " WHERE co.client_id = ? AND co.id = ? AND Date_format(IFNULL(op.invoice_tilldate,? ),'%Y-%m-%d') <= ? "
 					+ " AND Date_format(IFNULL(op.next_billable_day, co.start_date ), '%Y-%m-%d')  <= Date_format(IFNULL(op.bill_end_date,'3099-12-31'), '%Y-%m-%d')";
 		}
@@ -273,47 +275,24 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 			final Date billEndDate = resultSet.getDate("billEndDate");
 			final Long orderStatus = resultSet.getLong("orderStatus");
 			final Integer taxInclusive = resultSet.getInt("taxInclusive");
+			final String taxExemption = resultSet.getString("taxExemption");
 			//Long invoiceId = resultSet.getLong("invoiceId");
 			return new BillingOrderData(clientOderId,orderPriceId,planId, clientId, startDate,nextBillableDate, endDate, billingFrequency,
 					chargeCode,chargeType, chargeDuration, durationType, invoiceTillDate,price, billingAlign,billStartDate,billEndDate,orderStatus,
-					taxInclusive,null);
+					taxInclusive,taxExemption);
 		}
 
 		public String billingOrderSchema() {
 
 			return " co.id as clientOrderId,op.id AS orderPriceId,co.plan_id as planId,co.client_id AS clientId,co.start_date AS startDate,IFNULL(op.next_billable_day, co.start_date) AS nextBillableDate,"
 					+ "co.end_date AS endDate,co.billing_frequency AS billingFrequency,op.charge_code AS chargeCode,op.charge_type AS chargeType,"
-					+ "op.charge_duration AS chargeDuration,op.duration_type AS durationType,op.invoice_tilldate AS invoiceTillDate,op.price AS price,co.order_status as orderStatus,op.tax_inclusive as taxInclusive,"
+					+ "op.charge_duration AS chargeDuration,op.duration_type AS durationType,op.invoice_tilldate AS invoiceTillDate,op.price AS price," 
+					+ "co.order_status as orderStatus,op.tax_inclusive as taxInclusive, mc.exempt_tax AS taxExemption, "
 					+ "co.billing_align AS billingAlign,op.bill_start_date as billStartDate,Date_format(IFNULL(op.bill_end_date,'3099-12-31'), '%Y-%m-%d') AS billEndDate "
-					+ "FROM  b_orders co left JOIN b_order_price op ON co.id = op.order_id"
+					+ "FROM m_client mc JOIN b_orders co ON co.client_id=mc.id left JOIN b_order_price op ON co.id = op.order_id"
 					+ " WHERE co.client_id = ? AND co.id = ?  and op.is_addon = 'N'"/* AND Date_format(IFNULL(op.invoice_tilldate,now() ),'%Y-%m-%d') >= ? "*/;
 		}
 	}
-	 
-	/*  (non-Javadoc)
-	 * @see #retriveExemptionTaxDetails(java.lang.Long)
-	 
-	@Override
-		public TaxMappingRateData retriveExemptionTaxDetails(final Long clientId) {
-		 
-		 try{
-			 
-			final taxMapper mapper=new taxMapper();
-			final String sql= "select exempt_tax as taxExemption from m_client where id=?";
-			return this.jdbcTemplate.queryForObject(sql, mapper,new Object[]{clientId});
-		   }catch(EmptyResultDataAccessException e){
-			 return null;
-		   }
-		 }
-	 
-		private final static class taxMapper implements RowMapper<TaxMappingRateData>
-		  {
-			@Override
-			public TaxMappingRateData mapRow(ResultSet rs, int rowNum)throws SQLException {
-				final String taxExemption=rs.getString("taxExemption");
-				return new TaxMappingRateData(taxExemption);
-			}
-		}*/
 		
 	@Override
 	public AgreementData retriveClientOfficeDetails(final Long clientId) {

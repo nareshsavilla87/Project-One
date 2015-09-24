@@ -274,6 +274,16 @@ public class Plan{
 		return allowTopup;
 	}
 
+	public char getIsPrepaid() {
+		return isPrepaid;
+	}
+
+	public void setIsPrepaid(char isPrepaid) {
+		this.isPrepaid = isPrepaid;
+	}
+	
+	
+
 /*	public void addPlanQualifierDetails(PlanQualifier planQualifier) {
 		planQualifier.update(this);
 		this.planQualifier.add(planQualifier);
