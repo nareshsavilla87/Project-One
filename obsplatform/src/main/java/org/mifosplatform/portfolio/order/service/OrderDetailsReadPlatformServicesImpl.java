@@ -44,9 +44,8 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 		}
 
 		@Override
-		public ServiceData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+		public ServiceData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
+			
 			Long id = rs.getLong("id");
 			String serviceCode = rs.getString("service_code");
 			String serviceType = rs.getString("serviceType");
@@ -70,7 +69,7 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 				     " da.charging_variant AS charging_variant,c.charge_type AS charge_type,c.charge_duration AS charge_duration,c.duration_type AS duration_type," +
 				     " da.discount_id AS discountId,c.tax_inclusive AS taxInclusive,da.price AS price,da.price_region_id,s.id AS stateId,s.parent_code AS countryId," +
 				     " pd.state_id AS regionState,con.country_name,pd.country_id AS regionCountryId" +
-				     " FROM b_plan_pricing da LEFT JOIN b_charge_codes c ON c.charge_code = da.charge_code " +
+				     " FROM b_plan_pricing da LEFT JOIN b_charge_codes c ON c.charge_code = da.charge_code  " +
 				     " LEFT JOIN b_service se ON (da.service_code = se.service_code OR da.service_code = 'None')" +
 				     " LEFT JOIN b_priceregion_detail pd ON pd.priceregion_id = da.price_region_id" +
 				     " JOIN b_client_address ca LEFT JOIN b_state s ON ca.state = s.state_name LEFT JOIN b_country con ON ca.country = con.country_name" +
@@ -78,11 +77,12 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 				     " AND ca.client_id = ? AND (pd.state_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_state c," +
 				     " b_charge_codes cc,b_client_address d" +
 				     " WHERE b.priceregion_id = a.price_region_id  AND cc.charge_code = a.charge_code AND  b.state_id = c.id   AND a.price_region_id = b.priceregion_id " +
-				     " AND d.state = c.state_name AND d.address_key = 'PRIMARY' AND d.client_id = ? and a.plan_id=? AND cc.billfrequency_code = ? ),0)" +
+				     " AND d.state = c.state_name AND d.address_key = 'PRIMARY' AND d.client_id = ? and a.plan_id=? AND cc.billfrequency_code = ?),0)" +
 				     " AND pd.country_id = ifnull( (SELECT DISTINCT c.id FROM b_plan_pricing a, b_priceregion_detail b, b_country c, b_charge_codes cc,b_client_address d " +
 				     " WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND cc.charge_code = a.charge_code AND a.price_region_id = b.priceregion_id " +
 				     " AND c.country_name = d.country AND d.address_key = 'PRIMARY' AND d.client_id = ? AND a.plan_id = ? AND cc.billfrequency_code =  ?),0))" +
 				     " GROUP BY da.id";
+			
 			return this.jdbcTemplate.query(sql, mapper, new Object[] { planId,billingFreq,clientId,clientId,planId,billingFreq,clientId,planId,billingFreq});
 
 		} 
@@ -100,9 +100,7 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 			}
 
 			@Override
-			public PriceData mapRow(final ResultSet rs,
-					@SuppressWarnings("unused") final int rowNum)
-					throws SQLException {
+			public PriceData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
 
 				Long id = rs.getLong("id");
 				String serviceCode = rs.getString("service_code");
@@ -140,10 +138,6 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 					" AND pd.state_id = 0 GROUP BY da.id; ";
 			return this.jdbcTemplate.query(sql, mapper1, new Object[] { clientId });
 		}
-
-
-
-		
 
 	}
 

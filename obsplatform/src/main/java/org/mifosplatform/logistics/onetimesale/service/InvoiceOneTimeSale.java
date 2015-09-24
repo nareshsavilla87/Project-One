@@ -7,13 +7,17 @@ import java.util.Date;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
+import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
+import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
+import org.mifosplatform.finance.billingorder.service.BillingOrderReadPlatformService;
 import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
 import org.mifosplatform.finance.billingorder.service.GenerateBill;
 import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderService;
@@ -29,7 +33,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * @author Ranjith
- * invoices for device sale
+ * invoices for device sale and additional fee charges
  */
 @Service
 public class InvoiceOneTimeSale {
@@ -40,12 +44,15 @@ public class InvoiceOneTimeSale {
 	private final GenerateDisconnectionBill generateDisconnectionBill;
 	private final GenerateReverseBillingOrderService generateReverseBillingOrderService;
 	private final DiscountMasterRepository discountMasterRepository;
+	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final ClientRepositoryWrapper clientRepository;
+	
 	
 	@Autowired
 	public InvoiceOneTimeSale(final GenerateBill generateBill,final BillingOrderWritePlatformService billingOrderWritePlatformService,
-			final GenerateBillingOrderService generateBillingOrderService,final GenerateDisconnectionBill generateDisconnectionBill,final GenerateReverseBillingOrderService generateReverseBillingOrderService,
-	        final DiscountMasterRepository discountMasterRepository,final ClientRepositoryWrapper clientRepository) {
+			final GenerateBillingOrderService generateBillingOrderService,final GenerateDisconnectionBill generateDisconnectionBill,
+			final GenerateReverseBillingOrderService generateReverseBillingOrderService,final DiscountMasterRepository discountMasterRepository,
+			final ClientRepositoryWrapper clientRepository,final BillingOrderReadPlatformService billingOrderReadPlatformService) {
 		
 		this.generateBill = generateBill;
 		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
@@ -53,7 +60,9 @@ public class InvoiceOneTimeSale {
 		this.generateDisconnectionBill = generateDisconnectionBill;
 		this.generateReverseBillingOrderService = generateReverseBillingOrderService;
 		this.discountMasterRepository = discountMasterRepository;
+		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.clientRepository = clientRepository;
+
 
 	}
 
@@ -96,7 +105,7 @@ public class InvoiceOneTimeSale {
 		// calculation of invoice
 		Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
 
-		// To fetch record from client_balance table
+		// Update Client Balance
 		this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(), clientId, isWalletEnable);
 
 		return new CommandProcessingResult(invoice.getId());
@@ -106,7 +115,7 @@ public class InvoiceOneTimeSale {
 /**
  * @param clientId
  * @param oneTimeSaleData
- * @param invoice2 
+ * @param invoice 
  * @param wallet 
  *  reverse invoice 
  */
@@ -137,6 +146,53 @@ public class InvoiceOneTimeSale {
 		this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId,isWalletEnable);
 
 		return new CommandProcessingResult(invoice.getId());
+
+	}
+	
+
+	/**
+	 * @param chargeMaster
+	 * @param orderId
+	 * @param priceId
+	 * @param clientId
+	 * @param feeChargeAmount
+	 * @return invoice
+	 */
+	public Invoice calculateAdditionalFeeCharges(final ChargeCodeMaster chargeMaster,final Long orderId, final Long priceId, 
+			                      final Long clientId, final BigDecimal ChargeAmount) {
+		
+		List<BillingOrderCommand> billingOrderCommands = new ArrayList<BillingOrderCommand>();
+		List<InvoiceTaxCommand>  listOfTaxes = this.calculateTax(clientId, ChargeAmount,chargeMaster);
+		BillingOrderCommand billingOrderCommand = new BillingOrderCommand(orderId,priceId,clientId, DateUtils.getDateOfTenant(),
+				DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),chargeMaster.getBillFrequencyCode(), chargeMaster.getChargeCode(),
+				chargeMaster.getChargeType(),chargeMaster.getChargeDuration(), "",DateUtils.getDateOfTenant(),ChargeAmount, 
+				"N",listOfTaxes, DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(), null,chargeMaster.getTaxInclusive());
+
+		billingOrderCommands.add(billingOrderCommand);
+		
+		Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
+		
+		this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(), clientId, false);
+	
+		return invoice;
+	}
+	
+	/**
+	 * @param clientId
+	 * @param chargeAmount
+	 * @param chargeMaster
+	 * @return
+	 */
+	public List<InvoiceTaxCommand> calculateTax(Long clientId,BigDecimal billPrice, ChargeCodeMaster chargeMaster) {
+
+		// Get State level taxes
+		List<TaxMappingRateData> taxMappingRateDatas = this.billingOrderReadPlatformService.retrieveTaxMappingData(clientId,chargeMaster.getChargeCode());
+		if (taxMappingRateDatas.isEmpty()) {
+			taxMappingRateDatas = this.billingOrderReadPlatformService.retrieveDefaultTaxMappingData(clientId,chargeMaster.getChargeCode());
+		}
+		List<InvoiceTaxCommand> invoiceTaxCommand = this.generateBill.generateInvoiceTax(taxMappingRateDatas, billPrice, clientId,chargeMaster.getTaxInclusive());
+		
+		return invoiceTaxCommand;
 
 	}
 

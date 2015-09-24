@@ -292,7 +292,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
         								this.orderRepository.saveAndFlush(order);
 
         							 if(plan.isPrepaid() == 'Y'){
-        			        	  		Invoice invoice=this.invoiceClient.onTopUpAutoRenewalInvoice(order.getId(),order.getClientId(),new LocalDate(order.getStartDate()).plusDays(1));
+        			        	  		Invoice invoice=this.invoiceClient.singleOrderInvoice(order.getId(),order.getClientId(),new LocalDate(order.getStartDate()).plusDays(1));
         			        	  		 if(invoice!=null){
         			          		    	List<ActionDetaislData> actionDetaislData=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_TOPUP_INVOICE_MAIL);
         			          				if(actionDetaislData.size() != 0){
