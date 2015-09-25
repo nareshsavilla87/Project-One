@@ -1306,7 +1306,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			
 			List<SubscriptionData> listOfPrices = this.planReadPlatformService.retrieveSubscriptionData(orderIds.get(0), isPrepaid);
 			if(listOfPrices.isEmpty()){
-				throw new PriceNotFoundException(Long.valueOf(0));
+				throw new PriceNotFoundException(orderIds.get(0));
 			}
 			Long priceId  = listOfPrices.get(0).getPriceId();
 			for(SubscriptionData listOfPrice : listOfPrices){
