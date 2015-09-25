@@ -38,7 +38,6 @@ import org.mifosplatform.portfolio.group.data.GroupGeneralData;
 import org.mifosplatform.portfolio.group.service.SearchParameters;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -102,7 +101,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         
         sqlBuilder.append(clientMapper.schema());
-        sqlBuilder.append(" where a.address_key='PRIMARY' and o.hierarchy like ?");
+        sqlBuilder.append(" where a.address_key in ('PRIMARY','BILLING') and o.hierarchy like ?");
 
         final String extraCriteria = buildSqlStringFromClientCriteria(searchParameters);
 
@@ -147,7 +146,8 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         if (sqlSearch != null) {
           //  extraCriteria = " and (" + sqlSearch + ")";
             
-        	extraCriteria = " and ( display_name like '%" + sqlSearch + "%' OR c.phone like '%" + sqlSearch + "%' OR c.account_no like '%"+sqlSearch+"%' OR g.group_name like '%"+sqlSearch+"%' OR a.address_no like '%"+sqlSearch+"%'"
+        	extraCriteria = " and ( display_name like '%" + sqlSearch + "%' OR c.phone like '%" + sqlSearch + "%' OR c.account_no like '%"+sqlSearch+"%' OR g.group_name like '%"+sqlSearch+"%' "
+        			+" OR a.address_no like '%"+sqlSearch+"%' OR c.email like '%"+sqlSearch+"%'"
         			+ " OR IFNULL(( Select min(serial_no) from b_allocation ba where c.id=ba.client_id and ba. is_deleted = 'N'),'No Hardware') LIKE '%"+sqlSearch+"%' )";
             
         }
@@ -270,7 +270,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final String accountNo = rs.getString("accountNo");
             final String groupName = rs.getString("groupName");
@@ -337,7 +337,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final String accountNo = rs.getString("accountNo");
             final String title = rs.getString("title");
@@ -391,7 +391,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public GroupGeneralData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public GroupGeneralData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long groupId = JdbcSupport.getLong(rs, "groupId");
             final String groupName = rs.getString("groupName");
@@ -420,7 +420,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String displayName = rs.getString("displayName");
@@ -534,7 +534,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientAccountSummaryData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
             final String accountNo = rs.getString("accountNo");
@@ -559,7 +559,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientAccountSummaryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientAccountSummaryData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
 
             final Long id = JdbcSupport.getLong(rs, "id");
             final String accountNo = rs.getString("accountNo");
@@ -596,7 +596,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         }
 
         @Override
-        public ClientData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ClientData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String accountNo = rs.getString("accountNo");
@@ -639,7 +639,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	        }
 
 	        @Override
-	        public ClientCategoryData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+	        public ClientCategoryData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
 
 	            final Long id = rs.getLong("id");
 	            final String codeValue = rs.getString("codeValue");
