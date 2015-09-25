@@ -302,8 +302,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		} catch (final DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(null, dve);
 		}
-		return new CommandProcessingResult(Long.valueOf(oneTimeSale.getId()),
-				oneTimeSale.getClientId());
+		return new CommandProcessingResult(Long.valueOf(oneTimeSale.getId()),oneTimeSale.getClientId());
 	}
 
 	private OneTimeSale findOneById(final Long saleId) {

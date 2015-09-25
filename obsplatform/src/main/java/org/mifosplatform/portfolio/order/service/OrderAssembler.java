@@ -73,7 +73,6 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 				throw new NoRegionalPriceFound();
 			}
 			
-			
 			Contract contractData = this.contractRepository.findOne(order.getContarctPeriod());
 			LocalDate startDate=new LocalDate(order.getStartDate());
 			
