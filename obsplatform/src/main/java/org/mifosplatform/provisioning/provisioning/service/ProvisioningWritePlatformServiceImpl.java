@@ -348,15 +348,18 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		if (planMapping == null && "None".equalsIgnoreCase(plan.getProvisionSystem())) {
 			throw new PlanMappingNotExist(plan.getPlanCode());
 		}
-		 if ('Y'==plan.isHardwareReq()&&hardwareAssociation.isEmpty()) {
+		if ('Y' == plan.isHardwareReq() && hardwareAssociation.isEmpty()) {
 			throw new PairingNotExistException(order.getId(),plan.getPlanCode());
-		}
-		else if(1==hardwareAssociation.size()&&hardwareAssociation.get(0).getServiceId()==null){ //Plan level map exist's
-			 serialNumber = hardwareAssociation.get(0).getSerialNo();
-		}
-		else{
-			if(hardwareAssociation.size()!=order.getServices().size()) //service level map
-			 throw new PairingNotExistException(plan.getPlanCode());
+		} else if ('N' == plan.isHardwareReq()) {
+			if (!hardwareAssociation.isEmpty()) {
+				serialNumber = hardwareAssociation.get(0).getSerialNo();
+			}
+		} else if (1 == hardwareAssociation.size() && hardwareAssociation.get(0).getServiceId() == null) { // Plan level map exist's
+			serialNumber = hardwareAssociation.get(0).getSerialNo();
+		} 
+		else {
+			if (hardwareAssociation.size() != order.getServices().size()) // service level map
+				throw new PairingNotExistException(plan.getPlanCode());
 		}
 		List<ServiceParameters> parameters = this.serviceParametersRepository.findDataByOrderId(orderId);
 			
