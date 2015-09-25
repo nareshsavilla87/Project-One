@@ -268,7 +268,7 @@ try{
 						order.getId(),allocationDetailsDatas.get(0).getAllocationType(),null);
 			}else if(allocationDetailsDatas.isEmpty()){//plan and hardware mapping not exist's
 			configurationProperty=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SERVICE_DEVICE_MAPPING);
-			   if(configurationProperty !=null&&configurationProperty.isEnabled()){
+			   if(configurationProperty != null && configurationProperty.isEnabled()){
 				   List<OrderLine> orderServices=order.getServices();
 				   for(OrderLine service:orderServices){
 					   List<AllocationDetailsData> allocationDetails=this.allocationReadPlatformService.retrieveHardWareDetailsByServiceMap(clientId,service.getServiceId());
