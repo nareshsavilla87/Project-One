@@ -7,6 +7,7 @@ import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.finance.billingorder.data.BillDetailsData;
 import org.mifosplatform.finance.financialtransaction.data.FinancialTransactionsData;
 import org.mifosplatform.infrastructure.core.service.Page;
+import org.mifosplatform.scheduledjobs.scheduledjobs.data.BatchHistoryData;
 
 public interface BillMasterReadPlatformService {
 
@@ -21,10 +22,11 @@ public interface BillMasterReadPlatformService {
 	BigDecimal retrieveClientBalance(Long clientId);
 
 	List<FinancialTransactionsData> retrieveSingleInvoiceData(Long invoiceId);
-
 	List<BillDetailsData> retrieveStatementDetails(Long billId);
 
 	Page<FinancialTransactionsData> retrieveSampleData(SearchSqlQuery searchFinancialTransaction, Long clientId,String type);
 
 	List<FinancialTransactionsData> retriveDataForDownload(Long clientId,String fromDate, String toDate);
+	List<BatchHistoryData> retriveStatementDetailsForBill();
+	List<Long> retriveStatementsIdsByBatchId(String batchId);
 }

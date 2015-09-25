@@ -781,6 +781,24 @@ public class DataValidatorBuilder {
 		        }
 		        return this;
 		    }
+		 
+		 public DataValidatorBuilder notGreaterThanMax(final Long max) {
+		        if (value == null && ignoreNullValue) { return this; }
+
+		        if (value != null && max != null) {
+		        	Long number = Long.valueOf(value.toString());
+		            if (number > max) {
+		                StringBuilder validationErrorCode = new StringBuilder("validation.msg.").append(resource).append(".").append(parameter)
+		                        .append(".is.greater.than.max");
+		                StringBuilder defaultEnglishMessage = new StringBuilder("The ").append(parameter)
+		                        .append(" must be less than maximum value ").append(max);
+		                ApiParameterError error = ApiParameterError.parameterError(validationErrorCode.toString(),
+		                        defaultEnglishMessage.toString(), parameter, number, max);
+		                dataValidationErrors.add(error);
+		            }
+		        }
+		        return this;
+		  }
 		
     
 }

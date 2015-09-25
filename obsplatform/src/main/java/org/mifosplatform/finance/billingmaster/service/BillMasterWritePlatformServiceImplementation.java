@@ -33,6 +33,8 @@ import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSaleRepository;
 import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
+import org.mifosplatform.scheduledjobs.scheduledjobs.domain.BatchHistory;
+import org.mifosplatform.scheduledjobs.scheduledjobs.domain.BatchHistoryRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +59,7 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 		private final AdjustmentRepository adjustmentRepository;
 		private final OneTimeSaleRepository oneTimeSaleRepository;
 		private final DepositAndRefundRepository depositAndRefundRepository;
+		private final BatchHistoryRepository batchHistoryRepository;
 		 
 	@Autowired
 	 public BillMasterWritePlatformServiceImplementation(final PlatformSecurityContext context,final BillMasterRepository billMasterRepository,
@@ -65,7 +68,7 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 				final BillingOrderRepository billingOrderRepository, final InvoiceTaxRepository invoiceTaxRepository,
 		        final InvoiceRepository invoiceRepository, final PaymentRepository paymentRepository,
 		        final AdjustmentRepository adjustmentRepository,final OneTimeSaleRepository oneTimeSaleRepository,
-		        final DepositAndRefundRepository depositAndRefundRepository){
+		        final DepositAndRefundRepository depositAndRefundRepository, final BatchHistoryRepository batchHistoryRepository){
 		
 		    this.context = context;
 			this.billMasterRepository = billMasterRepository;
@@ -80,7 +83,7 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 			this.paymentRepository = paymentRepository;
 			this.oneTimeSaleRepository = oneTimeSaleRepository;
 			this.depositAndRefundRepository = depositAndRefundRepository;
-			
+			this.batchHistoryRepository = batchHistoryRepository;
 	}
 	
 	@Transactional
@@ -280,6 +283,26 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 		   return  CommandProcessingResult.empty();
 	   }
 		
+   }
+	
+	@Override
+	public CommandProcessingResult cancelBatchStatement(final String batchId) {
+		try{
+			context.authenticatedUser();
+			  List<Long> statementIds = this.billMasterReadPlatformService.retriveStatementsIdsByBatchId(batchId);
+			   Integer count = 0;
+			  for(Long id : statementIds){
+				 this.cancelBillMaster(id);
+				 count ++;
+			  }
+			  BatchHistory history = new BatchHistory(DateUtils.getDateOfTenant(),"cancel statement", count.toString(), batchId);
+				this.batchHistoryRepository.saveAndFlush(history);
+	   
+		return new CommandProcessingResult(history.getId());
+		}catch(DataIntegrityViolationException dve) {
+			   LOGGER.error(dve.getLocalizedMessage());
+			   return  CommandProcessingResult.empty();
+		   }
    }
 	
 	private void handleCodeDataIntegrityIssues(final JsonCommand command,final DataIntegrityViolationException dve) {

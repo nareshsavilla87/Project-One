@@ -141,6 +141,12 @@ final public class ClientData implements Comparable<ClientData> {
         		null,null,null, null,null,null,null,null,null,null,null, null,null,null,null,null,null,null,null,null,null);
 
     }
+    
+    public static ClientData walletAmount(final Long id, final String accountNo, final BigDecimal walletAmount,final String hwSerialNumber) {
+    	return new ClientData(accountNo,null, null, null, null, id, null, null, null, null, null, null, null, null, null, null,null,null,null,null,
+    			null,null,null, null,null,null,null,null,null,hwSerialNumber,null, null,null,null,null,null,walletAmount,null,null,null,null);
+    	
+    }
 
     public static ClientData instance(final String accountNo, final String groupName, final EnumOptionData status, final Long officeId, final String officeName,final Long id, 
     		final String firstname, final String middlename, final String lastname, final String fullname,final String displayName, final String externalId,

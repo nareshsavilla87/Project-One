@@ -690,7 +690,9 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 	                handler = applicationContext.getBean("updateBillMasterCommandHandler", NewCommandSourceHandler.class);
 	            } else if (wrapper.isDelete()) {
 	                handler = applicationContext.getBean("deleteBillMasterCommandHandler", NewCommandSourceHandler.class);
-	            } else {
+	            }else if(wrapper.isCancel()){
+		    		  handler = applicationContext.getBean("cancelBatchStatementCommandHandler",NewCommandSourceHandler.class);
+		    	 } else {
 	                throw new UnsupportedCommandException(wrapper.commandName());
 	            }
 			} else if (wrapper.isInventoryResource()) {
@@ -1349,8 +1351,15 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 	    	  }else {
 	    		  throw new UnsupportedCommandException(wrapper.commandName());
 	    	  }
+	      }else if(wrapper.isBeesmartClient()){
+			  if(wrapper.isUpdateBeesmartClient()){
+				 handler = applicationContext.getBean("updateBeesmartClientCommandHandler",NewCommandSourceHandler.class);
+			  }else if(wrapper.isDeleteBeesmartClient()){
+				 handler = applicationContext.getBean("deleteBeesmartClientCommandHandler",NewCommandSourceHandler.class);
+			  }else {
+				 throw new UnsupportedCommandException(wrapper.commandName());
+			  }
 	      }
-		
 	       return handler;
 	}
 }

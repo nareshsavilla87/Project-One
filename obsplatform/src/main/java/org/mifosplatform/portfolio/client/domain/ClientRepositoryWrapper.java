@@ -45,7 +45,7 @@ public class ClientRepositoryWrapper {
 
 	public Client findOneWithAccountId(final String accountId) {
 	  final Client client = this.repository.findwithAccountNo(accountId);
-	  if (client == null) { throw new ClientNotFoundException(Long.valueOf(accountId)); }
+	  if (client == null) { throw new ClientNotFoundException(accountId,Long.valueOf(0)); }
          return client;
 	}
 }
