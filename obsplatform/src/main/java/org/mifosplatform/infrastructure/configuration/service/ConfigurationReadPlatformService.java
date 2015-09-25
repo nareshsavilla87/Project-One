@@ -14,5 +14,7 @@ public interface ConfigurationReadPlatformService {
 
 	ConfigurationPropertyData retrieveGlobalConfiguration(Long configId);
 
+	ConfigurationPropertyData retrieveGlobalConfigurationByName(String configName);
+
 
 }

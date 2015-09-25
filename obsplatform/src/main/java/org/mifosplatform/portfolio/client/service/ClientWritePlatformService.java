@@ -43,4 +43,8 @@ public interface ClientWritePlatformService {
 
 	CommandProcessingResult updateClientAdditionalInfo(JsonCommand command);
 
+	CommandProcessingResult updateBeesmartClient(JsonCommand command);
+
+	CommandProcessingResult deleteBeesmartClient(JsonCommand command,Long entityId);
+
 }

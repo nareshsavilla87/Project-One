@@ -51,4 +51,6 @@ public interface ClientReadPlatformService {
 
 	ClientAdditionalData retrieveClientAdditionalData(Long clientId);
 
+	ClientData retrieveClientWalletAmount(Long clientId,String type);
+
 }
