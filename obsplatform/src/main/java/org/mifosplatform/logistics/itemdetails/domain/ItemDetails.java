@@ -71,15 +71,22 @@ public class ItemDetails extends AbstractAuditableCustom<AppUser, Long>{
 	@Column(name = "is_deleted")
 	private char isDeleted;
 	
+	@Column(name="received_quantity")
+	private Long receivedQuantity;
+	
 	public ItemDetails(){}
 	
 	
 	public ItemDetails(Long itemMasterId,String serialNumber,Long grnId,String provisioningSerialNumber,String quality,
-			String status,Long warranty,String remarks,String itemModel){
+			String status,Long warranty,String remarks,String itemModel, Boolean isSerialRequired, Long receivedQuantity){
 		this.itemMasterId=itemMasterId;
-		this.serialNumber=serialNumber;
+		this.receivedQuantity = receivedQuantity;
+		if(isSerialRequired){
+			this.serialNumber=serialNumber;
+			this.provisioningSerialNumber=provisioningSerialNumber;
+			this.receivedQuantity = Long.valueOf(1);
+		}
 		this.grnId=grnId;
-		this.provisioningSerialNumber=provisioningSerialNumber;
 		this.quality=quality;
 		this.status=getStatusOnQaulity(quality);
 		this.warranty=warranty;
@@ -239,11 +246,18 @@ public class ItemDetails extends AbstractAuditableCustom<AppUser, Long>{
 	            actualChanges.put(serialNumber, newValue);
 	            this.serialNumber = StringUtils.defaultIfEmpty(newValue, null);
 	        }
+	        
+	        final String quantity = "quantity";
+	        if(command.isChangeInLongParameterNamed(quantity, this.receivedQuantity)){
+	        	final Long newValue = command.longValueOfParameterNamed("quantity");
+	        	actualChanges.put(quantity, newValue);
+	        	this.receivedQuantity = newValue;
+	        }
 	        			
 	        return actualChanges;
 
 	}
-	public static ItemDetails fromJson(JsonCommand command, FromJsonHelper fromJsonHelper){
+	public static ItemDetails fromJson(JsonCommand command, FromJsonHelper fromJsonHelper, Boolean isSerialRequired){
 		
 		//final JsonElement element = fromJsonHelper.parse(command.toString());
 		Integer item = command.integerValueSansLocaleOfParameterNamed("itemMasterId");
@@ -257,7 +271,8 @@ public class ItemDetails extends AbstractAuditableCustom<AppUser, Long>{
 		String  quality = command.stringValueOfParameterNamed("quality");
 		String status = command.stringValueOfParameterNamed("status");
 		String itemModel = command.stringValueOfParameterNamed("itemModel");
-		return new ItemDetails(itemMasterId,serialNumber,grnId,provisioningSerialNumber,quality,status,null,remarks,itemModel);
+		Long receivedQuantity = command.longValueOfParameterNamed("quantity");
+		return new ItemDetails(itemMasterId,serialNumber,grnId,provisioningSerialNumber,quality,status,null,remarks,itemModel, isSerialRequired, receivedQuantity);
 	}
 
 
@@ -289,5 +304,16 @@ public class ItemDetails extends AbstractAuditableCustom<AppUser, Long>{
 	public void setWarrantyDate(LocalDate warrabtyEndDate) {
 		this.warrantyDate = warrabtyEndDate.toDate();
 	}
+
+
+	public Long getReceivedQuantity() {
+		return receivedQuantity;
+	}
+
+
+	public void setReceivedQuantity(Long receivedQuantity) {
+		this.receivedQuantity = receivedQuantity;
+	}
+	
 	
 }

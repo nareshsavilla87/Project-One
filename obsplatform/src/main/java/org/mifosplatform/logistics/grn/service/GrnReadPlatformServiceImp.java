@@ -81,7 +81,7 @@ public Page<InventoryGrnData> retriveGrnDetails(SearchSqlQuery searchGrn) {
 		String sql = "SQL_CALC_FOUND_ROWS g.id as id, f.name as officeName, g.purchase_date as purchaseDate, "
 				+ "g.supplier_id as supplierId, g.item_master_id as itemMasterId, g.orderd_quantity as orderdQuantity, "
 				+ "g.received_quantity as receivedQuantity, g.po_no as purchaseNo, im.item_description as itemDescription, "
-				+ "s.supplier_description as supplierDescription, (select count(id) from b_item_detail id where id.grn_id = g.id and status = 'Available') as availableQuantity "
+				+ "s.supplier_description as supplierDescription, stock_quantity as availableQuantity "
 				+ "from b_grn g left outer join m_office f on g.office_id=f.id "
 				+ "left outer join b_item_master im on g.item_master_id = im.id "
 				+ "left outer join b_supplier s on g.supplier_id=s.id ";
@@ -130,7 +130,7 @@ public Page<InventoryGrnData> retriveGrnDetails(SearchSqlQuery searchGrn) {
 			
 		final String sql = "select g.id as id, g.purchase_date as purchaseDate, g.supplier_id as supplierId, g.item_master_id as itemMasterId, " +
 				"g.po_no as purchaseNo,g.office_id as officeId,g.orderd_quantity as orderdQuantity, g.received_quantity as receivedQuantity," +
-				" im.item_description as itemDescription, s.supplier_description as supplierDescription from b_grn g left outer join b_item_master im " +
+				" im.item_description as itemDescription, im.units as units, s.supplier_description as supplierDescription from b_grn g left outer join b_item_master im " +
 				" on g.item_master_id = im.id left outer join b_supplier s on g.supplier_id = s.id where g.id = ?";
 		return jdbcTemplate.queryForObject(sql,grn,new Object[]{grnId});
 		
@@ -190,7 +190,8 @@ public Page<InventoryGrnData> retriveGrnDetails(SearchSqlQuery searchGrn) {
 			String supplierName = rs.getString("supplierDescription");
 			String purchaseNo = rs.getString("purchaseNo");
 			Long officeId = rs.getLong("officeId");
-			return new InventoryGrnData(id,purchaseDate,itemMasterId,orderedQuantity,receivedQuantity,itemDescription,supplierName,purchaseNo,supplierId,officeId);
+			String units = rs.getString("units");
+			return new InventoryGrnData(id,purchaseDate,itemMasterId,orderedQuantity,receivedQuantity,itemDescription,supplierName,purchaseNo,supplierId,officeId, units);
 			
 		}
 		

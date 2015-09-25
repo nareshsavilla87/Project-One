@@ -39,7 +39,7 @@ public final class InventoryItemCommandFromApiJsonDeserializer {
 
 
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("grnId","itemMasterId","quality","serialNumber","provisioningSerialNumber", 
-			"remarks","status","warranty","locale","officeId","clientId","inventorylisttable_length","flag","itemModel"));
+			"remarks","status","warranty","locale","officeId","clientId","inventorylisttable_length","flag","itemModel","quantity"));
 
     
     private final FromJsonHelper fromApiJsonHelper;
@@ -49,7 +49,7 @@ public final class InventoryItemCommandFromApiJsonDeserializer {
         this.fromApiJsonHelper = fromApiJsonHelper;
     }
 
-    public void validateForCreate(final JsonCommand command) {
+    public void validateForCreate(final JsonCommand command, final Boolean isSerialRequired) {
         if (StringUtils.isBlank(command.toString())) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -75,9 +75,10 @@ public final class InventoryItemCommandFromApiJsonDeserializer {
         
         baseDataValidator.reset().parameter("grnId").value(grnId).notBlank();
 		baseDataValidator.reset().parameter("itemMasterId").value(itemMasterId).notNull();
-		
-		baseDataValidator.reset().parameter("serialNumber").value(serialNumber).notBlank().notNull();
-		baseDataValidator.reset().parameter("provisioningSerialNumber").value(provisioningSerialNumber).notBlank().notNull();
+		if(isSerialRequired){
+			baseDataValidator.reset().parameter("serialNumber").value(serialNumber).notBlank().notNull();
+			baseDataValidator.reset().parameter("provisioningSerialNumber").value(provisioningSerialNumber).notBlank().notNull();
+		}
 		baseDataValidator.reset().parameter("status").value(status).notNull();
 		baseDataValidator.reset().parameter("quality").value(quality).notBlank();
 		
@@ -86,7 +87,7 @@ public final class InventoryItemCommandFromApiJsonDeserializer {
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
-    public void validateForUpdate(final String json) {
+    public void validateForUpdate(final String json, Boolean isSerialRequired) {
         if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
 
         final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
@@ -100,7 +101,7 @@ public final class InventoryItemCommandFromApiJsonDeserializer {
             final String name = fromApiJsonHelper.extractStringNamed("name", element);
             baseDataValidator.reset().parameter("name").value(name).notBlank().notExceedingLengthOf(100);
         }*/
-
+       if(isSerialRequired){
        final String provisioningSerialNumber = fromApiJsonHelper.extractStringNamed("provisioningSerialNumber", element);
        baseDataValidator.reset().parameter("provisioningSerialNumber").value(provisioningSerialNumber).notBlank().notExceedingLengthOf(100);
        
@@ -108,7 +109,7 @@ public final class InventoryItemCommandFromApiJsonDeserializer {
        final String serialNumber = fromApiJsonHelper.extractStringNamed("serialNumber",element);
        baseDataValidator.reset().parameter("serialNumber").value(serialNumber).notBlank().notExceedingLengthOf(100);
        }    
-
+       }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
 
