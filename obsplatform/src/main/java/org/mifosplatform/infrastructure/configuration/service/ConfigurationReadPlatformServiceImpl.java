@@ -71,5 +71,16 @@ public class ConfigurationReadPlatformServiceImpl implements ConfigurationReadPl
 
         return globalConfiguration;
     }
+    
+    @Override
+    public ConfigurationPropertyData retrieveGlobalConfigurationByName(final String configName) {
+    	
+    	this.context.authenticatedUser();
+    	
+    	final String sql = "SELECT c.id ,c.name, c.enabled, c.value, c.module, c.description FROM c_configuration c where c.name=? order by c.id";
+    	final ConfigurationPropertyData globalConfiguration = this.jdbcTemplate.queryForObject(sql, this.rowMap , new Object[] {configName});
+    	
+    	return globalConfiguration;
+    }
 
 }
