@@ -8,7 +8,7 @@ insert ignore into r_enum_value values('order_actions',6,'REN BEF AUTO EXP','REN
 insert ignore into `stretchy_parameter` values(null,'transactionTypeSelect','transactionType','transactionType','select','varchar','0',null,'Y',null,'select enum_id,enum_value from r_enum_value where enum_name ="order_actions";',null,'Single');
 
 
-insert into `stretchy_report` values (null,'ClientNotificationsByDay','Table','Table','Client','select  c.account_no ,c.display_name,v.plan from net_activedtls_vw v,m_client c WHERE v.client_id = c.id and v.transaction_type = ''${transactionType}''  AND date_format(v.actual_date,''%Y-%m-%d'')  = ''${startDate}''','Day Wise Net Activative Details',1,1);
+insert ignore into `stretchy_report` values (null,'ClientNotificationsByDay','Table','Table','Client','select  c.account_no ,c.display_name,v.plan from net_activedtls_vw v,m_client c WHERE v.client_id = c.id and v.transaction_type = ''${transactionType}''  AND date_format(v.actual_date,''%Y-%m-%d'')  = ''${startDate}''','Day Wise Net Activative Details',1,1);
 
 
 
