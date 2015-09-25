@@ -299,7 +299,19 @@ public class FinancialTransactionsData {
 	public void setTransactionCategory(String transactionCategory) {
 		this.transactionCategory = transactionCategory;
 	}
-     
+    
+	public BigDecimal getDiscountAmount() {
+		return discountAmount;
+	}
+
+	public Long getChargeId() {
+		return chargeId;
+	}
+
+	public Long getOrderId() {
+		return orderId;
+	}
+
 	
 
 }

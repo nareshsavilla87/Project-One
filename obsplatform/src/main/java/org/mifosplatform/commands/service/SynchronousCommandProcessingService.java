@@ -566,6 +566,8 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 				handler = applicationContext.getBean("orderSuspendCommandHandler",NewCommandSourceHandler.class);
 			}else if (wrapper.isOrderReactive()) {
 				handler = applicationContext.getBean("orderReactiveCommandHandler",NewCommandSourceHandler.class);
+			}else if (wrapper.isRenewOrderWithClient()) {
+				handler = applicationContext.getBean("renewalOrderWithClientCommandHandler",NewCommandSourceHandler.class);
 			}
 		} else if (wrapper.isOrderScheduling()) {
 			if (wrapper.isCreate()) {
@@ -1340,6 +1342,12 @@ public class SynchronousCommandProcessingService implements CommandProcessingSer
 	      }else if(wrapper.isDeposit()){
 	    	  if(wrapper.isCreate()){
 	    		  handler = applicationContext.getBean("createDepositeCommandHandler",NewCommandSourceHandler.class);
+	    	  }else {
+	    		  throw new UnsupportedCommandException(wrapper.commandName());
+	    	  }
+	      }else if(wrapper.isUsageCharge()){
+	    	  if(wrapper.isCreate()){
+	    		  handler = applicationContext.getBean("createUsageChargesRawDataCommandHandler",NewCommandSourceHandler.class);
 	    	  }else {
 	    		  throw new UnsupportedCommandException(wrapper.commandName());
 	    	  }

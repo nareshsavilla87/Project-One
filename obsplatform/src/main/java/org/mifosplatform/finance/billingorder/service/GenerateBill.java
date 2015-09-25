@@ -16,7 +16,6 @@ import org.mifosplatform.finance.billingorder.data.BillingOrderData;
 import org.mifosplatform.infrastructure.configuration.domain.Configuration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
-import org.mifosplatform.infrastructure.configuration.exception.ConfigurationPropertyNotFoundException;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -634,12 +633,10 @@ public class GenerateBill {
 	// create billing order command
 	public BillingOrderCommand createBillingOrderCommand(BillingOrderData billingOrderData, LocalDate chargeStartDate,LocalDate chargeEndDate, LocalDate invoiceTillDate,
 			LocalDate nextBillableDate, BigDecimal billPrice,List<InvoiceTaxCommand> listOfTaxes,DiscountMasterData discountMasterData) {
-		
 		         
 		      BigDecimal price = billPrice.setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP);
-		
-
-		return new BillingOrderCommand(billingOrderData.getClientOrderId(),billingOrderData.getOderPriceId(),
+		      
+		 return new BillingOrderCommand(billingOrderData.getClientOrderId(),billingOrderData.getOderPriceId(),
 				billingOrderData.getClientId(), chargeStartDate.toDate(),nextBillableDate.toDate(), chargeEndDate.toDate(),
 				billingOrderData.getBillingFrequency(),billingOrderData.getChargeCode(),billingOrderData.getChargeType(),
 				billingOrderData.getChargeDuration(),billingOrderData.getDurationType(), invoiceTillDate.toDate(),
@@ -653,9 +650,7 @@ public class GenerateBill {
 
 		final Configuration property = this.globalConfigurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_ROUNDING);
 		
-		if (property == null) {
-			throw new ConfigurationPropertyNotFoundException(ConfigurationConstants.CONFIG_PROPERTY_ROUNDING);
-		}if(property.isEnabled()){
+		if(property != null && property.isEnabled()){
 		
 		  return property.getValue();
 		}else{ 

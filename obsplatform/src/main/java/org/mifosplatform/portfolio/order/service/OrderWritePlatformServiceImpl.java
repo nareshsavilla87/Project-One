@@ -5,9 +5,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
-import org.codehaus.jettison.json.JSONException;
-import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.LocalDate;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.planprice.domain.Price;
@@ -35,6 +35,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
@@ -53,6 +54,7 @@ import org.mifosplatform.portfolio.client.domain.ClientStatus;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
+import org.mifosplatform.portfolio.contract.exception.ContractPeriodNotFoundException;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.UserActionStatusEnumaration;
@@ -60,7 +62,6 @@ import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderAddons;
 import org.mifosplatform.portfolio.order.domain.OrderAddonsRepository;
 import org.mifosplatform.portfolio.order.domain.OrderDiscount;
-import org.mifosplatform.portfolio.order.domain.OrderDiscountRepository;
 import org.mifosplatform.portfolio.order.domain.OrderHistory;
 import org.mifosplatform.portfolio.order.domain.OrderHistoryRepository;
 import org.mifosplatform.portfolio.order.domain.OrderLine;
@@ -78,6 +79,7 @@ import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanDetails;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.mifosplatform.portfolio.plan.exceptions.PlanNotFundException;
+import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
 import org.mifosplatform.portfolio.service.domain.ServiceMaster;
 import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
 import org.mifosplatform.provisioning.preparerequest.domain.PrepareRequest;
@@ -101,6 +103,8 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import com.google.gson.JsonElement;
 
 
 
@@ -134,7 +138,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final OrderCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final ContractRepository subscriptionRepository;
 	private final ConfigurationRepository configurationRepository;
-	private final OrderDiscountRepository orderDiscountRepository;
 	private final PromotionCodeRepository promotionCodeRepository;
 	private final HardwareAssociationReadplatformService hardwareAssociationReadplatformService;
 	private final ChargeCodeRepository chargeCodeRepository;
@@ -145,6 +148,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
 	private final ContractRepository contractRepository;
 	private final InvoiceClient invoiceClient;
+	private final FromJsonHelper fromJsonHelper;
+	private final PlanReadPlatformService planReadPlatformService;
     
 
     @Autowired
@@ -158,12 +163,13 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			final OrderReadPlatformService orderReadPlatformService,final OrderAddonsRepository  addonsRepository,final OrderAssembler orderAssembler,
 		    final ProcessRequestRepository processRequestRepository,final HardwareAssociationReadplatformService hardwareAssociationReadplatformService,
 		    final PrepareRequsetRepository prepareRequsetRepository,final PromotionCodeRepository promotionCodeRepository,final ContractRepository contractRepository, 
-		    final OrderDiscountRepository orderDiscountRepository,  final ClientRepository clientRepository,  final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
+		    final ClientRepository clientRepository,final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
 		    final ActiondetailsWritePlatformService actiondetailsWritePlatformService,final EventValidationReadPlatformService eventValidationReadPlatformService,
 		    final EventActionRepository eventActionRepository,final ContractPeriodReadPlatformService contractPeriodReadPlatformService,final InvoiceClient invoiceClient,
 		    final HardwareAssociationRepository associationRepository,final ProvisioningWritePlatformService provisioningWritePlatformService,
 		    final PaymentFollowupRepository paymentFollowupRepository,final PriceRepository priceRepository,final ChargeCodeRepository chargeCodeRepository,
-		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,final PaypalRecurringBillingRepository paypalRecurringBillingRepository) {
+		    final AccountNumberGeneratorFactory accountIdentifierGeneratorFactory,final PaypalRecurringBillingRepository paypalRecurringBillingRepository,
+		    final FromJsonHelper fromJsonHelper,final PlanReadPlatformService planReadPlatformService) {
 		    
 
 		this.context = context;
@@ -172,7 +178,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.serviceMasterRepository=serviceMasterRepository;
 		this.fromApiJsonDeserializer=fromApiJsonDeserializer;
 		this.configurationRepository=configurationRepository;
-		this.orderDiscountRepository=orderDiscountRepository;
 		this.prepareRequsetRepository=prepareRequsetRepository;
 		this.orderReadPlatformService = orderReadPlatformService;
 		this.paymentFollowupRepository=paymentFollowupRepository;
@@ -204,6 +209,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
 		this.contractRepository = contractRepository;
 		this.invoiceClient = invoiceClient;
+		this.fromJsonHelper = fromJsonHelper;
+		this.planReadPlatformService = planReadPlatformService;
 
 
 	}
@@ -593,7 +600,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
    			
      		 if(plan.isPrepaid() == 'Y' && orderDetails.getStatus().equals(StatusTypeEnum.ACTIVE.getValue().longValue())){
      			  
-     		    Invoice invoice=this.invoiceClient.onTopUpAutoRenewalInvoice(orderDetails.getId(),orderDetails.getClientId(),newStartdate.plusDays(1));
+     		    Invoice invoice=this.invoiceClient.singleOrderInvoice(orderDetails.getId(),orderDetails.getClientId(),newStartdate.plusDays(1));
      		    
      		    if(invoice!=null){
      		    	List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_TOPUP_INVOICE_MAIL);
@@ -1284,14 +1291,62 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
   }
   
 	private Plan findOneWithNotFoundDetection(final Long planId) {
-
+	
 		Plan plan = this.planRepository.findPlanCheckDeletedStatus(planId);
-
+	
 		if (plan == null) {
 			throw new PlanNotFundException(planId);
 		}
-
+	
 		return plan;
+	}
+	
+  @Override
+	public CommandProcessingResult renewalOrderWithClient(JsonCommand command, Long clientId) {
+
+	  try{	
+		this.context.authenticatedUser();
+		this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
+		Long planId = command.longValueOfParameterNamed("planId");
+		String contractPeriod = command.stringValueOfParameterNamed("duration");
+		Contract contract =this.contractRepository.findOneByContractId(contractPeriod);
+		if(contract == null){
+			throw new ContractPeriodNotFoundException(contractPeriod,clientId);
+		}
+		List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
+		if(orderIds.isEmpty()){
+			throw new NoOrdersFoundException(clientId,planId);
+		}
+		Plan  planData = this.planRepository.findOne(planId);
+		String isPrepaid = planData.getIsPrepaid() == 'N' ? "postpaid" : "prepaid";
+			
+			List<SubscriptionData> listOfPrices = this.planReadPlatformService.retrieveSubscriptionData(orderIds.get(0), isPrepaid);
+			if(listOfPrices.isEmpty()){
+				throw new PriceNotFoundException(Long.valueOf(0));
+			}
+			Long priceId  = listOfPrices.get(0).getPriceId();
+			for(SubscriptionData listOfPrice : listOfPrices){
+				if(listOfPrice.getContractdata().equalsIgnoreCase(contractPeriod)){
+					priceId = listOfPrice.getPriceId();
+				}
+			}
+			
+			JSONObject renewalJson = new JSONObject();
+			renewalJson.put("renewalPeriod", contract.getId());
+			renewalJson.put("priceId", priceId);
+			renewalJson.put("description", "Order renewal with clientId="+clientId+" and planId="+planId);
+			final JsonElement element = fromJsonHelper.parse(renewalJson.toString());
+			JsonCommand renewalCommand = new JsonCommand(null,renewalJson.toString(), element, fromJsonHelper,
+					null, null, null, null, null, null, null, null, null, null, 
+					null, null);
+			
+		return this.renewalClientOrder(renewalCommand,orderIds.get(0));
+	  }catch(DataIntegrityViolationException dve){
+			handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		} catch (JSONException e) {
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
 	}
 
  }

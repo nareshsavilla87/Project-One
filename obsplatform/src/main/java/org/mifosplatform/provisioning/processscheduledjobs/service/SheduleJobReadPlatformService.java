@@ -27,6 +27,5 @@ public interface SheduleJobReadPlatformService {
 	List<Long> getBillIds(String query, JobParameterData data);
 
 	List<Long> retrieveAddonsForDisconnection(LocalDate processingDate);
-	
 
 }

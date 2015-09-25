@@ -35,6 +35,7 @@ import org.mifosplatform.logistics.onetimesale.data.AllocationDetailsData;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSaleRepository;
 import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleReadPlatformService;
+import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.portfolio.association.data.AssociationData;
 import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
@@ -43,6 +44,10 @@ import org.mifosplatform.portfolio.order.exceptions.NoGrnIdFoundException;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
 import org.mifosplatform.portfolio.property.domain.PropertyDeviceMapping;
 import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyHistoryRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyMaster;
+import org.mifosplatform.portfolio.property.domain.PropertyMasterRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyTransactionHistory;
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.provisioning.provisioning.service.ProvisioningWritePlatformService;
 import org.mifosplatform.provisioning.provsionactions.domain.ProvisionActions;
@@ -88,6 +93,8 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 	private final InventoryItemCommandFromApiJsonDeserializer inventoryItemCommandFromApiJsonDeserializer;
 	private final InventoryItemAllocationCommandFromApiJsonDeserializer inventoryItemAllocationCommandFromApiJsonDeserializer;
 	private final ItemDetailsAllocationRepository allocationRepository;
+	private final PropertyMasterRepository propertyMasterRepository;
+	private final PropertyHistoryRepository propertyHistoryRepository;
 	
 	@Autowired
 	public ItemDetailsWritePlatformServiceImp(final ItemDetailsReadPlatformService inventoryItemDetailsReadPlatformService, 
@@ -101,7 +108,8 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			final ItemRepository itemRepository,final OrderReadPlatformService orderReadPlatformService,
 			final ProvisioningWritePlatformService provisioningWritePlatformService,final EventValidationReadPlatformService eventValidationReadPlatformService,
 			final ProvisioningActionsRepository provisioningActionsRepository,final PropertyDeviceMappingRepository propertyDeviceMappingRepository, 
-			final ItemDetailsAllocationRepository allocationRepository) 
+			final ItemDetailsAllocationRepository allocationRepository,final PropertyMasterRepository propertyMasterRepository,
+			final PropertyHistoryRepository propertyHistoryRepository) 
 	{
 		this.inventoryItemDetailsReadPlatformService = inventoryItemDetailsReadPlatformService;
 		this.context=context;
@@ -124,6 +132,8 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 		this.provisioningWritePlatformService=provisioningWritePlatformService;
 		this.eventValidationReadPlatformService=eventValidationReadPlatformService;
 		this.allocationRepository = allocationRepository;
+		this.propertyMasterRepository = propertyMasterRepository;
+		this.propertyHistoryRepository = propertyHistoryRepository;
 		
 	}
 	
@@ -409,8 +419,13 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
   				 PropertyDeviceMapping deviceMapping = this.propertyDeviceMappingRepository.findBySerailNumber(serialNo);
   				 if(deviceMapping != null){
 
+				// PropertyMaster propertyMaster = this.propertyMasterRepository.findoneByPropertyCode(deviceMapping.getPropertyCode());
   				 deviceMapping.delete();
   				 this.propertyDeviceMappingRepository.save(deviceMapping);
+  				   /*if(propertyMaster != null){
+  					 PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_UNMAPPED,clientId,propertyMaster.getPropertyCode());
+  				 	this.propertyHistoryRepository.save(propertyHistory);
+  				   }*/
   				 }
 
   			 }

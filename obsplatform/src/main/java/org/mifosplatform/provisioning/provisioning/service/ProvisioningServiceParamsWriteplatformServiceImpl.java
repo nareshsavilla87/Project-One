@@ -8,7 +8,6 @@ import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONException;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfiguration;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayConfigurationRepository;
-import org.mifosplatform.infrastructure.configuration.domain.Configuration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;

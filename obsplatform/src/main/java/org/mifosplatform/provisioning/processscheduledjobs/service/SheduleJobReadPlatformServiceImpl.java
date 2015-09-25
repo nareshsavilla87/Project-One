@@ -285,7 +285,7 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 		
 			}
 		}
-		
+
 	}
 
 

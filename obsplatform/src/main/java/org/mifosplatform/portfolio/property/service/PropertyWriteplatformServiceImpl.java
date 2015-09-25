@@ -1,8 +1,6 @@
 package org.mifosplatform.portfolio.property.service;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -10,20 +8,14 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.chargecode.exception.ChargeCodeNotFoundException;
-import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
-import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
-import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
-import org.mifosplatform.finance.billingorder.service.BillingOrderReadPlatformService;
-import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
-import org.mifosplatform.finance.billingorder.service.GenerateBill;
-import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderService;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.logistics.onetimesale.service.InvoiceOneTimeSale;
 import org.mifosplatform.organisation.address.domain.Address;
 import org.mifosplatform.organisation.address.domain.AddressRepository;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
@@ -56,20 +48,17 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	private final PropertyCodesMasterRepository propertyCodesMasterRepository;
 	private final AddressRepository addressRepository;
 	private final ChargeCodeRepository chargeCodeRepository;
-	private final GenerateBillingOrderService generateBillingOrderService;
-	private final BillingOrderWritePlatformService billingOrderWritePlatformService;
-	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
-	private final GenerateBill generateBill;
+	private final InvoiceOneTimeSale invoiceOneTimeSale;
 	private final PropertyReadPlatformService propertyReadPlatformService;
 	private final PropertyDeviceMappingRepository propertyDeviceMappingRepository;
+	
 
 	@Autowired
 	public PropertyWriteplatformServiceImpl(final PlatformSecurityContext context,final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final PropertyMasterRepository propertyMasterRepository,final PropertyHistoryRepository propertyHistoryRepository,
 			final PropertyCodesMasterRepository propertyCodesMasterRepository,final AddressRepository addressRepository,
-		    final ChargeCodeRepository chargeCodeRepository,final GenerateBillingOrderService generateBillingOrderService,
-            final BillingOrderWritePlatformService billingOrderWritePlatformService,final BillingOrderReadPlatformService billingOrderReadPlatformService,
-            final GenerateBill generateBill,final PropertyReadPlatformService propertyReadPlatformService,
+		    final ChargeCodeRepository chargeCodeRepository,final InvoiceOneTimeSale invoiceOneTimeSale,
+		    final PropertyReadPlatformService propertyReadPlatformService,
             final PropertyDeviceMappingRepository propertyDeviceMappingRepository) {
 
 		this.context = context;
@@ -80,10 +69,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		this.addressRepository = addressRepository;
 		this.propertyDeviceMappingRepository = propertyDeviceMappingRepository;
 		this.chargeCodeRepository = chargeCodeRepository;
-		this.generateBillingOrderService = generateBillingOrderService;
-		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
-		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
-		this.generateBill = generateBill;
+		this.invoiceOneTimeSale = invoiceOneTimeSale;
 		this.propertyReadPlatformService = propertyReadPlatformService;
 	}
 
@@ -220,7 +206,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 					if (!oldPropertyCode.equalsIgnoreCase(newPropertyCode) && oldPropertyMaster != null && newpropertyMaster != null
 							&& newpropertyMaster.getClientId() == null) {
 					
-					/*	if(clientAddress.getAddressKey().equalsIgnoreCase("PRIMARY")){
+						if("PRIMARY".equalsIgnoreCase(clientAddress.getAddressKey())){
 						oldPropertyMaster.setClientId(null);
 						oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
 						this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
@@ -234,10 +220,10 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 						clientAddress.setCountry(newpropertyMaster.getCountry());
 						clientAddress.setZip(newpropertyMaster.getPoBox());
 
-						}else{*/
+						}else{
 						   clientAddress = new Address(clientId, "BILLING", newpropertyMaster.getPropertyCode(), newpropertyMaster.getStreet(), newpropertyMaster.getPrecinct(),
 								   newpropertyMaster.getState(), newpropertyMaster.getCountry(), newpropertyMaster.getPoBox(), null,null);	
-					//	}
+						}
 
 						newpropertyMaster.setClientId(clientId);
 						newpropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
@@ -274,125 +260,22 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 
 				throw new PropertyMasterNotFoundException(clientId,oldPropertyCode);
 			}
+			/* call one time invoice for service transfer */
+			if (!StringUtils.isEmpty(chargeCode)) {
 
-			/*
-			 * if(oldPropertyCode!=null&&!oldPropertyCode.isEmpty()){
-			 * clientAddress =
-			 * this.addressRepository.findOneByAddressNo(clientId
-			 * ,oldPropertyCode); } PropertyTransactionHistory
-			 * transactionHistory=null; if(clientAddress !=null){ final
-			 * PropertyMaster
-			 * oldPropertyMaster=this.propertyMasterRepository.findoneByPropertyCode
-			 * (oldPropertyCode); final PropertyMaster
-			 * newpropertyMaster=this.propertyMasterRepository
-			 * .findoneByPropertyCode(newPropertyCode); if(newpropertyMaster !=
-			 * null && newpropertyMaster.getClientId() != null ){
-			 * if(!newpropertyMaster.getClientId().equals(clientId)){ throw new
-			 * PropertyCodeAllocatedException
-			 * (newpropertyMaster.getPropertyCode()); } } //check shifting
-			 * property same or not
-			 * if(!oldPropertyCode.equalsIgnoreCase(newPropertyCode) &&
-			 * oldPropertyMaster!=null && newpropertyMaster!=null){
-			 * oldPropertyMaster.setClientId(null);
-			 * oldPropertyMaster.setStatus(CodeNameConstants
-			 * .CODE_PROPERTY_VACANT);
-			 * this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
-			 * PropertyTransactionHistory propertyHistory = new
-			 * PropertyTransactionHistory
-			 * (DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
-			 * CodeNameConstants.CODE_PROPERTY_FREE,
-			 * null,oldPropertyMaster.getPropertyCode());
-			 * 
-			 * this.propertyHistoryRepository.save(propertyHistory);
-			 * 
-			 * newpropertyMaster.setClientId(clientId);
-			 * newpropertyMaster.setStatus
-			 * (CodeNameConstants.CODE_PROPERTY_OCCUPIED);
-			 * this.propertyMasterRepository.saveAndFlush(newpropertyMaster);
-			 * clientAddress.setAddressNo(newpropertyMaster.getPropertyCode());
-			 * clientAddress.setStreet(newpropertyMaster.getStreet());
-			 * clientAddress.setCity(newpropertyMaster.getPrecinct());
-			 * clientAddress.setState(newpropertyMaster.getState());
-			 * clientAddress.setCountry(newpropertyMaster.getCountry());
-			 * clientAddress.setZip(newpropertyMaster.getPoBox());
-			 * this.addressRepository.save(clientAddress);
-			 * 
-			 * } transactionHistory = new
-			 * PropertyTransactionHistory(DateUtils.getLocalDateOfTenant
-			 * (),newpropertyMaster.getId(),
-			 * CodeNameConstants.CODE_PROPERTY_SERVICE_TRANSFER
-			 * ,newpropertyMaster
-			 * .getClientId(),newpropertyMaster.getPropertyCode());
-			 * this.propertyHistoryRepository.save(transactionHistory); } else
-			 * if(clientAddress==null&&newPropertyCode!=null){
-			 * 
-			 * final PropertyMaster
-			 * newpropertyMaster=this.propertyMasterRepository
-			 * .findoneByPropertyCode(newPropertyCode); Address clientAddr =
-			 * this.addressRepository.findOneByClientId(clientId);
-			 * newpropertyMaster.setClientId(clientId);
-			 * newpropertyMaster.setStatus
-			 * (CodeNameConstants.CODE_PROPERTY_OCCUPIED);
-			 * this.propertyMasterRepository.saveAndFlush(newpropertyMaster);
-			 * clientAddr.setAddressNo(newpropertyMaster.getPropertyCode());
-			 * clientAddr.setStreet(newpropertyMaster.getStreet());
-			 * clientAddr.setCity(newpropertyMaster.getPrecinct());
-			 * clientAddr.setState(newpropertyMaster.getState());
-			 * clientAddr.setCountry(newpropertyMaster.getCountry());
-			 * clientAddr.setZip(newpropertyMaster.getPoBox());
-			 * this.addressRepository.save(clientAddr);
-			 * 
-			 * transactionHistory = new
-			 * PropertyTransactionHistory(DateUtils.getLocalDateOfTenant
-			 * (),newpropertyMaster.getId(),
-			 * CodeNameConstants.CODE_PROPERTY_SERVICE_TRANSFER
-			 * ,newpropertyMaster
-			 * .getClientId(),newpropertyMaster.getPropertyCode());
-			 * this.propertyHistoryRepository.save(transactionHistory);
-			 * 
-			 * } else{ throw new
-			 * PropertyMasterNotFoundException(clientId,oldPropertyCode); }
-			 */
-
-			// call one time invoice
-			List<BillingOrderCommand> billingOrderCommands = new ArrayList<BillingOrderCommand>();
-			List<InvoiceTaxCommand> listOfTaxes = new ArrayList<InvoiceTaxCommand>();
-			ChargeCodeMaster chargeCodeMaster = this.chargeCodeRepository.findOneByChargeCode(chargeCode);
-			if (chargeCode !=null && !StringUtils.isEmpty(chargeCode)) {
-				listOfTaxes = this.calculateTax(clientId, shiftChargeAmount,chargeCodeMaster);
-				BillingOrderCommand billingOrderCommand = new BillingOrderCommand(transactionHistory.getId(), Long.valueOf(-1L),
-						clientId, DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),
-						chargeCodeMaster.getBillFrequencyCode(), chargeCode,chargeCodeMaster.getChargeType(),chargeCodeMaster.getChargeDuration(), "",
-						DateUtils.getDateOfTenant(), shiftChargeAmount, "N",listOfTaxes, DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(), null,
-						chargeCodeMaster.getTaxInclusive());
-
-				billingOrderCommands.add(billingOrderCommand);
-				// Invoice calling
-				Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
-				// Update Client Balance
-				this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(), clientId, false);
-
+				ChargeCodeMaster chargeMaster = this.chargeCodeRepository.findOneByChargeCode(chargeCode);
+				Invoice invoice = this.invoiceOneTimeSale.calculateAdditionalFeeCharges(chargeMaster,transactionHistory.getId(), Long.valueOf(-1L),clientId, shiftChargeAmount);
 				return new CommandProcessingResult(invoice.getId(), clientId);
+
 			} else {
 				throw new ChargeCodeNotFoundException(chargeCode);
-			}
 
+			}
 		} catch (DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1L), clientId);
 		}
 
-	}
-
-	// Tax Calculation
-	private List<InvoiceTaxCommand> calculateTax(final Long clientId,BigDecimal billPrice, ChargeCodeMaster chargeCodeMaster) {
-		// Get State level taxes
-		List<TaxMappingRateData> taxMappingRateDatas = this.billingOrderReadPlatformService.retrieveTaxMappingData(clientId,chargeCodeMaster.getChargeCode());
-		if (taxMappingRateDatas.isEmpty()) {
-			taxMappingRateDatas = this.billingOrderReadPlatformService.retrieveDefaultTaxMappingData(clientId,chargeCodeMaster.getChargeCode());
-		}
-		List<InvoiceTaxCommand> invoiceTaxCommand = this.generateBill.generateInvoiceTax(taxMappingRateDatas, billPrice, clientId,chargeCodeMaster.getTaxInclusive());
-		return invoiceTaxCommand;
 	}
 
 	@Transactional
@@ -487,6 +370,13 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
         	this.context.authenticatedUser();
         	PropertyDeviceMapping propertyDeviceMapping = PropertyDeviceMapping.fromJson(entityId,command);
         	this.propertyDeviceMappingRepository.save(propertyDeviceMapping);
+        	
+        	/*PropertyMaster propertyMaster = this.propertyMasterRepository.findoneByPropertyCode(propertyDeviceMapping.getPropertyCode());
+        	if(propertyMaster != null){
+        		PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),propertyMaster.getId(),CodeNameConstants.CODE_MAPPED,entityId,propertyMaster.getPropertyCode());
+        		this.propertyHistoryRepository.save(propertyHistory);
+        	}*/
+			
         	return new CommandProcessingResult(propertyDeviceMapping.getId());
         }catch(DataIntegrityViolationException dve){
         	handleCodeDataIntegrityIssues(command, dve);

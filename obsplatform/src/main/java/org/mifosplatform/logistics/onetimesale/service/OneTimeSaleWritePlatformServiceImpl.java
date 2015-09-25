@@ -23,6 +23,9 @@ import org.mifosplatform.logistics.item.domain.ItemMaster;
 import org.mifosplatform.logistics.item.domain.ItemRepository;
 import org.mifosplatform.logistics.item.domain.UnitEnumType;
 import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
+import org.mifosplatform.logistics.itemdetails.domain.InventoryGrn;
+import org.mifosplatform.logistics.itemdetails.domain.InventoryGrnRepository;
+import org.mifosplatform.logistics.itemdetails.exception.OrderQuantityExceedsException;
 import org.mifosplatform.logistics.itemdetails.service.ItemDetailsWritePlatformService;
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
@@ -67,6 +70,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 	private final EventValidationReadPlatformService eventValidationReadPlatformService;
 	private final ChargeCodeRepository chargeCodeRepository;
 	private final InvoiceRepository invoiceRepository;
+	private final InventoryGrnRepository inventoryGrnRepository;
 
 	@Autowired
 	public OneTimeSaleWritePlatformServiceImpl(final PlatformSecurityContext context,final OneTimeSaleRepository oneTimeSaleRepository,
@@ -77,7 +81,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			final EventValidationReadPlatformService eventValidationReadPlatformService,
 			final DiscountReadPlatformService discountReadPlatformService,
 			final ChargeCodeRepository chargeCodeRepository,
-			final InvoiceRepository invoiceRepository) {
+			final InvoiceRepository invoiceRepository, final InventoryGrnRepository inventoryGrnRepository) {
 
 		this.context = context;
 		this.fromJsonHelper = fromJsonHelper;
@@ -92,7 +96,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		this.eventValidationReadPlatformService = eventValidationReadPlatformService;
 		this.chargeCodeRepository = chargeCodeRepository;
 		this.invoiceRepository = invoiceRepository;
-
+		this.inventoryGrnRepository = inventoryGrnRepository;
 	}
 
 	/* (non-Javadoc)
@@ -109,6 +113,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 			final JsonElement element = fromJsonHelper.parse(command.json());
 			final Long itemId = command.longValueOfParameterNamed("itemId");
 			ItemMaster item = this.itemMasterRepository.findOne(itemId);
+			final Long quantity = command.longValueOfParameterNamed("quantity");
 
 			// Check for Custome_Validation
 			this.eventValidationReadPlatformService.checkForCustomValidations(clientId, "Rental",command.json(),getUserId());
@@ -140,6 +145,20 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 				}
 				
 			}*/
+			if(UnitEnumType.ACCESSORIES.toString().equalsIgnoreCase(item.getUnits())){
+				InventoryGrn inventoryGrn = inventoryGrnRepository.findOne(command.longValueOfParameterNamed("grnId"));
+				if(inventoryGrn != null){
+					if(inventoryGrn.getReceivedQuantity() < inventoryGrn.getOrderdQuantity()){
+						inventoryGrn.setReceivedQuantity(inventoryGrn.getReceivedQuantity()+quantity);
+						this.inventoryGrnRepository.save(inventoryGrn);
+					
+					}
+					else{
+						throw new OrderQuantityExceedsException(inventoryGrn.getOrderdQuantity());
+					}
+				}
+				
+			}
 			
 			/**	Call if Item units is PIECES */
 			if(UnitEnumType.PIECES.toString().equalsIgnoreCase(item.getUnits())){
@@ -283,8 +302,7 @@ public class OneTimeSaleWritePlatformServiceImpl implements OneTimeSaleWritePlat
 		} catch (final DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(null, dve);
 		}
-		return new CommandProcessingResult(Long.valueOf(oneTimeSale.getId()),
-				oneTimeSale.getClientId());
+		return new CommandProcessingResult(Long.valueOf(oneTimeSale.getId()),oneTimeSale.getClientId());
 	}
 
 	private OneTimeSale findOneById(final Long saleId) {

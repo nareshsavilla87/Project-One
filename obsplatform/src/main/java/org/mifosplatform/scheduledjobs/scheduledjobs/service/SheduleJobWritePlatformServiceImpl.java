@@ -16,7 +16,6 @@ import java.util.Map;
 
 import me.legrange.mikrotik.ApiConnection;
 import me.legrange.mikrotik.MikrotikApiException;
-import net.sf.ehcache.search.aggregator.Count;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.HttpResponse;
@@ -72,7 +71,6 @@ import org.mifosplatform.organisation.message.service.MessagePlatformEmailServic
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.order.data.OrderData;
 import org.mifosplatform.portfolio.order.domain.Order;
-import org.mifosplatform.portfolio.order.domain.OrderAddonsRepository;
 import org.mifosplatform.portfolio.order.domain.OrderPrice;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.portfolio.order.service.OrderAddOnsWritePlatformService;
@@ -113,7 +111,6 @@ import org.springframework.stereotype.Service;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-
 @Service
 public class SheduleJobWritePlatformServiceImpl implements SheduleJobWritePlatformService {
 
@@ -152,6 +149,8 @@ private final ConfigurationRepository configurationRepository;
 private final EventActionReadPlatformService eventActionReadPlatformService;
 private final PlatformSecurityContext context;
 private final BatchHistoryRepository batchHistoryRepository;
+
+
 @Autowired
 public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,final FromJsonHelper fromApiJsonHelper,
 	   final BillingMasterApiResourse billingMasterApiResourse,final ProcessRequestRepository processRequestRepository,
@@ -169,6 +168,8 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
 	   final PaymentGatewayReadPlatformService paymentGatewayReadPlatformService,final ConfigurationRepository configurationRepository,
 	   final EventActionReadPlatformService eventActionReadPlatformService,final OrderAddOnsWritePlatformService addOnsWritePlatformService,
 	   final PlatformSecurityContext context,final BatchHistoryRepository batchHistoryRepository) {
+
+
 
 	this.sheduleJobReadPlatformService = sheduleJobReadPlatformService;
 	this.invoiceClient = invoiceClient;
@@ -202,7 +203,9 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
 	this.eventActionReadPlatformService = eventActionReadPlatformService;
 	this.context = context;
 	this.batchHistoryRepository = batchHistoryRepository;
-}
+	
+  }
+
 
 
 @Override
@@ -454,28 +457,28 @@ try {
 		}	
 		}
 
-private String generateBatchId() {
-    
-    //final AppUser user = this.context.authenticatedUser();
-    final Long time = System.currentTimeMillis();
-    final String uniqueVal = String.valueOf(time) +getUserId();
-    final String BatchId = Long.toHexString(Long.parseLong(uniqueVal));
-    return BatchId;
-}
+	private String generateBatchId() {
 
-private Long getUserId() {
-	
-	Long userId=null;
-	SecurityContext context = SecurityContextHolder.getContext();
-		if(context.getAuthentication() != null){
-			AppUser appUser=this.context.authenticatedUser();
-			userId=appUser.getId();
-		}else {
-			userId=new Long(0);
+		// final AppUser user = this.context.authenticatedUser();
+		final Long time = System.currentTimeMillis();
+		final String uniqueVal = String.valueOf(time) + getUserId();
+		final String BatchId = Long.toHexString(Long.parseLong(uniqueVal));
+		return BatchId;
+	}
+
+	private Long getUserId() {
+
+		Long userId = null;
+		SecurityContext context = SecurityContextHolder.getContext();
+		if (context.getAuthentication() != null) {
+			AppUser appUser = this.context.authenticatedUser();
+			userId = appUser.getId();
+		} else {
+			userId = new Long(0);
 		}
-		
+
 		return userId;
-}
+	}
 
 @Override
 @CronTarget(jobName = JobName.MESSAGE_MERGE)
@@ -1701,7 +1704,7 @@ public void reportStatmentPdf() {
 				if (!sheduleDatas.isEmpty()) {
 					for (ScheduleJobData scheduleJobData : sheduleDatas) {
 						 fw.append("ScheduleJobData id="+ scheduleJobData.getId() + " ,BatchName="+ scheduleJobData.getBatchName() + " ,query="+ scheduleJobData.getQuery() + "\r\n");
-						 List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(), data);
+						 List<Long> clientIds = this.sheduleJobReadPlatformService.getClientIds(scheduleJobData.getQuery(),data);
 						 if (!clientIds.isEmpty()) {
 							for (Long clientId : clientIds) {
 								fw.append("processing Unpaid Customer id :"+ clientId + "\r\n");
@@ -1734,7 +1737,7 @@ public void reportStatmentPdf() {
 			handleCodeDataIntegrityIssues(null, dve);
 		}
 	}
-
+	
 }
 
 

@@ -16,11 +16,11 @@ import org.hibernate.annotations.LazyCollectionOption;
 import org.mifosplatform.infrastructure.core.domain.AbstractAuditableCustom;
 import org.mifosplatform.useradministration.domain.AppUser;
 
-@SuppressWarnings("serial")
 @Entity
 @Table(name = "b_invoice")
 public class Invoice extends AbstractAuditableCustom<AppUser,Long>{
 
+	private static final long serialVersionUID = 1L;
 
 	@Column(name="client_id")
 	private Long clientId;
@@ -54,12 +54,12 @@ public class Invoice extends AbstractAuditableCustom<AppUser,Long>{
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "invoice", orphanRemoval = true)
 	private List<InvoiceTax> chargeTaxs = new ArrayList<InvoiceTax>();
 
-
 	
    public Invoice(){
 	
     }
-	public  Invoice(final Long clientId, final Date invoiceDate, final BigDecimal invoiceAmount, final BigDecimal netChargeAmount, 
+	
+   public  Invoice(final Long clientId, final Date invoiceDate, final BigDecimal invoiceAmount, final BigDecimal netChargeAmount, 
 			final BigDecimal taxAmount, final String  invoiceStatus){
 		
 		this.clientId = clientId;
