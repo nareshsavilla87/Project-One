@@ -2972,7 +2972,6 @@ public class CommandWrapperBuilder {
 		this.href = "/orderRenewal/" +clientId;
 		return this;
 	}
-	
 
 	public CommandWrapperBuilder createUsageChargesRawData() {
 		
@@ -2980,6 +2979,22 @@ public class CommandWrapperBuilder {
 		this.entityName = "CHARGES";
 		this.entityId = null;
 		this.href = "/charges";
+		return this;
+	}
+
+	public CommandWrapperBuilder updateBeesmartClient() {
+		this.actionName = "UPDATE";
+		this.entityName = "BEESMARTCLIENT";
+		this.entityId = null;
+		this.href = "/beesmart";
+		return this;
+	}
+	
+	public CommandWrapperBuilder deleteBeesmartClient(Long clientId) {
+		this.actionName = "DELETE";
+		this.entityName = "BEESMARTCLIENT";
+		this.entityId = clientId;
+		this.href = "/beesmart";
 		return this;
 	}
 }

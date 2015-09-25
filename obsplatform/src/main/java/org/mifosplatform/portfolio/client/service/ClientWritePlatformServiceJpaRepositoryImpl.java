@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -790,6 +791,69 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 				this.clientAdditionalFieldsRepository.save(additionalfields);
 				
 			return new CommandProcessingResult(command.entityId());
+		}catch(DataIntegrityViolationException dve){
+			handleDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+		
+	}
+	
+	@Override
+	public CommandProcessingResult updateBeesmartClient(JsonCommand command) {
+		try{
+			
+			this.context.authenticatedUser();
+			this.fromApiJsonDeserializer.ValidateBeesmartUpdateClient(command);
+			Client client=this.clientRepository.findOneWithAccountId(command.stringValueOfParameterNamed("accountNo"));
+			
+			if(client.getStatus() == 300){
+				SelfCare clientUser = this.selfCareRepository.findOneByClientId(client.getId());
+				if(clientUser == null){
+					throw new ClientNotFoundException(client.getId());
+				}
+				
+				final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+				 actualChanges.put("zebraSubscriberId", command.longValueOfParameterNamed("userId"));
+				 
+				clientUser.setZebraSubscriberId(command.longValueOfParameterNamed("userId"));
+				this.selfCareRepository.save(clientUser);
+				
+				return new CommandProcessingResultBuilder().withClientId(clientUser.getClientId()).with(actualChanges).build();
+			}else{
+				throw new PlatformDataIntegrityException("error.msg.client.status.not.active", 
+						"Client status is not in Active state", client.getId(),client.getStatus());
+			}
+		}catch(DataIntegrityViolationException dve){
+			handleDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
+		
+	}
+	
+	@Override
+	public CommandProcessingResult deleteBeesmartClient(JsonCommand command,Long entityId) {
+		try{
+			
+			this.context.authenticatedUser();
+			Client client=this.clientRepository.findOneWithNotFoundDetection(entityId);
+			
+			if(client.getStatus() == 300){
+				SelfCare clientUser = this.selfCareRepository.findOneByClientId(client.getId());
+				if(clientUser == null){
+					throw new ClientNotFoundException(client.getId());
+				}
+				
+				final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>();
+				 actualChanges.put("zebraSubscriberId", "null");
+				 
+				clientUser.setZebraSubscriberId(null);
+				this.selfCareRepository.save(clientUser);
+				
+				return new CommandProcessingResultBuilder().withClientId(clientUser.getClientId()).with(actualChanges).build();
+			}else{
+				throw new PlatformDataIntegrityException("error.msg.client.status.not.active", 
+						"Client status is not in Active state", client.getId(),client.getStatus());
+			}
 		}catch(DataIntegrityViolationException dve){
 			handleDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
