@@ -22,6 +22,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import org.mifosplatform.billing.chargecode.data.ChargeCodeData;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
@@ -42,6 +43,8 @@ import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.message.domain.BillingMessageTemplateConstants;
+import org.mifosplatform.scheduledjobs.scheduledjobs.data.BatchHistoryData;
+import org.mifosplatform.scheduledjobs.scheduledjobs.domain.BatchHistory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -205,5 +208,27 @@ public class BillingMasterApiResourse {
 		 response.header("Content-Disposition", "attachment; filename=\"" +file.getName()+ "\"");
 		 response.header("Content-Type", "application/pdf");
 		 return response.build();
+	}
+	
+	@GET
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveStatementsDetails(@Context final UriInfo uriInfo) {
+		
+		context.authenticatedUser().validateHasReadPermission(RESOURCENAMEFORPERMISSIONS);
+		final List<BatchHistoryData> data = this.billMasterReadPlatformService.retriveStatementDetailsForBill();
+		return this.toApiJsonSerializer.serialize(data);
+	}
+	
+	@PUT
+	@Path("{batchId}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String cancelBatchStatement(@PathParam("batchId") final String batchId) {
+		
+		final CommandWrapper commandRequest = new CommandWrapperBuilder().cancelBatchStatement(batchId).build();
+	    final CommandProcessingResult result = this.commandSourceWritePlatformService.logCommandSource(commandRequest);
+	    return this.toApiJsonSerializer.serialize(result);
+		
 	}
 }

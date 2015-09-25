@@ -10,4 +10,6 @@ public interface BillMasterWritePlatformService {
 
 	CommandProcessingResult cancelBillMaster(Long entityId);
 
+	CommandProcessingResult cancelBatchStatement(String batchId);
+
 }

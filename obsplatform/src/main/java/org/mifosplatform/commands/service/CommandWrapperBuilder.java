@@ -2954,6 +2954,15 @@ public class CommandWrapperBuilder {
 		this.href = "/orders/addons/" + orderAddonId;
 		return this;
 	}
+	
+	public CommandWrapperBuilder cancelBatchStatement(final String batchId) {
+		this.actionName = "CANCEL";
+		this.entityName = "BILLMASTER";
+		this.entityId 	= null;
+		this.supportedEntityType = batchId;
+		this.href = "/cancelstatement/" +batchId;
+		return this;
+	}
 
 	public CommandWrapperBuilder renewalOrderWithClient(Long clientId) {
 		
