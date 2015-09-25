@@ -28,4 +28,8 @@ public class ClientNotFoundException extends AbstractPlatformDomainRuleException
     public ClientNotFoundException(final String reason, final String deviceId) {
         super("error.msg.client.access.expection", reason, deviceId);
     }
+    
+    public ClientNotFoundException(final String accountNo,final Long clientId) {
+        super("error.msg.client.not.found", "Client with account Number " + accountNo + " does not exist", accountNo);
+    }
 }

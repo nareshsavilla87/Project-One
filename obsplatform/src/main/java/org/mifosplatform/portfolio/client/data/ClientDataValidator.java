@@ -36,6 +36,7 @@ public final class ClientDataValidator {
     private final FromJsonHelper fromApiJsonHelper;
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("billMode"));
     private final Set<String> supportedParentParameters = new HashSet<String>(Arrays.asList("accountNo","displayName"));
+    private final Set<String> supportedBeesmartParameters = new HashSet<String>(Arrays.asList("accountNo","userId"));
 
     @Autowired
     public ClientDataValidator(final FromJsonHelper fromApiJsonHelper) {
@@ -349,6 +350,29 @@ public final class ClientDataValidator {
 	        final String accountNo=this.fromApiJsonHelper.extractStringNamed("accountNo", element);
 	        baseDataValidator.reset().parameter("accountNo").value(accountNo).notBlank();
 	
+		throwExceptionIfValidationWarningsExist(dataValidationErrors);
+	}
+	
+	public void ValidateBeesmartUpdateClient(final JsonCommand command) {
+		
+		final String json = command.json();
+		
+		if (StringUtils.isBlank(json)) { throw new InvalidJsonException(); }
+		
+		final Type typeOfMap = new TypeToken<Map<String, Object>>() {}.getType();
+		fromApiJsonHelper.checkForUnsupportedParameters(typeOfMap, json, supportedBeesmartParameters);
+		
+		final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
+		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("beesmart");
+		
+		final JsonElement element = fromApiJsonHelper.parse(json);
+		
+		final String accountNo=this.fromApiJsonHelper.extractStringNamed("accountNo", element);
+		baseDataValidator.reset().parameter("accountNo").value(accountNo).notBlank();
+		
+		final String userId=this.fromApiJsonHelper.extractStringNamed("userId", element);
+		baseDataValidator.reset().parameter("userId").value(userId).notBlank().validateforNumeric();
+		
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	}
 	
