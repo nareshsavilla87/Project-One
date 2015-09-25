@@ -17,6 +17,7 @@ import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.domain.ItemMaster;
 import org.mifosplatform.logistics.item.domain.ItemRepository;
+import org.mifosplatform.logistics.item.domain.UnitEnumType;
 import org.mifosplatform.logistics.item.exception.ItemNotFoundException;
 import org.mifosplatform.logistics.itemdetails.data.AllocationHardwareData;
 import org.mifosplatform.logistics.itemdetails.domain.InventoryGrn;
@@ -95,6 +96,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 	private final ItemDetailsAllocationRepository allocationRepository;
 	private final PropertyMasterRepository propertyMasterRepository;
 	private final PropertyHistoryRepository propertyHistoryRepository;
+	private final ItemRepository itemMasterRepository;
 	
 	@Autowired
 	public ItemDetailsWritePlatformServiceImp(final ItemDetailsReadPlatformService inventoryItemDetailsReadPlatformService, 
@@ -109,7 +111,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			final ProvisioningWritePlatformService provisioningWritePlatformService,final EventValidationReadPlatformService eventValidationReadPlatformService,
 			final ProvisioningActionsRepository provisioningActionsRepository,final PropertyDeviceMappingRepository propertyDeviceMappingRepository, 
 			final ItemDetailsAllocationRepository allocationRepository,final PropertyMasterRepository propertyMasterRepository,
-			final PropertyHistoryRepository propertyHistoryRepository) 
+			final PropertyHistoryRepository propertyHistoryRepository, final ItemRepository itemMasterRepository) 
 	{
 		this.inventoryItemDetailsReadPlatformService = inventoryItemDetailsReadPlatformService;
 		this.context=context;
@@ -134,7 +136,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 		this.allocationRepository = allocationRepository;
 		this.propertyMasterRepository = propertyMasterRepository;
 		this.propertyHistoryRepository = propertyHistoryRepository;
-		
+		this.itemMasterRepository = itemMasterRepository;
 	}
 	
 
@@ -148,10 +150,19 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 		try{
 			context.authenticatedUser();
 			ItemDetails inventoryItemDetails=null;			
-			inventoryItemCommandFromApiJsonDeserializer.validateForCreate(command);
-			inventoryItemDetails = ItemDetails.fromJson(command,fromJsonHelper);
+			Long item = command.longValueOfParameterNamed("itemMasterId");
+			ItemMaster items = this.itemMasterRepository.findOne(item);
+			Long quantity = command.longValueOfParameterNamed("quantity");
+			Boolean isSerialRequired = true;
+			if(UnitEnumType.ACCESSORIES.toString().equalsIgnoreCase(items.getUnits()) ||
+					UnitEnumType.METERS.toString().equalsIgnoreCase(items.getUnits())){
+				isSerialRequired = false;
+			}
+			inventoryItemCommandFromApiJsonDeserializer.validateForCreate(command, isSerialRequired);
+			inventoryItemDetails = ItemDetails.fromJson(command,fromJsonHelper, isSerialRequired);
 			ItemMaster itemMaster=this.itemRepository.findOne(command.longValueOfParameterNamed("itemMasterId"));
 			InventoryGrn inventoryGrn = inventoryGrnRepository.findOne(command.longValueOfParameterNamed("grnId"));
+			
 			if(itemMaster == null){
 				throw new ItemNotFoundException(command.longValueOfParameterNamed("itemMasterId").toString());
 			}
@@ -167,7 +178,14 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 				inventoryItemDetails.setLocationId(inventoryGrn.getOfficeId());
 
 				if(inventoryGrn.getReceivedQuantity() < inventoryGrn.getOrderdQuantity()){
-					inventoryGrn.setReceivedQuantity(inventoryGrn.getReceivedQuantity()+1);
+					if(UnitEnumType.PIECES.toString().equalsIgnoreCase(items.getUnits())){
+						inventoryGrn.setReceivedQuantity(inventoryGrn.getReceivedQuantity()+1);
+						inventoryGrn.setStockQuantity(inventoryGrn.getStockQuantity()+1);
+					}else if(UnitEnumType.ACCESSORIES.toString().equalsIgnoreCase(items.getUnits()) ||
+								UnitEnumType.METERS.toString().equalsIgnoreCase(items.getUnits())){
+						inventoryGrn.setReceivedQuantity(inventoryGrn.getReceivedQuantity()+quantity);
+						inventoryGrn.setStockQuantity(inventoryGrn.getStockQuantity()+quantity);
+					}
 					this.inventoryGrnRepository.save(inventoryGrn);
 				
 				}
@@ -214,13 +232,37 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 	        try{
 	        	  
 	        	this.context.authenticatedUser();
-	        	this.inventoryItemCommandFromApiJsonDeserializer.validateForUpdate(command.json());
 	        	ItemDetails inventoryItemDetails=ItemretrieveById(id);
+	        	Long item = inventoryItemDetails.getItemMasterId();
+				ItemMaster items = this.itemMasterRepository.findOne(item);
+				Boolean isSerialRequired = true;
+				if(UnitEnumType.ACCESSORIES.toString().equalsIgnoreCase(items.getUnits()) ||
+						UnitEnumType.METERS.toString().equalsIgnoreCase(items.getUnits())){
+					isSerialRequired = false;
+				}
+	        	this.inventoryItemCommandFromApiJsonDeserializer.validateForUpdate(command.json(), isSerialRequired);
+	        	Long newQuantity = command.longValueOfParameterNamed("quantity");
 	        	final String oldHardware =inventoryItemDetails.getProvisioningSerialNumber();
 	        	final String oldSerilaNumber =inventoryItemDetails.getSerialNumber();
+	        	final Long oldQuantity = inventoryItemDetails.getReceivedQuantity();
 	        	final Map<String, Object> changes = inventoryItemDetails.update(command); 
 	        	
-	        	if(!oldSerilaNumber.equalsIgnoreCase(inventoryItemDetails.getSerialNumber()) &&inventoryItemDetails.getClientId()!=null){
+	        	if(!changes.isEmpty()){
+	        		this.inventoryItemDetailsRepository.saveAndFlush(inventoryItemDetails);
+	        	}
+	        	if(newQuantity != null && UnitEnumType.ACCESSORIES.toString().equalsIgnoreCase(items.getUnits()) ||
+						UnitEnumType.METERS.toString().equalsIgnoreCase(items.getUnits())){
+					
+	        		if(newQuantity != oldQuantity){
+	        			InventoryGrn inventoryGrn = inventoryGrnRepository.findOne(inventoryItemDetails.getGrnId());
+	        			inventoryGrn.setReceivedQuantity((inventoryGrn.getReceivedQuantity()-oldQuantity)+newQuantity);
+	        			inventoryGrn.setStockQuantity((inventoryGrn.getStockQuantity()-oldQuantity)+newQuantity);
+	        			// need to handle exception if stock is 0
+	        			this.inventoryGrnRepository.save(inventoryGrn);
+	        		}
+				}
+	        	
+	        	if(UnitEnumType.PIECES.toString().equalsIgnoreCase(items.getUnits()) && !oldSerilaNumber.equalsIgnoreCase(inventoryItemDetails.getSerialNumber()) &&inventoryItemDetails.getClientId()!=null){
 	        		
 	        		ItemDetailsAllocation allocationData = this.inventoryItemDetailsAllocationRepository.findAllocatedDevicesBySerialNum(inventoryItemDetails.getClientId(),oldSerilaNumber);
 		        		if(allocationData != null){
@@ -228,12 +270,8 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 		        			this.inventoryItemDetailsAllocationRepository.saveAndFlush(allocationData);
 		        		}
 	        	}
-
-	        	if(!changes.isEmpty()){
-	        		this.inventoryItemDetailsRepository.saveAndFlush(inventoryItemDetails);
-	        	}
 	        	
-	        	if((!oldHardware.equalsIgnoreCase(inventoryItemDetails.getProvisioningSerialNumber()) || !oldSerilaNumber.equalsIgnoreCase(inventoryItemDetails.getSerialNumber())) 
+	        	if(UnitEnumType.PIECES.toString().equalsIgnoreCase(items.getUnits()) && (!oldHardware.equalsIgnoreCase(inventoryItemDetails.getProvisioningSerialNumber()) || !oldSerilaNumber.equalsIgnoreCase(inventoryItemDetails.getSerialNumber())) 
 	        				&&inventoryItemDetails.getClientId()!=null){
 	          	  
 	        		this.provisioningWritePlatformService.updateHardwareDetails(inventoryItemDetails.getClientId(),inventoryItemDetails.getSerialNumber(),oldSerilaNumber,
@@ -285,9 +323,13 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 						inventoryItemDetails.setStatus("In Use");
 						LocalDate warrantyEndDate = new LocalDate(oneTimeSale.getSaleDate()).plusMonths(itemMasterData.getWarranty().intValue()).minusDays(1);
 						inventoryItemDetails.setWarrantyDate(warrantyEndDate);
-						
 						this.inventoryItemDetailsRepository.saveAndFlush(inventoryItemDetails);
 						this.inventoryItemDetailsAllocationRepository.saveAndFlush(inventoryItemDetailsAllocation);
+						InventoryGrn inventoryGrn = inventoryGrnRepository.findOne(inventoryItemDetails.getGrnId());
+						if(inventoryGrn.getReceivedQuantity() > 0 && inventoryGrn.getStockQuantity() > 0){
+							inventoryGrn.setStockQuantity(inventoryGrn.getStockQuantity()-1);
+							this.inventoryGrnRepository.saveAndFlush(inventoryGrn);
+						}
 						
 						oneTimeSale.setHardwareAllocated("ALLOCATED");
 						this.oneTimeSaleRepository.saveAndFlush(oneTimeSale);
@@ -368,7 +410,10 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 							ItemDetails inventoryItemDetails=this.inventoryItemDetailsRepository.findOne(allocationDetailsData.getItemDetailId());
 							inventoryItemDetails.setAvailable();
 							this.inventoryItemDetailsRepository.saveAndFlush(inventoryItemDetails);
-					     
+							InventoryGrn inventoryGrn = inventoryGrnRepository.findOne(inventoryItemDetails.getGrnId());
+							inventoryGrn.setStockQuantity(inventoryGrn.getStockQuantity()+1);
+							this.inventoryGrnRepository.saveAndFlush(inventoryGrn);
+							
 							InventoryTransactionHistory transactionHistory = InventoryTransactionHistory.logTransaction(new LocalDate().toDate(), 
 					  			inventoryItemDetailsAllocation.getOrderId(),"De Allocation",inventoryItemDetailsAllocation.getSerialNumber(), inventoryItemDetailsAllocation.getItemMasterId(),
 								inventoryItemDetailsAllocation.getClientId(),inventoryItemDetails.getOfficeId());
@@ -462,11 +507,22 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 	        try{
 	        	this.context.authenticatedUser();
 	        	ItemDetails inventoryItemDetails=ItemretrieveById(id);
+	        	Long quantity = inventoryItemDetails.getReceivedQuantity();
+	        	Long item = inventoryItemDetails.getItemMasterId();
+				ItemMaster items = this.itemMasterRepository.findOne(item);
+				
 	        	InventoryGrn grn=this.inventoryGrnRepository.findOne(inventoryItemDetails.getGrnId());
 	        	inventoryItemDetails.itemDelete();
 	        	this.inventoryItemDetailsRepository.saveAndFlush(inventoryItemDetails);
-	        	Long ReceivedItems=grn.getReceivedQuantity()-Long.valueOf(1);
-	        	grn.setReceivedQuantity(ReceivedItems);
+	        	if(UnitEnumType.ACCESSORIES.toString().equalsIgnoreCase(items.getUnits()) ||
+						UnitEnumType.METERS.toString().equalsIgnoreCase(items.getUnits())){
+	        		grn.setReceivedQuantity(grn.getReceivedQuantity()-quantity);
+	        		grn.setStockQuantity(grn.getStockQuantity()-quantity);
+	        		// handle if stock is 0
+				}else{
+					Long ReceivedItems=grn.getReceivedQuantity()-Long.valueOf(1);
+		        	grn.setReceivedQuantity(ReceivedItems);
+				}
 	        	this.inventoryGrnRepository.save(grn);
 	        	return new CommandProcessingResult(id);
 	        	

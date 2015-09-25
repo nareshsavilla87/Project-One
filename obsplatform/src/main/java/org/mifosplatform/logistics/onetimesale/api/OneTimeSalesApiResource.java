@@ -171,10 +171,10 @@ public class OneTimeSalesApiResource {
 	    }
 		final List<ChargesData> chargesDatas = this.itemMasterReadPlatformService.retrieveChargeCode();
 		final List<FeeMasterData> feeMasterData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId,"Deposit");
-		final Collection<InventoryGrnData> grnData = this.grnReadPlatformService.retriveGrnIdswithItemId(itemId);
+		//final Collection<InventoryGrnData> grnData = this.grnReadPlatformService.retriveGrnIdswithItemId(itemId);
 		
 		itemData = new ItemData(itemCodeData, itemData, null, null,discountdata, chargesDatas, feeMasterData);
-		itemData.setGrnData(grnData);
+		//itemData.setGrnData(grnData);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.defaultToApiJsonSerializer.serialize(settings, itemData,RESPONSE_DATA_PARAMETERS);
 	}
