@@ -33,7 +33,6 @@ public class InvoiceClient {
 	private final ConfigurationRepository globalConfigurationRepository;
 	private final InvoiceRepository invoiceRepository;
 	
-	
 
 	@Autowired
 	InvoiceClient(final BillingOrderReadPlatformService billingOrderReadPlatformService,final GenerateBillingOrderService generateBillingOrderService,
@@ -46,7 +45,6 @@ public class InvoiceClient {
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.globalConfigurationRepository = globalConfigurationRepository;
 		this.invoiceRepository = invoiceRepository;
-		
 	
 	}
 	
@@ -84,7 +82,6 @@ public class InvoiceClient {
 			for (BillingOrderData billingOrderData : billingOrderDatas) {
 				
 				nextBillableDate = billingOrderData.getNextBillableDate();
-				
 				if (prorataWithNextBillFlag && ("Y".equalsIgnoreCase(billingOrderData.getBillingAlign())) && billingOrderData.getInvoiceTillDate() == null ) {
 					LocalDate alignEndDate = new LocalDate(nextBillableDate).dayOfMonth().withMaximumValue();
 					if (!processDate.toDate().after(alignEndDate.toDate())) 

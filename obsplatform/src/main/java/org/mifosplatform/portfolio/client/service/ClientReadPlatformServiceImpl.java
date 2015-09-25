@@ -825,6 +825,49 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
 	    	}
 	    }
 		
+		 private static final class ClientWalletMapper implements RowMapper<ClientData>{
+		    	
+		    	public String schema(){
+		    		
+		    		return " c.id as id, c.account_no as accountNo, b.wallet_amount as walletAmount, " +
+		    				" coalesce(min(ba.serial_no),min(oh.serial_number),'No Device') HW_Serial from m_client c " +
+		    				" left outer join b_client_balance b ON b.client_id = c.id " +
+		    				" left outer join b_allocation ba on (c.id = ba.client_id AND ba.is_deleted = 'N') " +
+		    				" left outer join b_owned_hardware oh on (c.id=oh.client_id  AND oh.is_deleted = 'N') "+
+		    				" left outer join b_clientuser cu ON cu.client_id = c.id ";
+		    	}
+		    	
+		    	@Override
+		    	public ClientData mapRow(final ResultSet rs,final int rowNum)throws SQLException{
+		    		
+		    		final Long id = rs.getLong("id");
+		    		final String  accountNo = rs.getString("accountNo");
+		    		final BigDecimal walletAmount = rs.getBigDecimal("walletAmount");
+		    		final String hwSerialNumber = rs.getString("HW_Serial");
+		    		
+		    		return ClientData.walletAmount(id, accountNo, walletAmount,hwSerialNumber);
+		    	}
+	}
+		
+		@Override
+		public ClientData retrieveClientWalletAmount(Long clientId,String type) {
+			try{
+				
+				final ClientWalletMapper mapper = new ClientWalletMapper();
+				 String sql = "select "+mapper.schema();
+				if(type != null && type.equalsIgnoreCase("userId")){
+						sql = sql+" where cu.zebra_subscriber_id = ? ";
+				}else{
+					sql = sql+" where  c.id = ? ";
+				}
+				sql += " and c.status_enum <> 400 group by c.id ";
+				
+				return  jdbcTemplate.queryForObject(sql,mapper,new Object[]{clientId});
+			}catch(EmptyResultDataAccessException e){
+				return null;
+			}
+		}
+		
 }
 		
 

@@ -260,9 +260,9 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 
 				throw new PropertyMasterNotFoundException(clientId,oldPropertyCode);
 			}
-
 			/* call one time invoice for service transfer */
 			if (!StringUtils.isEmpty(chargeCode)) {
+
 				ChargeCodeMaster chargeMaster = this.chargeCodeRepository.findOneByChargeCode(chargeCode);
 				Invoice invoice = this.invoiceOneTimeSale.calculateAdditionalFeeCharges(chargeMaster,transactionHistory.getId(), Long.valueOf(-1L),clientId, shiftChargeAmount);
 				return new CommandProcessingResult(invoice.getId(), clientId);

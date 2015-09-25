@@ -25,7 +25,6 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final InvoiceRepository invoiceRepository;
 	
-	
 
 	@Autowired
 	public GenerateBillingOrderServiceImplementation(final GenerateBill generateBill,final BillingOrderReadPlatformService billingOrderReadPlatformService,
@@ -34,8 +33,6 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 		this.generateBill = generateBill;
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.invoiceRepository = invoiceRepository;
-		
-		
 	
 	}
 
@@ -121,13 +118,10 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 						billingOrderCommands.add(billingOrderCommand);
 
 					}
-				}/*else if(generateBill.isChargeTypeUC(billingOrderData)){
+				}else if(generateBill.isChargeTypeUC(billingOrderData)){
 					
 					System.out.println("---- UC ---");
-					billingOrderCommand = this.usageBill.checkOrderUsageCharges(billingOrderData);
-					if(billingOrderCommand != null)
-					billingOrderCommands.add(billingOrderCommand);
-				}*/
+				}
 
 			}
 		} else {

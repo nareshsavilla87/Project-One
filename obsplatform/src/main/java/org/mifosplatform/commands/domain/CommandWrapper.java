@@ -1333,4 +1333,16 @@ public class CommandWrapper {
 		return this.actionName.equalsIgnoreCase("RENEWALWITHCLIENT") && this.entityName.equalsIgnoreCase("ORDER");
 	}
 
+	public boolean isBeesmartClient() {
+		return this.entityName.equalsIgnoreCase("BEESMARTCLIENT");
+	}
+
+	public boolean isUpdateBeesmartClient() {
+		
+		return this.actionName.equalsIgnoreCase("UPDATE") && this.entityName.equalsIgnoreCase("BEESMARTCLIENT");
+	}
+	public boolean isDeleteBeesmartClient() {
+		
+		return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("BEESMARTCLIENT");
+	}
 }

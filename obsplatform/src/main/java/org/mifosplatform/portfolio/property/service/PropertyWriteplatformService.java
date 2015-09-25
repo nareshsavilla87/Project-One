@@ -21,5 +21,4 @@ public interface PropertyWriteplatformService {
 
 	CommandProcessingResult allocatePropertyDevice(Long entityId,JsonCommand command);
 
-	
 }
