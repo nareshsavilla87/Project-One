@@ -62,7 +62,7 @@ public class VoucherCommandFromApiJsonDeserializer {
 		final String batchName = fromApiJsonHelper.extractStringNamed("batchName", element);
 		baseDataValidator.reset().parameter("batchName").value(batchName).notBlank();
 
-		final BigDecimal length = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("length", element);
+		final Long length = fromApiJsonHelper.extractLongNamed("length", element);
 	    baseDataValidator.reset().parameter("length").value(length).notNull().notLessThanMin(1);
 	    
 	    final String beginWith = fromApiJsonHelper.extractStringNamed("beginWith", element);
@@ -71,7 +71,7 @@ public class VoucherCommandFromApiJsonDeserializer {
 		final String pinCategory = fromApiJsonHelper.extractStringNamed("pinCategory", element);
 		baseDataValidator.reset().parameter("pinCategory").value(pinCategory).notBlank();
 		
-		final BigDecimal quantity = fromApiJsonHelper.extractBigDecimalWithLocaleNamed("quantity", element);
+		final Long quantity = fromApiJsonHelper.extractLongNamed("quantity", element);
 	    baseDataValidator.reset().parameter("quantity").value(quantity).notNull().notLessThanMin(1);
 	    
 		final Long serialNo = fromApiJsonHelper.extractLongNamed("serialNo", element);
