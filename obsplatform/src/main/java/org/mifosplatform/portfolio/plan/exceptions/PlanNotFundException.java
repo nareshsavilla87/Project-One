@@ -9,4 +9,9 @@ super("error.msg.depositproduct.id.invalid",
 		"Charge Code already exists with same plan");
 }
 
+public PlanNotFundException(final Long id) {
+	super("error.msg.plan.not.found",
+			"Plan with this Identifier `"+id+"` not found ",id );
+}
+
 }
