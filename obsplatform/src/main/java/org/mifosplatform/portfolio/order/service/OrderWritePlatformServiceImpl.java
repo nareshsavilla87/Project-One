@@ -1330,7 +1330,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			
 			if(planData.getIsPrepaid() == 'Y'){
 			  for(SubscriptionData subscriptionData : subscriptionDatas){
-				if(subscriptionData.getContractdata().equals(contractPeriod)){
+				if(subscriptionData.getContractdata().equalsIgnoreCase(contractPeriod)){
 					priceId = subscriptionData.getPriceId();
 					break;
 				}
