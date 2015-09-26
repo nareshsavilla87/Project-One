@@ -1302,17 +1302,27 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			throw new NoOrdersFoundException(clientId,planId);
 		}
 		Plan  planData = this.planRepository.findOne(planId);
+		if(planData == null) throw new PlanNotFundException(planId);
+		
 		String isPrepaid = planData.getIsPrepaid() == 'N' ? "postpaid" : "prepaid";
 			
-			List<SubscriptionData> listOfPrices = this.planReadPlatformService.retrieveSubscriptionData(orderIds.get(0), isPrepaid);
-			if(listOfPrices.isEmpty()){
-				throw new PriceNotFoundException(orderIds.get(0));
+			List<SubscriptionData> subscriptionDatas = this.planReadPlatformService.retrieveSubscriptionData(orderIds.get(0), isPrepaid);
+			if(subscriptionDatas.isEmpty()){
+				throw new PriceNotFoundException(orderIds.get(0),clientId);
 			}
-			Long priceId  = listOfPrices.get(0).getPriceId();
-			for(SubscriptionData listOfPrice : listOfPrices){
-				if(listOfPrice.getContractdata().equalsIgnoreCase(contractPeriod)){
-					priceId = listOfPrice.getPriceId();
+			Long priceId = Long.valueOf(0);
+			
+			if(planData.getIsPrepaid() == 'Y'){
+			  for(SubscriptionData subscriptionData : subscriptionDatas){
+				if(subscriptionData.getContractdata().equals(contractPeriod)){
+					priceId = subscriptionData.getPriceId();
+					break;
 				}
+			  }
+			}
+			
+			if(planData.getIsPrepaid() == 'Y' && priceId.equals(Long.valueOf(0))){
+				throw new ContractPeriodNotFoundException(contractPeriod,orderIds.get(0),clientId);
 			}
 			
 			JSONObject renewalJson = new JSONObject();
