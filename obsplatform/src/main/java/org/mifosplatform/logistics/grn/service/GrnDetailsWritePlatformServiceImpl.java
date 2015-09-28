@@ -5,6 +5,7 @@ import java.util.Map;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.itemdetails.domain.InventoryGrn;
 import org.mifosplatform.logistics.itemdetails.domain.InventoryGrnRepository;
@@ -45,7 +46,8 @@ public class GrnDetailsWritePlatformServiceImpl implements GrnDetailsWritePlatfo
 			inventoryGrn = InventoryGrn.fromJson(command);
 			this.inventoryGrnRepository.save(inventoryGrn);
 		}catch(DataIntegrityViolationException dve){
-			logger.error(dve.getMessage(), dve);   
+			//logger.error(dve.getMessage(), dve);   
+			 handleDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		
 		}
@@ -82,6 +84,23 @@ public class GrnDetailsWritePlatformServiceImpl implements GrnDetailsWritePlatfo
 		}
 	}
 
+	/*
+     * Guaranteed to throw an exception no matter what the data integrity issue
+     * is.
+     */
+    private void handleDataIntegrityIssues(final JsonCommand command, final DataIntegrityViolationException dve) {
 
-     	
+    	final Throwable realCause = dve.getMostSpecificCause();
+        if (realCause.getMessage().contains("purchase_no_code_key")) {
+            final String purchaseNo = command.stringValueOfParameterNamed("purchaseNo");
+            throw new PlatformDataIntegrityException("error.msg.grn.duplicate.purchaseNo", "Grn with purchaseNo" + purchaseNo
+                    + "` already exists", "purchaseNo", purchaseNo);
+        }
+        logAsErrorUnexpectedDataIntegrityException(dve);
+        throw new PlatformDataIntegrityException("error.msg.client.unknown.data.integrity.issue",
+                "Unknown data integrity issue with resource.");
+    }
+    private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
+        logger.error(dve.getMessage(), dve);
+    }
 }

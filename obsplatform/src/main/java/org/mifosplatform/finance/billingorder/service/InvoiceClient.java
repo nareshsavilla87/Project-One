@@ -82,13 +82,11 @@ public class InvoiceClient {
 			for (BillingOrderData billingOrderData : billingOrderDatas) {
 				
 				nextBillableDate = billingOrderData.getNextBillableDate();
-
 				if (prorataWithNextBillFlag && ("Y".equalsIgnoreCase(billingOrderData.getBillingAlign())) && billingOrderData.getInvoiceTillDate() == null ) {
 					LocalDate alignEndDate = new LocalDate(nextBillableDate).dayOfMonth().withMaximumValue();
 					if (!processDate.toDate().after(alignEndDate.toDate())) 
 						processDate = alignEndDate.plusDays(2);
 				} else {
-
 					processDate = initialProcessDate;
 				}
 				while (processDate.toDate().after(nextBillableDate) || processDate.toDate().compareTo(nextBillableDate) == 0) {
@@ -102,7 +100,6 @@ public class InvoiceClient {
 					}
 				}
 			}
-
 			if (singleInvoiceFlag) {
 
 				this.invoiceRepository.save(invoiceData.getInvoice());
@@ -113,7 +110,6 @@ public class InvoiceClient {
 			return invoiceData.getInvoice();
 			
 		} else {
-
 			throw new BillingOrderNoRecordsFoundException();
 		}
 	}
