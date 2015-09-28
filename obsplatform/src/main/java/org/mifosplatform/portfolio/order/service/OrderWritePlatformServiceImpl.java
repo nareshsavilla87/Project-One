@@ -1289,6 +1289,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	public CommandProcessingResult renewalOrderWithClient(JsonCommand command, Long clientId) {
 
 	  try{	
+
 			this.context.authenticatedUser();
 			this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
 			Long planId = command.longValueOfParameterNamed("planId");
@@ -1300,6 +1301,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
 			if(orderIds.isEmpty()){
 				throw new NoOrdersFoundException(clientId,planId);
+
 			}
 			Plan  planData = this.planRepository.findOne(planId);
 			if(planData == null){ throw new PlanNotFundException(planId);}
