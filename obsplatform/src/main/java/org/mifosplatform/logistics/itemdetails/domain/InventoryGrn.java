@@ -45,6 +45,9 @@ public class InventoryGrn extends  AbstractPersistable<Long>{
 	@Column(name="po_no")
 	private String purchaseNo;
 	
+	@Column(name="stock_quantity")
+	private Long stockQuantity;
+	
 
 	public InventoryGrn(final Long itemMasterId,final Long orderdQuantity,final Date purchaseDate,final Long receivedQuantity,final Long supplierId,final Long officeId,String purchaseNo){
 		this.itemMasterId = itemMasterId;
@@ -54,7 +57,7 @@ public class InventoryGrn extends  AbstractPersistable<Long>{
 		this.supplierId = supplierId;
 		this.officeId = officeId;
 		this.purchaseNo = StringUtils.isEmpty(purchaseNo)?null:purchaseNo;
-		
+		this.stockQuantity = receivedQuantity;
 	}
 	
 	
@@ -126,6 +129,26 @@ public class InventoryGrn extends  AbstractPersistable<Long>{
 	public void setOfficeId(Long officeId) {
 		this.officeId = officeId;
 	}
+
+
+
+	public Long getStockQuantity() {
+		return stockQuantity;
+	}
+
+
+
+
+
+
+
+
+	public void setStockQuantity(Long stockQuantity) {
+		this.stockQuantity = stockQuantity;
+	}
+
+
+
 
 
 

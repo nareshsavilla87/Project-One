@@ -1,4 +1,6 @@
-SET SQL_SAFE_UPDATES=0;
+INSERT IGNORE INTO b_eventaction_mapping VALUES(NULL,'Provisioning Confirmation','Change Start', 'workflow_events', 'N','N');
+
+
 CREATE or replace VIEW `netplnactiv_content_vw` AS 
 select `nav`.`year_mon` AS `Month`, 
 bvm.vendor_code,
@@ -35,4 +37,5 @@ left join b_vendor_management bvm on (bva.vendor_id = bvm.id)
 group by `nav`.`year_mon` ,plan_id,plan, bvm.vendor_code
 order by `nav`.`month_number`;
 
-UPDATE stretchy_report SET report_name='Vendor Commission Report' WHERE report_name='Plan wise Revenue Report for Vendor';
+
+
