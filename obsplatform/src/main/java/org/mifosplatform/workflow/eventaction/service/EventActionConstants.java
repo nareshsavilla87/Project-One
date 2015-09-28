@@ -27,6 +27,7 @@ public class EventActionConstants {
 	public static final String EVENT_SEND_PAYMENT = "Send Payment Receipt";
 	public static final String EVENT_TOPUP_INVOICE_MAIL = "Topup Invoice Mail";
 	public static final String EVENT_NOTIFY_ORDER_TERMINATE="Notify Order Terminate";
+	public static final String EVENT_PROVISION_CONFIRM ="Provisioning Confirmation";
 	
 	//Actions
 	public static final String ACTION_SEND_MAIL="Send Mail";
@@ -66,6 +67,7 @@ public class EventActionConstants {
 	public static final String ACTION_NOTIFY_SMS_PAYMENT="Notify_SMS_Payment";
 	public static final String ACTION_NOTIFY_SMS_CHANGEPLAN = "Notify_SMS_ChangePlan";
 	public static final String ACTION_NOTIFY_SMS_ORDER_TERMINATE="Notify_SMS_Order_Terminate";
+	public static final String ACTION_CHANGE_START ="Change Start";
 	
 	
 }

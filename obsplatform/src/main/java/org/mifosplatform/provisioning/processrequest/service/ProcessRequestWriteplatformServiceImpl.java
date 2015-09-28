@@ -150,9 +150,12 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 						case ProvisioningApiConstants.REQUEST_ACTIVATION  :
 							 
 							if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.ACTIVATION.toString())){
-                                order.setStartDate(DateUtils.getLocalDateOfTenant());
 								order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
-								order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
+								ActionDetaislData provActionDetail=this.actionDetailsReadPlatformService.retrieveEventWithAction(EventActionConstants.EVENT_PROVISION_CONFIRM,EventActionConstants.ACTION_CHANGE_START);
+								 if(provActionDetail != null){
+									order.setStartDate(DateUtils.getLocalDateOfTenant());
+									order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
+								 }
 								client.setStatus(ClientStatus.ACTIVE.getValue());
 								this.orderRepository.saveAndFlush(order);
 								List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_ACTIVE_ORDER);
@@ -163,36 +166,36 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 								
 								break;
 							case ProvisioningApiConstants.REQUEST_RECONNECTION :
-								
-								 //client=this.clientRepository.findOne(detailsData.getClientId());
-								//if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.ACTIVATION.toString())){
-	                                order.setStartDate(DateUtils.getLocalDateOfTenant());
-									order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
-									order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
+
+								   order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
+								   ActionDetaislData provReconnectActionDetail=this.actionDetailsReadPlatformService.retrieveEventWithAction(EventActionConstants.EVENT_PROVISION_CONFIRM,EventActionConstants.ACTION_CHANGE_START);
+                                    if(provReconnectActionDetail != null){
+	                                  order.setStartDate(DateUtils.getLocalDateOfTenant());
+									  order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
+                                    }
 									client.setStatus(ClientStatus.ACTIVE.getValue());
 									this.orderRepository.saveAndFlush(order);
 									List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_ACTIVE_ORDER);
 									if(actionDetaislDatas.size() != 0){
 											this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,order.getClientId(), order.getId().toString(),null);
 									}
-								//}
 									
 									break;
 									
 							case ProvisioningApiConstants.REQUEST_CHANGE_PLAN :
 								
-								 //client=this.clientRepository.findOne(detailsData.getClientId());
-								//if(detailsData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.ACTIVATION.toString())){
-	                                order.setStartDate(DateUtils.getLocalDateOfTenant());
 									order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
-									order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
+									ActionDetaislData provChangePlanActionDetail=this.actionDetailsReadPlatformService.retrieveEventWithAction(EventActionConstants.EVENT_PROVISION_CONFIRM,EventActionConstants.ACTION_CHANGE_START);
+	                                 if(provChangePlanActionDetail != null){
+		                                  order.setStartDate(DateUtils.getLocalDateOfTenant());
+										  order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
+	                                  }
 									client.setStatus(ClientStatus.ACTIVE.getValue());
 									this.orderRepository.saveAndFlush(order);
 									actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CHANGE_PLAN);
 									if(actionDetaislDatas.size() != 0){
 											this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,order.getClientId(), order.getId().toString(),null);
 									}
-								//}
 									
 									break;		
 								
@@ -287,7 +290,10 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
         							
         							 client=this.clientRepository.findOne(detailsData.getClientId());
         								order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.ACTIVE).getId());
-        								order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
+        								ActionDetaislData provRenewalAfterActionDetail=this.actionDetailsReadPlatformService.retrieveEventWithAction(EventActionConstants.EVENT_PROVISION_CONFIRM,EventActionConstants.ACTION_CHANGE_START);
+                                        if(provRenewalAfterActionDetail != null){
+    									  order=this.orderAssembler.setDatesOnOrderActivation(order,DateUtils.getLocalDateOfTenant());
+                                        }
         								client.setStatus(ClientStatus.ACTIVE.getValue());
         								this.orderRepository.saveAndFlush(order);
 
