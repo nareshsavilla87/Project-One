@@ -253,12 +253,17 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 	        	if(newQuantity != null && UnitEnumType.ACCESSORIES.toString().equalsIgnoreCase(items.getUnits()) ||
 						UnitEnumType.METERS.toString().equalsIgnoreCase(items.getUnits())){
 					
+	        		InventoryGrn inventoryGrn = inventoryGrnRepository.findOne(inventoryItemDetails.getGrnId());
 	        		if(newQuantity != oldQuantity){
-	        			InventoryGrn inventoryGrn = inventoryGrnRepository.findOne(inventoryItemDetails.getGrnId());
+	        			if(newQuantity <= inventoryGrn.getStockQuantity()){
+	        				throw new OrderQuantityExceedsException();
+	        			}
+	        			
 	        			inventoryGrn.setReceivedQuantity((inventoryGrn.getReceivedQuantity()-oldQuantity)+newQuantity);
-	        			inventoryGrn.setStockQuantity((inventoryGrn.getStockQuantity()-oldQuantity)+newQuantity);
-	        			// need to handle exception if stock is 0
-	        			this.inventoryGrnRepository.save(inventoryGrn);
+		        		inventoryGrn.setStockQuantity((inventoryGrn.getStockQuantity()-oldQuantity)+newQuantity);
+		        		// need to handle exception if stock is 0
+		        		this.inventoryGrnRepository.save(inventoryGrn);
+	        			
 	        		}
 				}
 	        	
@@ -505,6 +510,9 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 	        	this.inventoryItemDetailsRepository.saveAndFlush(inventoryItemDetails);
 	        	if(UnitEnumType.ACCESSORIES.toString().equalsIgnoreCase(items.getUnits()) ||
 						UnitEnumType.METERS.toString().equalsIgnoreCase(items.getUnits())){
+	        		if(inventoryItemDetails.getReceivedQuantity() > grn.getStockQuantity()){
+	        			throw new OrderQuantityExceedsException("Unable to delete");
+	        		}
 	        		grn.setReceivedQuantity(grn.getReceivedQuantity()-quantity);
 	        		grn.setStockQuantity(grn.getStockQuantity()-quantity);
 	        		// handle if stock is 0
