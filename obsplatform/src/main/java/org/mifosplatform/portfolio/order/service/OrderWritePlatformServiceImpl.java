@@ -1289,43 +1289,55 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	public CommandProcessingResult renewalOrderWithClient(JsonCommand command, Long clientId) {
 
 	  try{	
-		this.context.authenticatedUser();
-		this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
-		Long planId = command.longValueOfParameterNamed("planId");
-		String contractPeriod = command.stringValueOfParameterNamed("duration");
-		Contract contract =this.contractRepository.findOneByContractId(contractPeriod);
-		if(contract == null){
-			throw new ContractPeriodNotFoundException(contractPeriod,clientId);
-		}
-		List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
-		if(orderIds.isEmpty()){
-			throw new NoOrdersFoundException(clientId,planId);
-		}
-		Plan  planData = this.planRepository.findOne(planId);
-		String isPrepaid = planData.getIsPrepaid() == 'N' ? "postpaid" : "prepaid";
-			
-			List<SubscriptionData> listOfPrices = this.planReadPlatformService.retrieveSubscriptionData(orderIds.get(0), isPrepaid);
-			if(listOfPrices.isEmpty()){
-				throw new PriceNotFoundException(orderIds.get(0));
+
+			this.context.authenticatedUser();
+			this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
+			Long planId = command.longValueOfParameterNamed("planId");
+			String contractPeriod = command.stringValueOfParameterNamed("duration");
+			Contract contract =this.contractRepository.findOneByContractId(contractPeriod);
+			if(contract == null){
+				throw new ContractPeriodNotFoundException(contractPeriod,clientId);
 			}
-			Long priceId  = listOfPrices.get(0).getPriceId();
-			for(SubscriptionData listOfPrice : listOfPrices){
-				if(listOfPrice.getContractdata().equalsIgnoreCase(contractPeriod)){
-					priceId = listOfPrice.getPriceId();
+			List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
+			if(orderIds.isEmpty()){
+				throw new NoOrdersFoundException(clientId,planId);
+
+			}
+			Plan  planData = this.planRepository.findOne(planId);
+			if(planData == null){ throw new PlanNotFundException(planId);}
+			
+			String isPrepaid = planData.getIsPrepaid() == 'N' ? "postpaid" : "prepaid";
+				
+				List<SubscriptionData> subscriptionDatas = this.planReadPlatformService.retrieveSubscriptionData(orderIds.get(0), isPrepaid);
+				if(subscriptionDatas.isEmpty()){
+					throw new PriceNotFoundException(orderIds.get(0),clientId);
 				}
-			}
-			
-			JSONObject renewalJson = new JSONObject();
-			renewalJson.put("renewalPeriod", contract.getId());
-			renewalJson.put("priceId", priceId);
-			renewalJson.put("description", "Order renewal with clientId="+clientId+" and planId="+planId);
-			final JsonElement element = fromJsonHelper.parse(renewalJson.toString());
-			JsonCommand renewalCommand = new JsonCommand(null,renewalJson.toString(), element, fromJsonHelper,
-					null, null, null, null, null, null, null, null, null, null, 
-					null, null);
-			
-		return this.renewalClientOrder(renewalCommand,orderIds.get(0));
-	  }catch(DataIntegrityViolationException dve){
+				Long priceId = Long.valueOf(0);
+				
+				if(planData.getIsPrepaid() == 'Y'){
+				  for(SubscriptionData subscriptionData : subscriptionDatas){
+					if(subscriptionData.getContractdata().equalsIgnoreCase(contractPeriod)){
+						priceId = subscriptionData.getPriceId();
+						break;
+					}
+				  }
+				}
+				
+				if(planData.getIsPrepaid() == 'Y' && priceId.equals(Long.valueOf(0))){
+					throw new ContractPeriodNotFoundException(contractPeriod,orderIds.get(0),clientId);
+				}
+				
+				JSONObject renewalJson = new JSONObject();
+				renewalJson.put("renewalPeriod", contract.getId());
+				renewalJson.put("priceId", priceId);
+				renewalJson.put("description", "Order renewal with clientId="+clientId+" and planId="+planId);
+				final JsonElement element = fromJsonHelper.parse(renewalJson.toString());
+				JsonCommand renewalCommand = new JsonCommand(null,renewalJson.toString(), element, fromJsonHelper,
+						null, null, null, null, null, null, null, null, null, null, 
+						null, null);
+				
+			return this.renewalClientOrder(renewalCommand,orderIds.get(0));
+		  }catch(DataIntegrityViolationException dve){
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		} catch (JSONException e) {

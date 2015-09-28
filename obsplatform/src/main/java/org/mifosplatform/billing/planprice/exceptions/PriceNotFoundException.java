@@ -19,4 +19,9 @@ public class PriceNotFoundException extends AbstractPlatformResourceNotFoundExce
     public PriceNotFoundException(final Long codeId) {
         super("error.msg.price.identifier.not.found", "price with identifier `" + codeId + "` does not exist", codeId);
     }
+    
+    public PriceNotFoundException(final Long orderId,final Long clientId) {
+    	super("error.msg.price.identifier.not.found", "price does not exist with order id `" + orderId + "` and client id `"+clientId+"`",
+    			orderId,clientId);
+    }
 }
