@@ -184,7 +184,8 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 						order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
 						this.orderRepository.saveAndFlush(order);
 
-					} else if((!detailsData.isEmpty()&&1==detailsData.size())&& detailsData.get(0).getServiceId()==null){//plan level HardWare Map 
+					} else if("N".equalsIgnoreCase(requestData.getIshardwareReq()) ||
+							(1==detailsData.size() && detailsData.get(0).getServiceId()==null)){//plan level HardWare Map 
 						
 						String HardWareId=null;
 							if(!detailsData.isEmpty()){
