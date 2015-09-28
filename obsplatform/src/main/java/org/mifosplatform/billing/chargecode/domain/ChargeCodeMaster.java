@@ -68,18 +68,12 @@ public class ChargeCodeMaster extends AbstractPersistable<Long> {
 	 */
 	public static ChargeCodeMaster fromJson(final JsonCommand command) {
 
-		final String chargeCode = command
-				.stringValueOfParameterNamed("chargeCode");
-		final String chargeDescription = command
-				.stringValueOfParameterNamed("chargeDescription");
-		final Integer chargeDuration = command
-				.integerValueOfParameterNamed("chargeDuration");
-		final String chargeType = command
-				.stringValueOfParameterNamed("chargeType");
-		final String durationType = command
-				.stringValueOfParameterNamed("durationType");
-		final boolean taxInclusive = command
-				.booleanPrimitiveValueOfParameterNamed("taxInclusive");
+		final String chargeCode = command.stringValueOfParameterNamed("chargeCode");
+		final String chargeDescription = command.stringValueOfParameterNamed("chargeDescription");
+		final Integer chargeDuration = command.integerValueOfParameterNamed("chargeDuration");
+		final String chargeType = command.stringValueOfParameterNamed("chargeType");
+		final String durationType = command.stringValueOfParameterNamed("durationType");
+		final boolean taxInclusive = command.booleanPrimitiveValueOfParameterNamed("taxInclusive");
 
 		Integer tax = null;
 
@@ -89,9 +83,10 @@ public class ChargeCodeMaster extends AbstractPersistable<Long> {
 			tax = 0;
 		}
 
-		final String billFrequencyCode = command
-				.stringValueOfParameterNamed("billFrequencyCode");
-
+		 String billFrequencyCode = command.stringValueOfParameterNamed("billFrequencyCode");
+		if("UC".equalsIgnoreCase(chargeType)){
+			billFrequencyCode = null;
+		}
 		return new ChargeCodeMaster(chargeCode, chargeDescription, chargeType,
 				chargeDuration, durationType, tax, billFrequencyCode);
 	}
@@ -179,47 +174,35 @@ public class ChargeCodeMaster extends AbstractPersistable<Long> {
 	 */
 	public Map<String, Object> update(JsonCommand command) {
 
-		final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(
-				1);
-		if (command.isChangeInStringParameterNamed("chargeCode",
-				this.chargeCode)) {
-			final String newValue = command
-					.stringValueOfParameterNamed("chargeCode");
+		final Map<String, Object> actualChanges = new LinkedHashMap<String, Object>(1);
+		if (command.isChangeInStringParameterNamed("chargeCode",this.chargeCode)) {
+			final String newValue = command.stringValueOfParameterNamed("chargeCode");
 			actualChanges.put("chargeCode", newValue);
 			this.chargeCode = StringUtils.defaultIfEmpty(newValue, null);
 		}
-		if (command.isChangeInStringParameterNamed("chargeDescription",
-				this.chargeDescription)) {
-			final String newValue = command
-					.stringValueOfParameterNamed("chargeDescription");
+		if (command.isChangeInStringParameterNamed("chargeDescription",this.chargeDescription)) {
+			final String newValue = command.stringValueOfParameterNamed("chargeDescription");
 			actualChanges.put("chargeDescription", newValue);
 			this.chargeDescription = StringUtils.defaultIfEmpty(newValue, null);
 		}
-		if (command.isChangeInStringParameterNamed("chargeType",
-				this.chargeType)) {
-			final String newValue = command
-					.stringValueOfParameterNamed("chargeType");
+		if (command.isChangeInStringParameterNamed("chargeType",this.chargeType)) {
+			final String newValue = command.stringValueOfParameterNamed("chargeType");
 			actualChanges.put("chargeType", newValue);
 			this.chargeType = StringUtils.defaultIfEmpty(newValue, null);
 		}
-		if (command.isChangeInIntegerParameterNamed("chargeDuration",
-				this.chargeDuration)) {
-			final Integer newValue = command
-					.integerValueOfParameterNamed("chargeDuration");
+		if (command.isChangeInIntegerParameterNamed("chargeDuration",this.chargeDuration)) {
+			final Integer newValue = command.integerValueOfParameterNamed("chargeDuration");
 			actualChanges.put("chargeDuration", newValue);
 			this.chargeDuration = newValue;
 		}
-		if (command.isChangeInStringParameterNamed("durationType",
-				this.durationType)) {
-			final String newValue = command
-					.stringValueOfParameterNamed("durationType");
+		if (command.isChangeInStringParameterNamed("durationType",this.durationType)) {
+			final String newValue = command.stringValueOfParameterNamed("durationType");
 			actualChanges.put("durationType", newValue);
 			this.durationType = StringUtils.defaultIfEmpty(newValue, null);
 		}
 		if (command.isChangeInBooleanParameterNamed("taxInclusive",
 				this.taxInclusive == 1 ? true : false)) {
-			final boolean taxInclusive = command
-					.booleanPrimitiveValueOfParameterNamed("taxInclusive");
+			final boolean taxInclusive = command.booleanPrimitiveValueOfParameterNamed("taxInclusive");
 
 			Integer newValue = null;
 
@@ -231,10 +214,11 @@ public class ChargeCodeMaster extends AbstractPersistable<Long> {
 			actualChanges.put("taxInclusive", newValue);
 			this.taxInclusive = newValue;
 		}
-		if (command.isChangeInStringParameterNamed("billFrequencyCode",
-				this.billFrequencyCode)) {
-			final String newValue = command
-					.stringValueOfParameterNamed("billFrequencyCode");
+		if (command.isChangeInStringParameterNamed("billFrequencyCode",this.billFrequencyCode)) {
+			 String newValue = command.stringValueOfParameterNamed("billFrequencyCode");
+			if("UC".equalsIgnoreCase(this.chargeType)){
+				newValue = null;
+			}
 			actualChanges.put("billFrequencyCode", newValue);
 			this.billFrequencyCode = StringUtils.defaultIfEmpty(newValue, null);
 

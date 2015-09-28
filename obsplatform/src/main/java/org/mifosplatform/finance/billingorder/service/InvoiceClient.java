@@ -13,6 +13,7 @@ import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.domain.InvoiceRepository;
 import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.finance.billingorder.serialization.BillingOrderCommandFromApiJsonDeserializer;
+import org.mifosplatform.finance.usagecharges.service.UsageChargesWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.Configuration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
@@ -32,12 +33,14 @@ public class InvoiceClient {
 	private final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer;
 	private final ConfigurationRepository globalConfigurationRepository;
 	private final InvoiceRepository invoiceRepository;
+	private final UsageChargesWritePlatformService usageChargesWritePlatformService;
 	
 
 	@Autowired
 	InvoiceClient(final BillingOrderReadPlatformService billingOrderReadPlatformService,final GenerateBillingOrderService generateBillingOrderService,
 			final BillingOrderWritePlatformService billingOrderWritePlatformService,final BillingOrderCommandFromApiJsonDeserializer apiJsonDeserializer,
-		    final ConfigurationRepository globalConfigurationRepository,final InvoiceRepository invoiceRepository) {
+		    final ConfigurationRepository globalConfigurationRepository,final InvoiceRepository invoiceRepository,
+		    final UsageChargesWritePlatformService usageChargesWritePlatformService) {
 
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.generateBillingOrderService = generateBillingOrderService;
@@ -45,6 +48,7 @@ public class InvoiceClient {
 		this.apiJsonDeserializer = apiJsonDeserializer;
 		this.globalConfigurationRepository = globalConfigurationRepository;
 		this.invoiceRepository = invoiceRepository;
+		this.usageChargesWritePlatformService = usageChargesWritePlatformService;
 	
 	}
 	
@@ -143,6 +147,9 @@ public class InvoiceClient {
 			// Update order-price
 			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
 			System.out.println("---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
+			
+			//Update usage charge's with chargeId
+			this.usageChargesWritePlatformService.updateUsageCharges(billingOrderCommands, singleInvoice);
 			
 			// Update Client Balance
 			this.billingOrderWritePlatformService.updateClientBalance(singleInvoice.getInvoiceAmount(), clientId, false);

@@ -14,6 +14,7 @@ import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
+import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -441,6 +442,7 @@ public class GenerateDisconnectionBill {
 			List<InvoiceTaxCommand> listOfTaxes,DiscountMasterData discountMasterData) {
 
 		 BigDecimal price = billPrice.setScale(Integer.parseInt(this.generateBill.roundingDecimal()),RoundingMode.HALF_UP);
+		 List<UsageCharge> usageCharges = new ArrayList<UsageCharge>();
 		
 		return new BillingOrderCommand(billingOrderData.getClientOrderId(),
 				billingOrderData.getOderPriceId(),
@@ -453,7 +455,7 @@ public class GenerateDisconnectionBill {
 				billingOrderData.getDurationType(), invoiceTillDate.toDate(),
 				price, billingOrderData.getBillingAlign(), listOfTaxes,
 				billingOrderData.getStartDate(), billingOrderData.getEndDate(),
-				discountMasterData, billingOrderData.getTaxInclusive());
+				discountMasterData, billingOrderData.getTaxInclusive(),usageCharges);
 	}
 	
 }
