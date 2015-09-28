@@ -72,12 +72,15 @@ public final class InventoryItemCommandFromApiJsonDeserializer {
         
         
         final String quality = command.stringValueOfParameterNamed("quality");
+        final Long quantity = command.longValueOfParameterNamed("quantity");
         
         baseDataValidator.reset().parameter("grnId").value(grnId).notBlank();
 		baseDataValidator.reset().parameter("itemMasterId").value(itemMasterId).notNull();
 		if(isSerialRequired){
 			baseDataValidator.reset().parameter("serialNumber").value(serialNumber).notBlank().notNull();
 			baseDataValidator.reset().parameter("provisioningSerialNumber").value(provisioningSerialNumber).notBlank().notNull();
+		}else{
+			baseDataValidator.reset().parameter("quantity").value(quantity).notBlank();
 		}
 		baseDataValidator.reset().parameter("status").value(status).notNull();
 		baseDataValidator.reset().parameter("quality").value(quality).notBlank();
@@ -109,6 +112,9 @@ public final class InventoryItemCommandFromApiJsonDeserializer {
        final String serialNumber = fromApiJsonHelper.extractStringNamed("serialNumber",element);
        baseDataValidator.reset().parameter("serialNumber").value(serialNumber).notBlank().notExceedingLengthOf(100);
        }    
+       }else{
+    	   final Long quantity = fromApiJsonHelper.extractLongNamed("quantity",element);
+    	   baseDataValidator.reset().parameter("quantity").value(quantity).notBlank();
        }
         throwExceptionIfValidationWarningsExist(dataValidationErrors);
     }
