@@ -18,9 +18,4 @@ public class PlanNotFundException extends AbstractPlatformResourceNotFoundExcept
 
 	}
 
-public PlanNotFundException(final Long id) {
-	super("error.msg.plan.not.found",
-			"Plan with this Identifier `"+id+"` not found ",id );
-}
-
 }
