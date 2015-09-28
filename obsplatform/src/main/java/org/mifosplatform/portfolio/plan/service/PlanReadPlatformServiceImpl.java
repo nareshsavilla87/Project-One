@@ -162,7 +162,7 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 			   " WHERE b.priceregion_id = a.price_region_id AND b.country_id = c.id AND c.country_name = d.country AND d.address_key = 'PRIMARY'" +
 			   " AND d.client_id =o.client_id and a.plan_id = o.plan_id and  d.state = s.state_name and " +
 			   " (s.id =b.state_id or(b.state_id = 0 and b.country_id = c.id ))), 0)) LEFT JOIN b_priceregion_master prm ON prm.id = pd.priceregion_id" +
-			   " JOIN b_plan_pricing p ON p.plan_id = o.plan_id AND p.price_region_id = prm.id WHERE     sb.is_deleted = 'N' AND sb.contract_period = p.duration" +
+			   " JOIN b_plan_pricing p ON p.plan_id = o.plan_id AND p.is_deleted='N' AND p.price_region_id = prm.id WHERE     sb.is_deleted = 'N' AND sb.contract_period = p.duration" +
 			   " AND o.plan_id = p.plan_id ";	
 
 			/*return " sb.id AS id,sb.contract_period AS contractPeriod,sb.contract_duration AS units,sb.contract_type AS contractType," +
