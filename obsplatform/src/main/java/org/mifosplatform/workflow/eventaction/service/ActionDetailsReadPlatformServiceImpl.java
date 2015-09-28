@@ -13,7 +13,6 @@ import org.json.JSONObject;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.order.data.SchedulingOrderData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.EventActionData;
 import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
@@ -32,12 +31,10 @@ public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPl
 	
 	private final SimpleJdbcCall jdbcCall;
 	private final JdbcTemplate jdbcTemplate;
-	private final PlatformSecurityContext context;
 	
 	@Autowired
-	public  ActionDetailsReadPlatformServiceImpl(final PlatformSecurityContext context, final TenantAwareRoutingDataSource dataSource) {
+	public  ActionDetailsReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
 		
-		this.context = context;
 		this.jdbcCall= new SimpleJdbcCall(dataSource);
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		
@@ -163,9 +160,8 @@ public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPl
 		}
 
 		@Override
-		public SchedulingOrderData mapRow(final ResultSet rs,
-				@SuppressWarnings("unused") final int rowNum)
-				throws SQLException {
+		public SchedulingOrderData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
+			
 			try {
 			Long id = rs.getLong("id");
 			LocalDate startDate= JdbcSupport.getLocalDate(rs,"transactiondate");
@@ -196,6 +192,22 @@ public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPl
 			
 		}catch(EmptyResultDataAccessException accessException){
 
+			return null;
+		}
+	}
+
+	/* (non-Javadoc)
+	 * @see retrieveEventWithAction(String, eventName,String ActionName)
+	 */
+	@Override
+	public ActionDetaislData retrieveEventWithAction(String eventName,String ActionName) {
+	
+		try{
+			EventMappingMapper mapper = new EventMappingMapper();
+			String sql = "select " + mapper.schema() + "and em.action_name = ?";
+			return this.jdbcTemplate.queryForObject(sql, mapper, new Object[] { eventName, ActionName});
+	
+		}catch(EmptyResultDataAccessException accessException){
 			return null;
 		}
 	}
