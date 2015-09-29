@@ -29,7 +29,9 @@ public class ItemDetailsData {
 	private final String accountNumber;
 	private Collection<OfficeData> officeData;
 	private Collection<ItemData> itemMasterData;
-
+	private String units;
+	private Long quantity;
+	
 	public ItemDetailsData(Collection<InventoryGrnData> inventoryGrnData,Collection<MCodeData> qualityDatas,Collection<MCodeData> statusDatas,
 			String serialNumber, String provisionSerialNumber) {
 		
@@ -57,7 +59,7 @@ public class ItemDetailsData {
 
 	public ItemDetailsData(final Long id,final  Long itemMasterId,final String serialNumber,final Long grnId,final  String provisioningSerialNumber,final  String quality,
 			final String status,final Long warranty,final String remarks,final String itemDescription,final String supplier,final Long clientId,final String officeName, 
-			final String accountNumber) {
+			final String accountNumber, String units, Long quantity) {
 		
 		this.id=id;
 		this.itemMasterId=itemMasterId;
@@ -77,6 +79,8 @@ public class ItemDetailsData {
 		this.inventoryGrnDatas=null;
 		this.qualityDatas=null;
 		this.statusDatas=null;
+		this.units = units;
+		this.quantity = quantity;
 	}
 	
 	public ItemDetailsData(Collection<OfficeData> officeData, Collection<ItemData> itemMasterData) {

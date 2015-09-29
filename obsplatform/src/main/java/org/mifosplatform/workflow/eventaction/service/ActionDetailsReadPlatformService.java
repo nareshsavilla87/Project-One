@@ -14,8 +14,9 @@ public interface ActionDetailsReadPlatformService {
 	
 	EventActionProcedureData checkCustomeValidationForEvents(Long clientId,String eventName,String actionName,String resourceId);
 
-
 	List<EventActionData> retrieveAllActionsForProccessing();
 
 	Collection<SchedulingOrderData> retrieveClientSchedulingOrders(Long clientId);
+	
+	ActionDetaislData retrieveEventWithAction(String eventName,String ActionName);
 }
