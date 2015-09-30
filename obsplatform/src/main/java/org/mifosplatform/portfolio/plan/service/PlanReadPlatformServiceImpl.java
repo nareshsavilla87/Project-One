@@ -57,11 +57,11 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 	PlanDataMapper mapper = new PlanDataMapper(this.priceReadPlatformService);
 	
 		if(planType!=null && PREPAID.equalsIgnoreCase(planType)){
-			sql = "select " + mapper.schema()+" AND pm.is_prepaid ='Y'";
+			sql = "select " + mapper.schema()+" AND pm.is_prepaid ='Y' "+"group by pm.id";
 		}else if(planType!=null && planType.equalsIgnoreCase(POST_PAID)){
-		sql = "select " + mapper.schema()+" AND pm.is_prepaid ='N'";
+		sql = "select " + mapper.schema()+" AND pm.is_prepaid ='N' "+"group by pm.id";
 		}else{
-			sql = "select " + mapper.schema();
+			sql = "select " + mapper.schema()+ "group by pm.id";
 		}
    
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
@@ -82,9 +82,12 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 		}
 
 		public String schema() {
-			return "  pm.id,pm.plan_code as planCode,pm.plan_description as planDescription,pm.start_date as startDate," +
-					" pm.end_date as endDate,pm.plan_status as planStatus,pm.is_prepaid AS isprepaid," +
-					" pm.provision_sys as provisionSystem  FROM  b_plan_master pm WHERE pm.is_deleted = 'n' ";
+			return  " pm.id,pm.plan_code as planCode,pm.plan_description as planDescription,pm.start_date as startDate,"+
+                    " pm.end_date as endDate,pm.plan_status as planStatus,pm.is_prepaid AS isprepaid,"+
+                    " pm.provision_sys as provisionSystem,count(o.id) as orders  FROM  b_plan_master pm"+ 
+                    " LEFT OUTER JOIN"+ 
+                    " b_orders o on (pm.id = o.plan_id and o.order_status in(1,4))"+
+                    " WHERE pm.is_deleted = 'n' ";
 
 		}
 
@@ -102,9 +105,10 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 			if(rs.getString("isprepaid").equalsIgnoreCase("Y")){
 			services=priceReadPlatformService.retrieveServiceDetails(id);
 			}
+			final Long count=rs.getLong("orders");
 			final String provisionSystem=rs.getString("provisionSystem");
 			return new PlanData(id, planCode, startDate, endDate,null,null, planStatus, planDescription, provisionSystem, enumstatus,
-					null,null, null,null,null,services,null,null);
+					null,null, null,null,null,services,null,null,count);
 		}
 	}
 
@@ -223,8 +227,9 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 		  context.authenticatedUser();
 	        final String sql = "SELECT pm.id AS id,pm.plan_code AS planCode,pm.plan_description AS planDescription,pm.start_date AS startDate,pm.end_date AS endDate,"
 	        		   +"pm.plan_status AS planStatus,pm.provision_sys AS provisionSys,pm.bill_rule AS billRule,pm.is_prepaid as isPrepaid,"
-	        		  +" pm.allow_topup as allowTopup,v.volume_type as volumeType, v.units as units,pm.is_hw_req as isHwReq,v.units_type as unitType FROM b_plan_master pm  left join b_volume_details v" +
-	        		  " on pm.id = v.plan_id WHERE pm.id = ? AND pm.is_deleted = 'n'";
+	        		  +" pm.allow_topup as allowTopup,v.volume_type as volumeType, v.units as units,pm.is_hw_req as isHwReq,v.units_type as unitType,count(o.id) as orders"+
+	        		   " FROM (b_plan_master pm  left join b_volume_details v on pm.id = v.plan_id) LEFT OUTER JOIN b_orders o on (pm.id = o.plan_id and o.order_status in(1,4))" +
+	        		  "  WHERE pm.id = ? AND pm.is_deleted = 'n' group by pm.id";
 
 
 	        RowMapper<PlanData> rm = new ServiceMapper();
@@ -253,9 +258,10 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 	            final String isHwReq=rs.getString("isHwReq");
 	            final String units=rs.getString("units");
 	            final String unitType=rs.getString("unitType");
+	            final Long count=rs.getLong("orders");
 	            
 	            return new PlanData(id,planCode,startDate,endDate,billRule,null,planStatus,planDescription,
-	            		provisionSys,null,isPrepaid,allowTopup,volume,units,unitType,null,null,isHwReq);
+	            		provisionSys,null,isPrepaid,allowTopup,volume,units,unitType,null,null,isHwReq,count);
 	        }
 	}
 

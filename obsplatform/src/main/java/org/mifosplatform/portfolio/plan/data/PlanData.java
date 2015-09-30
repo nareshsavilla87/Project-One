@@ -41,6 +41,7 @@ public class PlanData {
 	//private Integer planCount = 0;
 	private List<PlanData> data = null;
 	private int planCount;
+	private boolean ordersFlag;
 	
 	public PlanData(Collection<ServiceData> data, List<BillRuleData> billData,List<SubscriptionData> contractPeriod, List<EnumOptionData> status,
 			PlanData datas, Collection<ServiceData> selectedservice,Collection<MCodeData> provisionSysData, List<EnumOptionData> volumeType) {
@@ -81,7 +82,7 @@ public class PlanData {
 	
 	public PlanData(Long id, String planCode, LocalDate startDate,LocalDate endDate, Long bill_rule, String contractPeriod,
 			long status, String planDescription,String provisionSys,EnumOptionData enumstatus, String isPrepaid,
-			String allowTopup, String volume, String units, String unitType, Collection<ServiceData> services, Long contractId, String isHwReq) {
+			String allowTopup, String volume, String units, String unitType, Collection<ServiceData> services, Long contractId, String isHwReq,Long count) {
 
 		this.id = id;
 		this.planCode = planCode;
@@ -105,6 +106,7 @@ public class PlanData {
 		this.isHwReq=isHwReq;
 		this.services=services;
 		this.contractId=contractId;
+		this.ordersFlag=(count>0)?true:false;
 	}
 
 	

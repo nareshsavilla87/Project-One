@@ -34,6 +34,7 @@ public class InventoryGrnData {
 	private String purchaseNo;
 	private Long officeId;
 	private Long availableQuantity;
+	private String units;
 	
 	public InventoryGrnData(){
 		this.id=null;
@@ -60,7 +61,7 @@ public class InventoryGrnData {
 		this.balanceQuantity = orderedQuantity-receivedQuantity;
 	}
 	
-	public InventoryGrnData(Long id,LocalDate purchaseDate,Long itemMasterId,Long orderedQuantity,Long receivedQuantity,String itemDescription, String supplierName,String purchaseNo,Long supplierId,Long officeId){
+	public InventoryGrnData(Long id,LocalDate purchaseDate,Long itemMasterId,Long orderedQuantity,Long receivedQuantity,String itemDescription, String supplierName,String purchaseNo,Long supplierId,Long officeId, String units){
 		this.id=id;
 		this.itemMasterId=itemMasterId;
 		this.orderdQuantity=orderedQuantity;
@@ -72,6 +73,7 @@ public class InventoryGrnData {
 		this.supplierName = supplierName;
 		this.purchaseNo = purchaseNo;
 		this.officeId=officeId;
+		this.units = units;
 	}
 	
 	

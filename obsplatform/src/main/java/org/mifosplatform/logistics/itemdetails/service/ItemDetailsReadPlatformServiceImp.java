@@ -55,7 +55,9 @@ public class ItemDetailsReadPlatformServiceImp implements ItemDetailsReadPlatfor
 			Long clientId = rs.getLong("clientId");
 			String officeName = rs.getString("officeName");
 			String accountNumber = rs.getString("accountNumber");
-			return new ItemDetailsData(id,itemMasterId,serialNumber,grnId,provisioningSerialNumber,quality,status,warranty,remarks,itemDescription,supplier,clientId,officeName,accountNumber);
+			String units = rs.getString("units");
+			Long quantity = rs.getLong("quantity");
+			return new ItemDetailsData(id,itemMasterId,serialNumber,grnId,provisioningSerialNumber,quality,status,warranty,remarks,itemDescription,supplier,clientId,officeName,accountNumber, units, quantity);
 		}
 		
 		public String schema(){
@@ -65,7 +67,7 @@ public class ItemDetailsReadPlatformServiceImp implements ItemDetailsReadPlatfor
 					+ " s.supplier_description as supplier, "
 					+ "item.provisioning_serialno as provisioningSerialNumber, item.quality as quality, item.status as status, "
 					+ "item.warranty as warranty, item.remarks as remarks, master.item_description as itemDescription, "
-					+ "item.client_id as clientId, "
+					+ "item.client_id as clientId, master.units as units, item.received_quantity as quantity, "
 					+ "(select account_no from m_client where id = client_id) as accountNumber "
 					+ "from b_item_detail item left outer join b_item_master master on item.item_master_id = master.id "
 					+ "left outer join m_office office on item.office_id=office.id "
@@ -287,7 +289,7 @@ private final class SerialNumberForValidation implements RowMapper<String>{
 		Long clientId = rs.getLong("clientId");
 		String officeName = rs.getString("officeName");
 		return new ItemDetailsData(id, itemMasterId, serialNumber, grnId, provisioningSerialNumber, quality, status, warranty, remarks,
-				itemDescription, supplier, clientId, officeName, null);
+				itemDescription, supplier, clientId, officeName, null, null, null);
 		}
 		
 		}

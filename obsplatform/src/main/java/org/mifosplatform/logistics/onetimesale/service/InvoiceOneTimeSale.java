@@ -47,7 +47,6 @@ public class InvoiceOneTimeSale {
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final ClientRepositoryWrapper clientRepository;
 	
-	
 	@Autowired
 	public InvoiceOneTimeSale(final GenerateBill generateBill,final BillingOrderWritePlatformService billingOrderWritePlatformService,
 			final GenerateBillingOrderService generateBillingOrderService,final GenerateDisconnectionBill generateDisconnectionBill,
