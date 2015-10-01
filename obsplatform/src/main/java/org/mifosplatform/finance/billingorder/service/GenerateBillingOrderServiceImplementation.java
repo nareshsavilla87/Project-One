@@ -118,10 +118,10 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 						billingOrderCommands.add(billingOrderCommand);
 
 					}
-				}else if(generateBill.isChargeTypeUC(billingOrderData)){
+				}/*else if(generateBill.isChargeTypeUC(billingOrderData)){
 					
 					System.out.println("---- UC ---");
-				}
+				}*/
 
 			}
 		} else {
