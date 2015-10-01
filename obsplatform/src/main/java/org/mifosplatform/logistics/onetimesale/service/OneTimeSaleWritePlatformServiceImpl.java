@@ -28,7 +28,6 @@ import org.mifosplatform.logistics.item.service.ItemReadPlatformService;
 import org.mifosplatform.logistics.itemdetails.data.InventoryGrnData;
 import org.mifosplatform.logistics.itemdetails.domain.InventoryGrn;
 import org.mifosplatform.logistics.itemdetails.domain.InventoryGrnRepository;
-import org.mifosplatform.logistics.itemdetails.exception.OrderQuantityExceedsException;
 import org.mifosplatform.logistics.itemdetails.service.ItemDetailsWritePlatformService;
 import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
 import org.mifosplatform.logistics.onetimesale.domain.OneTimeSale;
