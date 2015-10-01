@@ -73,12 +73,9 @@ public class ReverseInvoice {
 	        
 		}
 		
-		//List<ClientBalanceData> clientBalancesDatas = clientBalanceReadPlatformService.retrieveAllClientBalances(clientId);
-		
 		this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(),clientId,false);
 		
 		this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
-	    //this.billingOrderWritePlatformService.updateOrderPrice(billingOrderCommands);
 		 
 		return invoiceAmount;
 	}else{
