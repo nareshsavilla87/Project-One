@@ -205,7 +205,7 @@ public final class ClientDataValidator {
         if (fromApiJsonHelper.parameterExists(ClientApiConstants.phoneParamName, element)) {
             final String phone = fromApiJsonHelper.extractStringNamed(ClientApiConstants.phoneParamName, element);
             baseDataValidator.reset().parameter(ClientApiConstants.phoneParamName).value(phone).notNull()
-                    .notExceedingLengthOf(11);
+                    .notExceedingLengthOf(16);
         }
       
         if (fromApiJsonHelper.parameterExists(ClientApiConstants.emailParamName, element)) {
