@@ -150,15 +150,17 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 		try{
 			context.authenticatedUser();
 			ItemDetails inventoryItemDetails=null;			
+			inventoryItemCommandFromApiJsonDeserializer.validateForCreate(command);
 			Long item = command.longValueOfParameterNamed("itemMasterId");
 			ItemMaster items = this.itemMasterRepository.findOne(item);
-			Long quantity = command.longValueOfParameterNamed("quantity");
 			Boolean isSerialRequired = true;
+			Long quantity = command.longValueOfParameterNamed("quantity");
 			if(UnitEnumType.ACCESSORIES.toString().equalsIgnoreCase(items.getUnits()) ||
 					UnitEnumType.METERS.toString().equalsIgnoreCase(items.getUnits())){
 				isSerialRequired = false;
 			}
-			inventoryItemCommandFromApiJsonDeserializer.validateForCreate(command, isSerialRequired);
+			
+			inventoryItemCommandFromApiJsonDeserializer.validateForSerialNumber(command.json(), isSerialRequired);
 			inventoryItemDetails = ItemDetails.fromJson(command,fromJsonHelper, isSerialRequired);
 			ItemMaster itemMaster=this.itemRepository.findOne(command.longValueOfParameterNamed("itemMasterId"));
 			InventoryGrn inventoryGrn = inventoryGrnRepository.findOne(command.longValueOfParameterNamed("grnId"));
