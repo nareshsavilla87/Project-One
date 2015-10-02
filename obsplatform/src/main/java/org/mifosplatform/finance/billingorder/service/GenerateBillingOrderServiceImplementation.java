@@ -128,7 +128,6 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 					if(billingOrderCommand !=null)
 						billingOrderCommands.add(billingOrderCommand);
 				}
-
 			}
 		} else {
 			throw new BillingOrderNoRecordsFoundException();

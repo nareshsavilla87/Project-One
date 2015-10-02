@@ -110,8 +110,8 @@ public class GenerateDisconnectionBill {
 			
 			if(discountMasterData !=null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0){
 
-		           if((billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
-		        		   ||billingOrderData.getBillStartDate().compareTo(discountMasterData.getDiscountStartDate().toDate())==0)){
+		           if(billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
+		        		   ||billingOrderData.getBillStartDate().equals(discountMasterData.getDiscountStartDate().toDate())){
 
 		    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
 		    			discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
@@ -132,10 +132,10 @@ public class GenerateDisconnectionBill {
 			   
 	        if((discountMasterData.getDiscountStartDate().toDate().after(billingOrderData.getBillStartDate())
 		    		   || discountMasterData.getDiscountStartDate().toDate().equals(billingOrderData.getBillStartDate())) &&
-		    		     (discountMasterData.getDiscountEndDate().toDate().compareTo(
-		    		      this.generateBill.getDiscountEndDateIfNull(discountMasterData, new LocalDate(billingOrderData.getInvoiceTillDate())))==0
-		    		    ||discountMasterData.getDiscountEndDate().toDate().before(
-		    		       this.generateBill.getDiscountEndDateIfNull(discountMasterData, new LocalDate(billingOrderData.getInvoiceTillDate()))))){
+		       (billingOrderData.getInvoiceTillDate().before(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
+		    		    new LocalDate(billingOrderData.getInvoiceTillDate())))
+		    			|| billingOrderData.getInvoiceTillDate().equals(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
+		    					new LocalDate(billingOrderData.getInvoiceTillDate()))))	){
 
     		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
     			discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
@@ -143,9 +143,9 @@ public class GenerateDisconnectionBill {
     		 }else if("flat".equalsIgnoreCase(discountMasterData.getDiscountType())){
     		     price = price.subtract(discountMasterData.getDiscountRate());
               }
-           }
+             }
 		   }
-
+		   
 			this.startDate = disconnectionDate;
 			this.endDate = new LocalDate(billingOrderData.getInvoiceTillDate());
 			invoiceTillDate = new LocalDate(billingOrderData.getInvoiceTillDate());
@@ -236,10 +236,10 @@ public class GenerateDisconnectionBill {
 
 	       if((discountMasterData.getDiscountStartDate().toDate().after(billingOrderData.getBillStartDate())
 	    		   || discountMasterData.getDiscountStartDate().toDate().equals(billingOrderData.getBillStartDate())) &&
-	    		     ( discountMasterData.getDiscountEndDate().toDate().compareTo(
-	    		      this.generateBill.getDiscountEndDateIfNull(discountMasterData, new LocalDate(billingOrderData.getInvoiceTillDate())))==0
-	    		    ||discountMasterData.getDiscountEndDate().toDate().before(
-	    		       this.generateBill.getDiscountEndDateIfNull(discountMasterData, new LocalDate(billingOrderData.getInvoiceTillDate()))))){
+	    		   (billingOrderData.getInvoiceTillDate().before(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
+			    		    new LocalDate(billingOrderData.getInvoiceTillDate())))
+			    			|| billingOrderData.getInvoiceTillDate().equals(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
+			    					new LocalDate(billingOrderData.getInvoiceTillDate()))))){
 
 		    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
 		    			   discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
