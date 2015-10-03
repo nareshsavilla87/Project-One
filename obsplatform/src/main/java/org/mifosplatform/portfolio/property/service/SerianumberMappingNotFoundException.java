@@ -1,8 +1,8 @@
 package org.mifosplatform.portfolio.property.service;
-import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 
-public class SerianumberMappingNotFoundException extends AbstractPlatformResourceNotFoundException  {
+public class SerianumberMappingNotFoundException extends AbstractPlatformDomainRuleException  {
 	
 	private static final long serialVersionUID = 1L;
 	
