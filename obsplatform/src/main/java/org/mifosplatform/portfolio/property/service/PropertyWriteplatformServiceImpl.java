@@ -254,7 +254,26 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 						newpropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
 						this.propertyMasterRepository.saveAndFlush(newpropertyMaster);
 						this.addressRepository.save(clientAddress);
+					}else{
+						if(newpropertyMaster.getClientId() != null)
+						{
+							if("BILLING1".equalsIgnoreCase(clientAddress.getAddressKey())){
+							List<PropertyDeviceMapping>	proertyallocation = this.propertyDeviceMappingRepository.findByPropertyCode(oldPropertyCode);
+							if(proertyallocation.size() <= 1){
+								oldPropertyMaster.setClientId(null);
+								oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
+								PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
+										CodeNameConstants.CODE_PROPERTY_ALLOCATE, null,oldPropertyMaster.getPropertyCode());
+								this.propertyHistoryRepository.save(propertyHistory);
+								 Address address=this.addressRepository.findOne(clientId);
+								address.delete();
+								this.addressRepository.saveAndFlush(address);
+								}	
+							}
+							
+						}
 					}
+					
 				} else {
 					
 					newpropertyMaster.setClientId(clientId);
