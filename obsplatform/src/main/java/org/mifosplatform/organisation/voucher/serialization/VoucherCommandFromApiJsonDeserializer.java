@@ -63,7 +63,7 @@ public class VoucherCommandFromApiJsonDeserializer {
 		baseDataValidator.reset().parameter("batchName").value(batchName).notBlank();
 
 		final Long length = fromApiJsonHelper.extractLongNamed("length", element);
-	    baseDataValidator.reset().parameter("length").value(length).notNull().notLessThanMin(1);
+	    baseDataValidator.reset().parameter("length").value(length).notNull().notLessThanMin(1).notGreaterThanMax(60);
 	    
 	    final String beginWith = fromApiJsonHelper.extractStringNamed("beginWith", element);
 		baseDataValidator.reset().parameter("beginWith").value(beginWith).notBlank();

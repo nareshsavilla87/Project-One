@@ -246,6 +246,8 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 					this.addressRepository.save(clientAddress);
 
 				}
+				if(!serialNumber.isEmpty() && null!=serialNumber)	{
+					
 				
 				PropertyDeviceMapping  deviceMapping=this.propertyDeviceMappingRepository.findBySerailNumber(serialNumber);
 					deviceMapping.setPropertyCode(newPropertyCode);
@@ -253,7 +255,11 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 				transactionHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),newpropertyMaster.getId(),
 						CodeNameConstants.CODE_PROPERTY_SERVICE_TRANSFER,newpropertyMaster.getClientId(),newpropertyMaster.getPropertyCode());
 				this.propertyHistoryRepository.save(transactionHistory);
-				
+				}else{
+					throw new SerianumberMappingNotFoundException(serialNumber,oldPropertyCode);
+					
+					/*System.out.println("serial number is not mapped with plan");*/
+				}
 				
 
 			} else {
