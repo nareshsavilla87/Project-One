@@ -119,8 +119,11 @@ public class VendorAgreementWritePlatformServiceImpl implements VendorAgreementW
 			DataIntegrityViolationException dve) {
 
 		final Throwable realCause = dve.getMostSpecificCause();
-		if (realCause.getMessage().contains("bvad_uq3")) {
-			throw new PlatformDataIntegrityException("error.msg.vendor.contentcode.lshare.duplicate", "Duplicate Loyaltyshare for Same Content Code");
+		
+		if (realCause.getMessage().contains("bvad_uq3")&&realCause.getMessage().contains("-0")) {
+			throw new PlatformDataIntegrityException("error.msg.vendor.contentcode.lType.duplicate", "Duplicate Loyaltytype for Same Content Code");
+		}else if (realCause.getMessage().contains("bvad_uq3")) {
+			throw new PlatformDataIntegrityException("error.msg.vendor.contentcode.lType.duration.duplicate", "Duplicate Loyaltytype for Same Content Code and duration");
 		}
 
 		LOGGER.error(dve.getMessage(), dve);
