@@ -35,6 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
@@ -229,21 +230,15 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 								PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
 										CodeNameConstants.CODE_PROPERTY_ALLOCATE, null,oldPropertyMaster.getPropertyCode());
 								this.propertyHistoryRepository.save(propertyHistory);
-								 Address address=this.addressRepository.findOne(clientId);
-								address.delete();
-								this.addressRepository.saveAndFlush(address);
 							}	
-							oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
+							oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
 							this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
-							clientAddress.setAddressNo(newpropertyMaster.getPropertyCode());
-							clientAddress.setStreet(newpropertyMaster.getStreet());
-							clientAddress.setCity(newpropertyMaster.getPrecinct());
-							clientAddress.setState(newpropertyMaster.getState());
-							clientAddress.setCountry(newpropertyMaster.getCountry());
-							clientAddress.setZip(newpropertyMaster.getPoBox());
 							clientAddress = new Address(clientId, "BILLING", newpropertyMaster.getPropertyCode(), newpropertyMaster.getStreet(), newpropertyMaster.getPrecinct(),
 									   newpropertyMaster.getState(), newpropertyMaster.getCountry(), newpropertyMaster.getPoBox(),null,null);	
-							
+							String addressNo = oldPropertyCode;
+							Address address=this.addressRepository.findOne(addressNo);
+								address.delete();
+								this.addressRepository.saveAndFlush(address);
 							
 						}else{
 						   clientAddress = new Address(clientId, "BILLING", newpropertyMaster.getPropertyCode(), newpropertyMaster.getStreet(), newpropertyMaster.getPrecinct(),
@@ -254,25 +249,8 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 						newpropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
 						this.propertyMasterRepository.saveAndFlush(newpropertyMaster);
 						this.addressRepository.save(clientAddress);
-					}else{
-						if(newpropertyMaster.getClientId() != null)
-						{
-							if("BILLING1".equalsIgnoreCase(clientAddress.getAddressKey())){
-							List<PropertyDeviceMapping>	proertyallocation = this.propertyDeviceMappingRepository.findByPropertyCode(oldPropertyCode);
-							if(proertyallocation.size() <= 1){
-								oldPropertyMaster.setClientId(null);
-								oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
-								PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
-										CodeNameConstants.CODE_PROPERTY_ALLOCATE, null,oldPropertyMaster.getPropertyCode());
-								this.propertyHistoryRepository.save(propertyHistory);
-								 Address address=this.addressRepository.findOne(clientId);
-								address.delete();
-								this.addressRepository.saveAndFlush(address);
-								}	
-							}
-							
-						}
 					}
+					
 					
 				} else {
 					
@@ -297,6 +275,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 				transactionHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),newpropertyMaster.getId(),
 						CodeNameConstants.CODE_PROPERTY_SERVICE_TRANSFER,newpropertyMaster.getClientId(),newpropertyMaster.getPropertyCode());
 				this.propertyHistoryRepository.save(transactionHistory);
+				
 				}else{
 					throw new SerianumberMappingNotFoundException(serialNumber,oldPropertyCode);
 					
