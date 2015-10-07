@@ -1,6 +1,7 @@
 package org.mifosplatform.portfolio.property.service;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
@@ -34,9 +35,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
 @Service
 public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformService {
 
@@ -205,21 +207,39 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 					// check shifting property same or not
 					if (!oldPropertyCode.equalsIgnoreCase(newPropertyCode) && oldPropertyMaster != null && newpropertyMaster != null
 							&& newpropertyMaster.getClientId() == null) {
-					
+						
 						if("PRIMARY".equalsIgnoreCase(clientAddress.getAddressKey())){
-						oldPropertyMaster.setClientId(null);
-						oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
-						this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
-						PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
-								CodeNameConstants.CODE_PROPERTY_FREE, null,oldPropertyMaster.getPropertyCode());
-						this.propertyHistoryRepository.save(propertyHistory);
-						clientAddress.setAddressNo(newpropertyMaster.getPropertyCode());
-						clientAddress.setStreet(newpropertyMaster.getStreet());
-						clientAddress.setCity(newpropertyMaster.getPrecinct());
-						clientAddress.setState(newpropertyMaster.getState());
-						clientAddress.setCountry(newpropertyMaster.getCountry());
-						clientAddress.setZip(newpropertyMaster.getPoBox());
-
+						List<PropertyDeviceMapping>	proertyallocation = this.propertyDeviceMappingRepository.findByPropertyCode(oldPropertyCode);
+						if(proertyallocation.size() <= 1){
+							oldPropertyMaster.setClientId(null);
+							oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
+							this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
+							PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
+									CodeNameConstants.CODE_PROPERTY_ALLOCATE, null,oldPropertyMaster.getPropertyCode());
+							this.propertyHistoryRepository.save(propertyHistory);
+						}
+						clientAddress.setAddressKey("BILLING1");
+						clientAddress = new Address(clientId, "PRIMARY", newpropertyMaster.getPropertyCode(), newpropertyMaster.getStreet(), newpropertyMaster.getPrecinct(),
+								   newpropertyMaster.getState(), newpropertyMaster.getCountry(), newpropertyMaster.getPoBox(),clientAddress.getPhone(),clientAddress.getEmail());	
+						
+						}else if("BILLING1".equalsIgnoreCase(clientAddress.getAddressKey())){	
+							List<PropertyDeviceMapping>	proertyallocation = this.propertyDeviceMappingRepository.findByPropertyCode(oldPropertyCode);
+							if(proertyallocation.size() <= 1){
+								oldPropertyMaster.setClientId(null);
+								oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
+								PropertyTransactionHistory propertyHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),oldPropertyMaster.getId(),
+										CodeNameConstants.CODE_PROPERTY_ALLOCATE, null,oldPropertyMaster.getPropertyCode());
+								this.propertyHistoryRepository.save(propertyHistory);
+							}	
+							oldPropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_VACANT);
+							this.propertyMasterRepository.saveAndFlush(oldPropertyMaster);
+							clientAddress = new Address(clientId, "BILLING", newpropertyMaster.getPropertyCode(), newpropertyMaster.getStreet(), newpropertyMaster.getPrecinct(),
+									   newpropertyMaster.getState(), newpropertyMaster.getCountry(), newpropertyMaster.getPoBox(),null,null);	
+							String addressNo = oldPropertyCode;
+							Address address=this.addressRepository.findOne(addressNo);
+								address.delete();
+								this.addressRepository.saveAndFlush(address);
+							
 						}else{
 						   clientAddress = new Address(clientId, "BILLING", newpropertyMaster.getPropertyCode(), newpropertyMaster.getStreet(), newpropertyMaster.getPrecinct(),
 								   newpropertyMaster.getState(), newpropertyMaster.getCountry(), newpropertyMaster.getPoBox(), null,null);	
@@ -228,10 +248,10 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 						newpropertyMaster.setClientId(clientId);
 						newpropertyMaster.setStatus(CodeNameConstants.CODE_PROPERTY_OCCUPIED);
 						this.propertyMasterRepository.saveAndFlush(newpropertyMaster);
-						
 						this.addressRepository.save(clientAddress);
 					}
-
+					
+					
 				} else {
 					
 					newpropertyMaster.setClientId(clientId);
@@ -255,6 +275,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 				transactionHistory = new PropertyTransactionHistory(DateUtils.getLocalDateOfTenant(),newpropertyMaster.getId(),
 						CodeNameConstants.CODE_PROPERTY_SERVICE_TRANSFER,newpropertyMaster.getClientId(),newpropertyMaster.getPropertyCode());
 				this.propertyHistoryRepository.save(transactionHistory);
+				
 				}else{
 					throw new SerianumberMappingNotFoundException(serialNumber,oldPropertyCode);
 					
