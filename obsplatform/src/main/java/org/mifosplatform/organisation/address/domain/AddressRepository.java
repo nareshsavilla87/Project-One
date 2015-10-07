@@ -16,4 +16,9 @@ public interface AddressRepository  extends JpaRepository<Address, Long>,JpaSpec
 
 	@Query("from Address address where address.clientId=:clientId and address.addressNo =:oldPropertyCode and deleted='n'")
 	Address findOneByClientIdAndPropertyCode(@Param("clientId") Long clientId,@Param("oldPropertyCode") String oldPropertyCode);
+
+	@Query("from Address address where address.addressNo=:addressNo and address.addressKey ='BILLING1' and deleted='n'")
+	Address findOne(@Param("addressNo")String addressNo);
+	
+	
 }
