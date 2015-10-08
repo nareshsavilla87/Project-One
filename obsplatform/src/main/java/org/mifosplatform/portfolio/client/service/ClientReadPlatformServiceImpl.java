@@ -101,7 +101,7 @@ public class ClientReadPlatformServiceImpl implements ClientReadPlatformService 
         sqlBuilder.append("select SQL_CALC_FOUND_ROWS ");
         
         sqlBuilder.append(clientMapper.schema());
-        sqlBuilder.append(" where a.address_key in ('PRIMARY','BILLING') and o.hierarchy like ?");
+        sqlBuilder.append(" where a.is_deleted='N' and a.address_key in ('PRIMARY','BILLING','BILLING1') and o.hierarchy like ?");
 
         final String extraCriteria = buildSqlStringFromClientCriteria(searchParameters);
 

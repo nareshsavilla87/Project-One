@@ -50,7 +50,7 @@ public class AddressReadPlatformServiceImpl implements AddressReadPlatformServic
 		if(addressType == null){
 		  sql = "select " + mapper.schema()+" where is_deleted='n' and a.address_key='PRIMARY' and a.client_id="+clientId;
 		}else{
-		  sql = "select " + mapper.schema()+" where is_deleted='n' and a.address_key='"+addressType+"' and a.client_id="+clientId;
+		  sql = "select " + mapper.schema()+" where is_deleted='n' and a.address_key like'"+addressType+"%' and a.client_id="+clientId;
 		}
 		return this.jdbcTemplate.query(sql, mapper, new Object[] {});
 		}catch (final EmptyResultDataAccessException e) {
