@@ -19,6 +19,7 @@ public class AssociationData {
 		private String provisionNumber;
 		private Long saleId;
 		private Long itemId;
+		private String propertyCode;
 		private Collection<EnumValuesData> enumValuesDatas;
 		
 	
@@ -62,10 +63,11 @@ public class AssociationData {
 		this.orderId=id;
 	}
 
-	public AssociationData(String serialNum, String provisionNumber,String allocationType) {
+	public AssociationData(String serialNum, String provisionNumber,String allocationType, String propertyCode) {
 	    this.serialNum=serialNum;
 	    this.provisionNumber=provisionNumber;
 	    this.allocationType=allocationType;
+	    this.propertyCode =propertyCode;
 	}
 
 	public void addHardwareDatas(List<AssociationData> hardwareDatas){
@@ -131,6 +133,14 @@ public class AssociationData {
 
 	public Long getItemId() {
 		return itemId;
+	}
+
+	public String getPropertyCode() {
+		return propertyCode;
+	}
+
+	public void setPropertyCode(String propertyCode) {
+		this.propertyCode = propertyCode;
 	}
 
 	
