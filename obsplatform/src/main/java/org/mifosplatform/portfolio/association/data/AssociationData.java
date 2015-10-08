@@ -6,30 +6,33 @@ import java.util.List;
 import org.mifosplatform.billing.emun.data.EnumValuesData;
 
 public class AssociationData {
+
 	private Long orderId;
 	private String planCode;
 	private String itemCode;
 	private String serialNum;
 	private Long id;
 	private Long planId;
+	private List<AssociationData> hardwareData;
+	private List<AssociationData> planData;
 	private Long clientId;
 	private String allocationType;
 	private String provisionNumber;
 	private Long saleId;
 	private Long itemId;
+	private String propertyCode;
 	private Long serviceId;
 	private Collection<EnumValuesData> enumValuesDatas;
-	private List<AssociationData> hardwareData;
-	private List<AssociationData> planData;
 
-	public AssociationData(Long orderId, Long id, String planCode,String itemCode, String serialNum, Long planId) {
 
-		this.orderId = orderId;
-		this.planCode = planCode;
-		this.itemCode = itemCode;
-		this.serialNum = serialNum;
-		this.planId = planId;
-		this.id = id;
+	public AssociationData(Long orderId,Long id, String planCode, String itemCode,String serialNum,Long planId) {
+		
+		this.orderId=orderId;
+		this.planCode=planCode;
+		this.itemCode=itemCode;
+		this.serialNum=serialNum;
+		this.planId=planId;
+		this.id=id;
 
 	}
 
@@ -73,11 +76,13 @@ public class AssociationData {
 		this.orderId = id;
 	}
 
-	public AssociationData(String serialNum, String provisionNumber,String allocationType) {
 
-		this.serialNum = serialNum;
-		this.provisionNumber = provisionNumber;
-		this.allocationType = allocationType;
+	public AssociationData(String serialNum, String provisionNumber,String allocationType, String propertyCode) {
+	    this.serialNum=serialNum;
+	    this.provisionNumber=provisionNumber;
+	    this.allocationType=allocationType;
+	    this.propertyCode =propertyCode;
+
 	}
 
 	public void addHardwareDatas(List<AssociationData> hardwareDatas) {
@@ -143,6 +148,14 @@ public class AssociationData {
 
 	public Long getItemId() {
 		return itemId;
+	}
+	
+	public String getPropertyCode() {
+		return propertyCode;
+	}
+
+	public void setPropertyCode(String propertyCode) {
+		this.propertyCode = propertyCode;
 	}
 
 	public Long getServiceId() {
