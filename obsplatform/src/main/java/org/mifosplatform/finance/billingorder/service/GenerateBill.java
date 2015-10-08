@@ -349,7 +349,7 @@ public class GenerateBill {
 	}
 
 	// Disconnection credit price
-	private BigDecimal getDisconnectionCredit(LocalDate startDate,LocalDate endDate, BigDecimal amount, String durationType,
+	protected BigDecimal getDisconnectionCredit(LocalDate startDate,LocalDate endDate, BigDecimal amount, String durationType,
 			Integer chargeDuration) {
 
 		LocalDate durationDate = startDate.plusMonths(chargeDuration).minusDays(1);
@@ -454,17 +454,28 @@ public class GenerateBill {
 		List<InvoiceTaxCommand> listOfTaxes = new ArrayList<>();
 
 		if (this.isDiscountApplicable(startDate, discountMasterData, endDate)) {
-			
+
 			discountMasterData = this.calculateDiscount(discountMasterData,price);
+
+			// Tax is calculated on netChages..whenever customer has tax exemption false and discount applicabled
+			if (!billingOrderData.isTaxExemption())
+				listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());
+
+		} else if (this.isPromotionAtMiddleOfMonth(startDate,discountMasterData, endDate, billingOrderData)) {
+
+			BigDecimal promoPrice = this.getDisconnectionCredit(discountMasterData.getDiscountEndDate().plusDays(1),
+					endDate, price, billingOrderData.getDurationType(),billingOrderData.getChargeDuration());
 			
-			// Tax is calculated on netChages..whenever customer has tax exemption false
-			if(!billingOrderData.isTaxExemption())
-			    listOfTaxes = this.calculateTax(billingOrderData,discountMasterData.getDiscountedChargeAmount());
+			 discountMasterData.setDiscountAmount(price.subtract(promoPrice).setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP));
+			 discountMasterData.setDiscountedChargeAmount(promoPrice.setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP));
+
+			if (!billingOrderData.isTaxExemption())
+				listOfTaxes = this.calculateTax(billingOrderData, promoPrice);
 
 		} else {
 			// Tax is calculated on charges ..whenever customer has tax exemption false
-			if(!billingOrderData.isTaxExemption())
-			    listOfTaxes = this.calculateTax(billingOrderData, price);
+			if (!billingOrderData.isTaxExemption())
+				listOfTaxes = this.calculateTax(billingOrderData, price);
 		}
 
 		return listOfTaxes;
@@ -536,9 +547,10 @@ public class GenerateBill {
 		boolean isDiscountApplicable = false;
 
 		if (discountMasterData != null) {
-			if ((chargeStartDate.toDate().after(discountMasterData.getDiscountStartDate().toDate()) || 
-					(chargeStartDate.toDate().compareTo(discountMasterData.getDiscountStartDate().toDate()) == 0))
-					&& chargeStartDate.toDate().before(this.getDiscountEndDateIfNull(discountMasterData,chargeEndDate))) {
+			if ((chargeStartDate.toDate().after(discountMasterData.getDiscountStartDate().toDate()) 
+					|| chargeStartDate.toDate().equals(discountMasterData.getDiscountStartDate().toDate()))
+					&& (chargeEndDate.toDate().before(this.getDiscountEndDateIfNull(discountMasterData,chargeEndDate)) 	
+					||	chargeEndDate.toDate().equals(this.getDiscountEndDateIfNull(discountMasterData,chargeEndDate)))) {
 
 				isDiscountApplicable = true;
 			}
@@ -567,7 +579,7 @@ public class GenerateBill {
 		return isDiscountPercentage;
 	}
 
-	// if is discount
+	// if is flat
 	public boolean isDiscountFlat(DiscountMasterData discountMasterData) {
 		boolean isDiscountFlat = false;
 		if ("Flat".equalsIgnoreCase(discountMasterData.getDiscountType())) {
@@ -657,6 +669,29 @@ public class GenerateBill {
 			return String.valueOf(2);
 		}
 		
+	}
+	
+	/**
+	 * @param startDate
+	 * @param discountMasterData
+	 * @param endDate
+	 * @param billingOrderData
+	 * @return boolean
+	 */
+	public boolean isPromotionAtMiddleOfMonth(LocalDate startDate,DiscountMasterData discountMasterData, 
+			LocalDate chargeEndDate,BillingOrderData billingOrderData) {
+
+		boolean isPromotionAtMiddleOfMonth = false;
+
+		if (discountMasterData != null && discountMasterData.getDiscountEndDate() != null) {
+
+			if (chargeEndDate.getYear() == discountMasterData.getDiscountEndDate().getYear() && 
+					chargeEndDate.getMonthOfYear() == discountMasterData.getDiscountEndDate().getMonthOfYear()) {
+				isPromotionAtMiddleOfMonth = true;
+			}
+		}
+
+		return isPromotionAtMiddleOfMonth;
 	}
 
 }
