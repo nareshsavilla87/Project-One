@@ -21,6 +21,8 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.billing.payterms.data.PaytermData;
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
@@ -43,7 +45,9 @@ import org.mifosplatform.portfolio.order.data.OrderLineData;
 import org.mifosplatform.portfolio.order.data.OrderPriceData;
 import org.mifosplatform.portfolio.order.service.OrderAddOnsReadPlaformService;
 import org.mifosplatform.portfolio.order.service.OrderReadPlatformService;
+import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
 import org.mifosplatform.portfolio.plan.data.PlanCodeData;
+import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.service.PlanReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -68,13 +72,15 @@ public class OrdersApiResource {
 	  private final OrderAddOnsReadPlaformService orderAddOnsReadPlaformService;
 	  private final DefaultToApiJsonSerializer<OrderData> toApiJsonSerializer;
 	  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
+	  private final OrderWritePlatformService orderWritePlatformService;
 	  
 
 	  @Autowired
 	   public OrdersApiResource(final PlatformSecurityContext context,final DefaultToApiJsonSerializer<OrderData> toApiJsonSerializer, 
 	   final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
 	   final OrderReadPlatformService orderReadPlatformService,final PlanReadPlatformService planReadPlatformService, 
-	   final MCodeReadPlatformService mCodeReadPlatformService,final OrderAddOnsReadPlaformService orderAddOnsReadPlaformService) {
+	   final MCodeReadPlatformService mCodeReadPlatformService,final OrderAddOnsReadPlaformService orderAddOnsReadPlaformService,
+	   final OrderWritePlatformService orderWritePlatformService) {
 
 
 		        this.context = context;
@@ -85,15 +91,20 @@ public class OrdersApiResource {
 		        this.orderAddOnsReadPlaformService=orderAddOnsReadPlaformService;
 		        this.apiRequestParameterHelper = apiRequestParameterHelper;
 		        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-		        
+		        this.orderWritePlatformService = orderWritePlatformService;
 		    }	
 	  
 	@POST
 	@Path("{clientId}")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String createOrder(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
- 	    final CommandWrapper commandRequest = new CommandWrapperBuilder().createOrder(clientId).withJson(apiRequestBodyAsJson).build();
+	public String createOrder(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) throws JSONException {
+		JSONObject object = new JSONObject(apiRequestBodyAsJson);
+		if(object.has("planCode")){
+			Plan plan = this.orderWritePlatformService.findOneWithNotFoundDetection(object.getLong("planCode"));
+			object.put("planDescription", plan.getDescription());
+		}
+ 	    final CommandWrapper commandRequest = new CommandWrapperBuilder().createOrder(clientId).withJson(object.toString()).build();
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         return this.toApiJsonSerializer.serialize(result);
 	}

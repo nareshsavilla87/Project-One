@@ -19,6 +19,7 @@ import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeMaster;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeRepository;
 import org.mifosplatform.billing.promotioncodes.exception.PromotionCodeNotFoundException;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
+import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.service.InvoiceClient;
 import org.mifosplatform.finance.billingorder.service.ReverseInvoice;
@@ -211,7 +212,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.invoiceClient = invoiceClient;
 		this.fromJsonHelper = fromJsonHelper;
 		this.planReadPlatformService = planReadPlatformService;
-
 
 	}
 	
@@ -1274,7 +1274,8 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		}
   }
   
-	private Plan findOneWithNotFoundDetection(final Long planId) {
+  @Override
+  public Plan findOneWithNotFoundDetection(final Long planId) {
 	
 		Plan plan = this.planRepository.findPlanCheckDeletedStatus(planId);
 	
