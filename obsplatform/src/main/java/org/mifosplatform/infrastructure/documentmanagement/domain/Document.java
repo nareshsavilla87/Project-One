@@ -46,6 +46,14 @@ public class Document extends AbstractPersistable<Long> {
 
     @Column(name = "location", length = 500)
     private String location;
+    
+    @Column(name="is_delete")
+    private char deleted = 'N';
+    
+    public void delete() {
+	    this.name=this.name+"_DEL_"+this.fileName;
+		this.deleted = 'Y';
+    }
 
     public Document() {}
 
@@ -152,4 +160,5 @@ public class Document extends AbstractPersistable<Long> {
         this.location = location;
     }
 
+	
 }

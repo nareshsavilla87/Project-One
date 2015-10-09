@@ -49,7 +49,7 @@ public class DocumentReadPlatformServiceImpl implements DocumentReadPlatformServ
         // has data
         // scope for the particular entities
         final DocumentMapper mapper = new DocumentMapper(true,true);
-        final String sql = "select " + mapper.schema() + " order by d.id";
+        final String sql = "select " + mapper.schema() + " and d.is_delete='N' order by d.id";
         return this.jdbcTemplate.query(sql, mapper, new Object[] { entityType, entityId });
     }
 

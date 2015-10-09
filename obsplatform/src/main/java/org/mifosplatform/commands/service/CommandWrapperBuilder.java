@@ -321,10 +321,11 @@ public class CommandWrapperBuilder {
 	}
 
 	public CommandWrapperBuilder deleteClientIdentifier(final Long clientId,
-			final Long clientIdentifierId) {
+			final Long clientIdentifierId, final Long fileId) {
 		this.actionName = "DELETE";
 		this.entityName = "CLIENTIDENTIFIER";
 		this.entityId = clientIdentifierId;
+		this.subentityId = fileId;
 		this.clientId = clientId;
 		this.href = "/clients/" + clientId + "/identifiers/"
 				+ clientIdentifierId;
