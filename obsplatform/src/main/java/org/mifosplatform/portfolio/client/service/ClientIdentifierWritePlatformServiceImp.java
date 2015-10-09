@@ -14,6 +14,8 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
+import org.mifosplatform.infrastructure.documentmanagement.domain.Document;
+import org.mifosplatform.infrastructure.documentmanagement.domain.DocumentRepository;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.client.command.ClientIdentifierCommand;
 import org.mifosplatform.portfolio.client.domain.Client;
@@ -44,17 +46,20 @@ public class ClientIdentifierWritePlatformServiceImp implements ClientIdentifier
     private final ClientIdentifierRepository clientIdentifierRepository;
     private final CodeValueRepositoryWrapper codeValueRepository;
     private final ClientIdentifierCommandFromApiJsonDeserializer apiJsonDeserializer;
+    private final DocumentRepository documentRepository;
+    
 
     @Autowired
     public ClientIdentifierWritePlatformServiceImp(final PlatformSecurityContext context,
             final ClientRepositoryWrapper clientRepository, final ClientIdentifierRepository clientIdentifierRepository,
             final CodeValueRepositoryWrapper codeValueRepository,
-            final ClientIdentifierCommandFromApiJsonDeserializer apiJsonDeserializer) {
+            final ClientIdentifierCommandFromApiJsonDeserializer apiJsonDeserializer,final DocumentRepository documentRepository) {
         this.context = context;
         this.clientRepository = clientRepository;
         this.clientIdentifierRepository = clientIdentifierRepository;
         this.codeValueRepository = codeValueRepository;
         this.apiJsonDeserializer = apiJsonDeserializer;
+        this.documentRepository = documentRepository;
     }
 
     /* (non-Javadoc)
@@ -160,20 +165,25 @@ public class ClientIdentifierWritePlatformServiceImp implements ClientIdentifier
      */
     @Transactional
     @Override
-    public CommandProcessingResult deleteClientIdentifier(final Long clientId, final Long identifierId, final Long commandId) {
+    public CommandProcessingResult deleteClientIdentifier(final Long clientId, final Long identifierId, final Long fileId, final Long commandId) {
 
         final Client client = this.clientRepository.findOneWithNotFoundDetection(clientId);
-
+        
+        if(fileId == null){
         final ClientIdentifier clientIdentifier = this.clientIdentifierRepository.findOne(identifierId);
         if (clientIdentifier == null) { throw new ClientIdentifierNotFoundException(identifierId); }
         this.clientIdentifierRepository.delete(clientIdentifier);
-
+        }else{
+        	final Document document = this.documentRepository.findOne(fileId);
+        	document.delete();
+	        this.documentRepository.save(document);
+        }
         return new CommandProcessingResultBuilder() //
-                .withCommandId(commandId) //
-                .withOfficeId(client.officeId()) //
-                .withClientId(clientId) //
-                .withEntityId(identifierId) //
-                .build();
+        .withCommandId(commandId) //
+        .withOfficeId(client.officeId()) //
+        .withClientId(clientId) //
+        .withEntityId(identifierId) //
+        .build();
     }
 
     private void handleClientIdentifierDataIntegrityViolation(final String documentTypeLabel, final Long documentTypeId,
@@ -192,4 +202,6 @@ public class ClientIdentifierWritePlatformServiceImp implements ClientIdentifier
     private void logAsErrorUnexpectedDataIntegrityException(final DataIntegrityViolationException dve) {
     	LOGGER.error(dve.getMessage(), dve);
     }
+
+	
 }
