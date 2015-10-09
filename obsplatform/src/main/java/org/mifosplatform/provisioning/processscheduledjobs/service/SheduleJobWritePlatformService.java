@@ -35,4 +35,6 @@ public interface SheduleJobWritePlatformService {
 
 	void processingDisconnectUnpaidCustomers();
 
+	void processingCustomerUsageCharges();
+
 }
