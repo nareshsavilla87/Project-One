@@ -171,7 +171,7 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 		      }
 		 }
 		 
-		 chargeAmount = chargeAmount.setScale(Integer.parseInt(this.generateBill.roundingDecimal()),RoundingMode.HALF_UP);
+		 chargeAmount = chargeAmount.add(billingOrderData.getPrice()).setScale(Integer.parseInt(this.generateBill.roundingDecimal()),RoundingMode.HALF_UP);
 		 
          billingOrderCommand= new BillingOrderCommand(billingOrderData.getClientOrderId(),billingOrderData.getOderPriceId(),
         		 billingOrderData.getClientId(), chargeStartDate.toDate(),chargeEndDate.plusDays(1).toDate(),chargeEndDate.toDate(),

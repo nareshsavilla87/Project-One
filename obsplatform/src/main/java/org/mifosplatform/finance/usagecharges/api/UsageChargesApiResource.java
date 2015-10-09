@@ -15,10 +15,8 @@ import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
 import org.mifosplatform.finance.usagecharges.data.UsageChargesData;
 import org.mifosplatform.infrastructure.codes.data.CodeData;
-import org.mifosplatform.infrastructure.core.api.ApiRequestParameterHelper;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -39,21 +37,16 @@ public class UsageChargesApiResource {
 
 	private final static String RESOURCENAMEFORPERMISSIONS = "CHARGES";
 
-	private final PlatformSecurityContext context;
 	private final DefaultToApiJsonSerializer<UsageChargesData> toApiJsonSerializer;
-	private final ApiRequestParameterHelper apiRequestParameterHelper;
+
 	private final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService;
 
 	@Autowired
 	public UsageChargesApiResource(
-			final PlatformSecurityContext context,
 			final DefaultToApiJsonSerializer<UsageChargesData> toApiJsonSerializer,
-			final ApiRequestParameterHelper apiRequestParameterHelper,
 			final PortfolioCommandSourceWritePlatformService commandSourceWritePlatformService) {
 
-		this.context = context;
 		this.toApiJsonSerializer = toApiJsonSerializer;
-		this.apiRequestParameterHelper = apiRequestParameterHelper;
 		this.commandSourceWritePlatformService = commandSourceWritePlatformService;
 
 	}

@@ -239,6 +239,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			System.out.println("Filling report failed...");
 			e.printStackTrace();
 		}
+		
 		return printInvoiceLocation;	
    }
 	
