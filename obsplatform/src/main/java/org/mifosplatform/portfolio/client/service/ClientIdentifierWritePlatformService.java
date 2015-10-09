@@ -14,5 +14,5 @@ public interface ClientIdentifierWritePlatformService {
 
     CommandProcessingResult updateClientIdentifier(Long clientId, Long clientIdentifierId, JsonCommand command);
 
-    CommandProcessingResult deleteClientIdentifier(Long clientId, Long clientIdentifierId, Long commandId);
+    CommandProcessingResult deleteClientIdentifier(Long clientId, Long clientIdentifierId, Long fileId, Long commandId);
 }

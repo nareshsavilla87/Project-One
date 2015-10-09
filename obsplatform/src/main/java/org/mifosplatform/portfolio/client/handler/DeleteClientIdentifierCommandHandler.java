@@ -27,7 +27,7 @@ public class DeleteClientIdentifierCommandHandler implements NewCommandSourceHan
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 
-        return this.clientIdentifierWritePlatformService.deleteClientIdentifier(command.getClientId(), command.entityId(),
+        return this.clientIdentifierWritePlatformService.deleteClientIdentifier(command.getClientId(), command.entityId(),command.subentityId(),
                 command.commandId());
     }
 }
