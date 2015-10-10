@@ -44,6 +44,8 @@ import org.mifosplatform.finance.paymentsgateway.domain.PaymentGateway;
 import org.mifosplatform.finance.paymentsgateway.domain.PaymentGatewayRepository;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayReadPlatformService;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayWritePlatformService;
+import org.mifosplatform.finance.usagecharges.data.UsageChargesData;
+import org.mifosplatform.finance.usagecharges.service.UsageChargesWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.domain.Configuration;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
@@ -149,6 +151,7 @@ private final ConfigurationRepository configurationRepository;
 private final EventActionReadPlatformService eventActionReadPlatformService;
 private final PlatformSecurityContext context;
 private final BatchHistoryRepository batchHistoryRepository;
+private final UsageChargesWritePlatformService usageChargesWritePlatformService;
 
 
 @Autowired
@@ -167,7 +170,8 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
 	   final PaymentGatewayWritePlatformService paymentGatewayWritePlatformService,final EventActionRepository eventActionRepository, 
 	   final PaymentGatewayReadPlatformService paymentGatewayReadPlatformService,final ConfigurationRepository configurationRepository,
 	   final EventActionReadPlatformService eventActionReadPlatformService,final OrderAddOnsWritePlatformService addOnsWritePlatformService,
-	   final PlatformSecurityContext context,final BatchHistoryRepository batchHistoryRepository) {
+	   final PlatformSecurityContext context,final BatchHistoryRepository batchHistoryRepository,
+	   final UsageChargesWritePlatformService usageChargesWritePlatformService) {
 
 
 
@@ -203,6 +207,7 @@ public SheduleJobWritePlatformServiceImpl(final InvoiceClient invoiceClient,fina
 	this.eventActionReadPlatformService = eventActionReadPlatformService;
 	this.context = context;
 	this.batchHistoryRepository = batchHistoryRepository;
+	this.usageChargesWritePlatformService = usageChargesWritePlatformService;
 	
   }
 
@@ -1737,6 +1742,59 @@ public void reportStatmentPdf() {
 			handleCodeDataIntegrityIssues(null, dve);
 		}
 	}
+	
+
+	@Override
+	@CronTarget(jobName = JobName.USAGE_CHARGES)
+	public void processingCustomerUsageCharges() {
+
+		try {
+			System.out.println("Processing Customers Usage Charges.......");
+			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.USAGE_CHARGES.toString());
+			if (data != null) {
+				MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
+				LocalTime date = new LocalTime(zone);
+				String dateTime = date.getHourOfDay()+"_"+date.getMinuteOfHour() +"_"+ date.getSecondOfMinute();
+				String path = FileUtils.generateLogFileDirectory()+JobName.USAGE_CHARGES.toString()+File.separator
+						     +"CDR_"+DateUtils.getLocalDateOfTenant().toString().replace("-", "")+"_" +dateTime+".log";
+				File fileHandler = new File(path.trim());
+				fileHandler.createNewFile();
+				FileWriter fw = new FileWriter(fileHandler);
+				FileUtils.BILLING_JOB_PATH = fileHandler.getAbsolutePath();
+				fw.append("Processing Customers Usage Charges....... \r\n");
+				List<ScheduleJobData> sheduleDatas = this.sheduleJobReadPlatformService.retrieveSheduleJobParameterDetails(data.getBatchName());
+
+				if (!sheduleDatas.isEmpty()) {
+					for (ScheduleJobData scheduleJobData : sheduleDatas) {
+						 fw.append("ScheduleJobData id="+ scheduleJobData.getId() + " ,BatchName="+ scheduleJobData.getBatchName() + " ,query="+ scheduleJobData.getQuery() + "\r\n");
+						 List<UsageChargesData> customerDatas = this.sheduleJobReadPlatformService.getCustomerUsageDataByNumber(scheduleJobData.getQuery(), data);
+						 if (!customerDatas.isEmpty()) {
+							for (UsageChargesData customerData : customerDatas) {
+								fw.append("processing Customer Id :"+ customerData.getClientId() + "\r\n");
+								this.usageChargesWritePlatformService.processCustomerUsageRawData(customerData);
+							}
+						} else {
+							fw.append("no records are available for processing Usage Charges \r\n");
+						}
+					}
+				} else {
+					fw.append("Usage Charges ScheduleJobData Empty \r\n");
+				}
+				fw.append("Usage Charges Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier() + " . \r\n");
+				fw.flush();
+				fw.close();
+			}
+			System.out.println("Usage Charges Job is Completed..."+ ThreadLocalContextUtil.getTenant().getTenantIdentifier());
+		} catch (DataIntegrityViolationException | IOException e) {
+			System.out.println(e);
+			e.printStackTrace();
+		} catch (Exception dve) {
+			System.out.println(dve.getMessage());
+			handleCodeDataIntegrityIssues(null, dve);
+		}
+	}
+	
 	
 }
 

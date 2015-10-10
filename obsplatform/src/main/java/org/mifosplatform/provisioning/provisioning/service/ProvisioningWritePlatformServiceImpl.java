@@ -49,6 +49,8 @@ import org.mifosplatform.portfolio.planmapping.domain.PlanMappingRepository;
 import org.mifosplatform.portfolio.planmapping.execption.PlanMappingNotExist;
 import org.mifosplatform.portfolio.service.domain.ServiceMaster;
 import org.mifosplatform.portfolio.service.domain.ServiceMasterRepository;
+import org.mifosplatform.portfolio.servicemapping.domain.ServiceMapping;
+import org.mifosplatform.portfolio.servicemapping.domain.ServiceMappingRepository;
 import org.mifosplatform.provisioning.preparerequest.data.PrepareRequestData;
 import org.mifosplatform.provisioning.preparerequest.service.PrepareRequestReadplatformService;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
@@ -96,6 +98,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 	private final ProvisioningCommandFromApiJsonDeserializer fromApiJsonDeserializer;
 	private final ProcessRequestReadplatformService processRequestReadplatformService;
 	private final ProcessRequestWriteplatformService processRequestWriteplatformService;
+	private final ServiceMappingRepository serviceMappingRepository;
 
 	@Autowired
 	public ProvisioningWritePlatformServiceImpl(final PlatformSecurityContext context,final ItemDetailsRepository inventoryItemDetailsRepository,
@@ -107,7 +110,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			final ProcessRequestReadplatformService processRequestReadplatformService,final IpPoolManagementJpaRepository ipPoolManagementJpaRepository,
 			final ProcessRequestWriteplatformService processRequestWriteplatformService,final PlanRepository planRepository,
 			final PrepareRequestReadplatformService prepareRequestReadplatformService,final PlanMappingRepository planMappingRepository,
-			final ConfigurationRepository configurationRepository) {
+			final ConfigurationRepository configurationRepository,final ServiceMappingRepository serviceMappingRepository) {
 
 		this.context = context;
 		this.fromJsonHelper = fromJsonHelper;
@@ -129,6 +132,7 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		this.inventoryItemDetailsRepository = inventoryItemDetailsRepository;
 		this.processRequestReadplatformService = processRequestReadplatformService;
 		this.processRequestWriteplatformService = processRequestWriteplatformService;
+		this.serviceMappingRepository = serviceMappingRepository;
 
 	}
 
@@ -345,9 +349,9 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		PlanMapping planMapping= this.planMappingRepository.findOneByPlanId(order.getPlanId());
 		//Configuration configProperty = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SERVICE_DEVICE_MAPPING);
 		
-		if (planMapping == null && "None".equalsIgnoreCase(plan.getProvisionSystem())) {
+		if (planMapping == null && !"None".equalsIgnoreCase(plan.getProvisionSystem())) {
 			throw new PlanMappingNotExist(plan.getPlanCode());
-		}
+		} 
 		if ('Y' == plan.isHardwareReq() && hardwareAssociation.isEmpty()) {
 			throw new PairingNotExistException(order.getId(),plan.getPlanCode());
 		} else if ('N' == plan.isHardwareReq()) {
@@ -358,8 +362,9 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			serialNumber = hardwareAssociation.get(0).getSerialNo();
 		} 
 		else {
-			if (hardwareAssociation.size() != order.getServices().size()) // service level map
-				throw new PairingNotExistException(plan.getPlanCode());
+			if (hardwareAssociation.size() != order.getServices().size()){
+				this.checkServiceProvisionRequired(hardwareAssociation,order,plan);// service level map
+			}
 		}
 		List<ServiceParameters> parameters = this.serviceParametersRepository.findDataByOrderId(orderId);
 			
@@ -400,6 +405,32 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 		}
 			return new CommandProcessingResult(commandProcessId);
 
+	}
+
+	/**
+	 * @param hardwareAssociation
+	 * @param order
+	 * @param plan
+	 */
+	private void checkServiceProvisionRequired(List<HardwareAssociation> hardwareAssociations, Order order,Plan plan) {
+
+		List<OrderLine> services = order.getServices();
+
+		for (OrderLine service : services) {
+			boolean serviceAssociation = true;
+			for (HardwareAssociation association : hardwareAssociations) {
+				if (service.getServiceId().equals(association.getServiceId())) {
+					serviceAssociation = false;
+					break;
+				}
+			}
+			if (serviceAssociation) {
+				List<ServiceMapping> serviceMap = this.serviceMappingRepository.findOneByServiceId(service.getServiceId());
+				if (!serviceMap.isEmpty() && 'Y' == serviceMap.get(0).getIsHwReq())
+					throw new PairingNotExistException(plan.getPlanCode());
+				      break;
+			}
+		}
 	}
 
 	@Transactional

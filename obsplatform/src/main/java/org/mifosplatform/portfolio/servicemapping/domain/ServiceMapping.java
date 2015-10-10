@@ -134,6 +134,10 @@ public class ServiceMapping extends AbstractPersistable<Long> {
 	public void setSortBy(Integer sortBy) {
 		this.sortBy = sortBy;
 	}
+	
+	public char getIsHwReq() {
+		return isHwReq;
+	}
 
 	public Map<String, Object> update(JsonCommand command, boolean isServiceLevelMap) {
 
