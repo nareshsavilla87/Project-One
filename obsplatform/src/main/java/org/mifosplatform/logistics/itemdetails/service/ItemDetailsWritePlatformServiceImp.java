@@ -188,7 +188,6 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 						inventoryGrn.setReceivedQuantity(inventoryGrn.getReceivedQuantity()+quantity);
 						inventoryGrn.setStockQuantity(inventoryGrn.getStockQuantity()+quantity);
 					}
-					this.inventoryGrnRepository.save(inventoryGrn);
 				
 				}
 				else{
@@ -197,6 +196,7 @@ public class ItemDetailsWritePlatformServiceImp implements ItemDetailsWritePlatf
 			
 			}
 			this.inventoryItemDetailsRepository.save(inventoryItemDetails);
+			this.inventoryGrnRepository.save(inventoryGrn);
 			
 			return new CommandProcessingResultBuilder().withEntityId(inventoryItemDetails.getId()).build();
 			}
