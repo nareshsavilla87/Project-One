@@ -13,6 +13,8 @@ public class AssociationData {
 	private String serialNum;
 	private Long id;
 	private Long planId;
+	private List<AssociationData> hardwareData;
+	private List<AssociationData> planData;
 	private Long clientId;
 	private String allocationType;
 	private String provisionNumber;
@@ -21,9 +23,7 @@ public class AssociationData {
 	private String propertyCode;
 	private Long serviceId;
 	private Collection<EnumValuesData> enumValuesDatas;
-	private List<AssociationData> hardwareData;
-	private List<AssociationData> planData;
-		
+
 	public AssociationData(Long orderId,Long id, String planCode, String itemCode,String serialNum,Long planId) {
 		
 		this.orderId=orderId;
@@ -160,8 +160,11 @@ public class AssociationData {
 		return serviceId;
 	}
 
+
 	public Collection<EnumValuesData> getEnumValuesDatas() {
 		return enumValuesDatas;
 	}
+
+
 	
 }
