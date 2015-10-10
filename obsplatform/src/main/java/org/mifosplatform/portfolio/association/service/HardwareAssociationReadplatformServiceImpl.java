@@ -188,6 +188,7 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			public AssociationData mapRow(final ResultSet rs,
 					final int rowNum)
 					throws SQLException {
+				
 				final String serialNum = rs.getString("serialNum");				
 				final String provisionNumber = rs.getString("provisionNum");
 				final String allocationType =rs.getString("allocationType");

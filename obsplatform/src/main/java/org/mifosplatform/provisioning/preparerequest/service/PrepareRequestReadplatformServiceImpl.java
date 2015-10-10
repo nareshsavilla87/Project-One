@@ -60,6 +60,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 	  private final PlanMappingRepository planMappingRepository;
 	  private final ConfigurationRepository configurationRepository;
 	  private final BillingMessageTemplateWritePlatformService billingMessageTemplateWritePlatformService;
+	  private final ServiceMappingRepository serviceMappingRepository;
 
 	
 
@@ -69,7 +70,8 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 	    		final AllocationReadPlatformService allocationReadPlatformService,final PrepareRequsetRepository prepareRequsetRepository,
 	    		final ServiceMappingRepository provisionServiceDetailsRepository,final PlanMappingRepository planMappingRepository,
 	    		final OrderAddonsRepository orderAddonsRepository,final ConfigurationRepository configurationRepository,
-	            final BillingMessageTemplateWritePlatformService billingMessageTemplateWritePlatformService) {
+	            final BillingMessageTemplateWritePlatformService billingMessageTemplateWritePlatformService,
+	            final ServiceMappingRepository serviceMappingRepository) {
 	            
 	    	    this.orderRepository=orderRepository;
 	    	    this.serviceMasterRepository=serviceMasterRepository;
@@ -82,6 +84,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 	            this.planMappingRepository=planMappingRepository;
 	            this.configurationRepository=configurationRepository;
 	            this.billingMessageTemplateWritePlatformService=billingMessageTemplateWritePlatformService;
+	            this.serviceMappingRepository = serviceMappingRepository;
 	        
 	    }
 
@@ -279,36 +282,20 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 
 							Configuration configProperty = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SERVICE_DEVICE_MAPPING);
 
-							if ("Y".equalsIgnoreCase(requestData.getIshardwareReq())&& (configProperty != null && configProperty.isEnabled())) {
+							if ("Y".equalsIgnoreCase(requestData.getIshardwareReq()) && (configProperty != null && configProperty.isEnabled())) {
 
-								if (detailsData.size() != orderLineData.size()) {
-									String status = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
-									if (prepareRequest != null) {
-										prepareRequest.setStatus(status);
-										this.prepareRequsetRepository.save(prepareRequest);
-									}
-									// Update Order Status
-									order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
-									this.orderRepository.saveAndFlush(order);
-									/*JSONArray serviceArray=new JSONArray();
-									for(OrderLine orderLine:orderLineData){
-										boolean serviceExist = true;
-										for(AllocationDetailsData service:detailsData){
-											if(orderLine.getServiceId().equals(service.getServiceId())){
-												serviceExist=false;
-												break;
-											}
+								if (detailsData.size() != orderLineData.size() && this.checkServicesProvisionRequired(detailsData,orderLineData) ) {
+								
+										String status = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
+										if (prepareRequest != null) {
+											prepareRequest.setStatus(status);
+											this.prepareRequsetRepository.save(prepareRequest);
 										}
-										if(serviceExist){
-											JSONObject js=new JSONObject();
-											js.put("serviceId",orderLine.getServiceId());
-											js.put("serviceType",orderLine.getServiceType());
-											serviceArray.add(js);
-										}
+										// Update Order Status
+										order.setStatus(OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getId());
+										this.orderRepository.saveAndFlush(order);
+										errorMessage = "Required Device map not exists with order all services";
 										
-									}*/
-									errorMessage = "order all services are not pairing with devices";
-
 								} else {
 
 									String HardWareId = null;
@@ -444,7 +431,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 					return new CommandProcessingResult(Long.valueOf(-1));
 				}
 			}
-			
+
 			public String stackTraceToString(Throwable e) {
 				StringBuilder sb = new StringBuilder();
 				for (StackTraceElement element : e.getStackTrace()) {
@@ -491,5 +478,32 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 			return 0;
 		}
 	}	
+	
+	
+	/**
+	 * @param detailsData
+	 * @param orderLineData
+	 * @return 
+	 */
+	private boolean checkServicesProvisionRequired(List<AllocationDetailsData> detailsDatas,List<OrderLine> orderLineDatas) {
+
+		for (OrderLine orderLine : orderLineDatas) {
+			boolean serviceAssociation = true;
+			for (AllocationDetailsData detailsData : detailsDatas) {
+				if (orderLine.getServiceId().equals(detailsData.getServiceId())) {
+					serviceAssociation = false;
+					break;
+				}
+			}
+			if (serviceAssociation) {
+				List<ServiceMapping> serviceMap = this.serviceMappingRepository.findOneByServiceId(orderLine.getServiceId());
+				if (!serviceMap.isEmpty() && 'Y' == serviceMap.get(0).getIsHwReq())
+					return true;
+				     break;
+			}
+		}
+		return false;
+		
+	}
 }
 

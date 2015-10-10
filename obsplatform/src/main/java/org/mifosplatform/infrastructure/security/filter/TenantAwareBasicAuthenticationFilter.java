@@ -17,7 +17,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.time.StopWatch;
 import org.joda.time.LocalDate;
-import org.mifosplatform.finance.paymentsgateway.data.RecurringPaymentTransactionTypeConstants;
 import org.mifosplatform.infrastructure.cache.domain.CacheType;
 import org.mifosplatform.infrastructure.cache.service.CacheWritePlatformService;
 import org.mifosplatform.infrastructure.configuration.data.LicenseData;
@@ -40,6 +39,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.codec.Base64;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.authentication.NullRememberMeServices;
 import org.springframework.security.web.authentication.RememberMeServices;
@@ -61,198 +61,215 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
  * If multi-tenant and basic auth credentials are invalid, a http error response
  * is returned.
  */
-public class TenantAwareBasicAuthenticationFilter extends BasicAuthenticationFilter {
 
-	 private static boolean firstRequestProcessed = false;
-     private final static Logger logger = LoggerFactory.getLogger(TenantAwareBasicAuthenticationFilter.class);
+public class TenantAwareBasicAuthenticationFilter extends
+		BasicAuthenticationFilter {
 
-    //ashok changed
-    private AuthenticationDetailsSource<HttpServletRequest,?> authenticationDetailsSource = new WebAuthenticationDetailsSource();
-    private RememberMeServices rememberMeServices = new NullRememberMeServices();
-   
-   
-    @Autowired
-    private AuthenticationEntryPoint authenticationEntryPoint;
-    
-    @Autowired
-    private AuthenticationManager authenticationManager;
-    private TenantDetailsService tenantDetailsService;
-    private ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
-    private final ConfigurationDomainService configurationDomainService;
-    private final CacheWritePlatformService cacheWritePlatformService;
-    private final LicenseUpdateService licenseUpdateService; 
-    private String tenantRequestHeader = "X-Obs-Platform-TenantId";
-    private boolean exceptionIfHeaderMissing = true;
+	private static boolean firstRequestProcessed = false;
+	private final static Logger logger = LoggerFactory.getLogger(TenantAwareBasicAuthenticationFilter.class);
 
-    @Autowired
-    public TenantAwareBasicAuthenticationFilter(final AuthenticationManager authenticationManager,final AuthenticationEntryPoint authenticationEntryPoint,
-    		final ConfigurationDomainService configurationDomainService,final CacheWritePlatformService cacheWritePlatformService,
-    		final TenantDetailsService tenantDetailsService,final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer,
-    		final LicenseUpdateService licenseUpdateService) {
-    	
-        super(authenticationManager, authenticationEntryPoint);
-        this.configurationDomainService=configurationDomainService;
-        this.cacheWritePlatformService=cacheWritePlatformService;
-        this.tenantDetailsService=tenantDetailsService;
-        this.toApiJsonSerializer=toApiJsonSerializer;
-        this.licenseUpdateService=licenseUpdateService;
-    }
+	// ashok changed
+	private AuthenticationDetailsSource<HttpServletRequest, ?> authenticationDetailsSource = new WebAuthenticationDetailsSource();
+	private RememberMeServices rememberMeServices = new NullRememberMeServices();
 
-    @Override
-    public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+	@Autowired
+	private AuthenticationEntryPoint authenticationEntryPoint;
 
-        HttpServletRequest request = (HttpServletRequest) req;
-        HttpServletResponse response = (HttpServletResponse) res;
+	@Autowired
+	private AuthenticationManager authenticationManager;
+	private TenantDetailsService tenantDetailsService;
+	private ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer;
+	private final ConfigurationDomainService configurationDomainService;
+	private final CacheWritePlatformService cacheWritePlatformService;
+	private final LicenseUpdateService licenseUpdateService;
+	private String tenantRequestHeader = "X-Obs-Platform-TenantId";
+	private boolean exceptionIfHeaderMissing = true;
+	private String accessToken = "accessToken";
+	private String credentialsCharset = "UTF-8";
+	private String tenantIdentifier = "tenantIdentifier";
+	private String defaultCode = "default";
+	private String GET = "GET";
+	private String POST = "POST";
 
-        String path=request.getRequestURI();
-        StopWatch task = new StopWatch();
-        task.start();
+	@Autowired
+	public TenantAwareBasicAuthenticationFilter(
+			final AuthenticationManager authenticationManager,
+			final AuthenticationEntryPoint authenticationEntryPoint,
+			final ConfigurationDomainService configurationDomainService,
+			final CacheWritePlatformService cacheWritePlatformService,
+			final TenantDetailsService tenantDetailsService,
+			final ToApiJsonSerializer<PlatformRequestLog> toApiJsonSerializer,
+			final LicenseUpdateService licenseUpdateService) {
 
-        try {
-        	String header = request.getHeader("Authorization");
-        	MifosPlatformTenant tenant;
-        	
-            if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
-                // ignore to allow 'preflight' requests from AJAX applications
-                // in different origin (domain name)
-            	super.doFilter(req, res, chain); //ashok changed please comment when delete the else if statement
-            } else if((path.contains("/api/v1/paymentgateways") && request.getMethod().equalsIgnoreCase("POST")) || 
-            		(path.contains("/api/v1/entitlements/getuser") && request.getMethod().equalsIgnoreCase("GET"))){
-            
-           	    String username= request.getParameter("username");
-                String password= request.getParameter("password");
-                      
-                if(request.getParameterMap().containsKey("tenantIdentifier")){
-                	tenant = this.tenantDetailsService.loadTenantById(request.getParameter("tenantIdentifier"));
-        		}else {
-        			tenant = this.tenantDetailsService.loadTenantById("default");
+		super(authenticationManager, authenticationEntryPoint);
+		this.configurationDomainService = configurationDomainService;
+		this.cacheWritePlatformService = cacheWritePlatformService;
+		this.tenantDetailsService = tenantDetailsService;
+		this.toApiJsonSerializer = toApiJsonSerializer;
+		this.licenseUpdateService = licenseUpdateService;
+	}
+
+	private final MifosPlatformTenant getTenantIdentifier(HttpServletRequest request) {
+
+		if (request.getParameterMap().containsKey(tenantIdentifier)) {
+			return this.tenantDetailsService.loadTenantById(request.getParameter(tenantIdentifier));
+		} else {
+			return this.tenantDetailsService.loadTenantById(defaultCode);
+		}
+	}
+
+	private final void authenticateLocal(HttpServletRequest request,
+			FilterChain chain, HttpServletResponse response, String username,
+			String password) throws IOException, ServletException {
+
+		if (!(org.apache.commons.lang.StringUtils.isBlank(username) || org.apache.commons.lang.StringUtils.isBlank(password))) {
+
+			UsernamePasswordAuthenticationToken authRequest = new UsernamePasswordAuthenticationToken(
+					username, password);
+			authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
+			Authentication authResult = authenticationManager.authenticate(authRequest);
+
+			SecurityContextHolder.getContext().setAuthentication(authResult);
+
+			rememberMeServices.loginSuccess(request, response, authResult);
+
+			onSuccessfulAuthentication(request, response, authResult);
+			
+			chain.doFilter(request, response);
+
+		} else {
+			throw new AuthenticationCredentialsNotFoundException("Credentials are not valid");
+		}
+	}
+
+	@Override
+	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
+
+		MifosPlatformTenant tenant;
+		HttpServletRequest request = (HttpServletRequest) req;
+		HttpServletResponse response = (HttpServletResponse) res;
+
+		String path = request.getRequestURI();
+		StopWatch task = new StopWatch();
+		task.start();
+		
+		try {
+
+			if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+				// ignore to allow 'preflight' requests from AJAX applications in different origin (domain name)
+				super.doFilter(req, res, chain);
+
+			} else if ((path.contains("/api/v1/paymentgateways") && request.getMethod().equalsIgnoreCase(POST))
+					|| (path.contains("/api/v1/entitlements/getuser") && request.getMethod().equalsIgnoreCase(GET))) {
+
+				String username = request.getParameter("username");
+				String password = request.getParameter("password");
+
+				tenant = getTenantIdentifier(request);
+
+				boolean isValid = this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
+				if (!isValid) {
+					throw new InvalidLicenseKeyException("License key Exipired.");
 				}
-                
-                boolean isValid =  this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
-                if(!isValid){
-	        		 throw new InvalidLicenseKeyException("License key Exipired."); 
-                }
-                ThreadLocalContextUtil.setTenant(tenant);
-                
-                if(!(org.apache.commons.lang.StringUtils.isBlank(username) || org.apache.commons.lang.StringUtils.isBlank(password))){
-	            	
-	                UsernamePasswordAuthenticationToken authRequest =
-	                        new UsernamePasswordAuthenticationToken(username, password);
-	                authRequest.setDetails(authenticationDetailsSource.buildDetails(request));
-	                Authentication authResult = authenticationManager.authenticate(authRequest);
-	       
-	                SecurityContextHolder.getContext().setAuthentication(authResult);
-	
-	                rememberMeServices.loginSuccess(request, response, authResult);
-	
-	                onSuccessfulAuthentication(request, response, authResult);
-	                chain.doFilter(request, response);
-                }else{
-               	   throw new AuthenticationCredentialsNotFoundException("Credentials are not valid");
-                }
+				ThreadLocalContextUtil.setTenant(tenant);
 
-           }else if(path.contains("/api/v1/entitlements/getauth") && request.getMethod().equalsIgnoreCase("GET")){
- 
-        	   if(request.getParameterMap().containsKey("tenantIdentifier")){              
-        		   tenant = this.tenantDetailsService.loadTenantById(request.getParameter("tenantIdentifier"));
-        	   }else {  
-        		   tenant = this.tenantDetailsService.loadTenantById("default");
-        	   } 
-               
-	             boolean isValid =  this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
-	        	 if(!isValid){
-	        		 throw new InvalidLicenseKeyException("License key Exipired.");
-	        	 }
-	             ThreadLocalContextUtil.setTenant(tenant);
-	             super.doFilter(req, res, chain);
-               
-          }else if(path.contains("/api/v1/keyinfo")){
-        	 
-        	  if(request.getParameterMap().containsKey("tenantIdentifier")){
-        		  tenant = this.tenantDetailsService.loadTenantById(request.getParameter("tenantIdentifier"));
-        	  }else {
-        		  tenant = this.tenantDetailsService.loadTenantById("default");
-        	  }
-        	  LicenseData licenseData=this.licenseUpdateService.getLicenseDetails(tenant.getLicensekey());
-        	  PrintWriter printWriter = res.getWriter();
-        	  printWriter.print(new LocalDate(licenseData.getKeyDate()));
-        	  
-         }else if(path.contains("/api/v1/licensekey")){
-        	        
-        	  if(request.getParameterMap().containsKey("tenantIdentifier")){         	
-        		  tenant = this.tenantDetailsService.loadTenantById(request.getParameter("tenantIdentifier"));
-        	  }else {      			
-        		  tenant = this.tenantDetailsService.loadTenantById("default");
-        	  }
-        	  
-        	  this.licenseUpdateService.updateLicenseKey(req,tenant);
-        	//  response.sendError(HttpServletResponse.SC_BAD_REQUEST,"send Error");
-        	 
-             	
-            /*  final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");             	
-	             ThreadLocalContextUtil.setTenant(tenant);
-	             super.doFilter(req, res, chain);*/
-              
-         }else {
+				authenticateLocal(request, chain, response, username, password);
 
-               String tenantId = request.getHeader(tenantRequestHeader);
-             
-               if (org.apache.commons.lang.StringUtils.isBlank(tenantId)) {
-                   tenantId = request.getParameter("tenantIdentifier");
-               }
+			} else if (path.contains("/api/v1/entitlements/getauth") && request.getMethod().equalsIgnoreCase(GET)) {
 
-               if (tenantId == null && exceptionIfHeaderMissing) { throw new InvalidTenantIdentiferException(
-                       "No tenant identifier found: Add request header of '" + tenantRequestHeader
-                               + "' or add the parameter 'tenantIdentifier' to query string of request URL."); }
+				tenant = getTenantIdentifier(request);
 
-               // check tenants database for tenantId
-                 tenant = this.tenantDetailsService.loadTenantById(tenantId);
-	             ThreadLocalContextUtil.setTenant(tenant);
-	            
-	             
-	             boolean isValid =  this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
-	        	 if(!isValid){
-	        		 throw new InvalidLicenseKeyException("License key Exipired.");
-	        	 }
-               
-	             if (!firstRequestProcessed) {
-                   final boolean ehcacheEnabled = this.configurationDomainService.isEhcacheEnabled();
-                   if (ehcacheEnabled) {
-                       this.cacheWritePlatformService.switchToCache(CacheType.SINGLE_NODE);
-                   } else {
-                       this.cacheWritePlatformService.switchToCache(CacheType.NO_CACHE);
-                   }
-                   TenantAwareBasicAuthenticationFilter.firstRequestProcessed = true;
-               }
+				boolean isValid = this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
+				if (!isValid) {
+					throw new InvalidLicenseKeyException("License key Exipired.");
+				}
+				ThreadLocalContextUtil.setTenant(tenant);
+				super.doFilter(req, res, chain);
 
-               ThreadLocalContextUtil.setTenant(tenant);
-               //ashokchanged
-               super.doFilter(req, res, chain);
-               //ashok changed
-           }
-            
-            //super.doFilter(req, res, chain); //active this line
-        } catch (InvalidTenantIdentiferException e) {
-            // deal with exception at low level
-            SecurityContextHolder.getContext().setAuthentication(null);
+			} else if (path.contains("/api/v1/keyinfo")) {
 
-            response.addHeader("WWW-Authenticate", "Basic realm=\"" + "Mifos Platform API" + "\"");
-            response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
-        }catch (AuthenticationException failed) {
-            SecurityContextHolder.clearContext();
+				tenant = getTenantIdentifier(request);
 
-            rememberMeServices.loginFail(request, response);
+				LicenseData licenseData = this.licenseUpdateService.getLicenseDetails(tenant.getLicensekey());
+				PrintWriter printWriter = res.getWriter();
+				printWriter.print(new LocalDate(licenseData.getKeyDate()));
 
-            onUnsuccessfulAuthentication(request, response, failed);
+			} else if (path.contains("/api/v1/licensekey")) {
 
-           
-                authenticationEntryPoint.commence(request, response, failed);
-            
-            return;
-        } finally {
-            task.stop();
-            final PlatformRequestLog log = PlatformRequestLog.from(task, request);
-            logger.info(toApiJsonSerializer.serialize(log));
-        }
-    }
+				tenant = getTenantIdentifier(request);
+
+				this.licenseUpdateService.updateLicenseKey(req, tenant);
+				
+			} else if (path.contains("/api/v1/billmaster/invoice/") && request.getMethod().equalsIgnoreCase(GET) 
+					&& request.getParameterMap().containsKey(accessToken)) {
+
+				tenant = getTenantIdentifier(request);
+
+				String accessTokenVal = new String(Base64.decode(request.getParameter(accessToken).getBytes(credentialsCharset)));
+				String[] credentials = accessTokenVal.split(":");
+				String username = credentials[0];
+				String password = credentials[1];
+
+				authenticateLocal(request, chain, response, username, password);
+				this.licenseUpdateService.updateLicenseKey(req, tenant);
+			
+			} else {
+
+				String tenantId = request.getHeader(tenantRequestHeader);
+
+				if (org.apache.commons.lang.StringUtils.isBlank(tenantId)) {
+					tenantId = request.getParameter(tenantIdentifier);
+				}
+
+				if (tenantId == null && exceptionIfHeaderMissing) {
+					throw new InvalidTenantIdentiferException("No tenant identifier found: Add request header of '"		
+							+ tenantRequestHeader + "' or add the parameter 'tenantIdentifier' to query string of request URL.");
+				}
+
+				// check tenants database for tenantId
+				tenant = this.tenantDetailsService.loadTenantById(tenantId);
+				ThreadLocalContextUtil.setTenant(tenant);
+
+				boolean isValid = this.licenseUpdateService.checkIfKeyIsValid(tenant.getLicensekey(), tenant);
+				if (!isValid) {
+					throw new InvalidLicenseKeyException("License key Exipired.");
+				}
+
+				if (!firstRequestProcessed) {
+					final boolean ehcacheEnabled = this.configurationDomainService.isEhcacheEnabled();
+					if (ehcacheEnabled) {
+						this.cacheWritePlatformService.switchToCache(CacheType.SINGLE_NODE);
+					} else {
+						this.cacheWritePlatformService.switchToCache(CacheType.NO_CACHE);
+					}
+					TenantAwareBasicAuthenticationFilter.firstRequestProcessed = true;
+				}
+
+				ThreadLocalContextUtil.setTenant(tenant);
+				super.doFilter(req, res, chain);
+			}
+
+		} catch (InvalidTenantIdentiferException e) {
+			// deal with exception at low level
+			SecurityContextHolder.getContext().setAuthentication(null);
+			response.addHeader("WWW-Authenticate", "Basic realm=\"" + "Mifos Platform API" + "\"");
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, e.getMessage());
+		
+		} catch (AuthenticationException failed) {
+			SecurityContextHolder.clearContext();
+
+			rememberMeServices.loginFail(request, response);
+
+			onUnsuccessfulAuthentication(request, response, failed);
+
+			authenticationEntryPoint.commence(request, response, failed);
+
+			return;
+		
+		} finally {
+			task.stop();
+			final PlatformRequestLog log = PlatformRequestLog.from(task, request);
+			logger.info(toApiJsonSerializer.serialize(log));
+		}
+	}
 }

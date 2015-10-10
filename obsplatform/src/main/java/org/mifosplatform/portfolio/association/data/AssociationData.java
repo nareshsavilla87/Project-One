@@ -24,7 +24,6 @@ public class AssociationData {
 	private Long serviceId;
 	private Collection<EnumValuesData> enumValuesDatas;
 
-
 	public AssociationData(Long orderId,Long id, String planCode, String itemCode,String serialNum,Long planId) {
 		
 		this.orderId=orderId;
@@ -75,7 +74,6 @@ public class AssociationData {
 		this.planCode = planCode;
 		this.orderId = id;
 	}
-
 
 	public AssociationData(String serialNum, String provisionNumber,String allocationType, String propertyCode) {
 	    this.serialNum=serialNum;
@@ -149,7 +147,7 @@ public class AssociationData {
 	public Long getItemId() {
 		return itemId;
 	}
-	
+
 	public String getPropertyCode() {
 		return propertyCode;
 	}
@@ -162,8 +160,11 @@ public class AssociationData {
 		return serviceId;
 	}
 
+
 	public Collection<EnumValuesData> getEnumValuesDatas() {
 		return enumValuesDatas;
 	}
 
+
+	
 }

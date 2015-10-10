@@ -392,7 +392,32 @@ public class DataUploadWritePlatformServiceImp implements DataUploadWritePlatfor
 	   		}
 		   	//writeToFile(fileLocation,errorData);
 		   	
-	   }
+	   }else if(uploadProcess.equalsIgnoreCase("Usage Charges") && new File(fileLocation).getName().contains(".csv")){
+	   		while((line = csvFileBufferedReader.readLine()) != null){
+	   			try{
+	   				line=line.replace(";"," ");
+	   				String[] currentLineData = line.split(splitLineRegX);
+	   				if(currentLineData!=null && currentLineData[0].equalsIgnoreCase("EOF")){
+	   					return  this.dataUploadHelper.updateFile(uploadStatus,totalRecordCount,processRecordCount,errorData);
+	   				}
+	   				jsonString=this.dataUploadHelper.buildJsonForUsageCharge(currentLineData, errorData, i);
+	   				
+	   				if(jsonString != null){
+	   					final CommandWrapper commandRequest = new CommandWrapperBuilder().createUsageChargesRawData().withJson(jsonString).build();
+	   					final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+	   					if(result!=null){
+	   						processRecordCount++;
+	   						errorData.add(new MRNErrorData((long)i, "Success."));
+	   					}
+	   				}
+	   			
+	   			}catch (Exception e) {
+	   				handleDataIntegrityIssues(i, errorData,e);
+	   			}
+	   			totalRecordCount++;
+	   			i++;
+			   }
+	   	}
 	
 		return new CommandProcessingResult(Long.valueOf(1));
 	}catch (FileNotFoundException e) {
