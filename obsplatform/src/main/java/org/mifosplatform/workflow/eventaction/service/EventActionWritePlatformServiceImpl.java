@@ -11,6 +11,9 @@ import net.java.dev.obs.beesmart.AddExternalBeesmartMethod;
 
 import org.apache.commons.lang.StringUtils;
 import org.codehaus.jettison.json.JSONObject;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
+import org.mifosplatform.billing.servicetransfer.service.ServiceTransferReadPlatformService;
 import org.mifosplatform.cms.eventmaster.domain.EventMaster;
 import org.mifosplatform.cms.eventmaster.domain.EventMasterRepository;
 import org.mifosplatform.cms.eventorder.domain.EventOrder;
@@ -24,6 +27,11 @@ import org.mifosplatform.crm.ticketmaster.domain.TicketMaster;
 import org.mifosplatform.crm.ticketmaster.domain.TicketMasterRepository;
 import org.mifosplatform.crm.ticketmaster.service.TicketMasterReadPlatformService;
 import org.mifosplatform.finance.billingorder.api.BillingOrderApiResourse;
+import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
+import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
+import org.mifosplatform.finance.billingorder.domain.Invoice;
+import org.mifosplatform.finance.billingorder.service.BillingOrderWritePlatformService;
+import org.mifosplatform.finance.billingorder.service.GenerateBillingOrderService;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBillingRepository;
 import org.mifosplatform.finance.paymentsgateway.service.PaymentGatewayRecurringWritePlatformService;
@@ -32,6 +40,7 @@ import org.mifosplatform.infrastructure.configuration.domain.ConfigurationConsta
 import org.mifosplatform.infrastructure.configuration.domain.ConfigurationRepository;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
+import org.mifosplatform.logistics.onetimesale.service.InvoiceOneTimeSale;
 import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
 import org.mifosplatform.organisation.message.domain.BillingMessage;
 import org.mifosplatform.organisation.message.domain.BillingMessageRepository;
@@ -50,6 +59,7 @@ import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformSe
 import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderPrice;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
+import org.mifosplatform.portfolio.property.service.PropertyWriteplatformService;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
@@ -91,6 +101,11 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
     private final PaypalRecurringBillingRepository paypalRecurringBillingRepository;
     private final EventActionReadPlatformService eventActionReadPlatformService;
     private final ConfigurationRepository configurationRepository;
+    private final ServiceTransferReadPlatformService serviceTransferReadPlatformService;
+    private final ChargeCodeRepository chargeCodeRepository;
+    private final InvoiceOneTimeSale invoiceOneTimeSale;
+    private final GenerateBillingOrderService generateBillingOrderService;
+    private final BillingOrderWritePlatformService billingOrderWritePlatformService;
     
     
     private BillingMessageTemplate activationTemplates;
@@ -117,7 +132,9 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			final TicketMasterReadPlatformService ticketMasterReadPlatformService,final AppUserReadPlatformService readPlatformService,
 			final PaymentGatewayRecurringWritePlatformService paymentGatewayRecurringWritePlatformService, final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
 			final PaypalRecurringBillingRepository paypalRecurringBillingRepository, final EventActionReadPlatformService eventActionReadPlatformService,
-			final ConfigurationRepository configurationRepository)
+			final ConfigurationRepository configurationRepository, final ServiceTransferReadPlatformService serviceTransferReadPlatformService,
+			final ChargeCodeRepository chargeCodeRepository, final InvoiceOneTimeSale invoiceOneTimeSale,
+			final GenerateBillingOrderService generateBillingOrderService, final BillingOrderWritePlatformService billingOrderWritePlatformService)
 	{
 		this.repository=repository;
 		this.orderRepository=orderRepository;
@@ -139,7 +156,11 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
         this.paypalRecurringBillingRepository = paypalRecurringBillingRepository;
         this.eventActionReadPlatformService = eventActionReadPlatformService;
         this.configurationRepository = configurationRepository;
-        
+        this.serviceTransferReadPlatformService = serviceTransferReadPlatformService;
+        this.chargeCodeRepository = chargeCodeRepository;
+        this.invoiceOneTimeSale = invoiceOneTimeSale;
+        this.generateBillingOrderService = generateBillingOrderService;
+        this.billingOrderWritePlatformService = billingOrderWritePlatformService;
 	}
 	
 	
@@ -587,6 +608,41 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    		
 				    	this.messageDataRepository.save(billingMessage);
 				    	
+				    	break;
+				    	
+				    case EventActionConstants.RECONNECTION_FEE : 
+						   
+				    	List<FeeMasterData> feeData = this.serviceTransferReadPlatformService.retrieveSingleFeeDetails(clientId, "Reconnection");
+				    	
+				    	// call one time invoice
+					
+						final String chargeCode = feeData.get(0).getChargeCode(); 
+						final BigDecimal shiftChargeAmount = feeData.get(0).getDefaultFeeAmount();
+						final Order orderDatas=this.orderRepository.findOne(Long.valueOf(resourceId));
+						final List<OrderPrice> orderPrices=orderDatas.getPrice();
+						ChargeCodeMaster chargeCodeMaster = this.chargeCodeRepository.findOneByChargeCode(chargeCode);
+						if (chargeCode !=null && !StringUtils.isEmpty(chargeCode)) {
+							/*//listOfTaxes = this.invoiceOneTimeSale.calculateTax(clientId, shiftChargeAmount,chargeCodeMaster);calculateAdditionalFeeCharges
+							listOfTaxes = this.invoiceOneTimeSale.calculateAdditionalFeeCharges(chargeCodeMaster, orderDatas.getId(), orderPrices.get(0).getId(), clientId, shiftChargeAmount);
+							BillingOrderCommand billingOrderCommand = new BillingOrderCommand(Long.valueOf(resourceId), orderPrices.get(0).getId(),
+									clientId, DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),
+									chargeCodeMaster.getBillFrequencyCode(), chargeCode,chargeCodeMaster.getChargeType(),chargeCodeMaster.getChargeDuration(), "",
+									DateUtils.getDateOfTenant(), shiftChargeAmount, "N",listOfTaxes, DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(), null,
+									chargeCodeMaster.getTaxInclusive(), null);
+
+							billingOrderCommands.add(billingOrderCommand);
+							// Invoice calling
+							Invoice invoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
+							// Update Client Balance
+							this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(), clientId, false);*/
+							
+							this.invoiceOneTimeSale.calculateAdditionalFeeCharges(chargeCodeMaster, orderDatas.getId(), orderPrices.get(0).getId(), clientId, shiftChargeAmount);
+						}
+				    	
+				    	/*ReconnectionFee fee = new ReconnectionFee(clientId, "Reconnection Fee", feeData.get(0).getDefaultFeeAmount());// need to add mount from feemaster
+				    	this.reconnectionFeeRepository.save(fee);
+				    	this.billingOrderWritePlatformService.updateClientBalance(feeData.get(0).getDefaultFeeAmount(), clientId, false);// need to add mount from feemaster
+				    	*/
 				    	break;
 				    	
 				    default:			
