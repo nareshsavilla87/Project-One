@@ -56,6 +56,13 @@ DELIMITER ;
 call jobUniqueName();
 DROP procedure IF EXISTS jobUniqueName;
 
+DELETE job_parameters FROM job_parameters prv1,
+    job_parameters prv2 
+WHERE
+    prv1.id < prv2.id
+    AND prv1.job_id = prv2.job_id   
+AND prv1.param_name = prv2.param_name;
+
 DROP procedure IF EXISTS jobParamUnique; 
 DELIMITER //
 CREATE procedure jobParamUnique() 
