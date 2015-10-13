@@ -77,6 +77,9 @@ INSERT IGNORE INTO job VALUES(NULL, 'USAGECHARGES', 'Usage Charges', '0 30 23 1/
 SET @ID=(select id from job where name='USAGECHARGES');
 INSERT IGNORE INTO job_parameters VALUES(NULL, @ID, 'reportName', 'COMBO', NULL, 'UsageCharges', 'N', NULL);
 
+SET @Id=(SELECT id FROM m_code WHERE code_name='Charge Type');
+INSERT IGNORE INTO m_code_value VALUES(NULL,@Id,'UC', '2');
+
 DROP procedure IF EXISTS `obsplatform-tenants`.tenantLocale; 
 DELIMITER //
 CREATE procedure `obsplatform-tenants`.tenantLocale() 

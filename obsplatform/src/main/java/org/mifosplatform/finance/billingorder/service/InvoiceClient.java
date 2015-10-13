@@ -131,9 +131,14 @@ public class InvoiceClient {
 
 			// Update order-price
 			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
-			System.out.println("---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
-
-			return new GenerateInvoiceData(clientId, billingOrderCommands.get(0).getNextBillableDate(), invoice.getInvoiceAmount(),invoice);
+			 Date nextBillableDate = billingOrderCommands.get(0).getNextBillableDate();
+				
+				if ("UC".equalsIgnoreCase(billingOrderCommands.get(0).getChargeType())) {
+					nextBillableDate = processDate.plusDays(3).toDate();
+				}
+			 System.out.println("---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
+			
+			return new GenerateInvoiceData(clientId,  nextBillableDate, invoice.getInvoiceAmount(),invoice);
 
 		}else{
 
@@ -149,8 +154,14 @@ public class InvoiceClient {
 			
 			// Update Client Balance
 			this.billingOrderWritePlatformService.updateClientBalance(singleInvoice.getInvoiceAmount(), clientId, false);
+			
+			 Date nextBillableDate = billingOrderCommands.get(0).getNextBillableDate();
+				
+				if ("UC".equalsIgnoreCase(billingOrderCommands.get(0).getChargeType())) {
+					nextBillableDate = processDate.plusDays(3).toDate();
+				}
 
-			return new GenerateInvoiceData(clientId, billingOrderCommands.get(0).getNextBillableDate(),singleInvoice.getInvoiceAmount(), singleInvoice);
+			return new GenerateInvoiceData(clientId, nextBillableDate,singleInvoice.getInvoiceAmount(), singleInvoice);
 		}
 	}
 

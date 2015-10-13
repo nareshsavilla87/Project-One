@@ -83,10 +83,8 @@ public class ChargeCodeMaster extends AbstractPersistable<Long> {
 			tax = 0;
 		}
 
-		 String billFrequencyCode = command.stringValueOfParameterNamed("billFrequencyCode");
-		if("UC".equalsIgnoreCase(chargeType)){
-			billFrequencyCode = null;
-		}
+		String billFrequencyCode = command.stringValueOfParameterNamed("billFrequencyCode");
+		
 		return new ChargeCodeMaster(chargeCode, chargeDescription, chargeType,
 				chargeDuration, durationType, tax, billFrequencyCode);
 	}
@@ -216,9 +214,6 @@ public class ChargeCodeMaster extends AbstractPersistable<Long> {
 		}
 		if (command.isChangeInStringParameterNamed("billFrequencyCode",this.billFrequencyCode)) {
 			 String newValue = command.stringValueOfParameterNamed("billFrequencyCode");
-			if("UC".equalsIgnoreCase(this.chargeType)){
-				newValue = null;
-			}
 			actualChanges.put("billFrequencyCode", newValue);
 			this.billFrequencyCode = StringUtils.defaultIfEmpty(newValue, null);
 
