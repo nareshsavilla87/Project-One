@@ -101,6 +101,15 @@ public class ProcessEventActionServiceImpl implements ProcessEventActionService 
 				this.orderWritePlatformService.createOrder(eventActionData.getClientId(), command);
 				break;	
 				
+				
+			case EventActionConstants.ACTION_CHNAGE_PLAN :
+
+	               parsedCommand = this.fromApiJsonHelper.parse(jsonObject);
+					command = JsonCommand.from(jsonObject,parsedCommand,this.fromApiJsonHelper,"ChangeOrder",eventActionData.getClientId(), null,
+							null,eventActionData.getClientId(), null, null, null,null, null, null,null);
+					this.orderWritePlatformService.changePlan(command, command.longValueOfParameterNamed("orderId"));
+					break;
+				
 			case EventActionConstants.ACTION_INVOICE :
 				try{
 					CommandProcessingResult result = null;
