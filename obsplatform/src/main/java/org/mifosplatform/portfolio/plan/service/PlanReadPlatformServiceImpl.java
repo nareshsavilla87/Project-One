@@ -274,10 +274,12 @@ public class PlanReadPlatformServiceImpl implements PlanReadPlatformService {
 	public List<ServiceData> retrieveSelectedServices(final Long planId) {
 		  context.authenticatedUser();
 
-	        String sql = "SELECT sm.id AS id,sm.service_description AS serviceDescription,p.plan_code AS planCode,pm.service_code AS serviceCode,psd.image AS image" +
-	        		" FROM b_plan_detail pm,b_plan_master p,b_service sm " +
-	        		" left join b_prov_service_details psd on psd.service_id = sm.id " +
-	        		" WHERE pm.service_code = sm.service_code AND p.id = pm.plan_id AND sm.is_deleted = 'N' AND pm.plan_id = ? GROUP BY sm.id";
+	        String sql = "SELECT sm.id AS id,sm.service_description AS serviceDescription,p.plan_code AS planCode,"+
+	        			 "pm.service_code AS serviceCode,psd.image AS image "+
+	        			 "FROM b_plan_detail pm,b_plan_master p,b_service sm "+
+	        			 "left join b_prov_service_details psd on psd.service_id = sm.id "+
+	        			 "WHERE pm.service_code = sm.service_code AND p.id = pm.plan_id AND sm.is_deleted = 'N'" +
+	        			 " AND pm.plan_id = ? GROUP BY sm.id;";
 
 
 	        RowMapper<ServiceData> rm = new PeriodMapper();
