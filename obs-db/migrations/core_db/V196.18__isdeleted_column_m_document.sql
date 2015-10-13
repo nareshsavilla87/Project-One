@@ -14,3 +14,7 @@ END //
 DELIMITER ;
 call addIsDeletedTickets();
 Drop procedure IF EXISTS addIsDeletedTickets;
+
+INSERT IGNORE INTO b_eventaction_mapping Values(null,'Add Comment','Send Email','workflow_events','N','N');
+
+INSERT IGNORE INTO b_eventaction_mapping Values(null,'Close Ticket','Send Email','workflow_events','N','N');
