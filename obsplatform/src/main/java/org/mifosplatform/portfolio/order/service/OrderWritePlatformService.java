@@ -43,5 +43,7 @@ public interface OrderWritePlatformService {
 	CommandProcessingResult renewalOrderWithClient(JsonCommand command,Long clientId);
 
 	Plan findOneWithNotFoundDetection(Long planId);
+
+	CommandProcessingResult scheduleOrderUpdation(Long entityId,JsonCommand command);
 	
 }

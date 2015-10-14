@@ -36,6 +36,8 @@ import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
+import org.mifosplatform.portfolio.association.data.AssociationData;
+import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.order.data.OrderAddonsData;
 import org.mifosplatform.portfolio.order.data.OrderData;
@@ -73,6 +75,7 @@ public class OrdersApiResource {
 	  private final DefaultToApiJsonSerializer<OrderData> toApiJsonSerializer;
 	  private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
 	  private final OrderWritePlatformService orderWritePlatformService;
+	  private final HardwareAssociationReadplatformService associationReadplatformService;
 	  
 
 	  @Autowired
@@ -80,7 +83,7 @@ public class OrdersApiResource {
 	   final ApiRequestParameterHelper apiRequestParameterHelper,final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
 	   final OrderReadPlatformService orderReadPlatformService,final PlanReadPlatformService planReadPlatformService, 
 	   final MCodeReadPlatformService mCodeReadPlatformService,final OrderAddOnsReadPlaformService orderAddOnsReadPlaformService,
-	   final OrderWritePlatformService orderWritePlatformService) {
+	   final OrderWritePlatformService orderWritePlatformService,final HardwareAssociationReadplatformService associationReadplatformService) {
 
 
 		        this.context = context;
@@ -92,6 +95,7 @@ public class OrdersApiResource {
 		        this.apiRequestParameterHelper = apiRequestParameterHelper;
 		        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
 		        this.orderWritePlatformService = orderWritePlatformService;
+		        this.associationReadplatformService=associationReadplatformService;
 		    }	
 	  
 	@POST
@@ -164,8 +168,8 @@ public class OrdersApiResource {
 	public String retrieveOrderDetails(@PathParam("clientId") final Long clientId, @Context final UriInfo uriInfo) {
     context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
     final List<OrderData> clientOrders = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
-                OrderData orderData=new OrderData(clientId,clientOrders);
-        
+     final List<AssociationData> HardwareDatas = this.associationReadplatformService.retrieveHardwareData(clientId);
+     OrderData orderData=new OrderData(clientId,clientOrders,HardwareDatas);
     final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
     return this.toApiJsonSerializer.serialize(settings, orderData, RESPONSE_DATA_PARAMETERS);
 	    }
@@ -411,5 +415,14 @@ public class OrdersApiResource {
 		return this.toApiJsonSerializer.serialize(result);
 		
 	}
-
+	
+	@PUT
+	@Path("scheduling/{orderId}")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String schedulingOrderUpdation(@PathParam("orderId") final Long orderId, final String apiRequestBodyAsJson) {
+ 	    final CommandWrapper commandRequest = new CommandWrapperBuilder().updateSchedulingOrder(orderId).withJson(apiRequestBodyAsJson).build();
+        final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        return this.toApiJsonSerializer.serialize(result);
+	}
 }

@@ -2049,6 +2049,13 @@ public class CommandWrapperBuilder {
 		this.href = "/orders/scheduling" + clientId;
 		return this;
 	}
+	public CommandWrapperBuilder updateSchedulingOrder(Long orderId) {
+		this.actionName = "UPDATE";
+		this.entityName = "ORDERSCHEDULING";
+		this.entityId = orderId;
+		this.href = "/orders/scheduling" + clientId;
+		return this;
+	}
 
 	public CommandWrapperBuilder deleteSchedulOrder(Long orderId) {
 
