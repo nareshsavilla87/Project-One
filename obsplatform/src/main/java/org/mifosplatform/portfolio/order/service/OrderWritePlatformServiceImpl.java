@@ -775,7 +775,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
 public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		
  try{
-	 Long userId=this.context.authenticatedUser().getId();
+	 //Long userId=this.context.authenticatedUser().getId();
 	 this.fromApiJsonDeserializer.validateForCreate(command.json());
 	 checkingContractPeriodAndBillfrequncyValidation(command.longValueOfParameterNamed("contractPeriod"),
 			 command.stringValueOfParameterNamed("paytermCode"));
@@ -853,7 +853,7 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 		     
     	// For Order History
 			OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),processResuiltId,
-					UserActionStatusTypeEnum.CHANGE_PLAN.toString(),userId,null);
+					UserActionStatusTypeEnum.CHANGE_PLAN.toString(),null,null);
 			this.orderHistoryRepository.save(orderHistory);
 			
 			return new CommandProcessingResult(result.resourceId(),order.getClientId());
@@ -934,7 +934,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			
 			//Check for Custome_Validation
 			this.eventValidationReadPlatformService.checkForCustomValidations(clientId,EventActionConstants.EVENT_CHANGE_ORDER,command.json(),userId);
-				
+					Long orderId = command.longValueOfParameterNamed("orderId");
 		    	  	jsonObject.put("billAlign",command.booleanPrimitiveValueOfParameterNamed("billAlign"));
 		    	  	jsonObject.put("contractPeriod",command.longValueOfParameterNamed("contractPeriod"));
 		    	  	jsonObject.put("dateFormat",command.booleanPrimitiveValueOfParameterNamed("dateFormat"));
@@ -946,8 +946,8 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		    	  	jsonObject.put("disconnectionDate",command.stringValueOfParameterNamed("disconnectionDate"));
 		    	  	jsonObject.put("disconnectReason",command.stringValueOfParameterNamed("disconnectReason"));
 	        	   
-	        	    eventAction=new EventAction(startDate.toDate(), "CHANGEPLAN", "ORDER",EventActionConstants.ACTION_CHNAGE_PLAN,"/orders/changPlan/"+clientId, 
-	        			  clientId,command.json(),null,clientId);
+	        	    eventAction=new EventAction(startDate.toDate(), "CHANGEPLAN", "ORDER",EventActionConstants.ACTION_CHNAGE_PLAN,"/orders/changPlan/"+orderId, 
+	        			  clientId,command.json(),orderId,clientId);
 			
 		}else{
 		

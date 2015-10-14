@@ -68,6 +68,7 @@ public class EventActionConstants {
 	public static final String ACTION_NOTIFY_SMS_CHANGEPLAN = "Notify_SMS_ChangePlan";
 	public static final String ACTION_NOTIFY_SMS_ORDER_TERMINATE="Notify_SMS_Order_Terminate";
 	public static final String ACTION_CHANGE_START ="Change Start";
+	public static final String RECONNECTION_FEE = "Reconnection_Fee";
 	
 	
 }
