@@ -10,6 +10,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.joda.time.LocalDate;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
+import org.mifosplatform.billing.payterms.data.PaytermData;
 import org.mifosplatform.billing.planprice.domain.Price;
 import org.mifosplatform.billing.planprice.domain.PriceRepository;
 import org.mifosplatform.billing.planprice.exceptions.ChargeCodeAndContractPeriodException;
@@ -20,6 +21,7 @@ import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeRepository;
 import org.mifosplatform.billing.promotioncodes.exception.PromotionCodeNotFoundException;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
+import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.finance.billingorder.service.InvoiceClient;
 import org.mifosplatform.finance.billingorder.service.ReverseInvoice;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
@@ -591,7 +593,7 @@ public CommandProcessingResult renewalClientOrder(JsonCommand command,Long order
      		  }
    		 
    			processNotifyMessages(EventActionConstants.EVENT_RECONNECTION_ORDER, orderDetails.getClientId(), orderId.toString());
-   			return new CommandProcessingResult(Long.valueOf(orderDetails.getClientId()),orderDetails.getClientId());
+   			return new CommandProcessingResult(Long.valueOf(orderDetails.getId()),orderDetails.getClientId());
 		
 			
 		}catch (DataIntegrityViolationException dve) {
@@ -1274,16 +1276,49 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	  try{	
 			this.context.authenticatedUser();
 			this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
+			CommandProcessingResult result;
+			// pls write validation for orderId
 			Long planId = command.longValueOfParameterNamed("planId");
 			String contractPeriod = command.stringValueOfParameterNamed("duration");
+			Long orderId = command.longValueOfParameterNamed("orderId");
 			Contract contract =this.contractRepository.findOneByContractId(contractPeriod);
 			if(contract == null){
 				throw new ContractPeriodNotFoundException(contractPeriod,clientId);
 			}
 			List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
 			if(orderIds.isEmpty()){
-				throw new NoOrdersFoundException(clientId,planId);
-			}
+				//throw new NoOrdersFoundException(clientId,planId);
+				
+				List<PaytermData> datas  = this.orderReadPlatformService.getChargeCodes(planId,null);
+				if(datas.size()==0){
+					throw new BillingOrderNoRecordsFoundException(planId);
+				}
+				Order order = retrieveOrderById(orderId);
+				LocalDate date = new LocalDate(order.getEndDate()).plusDays(1);
+				JSONObject jsonObject = new JSONObject();
+	    	  	jsonObject.put("billAlign","false");
+	    	  	jsonObject.put("autoRenew","false");
+	    	  	jsonObject.put("contractPeriod",contract.getSubscriptionPeriod());
+	    	  	jsonObject.put("dateFormat","dd MMMM yyyy");
+	    	  	jsonObject.put("locale","en");
+	    	  	jsonObject.put("isNewPlan","false");
+	    	  	for(PaytermData data : datas){
+					if(data.getDuration().equalsIgnoreCase(contractPeriod)){
+						jsonObject.put("paytermCode",data.getPaytermtype());
+					}
+				}
+	    	  	jsonObject.put("planCode",planId);
+	    	  	jsonObject.put("start_date",date);
+	    	  	jsonObject.put("disconnectionDate",date);
+	    	  	jsonObject.put("disconnectReason","Not Interested");
+	    	  	jsonObject.put("actionType","changeorder");
+	    	  	final JsonElement element = fromJsonHelper.parse(jsonObject.toString());
+				JsonCommand changeCommandCommand = new JsonCommand(null,jsonObject.toString(), element, fromJsonHelper,
+						null, null, null, null, null, null, null, null, null, null, 
+						null, null);
+				result = scheduleOrderCreation(clientId, changeCommandCommand);
+				
+			}else{
 			Plan  planData = this.planRepository.findOne(planId);
 			if(planData == null){ throw new PlanNotFundException(planId);}
 			
@@ -1317,7 +1352,9 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 						null, null, null, null, null, null, null, null, null, null, 
 						null, null);
 				
-			return this.renewalClientOrder(renewalCommand,orderIds.get(0));
+			 result = this.renewalClientOrder(renewalCommand,orderIds.get(0));
+			}
+			return result;
 		  }catch(DataIntegrityViolationException dve){
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
