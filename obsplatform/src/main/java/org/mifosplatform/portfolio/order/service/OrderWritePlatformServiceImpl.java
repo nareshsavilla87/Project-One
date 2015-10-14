@@ -19,7 +19,6 @@ import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeMaster;
 import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeRepository;
 import org.mifosplatform.billing.promotioncodes.exception.PromotionCodeNotFoundException;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
-import org.mifosplatform.commands.domain.CommandSource;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.finance.billingorder.service.InvoiceClient;
 import org.mifosplatform.finance.billingorder.service.ReverseInvoice;

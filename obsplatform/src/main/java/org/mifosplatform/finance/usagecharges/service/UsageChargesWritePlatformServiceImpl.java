@@ -153,8 +153,12 @@ public class UsageChargesWritePlatformServiceImpl implements UsageChargesWritePl
 	 List<HardwareAssociation> associations = this.associationRepository.findOneByOrderId(billingOrderData.getClientOrderId());
 	 
 	 if(!associations.isEmpty()){
-		 
-		 usageCharges = this.usageChargeRepository.findCustomerUsageCharges(billingOrderData.getClientId(),associations.get(0).getSerialNo());
+		 List<UsageCharge> usages = new ArrayList<UsageCharge>();
+		 for(HardwareAssociation association:associations){
+			 
+			 usages = this.usageChargeRepository.findCustomerUsageCharges(billingOrderData.getClientId(),association.getSerialNo());
+			 usageCharges.addAll(usages);
+		 }
 	 }
 	 
 	 if(!usageCharges.isEmpty()){

@@ -150,7 +150,5 @@ date_format(str_to_date(`RECONNECTION DATE`,''%d-%m-%Y''),''%Y-%m-%d'')
 between ''${startDate}'' and ''${endDate}''',use_report=1
 WHERE report_name='List of Re-Connections'; 
 
-ALTER TABLE b_prov_service_details MODIFY provision_system VARCHAR(200);
-ALTER TABLE b_process_request MODIFY provisioing_system VARCHAR(200);
 
 
