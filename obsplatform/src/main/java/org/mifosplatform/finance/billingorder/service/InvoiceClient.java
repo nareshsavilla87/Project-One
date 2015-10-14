@@ -136,7 +136,7 @@ public class InvoiceClient {
 				if ("UC".equalsIgnoreCase(billingOrderCommands.get(0).getChargeType())) {
 					nextBillableDate = processDate.plusDays(3).toDate();
 				}
-			 System.out.println("---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
+			 System.out.println("---------------------"+ nextBillableDate);
 			
 			return new GenerateInvoiceData(clientId,  nextBillableDate, invoice.getInvoiceAmount(),invoice);
 
@@ -155,11 +155,13 @@ public class InvoiceClient {
 			// Update Client Balance
 			this.billingOrderWritePlatformService.updateClientBalance(singleInvoice.getInvoiceAmount(), clientId, false);
 			
-			 Date nextBillableDate = billingOrderCommands.get(0).getNextBillableDate();
+			Date nextBillableDate = billingOrderCommands.get(0).getNextBillableDate();
 				
 				if ("UC".equalsIgnoreCase(billingOrderCommands.get(0).getChargeType())) {
 					nextBillableDate = processDate.plusDays(3).toDate();
 				}
+		    
+		    System.out.println("---------------------"+ nextBillableDate);	
 
 			return new GenerateInvoiceData(clientId, nextBillableDate,singleInvoice.getInvoiceAmount(), singleInvoice);
 		}
@@ -177,7 +179,14 @@ public class InvoiceClient {
 
 		// Update order-price
 		this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
-		System.out.println("Top-Up:---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
+		
+		Date nextBillableDate = billingOrderCommands.get(0).getNextBillableDate();
+		
+		if ("UC".equalsIgnoreCase(billingOrderCommands.get(0).getChargeType())) {
+			nextBillableDate = processDate.plusDays(3).toDate();
+		}
+		
+        System.out.println("Top-Up:---------------------"+ nextBillableDate);	
 
 		// Update Client Balance
 		this.billingOrderWritePlatformService.updateClientBalance(invoice.getInvoiceAmount(), clientId, false);

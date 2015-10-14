@@ -14,7 +14,6 @@ import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
-import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.BatchHistoryData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -318,10 +317,6 @@ public class BillMasterReadPlatformServiceImplementation implements BillMasterRe
 
 			}
 
-			public String schema() {
-				// TODO Auto-generated method stub
-				return null;
-			}
 		}
 		
 		@Override

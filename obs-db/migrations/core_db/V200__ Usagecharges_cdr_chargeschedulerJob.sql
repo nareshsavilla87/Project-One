@@ -80,6 +80,47 @@ INSERT IGNORE INTO job_parameters VALUES(NULL, @ID, 'reportName', 'COMBO', NULL,
 SET @Id=(SELECT id FROM m_code WHERE code_name='Charge Type');
 INSERT IGNORE INTO m_code_value VALUES(NULL,@Id,'UC', '2');
 
+DROP procedure IF EXISTS serviceMapProvision; 
+DELIMITER //
+CREATE procedure serviceMapProvision() 
+Begin
+IF EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME ='provision_system' 
+     AND TABLE_NAME ='b_prov_service_details'
+     AND TABLE_SCHEMA = DATABASE())THEN
+ALTER TABLE `b_prov_service_details` 
+CHANGE COLUMN `provision_system` `provision_system` VARCHAR(1000) NULL DEFAULT NULL ;
+END IF;
+END //
+DELIMITER ;
+call serviceMapProvision();
+DROP procedure IF EXISTS serviceMapProvision;
+
+
+DROP procedure IF EXISTS serviceMapProvision; 
+DELIMITER //
+CREATE procedure serviceMapProvision() 
+Begin
+IF EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE COLUMN_NAME ='provision_system' 
+     AND TABLE_NAME ='b_prov_service_details'
+     AND TABLE_SCHEMA = DATABASE())THEN
+ALTER TABLE `b_prov_service_details` 
+CHANGE COLUMN `provision_system` `provision_system` VARCHAR(1000) NULL DEFAULT NULL ;
+END IF;
+END //
+DELIMITER ;
+call serviceMapProvision();
+DROP procedure IF EXISTS serviceMapProvision;
+
+ALTER TABLE `b_orders_addons` 
+CHANGE COLUMN `provision_system` `provision_system` VARCHAR(1000) NULL DEFAULT NULL ;
+
+ALTER TABLE `b_process_request` 
+CHANGE COLUMN `provisioing_system` `provisioing_system` VARCHAR(1000) NULL DEFAULT NULL ;
+
 DROP procedure IF EXISTS `obsplatform-tenants`.tenantLocale; 
 DELIMITER //
 CREATE procedure `obsplatform-tenants`.tenantLocale() 
@@ -98,6 +139,64 @@ call `obsplatform-tenants`.tenantLocale();
 DROP procedure IF EXISTS `obsplatform-tenants`.tenantLocale;
 
 
-
+CREATE 
+  OR REPLACE
+VIEW `bmaster_vw` AS
+    select distinct
+        `bm`.`id` AS `billId`,
+        `bm`.`Bill_No` AS `billNo`,
+        `bm`.`Client_id` AS `clientId`,
+        cast(`bm`.`Bill_date` as date) AS `billDate`,
+        `bm`.`Due_date` AS `dueDate`,
+        `bm`.`Previous_balance` AS `previousBalance`,
+        `bm`.`Charges_amount` AS `chargesAmount`,
+        `bm`.`Adjustment_amount` AS `adjustmentAmount`,
+        round(`bm`.`Tax_amount`, 2) AS `taxAmount`,
+        `bm`.`Paid_amount` AS `paidAmount`,
+        `bm`.`deposit_refund_amount` AS `depositRefundAmount`,
+        `bm`.`Due_amount` AS `dueAmount`,
+        `bm`.`Promotion_description` AS `Description`,
+        sum(`bc`.`discount_amount`) AS `discountAmount`,
+        `ca`.`address_id` AS `addressId`,
+        `ca`.`address_key` AS `addressKey`,
+        `ca`.`address_no` AS `addressNo`,
+        `ca`.`street` AS `street`,
+        `ca`.`zip` AS `zip`,
+        `ca`.`city` AS `city`,
+        `ca`.`state` AS `state`,
+        `ca`.`country` AS `country`,
+        concat(`ca`.`address_no`,
+                `ca`.`street`,
+                ',',
+                `ca`.`city`,
+                ',',
+                `ca`.`state`,
+                ',',
+                `ca`.`country`,
+                '-',
+                `ca`.`zip`) AS `address`,
+        `c`.`account_no` AS `accountNo`,
+        `c`.`external_id` AS `externalId`,
+        `c`.`status_enum` AS `status`,
+        `c`.`activation_date` AS `activationDate`,
+        `c`.`office_id` AS `officeId`,
+        `c`.`firstname` AS `firstname`,
+        `c`.`middlename` AS `middlename`,
+        `c`.`lastname` AS `lastname`,
+        `c`.`display_name` AS `displayName`,
+        `c`.`email` AS `emailId`,
+        `c`.`image_key` AS `imageKey`,
+        `c`.`category_type` AS `categoryType`,
+        `mo`.`name` AS `officeName`
+    from
+        ((((`b_bill_master` `bm`
+        join `m_client` `c` ON ((`bm`.`Client_id` = `c`.`id`)))
+        join `m_office` `mo` ON ((`c`.`office_id` = `mo`.`id`)))
+        left join `b_client_address` `ca` ON (((`ca`.`client_id` = `c`.`id`)
+            and (`ca`.`address_key` = 'PRIMARY')
+            and (`ca`.`is_deleted` = 'n'))))
+        left join `b_charge` `bc` ON (((`bm`.`id` = `bc`.`bill_id`)
+            and (`bc`.`discount_amount` > 0))))
+    group by `bm`.`id`;
 
 
