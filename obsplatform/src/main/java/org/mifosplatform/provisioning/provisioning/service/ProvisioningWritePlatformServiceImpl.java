@@ -426,9 +426,9 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			}
 			if (serviceAssociation) {
 				List<ServiceMapping> serviceMap = this.serviceMappingRepository.findOneByServiceId(service.getServiceId());
-				if (!serviceMap.isEmpty() && 'Y' == serviceMap.get(0).getIsHwReq())
+				if (!serviceMap.isEmpty() && 'Y' == serviceMap.get(0).getIsHwReq()){
 					throw new PairingNotExistException(plan.getPlanCode());
-				      break;
+				}
 			}
 		}
 	}
