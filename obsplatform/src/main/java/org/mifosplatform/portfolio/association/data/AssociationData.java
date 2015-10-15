@@ -75,11 +75,12 @@ public class AssociationData {
 		this.orderId = id;
 	}
 
-	public AssociationData(String serialNum, String provisionNumber,String allocationType, String propertyCode) {
+	public AssociationData(String serialNum, String provisionNumber,String allocationType, String propertyCode,Long orderId) {
 	    this.serialNum=serialNum;
 	    this.provisionNumber=provisionNumber;
 	    this.allocationType=allocationType;
 	    this.propertyCode =propertyCode;
+	    this.orderId =orderId;
 
 	}
 

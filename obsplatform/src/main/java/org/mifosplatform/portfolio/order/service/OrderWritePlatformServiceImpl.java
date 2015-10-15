@@ -1,6 +1,8 @@
 package org.mifosplatform.portfolio.order.service;
 
 import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -219,6 +221,8 @@ public CommandProcessingResult createOrder(Long clientId,JsonCommand command) {
 	
 try{
 	this.fromApiJsonDeserializer.validateForCreate(command.json());
+	 String serialnum =command.stringValueOfParameterNamed("serialnumber");
+	 String allocationType =command.stringValueOfParameterNamed("allocation_type");
 	final Long userId=getUserId();
 	
 	checkingContractPeriodAndBillfrequncyValidation(command.longValueOfParameterNamed("contractPeriod"),
@@ -256,7 +260,7 @@ try{
 	//For Plan And HardWare Association
 	Configuration configurationProperty=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_IMPLICIT_ASSOCIATION);
 	
-	if(configurationProperty.isEnabled()){
+	if(configurationProperty.isEnabled() && serialnum == null ){
 		
 		if(plan.isHardwareReq() == 'Y'){
 			
@@ -280,6 +284,14 @@ try{
 			
 			}
 		}
+	}else if(serialnum!=null && configurationProperty.isEnabled()){
+		
+		//List<AllocationDetailsData> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetailsByItemCode(clientId,plan.getPlanCode());
+		
+		
+		this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),serialnum,
+				order.getId(),allocationType, userId);
+	
 	}
 	
 	if(plan.getProvisionSystem().equalsIgnoreCase("None")){
@@ -974,6 +986,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	    	  	jsonObject.put("paytermCode",command.stringValueOfParameterNamed("paytermCode"));
 	    	  	jsonObject.put("planCode",command.longValueOfParameterNamed("planCode"));
 	    	  	jsonObject.put("start_date",startDate.toDate());
+	    	  	jsonObject.put("serialnumber", "");
         	   
         	    eventAction=new EventAction(startDate.toDate(), "CREATE", "ORDER",EventActionConstants.ACTION_NEW,"/orders/"+clientId, 
         			  clientId,command.json(),null,clientId);
@@ -1012,6 +1025,57 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
+	}
+	
+	public CommandProcessingResult scheduleOrderUpdation(Long entityId,JsonCommand command){
+		
+		try{
+			
+			String actionType = command.stringValueOfParameterNamed("actionType");
+			 String serialnum =command.stringValueOfParameterNamed("serialnumber");
+			 String allcation_type = command.stringValueOfParameterNamed("allcation_type");
+			  if(!actionType.equalsIgnoreCase("renewalorder")){
+				  if(serialnum.isEmpty()){
+					  this.fromApiJsonDeserializer.validateForUpdate(command.json());
+				  }
+			  }
+			  String startDate=command.stringValueOfParameterNamed("start_date");
+			  
+			  char status = 'N';
+			  if(command.hasParameter("status")){
+				  status = command.stringValueOfParameterNamed("status").trim().charAt(0);
+			  }
+			 
+			  EventAction eventAction=this.eventActionRepository.findOne(entityId);
+			  
+			  JSONObject jsonObject=new JSONObject(eventAction.getCommandAsJson());
+			  Long clientId= eventAction.getClientId();
+			  this.eventValidationReadPlatformService.checkForCustomValidations(entityId,EventActionConstants.EVENT_CREATE_ORDER,command.json(),clientId);
+			  if(!serialnum.isEmpty()){
+				  jsonObject.remove("serialnumber");
+				  jsonObject.put("serialnumber", serialnum);
+				  jsonObject.put("allocation_type", allcation_type );
+			  }
+			  if(!startDate.isEmpty()){
+				  jsonObject.remove("start_date");
+				  jsonObject.put("start_date", startDate);
+				  Date startDate1=command.DateValueOfParameterNamed("start_date");
+				  eventAction.setTransDate(startDate1);
+				 
+			  }
+      	      eventAction.setCommandAsJson(jsonObject.toString());
+			  eventAction.updateStatus(status);
+			  this.eventActionRepository.save(eventAction);
+      	return  new CommandProcessingResult(command.entityId(),entityId);
+	
+}catch(DataIntegrityViolationException dve){
+		handleCodeDataIntegrityIssues(command, null);
+		return new CommandProcessingResult(Long.valueOf(-1));
+	}catch(JSONException dve){
+		
+		return new CommandProcessingResult(Long.valueOf(-1));
+		}
+		
 	}
 
     @Transactional
