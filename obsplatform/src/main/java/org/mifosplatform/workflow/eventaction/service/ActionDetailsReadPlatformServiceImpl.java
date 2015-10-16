@@ -3,15 +3,24 @@ package org.mifosplatform.workflow.eventaction.service;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.UriInfo;
 
 import org.joda.time.LocalDate;
 import org.json.JSONObject;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
+import org.mifosplatform.infrastructure.dataqueries.data.GenericResultsetData;
+import org.mifosplatform.infrastructure.dataqueries.service.GenericDataService;
+import org.mifosplatform.infrastructure.dataqueries.service.ReadReportingService;
 import org.mifosplatform.portfolio.order.data.SchedulingOrderData;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.EventActionData;
 import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
@@ -27,13 +36,22 @@ import org.springframework.stereotype.Service;
 @Service
 public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPlatformService{
 	
-	
+	@Context
+	public UriInfo uriInfo;
+	//private static final UriInfo uriInfo = null;
 	private final SimpleJdbcCall jdbcCall;
 	private final JdbcTemplate jdbcTemplate;
+	private final ReadReportingService readExtraDataAndReportingService;
+	private final GenericDataService genericDataService;
+	private final String NotifyOrderCount = "NotifyOrderCount";
+	private final String parameterTypeValue = "report";
+	private final String datePattern = "yyyy-MM-dd";
 	
 	@Autowired
-	public  ActionDetailsReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource) {
-		
+	public  ActionDetailsReadPlatformServiceImpl(final TenantAwareRoutingDataSource dataSource, final ReadReportingService readExtraDataAndReportingService,
+			final GenericDataService genericDataService) {
+		this.genericDataService = genericDataService;
+		this.readExtraDataAndReportingService = readExtraDataAndReportingService;
 		this.jdbcCall= new SimpleJdbcCall(dataSource);
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 		
@@ -211,5 +229,4 @@ public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPl
 		}
 	}
 	
-
 }

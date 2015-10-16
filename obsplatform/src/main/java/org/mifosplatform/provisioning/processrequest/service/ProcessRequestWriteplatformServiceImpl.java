@@ -49,8 +49,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
-
-
 @Service(value = "processRequestWriteplatformService")
 public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWriteplatformService{
 
@@ -175,7 +173,7 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
                                     }
 									client.setStatus(ClientStatus.ACTIVE.getValue());
 									this.orderRepository.saveAndFlush(order);
-									List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_ACTIVE_ORDER);
+									List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_RECONNECTION_ORDER);
 									if(actionDetaislDatas.size() != 0){
 											this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,order.getClientId(), order.getId().toString(),null);
 									}
@@ -207,7 +205,10 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
 								if(activeOrders == 0){
 									client.setStatus(ClientStatus.DEACTIVE.getValue());
 								}
-								
+								actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_DISCONNECTION_ORDER);
+								if(actionDetaislDatas.size() != 0){
+										this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,order.getClientId(), order.getId().toString(),null);
+								}
 								
 								break;
 								
@@ -306,6 +307,12 @@ public class ProcessRequestWriteplatformServiceImpl implements ProcessRequestWri
         			          				}
         			          		    }
         							 }
+        							 
+        							 actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_RECONNECTION_ORDER);
+     								if(actionDetaislDatas.size() != 0){
+     										this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,order.getClientId(), order.getId().toString(),null);
+     								}
+        							 
 								break;
 								
 								default : 

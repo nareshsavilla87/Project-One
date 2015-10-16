@@ -103,7 +103,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             public void write(final OutputStream out) {
                 try {
 
-                    GenericResultsetData result = retrieveGenericResultset(name, type, queryParams);
+                    GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, null);
                     StringBuffer sb = generateCsvFileBuffer(result);
 
                     InputStream in = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
@@ -171,12 +171,13 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public GenericResultsetData retrieveGenericResultset(final String name, final String type, final Map<String, String> queryParams) {
+    public GenericResultsetData retrieveGenericResultset(final String name, final String type, 
+    		final Map<String, String> queryParams, String schedulerName) {
 
         long startTime = System.currentTimeMillis();
         logger.info("STARTING REPORT: " + name + "   Type: " + type);
 
-        String sql = getSQLtoRun(name, type, queryParams);
+        String sql = getSQLtoRun(name, type, queryParams, schedulerName);
 
         GenericResultsetData result = genericDataService.fillGenericResultSet(sql);
 
@@ -185,27 +186,34 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return result;
     }
 
-    private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams) {
+    private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams, String schedulerName) {
 
         String sql = getSql(name, type);
 
         Set<String> keys = queryParams.keySet();
+        
         for (String key : keys) {
             String pValue = queryParams.get(key);
             // logger.info("(" + key + " : " + pValue + ")");
             sql = genericDataService.replace(sql, key, pValue);
         }
 
-        AppUser currentUser = context.authenticatedUser();
-        // Allows sql query to restrict data by office hierarchy if required
-        sql = genericDataService.replace(sql, "${currentUserHierarchy}", currentUser.getOffice().getHierarchy());
-        // Allows sql query to restrict data by current user Id if required
-        // (typically used to return report lists containing only reports
-        // permitted to be run by the user
-        sql = genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
-
-        sql = genericDataService.wrapSQL(sql);
-
+        if(null != schedulerName && schedulerName.equalsIgnoreCase(JobName.EVENT_ACTION_PROCESSOR.toString())) {
+     
+            sql = genericDataService.wrapSQL(sql);
+            
+        } else {
+        	AppUser currentUser = context.authenticatedUser();
+            // Allows sql query to restrict data by office hierarchy if required
+            sql = genericDataService.replace(sql, "${currentUserHierarchy}", currentUser.getOffice().getHierarchy());
+            // Allows sql query to restrict data by current user Id if required
+            // (typically used to return report lists containing only reports
+            // permitted to be run by the user
+            sql = genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
+        	
+            sql = genericDataService.wrapSQL(sql);
+		} 
+        
         return sql;
 
     }
@@ -360,7 +368,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         String genaratePdf = fileLocation + reportName + ".pdf";
 
         try {
-            GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams);
+            GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, null);
 
             List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
             List<ResultsetRowData> data = result.getData();

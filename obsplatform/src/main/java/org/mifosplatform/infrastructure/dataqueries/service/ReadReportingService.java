@@ -23,8 +23,8 @@ public interface ReadReportingService {
 	StreamingOutput retrieveReportCSV(String name, String type,
 			Map<String, String> extractedQueryParams);
 
-	GenericResultsetData retrieveGenericResultset(String name, String type,
-			Map<String, String> extractedQueryParams);
+	//GenericResultsetData retrieveGenericResultset(String name, String type,
+		//	Map<String, String> extractedQueryParams);
 
 	Response processPentahoRequest(String reportName, String outputType,
 			Map<String, String> queryParams);
@@ -48,6 +48,9 @@ public interface ReadReportingService {
 	Page<ReportParameterJoinData> retrieveSearchReportList(SearchSqlQuery searchItemDetails);
 
 	Collection<ReportParameterData> getAllowedServiceParameters();
+
+	GenericResultsetData retrieveGenericResultset(String name, String type,
+			Map<String, String> queryParams, String schedulerName);
 
 	
 }
