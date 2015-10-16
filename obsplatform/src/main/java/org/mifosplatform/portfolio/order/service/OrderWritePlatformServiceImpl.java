@@ -822,21 +822,22 @@ public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
     	 this.orderPriceRepository.saveAndFlush(orderPrice);
     	  this.orderAddonsRepository.saveAndFlush(orderAddons);
       }
-      
-	 if(property.isEnabled()){
-		 
-		 List<OrderPrice> orderPrices=newOrder.getPrice();
-		 for(OrderPrice orderPrice:orderPrices){
-			 if(billEndDate == null){
-				// orderPrice.setBillEndDate(null);	
-				 
-			 }else{
-				// orderPrice.setBillEndDate(new LocalDate(billEndDate));
-			 }
-			 orderPrice.setInvoiceTillDate(invoicetillDate);
-			 orderPrice.setNextBillableDay(order.getPrice().get(0).getNextBillableDay());
+
+	 if (property.isEnabled()) {
+
+		  List<OrderPrice> orderPrices = newOrder.getPrice();
+			for (OrderPrice orderPrice : orderPrices) {
+					if (billEndDate == null) {
+						// orderPrice.setBillEndDate(null);
+
+					} else {
+						// orderPrice.setBillEndDate(new
+						// LocalDate(billEndDate));
 					}
-			}
+					orderPrice.setInvoiceTillDate(invoicetillDate);
+					orderPrice.setNextBillableDay(order.getPrice().get(0).getNextBillableDay());
+				}
+	 }
 				
 	 newOrder.setuserAction(UserActionStatusTypeEnum.CHANGE_PLAN.toString());
 	 this.orderRepository.save(newOrder);

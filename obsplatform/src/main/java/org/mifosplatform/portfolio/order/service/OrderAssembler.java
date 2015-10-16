@@ -107,7 +107,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 				LocalDate billEndDate = null;
 
 				//end date is null for rc
-				if (data.getChagreType().equalsIgnoreCase("RC") || "UC".equalsIgnoreCase(data.getChagreType())&& endDate != null) {
+				if (endDate != null  && ("RC".equalsIgnoreCase(data.getChagreType()) || "UC".equalsIgnoreCase(data.getChagreType()))) {
 					billEndDate = new LocalDate(order.getEndDate());
 				} else if(data.getChagreType().equalsIgnoreCase("NRC")) {
 					billEndDate = billstartDate;
@@ -184,7 +184,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 				
 				orderPrice.setBillStartDate(billstartDate);
 				//end date is null for rc
-				if (orderPrice.getChargeType().equalsIgnoreCase("RC") || "UC".equalsIgnoreCase(orderPrice.getChargeType())	&& endDate != null) {
+				if (endDate != null && ("RC".equalsIgnoreCase(orderPrice.getChargeType()) || "UC".equalsIgnoreCase(orderPrice.getChargeType()))) {
 					orderPrice.setBillEndDate(new LocalDate(order.getEndDate()));
 				}else if(endDate == null){
 					orderPrice.setBillEndDate(endDate);

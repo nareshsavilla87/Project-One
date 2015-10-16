@@ -497,9 +497,10 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 			}
 			if (serviceAssociation) {
 				List<ServiceMapping> serviceMap = this.serviceMappingRepository.findOneByServiceId(orderLine.getServiceId());
-				if (!serviceMap.isEmpty() && 'Y' == serviceMap.get(0).getIsHwReq())
-					return true;
-				     break;
+				if (!serviceMap.isEmpty() && 'Y' == serviceMap.get(0).getIsHwReq()){
+					 return true;
+				}
+				
 			}
 		}
 		return false;
