@@ -108,8 +108,9 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			}
 
 			@Override
+
 			public HardwareAssociationData mapRow(final ResultSet rs, final int rowNum)throws SQLException {
-				
+
 				Long id = rs.getLong("id");
 				Long planId = rs.getLong("planId");
 				Long orderId=rs.getLong("id");
@@ -120,8 +121,10 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 
 			}
 		}
+
 		@Override
 		public List<AssociationData> retrieveClientAssociationDetails(Long clientId,String serialNo) {
+
             try
             {
 
@@ -429,5 +432,4 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 				}
 
 		}
-		
 }
