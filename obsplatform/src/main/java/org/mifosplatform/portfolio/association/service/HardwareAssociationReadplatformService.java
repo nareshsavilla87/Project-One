@@ -22,8 +22,4 @@ public interface HardwareAssociationReadplatformService {
 
 	List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long clientId);
 
-	List<AssociationData> retrieveClientAssociationDetails(Long clientId,
-			String serialNumber);
-
-
 }

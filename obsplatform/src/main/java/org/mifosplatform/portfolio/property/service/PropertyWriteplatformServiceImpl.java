@@ -21,6 +21,7 @@ import org.mifosplatform.organisation.address.domain.Address;
 import org.mifosplatform.organisation.address.domain.AddressRepository;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.portfolio.association.data.AssociationData;
+import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
 import org.mifosplatform.portfolio.property.domain.PropertyCodesMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyCodesMasterRepository;
@@ -188,7 +189,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			final String chargeCode = command.stringValueOfParameterNamed("chargeCode");
 			final boolean serialNumberFlag =command.booleanPrimitiveValueOfParameterNamed("serialNumberFlag");
 			Address clientAddress =null;
-			List<AssociationData> associationDatas = this.associationReadplatformService.retrieveClientAssociationDetails(clientId,serialNumber);
+			List<HardwareAssociationData> associationDatas = this.associationReadplatformService.retrieveClientAllocatedPlan(clientId,serialNumber);
 			PropertyTransactionHistory transactionHistory = null;
 			if(oldPropertyCode != null){
 				clientAddress = this.addressRepository.findOneByClientIdAndPropertyCode(clientId,oldPropertyCode);	

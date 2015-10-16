@@ -106,7 +106,7 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 
 			@Override
 			public HardwareAssociationData mapRow(final ResultSet rs,
-					@SuppressWarnings("unused") final int rowNum)
+					 final int rowNum)
 					throws SQLException {
 				Long id = rs.getLong("id");
 				Long planId = rs.getLong("planId");
@@ -118,7 +118,6 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 
 			}
 		}
-		@Override
 		public List<AssociationData> retrieveClientAssociationDetails(Long clientId) {
             try
             {
@@ -341,34 +340,4 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 
 				}
 			}
-		public List<AssociationData> retrieveClientAssociationDetails(Long clientId,String serialNumber) {
-            try
-            {
-
-          	  HarderwareAssociationMapper1 mapper1 = new HarderwareAssociationMapper1();
-			  String sql = "select " + mapper1.schema();
-			   return this.jdbcTemplate.query(sql, mapper1, new Object[] {clientId,serialNumber});
-
-		    }catch(EmptyResultDataAccessException accessException){
-			return null;
-		  }
-		}
-		private static final class HarderwareAssociationMapper1 implements RowMapper<AssociationData> {
-
-			public String schema() {
-				return "a.order_id AS orderId, a.hw_serial_no AS serialNum FROM b_association a where a.client_id = ? and a.hw_serial_no=? ";
-
-			}
-
-			@Override
-			public AssociationData mapRow(final ResultSet rs, final int rowNum)
-					throws SQLException {
-				Long orderId = rs.getLong("orderId");
-				String serialNum = rs.getString("serialNum");
-				
-				return  new AssociationData(orderId,serialNum,null);
-
-			}
-		}
-		
 }
