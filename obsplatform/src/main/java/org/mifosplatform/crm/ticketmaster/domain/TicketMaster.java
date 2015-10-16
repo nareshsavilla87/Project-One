@@ -195,7 +195,7 @@ public class TicketMaster {
 	}
 
 	public void updateTicket(final TicketMasterCommand command) {
-		this.statusCode = command.getStatusCode();
+		this.status = command.getStatus();
 		this.assignedTo = command.getAssignedTo();
 		this.priority = command.getPriority();
 		this.problemCode = command.getProblemCodeId();

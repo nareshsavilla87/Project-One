@@ -2,16 +2,22 @@ package org.mifosplatform.portfolio.property.data;
 
 public class PropertyDeviceMappingData {
 
-	Long id;
-	String serialNumber;
-	String propertycode;
-	
-	public PropertyDeviceMappingData(Long id, String serialNumber,String propertyCode) {
-		
+	private Long id;
+	private String serialNumber;
+	private String propertycode;
+	private boolean serialNumberFlag;	
+
+	public PropertyDeviceMappingData(Long id, String serialNumber,
+			String propertyCode, boolean serialNumberFlag) {
+
 		this.id = id;
 		this.serialNumber = serialNumber;
 		this.propertycode = propertyCode;
-				
+		this.serialNumberFlag = serialNumberFlag;	
+	}
+
+	public boolean isSerialNumberFlag() {
+		return serialNumberFlag;
 	}
 
 	public Long getId() {
