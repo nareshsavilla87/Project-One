@@ -346,6 +346,7 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 
 				}
 			}
+
 		/* (non-Javadoc)
 		 * @see #retrieveClientAllocatedPlanByServiceMap(java.lang.Long, java.lang.Long)
 		 */
@@ -426,6 +427,7 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 				
 				return new AssociationData(null,null,null,null,null,officeId,serialNum,null,saleId,itemMasterId,null);
 				}
+
 		}
 		
 }
