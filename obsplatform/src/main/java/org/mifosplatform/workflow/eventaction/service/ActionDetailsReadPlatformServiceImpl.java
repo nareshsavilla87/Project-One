@@ -185,11 +185,16 @@ public class ActionDetailsReadPlatformServiceImpl implements ActionDetailsReadPl
 			String jsonData = rs.getString("json");
 			
 			JSONObject jsonObject = new JSONObject(jsonData);
+			String serialnum=jsonObject.getString("serialnumber");
 			String billingfreq=jsonObject.getString("paytermCode");
 			Long planId=jsonObject.getLong("planCode");
 			Long contractPeriod=jsonObject.getLong("contractPeriod");
-			
-			return new SchedulingOrderData(id,startDate,planId,contractPeriod,billingfreq);
+			if(serialnum != null && !serialnum.isEmpty()){
+				Boolean isSerialnum = jsonObject.getString("serialnumber") != null ? true : false;
+				return new SchedulingOrderData(id,startDate,planId,contractPeriod,billingfreq,isSerialnum,serialnum, jsonData);
+				}else{
+					return new SchedulingOrderData(id,startDate,planId,contractPeriod,billingfreq,false,serialnum, jsonData);
+					}
 			} catch (org.json.JSONException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

@@ -233,15 +233,19 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		this.planReadPlatformService = planReadPlatformService;
 
 	}
-
+	
+	
 	@Override
 	public CommandProcessingResult createOrder(Long clientId, JsonCommand command) {
 
 		try {
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
+			String serialnum = command.stringValueOfParameterNamed("serialnumber");
+			String allocationType = command.stringValueOfParameterNamed("allocation_type");
 			final Long userId = getUserId();
 
-			checkingContractPeriodAndBillfrequncyValidation(command.longValueOfParameterNamed("contractPeriod"), command.stringValueOfParameterNamed("paytermCode"));
+			checkingContractPeriodAndBillfrequncyValidation(command.longValueOfParameterNamed("contractPeriod"),
+					command.stringValueOfParameterNamed("paytermCode"));
 
 			// Check for Custome_Validation
 			this.eventValidationReadPlatformService.checkForCustomValidations(clientId, EventActionConstants.EVENT_CREATE_ORDER, command.json(), userId);
@@ -262,7 +266,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 				Long commandId = Long.valueOf(0);
 
 				if (service != null && service.isAuto() == 'Y' && !plan.getProvisionSystem().equalsIgnoreCase("None")) {
-
 					CommandProcessingResult processingResult = this.prepareRequestWriteplatformService.prepareNewRequest(order, plan, requstStatus);
 					commandId = processingResult.commandId();
 				}
@@ -275,17 +278,21 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			// For Plan And HardWare Association
 			Configuration configurationProperty = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_IMPLICIT_ASSOCIATION);
 
-			if (configurationProperty.isEnabled()) {
+			if (configurationProperty.isEnabled() && serialnum == null) {
 
 				if (plan.isHardwareReq() == 'Y') {
-
 					List<AllocationDetailsData> allocationDetailsDatas = this.allocationReadPlatformService.retrieveHardWareDetailsByItemCode(clientId, plan.getPlanCode());
 					
 					if (allocationDetailsDatas.size() == 1) {
-						this.associationWriteplatformService.createNewHardwareAssociation(clientId, plan.getId(), 
-								allocationDetailsDatas.get(0).getSerialNo(), order.getId(), allocationDetailsDatas.get(0).getAllocationType());
+						this.associationWriteplatformService.createNewHardwareAssociation(clientId, plan.getId(), allocationDetailsDatas.get(0).getSerialNo(), 
+								order.getId(), allocationDetailsDatas.get(0).getAllocationType());
 					}
 				}
+
+			} else if (serialnum != null && configurationProperty.isEnabled()) {
+
+				// List<AllocationDetailsData> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetailsByItemCode(clientId,plan.getPlanCode());
+				this.associationWriteplatformService.createNewHardwareAssociation(clientId, plan.getId(), serialnum, order.getId(), allocationType);
 			}
 
 			if (plan.getProvisionSystem().equalsIgnoreCase("None")) {
@@ -293,20 +300,19 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 				Client client = this.clientRepository.findOne(clientId);
 				client.setStatus(ClientStatus.ACTIVE.getValue());
 				this.clientRepository.save(client);
-				
+
 				if (isNewPlan) {
 					processNotifyMessages(EventActionConstants.EVENT_CREATE_ORDER, clientId, order.getId().toString(), null);
 				}
-				
 			}
 
 			if (isNewPlan) {
 				processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, clientId, order.getId().toString(), "ACTIVATION");
 			}
-			
+
 			this.orderRepository.save(order);
 			return new CommandProcessingResult(order.getId(), order.getClientId());
-			
+
 		} catch (DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
@@ -711,6 +717,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		}
 	}
 
+	@SuppressWarnings("unused")
 	@Override
 	public CommandProcessingResult retrackOsdMessage(final JsonCommand command) {
 		try {
@@ -790,9 +797,10 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 	public CommandProcessingResult changePlan(JsonCommand command, Long entityId) {
 
 		try {
-			Long userId = this.context.authenticatedUser().getId();
+			//Long userId = this.context.authenticatedUser().getId();
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
-			checkingContractPeriodAndBillfrequncyValidation(command.longValueOfParameterNamed("contractPeriod"), command.stringValueOfParameterNamed("paytermCode"));
+			checkingContractPeriodAndBillfrequncyValidation(command.longValueOfParameterNamed("contractPeriod"), 
+					command.stringValueOfParameterNamed("paytermCode"));
 			Order order = this.orderRepository.findOne(entityId);
 			order.updateDisconnectionstate();
 			Date billEndDate = order.getPrice().get(0).getBillEndDate();
@@ -833,8 +841,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 						// orderPrice.setBillEndDate(null);
 
 					} else {
-						// orderPrice.setBillEndDate(new
-						// LocalDate(billEndDate));
+						// orderPrice.setBillEndDate(new LocalDate(billEndDate));
 					}
 					orderPrice.setInvoiceTillDate(invoicetillDate);
 					orderPrice.setNextBillableDay(order.getPrice().get(0).getNextBillableDay());
@@ -861,10 +868,11 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 				// Notify details for change plan
 				processNotifyMessages(EventActionConstants.EVENT_CHANGE_PLAN, newOrder.getClientId(), newOrder.getId().toString(), null);
 			}
-
+     
 			// For Order History
-			OrderHistory orderHistory = new OrderHistory(order.getId(), DateUtils.getLocalDateOfTenant(), DateUtils.getLocalDateOfTenant(), processResuiltId,
-					UserActionStatusTypeEnum.CHANGE_PLAN.toString(), userId, null);
+			OrderHistory orderHistory=new OrderHistory(order.getId(),DateUtils.getLocalDateOfTenant(),DateUtils.getLocalDateOfTenant(),processResuiltId,					
+					UserActionStatusTypeEnum.CHANGE_PLAN.toString(),null,null);
+
 			this.orderHistoryRepository.save(orderHistory);
 			processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, newOrder.getClientId(), newOrder.getId().toString(), "CHANGE PLAN");
 			return new CommandProcessingResult(result.resourceId(),order.getClientId());
@@ -937,54 +945,54 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 						"/orders/renewalorder/" + clientId, clientId, command.json(), null, clientId);
 
 			} else if (actionType.equalsIgnoreCase("changeorder")) {
-
-				// Check for Custome_Validation
-				this.eventValidationReadPlatformService.checkForCustomValidations(clientId, EventActionConstants.EVENT_CHANGE_ORDER, command.json(), userId);
-
-				jsonObject.put("billAlign", command.booleanPrimitiveValueOfParameterNamed("billAlign"));
-				jsonObject.put("contractPeriod", command.longValueOfParameterNamed("contractPeriod"));
-				jsonObject.put("dateFormat", command.booleanPrimitiveValueOfParameterNamed("dateFormat"));
-				jsonObject.put("locale", command.booleanPrimitiveValueOfParameterNamed("locale"));
-				jsonObject.put("isNewPlan", command.booleanPrimitiveValueOfParameterNamed("isNewPlan"));
-				jsonObject.put("paytermCode", command.stringValueOfParameterNamed("paytermCode"));
-				jsonObject.put("planCode", command.longValueOfParameterNamed("planCode"));
-				jsonObject.put("start_date", command.stringValueOfParameterNamed("start_date"));
-				jsonObject.put("disconnectionDate", command.stringValueOfParameterNamed("disconnectionDate"));
-				jsonObject.put("disconnectReason", command.stringValueOfParameterNamed("disconnectReason"));
-
-				eventAction = new EventAction(startDate.toDate(), "CHANGEPLAN","ORDER", EventActionConstants.ACTION_CHNAGE_PLAN,
-						"/orders/changPlan/" + clientId, clientId, command.json(), null, clientId);
+				//Check for Custome_Validation
+				this.eventValidationReadPlatformService.checkForCustomValidations(clientId,EventActionConstants.EVENT_CHANGE_ORDER,command.json(),userId);
+						Long orderId = command.longValueOfParameterNamed("orderId");
+			    	  	jsonObject.put("billAlign",command.booleanPrimitiveValueOfParameterNamed("billAlign"));
+			    	  	jsonObject.put("contractPeriod",command.longValueOfParameterNamed("contractPeriod"));
+			    	  	jsonObject.put("dateFormat",command.booleanPrimitiveValueOfParameterNamed("dateFormat"));
+			    	  	jsonObject.put("locale",command.booleanPrimitiveValueOfParameterNamed("locale"));
+			    	  	jsonObject.put("isNewPlan",command.booleanPrimitiveValueOfParameterNamed("isNewPlan"));
+			    	  	jsonObject.put("paytermCode",command.stringValueOfParameterNamed("paytermCode"));
+			    	  	jsonObject.put("planCode",command.longValueOfParameterNamed("planCode"));
+			    	  	jsonObject.put("start_date",command.stringValueOfParameterNamed("start_date"));
+			    	  	jsonObject.put("disconnectionDate",command.stringValueOfParameterNamed("disconnectionDate"));
+			    	  	jsonObject.put("disconnectReason",command.stringValueOfParameterNamed("disconnectReason"));
+		        	   
+		        	    eventAction=new EventAction(startDate.toDate(), "CHANGEPLAN", "ORDER",EventActionConstants.ACTION_CHNAGE_PLAN,"/orders/changPlan/"+orderId, 
+		        			  clientId,command.json(),orderId,clientId);
 
 			} else {
 
 				// Check for Custome_Validation
 				this.eventValidationReadPlatformService.checkForCustomValidations(clientId, EventActionConstants.EVENT_CREATE_ORDER, command.json(), userId);
-
-				// Check for Active Orders
-				/*
-				 * Long activeorderId=this.orderReadPlatformService.
-				 * retrieveClientActiveOrderDetails(clientId,null); /* Long
-				 * activeorderId
-				 * =this.orderReadPlatformService.retrieveClientActiveOrderDetails
-				 * (clientId,null); >>>>>>> upstream/obsplatform-3.0 >>>>>>>
-				 * obsplatform-3.0 if(activeorderId !=null && activeorderId
-				 * !=0){ Order
-				 * order=this.orderRepository.findOne(activeorderId);
-				 * if(order.getEndDate() == null || !startDate.isAfter(new
-				 * LocalDate(order.getEndDate()))){ throw new
-				 * SchedulerOrderFoundException(activeorderId); } }
-				 */
-
-				jsonObject.put("billAlign", command.booleanPrimitiveValueOfParameterNamed("billAlign"));
-				jsonObject.put("contractPeriod", command.longValueOfParameterNamed("contractPeriod"));
-				jsonObject.put("dateFormat", "dd MMMM yyyy");
-				jsonObject.put("locale", "en");
-				jsonObject.put("isNewPlan", "true");
-				jsonObject.put("paytermCode",command.stringValueOfParameterNamed("paytermCode"));
-				jsonObject.put("planCode",command.longValueOfParameterNamed("planCode"));
-				jsonObject.put("start_date", startDate.toDate());
-
-				eventAction = new EventAction(startDate.toDate(), "CREATE", "ORDER", EventActionConstants.ACTION_NEW, "/orders/"+ clientId, clientId, command.json(), null, clientId);
+			
+				//Check for Active Orders	
+		    	 /* Long activeorderId=this.orderReadPlatformService.retrieveClientActiveOrderDetails(clientId,null);
+		    	/*  Long activeorderId=this.orderReadPlatformService.retrieveClientActiveOrderDetails(clientId,null);
+	>>>>>>> upstream/obsplatform-3.0
+	>>>>>>> obsplatform-3.0
+		    	  	if(activeorderId !=null && activeorderId !=0){
+		    	  		Order order=this.orderRepository.findOne(activeorderId);
+					   		if(order.getEndDate() == null || !startDate.isAfter(new LocalDate(order.getEndDate()))){
+					   			throw new SchedulerOrderFoundException(activeorderId);				   
+					   		}
+		    	  	}*/
+				
+				jsonObject.put("billAlign",command.booleanPrimitiveValueOfParameterNamed("billAlign"));
+	    	  	jsonObject.put("contractPeriod",command.longValueOfParameterNamed("contractPeriod"));
+	    	  	jsonObject.put("dateFormat","dd MMMM yyyy");
+	    	  	jsonObject.put("locale","en");
+	    	  	jsonObject.put("isNewPlan","true");
+	    	  	jsonObject.put("paytermCode",command.stringValueOfParameterNamed("paytermCode"));
+	    	  	jsonObject.put("planCode",command.longValueOfParameterNamed("planCode"));
+	    	  	jsonObject.put("start_date",startDate.toDate());
+	    	  	jsonObject.put("serialnumber", "");
+        	   
+        	    eventAction=new EventAction(startDate.toDate(), "CREATE", "ORDER",EventActionConstants.ACTION_NEW,"/orders/"+clientId, 
+        			  clientId,command.json(),null,clientId);
+			
+				
 			}
 
 			eventAction.updateStatus(status);
@@ -995,7 +1003,6 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			handleCodeDataIntegrityIssues(command, null);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		} catch (JSONException dve) {
-
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
 
@@ -1018,6 +1025,57 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
+	}
+	
+	public CommandProcessingResult scheduleOrderUpdation(Long entityId,JsonCommand command){
+		
+		try{
+			
+			String actionType = command.stringValueOfParameterNamed("actionType");
+			 String serialnum =command.stringValueOfParameterNamed("serialnumber");
+			 String allcation_type = command.stringValueOfParameterNamed("allcation_type");
+			  if(!actionType.equalsIgnoreCase("renewalorder")){
+				  if(serialnum.isEmpty()){
+					  this.fromApiJsonDeserializer.validateForUpdate(command.json());
+				  }
+			  }
+			  String startDate=command.stringValueOfParameterNamed("start_date");
+			  
+			  char status = 'N';
+			  if(command.hasParameter("status")){
+				  status = command.stringValueOfParameterNamed("status").trim().charAt(0);
+			  }
+			 
+			  EventAction eventAction=this.eventActionRepository.findOne(entityId);
+			  
+			  JSONObject jsonObject=new JSONObject(eventAction.getCommandAsJson());
+			  Long clientId= eventAction.getClientId();
+			  this.eventValidationReadPlatformService.checkForCustomValidations(entityId,EventActionConstants.EVENT_CREATE_ORDER,command.json(),clientId);
+			  if(!serialnum.isEmpty()){
+				  jsonObject.remove("serialnumber");
+				  jsonObject.put("serialnumber", serialnum);
+				  jsonObject.put("allocation_type", allcation_type );
+			  }
+			  if(!startDate.isEmpty()){
+				  jsonObject.remove("start_date");
+				  jsonObject.put("start_date", startDate);
+				  Date startDate1=command.DateValueOfParameterNamed("start_date");
+				  eventAction.setTransDate(startDate1);
+				 
+			  }
+      	      eventAction.setCommandAsJson(jsonObject.toString());
+			  eventAction.updateStatus(status);
+			  this.eventActionRepository.save(eventAction);
+      	return  new CommandProcessingResult(command.entityId(),entityId);
+	
+}catch(DataIntegrityViolationException dve){
+		handleCodeDataIntegrityIssues(command, null);
+		return new CommandProcessingResult(Long.valueOf(-1));
+	}catch(JSONException dve){
+		
+		return new CommandProcessingResult(Long.valueOf(-1));
+		}
+		
 	}
 
 	@Transactional
@@ -1289,9 +1347,9 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			}
 		}
 	}
-
-	private Plan findOneWithNotFoundDetection(final Long planId) {
-
+  
+	@Override
+	public Plan findOneWithNotFoundDetection(final Long planId) {
 		Plan plan = this.planRepository.findPlanCheckDeletedStatus(planId);
 
 		if (plan == null) {

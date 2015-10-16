@@ -321,10 +321,11 @@ public class CommandWrapperBuilder {
 	}
 
 	public CommandWrapperBuilder deleteClientIdentifier(final Long clientId,
-			final Long clientIdentifierId) {
+			final Long clientIdentifierId, final Long fileId) {
 		this.actionName = "DELETE";
 		this.entityName = "CLIENTIDENTIFIER";
 		this.entityId = clientIdentifierId;
+		this.subentityId = fileId;
 		this.clientId = clientId;
 		this.href = "/clients/" + clientId + "/identifiers/"
 				+ clientIdentifierId;
@@ -2045,6 +2046,13 @@ public class CommandWrapperBuilder {
 		this.actionName = "CREATE";
 		this.entityName = "ORDERSCHEDULING";
 		this.entityId = clientId;
+		this.href = "/orders/scheduling" + clientId;
+		return this;
+	}
+	public CommandWrapperBuilder updateSchedulingOrder(Long orderId) {
+		this.actionName = "UPDATE";
+		this.entityName = "ORDERSCHEDULING";
+		this.entityId = orderId;
 		this.href = "/orders/scheduling" + clientId;
 		return this;
 	}

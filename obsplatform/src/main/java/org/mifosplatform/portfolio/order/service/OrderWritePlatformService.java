@@ -2,6 +2,7 @@ package org.mifosplatform.portfolio.order.service;
 
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.portfolio.plan.domain.Plan;
 
 public interface OrderWritePlatformService {
 	
@@ -40,5 +41,9 @@ public interface OrderWritePlatformService {
 	void checkingContractPeriodAndBillfrequncyValidation(Long contractPeriod, String paytermCode);
 	
 	CommandProcessingResult renewalOrderWithClient(JsonCommand command,Long clientId);
+
+	Plan findOneWithNotFoundDetection(Long planId);
+
+	CommandProcessingResult scheduleOrderUpdation(Long entityId,JsonCommand command);
 	
 }

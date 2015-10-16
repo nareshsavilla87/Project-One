@@ -172,10 +172,10 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 		private static final class AssociationMapper implements RowMapper<AssociationData> {
 
 			public String schema() {
-				return " 'ALLOT' as allocationType,b.serial_no AS serialNum,b.provisioning_serialno as provisionNum, pdm.property_code as propertyCode FROM  b_item_detail b  LEFT JOIN "+
-						"b_propertydevice_mapping pdm ON (b.serial_no = pdm.serial_number and b.client_id = pdm.client_id) where  b.client_id=? union" +
-						" select  'OWNED' as allocationType,o.serial_number  AS serialNum, o.provisioning_serial_number  AS provisionNum, pdm.property_code as propertyCode"+
-						" FROM b_owned_hardware o LEFT JOIN b_propertydevice_mapping pdm ON (o.serial_number = pdm.serial_number and o.client_id = pdm.client_id)" +
+				return " 'ALLOT' as allocationType,b.serial_no AS serialNum,b.provisioning_serialno as provisionNum, pdm.property_code as propertyCode, ba.order_id as orderId FROM  b_item_detail b  LEFT JOIN "+
+						"b_propertydevice_mapping pdm ON (b.serial_no = pdm.serial_number and b.client_id = pdm.client_id) Left JOIN b_association ba on (b.serial_no = ba.hw_serial_no) where  b.client_id=? union" +
+						" select  'OWNED' as allocationType,o.serial_number  AS serialNum, o.provisioning_serial_number  AS provisionNum, pdm.property_code as propertyCode, ba.order_id as orderId"+
+						" FROM b_owned_hardware o LEFT JOIN b_propertydevice_mapping pdm ON (o.serial_number = pdm.serial_number and o.client_id = pdm.client_id) Left JOIN b_association ba on (o.serial_number = ba.hw_serial_no)" +
 						" WHERE o.client_id = ? and o.is_deleted = 'N'";
  
 			}
@@ -188,7 +188,8 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 				final String provisionNumber = rs.getString("provisionNum");
 				final String allocationType =rs.getString("allocationType");
 				final String propertyCode =rs.getString("propertycode");
-				return new AssociationData(serialNum,provisionNumber,allocationType,propertyCode); 
+				final Long orderId = rs.getLong("orderId");
+				return new AssociationData(serialNum,provisionNumber,allocationType,propertyCode,orderId); 
 			}
 		}
 		@Override
