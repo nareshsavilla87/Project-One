@@ -220,7 +220,7 @@ public class DocumentManagementApiResource {
 	public String addTicketDetails(@PathParam("ticketId") Long ticketId,@PathParam("entityType") String entityType, @PathParam("entityId") Long entityId,
             @HeaderParam("Content-Length") Long fileSize, @FormDataParam("file") InputStream inputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetails, @FormDataParam("file") FormDataBodyPart bodyPart,
-            @FormDataParam("comments") String comments, @FormDataParam("status") Integer status, @FormDataParam("assignedTo") Integer assignedTo,
+            @FormDataParam("comments") String comments, @FormDataParam("status") String status, @FormDataParam("assignedTo") Integer assignedTo,
             @FormDataParam("ticketURL") String ticketURL, @FormDataParam("problemCode") Integer problemCode, @FormDataParam("priority") String priority) {
 	   
 
@@ -236,7 +236,7 @@ public class DocumentManagementApiResource {
          * permissable
          **/
         Long createdbyId = context.authenticatedUser().getId();
-        TicketMasterCommand ticketMasterCommand=new TicketMasterCommand(ticketId,comments,null,assignedTo,createdbyId,status,problemCode,priority);
+        TicketMasterCommand ticketMasterCommand=new TicketMasterCommand(ticketId,comments,status,assignedTo,createdbyId,null,problemCode,priority);
         DocumentCommand documentCommand=null;
         if(fileDetails!=null&&bodyPart!=null){
          documentCommand = new DocumentCommand(null, null, entityType, entityId, null, fileDetails.getFileName(), fileSize,
