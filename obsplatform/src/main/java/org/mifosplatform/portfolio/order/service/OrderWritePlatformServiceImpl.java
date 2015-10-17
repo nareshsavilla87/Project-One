@@ -1,13 +1,18 @@
 package org.mifosplatform.portfolio.order.service;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import org.codehaus.jettison.json.JSONException;
 import org.codehaus.jettison.json.JSONObject;
+import org.joda.time.DateTimeField;
 import org.joda.time.LocalDate;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.payterms.data.PaytermData;
@@ -58,6 +63,7 @@ import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.contract.exception.ContractPeriodNotFoundException;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
+import org.mifosplatform.portfolio.order.data.OrderData;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.UserActionStatusEnumaration;
 import org.mifosplatform.portfolio.order.domain.Order;
@@ -1277,15 +1283,31 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			this.context.authenticatedUser();
 			this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
 			CommandProcessingResult result;
-			// pls write validation for orderId
+			
 			Long planId = command.longValueOfParameterNamed("planId");
 			String contractPeriod = command.stringValueOfParameterNamed("duration");
 			Long orderId = command.longValueOfParameterNamed("orderId");
+			
+			Plan  planData = this.planRepository.findOne(planId);
+			if(planData == null){ throw new PlanNotFundException(planId);}
+			
+			String isPrepaid = planData.getIsPrepaid() == 'N' ? "postpaid" : "prepaid";
+			
 			Contract contract =this.contractRepository.findOneByContractId(contractPeriod);
 			if(contract == null){
 				throw new ContractPeriodNotFoundException(contractPeriod,clientId);
 			}
 			List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
+			final List<OrderData> clientOrders = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
+			Boolean flag = false;
+			for(OrderData orders:clientOrders){
+				if(orderId == Long.valueOf(orders.getOrderNo())){
+					flag = true;
+				}
+			}
+			if(!flag){
+				throw new OrderNotFoundException(orderId);
+			}
 			if(orderIds.isEmpty()){
 				//throw new NoOrdersFoundException(clientId,planId);
 				
@@ -1293,25 +1315,33 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 				if(datas.size()==0){
 					throw new BillingOrderNoRecordsFoundException(planId);
 				}
-				Order order = retrieveOrderById(orderId);
+				Order mainOrder = retrieveOrderById(orderId);
+				final Order order= this.orderRepository.findOneOrderByOrderNO(mainOrder.getOrderNo());
+		        if (order == null) { throw new NoOrdersFoundException(clientId.toString(),orderId); }
+		        
 				LocalDate date = new LocalDate(order.getEndDate()).plusDays(1);
+				DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
+				
 				JSONObject jsonObject = new JSONObject();
 	    	  	jsonObject.put("billAlign","false");
 	    	  	jsonObject.put("autoRenew","false");
-	    	  	jsonObject.put("contractPeriod",contract.getSubscriptionPeriod());
+	    	  	jsonObject.put("contractPeriod",contract.getId());
 	    	  	jsonObject.put("dateFormat","dd MMMM yyyy");
 	    	  	jsonObject.put("locale","en");
 	    	  	jsonObject.put("isNewPlan","false");
+	    	  	if(isPrepaid.equalsIgnoreCase("prepaid")){
 	    	  	for(PaytermData data : datas){
 					if(data.getDuration().equalsIgnoreCase(contractPeriod)){
 						jsonObject.put("paytermCode",data.getPaytermtype());
 					}
 				}
+	    	  	}
 	    	  	jsonObject.put("planCode",planId);
-	    	  	jsonObject.put("start_date",date);
-	    	  	jsonObject.put("disconnectionDate",date);
+	    	  	jsonObject.put("start_date",formatter.print(date));
+	    	  	jsonObject.put("disconnectionDate",formatter.print(date));
 	    	  	jsonObject.put("disconnectReason","Not Interested");
 	    	  	jsonObject.put("actionType","changeorder");
+	    	  	jsonObject.put("orderId",orderId);
 	    	  	final JsonElement element = fromJsonHelper.parse(jsonObject.toString());
 				JsonCommand changeCommandCommand = new JsonCommand(null,jsonObject.toString(), element, fromJsonHelper,
 						null, null, null, null, null, null, null, null, null, null, 
@@ -1319,10 +1349,6 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 				result = scheduleOrderCreation(clientId, changeCommandCommand);
 				
 			}else{
-			Plan  planData = this.planRepository.findOne(planId);
-			if(planData == null){ throw new PlanNotFundException(planId);}
-			
-			String isPrepaid = planData.getIsPrepaid() == 'N' ? "postpaid" : "prepaid";
 				
 				List<SubscriptionData> subscriptionDatas = this.planReadPlatformService.retrieveSubscriptionData(orderIds.get(0), isPrepaid);
 				if(subscriptionDatas.isEmpty()){

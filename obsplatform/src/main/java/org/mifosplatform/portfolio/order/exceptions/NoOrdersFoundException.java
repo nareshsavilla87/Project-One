@@ -22,4 +22,9 @@ public class NoOrdersFoundException extends AbstractPlatformDomainRuleException 
 		
 		super("error.msg.orders.not.found", "No Orders found with clientId "+clientId+" and planId "+planId,clientId);
 	}
+	
+	public NoOrdersFoundException(String clientId, Long orderNo) {
+		
+		super("error.msg.orders.not.found", "No Orders found with clientId "+clientId+" and orderNo "+orderNo,clientId);
+	}
 }

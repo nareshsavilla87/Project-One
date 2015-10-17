@@ -33,7 +33,7 @@ public final class OrderCommandFromApiJsonDeserializer {
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("planCode","locale","dateFormat","start_date","paytermCode",
     		"contractPeriod","billAlign","price","description","renewalPeriod","disconnectReason","isPrepaid","disconnectionDate","ispaymentEnable",
     		"paymentCode","amountPaid","paymentDate","receiptNo","promoId","startDate","isNewplan","suspensionDate","suspensionReason",
-    		"suspensionDescription","status","actionType","priceId","autoRenew","planId","duration","orderId"));
+    		"suspensionDescription","status","actionType","priceId","autoRenew","planId","duration","orderId","isNewPlan"));
     private final Set<String> retracksupportedParameters = new HashSet<String>(Arrays.asList("commandName","message","orderId"));
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -200,6 +200,8 @@ public final class OrderCommandFromApiJsonDeserializer {
 		baseDataValidator.reset().parameter("planId").value(planId).notBlank().validateforNumeric();
 		final String duration = fromApiJsonHelper.extractStringNamed("duration", element);
 		baseDataValidator.reset().parameter("duration").value(duration).notBlank();
+		final String orderId=fromApiJsonHelper.extractStringNamed("orderId", element);
+		baseDataValidator.reset().parameter("orderId").value(orderId).notBlank().validateforNumeric();
 		
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 		
