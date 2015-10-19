@@ -2,11 +2,12 @@ package org.mifosplatform.portfolio.property.service;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Collection;
 import java.util.List;
 
-import org.apache.poi.ss.formula.functions.Vlookup;
 import org.joda.time.LocalDate;
-import org.mifosplatform.billing.planprice.service.PriceReadPlatformService;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.billing.servicetransfer.data.ClientPropertyData;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
@@ -15,8 +16,10 @@ import org.mifosplatform.infrastructure.core.service.PaginationHelper;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.portfolio.order.data.SchedulingOrderData;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
 import org.mifosplatform.portfolio.property.data.PropertyDeviceMappingData;
+import org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -29,11 +32,18 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 	private final JdbcTemplate jdbcTemplate;
 	private final PlatformSecurityContext context;
 	private final PaginationHelper<PropertyDefinationData> paginationHelper = new PaginationHelper<PropertyDefinationData>();
-
+	private static ActionDetailsReadPlatformService actionDetailsReadPlatformService; 
+	private final static String serialNumber = "serialnumber";
+	
 	@Autowired
-	public PropertyReadPlatformServiceImp(final PlatformSecurityContext context,final TenantAwareRoutingDataSource dataSource) {
+	public PropertyReadPlatformServiceImp(final PlatformSecurityContext context,
+			final TenantAwareRoutingDataSource dataSource, 
+			ActionDetailsReadPlatformService actionDetailsReadPlatformService ) {
+		
 		this.context = context;
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
+		PropertyReadPlatformServiceImp.actionDetailsReadPlatformService = actionDetailsReadPlatformService;
+	    
 	}
 
 	@Override
@@ -288,8 +298,40 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 			final Long id =rs.getLong("id");
 			final String serialnumber = rs.getString("serialnumber");
 			final String propertyCode = rs.getString("propertyCode");
+			final Long clientId =rs.getLong("clientId");
 			
-			return new PropertyDeviceMappingData(id,serialnumber,propertyCode);
+			boolean serialNumberFlag = processScheduleOrders(clientId, serialnumber);
+			
+			return new PropertyDeviceMappingData(id,serialnumber,propertyCode, serialNumberFlag);
+		}
+
+		private boolean processScheduleOrders(Long clientId, String serialnumber) {
+
+			try {
+				final Collection<SchedulingOrderData> schedulingOrderDatas = actionDetailsReadPlatformService
+						.retrieveClientSchedulingOrders(clientId);
+
+				for (SchedulingOrderData data : schedulingOrderDatas) {
+
+					JSONObject object = new JSONObject(data.getJsonData());
+
+					if (object.has(serialNumber)) {
+
+						String jsonSerialNo = object.getString(serialNumber);
+
+						if (null != jsonSerialNo && !jsonSerialNo.isEmpty()
+								&& jsonSerialNo.equalsIgnoreCase(serialnumber)) {
+							return true;
+						}
+					}
+
+				}
+
+			} catch (JSONException e) {
+				System.out.println(" throwing JsonException at ProcessScheduleOrders(). ");
+			}
+			
+			return false;
 		}
 		
 	}
@@ -299,8 +341,8 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
   					context.authenticatedUser();
 					final PropertyDeviceMapper mapper = new PropertyDeviceMapper();
 					
-					final String sql = "select pd.id as id,pd.serial_number as serialnumber,pd.property_code as propertyCode " +
-							" from b_propertydevice_mapping pd where pd.client_id =? and pd.is_deleted = 'N'";
+					final String sql = "select pd.id as id,pd.serial_number as serialnumber,pd.property_code as propertyCode, " +
+							" pd.client_id as clientId from b_propertydevice_mapping pd where pd.client_id =? and pd.is_deleted = 'N'" ;
 					
 					return this.jdbcTemplate.query(sql, mapper, new Object[] {clienId});
 		            }catch (EmptyResultDataAccessException accessException) {

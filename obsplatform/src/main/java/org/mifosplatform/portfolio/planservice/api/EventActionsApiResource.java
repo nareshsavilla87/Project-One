@@ -3,6 +3,7 @@ package org.mifosplatform.portfolio.planservice.api;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import javax.ws.rs.Consumes;
@@ -21,11 +22,15 @@ import org.mifosplatform.infrastructure.core.serialization.ApiRequestJsonSeriali
 import org.mifosplatform.infrastructure.core.serialization.DefaultToApiJsonSerializer;
 import org.mifosplatform.infrastructure.core.service.Page;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.logistics.onetimesale.data.OneTimeSaleData;
+import org.mifosplatform.logistics.onetimesale.service.OneTimeSaleReadPlatformService;
 import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.order.data.SchedulingOrderData;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMapping;
+import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
 import org.mifosplatform.scheduledjobs.scheduledjobs.data.EventActionData;
 import org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
 import org.mifosplatform.workflow.eventaction.service.EventActionReadPlatformService;
@@ -49,6 +54,7 @@ public class EventActionsApiResource {
 	private final ContractRepository subscriptionRepository;
 	private final EventActionReadPlatformService eventActionReadPlatformService;
 	private final DefaultToApiJsonSerializer<EventActionData> toApiJsonSerializerEventsAction;
+	private final PropertyDeviceMappingRepository propertyDeviceMappingRepository;
 	
 	    
 	     @Autowired
@@ -56,7 +62,8 @@ public class EventActionsApiResource {
 	    		final ApiRequestParameterHelper apiRequestParameterHelper,final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
 	    		final PlanRepository planRepository,final ContractRepository subscriptionRepository,
 	    		final EventActionReadPlatformService eventActionReadPlatformService,
-	    		final DefaultToApiJsonSerializer<EventActionData> toApiJsonSerializerEventsAction)
+	    		final DefaultToApiJsonSerializer<EventActionData> toApiJsonSerializerEventsAction,
+	    		final PropertyDeviceMappingRepository propertyDeviceMappingRepository)
 	     {
 		        this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
@@ -66,6 +73,7 @@ public class EventActionsApiResource {
 		        this.subscriptionRepository=subscriptionRepository;
 		        this.eventActionReadPlatformService = eventActionReadPlatformService;
 		        this.toApiJsonSerializerEventsAction = toApiJsonSerializerEventsAction;
+		        this.propertyDeviceMappingRepository= propertyDeviceMappingRepository;
 		    }
 
 	        @GET
@@ -81,6 +89,12 @@ public class EventActionsApiResource {
 					Contract contract=this.subscriptionRepository.findOne(orderData.getContractId());
 					orderData.setPlandesc(plan.getPlanCode());
 					orderData.setContract(contract.getSubscriptionPeriod());
+					if(orderData.getIsSerialnum()==true){
+						String serialNumber = orderData.getSerialnum();
+						PropertyDeviceMapping deviceMapping = this.propertyDeviceMappingRepository.findByCustomerSerailNumber(serialNumber,clientId);
+						if(deviceMapping!=null)
+						orderData.setPropertyCode(deviceMapping.getPropertyCode());
+					}
 					
 				}
 				final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());

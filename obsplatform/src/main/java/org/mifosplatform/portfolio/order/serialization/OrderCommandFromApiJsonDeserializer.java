@@ -33,7 +33,7 @@ public final class OrderCommandFromApiJsonDeserializer {
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("planCode","locale","dateFormat","start_date","paytermCode",
     		"contractPeriod","billAlign","price","description","renewalPeriod","disconnectReason","isPrepaid","disconnectionDate","ispaymentEnable",
     		"paymentCode","amountPaid","paymentDate","receiptNo","promoId","startDate","isNewplan","suspensionDate","suspensionReason",
-    		"suspensionDescription","status","actionType","priceId","autoRenew","planId","duration","planDescription","orderId"));
+    		"suspensionDescription","status","actionType","priceId","autoRenew","planId","duration","planDescription","serialnumber","allocation_type","orderId"));
     private final Set<String> retracksupportedParameters = new HashSet<String>(Arrays.asList("commandName","message","orderId"));
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -73,8 +73,10 @@ public final class OrderCommandFromApiJsonDeserializer {
 
         final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
         final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("code");
-
         final JsonElement element = fromApiJsonHelper.parse(json);
+        final LocalDate startDate = fromApiJsonHelper.extractLocalDateNamed("start_date", element);
+        baseDataValidator.reset().parameter("start_date").value(startDate).notBlank();
+        
         if (fromApiJsonHelper.parameterExists("renewalPeriod", element)) {
             final String renewalPeriod = fromApiJsonHelper.extractStringNamed("renewalPeriod", element);
             baseDataValidator.reset().parameter("renewalPeriod").value(renewalPeriod).notBlank();

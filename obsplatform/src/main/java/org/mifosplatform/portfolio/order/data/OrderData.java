@@ -7,6 +7,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.billing.payterms.data.PaytermData;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.portfolio.association.data.AssociationData;
 import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 import org.mifosplatform.portfolio.plan.data.PlanCodeData;
 
@@ -53,6 +54,7 @@ public class OrderData {
 	private List<OrderAddonsData> orderAddonsDatas;
 	private String autoRenew;
 	private LocalDate date;
+	private List<AssociationData> HardwareDatas;
 
 	public OrderData(List<PlanCodeData> allowedtypes,List<PaytermData> paytermData,
 			List<SubscriptionData> contractPeriod, OrderData data) {
@@ -128,6 +130,11 @@ public class OrderData {
 	public OrderData(Long clientId, List<OrderData> clientOrders) {
 		this.clientId=clientId;
 		this.clientOrders=clientOrders;
+	}
+	public OrderData(Long clientId, List<OrderData> clientOrders,List<AssociationData> HardwareDatas) {
+		this.clientId=clientId;
+		this.clientOrders=clientOrders;
+		this.setHardwareDatas(HardwareDatas);
 	}
 
 	public OrderData(Long orderId, String planCode, String planDescription,
@@ -353,6 +360,13 @@ public class OrderData {
 
 	public void setDate(LocalDate date) {
 		this.date = date;
+	}
+	public List<AssociationData> getHardwareDatas() {
+		return HardwareDatas;
+	}
+
+	public void setHardwareDatas(List<AssociationData> hardwareDatas) {
+		HardwareDatas = hardwareDatas;
 	}
 
 	
