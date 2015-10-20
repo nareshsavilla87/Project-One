@@ -9,6 +9,8 @@ import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 public interface HardwareAssociationReadplatformService {
 
 	//List<HardwareAssociationData> retrieveClientHardwareDetails(Long clientId);
+	
+	List<AssociationData> retrieveClientAssociationDetails(Long clientId, String serialNumber);
 
 	List<HardwareAssociationData> retrieveClientAllocatedPlan(Long clientId, String itemCode);
 
@@ -21,5 +23,6 @@ public interface HardwareAssociationReadplatformService {
 	List<AssociationData> retrieveplanData(Long clientId);
 
 	List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long clientId);
-
+	
+	
 }

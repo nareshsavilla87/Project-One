@@ -21,7 +21,8 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 	
 	
 	 private final JdbcTemplate jdbcTemplate;
-	 private final ConfigurationRepository configurationRepository;
+	 @SuppressWarnings("unused")
+	private final ConfigurationRepository configurationRepository;
 	
 	  
 	    @Autowired
@@ -141,7 +142,7 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 
 			@Override
 			public AssociationData mapRow(final ResultSet rs,
-					@SuppressWarnings("unused") final int rowNum)
+					 final int rowNum)
 					throws SQLException {
 				Long id= rs.getLong("id");
 				Long orderId = rs.getLong("orderId");
@@ -214,7 +215,7 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 
 			@Override
 			public AssociationData mapRow(final ResultSet rs,
-					@SuppressWarnings("unused") final int rowNum)
+					 final int rowNum)
 					throws SQLException {
 				Long planId= rs.getLong("id");
 				String planCode = rs.getString("planCode");
@@ -340,4 +341,43 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 
 				}
 			}
+		@Override
+		public List<AssociationData> retrieveClientAssociationDetails(Long clientId,String serialNumber) {
+
+            try
+            {
+
+          	  HarderwareAssociation mapper = new HarderwareAssociation();
+			  String sql = "select " + mapper.schema();
+			
+				 sql = sql + " and a.hw_serial_no= ?";
+			  
+			   return this.jdbcTemplate.query(sql, mapper, new Object[] {clientId,serialNumber});
+
+		    }catch(EmptyResultDataAccessException accessException){
+			return null;
+		  }
+		}
+		private static final class HarderwareAssociation implements RowMapper<AssociationData> {
+
+			public String schema() {
+				return "a.id as id,a.order_id AS orderId, a.hw_serial_no AS serialNum FROM b_association a where a.client_id = ?";
+
+			}
+
+			@Override
+			public AssociationData mapRow(final ResultSet rs, final int rowNum)
+					throws SQLException {
+				Long id= rs.getLong("id");
+				Long orderId = rs.getLong("orderId");
+				String serialNum = rs.getString("serialNum");
+				
+				return  new AssociationData(orderId,id,null,null,serialNum,null);
+
+			}
+		}
+		
+		
+		
+		
 }
