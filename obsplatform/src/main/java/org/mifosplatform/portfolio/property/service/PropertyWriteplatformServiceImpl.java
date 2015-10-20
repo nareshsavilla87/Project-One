@@ -20,6 +20,9 @@ import org.mifosplatform.logistics.onetimesale.service.InvoiceOneTimeSale;
 import org.mifosplatform.organisation.address.domain.Address;
 import org.mifosplatform.organisation.address.domain.AddressRepository;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
+import org.mifosplatform.portfolio.association.data.AssociationData;
+import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
+import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
 import org.mifosplatform.portfolio.property.domain.PropertyCodesMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyCodesMasterRepository;
 import org.mifosplatform.portfolio.property.domain.PropertyDeviceMapping;
@@ -53,7 +56,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	private final InvoiceOneTimeSale invoiceOneTimeSale;
 	private final PropertyReadPlatformService propertyReadPlatformService;
 	private final PropertyDeviceMappingRepository propertyDeviceMappingRepository;
-	
+	private final HardwareAssociationReadplatformService associationReadplatformService;
 
 	@Autowired
 	public PropertyWriteplatformServiceImpl(final PlatformSecurityContext context,final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer,
@@ -61,7 +64,8 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			final PropertyCodesMasterRepository propertyCodesMasterRepository,final AddressRepository addressRepository,
 		    final ChargeCodeRepository chargeCodeRepository,final InvoiceOneTimeSale invoiceOneTimeSale,
 		    final PropertyReadPlatformService propertyReadPlatformService,
-            final PropertyDeviceMappingRepository propertyDeviceMappingRepository) {
+            final PropertyDeviceMappingRepository propertyDeviceMappingRepository,
+            final HardwareAssociationReadplatformService associationReadplatformService) {
 
 		this.context = context;
 		this.apiJsonDeserializer = apiJsonDeserializer;
@@ -73,6 +77,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		this.chargeCodeRepository = chargeCodeRepository;
 		this.invoiceOneTimeSale = invoiceOneTimeSale;
 		this.propertyReadPlatformService = propertyReadPlatformService;
+		 this.associationReadplatformService=associationReadplatformService;
 	}
 
 	@Transactional
@@ -182,7 +187,9 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			final String serialNumber = command.stringValueOfParameterNamed("serialNumber");
 			final BigDecimal shiftChargeAmount = command.bigDecimalValueOfParameterNamed("shiftChargeAmount");
 			final String chargeCode = command.stringValueOfParameterNamed("chargeCode");
+			final boolean serialNumberFlag =command.booleanPrimitiveValueOfParameterNamed("serialNumberFlag");
 			Address clientAddress =null;
+			List<AssociationData> associationDatas = this.associationReadplatformService.retrieveClientAssociationDetails(clientId,serialNumber);
 			PropertyTransactionHistory transactionHistory = null;
 			if(oldPropertyCode != null){
 				clientAddress = this.addressRepository.findOneByClientIdAndPropertyCode(clientId,oldPropertyCode);	
@@ -207,8 +214,8 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 					// check shifting property same or not
 					if (!oldPropertyCode.equalsIgnoreCase(newPropertyCode) && oldPropertyMaster != null && newpropertyMaster != null
 							&& newpropertyMaster.getClientId() == null) {
-						
-						if("PRIMARY".equalsIgnoreCase(clientAddress.getAddressKey())){
+						/*if(serialNumberFlag == true && associationDatas.size() ==0 && "PRIMARY".equalsIgnoreCase(clientAddress.getAddressKey())){*/
+						if(associationDatas.size() !=0 && "PRIMARY".equalsIgnoreCase(clientAddress.getAddressKey())){
 						List<PropertyDeviceMapping>	proertyallocation = this.propertyDeviceMappingRepository.findByPropertyCode(oldPropertyCode);
 						if(proertyallocation.size() <= 1){
 							oldPropertyMaster.setClientId(null);
