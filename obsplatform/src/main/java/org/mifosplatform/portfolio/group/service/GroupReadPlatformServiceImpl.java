@@ -301,7 +301,7 @@ public class GroupReadPlatformServiceImpl implements GroupReadPlatformService {
 		Map<String, String> queryParams=new HashMap<String, String>();
 		   Collection<GroupData> codeDatas=new ArrayList<GroupData>();
 		   queryParams.put("${orderId}", orderId.toString());
-		final GenericResultsetData resultsetData=this.readReportingService.retrieveGenericResultset("GROUP_NAME", "parameter", queryParams);
+		final GenericResultsetData resultsetData=this.readReportingService.retrieveGenericResultset("GROUP_NAME", "parameter", queryParams, null);
 		   List<ResultsetColumnHeaderData> columnHeaderDatas=resultsetData.getColumnHeaders();
 		   List<ResultsetRowData> datas = resultsetData.getData();
 		   

@@ -28,6 +28,7 @@ public class EventActionConstants {
 	public static final String EVENT_TOPUP_INVOICE_MAIL = "Topup Invoice Mail";
 	public static final String EVENT_NOTIFY_ORDER_TERMINATE="Notify Order Terminate";
 	public static final String EVENT_PROVISION_CONFIRM ="Provisioning Confirmation";
+	public static final String EVENT_NOTIFY_TECHNICALTEAM = "Notify Technical Team";
 	
 	//Actions
 	public static final String ACTION_SEND_MAIL="Send Mail";
@@ -48,6 +49,7 @@ public class EventActionConstants {
 	public static final String ACTION_CREATE_PAYMENT="Create Payment";
 	public static final String ACTION_CARD_PAYMENT="Card Payment";
 	public static final String ACTION_TOPUP_INVOICE_MAIL = "Invoice Mail";
+	public static final String ACTION_NOTIFY_TECHNICALTEAM = "Notify Technical Team";
 
 	public static final String ACTION_RECURRING_DISCONNECT="RecurringDisconnect";
 	public static final String ACTION_RECURRING_RECONNECTION="RecurringReconnection";

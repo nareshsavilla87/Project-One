@@ -14,6 +14,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.UriInfo;
+
 import me.legrange.mikrotik.ApiConnection;
 import me.legrange.mikrotik.MikrotikApiException;
 
@@ -1183,13 +1185,15 @@ public void eventActionProcessor() {
 		fileHandler.createNewFile();
 		FileWriter fw = new FileWriter(fileHandler);
 		FileUtils.BILLING_JOB_PATH=fileHandler.getAbsolutePath();
+		
 		List<EventActionData> actionDatas=this.actionDetailsReadPlatformService.retrieveAllActionsForProccessing();
-			
+		
 			for(EventActionData eventActionData:actionDatas){
 				fw.append("Process Response id="+eventActionData.getId()+" ,orderId="+eventActionData.getOrderId()+" ,Provisiong System="+eventActionData.getActionName()+ " \r\n");
 				System.out.println(eventActionData.getId());
 				this.actiondetailsWritePlatformService.processEventActions(eventActionData);
 			}
+			
 			System.out.println("Event Actions are Processed....");
 			fw.append("Event Actions are Completed.... \r\n");
 			fw.flush();
