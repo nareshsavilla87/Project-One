@@ -1,8 +1,6 @@
 package org.mifosplatform.portfolio.order.service;
 
 import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -286,11 +284,7 @@ try{
 		}
 	}else if(serialnum!=null && configurationProperty.isEnabled()){
 		
-		//List<AllocationDetailsData> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetailsByItemCode(clientId,plan.getPlanCode());
-		
-		
-		this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),serialnum,
-				order.getId(),allocationType);
+		this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),serialnum,order.getId(),allocationType,null);
 	
 	}
 	
