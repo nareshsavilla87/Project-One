@@ -176,7 +176,7 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 						"b_propertydevice_mapping pdm ON (b.serial_no = pdm.serial_number and b.client_id = pdm.client_id) Left JOIN b_association ba on (b.serial_no = ba.hw_serial_no) where  b.client_id=? union" +
 						" select  'OWNED' as allocationType,o.serial_number  AS serialNum, o.provisioning_serial_number  AS provisionNum, pdm.property_code as propertyCode, ba.order_id as orderId"+
 						" FROM b_owned_hardware o LEFT JOIN b_propertydevice_mapping pdm ON (o.serial_number = pdm.serial_number and o.client_id = pdm.client_id) Left JOIN b_association ba on (o.serial_number = ba.hw_serial_no)" +
-						" WHERE o.client_id = ? and o.is_deleted = 'N'";
+						" WHERE o.client_id = ? and o.is_deleted = 'N' and ba.is_deleted='N'" ;
  
 			}
 			
