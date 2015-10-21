@@ -35,6 +35,7 @@ import org.mifosplatform.portfolio.client.domain.Client;
 import org.mifosplatform.portfolio.client.domain.ClientRepository;
 import org.mifosplatform.portfolio.client.exception.ClientNotFoundException;
 import org.mifosplatform.portfolio.client.exception.ClientStatusException;
+import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequest;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetails;
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
@@ -42,6 +43,7 @@ import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.provisioning.provsionactions.domain.ProvisionActions;
 import org.mifosplatform.provisioning.provsionactions.domain.ProvisioningActionsRepository;
 import org.mifosplatform.workflow.eventaction.data.OrderNotificationData;
+import org.mifosplatform.workflow.eventaction.service.EventActionConstants;
 import org.mifosplatform.workflow.eventaction.service.EventActionReadPlatformService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,6 +78,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 	private final ProvisioningActionsRepository provisioningActionsRepository;
 	private final ProcessRequestRepository processRequestRepository;
 	private final EventActionReadPlatformService eventActionReadPlatformService;
+	private final OrderWritePlatformService orderWritePlatformService;
 
 	@Autowired
 	public SelfCareWritePlatformServiceImp(final PlatformSecurityContext context, 
@@ -91,7 +94,8 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 			final ConfigurationRepository configurationRepository,
 			final ProvisioningActionsRepository provisioningActionsRepository,
 			final ProcessRequestRepository processRequestRepository,
-			final EventActionReadPlatformService eventActionReadPlatformService) {
+			final EventActionReadPlatformService eventActionReadPlatformService,
+			final OrderWritePlatformService orderWritePlatformService) {
 		
 		this.context = context;
 		this.selfCareRepository = selfCareRepository;
@@ -108,6 +112,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 		this.provisioningActionsRepository = provisioningActionsRepository;		
 		this.processRequestRepository = processRequestRepository;
 		this.eventActionReadPlatformService = eventActionReadPlatformService;
+		this.orderWritePlatformService = orderWritePlatformService;
 	}
 	
 	@Override
@@ -185,8 +190,7 @@ public class SelfCareWritePlatformServiceImp implements SelfCareWritePlatformSer
 				
 			}	
 			
-			
-		
+			this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, selfCare.getClientId(), null, "Client Creation");
 			
 			return new CommandProcessingResultBuilder().withEntityId(selfCare.getId()).withClientId(selfCare.getClientId()).build();
 			
