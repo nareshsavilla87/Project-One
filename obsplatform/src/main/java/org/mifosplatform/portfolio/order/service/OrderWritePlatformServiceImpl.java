@@ -5,6 +5,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -258,7 +259,7 @@ try{
 	//For Plan And HardWare Association
 	Configuration configurationProperty=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_IMPLICIT_ASSOCIATION);
 	
-	if(configurationProperty.isEnabled() && serialnum == null ){
+	if(configurationProperty.isEnabled() && StringUtils.isEmpty(serialnum)){
 		
 		if(plan.isHardwareReq() == 'Y'){
 			
@@ -282,7 +283,7 @@ try{
 			
 			}
 		}
-	}else if(serialnum!=null && configurationProperty.isEnabled()){
+	}else if( configurationProperty.isEnabled() && StringUtils.isNotBlank(serialnum)){
 		
 		this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),serialnum,order.getId(),allocationType,null);
 	
