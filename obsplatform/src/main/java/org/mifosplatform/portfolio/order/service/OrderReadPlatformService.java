@@ -43,6 +43,8 @@ public interface OrderReadPlatformService {
 	Long retrieveClientActiveOrderDetails(Long clientId, String serialNo);
 	
 	List<Long> retrieveOrderActiveAndDisconnectionIds(Long clientId,Long planId);
+	
+	List<Long> getEventActionsData(Long clientId, Long orderId);
 
 	
 	

@@ -80,6 +80,7 @@ import org.mifosplatform.portfolio.order.domain.PaymentFollowup;
 import org.mifosplatform.portfolio.order.domain.PaymentFollowupRepository;
 import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
+import org.mifosplatform.portfolio.order.exceptions.EventActionsAvailabeForRenewalWithChangePlanFound;
 import org.mifosplatform.portfolio.order.exceptions.NoDurationFound;
 import org.mifosplatform.portfolio.order.exceptions.NoOrdersFoundException;
 import org.mifosplatform.portfolio.order.exceptions.OrderNotFoundException;
@@ -1327,7 +1328,10 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 				if(oldOrderIds.isEmpty()){
 					throw new NoOrdersFoundException(clientId,oldplanId);
 				}
-				
+				List<Long> isEventActionsAvailabel = this.orderReadPlatformService.getEventActionsData(clientId, oldOrderIds.get(0).longValue());
+				if(!isEventActionsAvailabel.isEmpty()){
+					throw new EventActionsAvailabeForRenewalWithChangePlanFound(clientId, oldOrderIds.get(0).longValue());
+				}
 				Order mainOrder = retrieveOrderById(oldOrderIds.get(0).longValue());
 				final Order order= this.orderRepository.findOneOrderByOrderNO(mainOrder.getOrderNo());
 		        if (order == null) { throw new NoOrdersFoundException(clientId.toString(),oldOrderIds.get(0).longValue()); }
@@ -1371,6 +1375,10 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 				List<SubscriptionData> subscriptionDatas = this.planReadPlatformService.retrieveSubscriptionData(orderIds.get(0), isPrepaid);
 				if(subscriptionDatas.isEmpty()){
 					throw new PriceNotFoundException(orderIds.get(0),clientId);
+				}
+				List<Long> isEventActionsAvailabel = this.orderReadPlatformService.getEventActionsData(clientId, orderIds.get(0));
+				if(!isEventActionsAvailabel.isEmpty()){
+					throw new EventActionsAvailabeForRenewalWithChangePlanFound(clientId, orderIds.get(0));
 				}
 				Long priceId = Long.valueOf(0);
 				
