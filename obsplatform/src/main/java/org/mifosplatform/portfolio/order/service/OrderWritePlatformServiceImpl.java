@@ -1284,9 +1284,16 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
 			CommandProcessingResult result;
 			
-			Long planId = command.longValueOfParameterNamed("planId");
+			Long oldplanId = command.longValueOfParameterNamed("oldplanId");
 			String contractPeriod = command.stringValueOfParameterNamed("duration");
-			Long orderId = command.longValueOfParameterNamed("orderId");
+			//Long orderId = command.longValueOfParameterNamed("orderId");
+			Long newplanId = command.longValueOfParameterNamed("newplanId");
+			Long planId;
+			if(oldplanId == newplanId){
+				planId = oldplanId;
+			}else{
+				planId = newplanId;
+			}
 			
 			Plan  planData = this.planRepository.findOne(planId);
 			if(planData == null){ throw new PlanNotFundException(planId);}
@@ -1298,7 +1305,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 				throw new ContractPeriodNotFoundException(contractPeriod,clientId);
 			}
 			List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
-			final List<OrderData> clientOrders = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
+			/*final List<OrderData> clientOrders = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
 			Boolean flag = false;
 			for(OrderData orders:clientOrders){
 				if(orderId == Long.valueOf(orders.getOrderNo())){
@@ -1307,7 +1314,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			}
 			if(!flag){
 				throw new OrderNotFoundException(orderId);
-			}
+			}*/
 			if(orderIds.isEmpty()){
 				//throw new NoOrdersFoundException(clientId,planId);
 				
@@ -1315,9 +1322,14 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 				if(datas.size()==0){
 					throw new BillingOrderNoRecordsFoundException(planId);
 				}
-				Order mainOrder = retrieveOrderById(orderId);
+				List<Long> oldOrderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, oldplanId);
+				if(oldOrderIds.isEmpty()){
+					throw new NoOrdersFoundException(clientId,oldplanId);
+				}
+				
+				Order mainOrder = retrieveOrderById(oldOrderIds.get(0).longValue());
 				final Order order= this.orderRepository.findOneOrderByOrderNO(mainOrder.getOrderNo());
-		        if (order == null) { throw new NoOrdersFoundException(clientId.toString(),orderId); }
+		        if (order == null) { throw new NoOrdersFoundException(clientId.toString(),oldOrderIds.get(0).longValue()); }
 		        
 				LocalDate date = new LocalDate(order.getEndDate()).plusDays(1);
 				DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
@@ -1341,7 +1353,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	    	  	jsonObject.put("disconnectionDate",formatter.print(date));
 	    	  	jsonObject.put("disconnectReason","Not Interested");
 	    	  	jsonObject.put("actionType","changeorder");
-	    	  	jsonObject.put("orderId",orderId);
+	    	  	jsonObject.put("orderId",oldOrderIds.get(0).longValue());
 	    	  	final JsonElement element = fromJsonHelper.parse(jsonObject.toString());
 				JsonCommand changeCommandCommand = new JsonCommand(null,jsonObject.toString(), element, fromJsonHelper,
 						null, null, null, null, null, null, null, null, null, null, 
