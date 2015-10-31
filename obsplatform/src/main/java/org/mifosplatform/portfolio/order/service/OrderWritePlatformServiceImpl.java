@@ -80,6 +80,7 @@ import org.mifosplatform.portfolio.order.domain.PaymentFollowup;
 import org.mifosplatform.portfolio.order.domain.PaymentFollowupRepository;
 import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
+import org.mifosplatform.portfolio.order.exceptions.NoDurationFound;
 import org.mifosplatform.portfolio.order.exceptions.NoOrdersFoundException;
 import org.mifosplatform.portfolio.order.exceptions.OrderNotFoundException;
 import org.mifosplatform.portfolio.order.serialization.OrderCommandFromApiJsonDeserializer;
@@ -1342,11 +1343,16 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	    	  	jsonObject.put("locale","en");
 	    	  	jsonObject.put("isNewPlan","false");
 	    	  	if(isPrepaid.equalsIgnoreCase("prepaid")){
+	    	  		boolean flag = false;
 	    	  	for(PaytermData data : datas){
 					if(data.getDuration().equalsIgnoreCase(contractPeriod)){
 						jsonObject.put("paytermCode",data.getPaytermtype());
+						flag = true;
 					}
 				}
+	    	  	if(!flag){
+	    	  		throw new NoDurationFound(contractPeriod);
+	    	  	}
 	    	  	}
 	    	  	jsonObject.put("planCode",planId);
 	    	  	jsonObject.put("start_date",formatter.print(date));
