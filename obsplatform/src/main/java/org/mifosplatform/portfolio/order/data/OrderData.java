@@ -34,7 +34,7 @@ public class OrderData {
 	private List<OrderPriceData> orderPriceData;
 	private LocalDate activeDate;
 	private String contractPeriod;
-//	private boolean flag;
+	// private boolean flag;
 	private Collection<MCodeData> disconnectDetails;
 	private List<OrderHistoryData> orderHistory;
 	private String isPrepaid;
@@ -56,11 +56,12 @@ public class OrderData {
 	private LocalDate date;
 	private List<AssociationData> HardwareDatas;
 
-	public OrderData(List<PlanCodeData> allowedtypes,List<PaytermData> paytermData,
+	public OrderData(List<PlanCodeData> allowedtypes,
+			List<PaytermData> paytermData,
 			List<SubscriptionData> contractPeriod, OrderData data) {
 
 		if (data != null) {
-			
+
 			this.id = data.getId();
 			this.pdid = data.getPdid();
 			this.planCode = data.getPlan_code();
@@ -70,7 +71,7 @@ public class OrderData {
 			this.service_code = null;
 			this.startDate = data.getStartDate();
 		}
-		this.startDate=DateUtils.getLocalDateOfTenant();
+		this.startDate = DateUtils.getLocalDateOfTenant();
 		this.variant = null;
 		this.chargeCode = null;
 		this.paytermdata = paytermData;
@@ -79,9 +80,12 @@ public class OrderData {
 
 	}
 
-	public OrderData(Long id, Long planId, String plancode, String status,LocalDate startDate, LocalDate endDate,
-			double price,String contractPeriod, String isprepaid, String allowtopup,String userAction,
-			String provisioningSys, String orderNo, LocalDate invoiceTillDate, LocalDate activaDate, String groupName,String autoRenew) {
+	public OrderData(Long id, Long planId, String plancode, String status,
+			LocalDate startDate, LocalDate endDate, double price,
+			String contractPeriod, String isprepaid, String allowtopup,
+			String userAction, String provisioningSys, String orderNo,
+			LocalDate invoiceTillDate, LocalDate activaDate, String groupName,
+			String autoRenew) {
 		this.id = id;
 		this.pdid = planId;
 		this.planCode = plancode;
@@ -99,76 +103,82 @@ public class OrderData {
 		this.plandata = null;
 		this.subscriptiondata = null;
 		this.contractPeriod = contractPeriod;
-		this.isPrepaid=isprepaid;
-		this.allowtopup=allowtopup;
-		this.userAction=userAction;
-        this.provisioningSys=provisioningSys;
-        this.orderNo=orderNo;
-        this.invoiceTilldate=invoiceTillDate;
-		this.activeDate=activaDate;
-		this.groupName=groupName;
-		this.autoRenew=autoRenew;
+		this.isPrepaid = isprepaid;
+		this.allowtopup = allowtopup;
+		this.userAction = userAction;
+		this.provisioningSys = provisioningSys;
+		this.orderNo = orderNo;
+		this.invoiceTilldate = invoiceTillDate;
+		this.activeDate = activaDate;
+		this.groupName = groupName;
+		this.autoRenew = autoRenew;
 
 	}
 
-	public OrderData(List<OrderPriceData> priceDatas, List<OrderHistoryData> historyDatas, OrderData orderDetailsData,
-			  List<OrderLineData> services, List<OrderDiscountData> discountDatas, List<OrderAddonsData> orderAddonsDatas) {
+	public OrderData(List<OrderPriceData> priceDatas,
+			List<OrderHistoryData> historyDatas, OrderData orderDetailsData,
+			List<OrderLineData> services,
+			List<OrderDiscountData> discountDatas,
+			List<OrderAddonsData> orderAddonsDatas) {
 		this.orderPriceData = priceDatas;
-		this.orderHistory=historyDatas;
-		this.orderData=orderDetailsData;
-		this.orderServices=services;
-		this.orderDiscountDatas=discountDatas;
-		this.orderAddonsDatas=orderAddonsDatas;
-       
+		this.orderHistory = historyDatas;
+		this.orderData = orderDetailsData;
+		this.orderServices = services;
+		this.orderDiscountDatas = discountDatas;
+		this.orderAddonsDatas = orderAddonsDatas;
+
 	}
 
-	public OrderData(final Collection<MCodeData> disconnectDetails, final List<SubscriptionData> subscriptionDatas) {
+	public OrderData(final Collection<MCodeData> disconnectDetails,
+			final List<SubscriptionData> subscriptionDatas) {
 		this.disconnectDetails = disconnectDetails;
 		this.subscriptiondata = subscriptionDatas;
 	}
 
 	public OrderData(Long clientId, List<OrderData> clientOrders) {
-		this.clientId=clientId;
-		this.clientOrders=clientOrders;
+		this.clientId = clientId;
+		this.clientOrders = clientOrders;
 	}
-	public OrderData(Long clientId, List<OrderData> clientOrders,List<AssociationData> HardwareDatas) {
-		this.clientId=clientId;
-		this.clientOrders=clientOrders;
+
+	public OrderData(Long clientId, List<OrderData> clientOrders,
+			List<AssociationData> HardwareDatas) {
+		this.clientId = clientId;
+		this.clientOrders = clientOrders;
 		this.setHardwareDatas(HardwareDatas);
 	}
 
 	public OrderData(Long orderId, String planCode, String planDescription,
-			String billingFreq, String contractPeriod, Double price, LocalDate endDate) {
-                 
-		            this.id=orderId;
-		            this.planCode=planCode;
-		            this.planDescription=planDescription;
-		            this.billingFrequency=billingFreq;
-		            this.contractPeriod=contractPeriod;
-		            this.price=price;
-		            this.endDate=endDate;
-		           
+			String billingFreq, String contractPeriod, Double price,
+			LocalDate endDate) {
+
+		this.id = orderId;
+		this.planCode = planCode;
+		this.planDescription = planDescription;
+		this.billingFrequency = billingFreq;
+		this.contractPeriod = contractPeriod;
+		this.price = price;
+		this.endDate = endDate;
+
 	}
-	
+
 	public OrderData(Collection<MCodeData> extensionPeriodDatas,
 			Collection<MCodeData> extensionReasonDatas) {
-		
-		this.extensionPeriodDatas=extensionPeriodDatas;
-		this.reasons=extensionReasonDatas;
+
+		this.extensionPeriodDatas = extensionPeriodDatas;
+		this.reasons = extensionReasonDatas;
 	}
-	
-	public OrderData(Long planId,Long planStatus) {
+
+	public OrderData(Long planId, Long planStatus) {
 		this.planStatus = planStatus;
 		this.pdid = planId;
 	}
 
 	public OrderData(Collection<MCodeData> disconnectDetails) {
-		this.disconnectDetails=disconnectDetails;
+		this.disconnectDetails = disconnectDetails;
 	}
-	
-	
+
 	public OrderData(Long orderId) {
-		this.id=orderId;
+		this.id = orderId;
 	}
 
 	public Long getPlanStatus() {
@@ -195,7 +205,6 @@ public class OrderData {
 		return billingFrequency;
 	}
 
-	
 	public String getPlanCode() {
 		return planCode;
 	}
@@ -251,9 +260,6 @@ public class OrderData {
 	public String getProvisioningSys() {
 		return provisioningSys;
 	}
-
-
-
 
 	public List<OrderLineData> getOrderServices() {
 		return orderServices;
@@ -340,18 +346,18 @@ public class OrderData {
 	}
 
 	public void setDisconnectDetails(Collection<MCodeData> disconnectDetails) {
-	this.disconnectDetails = disconnectDetails;
-		
+		this.disconnectDetails = disconnectDetails;
+
 	}
 
 	public void setDuration(String duration) {
-		this.contractPeriod=duration;
-		
+		this.contractPeriod = duration;
+
 	}
 
 	public void setplanType(String planType) {
-	this.isPrepaid=planType;
-		
+		this.isPrepaid = planType;
+
 	}
 
 	public LocalDate getDate() {
@@ -361,14 +367,14 @@ public class OrderData {
 	public void setDate(LocalDate date) {
 		this.date = date;
 	}
+
 	public List<AssociationData> getHardwareDatas() {
 		return HardwareDatas;
 	}
 
 	public void setHardwareDatas(List<AssociationData> hardwareDatas) {
 		HardwareDatas = hardwareDatas;
-	}
 
-	
+	}
 
 }

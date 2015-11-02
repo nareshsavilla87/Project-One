@@ -24,25 +24,28 @@ public class AssociationData {
 	private Long serviceId;
 	private Collection<EnumValuesData> enumValuesDatas;
 
-	public AssociationData(Long orderId,Long id, String planCode, String itemCode,String serialNum,Long planId) {
-		
-		this.orderId=orderId;
-		this.planCode=planCode;
-		this.itemCode=itemCode;
-		this.serialNum=serialNum;
-		this.planId=planId;
-		this.id=id;
+	public AssociationData(Long orderId, Long id, String planCode,
+			String itemCode, String serialNum, Long planId) {
+
+		this.orderId = orderId;
+		this.planCode = planCode;
+		this.itemCode = itemCode;
+		this.serialNum = serialNum;
+		this.planId = planId;
+		this.id = id;
 
 	}
 
-	public AssociationData(List<AssociationData> hardwareDatas,List<AssociationData> planDatas) {
+	public AssociationData(List<AssociationData> hardwareDatas,
+			List<AssociationData> planDatas) {
 
 		this.hardwareData = hardwareDatas;
 		this.planData = planDatas;
 	}
 
-	public AssociationData(Long id,Long clientId,Long orderId, Long planId, String serialNum, String allocationType, Long serviceId) {
-		
+	public AssociationData(Long id, Long clientId, Long orderId, Long planId,
+			String serialNum, String allocationType, Long serviceId) {
+
 		this.id = id;
 		this.clientId = clientId;
 		this.orderId = orderId;
@@ -51,10 +54,12 @@ public class AssociationData {
 		this.allocationType = allocationType;
 		this.serviceId = Long.valueOf(0).equals(serviceId) ? null : serviceId;
 	}
-	
-	public AssociationData(Long orderId, String planCode,String provisionNumber, Long id, Long planId, Long clientId,
-			String serialNum, String itemCode, Long saleId, Long itemId,String allocationType) {
-		
+
+	public AssociationData(Long orderId, String planCode,
+			String provisionNumber, Long id, Long planId, Long clientId,
+			String serialNum, String itemCode, Long saleId, Long itemId,
+			String allocationType) {
+
 		this.orderId = orderId;
 		this.planCode = planCode;
 		this.serialNum = serialNum;
@@ -75,12 +80,14 @@ public class AssociationData {
 		this.orderId = id;
 	}
 
-	public AssociationData(String serialNum, String provisionNumber,String allocationType, String propertyCode,Long orderId) {
-	    this.serialNum=serialNum;
-	    this.provisionNumber=provisionNumber;
-	    this.allocationType=allocationType;
-	    this.propertyCode =propertyCode;
-	    this.orderId =orderId;
+	public AssociationData(String serialNum, String provisionNumber,
+			String allocationType, String propertyCode, Long orderId) {
+		this.serialNum = serialNum;
+		this.provisionNumber = provisionNumber;
+		this.allocationType = allocationType;
+		this.propertyCode = propertyCode;
+		this.orderId = orderId;
+
 	}
 
 	public void addHardwareDatas(List<AssociationData> hardwareDatas) {
@@ -160,11 +167,8 @@ public class AssociationData {
 		return serviceId;
 	}
 
-
 	public Collection<EnumValuesData> getEnumValuesDatas() {
 		return enumValuesDatas;
 	}
 
-
-	
 }

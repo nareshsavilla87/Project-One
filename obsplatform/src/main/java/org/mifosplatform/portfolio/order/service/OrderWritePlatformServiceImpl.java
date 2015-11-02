@@ -290,7 +290,7 @@ try{
 		
 		
 		this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),serialnum,
-				order.getId(),allocationType);
+				order.getId(),allocationType, userId);
 	
 	}
 	
