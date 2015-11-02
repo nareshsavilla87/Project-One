@@ -137,8 +137,7 @@ public class AssociationApiResource {
 		 final CommandWrapper commandRequest = new CommandWrapperBuilder().updateAssociation(associationId).withJson(apiRequestBodyAsJson).build();
 		 final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
 		  return this.toApiJsonSerializer.serialize(result);
-	}
-	
+	}	
 	@PUT
 	@Path("deassociation/{associationId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
