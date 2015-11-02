@@ -130,7 +130,8 @@ public class GenerateDisconnectionBill {
 		   if(discountMasterData != null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0 ){	
 			   
 	        if((discountMasterData.getDiscountStartDate().toDate().after(billingOrderData.getBillStartDate())
-		    		   || discountMasterData.getDiscountStartDate().toDate().equals(billingOrderData.getBillStartDate())) &&
+		    		   || discountMasterData.getDiscountStartDate().toDate().equals(billingOrderData.getBillStartDate())
+		    		  || discountMasterData.getDiscountStartDate().toDate().before(billingOrderData.getBillStartDate())) &&
 		       (billingOrderData.getInvoiceTillDate().before(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
 		    		    new LocalDate(billingOrderData.getInvoiceTillDate())))
 		    			|| billingOrderData.getInvoiceTillDate().equals(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
