@@ -669,6 +669,8 @@ public class ReadReportingServiceImpl implements ReadReportingService {
                         } else {
                             table.addCell(currVal.toString());
                         }
+                    }else{
+                    	table.addCell(currVal);
                     }
                 }
             }
