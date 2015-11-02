@@ -23,7 +23,8 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 	
 	 private final PlatformSecurityContext context;
 	 private final JdbcTemplate jdbcTemplate;
-	 private final ConfigurationRepository configurationRepository;
+	 @SuppressWarnings("unused")
+	private final ConfigurationRepository configurationRepository;
 	
 	  
 	    @Autowired
@@ -149,8 +150,9 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			}
 
 			@Override
-			public AssociationData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
-				
+			public AssociationData mapRow(final ResultSet rs,
+					 final int rowNum)
+					throws SQLException {
 				Long id= rs.getLong("id");
 				Long orderId = rs.getLong("orderId");
 				String planCode = rs.getString("planCode");
@@ -180,10 +182,11 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 
 			public String schema() {
 				return " 'ALLOT' as allocationType,b.serial_no AS serialNum,b.provisioning_serialno as provisionNum, pdm.property_code as propertyCode, ba.order_id as orderId FROM  b_item_detail b  LEFT JOIN "+
-						"b_propertydevice_mapping pdm ON (b.serial_no = pdm.serial_number and b.client_id = pdm.client_id) Left JOIN b_association ba on (b.serial_no = ba.hw_serial_no) where  b.client_id=? union" +
+						"b_propertydevice_mapping pdm ON (b.serial_no = pdm.serial_number and b.client_id = pdm.client_id) Left JOIN b_association ba on (b.serial_no = ba.hw_serial_no) where  b.client_id=? " +
+						"and ba.is_deleted='N' union" +
 						" select  'OWNED' as allocationType,o.serial_number  AS serialNum, o.provisioning_serial_number  AS provisionNum, pdm.property_code as propertyCode, ba.order_id as orderId"+
 						" FROM b_owned_hardware o LEFT JOIN b_propertydevice_mapping pdm ON (o.serial_number = pdm.serial_number and o.client_id = pdm.client_id) Left JOIN b_association ba on (o.serial_number = ba.hw_serial_no)" +
-						" WHERE o.client_id = ? and o.is_deleted = 'N'";
+						" WHERE o.client_id = ? and o.is_deleted = 'N' and ba.is_deleted='N'" ;
  
 			}
 			
@@ -222,8 +225,9 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			}
 
 			@Override
-			public AssociationData mapRow(final ResultSet rs,final int rowNum)throws SQLException {
-				
+			public AssociationData mapRow(final ResultSet rs,
+					 final int rowNum)
+					throws SQLException {
 				Long planId= rs.getLong("id");
 				String planCode = rs.getString("planCode");
 			    Long id=rs.getLong("orderId");
@@ -432,4 +436,42 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 				}
 
 		}
+
+		@Override
+		public List<AssociationData> retrieveClientAssociationDetailsForProperty(Long clientId,String serialNumber) {
+
+            try
+            {
+
+          	  HarderwareAssociation mapper = new HarderwareAssociation();
+			  String sql = "select " + mapper.schema();
+			
+				 sql = sql + " and a.hw_serial_no= ?";
+			  
+			   return this.jdbcTemplate.query(sql, mapper, new Object[] {clientId,serialNumber});
+
+		    }catch(EmptyResultDataAccessException accessException){
+			return null;
+		  }
+		}
+		private static final class HarderwareAssociation implements RowMapper<AssociationData> {
+
+			public String schema() {
+				return "a.id as id,a.order_id AS orderId, a.hw_serial_no AS serialNum FROM b_association a where a.client_id = ?";
+
+			}
+
+			@Override
+			public AssociationData mapRow(final ResultSet rs, final int rowNum)
+					throws SQLException {
+				Long id= rs.getLong("id");
+				Long orderId = rs.getLong("orderId");
+				String serialNum = rs.getString("serialNum");
+				
+				return  new AssociationData(orderId,id,null,null,serialNum,null);
+
+			}
+		}
+		
+
 }

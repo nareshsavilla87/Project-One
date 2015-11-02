@@ -68,26 +68,15 @@ public class ReportsApiResource {
 		this.apiRequestParameterHelper = apiRequestParameterHelper;
 	}
 
-/*	@GET
-	@Consumes({ MediaType.APPLICATION_JSON })
-	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveReportList(@Context final UriInfo uriInfo) {
-
-		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		final Collection<ReportData> result = this.readReportingService.retrieveReportList();
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-		return this.toApiJsonSerializer.serialize(settings, result,RESPONSE_DATA_PARAMETERS);
-	}*/
-
 	@GET
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retriveItemDetails(@Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch,  @QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset) {
+	public String retrieveReportList(@Context final UriInfo uriInfo,@QueryParam("sqlSearch") final String sqlSearch,  @QueryParam("limit") final Integer limit, @QueryParam("offset") final Integer offset) {
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 		final SearchSqlQuery searchItemDetails =SearchSqlQuery.forSearch(sqlSearch, offset,limit );
 		final Page<ReportParameterJoinData> result = this.readReportingService.retrieveSearchReportList(searchItemDetails);
 		//final Page<InventoryItemDetailsData> clientDatafinal = this.itemDetailsReadPlatformService.retriveAllItemDetails(searchItemDetails);
-		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		//final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
 		return this.toApiJsonSerializer.serialize(result);
 		
 
@@ -113,7 +102,7 @@ public class ReportsApiResource {
 	@Path("template")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String retrieveOfficeTemplate(@Context final UriInfo uriInfo) {
+	public String retrieveReportTemplate(@Context final UriInfo uriInfo) {
 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 
@@ -137,8 +126,7 @@ public class ReportsApiResource {
 	@Path("{id}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String updateReport(@PathParam("id") final Long id,
-			final String apiRequestBodyAsJson) {
+	public String updateReport(@PathParam("id") final Long id,final String apiRequestBodyAsJson) {
 
 		final CommandWrapper commandRequest = new CommandWrapperBuilder().updateReport(id).withJson(apiRequestBodyAsJson).build();
 		final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);

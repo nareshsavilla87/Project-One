@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
-import java.util.List;
 
 import org.mifosplatform.crm.ticketmaster.command.TicketMasterCommand;
 import org.mifosplatform.crm.ticketmaster.domain.TicketDetail;
@@ -20,10 +19,8 @@ import org.mifosplatform.infrastructure.core.service.FileUtils;
 import org.mifosplatform.infrastructure.documentmanagement.command.DocumentCommand;
 import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentManagementException;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
+import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
 import org.mifosplatform.useradministration.domain.AppUser;
-import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
-import org.mifosplatform.workflow.eventaction.service.ActionDetailsReadPlatformService;
-import org.mifosplatform.workflow.eventaction.service.ActiondetailsWritePlatformService;
 import org.mifosplatform.workflow.eventaction.service.EventActionConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -41,15 +38,13 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 	private TicketMasterFromApiJsonDeserializer fromApiJsonDeserializer;
 	private TicketMasterRepository ticketMasterRepository;
 	private TicketDetailsRepository detailsRepository;
-	private final ActionDetailsReadPlatformService actionDetailsReadPlatformService; 
-	private final ActiondetailsWritePlatformService actiondetailsWritePlatformService;
+	private final OrderWritePlatformService orderWritePlatformService;
 	
 	@Autowired
 	public TicketMasterWritePlatformServiceImpl(final PlatformSecurityContext context,
 			final TicketMasterRepository repository,final TicketDetailsRepository ticketDetailsRepository, 
 			final TicketMasterFromApiJsonDeserializer fromApiJsonDeserializer,final TicketMasterRepository ticketMasterRepository,
-			TicketDetailsRepository detailsRepository,final ActionDetailsReadPlatformService actionDetailsReadPlatformService,
-			final ActiondetailsWritePlatformService actiondetailsWritePlatformService) {
+			TicketDetailsRepository detailsRepository,final OrderWritePlatformService orderWritePlatformService) {
 		
 		this.context = context;
 		this.repository = repository;
@@ -57,8 +52,7 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 		this.fromApiJsonDeserializer = fromApiJsonDeserializer;
 		this.ticketMasterRepository = ticketMasterRepository;
 		this.detailsRepository = detailsRepository;
-		this.actionDetailsReadPlatformService = actionDetailsReadPlatformService;
-		this.actiondetailsWritePlatformService = actiondetailsWritePlatformService;
+		this.orderWritePlatformService = orderWritePlatformService;
 	}
 
 	private void handleDataIntegrityIssues(final TicketMasterCommand command,
@@ -90,10 +84,10 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
          ticketMaster.updateTicket(ticketMasterCommand);
          this.ticketMasterRepository.save(ticketMaster);
          this.ticketDetailsRepository.save(detail);
-         List<ActionDetaislData> actionDetaislDatas = this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_EDIT_TICKET);
-  		 if(actionDetaislDatas.size() != 0){
-  			this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,ticketMaster.getClientId(), ticketMaster.getId().toString(),ticketURL);
-  		 }
+          
+  		this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_EDIT_TICKET, ticketMaster.getClientId(), ticketMaster.getId().toString(), ticketURL);
+  		this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, ticketMaster.getClientId(), ticketMaster.getId().toString(), "UPDATE TICKET");
+		
          return detail.getId();
 
 	 	}
@@ -120,10 +114,9 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 			if (!ticketMaster.getStatus().equalsIgnoreCase("CLOSED")) {
 				ticketMaster.closeTicket(command,this.context.authenticatedUser().getId());
 				this.repository.save(ticketMaster);
-				List<ActionDetaislData> actionDetaislDatas = this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CLOSE_TICKET);
-		  		 if(actionDetaislDatas.size() != 0){
-		  			this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas, ticketMaster.getClientId(), ticketMaster.getId().toString(), ticketURL);
-		  		 }
+		  		 
+		  		this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_CLOSE_TICKET, ticketMaster.getClientId(), ticketMaster.getId().toString(), ticketURL);
+		  		this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, ticketMaster.getClientId(), ticketMaster.getId().toString(), "CLOSE TICKET");
 				
 			} else {
 				
@@ -174,11 +167,11 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 			details.setTicketId(ticketMaster.getId());
 			details.setCreatedbyId(created);
 			this.detailsRepository.saveAndFlush(details);
-			List<ActionDetaislData> actionDetaislDatas = this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_TICKET);
-		
-			if(!actionDetaislDatas.isEmpty()){
-				this.actiondetailsWritePlatformService.AddNewActions(actionDetaislDatas,command.getClientId(), ticketMaster.getId().toString(),ticketURL);
-			}
+			
+			this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_CREATE_TICKET, command.getClientId(), ticketMaster.getId().toString(), ticketURL);
+			
+			this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, command.getClientId(), ticketMaster.getId().toString(), "CREATE TICKET");
+			
 			return new CommandProcessingResultBuilder().withCommandId(command.commandId()).withEntityId(ticketMaster.getId()).withClientId(command.getClientId()).build();
 		 } catch (DataIntegrityViolationException dve) {
 			 	return new CommandProcessingResult(Long.valueOf(-1));

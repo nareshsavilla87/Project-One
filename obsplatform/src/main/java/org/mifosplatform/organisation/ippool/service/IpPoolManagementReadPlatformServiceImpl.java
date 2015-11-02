@@ -54,7 +54,7 @@ public class IpPoolManagementReadPlatformServiceImpl implements IpPoolManagement
 		final Map<String, String> queryParams = new HashMap<String, String>();
 		final List<IpPoolData> ipPoolDatas = new ArrayList<IpPoolData>();
 
-		final GenericResultsetData resultsetData = this.readReportingService.retrieveGenericResultset("IP_ADDRESS", "parameter", queryParams);
+		final GenericResultsetData resultsetData = this.readReportingService.retrieveGenericResultset("IP_ADDRESS", "parameter", queryParams, null);
 		
 		List<ResultsetRowData> datas = resultsetData.getData();
 		List<String> row;

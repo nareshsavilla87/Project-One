@@ -20,17 +20,11 @@ import org.mifosplatform.infrastructure.dataqueries.data.ReportParameterJoinData
 
 public interface ReadReportingService {
 
-	StreamingOutput retrieveReportCSV(String name, String type,
-			Map<String, String> extractedQueryParams);
+	StreamingOutput retrieveReportCSV(String name, String type,Map<String, String> extractedQueryParams);
 
-	GenericResultsetData retrieveGenericResultset(String name, String type,
-			Map<String, String> extractedQueryParams);
+	Response processPentahoRequest(String reportName, String outputType,Map<String, String> queryParams);
 
-	Response processPentahoRequest(String reportName, String outputType,
-			Map<String, String> queryParams);
-
-	String retrieveReportPDF(String name, String type,
-			Map<String, String> extractedQueryParams);
+	String retrieveReportPDF(String name, String type,Map<String, String> extractedQueryParams);
 
 	String getReportType(String reportName);
 
@@ -38,16 +32,15 @@ public interface ReadReportingService {
 
 	ReportData retrieveReport(final Long id);
 	
-	String generateEmailReport(String name, String type,
-			Map<String, String> extractedQueryParams, String fileLocation);
+	String generateEmailReport(String name, String type,Map<String, String> reportParams, String fileLocation);
 	
-	
-	GenericResultsetData generateEmailResultset(String name, String type,
-			Map<String, String> extractedQueryParams);
+	/*GenericResultsetData generateEmailResultset(String name, String type,Map<String, String> extractedQueryParams);*/
 
 	Page<ReportParameterJoinData> retrieveSearchReportList(SearchSqlQuery searchItemDetails);
 
 	Collection<ReportParameterData> getAllowedServiceParameters();
 
-	
+	GenericResultsetData retrieveGenericResultset(String name, String type,Map<String, String> queryParams, String schedulerName);
+
+
 }

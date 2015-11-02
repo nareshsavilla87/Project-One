@@ -169,16 +169,11 @@ public class AssociationApiResource {
 	@Path("{associationId}")
 	@Consumes({ MediaType.APPLICATION_JSON })
 	@Produces({ MediaType.APPLICATION_JSON })
-	public String updateAssociation(
-			@PathParam("associationId") final Long associationId,
-			final String apiRequestBodyAsJson) {
-		final CommandWrapper commandRequest = new CommandWrapperBuilder()
-				.updateAssociation(associationId)
-				.withJson(apiRequestBodyAsJson).build();
-		final CommandProcessingResult result = this.commandsSourceWritePlatformService
-				.logCommandSource(commandRequest);
-		return this.toApiJsonSerializer.serialize(result);
-	}
+	public String updateAssociation(@PathParam("associationId") final Long associationId,final String apiRequestBodyAsJson) {
+		 final CommandWrapper commandRequest = new CommandWrapperBuilder().updateAssociation(associationId).withJson(apiRequestBodyAsJson).build();
+		 final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+		  return this.toApiJsonSerializer.serialize(result);
+	}	
 
 	@PUT
 	@Path("deassociation/{associationId}")
