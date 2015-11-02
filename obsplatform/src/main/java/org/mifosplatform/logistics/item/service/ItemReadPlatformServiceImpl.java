@@ -100,7 +100,7 @@ private static final class SalesDataMapper implements
 		RowMapper<ItemData> {
 
 	public String schema() {
-		return " a.id as id,a.item_code as itemCode,a.item_description as itemDescription,a.item_class as itemClass,a.units as units,a.charge_code as chargeCode,round(a.unit_price,2) price,a.warranty as warranty,a.reorder_level as reorderLevel,"+
+		return " SQL_CALC_FOUND_ROWS a.id as id,a.item_code as itemCode,a.item_description as itemDescription,a.item_class as itemClass,a.units as units,a.charge_code as chargeCode,round(a.unit_price,2) price,a.warranty as warranty,a.reorder_level as reorderLevel,"+
 				"b.Used as used,b.Available as available," +
 				" b.Total_items as totalItems from b_item_master a "+
 				"left join ( Select item_master_id,Sum(Case When Client_id IS NULL "+
