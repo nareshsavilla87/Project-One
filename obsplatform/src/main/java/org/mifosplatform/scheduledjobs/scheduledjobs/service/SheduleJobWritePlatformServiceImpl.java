@@ -1286,6 +1286,7 @@ public void reportEmail() {
 							" ,query="+scheduleJobData.getQuery()+"\r\n");
 				     Map<String, String> reportParams = new HashMap<String, String>();
 				     reportParams.put("${officeId}", "-1");
+				     reportParams.put("${paymode_id}","-1");
 				     reportParams.put("${endDate}",DateUtils.getLocalDateOfTenant().toString());
 				     reportParams.put("${startDate}", DateUtils.getLocalDateOfTenant().minusMonths(1).toString());
 					 String pdfFileName = this.readExtraDataAndReportingService.generateEmailReport(scheduleJobData.getBatchName(), "report",reportParams,fileLocation);
