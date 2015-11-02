@@ -27,5 +27,5 @@ public interface HardwareAssociationReadplatformService {
 	
 	AssociationData retrieveAssociationsDetailsWithSerialNum(Long clientId,String serialNumber);
 
-
+	List<AssociationData> retrieveClientAssociationDetailsForProperty(Long clientId, String serialNumber);
 }

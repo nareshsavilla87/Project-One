@@ -11,5 +11,6 @@ public interface OrderRepository  extends JpaRepository<Order, Long>,
     @Query("from Order order where order.id=(select max(newOrder.id) from Order newOrder where newOrder.orderNo =:orderNo and newOrder.status=3 )")
 	Order findOldOrderByOrderNO(@Param("orderNo")String orderNo);
 
-	
+    @Query("from Order order where order.id=(select max(newOrder.id) from Order newOrder where newOrder.orderNo =:orderNo)")
+	Order findOneOrderByOrderNO(@Param("orderNo")String orderNo);
 }

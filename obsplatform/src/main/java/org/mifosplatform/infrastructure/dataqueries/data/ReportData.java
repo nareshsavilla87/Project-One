@@ -12,32 +12,35 @@ import java.util.List;
 final public class ReportData {
 
 	@SuppressWarnings("unused")
-	private final Long id;
+	private  Long id;
 	@SuppressWarnings("unused")
-	private final String reportName;
+	private  String reportName;
 	@SuppressWarnings("unused")
-	private final String reportType;
+	private  String reportType;
 	@SuppressWarnings("unused")
-	private final String reportSubType;
+	private  String reportSubType;
 	@SuppressWarnings("unused")
-	private final String reportCategory;
+	private  String reportCategory;
 	@SuppressWarnings("unused")
-	private final String description;
+	private  String description;
 	@SuppressWarnings("unused")
-	private final String reportSql;
+	private  String reportSql;
 	@SuppressWarnings("unused")
-	private final Boolean coreReport;
+	private  Boolean coreReport;
 	@SuppressWarnings("unused")
-	private final Boolean useReport;
+	private  Boolean useReport;
 	@SuppressWarnings("unused")
-	private final Collection<ReportParameterData> reportParameters;
-
+	private  Collection<ReportParameterData> reportParameters;
 	@SuppressWarnings("unused")
 	private List<String> allowedReportTypes;
 	@SuppressWarnings("unused")
 	private List<String> allowedReportSubTypes;
 	@SuppressWarnings("unused")
 	private Collection<ReportParameterData> allowedParameters;
+	@SuppressWarnings("unused")
+	private Collection<ReportData> reportNames;
+	@SuppressWarnings("unused")
+	private List<String> reportCategories;
 
 	public ReportData(final Long id, final String reportName,
 			final String reportType, final String reportSubType,
@@ -74,6 +77,28 @@ final public class ReportData {
 		this.allowedReportTypes = null;
 		this.allowedReportSubTypes = null;
 		this.allowedParameters = null;
+	}
+
+
+	/**
+	 * @param reportNames
+	 * @param reportCategories
+	 */
+	public ReportData(Collection<ReportData> reportNames,List<String> reportCategories) {
+		
+		this.reportNames = reportNames;
+		this.reportCategories = reportCategories;
+		
+	}
+
+	/**
+	 * @param reportName
+	 * @param reportCategory
+	 */
+	public ReportData(String reportName, String reportCategory) {
+	
+		this.reportName = reportName;
+		this.reportCategory = reportCategory;
 	}
 
 	public void appendedTemplate(

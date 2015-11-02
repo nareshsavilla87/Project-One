@@ -2,7 +2,6 @@ package org.mifosplatform.workflow.eventaction.service;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +13,7 @@ import org.codehaus.jettison.json.JSONObject;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.servicetransfer.service.ServiceTransferReadPlatformService;
+import org.joda.time.LocalDate;
 import org.mifosplatform.cms.eventmaster.domain.EventMaster;
 import org.mifosplatform.cms.eventmaster.domain.EventMasterRepository;
 import org.mifosplatform.cms.eventorder.domain.EventOrder;
@@ -26,6 +26,9 @@ import org.mifosplatform.crm.ticketmaster.data.TicketMasterData;
 import org.mifosplatform.crm.ticketmaster.domain.TicketMaster;
 import org.mifosplatform.crm.ticketmaster.domain.TicketMasterRepository;
 import org.mifosplatform.crm.ticketmaster.service.TicketMasterReadPlatformService;
+import org.mifosplatform.crm.userchat.domain.UserChat;
+import org.mifosplatform.crm.userchat.domain.UserChatRepository;
+import org.mifosplatform.crm.userchat.service.UserChatWriteplatformService;
 import org.mifosplatform.finance.billingorder.api.BillingOrderApiResourse;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
@@ -65,6 +68,8 @@ import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetail
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.useradministration.data.AppUserData;
+import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.useradministration.domain.AppUserRepository;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
 import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
 import org.mifosplatform.workflow.eventaction.data.EventActionProcedureData;
@@ -106,7 +111,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
     private final InvoiceOneTimeSale invoiceOneTimeSale;
     private final GenerateBillingOrderService generateBillingOrderService;
     private final BillingOrderWritePlatformService billingOrderWritePlatformService;
-    
+    private final UserChatRepository userChatRepository;
     
     private BillingMessageTemplate activationTemplates;
     private BillingMessageTemplate reConnectionTemplates;
@@ -121,6 +126,8 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
     private BillingMessageTemplate smsPaymentTemplates;
     private BillingMessageTemplate smsChangePlanTemplates;
     private BillingMessageTemplate smsOrderTerminationTemplates;
+    
+    private BillingMessageTemplate notifyTechicalTeam;
 
 
 	@Autowired
@@ -134,8 +141,8 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			final PaypalRecurringBillingRepository paypalRecurringBillingRepository, final EventActionReadPlatformService eventActionReadPlatformService,
 			final ConfigurationRepository configurationRepository, final ServiceTransferReadPlatformService serviceTransferReadPlatformService,
 			final ChargeCodeRepository chargeCodeRepository, final InvoiceOneTimeSale invoiceOneTimeSale,
-			final GenerateBillingOrderService generateBillingOrderService, final BillingOrderWritePlatformService billingOrderWritePlatformService)
-	{
+			final GenerateBillingOrderService generateBillingOrderService, final BillingOrderWritePlatformService billingOrderWritePlatformService,
+			final UserChatRepository userChatRepository){
 		this.repository=repository;
 		this.orderRepository=orderRepository;
 		this.clientRepository=clientRepository;
@@ -161,6 +168,7 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
         this.invoiceOneTimeSale = invoiceOneTimeSale;
         this.generateBillingOrderService = generateBillingOrderService;
         this.billingOrderWritePlatformService = billingOrderWritePlatformService;
+        this.userChatRepository = userChatRepository;
 	}
 	
 	
@@ -477,6 +485,37 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				    	}	
 						
 			        	break;
+			        	
+
+				    case EventActionConstants.ACTION_NOTIFY_TECHNICALTEAM : 
+				    	
+				    	String userName= "billing";
+				    	
+				    	Configuration configValue = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_APPUSER);
+				    	
+				    	if(null != configValue && configValue.isEnabled() && configValue.getValue() != null && !configValue.getValue().isEmpty()) {
+				    		userName = configValue.getValue();
+				    	}
+				    	
+				    	String data = userName.replace("{", "").replace("}", "").trim();
+				    		
+				    	String[] valArray = data.split(",");
+				    	
+				    	template = getTemplate(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_TECHNICAL_TEAM);
+				    	
+				    	bodyMessage = template.getBody().replaceAll("<ActionType>", ticketURL);
+				    	bodyMessage = bodyMessage.replaceAll("<clientId>", clientId.toString());
+				    	bodyMessage = bodyMessage.replaceAll("<id>", resourceId == null ? "":resourceId);
+				    	
+						final LocalDate messageDate = DateUtils.getLocalDateOfTenant();
+						
+						for (String val : valArray) {
+							UserChat userChat=new UserChat(val, messageDate.toDate(), bodyMessage, ConfigurationConstants.OBSUSER);
+							this.userChatRepository.save(userChat);
+						}
+						
+				    	
+				    	break;
 
 				    case EventActionConstants.ACTION_NOTIFY_ACTIVATION : 
 				    	
@@ -1019,6 +1058,13 @@ private BillingMessageTemplate getTemplate(String templateName){
 				smsOrderTerminationTemplates = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_SMS_NOTIFY_ORDERTERMINATION);
 			}
 			return smsOrderTerminationTemplates;
+			
+		} else if (BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_TECHNICAL_TEAM.equalsIgnoreCase(templateName)) {
+			
+			if(null == notifyTechicalTeam){
+				notifyTechicalTeam = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_NOTIFY_TECHNICAL_TEAM);
+			}
+			return notifyTechicalTeam;
 			
 		} else {
 			throw new BillingMessageTemplateNotFoundException(templateName);
