@@ -3,6 +3,7 @@ package org.mifosplatform.finance.billingmaster.service;
 import java.io.File;
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -134,6 +135,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	@Override
 	public String generateStatementPdf(final Long billId)  {
 		
+		Connection connection = null;
 		try {
 			BillMaster billMaster = this.billMasterRepository.findOne(billId);
 
@@ -156,7 +158,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 					File sourceFile = new File(this.getClass().getClassLoader().getResource("Files/Statement.jasper").getFile());
 					FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
 				}
-				final Connection connection = this.dataSource.getConnection();
+				connection = this.dataSource.getConnection();
 				Map<String, Object> parameters = new HashMap<String, Object>();
 				final Integer id = Integer.valueOf(billMaster.getId().toString());
 				parameters.put("param1", id);
@@ -166,10 +168,10 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				JasperExportManager.exportReportToPdfFile(jasperPrint,printStatementLocation);
 				billMaster.setFileName(printStatementLocation);
 				this.billMasterRepository.save(billMaster);
-				connection.close();
 				System.out.println("Filling report successfully...");
+				sendPdfToEmail(billMaster.getFileName(),billMaster.getClientId(),BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATEMENT);
 			}
-			sendPdfToEmail(billMaster.getFileName(),billMaster.getClientId(),BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATEMENT);
+			
 			return billMaster.getFileName();
 		} catch (final DataIntegrityViolationException ex) {
 
@@ -191,7 +193,17 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			System.out.println("Filling report failed...");
 			e.printStackTrace();
 			return null;
-		}
+		} finally {
+			
+		if(connection != null)	{
+			try {
+				connection.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		 }
+	   }
+		
 	}
 
 	@Transactional
@@ -209,6 +221,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		}
 		final String printInvoiceLocation = InvoiceDetailsLocation +File.separator +invoiceId+"_"+DateUtils.getLocalDateOfTenant()+".pdf";
 		final Integer id = Integer.valueOf(invoiceId.toString());
+		Connection connection = null;
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
@@ -219,13 +232,12 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Files/Invoicereport.jasper").getFile());
 		    	FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
 		       }
-			final Connection connection = this.dataSource.getConnection();
+		    connection = this.dataSource.getConnection();
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("param1", id);
 			parameters.put(JRParameter.REPORT_LOCALE, getLocale(tenant)); 
 		   final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperfilepath, parameters, connection);
 		   JasperExportManager.exportReportToPdfFile(jasperPrint,printInvoiceLocation);
-	       connection.close();
 	       System.out.println("Filling report successfully...");
 	       
 		   }catch (final DataIntegrityViolationException ex) {
@@ -240,6 +252,16 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			LOGGER.error("Filling report failed...\r\n" + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 			e.printStackTrace();
+		}finally{
+			
+			if(connection != null){
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			
 		}
 		
 		return printInvoiceLocation;	
@@ -260,6 +282,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		}
 		final String printPaymentLocation = PaymentDetailsLocation +File.separator +paymentId+"_"+DateUtils.getLocalDateOfTenant()+".pdf";
 		final Integer id = Integer.valueOf(paymentId.toString());
+		Connection connection = null;
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
@@ -270,13 +293,12 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		    	File sourceFile=new File(this.getClass().getClassLoader().getResource("Files/Paymentreport.jasper").getFile());
 		    	FileUtils.copyFileUsingApacheCommonsIO(sourceFile,destinationFile);
 		      }
-			final Connection connection = this.dataSource.getConnection();
+			 connection = this.dataSource.getConnection();
 			Map<String, Object> parameters = new HashMap<String, Object>();
 			parameters.put("param1", id);
 			parameters.put(JRParameter.REPORT_LOCALE, getLocale(tenant));
 		   final JasperPrint jasperPrint = JasperFillManager.fillReport(jasperfilepath, parameters, connection);
 		   JasperExportManager.exportReportToPdfFile(jasperPrint,printPaymentLocation);
-	       connection.close();
 	       System.out.println("Filling report successfully...");
 	       
 		   }catch (final DataIntegrityViolationException ex) {
@@ -291,6 +313,16 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			LOGGER.error("Filling report failed...\r\n" + e.getLocalizedMessage());
 			System.out.println("Filling report failed...");
 			e.printStackTrace();
+		}finally{
+			
+			if(connection != null){
+				try {
+					connection.close();
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			}
+			
 		}
 		return printPaymentLocation;	
 	}

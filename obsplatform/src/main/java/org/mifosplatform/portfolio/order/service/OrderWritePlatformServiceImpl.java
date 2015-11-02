@@ -1,19 +1,16 @@
 package org.mifosplatform.portfolio.order.service;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.joda.time.DateTimeField;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.payterms.data.PaytermData;
@@ -64,7 +61,6 @@ import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.contract.exception.ContractPeriodNotFoundException;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
-import org.mifosplatform.portfolio.order.data.OrderData;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.UserActionStatusEnumaration;
 import org.mifosplatform.portfolio.order.domain.Order;
@@ -337,6 +333,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 				return new CommandProcessingResult(Long.valueOf(-1));
 				
 				}
+
 	}
 	
 
