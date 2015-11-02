@@ -286,6 +286,8 @@ try{
 	}else if( configurationProperty.isEnabled() && StringUtils.isNotBlank(serialnum)){
 		
 		this.associationWriteplatformService.createNewHardwareAssociation(clientId,plan.getId(),serialnum,order.getId(),allocationType,null);
+		
+		//List<AllocationDetailsData> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetailsByItemCode(clientId,plan.getPlanCode());
 	
 	}
 	
