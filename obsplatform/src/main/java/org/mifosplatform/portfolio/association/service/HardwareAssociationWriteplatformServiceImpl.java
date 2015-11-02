@@ -138,15 +138,20 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 //			AssociationData associationData=this.associationReadplatformService.retrieveSingleDetails(orderId);
 			
 		      HardwareAssociation association=this.associationRepository.findOne(associationId);
+		    
 		      if(association == null){
 					throw new HardwareDetailsNotFoundException(associationId);
 				}
-		      ItemDetails itemDetails = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(association.getSerialNo());
-			    if(itemDetails.getWarrantyDate() != null){
-				    if(itemDetails.getWarrantyDate().before(DateUtils.getDateOfTenant())){
-				    	throw new WarrantyEndDateExpireException(association.getSerialNo());
-				    }
-			    }
+		      String allocationType=association.getAllocationType();
+		    
+		    	  if("OWNED"==allocationType && allocationType != ""){
+		    	  ItemDetails itemDetails = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(association.getSerialNo());
+		    	  if(itemDetails.getWarrantyDate() != null){
+		    		  if(itemDetails.getWarrantyDate().before(DateUtils.getDateOfTenant())){
+		    			  throw new WarrantyEndDateExpireException(association.getSerialNo());
+		    			  }
+		    		  }
+		    	  }
 		      
 		      JSONObject jsonObject=new JSONObject();
 		      jsonObject.put("clientId", association.getClientId());

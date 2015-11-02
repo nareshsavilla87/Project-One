@@ -622,5 +622,15 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 						}
 						
 					}
+
+					@Override
+					public List<Long> getEventActionsData(Long clientId,
+							Long orderId) {
+						final OrderIdMapper mapper=new OrderIdMapper();
+						final String sql="select id from b_event_actions where event_action = 'CHANGEPLAN' and "+
+											"action_name = 'CHANGE PLAN' and client_id = ? and order_id = ? and "+
+											"is_processed = 'N' and trans_date >  "+DateUtils.getLocalDateOfTenant() ;
+						return this.jdbcTemplate.query(sql,mapper,new Object[] { clientId,orderId});
+					}
 	}
 

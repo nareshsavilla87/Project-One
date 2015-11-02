@@ -5,6 +5,7 @@
  */
 package org.mifosplatform.infrastructure.dataqueries.service;
 
+import java.awt.Color;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -65,8 +66,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Service;
 
+import com.itextpdf.text.Element;
 import com.lowagie.text.Document;
 import com.lowagie.text.PageSize;
+import com.lowagie.text.Phrase;
+import com.lowagie.text.pdf.PdfPCell;
 import com.lowagie.text.pdf.PdfPTable;
 import com.lowagie.text.pdf.PdfWriter;
 
@@ -103,7 +107,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             public void write(final OutputStream out) {
                 try {
 
-                    GenericResultsetData result = retrieveGenericResultset(name, type, queryParams);
+                    GenericResultsetData result = retrieveGenericResultset(name, type, queryParams, null);
                     StringBuffer sb = generateCsvFileBuffer(result);
 
                     InputStream in = new ByteArrayInputStream(sb.toString().getBytes("UTF-8"));
@@ -171,12 +175,13 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
     @Override
-    public GenericResultsetData retrieveGenericResultset(final String name, final String type, final Map<String, String> queryParams) {
+    public GenericResultsetData retrieveGenericResultset(final String name, final String type, 
+    		final Map<String, String> queryParams, String schedulerName) {
 
         long startTime = System.currentTimeMillis();
         logger.info("STARTING REPORT: " + name + "   Type: " + type);
 
-        String sql = getSQLtoRun(name, type, queryParams);
+        String sql = getSQLtoRun(name, type, queryParams, schedulerName);
 
         GenericResultsetData result = genericDataService.fillGenericResultSet(sql);
 
@@ -185,27 +190,38 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return result;
     }
 
-    private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams) {
+    private String getSQLtoRun(final String name, final String type, final Map<String, String> queryParams, String schedulerName) {
 
         String sql = getSql(name, type);
 
         Set<String> keys = queryParams.keySet();
+        
         for (String key : keys) {
             String pValue = queryParams.get(key);
             // logger.info("(" + key + " : " + pValue + ")");
             sql = genericDataService.replace(sql, key, pValue);
         }
 
-        AppUser currentUser = context.authenticatedUser();
-        // Allows sql query to restrict data by office hierarchy if required
-        sql = genericDataService.replace(sql, "${currentUserHierarchy}", currentUser.getOffice().getHierarchy());
-        // Allows sql query to restrict data by current user Id if required
-        // (typically used to return report lists containing only reports
-        // permitted to be run by the user
-        sql = genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
-
-        sql = genericDataService.wrapSQL(sql);
-
+        if(null != schedulerName && schedulerName.equalsIgnoreCase(JobName.EVENT_ACTION_PROCESSOR.toString())) {
+     
+            sql = genericDataService.wrapSQL(sql);
+            
+        } else if(null != schedulerName && JobName.REPORT_EMAIL.toString().equalsIgnoreCase(schedulerName)){
+        	 
+        	sql = genericDataService.wrapSQL(sql);
+        	
+        } else {
+        	AppUser currentUser = context.authenticatedUser();
+            // Allows sql query to restrict data by office hierarchy if required
+            sql = genericDataService.replace(sql, "${currentUserHierarchy}", currentUser.getOffice().getHierarchy());
+            // Allows sql query to restrict data by current user Id if required
+            // (typically used to return report lists containing only reports
+            // permitted to be run by the user
+            sql = genericDataService.replace(sql, "${currentUserId}", currentUser.getId().toString());
+        	
+            sql = genericDataService.wrapSQL(sql);
+		} 
+        
         return sql;
 
     }
@@ -360,7 +376,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         String genaratePdf = fileLocation + reportName + ".pdf";
 
         try {
-            GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams);
+            GenericResultsetData result = retrieveGenericResultset(reportName, type, queryParams, null);
 
             List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
             List<ResultsetRowData> data = result.getData();
@@ -544,7 +560,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         }
 
         @Override
-        public ReportParameterJoinData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ReportParameterJoinData mapRow(final ResultSet rs, final int rowNum) throws SQLException {
 
             final Long reportId = rs.getLong("reportId");
             final String reportName = rs.getString("reportName");
@@ -581,7 +597,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         }
 
         @Override
-        public ReportParameterData mapRow(final ResultSet rs, @SuppressWarnings("unused") final int rowNum) throws SQLException {
+        public ReportParameterData mapRow(final ResultSet rs,final int rowNum) throws SQLException {
 
             final Long id = rs.getLong("id");
             final String parameterName = rs.getString("parameterName");
@@ -591,24 +607,24 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     }
 
 	@Override
-	public String generateEmailReport(String name, String type,
-			Map<String, String> extractedQueryParams,String fileLocation) {
-		 String location = FileUtils.MIFOSX_BASE_DIR+ File.separator + JobName.REPORT_EMAIL.toString();
+	public String generateEmailReport(String name, String type,Map<String, String> reportParams,String fileLocation) {
+		
+		String location = FileUtils.MIFOSX_BASE_DIR+ File.separator + JobName.REPORT_EMAIL.toString();
         if (!new File(location).isDirectory()) {
             new File(location).mkdirs();
         }
-
-        String genaratePdf = fileLocation + ".pdf";
+        String genaratePdf = fileLocation+".pdf";
 
         try {
-            GenericResultsetData result = generateEmailResultset(name, type, extractedQueryParams);
+            GenericResultsetData result = retrieveGenericResultset(name,type,reportParams,JobName.REPORT_EMAIL.toString());// generateEmailResultset(name, type, extractedQueryParams);
 
             List<ResultsetColumnHeaderData> columnHeaders = result.getColumnHeaders();
             List<ResultsetRowData> data = result.getData();
             List<String> row;
-
+          
             logger.info("NO. of Columns: " + columnHeaders.size());
             Integer chSize = columnHeaders.size();
+            float[] columnWidths = new float[chSize];
 
             Document document = new Document(PageSize.A4.rotate());
 
@@ -618,11 +634,21 @@ public class ReadReportingServiceImpl implements ReadReportingService {
             PdfPTable table = new PdfPTable(chSize);
             table.setWidthPercentage(100);
 
+            // first row with report name
+            PdfPCell reportNameCell = new PdfPCell(new Phrase(name));
+            reportNameCell.setColspan(chSize);
+            reportNameCell.setHorizontalAlignment(Element.ALIGN_CENTER);
+            reportNameCell.setPadding(5.0f);
+            reportNameCell.setBackgroundColor(Color.lightGray);
+            table.addCell(reportNameCell);
+         
             for (int i = 0; i < chSize; i++) {
-
-                table.addCell(columnHeaders.get(i).getColumnName());
-
+            	
+            	columnWidths[i] = 100.0f;
+				PdfPCell cell = new PdfPCell(new Phrase(columnHeaders.get(i).getColumnName()));
+				table.addCell(cell);
             }
+            table.setWidths(columnWidths);
             table.completeRow();
 
             Integer rSize;
@@ -656,13 +682,13 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         }
     }
 
-	@Override
-	public GenericResultsetData generateEmailResultset(String name,String type, Map<String, String> extractedQueryParams) {
+	/*	@Override
+		public GenericResultsetData generateEmailResultset(String name,String type, Map<String, String> extractedQueryParams) {
 
         long startTime = System.currentTimeMillis();
         logger.info("STARTING REPORT: " + name + "   Type: " + type);
 
-        String sql = getEmailSQLtoRun(name, type, extractedQueryParams);
+        String sql = getSQLtoRun(name, type, extractedQueryParams, null); //getEmailSQLtoRun(name, type, extractedQueryParams);
 
         GenericResultsetData result = genericDataService.fillGenericResultSet(sql);
 
@@ -671,14 +697,22 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         return result;
     }
 	
-	private String getEmailSQLtoRun(final String name, final String type, final Map<String, String> queryParams) {
+   private String getEmailSQLtoRun(final String name, final String type, final Map<String, String> queryParams) {
 
         String sql = getSql(name, type);
+
+        Set<String> keys = queryParams.keySet();
+        
+        for (String key : keys) {
+            String pValue = queryParams.get(key);
+            sql = genericDataService.replace(sql, key, pValue);
+        }
+        
         sql = genericDataService.wrapSQL(sql);
 
         return sql;
 
-    }
+    }*/
 
 	@Override
 	public Page<ReportParameterJoinData> retrieveSearchReportList(SearchSqlQuery searchReportDetails) {

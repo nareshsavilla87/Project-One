@@ -167,7 +167,7 @@ public class ProvisioningReadPlatformServiceImpl implements ProvisioningReadPlat
 		Map<String, String> queryParams = new HashMap<String, String>();
 		queryParams.put("${orderId}", orderId.toString());
 		List<ServiceParameterData> parameterDatas = new ArrayList<ServiceParameterData>();
-		final GenericResultsetData resultsetData = this.readReportingService.retrieveGenericResultset("Service", "parameter", queryParams);
+		final GenericResultsetData resultsetData = this.readReportingService.retrieveGenericResultset("Service", "parameter", queryParams, null);
 		List<ResultsetRowData> datas = resultsetData.getData();
 		List<String> row;
 		Integer rSize;
@@ -355,7 +355,7 @@ public class ProvisioningReadPlatformServiceImpl implements ProvisioningReadPlat
 		Collection<MCodeData> codeDatas = new ArrayList<MCodeData>();
 		queryParams.put("${codeName}", string);
 		final GenericResultsetData resultsetData = this.readReportingService
-				.retrieveGenericResultset("VLAN_ID", "parameter", queryParams);
+				.retrieveGenericResultset("VLAN_ID", "parameter", queryParams, null);
 		List<ResultsetColumnHeaderData> columnHeaderDatas = resultsetData
 				.getColumnHeaders();
 		List<ResultsetRowData> datas = resultsetData.getData();

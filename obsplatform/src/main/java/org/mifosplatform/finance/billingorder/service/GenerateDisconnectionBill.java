@@ -133,6 +133,7 @@ public class GenerateDisconnectionBill {
 	        if((discountMasterData.getDiscountStartDate().toDate().after(billingOrderData.getBillStartDate())
 		    		   || discountMasterData.getDiscountStartDate().toDate().equals(billingOrderData.getBillStartDate())
 		    		   || discountMasterData.getDiscountStartDate().toDate().before(billingOrderData.getBillStartDate())) &&
+
 		       (billingOrderData.getInvoiceTillDate().before(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
 		    		    new LocalDate(billingOrderData.getInvoiceTillDate())))
 		    			|| billingOrderData.getInvoiceTillDate().equals(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 

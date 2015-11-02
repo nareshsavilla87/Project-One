@@ -184,7 +184,7 @@ public class PaymentWritePlatformServiceImpl implements PaymentWritePlatformServ
 			}
 			
 			// Notify Payment Details to Clients. written by ashok
-			this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_PAYMENT, payment.getClientId(), payment.getAmountPaid().toString());
+			this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_PAYMENT, payment.getClientId(), payment.getAmountPaid().toString(), null);
 			
 			//Add New Action 
 			final List<ActionDetaislData> actionDetaislDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_SEND_PAYMENT);

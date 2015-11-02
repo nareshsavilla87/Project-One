@@ -65,7 +65,7 @@ public class RunreportsApiResource {
 	public Response runReport(@PathParam("reportName") final String reportName,@Context final UriInfo uriInfo) {
 
 		MultivaluedMap<String, String> queryParams = uriInfo.getQueryParameters();
-		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters());
+		boolean prettyPrint = ApiParameterHelper.prettyPrint(uriInfo.getQueryParameters()); 
 		boolean exportCsv = ApiParameterHelper.exportCsv(uriInfo.getQueryParameters());
 		boolean parameterType = ApiParameterHelper.parameterType(uriInfo.getQueryParameters());
 		boolean exportPdf = ApiParameterHelper.exportPdf(uriInfo.getQueryParameters());
@@ -103,7 +103,7 @@ public class RunreportsApiResource {
 
 		if (!exportCsv) {
 			Map<String, String> reportParams = getReportParams(queryParams,false);
-			GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName, parameterTypeValue,reportParams);
+			GenericResultsetData result = this.readExtraDataAndReportingService.retrieveGenericResultset(reportName, parameterTypeValue, reportParams, null);
 			String json = "";
 			final boolean genericResultSetIsPassed = ApiParameterHelper.genericResultSetPassed(uriInfo.getQueryParameters());
 			final boolean genericResultSet = ApiParameterHelper.genericResultSet(uriInfo.getQueryParameters());

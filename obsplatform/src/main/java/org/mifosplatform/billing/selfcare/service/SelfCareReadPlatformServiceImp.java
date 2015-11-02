@@ -52,7 +52,7 @@ public class SelfCareReadPlatformServiceImp implements SelfCareReadPlatformServi
 	public SelfCareData login(String userName, String password) {
 		try{
 
-		 String	sql = "select client_id as clientId, auth_pin as authPin, password as password from b_clientuser where unique_reference=? or username =? and password=? and is_deleted=0";
+		String	sql = "select client_id as clientId, auth_pin as authPin, password as password from b_clientuser where unique_reference=? or username =? and password=? and is_deleted=0";
 		
 		PasswordMapper mapper1 = new PasswordMapper();
 		return jdbcTemplate.queryForObject(sql,mapper1,new Object[]{userName,userName,password});

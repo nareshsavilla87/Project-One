@@ -63,6 +63,7 @@ public class UserChatApiResource{
 	        this.userChatReadplatformReadService=chatReadplatformReadService;
 	        this.appUserReadPlatformService=appUserReadPlatformService;
 	    }
+	    
 	    @POST
 	    @Consumes({ MediaType.APPLICATION_JSON })
 	    @Produces({ MediaType.APPLICATION_JSON })
