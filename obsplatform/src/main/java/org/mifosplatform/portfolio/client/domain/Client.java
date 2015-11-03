@@ -170,6 +170,7 @@ public final class Client extends AbstractPersistable<Long> {
 
 	    final String password=command.stringValueOfParameterNamed(ClientApiConstants.passwordParamName);
 	    final Long groupName=command.longValueOfParameterNamed(ClientApiConstants.groupParamName);
+	    LocalDate activationDate = command.localDateValueOfParameterNamed(ClientApiConstants.activationDateParamName);
 
 	    if(email.isEmpty()){
 	    	email=null;
@@ -184,10 +185,13 @@ public final class Client extends AbstractPersistable<Long> {
 	    final boolean active = true;
        
 
-        LocalDate activationDate = null;
+        
         if (active) {
             status = ClientStatus.NEW;
-            activationDate = DateUtils.getLocalDateOfTenant(); 
+            if(activationDate == null){
+         	   activationDate = DateUtils.getLocalDateOfTenant();
+            }
+           
         }
 
         return new Client(status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
