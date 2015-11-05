@@ -1290,6 +1290,7 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 			String contractPeriod = command.stringValueOfParameterNamed("duration");
 			//Long orderId = command.longValueOfParameterNamed("orderId");
 			Long newplanId = command.longValueOfParameterNamed("newplanId");
+			String isChangePlan = command.stringValueOfParameterNamed("isChangePlan");
 			Long planId;
 			if(oldplanId == newplanId){
 				planId = oldplanId;
@@ -1338,6 +1339,9 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 		        
 				LocalDate date = new LocalDate(order.getEndDate()).plusDays(1);
 				DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
+				if(isChangePlan.equalsIgnoreCase("true")){
+					date = DateUtils.getLocalDateOfTenant();
+				}
 				
 				JSONObject jsonObject = new JSONObject();
 	    	  	jsonObject.put("billAlign","false");
@@ -1362,14 +1366,24 @@ public CommandProcessingResult scheduleOrderCreation(Long clientId,JsonCommand c
 	    	  	jsonObject.put("start_date",formatter.print(date));
 	    	  	jsonObject.put("disconnectionDate",formatter.print(date));
 	    	  	jsonObject.put("disconnectReason","Not Interested");
-	    	  	jsonObject.put("actionType","changeorder");
-	    	  	jsonObject.put("orderId",oldOrderIds.get(0).longValue());
-	    	  	final JsonElement element = fromJsonHelper.parse(jsonObject.toString());
-				JsonCommand changeCommandCommand = new JsonCommand(null,jsonObject.toString(), element, fromJsonHelper,
-						null, null, null, null, null, null, null, null, null, null, 
-						null, null);
-				result = scheduleOrderCreation(clientId, changeCommandCommand);
-				
+	    	  	if(isChangePlan.equalsIgnoreCase("true")){
+	    	  		
+	    	  		final JsonElement element = fromJsonHelper.parse(jsonObject.toString());
+					JsonCommand changeCommandCommand = new JsonCommand(null,jsonObject.toString(), element, fromJsonHelper,
+							null, null, null, null, null, null, null, null, null, null, 
+							null, null);
+					result = changePlan(changeCommandCommand, oldOrderIds.get(0).longValue());
+	    	  		
+	    	  	}else{
+	    	  		jsonObject.put("actionType","changeorder");
+		    	  	jsonObject.put("orderId",oldOrderIds.get(0).longValue());
+		    	  	final JsonElement element = fromJsonHelper.parse(jsonObject.toString());
+					JsonCommand changeCommandCommand = new JsonCommand(null,jsonObject.toString(), element, fromJsonHelper,
+							null, null, null, null, null, null, null, null, null, null, 
+							null, null);
+					result = scheduleOrderCreation(clientId, changeCommandCommand);
+	    	  	}
+	    	  	
 			}else{
 				
 				List<SubscriptionData> subscriptionDatas = this.planReadPlatformService.retrieveSubscriptionData(orderIds.get(0), isPrepaid);
