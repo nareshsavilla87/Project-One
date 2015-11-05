@@ -678,7 +678,7 @@ public class GenerateBill {
 	 * @param billingOrderData
 	 * @return boolean
 	 */
-	public boolean isPromotionAtMiddleOfMonth(LocalDate startDate,DiscountMasterData discountMasterData, 
+	public boolean isPromotionAtMiddleOfMonth(LocalDate chargeStartDate,DiscountMasterData discountMasterData, 
 			LocalDate chargeEndDate,BillingOrderData billingOrderData) {
 
 		boolean isPromotionAtMiddleOfMonth = false;
@@ -686,7 +686,9 @@ public class GenerateBill {
 		if (discountMasterData != null && discountMasterData.getDiscountEndDate() != null) {
 
 			if (chargeEndDate.getYear() == discountMasterData.getDiscountEndDate().getYear() && 
-					chargeEndDate.getMonthOfYear() == discountMasterData.getDiscountEndDate().getMonthOfYear()) {
+					chargeEndDate.getMonthOfYear() == discountMasterData.getDiscountEndDate().getMonthOfYear() &&
+					(chargeStartDate.toDate().before(discountMasterData.getDiscountEndDate().toDate()) 
+							 || chargeStartDate.toDate().equals(discountMasterData.getDiscountEndDate().toDate()))	) {
 				isPromotionAtMiddleOfMonth = true;
 			}
 		}
