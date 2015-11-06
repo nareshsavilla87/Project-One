@@ -129,20 +129,14 @@ public class GenerateDisconnectionBill {
 			System.out.println("---- DC ----");
 		   if(discountMasterData != null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0 ){	
 			   
-	        if((discountMasterData.getDiscountStartDate().toDate().after(billingOrderData.getBillStartDate())
-		    		   || discountMasterData.getDiscountStartDate().toDate().equals(billingOrderData.getBillStartDate())
-		    		  || discountMasterData.getDiscountStartDate().toDate().before(billingOrderData.getBillStartDate())) &&
-		       (billingOrderData.getInvoiceTillDate().before(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
-		    		    new LocalDate(billingOrderData.getInvoiceTillDate())))
-		    			|| billingOrderData.getInvoiceTillDate().equals(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
-		    					new LocalDate(billingOrderData.getInvoiceTillDate()))))	){
+	        if(this.IsDiscountOrPromotionApplicable(billingOrderData,discountMasterData)){
 
-    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
+    		 if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
     			discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
 	               price = price.subtract(discountAmount);
-    		 }else if("flat".equalsIgnoreCase(discountMasterData.getDiscountType())){
+    		  }else if("flat".equalsIgnoreCase(discountMasterData.getDiscountType())){
     		     price = price.subtract(discountMasterData.getDiscountRate());
-              }
+                }
              }
 		   }
 		   
@@ -187,6 +181,11 @@ public class GenerateDisconnectionBill {
 			 }else{
 				   disconnectionCreditPerday = price.divide(new BigDecimal(maxDaysOfMonth),RoundingMode.HALF_UP);
 			 }
+			 
+			 
+			 
+			 
+			 
 			if (numberOfDays != 0) {
 				disconnectionCreditForDays = disconnectionCreditPerday.multiply(new BigDecimal(numberOfDays));
 			}
@@ -203,6 +202,7 @@ public class GenerateDisconnectionBill {
 		 return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, 
 				                   nextbillDate, price, listOfTaxes,discountMasterData);
 	}
+
 
 	// Reverse Weekly Bill
 	public BillingOrderCommand getReverseWeeklyBill(final BillingOrderData billingOrderData,final DiscountMasterData discountMasterData, 
@@ -234,12 +234,7 @@ public class GenerateDisconnectionBill {
 
 		  if(discountMasterData != null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0){
 
-	       if((discountMasterData.getDiscountStartDate().toDate().after(billingOrderData.getBillStartDate())
-	    		   || discountMasterData.getDiscountStartDate().toDate().equals(billingOrderData.getBillStartDate())) &&
-	    		   (billingOrderData.getInvoiceTillDate().before(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
-			    		    new LocalDate(billingOrderData.getInvoiceTillDate())))
-			    			|| billingOrderData.getInvoiceTillDate().equals(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
-			    					new LocalDate(billingOrderData.getInvoiceTillDate()))))){
+	       if(this.IsDiscountOrPromotionApplicable(billingOrderData, discountMasterData)){
 
 		    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
 		    			   discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
@@ -247,7 +242,10 @@ public class GenerateDisconnectionBill {
 		    		}else if("flat".equalsIgnoreCase(discountMasterData.getDiscountType())){
 		    			  price = price.subtract(discountMasterData.getDiscountRate());
 		              }
-		           }
+		    }else if(){
+		    	
+		    	
+		    }
 
 		  }
 
@@ -456,5 +454,23 @@ public class GenerateDisconnectionBill {
 				billingOrderData.getStartDate(), billingOrderData.getEndDate(),
 				discountMasterData, billingOrderData.getTaxInclusive());
 	}
+	
+	/**
+	 * @param discountMasterData
+	 * @param billingOrderData
+	 * @return
+	 */
+	private boolean IsDiscountOrPromotionApplicable(BillingOrderData billingOrderData,DiscountMasterData discountMasterData) {
+
+		boolean IsDiscountOrPromotionApplicable = false;
+
+		if (billingOrderData.getInvoiceTillDate().before(this.generateBill.getDiscountEndDateIfNull(discountMasterData, new LocalDate(billingOrderData.getInvoiceTillDate()))) 
+				|| billingOrderData.getInvoiceTillDate().equals(this.generateBill.getDiscountEndDateIfNull(discountMasterData,new LocalDate(billingOrderData.getInvoiceTillDate())))) {
+			IsDiscountOrPromotionApplicable = true;
+		}
+
+		return IsDiscountOrPromotionApplicable;
+	}
+	
 	
 }

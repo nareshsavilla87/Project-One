@@ -372,7 +372,7 @@ VIEW `netrevenuedtls_vw` AS
         ((`bi`.`id` is not null)
             or (`bp`.`id` is not null))
     group by `bi`.`client_id` , `dt`.`date_value` , `bi`.`id` , `bp`.`id`
-    order by `c`.`id` , `dt`.`year4` , `dt`.`date_value`
+    order by `c`.`id` , `dt`.`year4` , `dt`.`date_value`;
 
 
 INSERT IGNORE INTO stretchy_report VALUES(null,'Customer Revenue Details', 'Table', NULL, 'Client', 'SELECT 
