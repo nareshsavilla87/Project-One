@@ -33,7 +33,7 @@ public final class OrderCommandFromApiJsonDeserializer {
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("planCode","locale","dateFormat","start_date","paytermCode",
     		"contractPeriod","billAlign","price","description","renewalPeriod","disconnectReason","isPrepaid","disconnectionDate","ispaymentEnable",
     		"paymentCode","amountPaid","paymentDate","receiptNo","promoId","startDate","isNewplan","suspensionDate","suspensionReason",
-    		"suspensionDescription","status","actionType","priceId","autoRenew","planId","duration","orderId","isNewPlan","oldplanId","newplanId"));
+    		"suspensionDescription","status","actionType","priceId","autoRenew","planId","duration","orderId","isNewPlan","oldplanId","newplanId","isChangePlan"));
     private final Set<String> retracksupportedParameters = new HashSet<String>(Arrays.asList("commandName","message","orderId"));
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -204,6 +204,9 @@ public final class OrderCommandFromApiJsonDeserializer {
 		baseDataValidator.reset().parameter("orderId").value(orderId).notBlank().validateforNumeric();*/
 		final String newplanId=fromApiJsonHelper.extractStringNamed("newplanId", element);
 		baseDataValidator.reset().parameter("newplanId").value(newplanId).notBlank().validateforNumeric();
+		
+		final String isChangePlan=fromApiJsonHelper.extractStringNamed("isChangePlan", element);
+		baseDataValidator.reset().parameter("isChangePlan").value(isChangePlan).notBlank();
 		
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 		
