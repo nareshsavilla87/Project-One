@@ -30,6 +30,6 @@ public interface BillingOrderReadPlatformService {
 
 	List<Long> listOfInvoices(Long clientId, Long orderId);
 
-	GenerateInvoiceData getAllChargesAmountsOnOrder(Long clientId, Long clientOrderId,LocalDate discountEndDate);
+	GenerateInvoiceData getAllChargesAmountsOnOrder(Long clientId, Long clientOrderId,LocalDate disconnectionDate);
 
 }

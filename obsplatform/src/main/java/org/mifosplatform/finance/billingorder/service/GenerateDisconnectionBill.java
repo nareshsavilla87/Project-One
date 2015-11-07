@@ -135,30 +135,18 @@ public class GenerateDisconnectionBill {
 					} else if ("flat".equalsIgnoreCase(discountMasterData.getDiscountType())) {
 						price = price.subtract(discountMasterData.getDiscountRate());
 					}
-					price = this.calcualateDisconnectionCredit(billingOrderData, disconnectionDate);
-
-					if (BigDecimal.ZERO.compareTo(price) != 0) {
-						listOfTaxes = this.calculateTax(billingOrderData,price, disconnectionDate);
-					}
 				  	
 				}else if(this.isDiscountEndedBeforeOrderInvoice(billingOrderData, discountMasterData)){
 					
-					this.startDate = disconnectionDate;
-					this.endDate = new LocalDate(billingOrderData.getInvoiceTillDate());
-					invoiceTillDate = new LocalDate(billingOrderData.getInvoiceTillDate());
-					
 					GenerateInvoiceData	orderChargesData = this.billingOrderReadPlatformService.getAllChargesAmountsOnOrder(billingOrderData.getClientId(),
-							                              billingOrderData.getClientOrderId(),discountMasterData.getDiscountEndDate());
+							                              billingOrderData.getClientOrderId(),disconnectionDate);
 					if(orderChargesData !=null) {
 					   price = orderChargesData.getChargeAmount().subtract(orderChargesData.getDiscountAmount()).setScale(2,RoundingMode.HALF_UP);
 					}
-					
-					if (BigDecimal.ZERO.compareTo(price) != 0) {
-						listOfTaxes = this.calculateTax(billingOrderData,price, discountMasterData.getDiscountEndDate());
-					}
+				
 				}
 
-			} else {
+			} 
 
 				price = this.calcualateDisconnectionCredit(billingOrderData,disconnectionDate);
 
@@ -166,8 +154,6 @@ public class GenerateDisconnectionBill {
 					listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
 				}
 
-			}
-			
 			this.startDate = invoiceTillDate;
 			this.endDate = disconnectionDate;
 			this.invoiceTillDate = disconnectionDate;

@@ -386,11 +386,11 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 	 * @see #getAllDiscountAmountsOnOrder(Long, Long, org.joda.time.LocalDate)
 	 */
 	@Override
-	public GenerateInvoiceData getAllChargesAmountsOnOrder(Long clientId,Long clientOrderId, LocalDate discountEndDate) {
+	public GenerateInvoiceData getAllChargesAmountsOnOrder(Long clientId,Long clientOrderId, LocalDate disconnectionDate) {
 		
 		final ChargesMapper chargesMapper = new ChargesMapper();
 		
-		final String sql  = "select sum(discount_amount) as discountAmount,sum(charge_amount) as chargeAmount from b_charge where client_id= ? and order_id= ? and month(charge_start_date) >=month('"+discountEndDate+"') ";
+		final String sql  = "select sum(discount_amount) as discountAmount,sum(charge_amount) as chargeAmount from b_charge where client_id= ? and order_id= ? and month(charge_start_date) >=month('"+disconnectionDate+"') ";
 		
 		return this.jdbcTemplate.queryForObject(sql, chargesMapper, new Object[] {clientId,clientOrderId});
 	}
