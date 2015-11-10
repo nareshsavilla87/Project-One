@@ -119,7 +119,7 @@ public class GenerateBill {
 
 		} else if (endDate.toDate().after(billingOrderData.getBillEndDate())) {
 			endDate = new LocalDate(billingOrderData.getBillEndDate());
-			price = getDisconnectionCredit(startDate, endDate,billingOrderData.getPrice(),billingOrderData.getDurationType(),billingOrderData.getChargeDuration());
+			price = this.getLastRecurringPrice(startDate, endDate,billingOrderData.getPrice(),billingOrderData.getDurationType(),billingOrderData.getChargeDuration());
 		}
 		
 		invoiceTillDate = endDate;
@@ -150,7 +150,7 @@ public class GenerateBill {
 		} else if (endDate.toDate().after(billingOrderData.getBillEndDate())) {
 			
 			endDate = new LocalDate(billingOrderData.getBillEndDate());
-			price = getDisconnectionCredit(startDate, endDate,billingOrderData.getPrice(),billingOrderData.getDurationType(),billingOrderData.getChargeDuration());
+			price = this.getLastRecurringPrice(startDate, endDate,billingOrderData.getPrice(),billingOrderData.getDurationType(),billingOrderData.getChargeDuration());
 		}
 
 		invoiceTillDate = endDate;
@@ -188,7 +188,7 @@ public class GenerateBill {
 			} else if (endDate.toDate().after(billingOrderData.getBillEndDate())) {
 				
 				endDate = new LocalDate(billingOrderData.getBillEndDate());
-				price = getDisconnectionCredit(startDate, endDate,billingOrderData.getPrice(),billingOrderData.getDurationType(),billingOrderData.getChargeDuration());
+				price = this.getLastRecurringPrice(startDate, endDate,billingOrderData.getPrice(),billingOrderData.getDurationType(),billingOrderData.getChargeDuration());
 			}
 		
 
@@ -260,7 +260,7 @@ public class GenerateBill {
 			price = billingOrderData.getPrice();
 		} else if (endDate.toDate().after(billingOrderData.getBillEndDate())) {
 			endDate = new LocalDate(billingOrderData.getBillEndDate());
-			price = getDisconnectionCredit(startDate, endDate,
+			price = this.getLastRecurringPrice(startDate, endDate,
 					billingOrderData.getPrice(),
 					billingOrderData.getDurationType(),
 					billingOrderData.getChargeDuration());
@@ -300,7 +300,7 @@ public class GenerateBill {
 			} else if (endDate.toDate().after(billingOrderData.getBillEndDate())) {
 				
 				endDate = new LocalDate(billingOrderData.getBillEndDate());
-				price = getDisconnectionCredit(startDate, endDate,billingOrderData.getPrice(),billingOrderData.getDurationType(),
+				price = this.getLastRecurringPrice(startDate, endDate,billingOrderData.getPrice(),billingOrderData.getDurationType(),
 						billingOrderData.getChargeDuration());
 			}
 		}
@@ -343,13 +343,12 @@ public class GenerateBill {
 			listOfTaxes = this.calculateTax(billingOrderData,billingOrderData.getPrice());
 		}
 
-		return this.createBillingOrderCommand(billingOrderData, startDate,
-				endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,
-				discountMasterData);
+		return this.createBillingOrderCommand(billingOrderData, startDate,endDate, invoiceTillDate,
+				nextbillDate, price, listOfTaxes,discountMasterData);
 	}
 
-	// Disconnection credit price
-	protected BigDecimal getDisconnectionCredit(LocalDate startDate,LocalDate endDate, BigDecimal amount, String durationType,
+	// order last recurring price
+	protected BigDecimal getLastRecurringPrice(LocalDate startDate,LocalDate endDate, BigDecimal amount, String durationType,
 			Integer chargeDuration) {
 
 		LocalDate durationDate = startDate.plusMonths(chargeDuration).minusDays(1);
@@ -404,7 +403,7 @@ public class GenerateBill {
 			startDate = new LocalDate(billingOrderData.getNextBillableDate());
 
 		endDate = new LocalDate(billingOrderData.getBillEndDate());
-		price = this.getDisconnectionCredit(startDate, endDate,billingOrderData.getPrice(),billingOrderData.getDurationType(), null);
+		price = this.getLastRecurringPrice(startDate, endDate,billingOrderData.getPrice(),billingOrderData.getDurationType(), null);
 
 		nextbillDate = new LocalDate().plusYears(1000);
 		invoiceTillDate = endDate;
@@ -463,7 +462,7 @@ public class GenerateBill {
 
 		} else if (this.isPromotionAtMiddleOfMonth(startDate,discountMasterData, endDate, billingOrderData)) {
 
-			BigDecimal promoPrice = this.getDisconnectionCredit(discountMasterData.getDiscountEndDate().plusDays(1),
+			BigDecimal promoPrice = this.getLastRecurringPrice(discountMasterData.getDiscountEndDate().plusDays(1),
 					endDate, price, billingOrderData.getDurationType(),billingOrderData.getChargeDuration());
 			
 			 discountMasterData.setDiscountAmount(price.subtract(promoPrice).setScale(Integer.parseInt(roundingDecimal()),RoundingMode.HALF_UP));

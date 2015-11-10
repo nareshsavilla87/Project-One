@@ -3,9 +3,11 @@ package org.mifosplatform.finance.billingorder.service;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
+import org.mifosplatform.finance.billingorder.data.GenerateInvoiceData;
 import org.mifosplatform.organisation.partneragreement.data.AgreementData;
 
 public interface BillingOrderReadPlatformService {
@@ -27,5 +29,7 @@ public interface BillingOrderReadPlatformService {
 	AgreementData retrieveOfficeChargesCommission(Long id);
 
 	List<Long> listOfInvoices(Long clientId, Long orderId);
+
+	GenerateInvoiceData getAllChargesAmountsOnOrder(Long clientId, Long clientOrderId,LocalDate disconnectionDate);
 
 }

@@ -7,16 +7,25 @@ import org.mifosplatform.finance.billingorder.domain.Invoice;
 
 public class GenerateInvoiceData {
 	
-	private final Long clientId;
-	private final Date nextBillableDay;
+	private Long clientId;
+	private Date nextBillableDay;
 	private BigDecimal invoiceAmount;
 	private Invoice invoice;
+	private BigDecimal chargeAmount;
+	private BigDecimal discountAmount;
 	
 	public GenerateInvoiceData( final Long clientId, final Date nextBillableDay,BigDecimal invoiceAmount,Invoice invoice) {
 		this.clientId = clientId;
 		this.nextBillableDay = nextBillableDay;
 		this.invoiceAmount=invoiceAmount;
 		this.invoice = invoice;
+	}
+
+	
+	public GenerateInvoiceData(BigDecimal chargeAmount,BigDecimal discountAmount) {
+		
+		this.chargeAmount = chargeAmount;
+		this.discountAmount = discountAmount;
 	}
 
 	public Long getClientId() {
@@ -35,4 +44,12 @@ public class GenerateInvoiceData {
 		return invoice;
 	}
 
+	public BigDecimal getChargeAmount() {
+		return chargeAmount;
+	}
+
+	public BigDecimal getDiscountAmount() {
+		return discountAmount;
+	}
+	
 }

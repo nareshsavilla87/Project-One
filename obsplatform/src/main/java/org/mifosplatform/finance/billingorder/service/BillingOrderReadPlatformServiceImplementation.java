@@ -10,6 +10,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
+import org.mifosplatform.finance.billingorder.data.GenerateInvoiceData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.organisation.partneragreement.data.AgreementData;
@@ -378,6 +379,34 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 					" WHERE c.client_id = ? and c.invoice_id = i.id and c.order_id = ? and c.charge_end_date > now() " +
 					" and c.charge_type = 'RC' order by i.id desc; ";
 		}
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see #getAllDiscountAmountsOnOrder(Long, Long, org.joda.time.LocalDate)
+	 */
+	@Override
+	public GenerateInvoiceData getAllChargesAmountsOnOrder(Long clientId,Long clientOrderId, LocalDate disconnectionDate) {
+		
+		final ChargesMapper chargesMapper = new ChargesMapper();
+		
+		final String sql  = "select sum(discount_amount) as discountAmount,sum(charge_amount) as chargeAmount from b_charge where client_id= ? and order_id= ? and month(charge_start_date) >=month('"+disconnectionDate+"') ";
+		
+		return this.jdbcTemplate.queryForObject(sql, chargesMapper, new Object[] {clientId,clientOrderId});
+	}
+	
+
+	private static final class ChargesMapper implements RowMapper<GenerateInvoiceData> {
+
+		@Override
+		public GenerateInvoiceData  mapRow(ResultSet rs, int rowNum) throws SQLException {
+			
+			final  BigDecimal  chargeAmount  = rs.getBigDecimal("chargeAmount");
+			final  BigDecimal  discountAmount = rs.getBigDecimal("discountAmount");
+			
+			return new GenerateInvoiceData(chargeAmount,discountAmount);
+		}
+
 		
 	}
 
