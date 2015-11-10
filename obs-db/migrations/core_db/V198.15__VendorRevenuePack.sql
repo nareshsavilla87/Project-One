@@ -79,7 +79,7 @@ INSERT IGNORE INTO stretchy_report_parameter(report_id,parameter_id,report_param
 INSERT IGNORE INTO stretchy_report_parameter(report_id,parameter_id,report_parameter_name)VALUES (@ID,@vendor,'Vendor Name');
 
 -- Monthly Net Activations --
-
+DROP TABLE IF EXISTS `v_netact_dtls`;
 CREATE 
 OR REPLACE
 VIEW `v_netact_dtls` AS
@@ -214,6 +214,7 @@ VIEW `v_netact_dtls` AS
         (`dt`.`year4` = year(now()));
 
 -- --
+DROP TABLE IF EXISTS `v_netact_summary`;
 CREATE 
 OR REPLACE
 VIEW `v_netact_summary` AS
@@ -238,7 +239,7 @@ VIEW `v_netact_summary` AS
     order by `v_netact_dtls`.`month_number`;
 
 -- Monthly planwise Activations --
-
+DROP TABLE IF EXISTS `v_netactpln_summary`;
 CREATE 
    OR REPLACE
 VIEW `v_netactpln_summary` AS

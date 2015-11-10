@@ -14,12 +14,15 @@ import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
+import org.mifosplatform.finance.billingorder.data.GenerateInvoiceData;
+
 import org.mifosplatform.finance.usagecharges.domain.UsageCharge;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * @author hugo
+ * @author Ranjith
  *
  */
 @Service
@@ -71,227 +74,164 @@ public class GenerateDisconnectionBill {
 	}
 
 	// Monthly Bill
-	public BillingOrderCommand getReverseMonthyBill(final BillingOrderData billingOrderData,
-			final DiscountMasterData discountMasterData, final LocalDate disconnectionDate) {
-		
-	    BigDecimal discountAmount = BigDecimal.ZERO;
-	    BigDecimal netAmount=BigDecimal.ZERO;
-		BigDecimal disconnectionCreditForMonths = BigDecimal.ZERO;
-		BigDecimal disconnectionCreditPerday = BigDecimal.ZERO;
-		BigDecimal disconnectionCreditForDays = BigDecimal.ZERO;
-		List<InvoiceTaxCommand> listOfTaxes =new ArrayList<InvoiceTaxCommand>();
+	public BillingOrderCommand getReverseMonthyBill(final BillingOrderData billingOrderData,final DiscountMasterData discountMasterData,
+			final LocalDate disconnectionDate) {
+
+		BigDecimal discountAmount = BigDecimal.ZERO;
+		BigDecimal netAmount = BigDecimal.ZERO;
+		List<InvoiceTaxCommand> listOfTaxes = new ArrayList<InvoiceTaxCommand>();
 		int numberOfDays = 0;
 		int totalDays = 0;
-		
+
 		billEndDate = new LocalDate(billingOrderData.getBillEndDate());
 		price = billingOrderData.getPrice();
-		
-		if (billingOrderData.getInvoiceTillDate() == null) { //with out invoice direct disconnect order
-			
+
+		if (billingOrderData.getInvoiceTillDate() == null) { // with out invoice direct disconnect order
+
 			System.out.println("---- RC ----");
 			this.startDate = new LocalDate(billingOrderData.getBillStartDate());
 			this.endDate = disconnectionDate;
 			this.invoiceTillDate = disconnectionDate;
 			this.nextbillDate = invoiceTillDate.plusDays(1);
-			LocalDate nextDurationDate	=startDate.plusMonths(billingOrderData.getChargeDuration()).minusDays(1);
-		    numberOfDays = Days.daysBetween(startDate, invoiceTillDate).getDays()+1;
-			
-			if(billingOrderData.getChargeDuration()==12){
-			   int maxDaysInYear =startDate.dayOfYear().withMaximumValue().getDayOfYear();
-			   netAmount = price.divide(new BigDecimal(maxDaysInYear),RoundingMode.HALF_UP);
-			}else if(billingOrderData.getChargeDuration()!=1){
-			   totalDays = Days.daysBetween(startDate, nextDurationDate).getDays()+1;
-			   netAmount = price.divide(new BigDecimal(totalDays),RoundingMode.HALF_UP);
-			}else{
-			   int maxDaysOfMonth = startDate.dayOfMonth().withMaximumValue().getDayOfMonth();
-			   netAmount = price.divide(new BigDecimal(maxDaysOfMonth),RoundingMode.HALF_UP);
+			LocalDate nextDurationDate = startDate.plusMonths(billingOrderData.getChargeDuration()).minusDays(1);
+			numberOfDays = Days.daysBetween(startDate, invoiceTillDate).getDays() + 1;
+
+			if (billingOrderData.getChargeDuration() == 12) {
+				int maxDaysInYear = startDate.dayOfYear().withMaximumValue().getDayOfYear();
+				netAmount = price.divide(new BigDecimal(maxDaysInYear),RoundingMode.HALF_UP);
+			} else if (billingOrderData.getChargeDuration() != 1) {
+				totalDays = Days.daysBetween(startDate, nextDurationDate).getDays() + 1;
+				netAmount = price.divide(new BigDecimal(totalDays),RoundingMode.HALF_UP);
+			} else {
+				int maxDaysOfMonth = startDate.dayOfMonth().withMaximumValue().getDayOfMonth();
+				netAmount = price.divide(new BigDecimal(maxDaysOfMonth),RoundingMode.HALF_UP);
 			}
-			price=netAmount.multiply(new BigDecimal(numberOfDays));
-			
-			if(discountMasterData !=null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0){
+			price = netAmount.multiply(new BigDecimal(numberOfDays));
 
-		           if(billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
-		        		   ||billingOrderData.getBillStartDate().equals(discountMasterData.getDiscountStartDate().toDate())){
+			if (discountMasterData != null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0) {
 
-		    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
-		    			discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
-			               price = price.subtract(discountAmount);
-		    		 }else if("flat".equalsIgnoreCase(discountMasterData.getDiscountType())){
-		    		     price = price.subtract(discountMasterData.getDiscountRate());
-		              }
-		           }
-			}
-			if(price.compareTo(BigDecimal.ZERO) !=0){
-			   listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
-			}
-			
-		}else { // If Invoice till date not equal to null
-		  
-			System.out.println("---- DC ----");
-		   if(discountMasterData != null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0 ){	
-			   
-	        if((discountMasterData.getDiscountStartDate().toDate().after(billingOrderData.getBillStartDate())
-		    		   || discountMasterData.getDiscountStartDate().toDate().equals(billingOrderData.getBillStartDate())
-		    		   || discountMasterData.getDiscountStartDate().toDate().before(billingOrderData.getBillStartDate())) &&
+				if (billingOrderData.getBillStartDate().after(discountMasterData.getDiscountStartDate().toDate())
+						|| billingOrderData.getBillStartDate().equals(discountMasterData.getDiscountStartDate().toDate())) {
 
-		       (billingOrderData.getInvoiceTillDate().before(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
-		    		    new LocalDate(billingOrderData.getInvoiceTillDate())))
-		    			|| billingOrderData.getInvoiceTillDate().equals(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
-		    					new LocalDate(billingOrderData.getInvoiceTillDate()))))	){
-
-    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
-    			discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
-	               price = price.subtract(discountAmount);
-    		 }else if("flat".equalsIgnoreCase(discountMasterData.getDiscountType())){
-    		     price = price.subtract(discountMasterData.getDiscountRate());
-              }
-             }
-		   }
-		   
-			this.startDate = disconnectionDate;
-			this.endDate = new LocalDate(billingOrderData.getInvoiceTillDate());
-			invoiceTillDate = new LocalDate(billingOrderData.getInvoiceTillDate());
-			int maxDaysOfMonth =startDate.dayOfMonth().withMaximumValue().getDayOfMonth();
-			int  maximumDaysInYear = startDate.dayOfYear().withMaximumValue().getDayOfYear();
-			LocalDate nextDurationDate=startDate.plusMonths(billingOrderData.getChargeDuration()).minusDays(1);
-			totalDays =Days.daysBetween(startDate, nextDurationDate).getDays()+1;
-			int numberOfMonths = Months.monthsBetween(disconnectionDate, invoiceTillDate).getMonths();
-		
-			if (billingOrderData.getBillingAlign().equalsIgnoreCase("N")) {
-				LocalDate tempBillEndDate = invoiceTillDate.minusMonths(numberOfMonths);
-				numberOfDays = Days.daysBetween(disconnectionDate, tempBillEndDate).getDays();
-				
-			} else if (billingOrderData.getBillingAlign().equalsIgnoreCase("Y")) {
-                if(numberOfMonths>0){
-				 LocalDate tempBillEndDate = invoiceTillDate.minusMonths(numberOfMonths).dayOfMonth().withMaximumValue();
-				 numberOfDays = Days.daysBetween(disconnectionDate, tempBillEndDate).getDays();
-               }else{
-					/*LocalDate tempBillEndDate = invoiceTillDate.minusMonths(numberOfMonths).dayOfMonth().withMaximumValue()*/;
-					numberOfDays = Days.daysBetween(disconnectionDate, invoiceTillDate).getDays();
+					if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())) {
+						discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
+						price = price.subtract(discountAmount);
+					} else if ("flat".equalsIgnoreCase(discountMasterData.getDiscountType())) {
+						price = price.subtract(discountMasterData.getDiscountRate());
+					}
 				}
 			}
-            //calculate amount for one month
-			if (numberOfMonths != 0) {
-			   if(billingOrderData.getChargeDuration()==12){
-				    netAmount=price.divide(new BigDecimal(billingOrderData.getChargeDuration()),RoundingMode.HALF_UP);
-				    disconnectionCreditForMonths = netAmount.multiply(new BigDecimal(numberOfMonths));
-			     }else if(billingOrderData.getChargeDuration()!=1){
-					netAmount=price.divide(new BigDecimal(billingOrderData.getChargeDuration()),RoundingMode.HALF_UP);
-					disconnectionCreditForMonths = netAmount.multiply(new BigDecimal(numberOfMonths));
-			     }else{
-				    disconnectionCreditForMonths = price.multiply(new BigDecimal(numberOfMonths));//monthly
-			   }
-			}//calculate amount for one Day
-			 if(billingOrderData.getChargeDuration()==12){
-			        disconnectionCreditPerday = price.divide(new BigDecimal(maximumDaysInYear),RoundingMode.HALF_UP);
-			 }else if(billingOrderData.getChargeDuration()!=1){
-			        disconnectionCreditPerday = price.divide(new BigDecimal(totalDays),RoundingMode.HALF_UP);
-			 }else{
-				   disconnectionCreditPerday = price.divide(new BigDecimal(maxDaysOfMonth),RoundingMode.HALF_UP);
-			 }
-			if (numberOfDays != 0) {
-				disconnectionCreditForDays = disconnectionCreditPerday.multiply(new BigDecimal(numberOfDays));
+			if (price.compareTo(BigDecimal.ZERO) != 0) {
+				listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
 			}
-			price = disconnectionCreditForMonths.add(disconnectionCreditForDays);//final case
-			
-			this.startDate=invoiceTillDate;
+
+		} else { // If Invoice till date not equal to null
+
+			System.out.println("---- DC ----");
+			if (discountMasterData != null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0) {
+
+				if (this.IsDiscountOrPromotionApplicable(billingOrderData,discountMasterData)) {
+
+					if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())) {
+						discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
+						price = price.subtract(discountAmount);
+					} else if ("flat".equalsIgnoreCase(discountMasterData.getDiscountType())) {
+						price = price.subtract(discountMasterData.getDiscountRate());
+					}
+				  	
+				}else if(this.isDiscountEndedBeforeOrderInvoice(billingOrderData, discountMasterData)){
+					
+					GenerateInvoiceData	orderChargesData = this.billingOrderReadPlatformService.getAllChargesAmountsOnOrder(billingOrderData.getClientId(),
+							                              billingOrderData.getClientOrderId(),disconnectionDate);
+					if(orderChargesData !=null) {
+					   price = orderChargesData.getChargeAmount().subtract(orderChargesData.getDiscountAmount()).setScale(2,RoundingMode.HALF_UP);
+					}
+				
+				}
+
+			} 
+
+				price = this.calcualateMonthlyDisconnectionCredit(billingOrderData,disconnectionDate);
+
+				if (BigDecimal.ZERO.compareTo(price) != 0) {
+					listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
+				}
+
+			this.startDate = invoiceTillDate;
 			this.endDate = disconnectionDate;
-			this.invoiceTillDate =disconnectionDate;
+			this.invoiceTillDate = disconnectionDate;
 			this.nextbillDate = invoiceTillDate.plusDays(1);
 			billingOrderData.setChargeType("DC");
-			listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
-		 }
-		
-		 return this.createBillingOrderCommand(billingOrderData, startDate, endDate, invoiceTillDate, 
-				                   nextbillDate, price, listOfTaxes,discountMasterData);
+				
+		}
+
+		return this.createBillingOrderCommand(billingOrderData, startDate,endDate, 
+				invoiceTillDate, nextbillDate, price, listOfTaxes,discountMasterData);
 	}
 
+
 	// Reverse Weekly Bill
-	public BillingOrderCommand getReverseWeeklyBill(final BillingOrderData billingOrderData,final DiscountMasterData discountMasterData, 
-			                            final  LocalDate disconnectionDate) {
-		
-		BigDecimal disconnectionCreditForWeeks = BigDecimal.ZERO;
-		BigDecimal disconnectionCreditPerday = BigDecimal.ZERO;
-		BigDecimal disconnectionCreditForDays = BigDecimal.ZERO;
+	public BillingOrderCommand getReverseWeeklyBill(final BillingOrderData billingOrderData,final DiscountMasterData discountMasterData,
+			final LocalDate disconnectionDate) {
+
 		BigDecimal discountAmount = BigDecimal.ZERO;
-		BigDecimal netAmount=BigDecimal.ZERO;
+		BigDecimal netAmount = BigDecimal.ZERO;
 		int numberOfDays = 0;
-		
+		List<InvoiceTaxCommand> listOfTaxes=new ArrayList<InvoiceTaxCommand>();
+
 		billEndDate = new LocalDate(billingOrderData.getBillEndDate());
 		price = billingOrderData.getPrice();
 
-		 if (billingOrderData.getInvoiceTillDate() == null) {//with out invoice direct disconnect order
+		if (billingOrderData.getInvoiceTillDate() == null) {// with out invoice direct disconnect order
 
-				this.startDate = new LocalDate(billingOrderData.getBillStartDate());
-				this.endDate = disconnectionDate;
-				this.invoiceTillDate = disconnectionDate;
-				this.nextbillDate = invoiceTillDate.plusDays(1);
-				Integer billingDays = 7 * billingOrderData.getChargeDuration();
-				numberOfDays = Days.daysBetween(startDate, nextbillDate).getDays();
-			    netAmount=price.divide(new BigDecimal(billingDays),RoundingMode.HALF_UP);
-				price=netAmount.multiply(new BigDecimal(numberOfDays));
-						
-		}else{//if invoice till date not null or after invoice disconnect order
-			
-
-		  if(discountMasterData != null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0){
-
-	       if((discountMasterData.getDiscountStartDate().toDate().after(billingOrderData.getBillStartDate())
-	    		   || discountMasterData.getDiscountStartDate().toDate().equals(billingOrderData.getBillStartDate())) &&
-	    		   (billingOrderData.getInvoiceTillDate().before(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
-			    		    new LocalDate(billingOrderData.getInvoiceTillDate())))
-			    			|| billingOrderData.getInvoiceTillDate().equals(this.generateBill.getDiscountEndDateIfNull(discountMasterData, 
-			    					new LocalDate(billingOrderData.getInvoiceTillDate()))))){
-
-		    		if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())){
-		    			   discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
-			               price = price.subtract(discountAmount);
-		    		}else if("flat".equalsIgnoreCase(discountMasterData.getDiscountType())){
-		    			  price = price.subtract(discountMasterData.getDiscountRate());
-		              }
-		           }
-
-		  }
-
-			this.startDate = disconnectionDate;
-			this.endDate = new LocalDate(billingOrderData.getInvoiceTillDate());
-			invoiceTillDate = new LocalDate(billingOrderData.getInvoiceTillDate());
-			int numberOfWeeks = Weeks.weeksBetween(disconnectionDate, invoiceTillDate).getWeeks();
-
-			if (billingOrderData.getBillingAlign().equalsIgnoreCase("N")) {
-		     	LocalDate tempBillEndDate = invoiceTillDate.minusWeeks(numberOfWeeks);
-				numberOfDays = Days.daysBetween(disconnectionDate, tempBillEndDate).getDays();
-				
-			} else if (billingOrderData.getBillingAlign().equalsIgnoreCase("Y")) {
-				LocalDate tempBillEndDate = invoiceTillDate.minusWeeks(numberOfWeeks).dayOfWeek().withMaximumValue();
-				numberOfDays = Days.daysBetween(disconnectionDate, tempBillEndDate).getDays();
-			}
-
-			if (numberOfWeeks != 0) {
-				 if(billingOrderData.getChargeDuration() == 2) {
-					netAmount=price.divide(new BigDecimal(billingOrderData.getChargeDuration()),RoundingMode.HALF_UP);
-					disconnectionCreditForWeeks = netAmount.multiply(new BigDecimal(numberOfWeeks));
-				}else{
-				disconnectionCreditForWeeks = price.multiply(new BigDecimal(numberOfWeeks));	
-			   }
-			}
-			disconnectionCreditPerday =this.getWeeklyPricePerDay(billingOrderData.getChargeDuration(),price);
-			if (numberOfDays != 0) {
-				disconnectionCreditForDays = disconnectionCreditPerday.multiply(new BigDecimal(numberOfDays));
-			}
-			price = disconnectionCreditForWeeks.add(disconnectionCreditForDays);
-			billingOrderData.setChargeType("DC");
-
-			this.startDate=invoiceTillDate;
+			this.startDate = new LocalDate(billingOrderData.getBillStartDate());
 			this.endDate = disconnectionDate;
-			this.invoiceTillDate =disconnectionDate;
+			this.invoiceTillDate = disconnectionDate;
+			this.nextbillDate = invoiceTillDate.plusDays(1);
+			Integer billingDays = 7 * billingOrderData.getChargeDuration();
+			numberOfDays = Days.daysBetween(startDate, nextbillDate).getDays();
+			netAmount = price.divide(new BigDecimal(billingDays),RoundingMode.HALF_UP);
+			price = netAmount.multiply(new BigDecimal(numberOfDays));
+
+		} else {// if invoice till date not null or after invoice disconnect order
+
+			if (discountMasterData != null&& BigDecimal.ZERO.compareTo(discountMasterData.getDiscountRate()) < 0) {
+
+				if (this.IsDiscountOrPromotionApplicable(billingOrderData,discountMasterData)) {
+
+					if ("percentage".equalsIgnoreCase(discountMasterData.getDiscountType())) {
+						discountAmount = price.multiply(discountMasterData.getDiscountRate().divide(new BigDecimal(100),RoundingMode.HALF_UP));
+						price = price.subtract(discountAmount);
+					} else if ("flat".equalsIgnoreCase(discountMasterData.getDiscountType())) {
+						price = price.subtract(discountMasterData.getDiscountRate());
+					}
+				}else if(this.isDiscountEndedBeforeOrderInvoice(billingOrderData, discountMasterData)){
+					
+					GenerateInvoiceData	orderChargesData = this.billingOrderReadPlatformService.getAllChargesAmountsOnOrder(billingOrderData.getClientId(),
+							                              billingOrderData.getClientOrderId(),disconnectionDate);
+					if(orderChargesData !=null) {
+					   price = orderChargesData.getChargeAmount().subtract(orderChargesData.getDiscountAmount()).setScale(2,RoundingMode.HALF_UP);
+					}
+				
+				}
+			}
+			
+			price = this.calcualateWeeklyDisconnectionCredit(billingOrderData,disconnectionDate);
+
+			if (BigDecimal.ZERO.compareTo(price) != 0) {
+				listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
+			}
+           
+			billingOrderData.setChargeType("DC");
+			this.startDate = invoiceTillDate;
+			this.endDate = disconnectionDate;
+			this.invoiceTillDate = disconnectionDate;
 			this.nextbillDate = invoiceTillDate.plusDays(1);
 
 		}
-		List<InvoiceTaxCommand> listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
 
-		return this.createBillingOrderCommand(billingOrderData, startDate,endDate, invoiceTillDate, 
-				                      nextbillDate, price, listOfTaxes,discountMasterData);
+		return this.createBillingOrderCommand(billingOrderData, startDate,endDate, 
+				invoiceTillDate,nextbillDate, price, listOfTaxes,discountMasterData);
 	}
 
 	// Per day weekly price
@@ -335,7 +275,6 @@ public class GenerateDisconnectionBill {
 		return this.createBillingOrderCommand(billingOrderData, startDate,endDate,invoiceTillDate,nextbillDate,price,
 					listOfTaxes,discountMasterData);
 		}
-	
 	
 
 	// Tax Calculation
@@ -459,5 +398,152 @@ public class GenerateDisconnectionBill {
 				billingOrderData.getStartDate(), billingOrderData.getEndDate(),
 				discountMasterData, billingOrderData.getTaxInclusive(),usageCharges);
 	}
+	
+	/**
+	 * @param billingOrderData
+	 * @param disconnectionDate
+	 * return bigdecimal price
+	 */
+	public BigDecimal calcualateMonthlyDisconnectionCredit(BillingOrderData billingOrderData, LocalDate disconnectionDate) {
+
+		BigDecimal disconnectionCreditForMonths = BigDecimal.ZERO;
+		BigDecimal disconnectionCreditPerday = BigDecimal.ZERO;
+		BigDecimal disconnectionCreditForDays = BigDecimal.ZERO;
+		BigDecimal netAmount = BigDecimal.ZERO;
+		int numberOfDays = 0;
+		int totalDays = 0;
+
+		this.startDate = disconnectionDate;
+		this.endDate = new LocalDate(billingOrderData.getInvoiceTillDate());
+		invoiceTillDate = new LocalDate(billingOrderData.getInvoiceTillDate());
+		int maxDaysOfMonth = startDate.dayOfMonth().withMaximumValue().getDayOfMonth();
+		int maximumDaysInYear = startDate.dayOfYear().withMaximumValue().getDayOfYear();
+		LocalDate nextDurationDate = startDate.plusMonths(billingOrderData.getChargeDuration()).minusDays(1);
+		totalDays = Days.daysBetween(startDate, nextDurationDate).getDays() + 1;
+		int numberOfMonths = Months.monthsBetween(disconnectionDate,invoiceTillDate).getMonths();
+
+		if (billingOrderData.getBillingAlign().equalsIgnoreCase("N")) {
+			LocalDate tempBillEndDate = invoiceTillDate.minusMonths(numberOfMonths);
+			numberOfDays = Days.daysBetween(disconnectionDate, tempBillEndDate).getDays();
+
+		} else if (billingOrderData.getBillingAlign().equalsIgnoreCase("Y")) {
+			if (numberOfMonths > 0) {
+				LocalDate tempBillEndDate = invoiceTillDate.minusMonths(numberOfMonths).dayOfMonth().withMaximumValue();
+				numberOfDays = Days.daysBetween(disconnectionDate,tempBillEndDate).getDays();
+			} else {
+				/* LocalDate tempBillEndDate =invoiceTillDate.minusMonths(numberOfMonths).dayOfMonth().withMaximumValue()*/;
+				numberOfDays = Days.daysBetween(disconnectionDate,invoiceTillDate).getDays();
+			}
+		}
+
+		// calculate amount for one month
+		if (numberOfMonths != 0) {
+			if (billingOrderData.getChargeDuration() == 12) {
+				netAmount = price.divide(new BigDecimal(billingOrderData.getChargeDuration()),RoundingMode.HALF_UP);
+				disconnectionCreditForMonths = netAmount.multiply(new BigDecimal(numberOfMonths));
+			} else if (billingOrderData.getChargeDuration() != 1) {
+				netAmount = price.divide(new BigDecimal(billingOrderData.getChargeDuration()),RoundingMode.HALF_UP);
+				disconnectionCreditForMonths = netAmount.multiply(new BigDecimal(numberOfMonths));
+			} else {
+				disconnectionCreditForMonths = price.multiply(new BigDecimal(numberOfMonths));// monthly
+			}
+		}
+
+		// calculate amount for one Day
+		if (billingOrderData.getChargeDuration() == 12) {
+			disconnectionCreditPerday = price.divide(new BigDecimal(maximumDaysInYear), RoundingMode.HALF_UP);
+		} else if (billingOrderData.getChargeDuration() != 1) {
+			disconnectionCreditPerday = price.divide(new BigDecimal(totalDays),RoundingMode.HALF_UP);
+		} else {
+			disconnectionCreditPerday = price.divide(new BigDecimal(maxDaysOfMonth), RoundingMode.HALF_UP);
+		}
+
+		if (numberOfDays != 0) {
+			disconnectionCreditForDays = disconnectionCreditPerday.multiply(new BigDecimal(numberOfDays));
+		}
+		return price = disconnectionCreditForMonths.add(disconnectionCreditForDays);// final case
+
+	}
+	
+	/**
+	 * @param billingOrderData
+	 * @param disconnectionDate
+	 * @return bigdecimal value 
+	 */
+	public BigDecimal calcualateWeeklyDisconnectionCredit(BillingOrderData billingOrderData, LocalDate disconnectionDate) {
+		
+		BigDecimal disconnectionCreditForWeeks = BigDecimal.ZERO;
+		BigDecimal disconnectionCreditPerday = BigDecimal.ZERO;
+		BigDecimal disconnectionCreditForDays = BigDecimal.ZERO;
+		BigDecimal netAmount = BigDecimal.ZERO;
+		int numberOfDays = 0;
+		
+		this.startDate = disconnectionDate;
+		this.endDate = new LocalDate(billingOrderData.getInvoiceTillDate());
+		invoiceTillDate = new LocalDate(billingOrderData.getInvoiceTillDate());
+		int numberOfWeeks = Weeks.weeksBetween(disconnectionDate,invoiceTillDate).getWeeks();
+
+		if (billingOrderData.getBillingAlign().equalsIgnoreCase("N")) {
+			LocalDate tempBillEndDate = invoiceTillDate.minusWeeks(numberOfWeeks);
+			numberOfDays = Days.daysBetween(disconnectionDate,tempBillEndDate).getDays();
+
+		} else if (billingOrderData.getBillingAlign().equalsIgnoreCase("Y")) {
+			LocalDate tempBillEndDate = invoiceTillDate.minusWeeks(numberOfWeeks).dayOfWeek().withMaximumValue();
+			numberOfDays = Days.daysBetween(disconnectionDate,tempBillEndDate).getDays();
+		}
+
+		if (numberOfWeeks != 0) {
+			if (billingOrderData.getChargeDuration() == 2) {
+				netAmount = price.divide(new BigDecimal(billingOrderData.getChargeDuration()), RoundingMode.HALF_UP);
+				disconnectionCreditForWeeks = netAmount.multiply(new BigDecimal(numberOfWeeks));
+			} else {
+				disconnectionCreditForWeeks = price.multiply(new BigDecimal(numberOfWeeks));
+			}
+		}
+		disconnectionCreditPerday = this.getWeeklyPricePerDay(billingOrderData.getChargeDuration(), price);
+		if (numberOfDays != 0) {
+			disconnectionCreditForDays = disconnectionCreditPerday.multiply(new BigDecimal(numberOfDays));
+		}
+	
+		
+	  return price = disconnectionCreditForWeeks.add(disconnectionCreditForDays);
+		
+	}
+
+	
+	/**
+	 * @param discountMasterData
+	 * @param billingOrderData
+	 * @return  boolean value
+	 */
+	private boolean IsDiscountOrPromotionApplicable(BillingOrderData billingOrderData,DiscountMasterData discountMasterData) {
+
+		boolean IsDiscountOrPromotionApplicable = false;
+
+		if (billingOrderData.getInvoiceTillDate().before(this.generateBill.getDiscountEndDateIfNull(discountMasterData, new LocalDate(billingOrderData.getInvoiceTillDate()))) 
+				|| billingOrderData.getInvoiceTillDate().equals(this.generateBill.getDiscountEndDateIfNull(discountMasterData,new LocalDate(billingOrderData.getInvoiceTillDate())))) {
+			IsDiscountOrPromotionApplicable = true;
+		}
+
+		return IsDiscountOrPromotionApplicable;
+	}
+	
+
+	/**
+	 * @param billingOrderData
+	 * @param discountMasterData
+	 * @return boolean value
+	 */
+	private boolean isDiscountEndedBeforeOrderInvoice(BillingOrderData billingOrderData,DiscountMasterData discountMasterData) {
+		
+		boolean isDiscountEndedBeforeOrderInvoice = false;
+		 
+		 if (discountMasterData.getDiscountEndDate() != null && billingOrderData.getInvoiceTillDate().after(discountMasterData.getDiscountEndDate().toDate())){
+			     isDiscountEndedBeforeOrderInvoice = true;
+			}
+		
+		return isDiscountEndedBeforeOrderInvoice;
+	}
+
 	
 }
