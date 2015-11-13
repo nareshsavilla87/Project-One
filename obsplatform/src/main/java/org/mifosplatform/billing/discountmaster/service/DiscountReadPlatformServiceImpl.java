@@ -120,6 +120,7 @@ public class DiscountReadPlatformServiceImpl implements DiscountReadPlatformServ
 			
 			final Long id = rs.getLong("id");
 			final String categoryType=rs.getString("categoryType");
+			
 			final Long categoryTypeId=rs.getLong("categoryTypeId");
 			final BigDecimal discountRate =rs.getBigDecimal("discountRate");
 			return new DiscountDetailData(id,categoryType,categoryTypeId,discountRate);
