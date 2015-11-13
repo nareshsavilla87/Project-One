@@ -251,27 +251,23 @@ public class GenerateBill {
 		LocalDate nextbillDate = null;
 
 		startDate = new LocalDate(billingOrderData.getNextBillableDate());
-		endDate = startDate.plusWeeks(billingOrderData.getChargeDuration())
-				.minusDays(1);
+		endDate = startDate.plusWeeks(billingOrderData.getChargeDuration()).minusDays(1);
 
-		if (endDate.toDate().before(billingOrderData.getBillEndDate())
-				|| endDate.toDate()
-						.compareTo(billingOrderData.getBillEndDate()) == 0) {
+		if (endDate.toDate().before(billingOrderData.getBillEndDate()) || 
+				endDate.toDate().compareTo(billingOrderData.getBillEndDate()) == 0) {
 			price = billingOrderData.getPrice();
 		} else if (endDate.toDate().after(billingOrderData.getBillEndDate())) {
 			endDate = new LocalDate(billingOrderData.getBillEndDate());
-			price = this.getLastRecurringPrice(startDate, endDate,
-					billingOrderData.getPrice(),
-					billingOrderData.getDurationType(),
-					billingOrderData.getChargeDuration());
+			price = this.getLastRecurringPrice(startDate, endDate,billingOrderData.getPrice(),
+					billingOrderData.getDurationType(),billingOrderData.getChargeDuration());
 		}
 
 		invoiceTillDate = endDate;
 		nextbillDate = endDate.plusDays(1);
 
 		List<InvoiceTaxCommand> listOfTaxes=this.calculateDiscountAndTax(billingOrderData,discountMasterData,startDate,endDate,price);
-		return this.createBillingOrderCommand(billingOrderData, startDate,endDate, invoiceTillDate, nextbillDate, price, listOfTaxes,
-				discountMasterData);
+		return this.createBillingOrderCommand(billingOrderData, startDate,endDate, invoiceTillDate, nextbillDate, 
+				price, listOfTaxes,discountMasterData);
 
 	}
 
@@ -324,16 +320,16 @@ public class GenerateBill {
 		LocalDate startDate = new LocalDate(billingOrderData.getBillStartDate());
 		BigDecimal price = billingOrderData.getPrice();
 		
-		if(billingOrderData.getStartDate()!=null){
+	/*	if(billingOrderData.getStartDate()!=null){
 			endDate = startDate.plusMonths(billingOrderData.getChargeDuration()).minusDays(1);
 			invoiceTillDate = endDate;
 			nextbillDate = invoiceTillDate.plusDays(1);
 			
-		}else{
-			endDate = startDate;
-		    invoiceTillDate = startDate;
-		    nextbillDate = invoiceTillDate;
-		}
+		}else{ }*/
+		
+		endDate = startDate;
+	    invoiceTillDate = startDate;
+	    nextbillDate = invoiceTillDate.plusDays(1);
 
 		if(discountMasterData !=null && BigDecimal.ZERO.compareTo(discountMasterData.getDiscountAmount()) <= 1){
 

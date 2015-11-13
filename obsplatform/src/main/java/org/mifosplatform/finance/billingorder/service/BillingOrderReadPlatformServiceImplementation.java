@@ -390,7 +390,7 @@ public class BillingOrderReadPlatformServiceImplementation implements BillingOrd
 		
 		final ChargesMapper chargesMapper = new ChargesMapper();
 		
-		final String sql  = "select sum(discount_amount) as discountAmount,sum(charge_amount) as chargeAmount from b_charge where client_id= ? and order_id= ? and month(charge_start_date) >=month('"+disconnectionDate+"') ";
+		final String sql  = "select sum(discount_amount) as discountAmount,sum(charge_amount) as chargeAmount from b_charge where client_id= ? and order_id= ? and DATE_FORMAT(charge_start_date,'%Y-%m') >=DATE_FORMAT('"+disconnectionDate+"','%Y-%m') ";
 		
 		return this.jdbcTemplate.queryForObject(sql, chargesMapper, new Object[] {clientId,clientOrderId});
 	}
