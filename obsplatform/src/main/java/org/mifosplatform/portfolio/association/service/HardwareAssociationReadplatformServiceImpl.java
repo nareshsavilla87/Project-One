@@ -174,6 +174,7 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
  
 			}
 			
+			
 		@Override
 		public AssociationData mapRow(final ResultSet rs, final int rowNum)throws SQLException {
 
@@ -185,6 +186,40 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			return new AssociationData(serialNum, provisionNumber,allocationType, propertyCode, orderId);
 		}
 	}
+		
+	@Override
+	public List<AssociationData> retrieveCustomerHardwareAllocationData(final Long clientId) {
+
+		try {
+			AllocationMapper mapper = new AllocationMapper();
+			final String sql = "select " + mapper.allocationSchema();
+			return this.jdbcTemplate.query(sql, mapper, new Object[] {clientId, clientId });
+
+		} catch (EmptyResultDataAccessException accessException) {
+			return null;
+		}
+	}
+	
+	private static final class AllocationMapper implements RowMapper<AssociationData> {
+		
+		public String allocationSchema() {
+			return " 'ALLOT' as allocationType,b.serial_no AS serialNum,b.provisioning_serialno as provisionNum FROM  b_item_detail b" +
+					" where  b.client_id=?  AND b.is_deleted ='N'" +
+					" union" +
+					" select  'OWNED' as allocationType,o.serial_number  AS serialNum, o.provisioning_serial_number  AS provisionNum FROM b_owned_hardware o" +
+					" WHERE o.client_id = ? AND o.is_deleted = 'N'";
+
+		}	
+		
+	@Override
+	public AssociationData mapRow(final ResultSet rs, final int rowNum)throws SQLException {
+
+		final String serialNum = rs.getString("serialNum");
+		final String provisionNumber = rs.getString("provisionNum");
+		final String allocationType = rs.getString("allocationType");
+		return new AssociationData(serialNum, provisionNumber,allocationType, null, null);
+	}
+}
 
 	@Override
 	public List<AssociationData> retrieveplanData(Long clientId) {
@@ -369,5 +404,5 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 
 		}
 	}
-		
+
 }
