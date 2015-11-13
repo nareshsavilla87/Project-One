@@ -126,7 +126,7 @@ public class PriceReadPlatformServiceImpl implements PriceReadPlatformService {
 			     " LEFT JOIN b_contract_period cp ON cp.contract_period = pm.duration" +
 			     " LEFT JOIN b_priceregion_detail pd ON pd.priceregion_id = pm.price_region_id" +
 			     " WHERE p.id = pm.plan_id AND pm.charge_code = c.charge_code AND (pm.service_code = se.service_code OR pm.service_code = 'None')" +
-			     " AND pm.is_deleted = 'n' AND se.is_deleted = 'n' " +
+			     " AND pm.is_deleted = 'n' AND se.is_deleted = 'n' AND c.billfrequency_code <> 'Once' " +
 			     " AND (pd.state_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b, b_state c WHERE  b.priceregion_id = a.price_region_id" +
 			     " AND a.price_region_id = b.priceregion_id and pm.charge_code = a.charge_code AND c.id = b.state_id AND c.state_name = '"+region+"' AND a.plan_id = "+planId+"),0)" +
 			     " AND pd.country_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_country c,  b_state s WHERE b.priceregion_id = a.price_region_id" +

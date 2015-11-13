@@ -14,7 +14,6 @@ import org.mifosplatform.billing.taxmaster.data.TaxMappingRateData;
 import org.mifosplatform.finance.billingorder.commands.BillingOrderCommand;
 import org.mifosplatform.finance.billingorder.commands.InvoiceTaxCommand;
 import org.mifosplatform.finance.billingorder.data.BillingOrderData;
-import org.mifosplatform.finance.billingorder.data.GenerateInvoiceData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -135,24 +134,34 @@ public class GenerateDisconnectionBill {
 					} else if ("flat".equalsIgnoreCase(discountMasterData.getDiscountType())) {
 						price = price.subtract(discountMasterData.getDiscountRate());
 					}
-				  	
+					
+					price = this.calcualateMonthlyDisconnectionCredit(billingOrderData,disconnectionDate);
+					
 				}else if(this.isDiscountEndedBeforeOrderInvoice(billingOrderData, discountMasterData)){
 					
-					GenerateInvoiceData	orderChargesData = this.billingOrderReadPlatformService.getAllChargesAmountsOnOrder(billingOrderData.getClientId(),
+					/*GenerateInvoiceData	orderChargesData = this.billingOrderReadPlatformService.getAllChargesAmountsOnOrder(billingOrderData.getClientId(),
 							                              billingOrderData.getClientOrderId(),disconnectionDate);
 					if(orderChargesData !=null) {
 					   price = orderChargesData.getChargeAmount().subtract(orderChargesData.getDiscountAmount()).setScale(2,RoundingMode.HALF_UP);
+					}*/
+					if(disconnectionDate.toDate().before(discountMasterData.getDiscountEndDate().toDate())){
+						invoiceTillDate = new LocalDate(billingOrderData.getInvoiceTillDate());
+						int maxDaysOfMonth = disconnectionDate.dayOfMonth().withMaximumValue().getDayOfMonth();
+						numberOfDays = Days.daysBetween(discountMasterData.getDiscountEndDate(),invoiceTillDate).getDays();
+						price = ((price.divide(new BigDecimal(maxDaysOfMonth),RoundingMode.HALF_UP))
+								   .multiply(new BigDecimal(numberOfDays))).setScale(2,RoundingMode.HALF_UP);
+
+					}else{
+						price = this.calcualateMonthlyDisconnectionCredit(billingOrderData,disconnectionDate);
 					}
-				
-				}
+			   }
 
-			} 
-
+			}else{
 				price = this.calcualateMonthlyDisconnectionCredit(billingOrderData,disconnectionDate);
-
-				if (BigDecimal.ZERO.compareTo(price) != 0) {
-					listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
-				}
+			}
+			if (BigDecimal.ZERO.compareTo(price) != 0) {
+				listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
+			}
 
 			this.startDate = invoiceTillDate;
 			this.endDate = disconnectionDate;
@@ -202,28 +211,27 @@ public class GenerateDisconnectionBill {
 					} else if ("flat".equalsIgnoreCase(discountMasterData.getDiscountType())) {
 						price = price.subtract(discountMasterData.getDiscountRate());
 					}
+					price = this.calcualateWeeklyDisconnectionCredit(billingOrderData,disconnectionDate);
+					
 				}else if(this.isDiscountEndedBeforeOrderInvoice(billingOrderData, discountMasterData)){
 					
-					GenerateInvoiceData	orderChargesData = this.billingOrderReadPlatformService.getAllChargesAmountsOnOrder(billingOrderData.getClientId(),
-							                              billingOrderData.getClientOrderId(),disconnectionDate);
-					if(orderChargesData !=null) {
-					   price = orderChargesData.getChargeAmount().subtract(orderChargesData.getDiscountAmount()).setScale(2,RoundingMode.HALF_UP);
-					}
+				//Here not write logic
 				
 				}
+			}else{
+				
+				price = this.calcualateWeeklyDisconnectionCredit(billingOrderData,disconnectionDate);
 			}
-			
-			price = this.calcualateWeeklyDisconnectionCredit(billingOrderData,disconnectionDate);
 
 			if (BigDecimal.ZERO.compareTo(price) != 0) {
 				listOfTaxes = this.calculateTax(billingOrderData, price,disconnectionDate);
 			}
-           
-			billingOrderData.setChargeType("DC");
+			
 			this.startDate = invoiceTillDate;
 			this.endDate = disconnectionDate;
 			this.invoiceTillDate = disconnectionDate;
 			this.nextbillDate = invoiceTillDate.plusDays(1);
+			billingOrderData.setChargeType("DC");
 
 		}
 
