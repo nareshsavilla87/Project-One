@@ -2,7 +2,6 @@ package org.mifosplatform.crm.clientprospect.service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.Map;
 
 import org.codehaus.jettison.json.JSONException;

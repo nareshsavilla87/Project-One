@@ -693,7 +693,11 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 				if (price.isAddon() == 'N') {
 
 					price.setBillStartDate(startDate);
-					price.setBillEndDate(EndDate);
+					if("NRC".equalsIgnoreCase(price.getChargeType())){
+						price.setBillEndDate(startDate);
+					}else{
+						price.setBillEndDate(EndDate);
+					}
 					price.setNextBillableDay(null);
 					price.setInvoiceTillDate(null);
 				}
