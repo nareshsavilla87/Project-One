@@ -22,6 +22,8 @@ public interface HardwareAssociationReadplatformService {
 	List<AssociationData> retrieveplanData(Long clientId);
 
 	List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long clientId);
+	
+	List<AssociationData> retrieveCustomerHardwareAllocationData(Long clientId);
 
 	List<AllocationDetailsData> retrieveClientAllocatedPlanByServiceMap(Long clientId, Long itemId);
 	
