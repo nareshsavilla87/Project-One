@@ -123,10 +123,11 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 					}
 				}else if(generateBill.isChargeTypeUC(billingOrderData)){
 					
-					System.out.println("---- UC ---");
 					billingOrderCommand = this.usageChargesWritePlatformService.checkOrderUsageCharges(billingOrderData);
-					if(billingOrderCommand !=null)
+					if (billingOrderCommand != null) {
+						System.out.println("---- UC ---");
 						billingOrderCommands.add(billingOrderCommand);
+					}
 				}
 			}
 		} else {

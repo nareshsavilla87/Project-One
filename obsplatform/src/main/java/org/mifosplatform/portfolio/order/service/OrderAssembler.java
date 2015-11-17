@@ -179,19 +179,20 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 			order.setEndDate(endDate);
 		}
 
-			for (OrderPrice orderPrice: order.getPrice()) {
-				LocalDate billstartDate = startDate;
-				
-				orderPrice.setBillStartDate(billstartDate);
-				//end date is null for rc
-				if (endDate != null && ("RC".equalsIgnoreCase(orderPrice.getChargeType()) || "UC".equalsIgnoreCase(orderPrice.getChargeType()))) {
-					orderPrice.setBillEndDate(new LocalDate(order.getEndDate()));
-				}else if(endDate == null){
-					orderPrice.setBillEndDate(endDate);
-				} else if(orderPrice.getChargeType().equalsIgnoreCase("NRC")) {
-					orderPrice.setBillEndDate(billstartDate);
-				}
-	}
-			return order;
+		for (OrderPrice orderPrice : order.getPrice()) {
+			LocalDate billstartDate = startDate;
+
+			orderPrice.setBillStartDate(billstartDate);
+			// end date is null for rc
+			if (("RC".equalsIgnoreCase(orderPrice.getChargeType()) || "UC".equalsIgnoreCase(orderPrice.getChargeType())) && endDate != null) {
+				orderPrice.setBillEndDate(new LocalDate(order.getEndDate()));
+			} else if ("RC".equalsIgnoreCase(orderPrice.getChargeType()) && endDate == null) {
+				orderPrice.setBillEndDate(endDate);
+			} else if ("NRC".equalsIgnoreCase(orderPrice.getChargeType())) {
+				orderPrice.setBillEndDate(billstartDate);
+			}
+		}
+		return order;
+
 	}
 }
