@@ -14,7 +14,6 @@ import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.codehaus.jettison.json.JSONArray;
-import org.joda.time.LocalDate;
 import org.mifosplatform.finance.adjustment.data.AdjustmentData;
 import org.mifosplatform.finance.adjustment.exception.AdjustmentCodeNotFoundException;
 import org.mifosplatform.finance.adjustment.service.AdjustmentReadPlatformService;
@@ -22,6 +21,7 @@ import org.mifosplatform.finance.payments.data.McodeData;
 import org.mifosplatform.finance.payments.exception.PaymentCodeNotFoundException;
 import org.mifosplatform.finance.payments.service.PaymentReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.address.data.CityDetailsData;
 import org.mifosplatform.organisation.address.service.AddressReadPlatformService;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
@@ -29,14 +29,11 @@ import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
 import org.mifosplatform.organisation.mcodevalues.service.MCodeReadPlatformService;
 import org.mifosplatform.portfolio.property.data.PropertyDefinationData;
 import org.mifosplatform.portfolio.property.service.PropertyReadPlatformService;
-import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.scheduledjobs.dataupload.data.MRNErrorData;
 import org.mifosplatform.scheduledjobs.dataupload.domain.DataUpload;
 import org.mifosplatform.scheduledjobs.dataupload.domain.DataUploadRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import antlr.StringUtils;
 
 import com.google.gson.Gson;
 
@@ -387,7 +384,7 @@ public class DataUploadHelper {
 					} 
 				}
 
-				final Collection<PropertyDefinationData> unitCodesList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_UNIT,currentLineData[2].trim());
+				final Collection<PropertyDefinationData> unitCodesList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_UNIT,currentLineData[2].trim(),null);
 				if (!unitCodesList.isEmpty()) {
 					for (PropertyDefinationData unitData : unitCodesList) {
 						if (unitData.getCode().equalsIgnoreCase(currentLineData[2].toString().trim())) {
@@ -396,7 +393,7 @@ public class DataUploadHelper {
 						}
 					}
 
-					final Collection<PropertyDefinationData> floorList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_FLOOR,currentLineData[3].trim());
+					final Collection<PropertyDefinationData> floorList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_FLOOR,currentLineData[3].trim(),null);
 					if (!floorList.isEmpty()) {
 						for (PropertyDefinationData floorData : floorList) {
 							if (floorData.getCode().equalsIgnoreCase(currentLineData[3].toString().trim())) {
@@ -405,7 +402,7 @@ public class DataUploadHelper {
 							}
 						}
 
-						final Collection<PropertyDefinationData> buildingCodeList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_BUILDING,currentLineData[4].trim());
+						final Collection<PropertyDefinationData> buildingCodeList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_BUILDING,currentLineData[4].trim(),null);
 						if (!buildingCodeList.isEmpty()) {
 							for (PropertyDefinationData buildingCode : buildingCodeList) {
 								if (buildingCode.getCode().equalsIgnoreCase(currentLineData[4].toString().trim())) {
@@ -414,7 +411,7 @@ public class DataUploadHelper {
 								}
 							}
 
-							final Collection<PropertyDefinationData> parcelList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_PARCEL,currentLineData[5].trim());
+							final Collection<PropertyDefinationData> parcelList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_PARCEL,currentLineData[5].trim(),null);
 							if (!buildingCodeList.isEmpty()) {
 								for (PropertyDefinationData parcel : parcelList) {
 									if (parcel.getCode().equalsIgnoreCase(currentLineData[5].toString().trim())) {

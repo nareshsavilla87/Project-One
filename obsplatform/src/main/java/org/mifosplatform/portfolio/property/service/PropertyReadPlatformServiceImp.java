@@ -427,14 +427,20 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 
 
 	@Override
-	public List<PropertyDefinationData> retrievPropertyType(final String propertyType,final String code) {
+	public List<PropertyDefinationData> retrievPropertyType(final String propertyType,final String code,final String paramLength) {
 		
 		try {
 			context.authenticatedUser();
 			final PropertyMasterMapper mapper = new PropertyMasterMapper();
-			final String sql = "select "+ mapper.schema()+ "  and pm.property_code_type like '%"+propertyType+"%' AND pm.code like '%"+code+"%'  order by pm.id LIMIT 20";
+/*			final String sql = "select "+ mapper.schema()+ "  and pm.property_code_type like '%"+propertyType+"%' AND pm.code like '%"+code+"%'  order by pm.id LIMIT 20";*/
+	        String sql =" ";
+			if (paramLength != null) {
+				sql = "select " + mapper.schema()+ "  and pm.property_code_type like '%" + propertyType+ "%' AND pm.code like '%" + code+ "%' and length(pm.code)=" + paramLength+ " order by pm.id LIMIT 20";
+			} else {
+				sql = "select " + mapper.schema()+ "  and pm.property_code_type like '%" + propertyType+ "%' AND pm.code like '%" + code+ "%'  order by pm.id LIMIT 20";
+			}
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {});
-		    } catch (final EmptyResultDataAccessException e) {
+		 } catch (final EmptyResultDataAccessException e) {
 			return null;
 		}
 	}
