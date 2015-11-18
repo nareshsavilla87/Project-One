@@ -13,7 +13,7 @@ public interface ChargeCodeRepository extends JpaRepository<ChargeCodeMaster, Lo
 	@Query("from ChargeCodeMaster charge where charge.chargeCode =:chargeCode")
 	ChargeCodeMaster findOneByChargeCode(@Param("chargeCode") String chargeCode);
 	
-	@Query("from ChargeCodeMaster charge where charge.billFrequencyCode =:billFrequencyCode")
+	@Query("from ChargeCodeMaster charge where charge.billFrequencyCode =:billFrequencyCode ")
 	List<ChargeCodeMaster> findOneByBillFrequency(@Param("billFrequencyCode") String billFrequencyCode);
 
 }

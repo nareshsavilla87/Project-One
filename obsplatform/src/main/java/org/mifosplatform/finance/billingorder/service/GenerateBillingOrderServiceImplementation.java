@@ -145,7 +145,7 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 		BigDecimal totalChargeAmount = BigDecimal.ZERO;
 		BigDecimal netTaxAmount = BigDecimal.ZERO;
 		
-        if(billingOrderCommands.size() !=0){
+   
 		Invoice invoice = new Invoice(billingOrderCommands.get(0).getClientId(),DateUtils.getLocalDateOfTenant().toDate(), 
 				                      invoiceAmount, invoiceAmount,netTaxAmount, "active");
 
@@ -203,10 +203,6 @@ public class GenerateBillingOrderServiceImplementation implements GenerateBillin
 		invoice.setTaxAmount(netTaxAmount);
 		invoice.setInvoiceAmount(invoiceAmount);
 		return this.invoiceRepository.saveAndFlush(invoice);
-        }
-        else{
-        	throw new BillingOrderNoRecordsFoundException();
-        }
         
 	}
 

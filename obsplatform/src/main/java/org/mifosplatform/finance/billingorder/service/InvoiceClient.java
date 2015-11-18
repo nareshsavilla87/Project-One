@@ -107,13 +107,16 @@ public class InvoiceClient {
 				}
 			}
 			if (singleInvoiceFlag) {
-
 				this.invoiceRepository.save(invoiceData.getInvoice());
 
 				// Update Client Balance
 				this.billingOrderWritePlatformService.updateClientBalance(invoiceData.getInvoice().getInvoiceAmount(), clientId,false);
 			}
-			return invoiceData.getInvoice();
+			if (invoiceData != null) {
+				return invoiceData.getInvoice();
+			} else {
+				throw new BillingOrderNoRecordsFoundException();
+			}
 			
 		} else {
 			throw new BillingOrderNoRecordsFoundException();
