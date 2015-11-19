@@ -1,19 +1,17 @@
 package org.mifosplatform.portfolio.order.service;
 
 import java.math.BigDecimal;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
 import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.joda.time.DateTimeField;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.payterms.data.PaytermData;
@@ -64,7 +62,6 @@ import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.contract.exception.ContractPeriodNotFoundException;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
-import org.mifosplatform.portfolio.order.data.OrderData;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.UserActionStatusEnumaration;
 import org.mifosplatform.portfolio.order.domain.Order;
@@ -324,7 +321,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			this.orderRepository.save(order);
 			return new CommandProcessingResult(order.getId(), order.getClientId());
 
-		} catch (DataIntegrityViolationException dve) {
+		} catch (JSONException | DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
@@ -340,7 +337,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		}
 	}
 
-	private void handleCodeDataIntegrityIssues(JsonCommand command, DataIntegrityViolationException dve) {
+	private void handleCodeDataIntegrityIssues(JsonCommand command, Exception dve) {
 		throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
 	}
 
@@ -550,14 +547,16 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			}
 			LocalDate renewalEndDate = this.orderAssembler.calculateEndDate(newStartdate, contractDetails.getSubscriptionType(), contractDetails.getUnits());
 
-			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
+			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BILLING_CYCLE);
 
-			if (configuration != null && plan.isPrepaid() == 'N') {
-
-				orderDetails.setBillingAlign(configuration.isEnabled() ? 'Y': 'N');
-				if (configuration.isEnabled() && renewalEndDate != null) {
+			if (configuration != null && configuration.isEnabled() && plan.isPrepaid() == 'N') {
+				
+				JSONObject configValue = new JSONObject(configuration.getValue());
+				if (renewalEndDate != null) {
+					orderDetails.setBillingAlign(configValue.getBoolean("fixed") ? 'Y': 'N');
 					orderDetails.setEndDate(renewalEndDate.dayOfMonth().withMaximumValue());
 				} else {
+					orderDetails.setBillingAlign(configValue.getBoolean("perpetual") ? 'Y': 'N');
 					orderDetails.setEndDate(renewalEndDate);
 				}
 			} else {
@@ -567,13 +566,13 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			orderDetails.setuserAction(requstStatus);
 
 			for (OrderPrice orderprice : orderPrices) {
-				if (plan.isPrepaid() == 'Y' && orderprice.isAddon() == 'N') {
+				if (plan.isPrepaid() == 'Y' && orderprice.isAddon() == 'N' && !"RF".equalsIgnoreCase(orderprice.getChargeCode())) {
 					final Long priceId = command.longValueOfParameterNamed("priceId");
 					ServiceMaster service = this.serviceMasterRepository.findOne(orderprice.getServiceId());
 					Price price1 = this.priceRepository.findOne(priceId);
 					Price price = this.priceRepository.findOneByPlanAndService(plan.getId(), service.getServiceCode(), contractDetails.getSubscriptionPeriod(),
 							price1.getChargeCode(), price1.getPriceRegion());
-					if (price != null) {
+					if (price != null ) {
 						ChargeCodeMaster chargeCode = this.chargeCodeRepository.findOneByChargeCode(price.getChargeCode());
 						orderprice.setChargeCode(chargeCode.getChargeCode());
 						orderprice.setChargeDuration(chargeCode.getChargeDuration().toString());
@@ -585,7 +584,9 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 						throw new PriceNotFoundException(priceId);
 					}
 				}
-				orderprice.setDatesOnOrderStatus(newStartdate, new LocalDate(orderDetails.getEndDate()), orderDetails.getUserAction());
+				if(!"RF".equalsIgnoreCase(orderprice.getChargeCode()) || "RENEWAL AFTER AUTOEXIPIRY".equalsIgnoreCase(orderDetails.getUserAction())){
+				 orderprice.setDatesOnOrderStatus(newStartdate, new LocalDate(orderDetails.getEndDate()), orderDetails.getUserAction());
+				}
 				// setBillEndDate(renewalEndDate);
 				// this.OrderPriceRepository.save(orderprice);
 				orderDetails.setNextBillableDay(null);
@@ -639,7 +640,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 
 			return new CommandProcessingResult(Long.valueOf(orderDetails.getClientId()), orderDetails.getClientId());
 
-		} catch (DataIntegrityViolationException dve) {
+		} catch (JSONException | DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(null, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
