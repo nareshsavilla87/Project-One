@@ -189,7 +189,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			final String chargeCode = command.stringValueOfParameterNamed("chargeCode");
 			final boolean serialNumberFlag =command.booleanPrimitiveValueOfParameterNamed("serialNumberFlag");
 			Address clientAddress =null;
-			List<AssociationData> associationDatas = this.associationReadplatformService.retrieveClientAssociationDetailsForProperty(clientId,serialNumber);
+			List<AssociationData> associationDatas = this.associationReadplatformService.retrieveClientAssociationDetails(clientId,serialNumber);
 			PropertyTransactionHistory transactionHistory = null;
 			if(oldPropertyCode != null){
 				clientAddress = this.addressRepository.findOneByClientIdAndPropertyCode(clientId,oldPropertyCode);	
