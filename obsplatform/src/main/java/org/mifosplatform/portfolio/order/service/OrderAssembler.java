@@ -105,15 +105,17 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 		  if (configuration != null && configuration.isEnabled() && plan.isPrepaid() == 'N') {
 
 			JSONObject configValue = new JSONObject(configuration.getValue());
-			 if (endDate != null) {
-				order.setBillingAlign(configValue.getBoolean("fixed") ? 'Y': 'N');
+			if (endDate != null && configValue.getBoolean("fixed")) {
+				order.setBillingAlign('Y');
 				order.setEndDate(endDate.dayOfMonth().withMaximumValue());
-			  } else {
-				order.setBillingAlign(configValue.getBoolean("perpetual") ? 'Y': 'N');
-			 }
-		   } else {
+			} else if (endDate == null && configValue.getBoolean("perpetual")) {
+				order.setBillingAlign('Y');
+			} else {
+				order.setBillingAlign('N');
+			}
+		  } else {
 			order.setBillingAlign('N');
-		 }
+		}
 			
 			BigDecimal priceforHistory=BigDecimal.ZERO;
 

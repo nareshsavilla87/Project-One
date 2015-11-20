@@ -552,11 +552,13 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			if (configuration != null && configuration.isEnabled() && plan.isPrepaid() == 'N') {
 				
 				JSONObject configValue = new JSONObject(configuration.getValue());
-				if (renewalEndDate != null) {
-					orderDetails.setBillingAlign(configValue.getBoolean("fixed") ? 'Y': 'N');
+				if (renewalEndDate != null && configValue.getBoolean("fixed")) {
+					orderDetails.setBillingAlign('Y');
 					orderDetails.setEndDate(renewalEndDate.dayOfMonth().withMaximumValue());
-				} else {
-					orderDetails.setBillingAlign(configValue.getBoolean("perpetual") ? 'Y': 'N');
+				} else if(renewalEndDate == null && configValue.getBoolean("perpetual")){
+					orderDetails.setBillingAlign('Y');
+					orderDetails.setEndDate(renewalEndDate);
+				}else{
 					orderDetails.setEndDate(renewalEndDate);
 				}
 			} else {
@@ -566,7 +568,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			orderDetails.setuserAction(requstStatus);
 
 			for (OrderPrice orderprice : orderPrices) {
-				if (plan.isPrepaid() == 'Y' && orderprice.isAddon() == 'N' && !"RF".equalsIgnoreCase(orderprice.getChargeCode())) {
+				if (plan.isPrepaid() == 'Y' && orderprice.isAddon() == 'N') {
 					final Long priceId = command.longValueOfParameterNamed("priceId");
 					ServiceMaster service = this.serviceMasterRepository.findOne(orderprice.getServiceId());
 					Price price1 = this.priceRepository.findOne(priceId);
@@ -584,9 +586,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 						throw new PriceNotFoundException(priceId);
 					}
 				}
-				if(!"RF".equalsIgnoreCase(orderprice.getChargeCode()) || "RENEWAL AFTER AUTOEXIPIRY".equalsIgnoreCase(orderDetails.getUserAction())){
 				 orderprice.setDatesOnOrderStatus(newStartdate, new LocalDate(orderDetails.getEndDate()), orderDetails.getUserAction());
-				}
+				
 				// setBillEndDate(renewalEndDate);
 				// this.OrderPriceRepository.save(orderprice);
 				orderDetails.setNextBillableDay(null);

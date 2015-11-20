@@ -158,8 +158,6 @@ VIEW `fin_trans_vw` AS
             and (`bdr`.`transaction_date` <= now()))
     order by 1 , 2;
 
-INSERT IGNORE INTO b_charge_codes VALUES(NULL,'RF', 'Registration Fee', 'NRC', '1', 'Month(s)', '0', 'Once');
-
 UPDATE c_configuration SET name='align-billing-cycle',value='{\"fixed\":false,\"perpetual\":true}',
 module='Billing', description='If this flag is enable we will perform prorata charges separately to order'
 WHERE name='align-biiling-cycle';
