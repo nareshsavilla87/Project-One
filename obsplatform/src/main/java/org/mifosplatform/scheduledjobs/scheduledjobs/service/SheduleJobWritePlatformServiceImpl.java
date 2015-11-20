@@ -1218,8 +1218,8 @@ public void reportEmail() {
           		final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
           		LocalTime date=new LocalTime(zone);
           		String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-          		String fileLocation=FileUtils.MIFOSX_BASE_DIR+ File.separator + JobName.REPORT_EMAIL.toString() + File.separator +"ReportEmail_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime;
-				//Retrieve Event Actions
+          		String fileLocation=FileUtils.MIFOSX_BASE_DIR+ File.separator + JobName.REPORT_EMAIL.toString() + File.separator +"ReportEmail_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+dateTime;
+				
 				String path=FileUtils.generateLogFileDirectory()+ JobName.REPORT_EMAIL.toString() + File.separator +"ReportEmail_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".log";
 				File fileHandler = new File(path.trim());
 				fileHandler.createNewFile();
@@ -1235,6 +1235,10 @@ public void reportEmail() {
 					fw.append("ScheduleJobData id= "+scheduleJobData.getId()+" ,BatchName= "+scheduleJobData.getBatchName()+
 							" ,query="+scheduleJobData.getQuery()+"\r\n");
 				     Map<String, String> reportParams = new HashMap<String, String>();
+				     reportParams.put("${officeId}", "-1");
+				     reportParams.put("${paymode_id}","-1");
+				     reportParams.put("${endDate}",DateUtils.getLocalDateOfTenant().toString());
+				     reportParams.put("${startDate}", DateUtils.getLocalDateOfTenant().minusMonths(1).toString());
 					 String pdfFileName = this.readExtraDataAndReportingService.generateEmailReport(scheduleJobData.getBatchName(), "report",reportParams,fileLocation);
 
 					 if(pdfFileName!=null){
@@ -1259,7 +1263,7 @@ public void reportEmail() {
 				fw.flush();
 				fw.close();
           	}
-          	System.out.println("Report Emails are Processed....");
+          	System.out.println("Report Emails Job is Completed....");
 		} catch (Exception e) {
 			System.out.println(e.getMessage());
 		}

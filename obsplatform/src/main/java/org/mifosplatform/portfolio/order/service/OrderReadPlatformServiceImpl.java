@@ -10,6 +10,7 @@ import org.mifosplatform.billing.payterms.data.PaytermData;
 import org.mifosplatform.billing.planprice.service.PriceReadPlatformService;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.order.data.OrderData;
@@ -165,7 +166,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 	        	sql="SELECT DISTINCT b.billfrequency_code AS billfrequencyCode,a.id AS id,c.contract_period AS duration,pm.is_prepaid AS isPrepaid,a.price AS price" +
 			   		" FROM b_charge_codes b,b_plan_master pm,b_plan_pricing a LEFT JOIN b_contract_period c ON c.contract_period = a.duration LEFT JOIN b_priceregion_detail pd" +
 			   		" ON pd.priceregion_id = a.price_region_id JOIN b_client_address ca LEFT JOIN b_state s ON ca.state = s.state_name LEFT JOIN b_country con ON ca.country = con.country_name" +
-			   		" WHERE   a.charge_code = b.charge_code AND a.is_deleted = 'n' AND (pd.state_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_state c, b_charge_codes cc," +
+			   		" WHERE   a.charge_code = b.charge_code AND a.is_deleted = 'n' AND b.billfrequency_code <> 'Once' AND (pd.state_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_state c, b_charge_codes cc," +
 			   		" b_client_address d  WHERE b.priceregion_id = a.price_region_id AND b.state_id = c.id AND a.price_region_id = b.priceregion_id AND d.state = c.state_name " +
 			   		" AND cc.charge_code = a.charge_code AND cc.charge_code = b.charge_code AND d.address_key = 'PRIMARY' AND d.client_id = "+clientId+" " +
 			   		" AND a.plan_id = "+planCode+" and a.is_deleted = 'n'),0) AND pd.country_id =ifnull((SELECT DISTINCT c.id FROM b_plan_pricing a,b_priceregion_detail b,b_country c, b_charge_codes cc,b_client_address d" +
@@ -252,7 +253,7 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 				   +" o.end_date AS end_date,co.contract_period as contractPeriod,o.order_no as orderNo,o.user_action AS userAction,o.active_date AS activeDate," +
 					" p.is_prepaid as isprepaid,p.allow_topup as allowTopUp, ifnull(g.group_name, p.plan_code) as groupName,  " +
 					" date_sub(o.next_billable_day,INTERVAL 1 DAY) as invoiceTillDate,(SELECT sum(ol.price) AS price FROM b_order_price ol"
-				   +" WHERE o.id = ol.order_id)  AS price,p.provision_sys as provSys  FROM b_orders o, b_plan_master p,b_contract_period co, m_client c " +
+				   +" WHERE o.id = ol.order_id AND charge_type <> 'NRC')  AS price,p.provision_sys as provSys  FROM b_orders o, b_plan_master p,b_contract_period co, m_client c " +
 				   "  left join b_group g on g.id=c.group_id ";
 			}
 
@@ -584,6 +585,16 @@ public class OrderReadPlatformServiceImpl implements OrderReadPlatformService
 							return rs.getLong("id");
 						}
 						
+					}
+
+					@Override
+					public List<Long> getEventActionsData(Long clientId,
+							Long orderId) {
+						final OrderIdMapper mapper=new OrderIdMapper();
+						final String sql="select id from b_event_actions where event_action = 'CHANGEPLAN' and "+
+											"action_name = 'CHANGE PLAN' and client_id = ? and order_id = ? and "+
+											"is_processed = 'N' and trans_date >  "+DateUtils.getLocalDateOfTenant() ;
+						return this.jdbcTemplate.query(sql,mapper,new Object[] { clientId,orderId});
 					}
 	}
 

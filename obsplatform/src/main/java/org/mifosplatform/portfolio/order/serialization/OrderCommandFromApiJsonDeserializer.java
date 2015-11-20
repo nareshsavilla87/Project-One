@@ -33,7 +33,7 @@ public final class OrderCommandFromApiJsonDeserializer {
     private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("planCode","locale","dateFormat","start_date","paytermCode",
     		"contractPeriod","billAlign","price","description","renewalPeriod","disconnectReason","isPrepaid","disconnectionDate","ispaymentEnable",
     		"paymentCode","amountPaid","paymentDate","receiptNo","promoId","startDate","isNewplan","suspensionDate","suspensionReason",
-    		"suspensionDescription","status","actionType","priceId","autoRenew","planId","duration","planDescription","serialnumber","allocation_type","orderId"));
+    		"suspensionDescription","status","actionType","priceId","autoRenew","planId","duration","planDescription","serialnumber","allocation_type","orderId","isNewPlan","oldplanId","newplanId"));
     private final Set<String> retracksupportedParameters = new HashSet<String>(Arrays.asList("commandName","message","orderId"));
     private final FromJsonHelper fromApiJsonHelper;
 
@@ -198,10 +198,14 @@ public final class OrderCommandFromApiJsonDeserializer {
 		final List<ApiParameterError> dataValidationErrors = new ArrayList<ApiParameterError>();
 		final DataValidatorBuilder baseDataValidator = new DataValidatorBuilder(dataValidationErrors).resource("orderrenewal");
 		final JsonElement element = fromApiJsonHelper.parse(json);
-		final String planId=fromApiJsonHelper.extractStringNamed("planId", element);
-		baseDataValidator.reset().parameter("planId").value(planId).notBlank().validateforNumeric();
+		final String oldplanId=fromApiJsonHelper.extractStringNamed("oldplanId", element);
+		baseDataValidator.reset().parameter("oldplanId").value(oldplanId).notBlank().validateforNumeric();
 		final String duration = fromApiJsonHelper.extractStringNamed("duration", element);
 		baseDataValidator.reset().parameter("duration").value(duration).notBlank();
+		/*final String orderId=fromApiJsonHelper.extractStringNamed("orderId", element);
+		baseDataValidator.reset().parameter("orderId").value(orderId).notBlank().validateforNumeric();*/
+		final String newplanId=fromApiJsonHelper.extractStringNamed("newplanId", element);
+		baseDataValidator.reset().parameter("newplanId").value(newplanId).notBlank().validateforNumeric();
 		
 		throwExceptionIfValidationWarningsExist(dataValidationErrors);
 		

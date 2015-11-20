@@ -11,7 +11,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
-import java.util.Date;
 import java.util.Properties;
 
 import javax.activation.DataHandler;
@@ -34,7 +33,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.mifosplatform.infrastructure.configuration.domain.Configuration;
@@ -301,7 +299,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 	}
 
 
-	@SuppressWarnings("deprecation")
+	
 	@Override
 	public String createEmail(String pdfFileName, String emailId) {
 		
@@ -309,9 +307,7 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 
 		if(configuration != null){
 			
-			Date date=DateUtils.getDateOfTenant();
-			String dateTime=date.getHours()+""+date.getMinutes();
-		    String fileName="ReportEmail_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".pdf";
+		    String fileName="ReportEmail_"+DateUtils.getDateTimeOfTenant().toString().replace("-","")+".pdf";
 		    Properties props = new Properties();
 		    props.put("mail.smtp.auth", "true");
 			props.put("mail.smtp.starttls.enable", starttlsValue);
@@ -327,15 +323,14 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 			try {
 
 				Message message = new MimeMessage(session);
-			    message.setFrom(new InternetAddress(emailId));
-			    message.setRecipients(Message.RecipientType.TO,
-			       InternetAddress.parse(emailId));
+			    message.setFrom(new InternetAddress(authuser));
+			    message.setRecipients(Message.RecipientType.TO,InternetAddress.parse(emailId));
 			    message.setSubject("ReportEmail");
 					
 				MimeBodyPart messageBodyPart = new MimeBodyPart();
 
 			    Multipart multipart = new MimeMultipart();
-			  
+			 
 			    String file = pdfFileName;
 			    DataSource source = new FileDataSource(file);
 			    messageBodyPart.setDataHandler(new DataHandler(source));

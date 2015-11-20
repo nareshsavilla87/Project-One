@@ -184,7 +184,6 @@ public final class Client extends AbstractPersistable<Long> {
 	    ClientStatus status =  ClientStatus.NEW;
 	    final boolean active = true;
        
-
        
         if (active) {
             status = ClientStatus.NEW;

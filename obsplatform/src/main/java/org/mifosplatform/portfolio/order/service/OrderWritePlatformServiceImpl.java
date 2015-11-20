@@ -1,15 +1,22 @@
 package org.mifosplatform.portfolio.order.service;
 
 import java.math.BigDecimal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang.StringUtils;
 import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.joda.time.DateTimeField;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
+import org.mifosplatform.billing.payterms.data.PaytermData;
 import org.mifosplatform.billing.planprice.domain.Price;
 import org.mifosplatform.billing.planprice.domain.PriceRepository;
 import org.mifosplatform.billing.planprice.exceptions.ChargeCodeAndContractPeriodException;
@@ -20,6 +27,7 @@ import org.mifosplatform.billing.promotioncodes.domain.PromotionCodeRepository;
 import org.mifosplatform.billing.promotioncodes.exception.PromotionCodeNotFoundException;
 import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformService;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
+import org.mifosplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.mifosplatform.finance.billingorder.service.InvoiceClient;
 import org.mifosplatform.finance.billingorder.service.ReverseInvoice;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
@@ -56,6 +64,7 @@ import org.mifosplatform.portfolio.contract.domain.Contract;
 import org.mifosplatform.portfolio.contract.domain.ContractRepository;
 import org.mifosplatform.portfolio.contract.exception.ContractPeriodNotFoundException;
 import org.mifosplatform.portfolio.contract.service.ContractPeriodReadPlatformService;
+import org.mifosplatform.portfolio.order.data.OrderData;
 import org.mifosplatform.portfolio.order.data.OrderStatusEnumaration;
 import org.mifosplatform.portfolio.order.data.UserActionStatusEnumaration;
 import org.mifosplatform.portfolio.order.domain.Order;
@@ -72,6 +81,8 @@ import org.mifosplatform.portfolio.order.domain.PaymentFollowup;
 import org.mifosplatform.portfolio.order.domain.PaymentFollowupRepository;
 import org.mifosplatform.portfolio.order.domain.StatusTypeEnum;
 import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
+import org.mifosplatform.portfolio.order.exceptions.EventActionsAvailabeForRenewalWithChangePlanFound;
+import org.mifosplatform.portfolio.order.exceptions.NoDurationFound;
 import org.mifosplatform.portfolio.order.exceptions.NoOrdersFoundException;
 import org.mifosplatform.portfolio.order.exceptions.OrderNotFoundException;
 import org.mifosplatform.portfolio.order.serialization.OrderCommandFromApiJsonDeserializer;
@@ -278,7 +289,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			// For Plan And HardWare Association
 			Configuration configurationProperty = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_IMPLICIT_ASSOCIATION);
 
-			if (configurationProperty.isEnabled() && serialnum == null) {
+			if (configurationProperty.isEnabled() && StringUtils.isEmpty(serialnum)) {
 
 				if (plan.isHardwareReq() == 'Y') {
 					List<AllocationDetailsData> allocationDetailsDatas = this.allocationReadPlatformService.retrieveHardWareDetailsByItemCode(clientId, plan.getPlanCode());
@@ -289,7 +300,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 					}
 				}
 
-			} else if (serialnum != null && configurationProperty.isEnabled()) {
+			} else if (configurationProperty.isEnabled() && StringUtils.isNotBlank(serialnum)) {
 
 				// List<AllocationDetailsData> allocationDetailsDatas=this.allocationReadPlatformService.retrieveHardWareDetailsByItemCode(clientId,plan.getPlanCode());
 				this.associationWriteplatformService.createNewHardwareAssociation(clientId, plan.getId(), serialnum, order.getId(), allocationType);
@@ -578,7 +589,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 				// setBillEndDate(renewalEndDate);
 				// this.OrderPriceRepository.save(orderprice);
 				orderDetails.setNextBillableDay(null);
-			}
+		  	}
 
 			orderDetails.setContractPeriod(contractDetails.getId());
 			orderDetails.setuserAction(requstStatus);
@@ -675,7 +686,11 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 				if (price.isAddon() == 'N') {
 
 					price.setBillStartDate(startDate);
-					price.setBillEndDate(EndDate);
+					if("NRC".equalsIgnoreCase(price.getChargeType())){
+						price.setBillEndDate(startDate);
+					}else{
+						price.setBillEndDate(EndDate);
+					}
 					price.setNextBillableDay(null);
 					price.setInvoiceTillDate(null);
 				}
@@ -1365,33 +1380,107 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 
 			this.context.authenticatedUser();
 			this.fromApiJsonDeserializer.validateForOrderRenewalWithClient(command.json());
-			Long planId = command.longValueOfParameterNamed("planId");
+			CommandProcessingResult result;
+			
+			Long oldplanId = command.longValueOfParameterNamed("oldplanId");
 			String contractPeriod = command.stringValueOfParameterNamed("duration");
-			Contract contract = this.contractRepository.findOneByContractId(contractPeriod);
-			if (contract == null) {
+			//Long orderId = command.longValueOfParameterNamed("orderId");
+			Long newplanId = command.longValueOfParameterNamed("newplanId");
+			Long planId;
+			if(oldplanId == newplanId){
+				planId = oldplanId;
+			}else{
+				planId = newplanId;
+			}
+			
+			Plan  planData = this.planRepository.findOne(planId);
+			if(planData == null){ throw new PlanNotFundException(planId);}
+			
+			String isPrepaid = planData.getIsPrepaid() == 'N' ? "postpaid" : "prepaid";
+			
+			Contract contract =this.contractRepository.findOneByContractId(contractPeriod);
+			if(contract == null){
 				throw new ContractPeriodNotFoundException(contractPeriod,clientId);
 			}
 			List<Long> orderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, planId);
-			if (orderIds.isEmpty()) {
-				throw new NoOrdersFoundException(clientId, planId);
-
+			/*final List<OrderData> clientOrders = this.orderReadPlatformService.retrieveClientOrderDetails(clientId);
+			Boolean flag = false;
+			for(OrderData orders:clientOrders){
+				if(orderId == Long.valueOf(orders.getOrderNo())){
+					flag = true;
+				}
 			}
-			Plan planData = this.planRepository.findOne(planId);
-			if (planData == null) {
-				throw new PlanNotFundException(planId);
-			}
-
-			String isPrepaid = planData.getIsPrepaid() == 'N' ? "postpaid": "prepaid";
-
-			List<SubscriptionData> subscriptionDatas = this.planReadPlatformService.retrieveSubscriptionData(orderIds.get(0), isPrepaid);
-			if (subscriptionDatas.isEmpty()) {
-				throw new PriceNotFoundException(orderIds.get(0), clientId);
-			}
-			Long priceId = Long.valueOf(0);
-
-			if (planData.getIsPrepaid() == 'Y') {
-				for (SubscriptionData subscriptionData : subscriptionDatas) {
-					if (subscriptionData.getContractdata().equalsIgnoreCase(contractPeriod)) {
+			if(!flag){
+				throw new OrderNotFoundException(orderId);
+			}*/
+			if(orderIds.isEmpty()){
+				//throw new NoOrdersFoundException(clientId,planId);
+				
+				List<PaytermData> datas  = this.orderReadPlatformService.getChargeCodes(planId,null);
+				if(datas.size()==0){
+					throw new BillingOrderNoRecordsFoundException(planId);
+				}
+				List<Long> oldOrderIds = this.orderReadPlatformService.retrieveOrderActiveAndDisconnectionIds(clientId, oldplanId);
+				if(oldOrderIds.isEmpty()){
+					throw new NoOrdersFoundException(clientId,oldplanId);
+				}
+				List<Long> isEventActionsAvailabel = this.orderReadPlatformService.getEventActionsData(clientId, oldOrderIds.get(0).longValue());
+				if(!isEventActionsAvailabel.isEmpty()){
+					throw new EventActionsAvailabeForRenewalWithChangePlanFound(clientId, oldOrderIds.get(0).longValue());
+				}
+				Order mainOrder = retrieveOrderById(oldOrderIds.get(0).longValue());
+				final Order order= this.orderRepository.findOneOrderByOrderNO(mainOrder.getOrderNo());
+		        if (order == null) { throw new NoOrdersFoundException(clientId.toString(),oldOrderIds.get(0).longValue()); }
+		        
+				LocalDate date = new LocalDate(order.getEndDate()).plusDays(1);
+				DateTimeFormatter formatter = DateTimeFormat.forPattern("dd MMMM yyyy");
+				
+				JSONObject jsonObject = new JSONObject();
+	    	  	jsonObject.put("billAlign","false");
+	    	  	jsonObject.put("autoRenew","false");
+	    	  	jsonObject.put("contractPeriod",contract.getId());
+	    	  	jsonObject.put("dateFormat","dd MMMM yyyy");
+	    	  	jsonObject.put("locale","en");
+	    	  	jsonObject.put("isNewPlan","false");
+	    	  	if(isPrepaid.equalsIgnoreCase("prepaid")){
+	    	  		boolean flag = false;
+	    	  	for(PaytermData data : datas){
+					if(data.getDuration().equalsIgnoreCase(contractPeriod)){
+						jsonObject.put("paytermCode",data.getPaytermtype());
+						flag = true;
+					}
+				}
+	    	  	if(!flag){
+	    	  		throw new NoDurationFound(contractPeriod);
+	    	  	}
+	    	  	}
+	    	  	jsonObject.put("planCode",planId);
+	    	  	jsonObject.put("start_date",formatter.print(date));
+	    	  	jsonObject.put("disconnectionDate",formatter.print(date));
+	    	  	jsonObject.put("disconnectReason","Not Interested");
+	    	  	jsonObject.put("actionType","changeorder");
+	    	  	jsonObject.put("orderId",oldOrderIds.get(0).longValue());
+	    	  	final JsonElement element = fromJsonHelper.parse(jsonObject.toString());
+				JsonCommand changeCommandCommand = new JsonCommand(null,jsonObject.toString(), element, fromJsonHelper,
+						null, null, null, null, null, null, null, null, null, null, 
+						null, null);
+				result = scheduleOrderCreation(clientId, changeCommandCommand);
+				
+			}else{
+				
+				List<SubscriptionData> subscriptionDatas = this.planReadPlatformService.retrieveSubscriptionData(orderIds.get(0), isPrepaid);
+				if(subscriptionDatas.isEmpty()){
+					throw new PriceNotFoundException(orderIds.get(0),clientId);
+				}
+				List<Long> isEventActionsAvailabel = this.orderReadPlatformService.getEventActionsData(clientId, orderIds.get(0));
+				if(!isEventActionsAvailabel.isEmpty()){
+					throw new EventActionsAvailabeForRenewalWithChangePlanFound(clientId, orderIds.get(0));
+				}
+				Long priceId = Long.valueOf(0);
+				
+				if(planData.getIsPrepaid() == 'Y'){
+				  for(SubscriptionData subscriptionData : subscriptionDatas){
+					if(subscriptionData.getContractdata().equalsIgnoreCase(contractPeriod)){
 						priceId = subscriptionData.getPriceId();
 						break;
 					}
@@ -1409,9 +1498,11 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			final JsonElement element = fromJsonHelper.parse(renewalJson.toString());
 			JsonCommand renewalCommand = new JsonCommand(null, renewalJson.toString(), element, fromJsonHelper, null,
 					null, null, null, null, null, null, null, null, null, null,null);
-
-			return this.renewalClientOrder(renewalCommand, orderIds.get(0));
-		} catch (DataIntegrityViolationException dve) {
+	
+			 result = this.renewalClientOrder(renewalCommand,orderIds.get(0));
+			}
+			return result;
+		  }catch(DataIntegrityViolationException dve){
 			handleCodeDataIntegrityIssues(command, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		} catch (JSONException e) {
