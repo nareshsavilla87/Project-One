@@ -10,7 +10,7 @@ public interface HardwareAssociationReadplatformService {
 
 	//List<HardwareAssociationData> retrieveClientHardwareDetails(Long clientId);
 	
-	List<AssociationData> retrieveClientAssociationDetails(Long clientId, String serialNumber);
+	List<AssociationData> retrieveClientAssociationDetailsForProperty(Long clientId, String serialNumber);
 
 	List<HardwareAssociationData> retrieveClientAllocatedPlan(Long clientId, String itemCode);
 

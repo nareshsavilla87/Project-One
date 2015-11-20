@@ -4,8 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.List;
 
 import org.mifosplatform.crm.ticketmaster.command.TicketMasterCommand;
+import org.mifosplatform.crm.ticketmaster.data.TicketMasterData;
 import org.mifosplatform.crm.ticketmaster.domain.TicketDetail;
 import org.mifosplatform.crm.ticketmaster.domain.TicketDetailsRepository;
 import org.mifosplatform.crm.ticketmaster.domain.TicketMaster;
@@ -21,6 +23,7 @@ import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentMan
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.order.service.OrderWritePlatformService;
 import org.mifosplatform.useradministration.domain.AppUser;
+import org.mifosplatform.useradministration.domain.AppUserRepository;
 import org.mifosplatform.workflow.eventaction.service.EventActionConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -28,6 +31,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.mifosplatform.crm.ticketmaster.data.UsersData;
 
 @Service
 public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePlatformService{
@@ -39,12 +43,14 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 	private TicketMasterRepository ticketMasterRepository;
 	private TicketDetailsRepository detailsRepository;
 	private final OrderWritePlatformService orderWritePlatformService;
+	private final AppUserRepository appUserRepository;
+
 	
 	@Autowired
 	public TicketMasterWritePlatformServiceImpl(final PlatformSecurityContext context,
 			final TicketMasterRepository repository,final TicketDetailsRepository ticketDetailsRepository, 
 			final TicketMasterFromApiJsonDeserializer fromApiJsonDeserializer,final TicketMasterRepository ticketMasterRepository,
-			TicketDetailsRepository detailsRepository,final OrderWritePlatformService orderWritePlatformService) {
+			TicketDetailsRepository detailsRepository,final OrderWritePlatformService orderWritePlatformService	,AppUserRepository appUserRepository) {
 		
 		this.context = context;
 		this.repository = repository;
@@ -53,6 +59,8 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 		this.ticketMasterRepository = ticketMasterRepository;
 		this.detailsRepository = detailsRepository;
 		this.orderWritePlatformService = orderWritePlatformService;
+		this. appUserRepository = appUserRepository;
+		
 	}
 
 	private void handleDataIntegrityIssues(final TicketMasterCommand command,
@@ -63,11 +71,11 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 	@Override
 	public Long upDateTicketDetails(TicketMasterCommand ticketMasterCommand,
 			DocumentCommand documentCommand, Long ticketId, InputStream inputStream, String ticketURL) {
-		
+			
 	 	try {
 		 String fileUploadLocation = FileUtils.generateFileParentDirectory(documentCommand.getParentEntityType(),
                  documentCommand.getParentEntityId());
-
+        
          /** Recursively create the directory if it does not exist **/
          if (!new File(fileUploadLocation).isDirectory()) {
              new File(fileUploadLocation).mkdirs();
@@ -77,14 +85,20 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
           fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, documentCommand.getFileName());
          }
          Long createdbyId = context.authenticatedUser().getId();
-         
-         TicketDetail detail = new TicketDetail(ticketId,ticketMasterCommand.getComments(),fileLocation,ticketMasterCommand.getAssignedTo(),createdbyId);
+         TicketDetail ticket = this.ticketDetailsRepository.findOne(ticketId);
+         String assignFrom=null;
+        AppUser user =this.appUserRepository.findOne(ticket.getAssignedTo());
+        if(user.getUsername().equalsIgnoreCase(ticket.getAssignFrom())) {
+        	assignFrom = ticket.getAssignFrom();
+        }else{
+        	assignFrom = user.getUsername();
+        }
+		TicketDetail detail = new TicketDetail(ticketId,ticketMasterCommand.getComments(),fileLocation,ticketMasterCommand.getAssignedTo(),createdbyId,assignFrom);
          /*TicketMaster master = new TicketMaster(ticketMasterCommand.getStatusCode(), ticketMasterCommand.getAssignedTo());*/
          TicketMaster ticketMaster = this.ticketMasterRepository.findOne(ticketId);
          ticketMaster.updateTicket(ticketMasterCommand);
          this.ticketMasterRepository.save(ticketMaster);
-         this.ticketDetailsRepository.save(detail);
-          
+        	 this.ticketDetailsRepository.save(detail);
   		this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_EDIT_TICKET, ticketMaster.getClientId(), ticketMaster.getId().toString(), ticketURL);
   		this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, ticketMaster.getClientId(), ticketMaster.getId().toString(), "UPDATE TICKET");
 		
