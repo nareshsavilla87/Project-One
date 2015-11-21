@@ -12,9 +12,7 @@ import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRul
  */
 public class PriceNotFoundException extends AbstractPlatformDomainRuleException {
 
-    /**
-	 * 
-	 */
+
 	private static final long serialVersionUID = 1L;
 
 	public PriceNotFoundException(final String name) {

@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.LocalDate;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMasterRepository;
@@ -54,7 +56,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 	
 }
 
-	public Order assembleOrderDetails(JsonCommand command, Long clientId, Plan plan) {
+	public Order assembleOrderDetails(JsonCommand command, Long clientId, Plan plan) throws JSONException {
 		
 		List<OrderLine> serviceDetails = new ArrayList<OrderLine>();
 		List<OrderPrice> orderprice = new ArrayList<OrderPrice>();
@@ -91,15 +93,30 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 					 UserActionStatusTypeEnum.ACTIVATION.toString(),plan.isPrepaid(),order.isAutoRenewal());
 			
 
-	Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
-
-			
+	        Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BILLING_CYCLE);
+			/*
 			if(configuration != null && plan.isPrepaid() == 'N'){
 				order.setBillingAlign(configuration.isEnabled()?'Y':'N');
 				if(configuration.isEnabled() && endDate != null){
 				order.setEndDate(endDate.dayOfMonth().withMaximumValue());
 				}
+			}*/
+
+		  if (configuration != null && configuration.isEnabled() && plan.isPrepaid() == 'N') {
+
+			JSONObject configValue = new JSONObject(configuration.getValue());
+			if (endDate != null && configValue.getBoolean("fixed")) {
+				order.setBillingAlign('Y');
+				order.setEndDate(endDate.dayOfMonth().withMaximumValue());
+			} else if (endDate == null && configValue.getBoolean("perpetual")) {
+				order.setBillingAlign('Y');
+			} else {
+				order.setBillingAlign('N');
 			}
+		  } else {
+			order.setBillingAlign('N');
+		}
+			
 			BigDecimal priceforHistory=BigDecimal.ZERO;
 
 			for (PriceData data : datas) {

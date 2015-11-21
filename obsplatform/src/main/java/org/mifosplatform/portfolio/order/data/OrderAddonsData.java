@@ -9,46 +9,37 @@ import org.mifosplatform.portfolio.contract.data.SubscriptionData;
 
 public class OrderAddonsData {
 	
-	private final Long id;
-	private final Long serviceId;
-	private final String serviceCode;
-	private final String status;
-	private final LocalDate startDate;
-	private final LocalDate endDate;
-	private final BigDecimal price;
-	private final List<AddonsPriceData> addonsPriceDatas;
-	private final List<SubscriptionData> contractPeriods;
+	private Long id;
+	private Long serviceId;
+	private String serviceCode;
+	private String status;
+	private LocalDate startDate;
+	private LocalDate endDate;
+	private BigDecimal price;
+	private List<AddonsPriceData> addonsPriceDatas;
+	private List<SubscriptionData> contractPeriods;
 	private LocalDate date;
+	private String addOnSerialNo;
 
 	public OrderAddonsData(List<AddonsPriceData> addonsPriceDatas,List<SubscriptionData> contractPeriods) {
-		
-		this.addonsPriceDatas=addonsPriceDatas;
-		this.contractPeriods=contractPeriods;
-		this.id=null;
-		this.serviceId=null;
-		this.serviceCode=null;
-		this.startDate=null;
-		this.endDate=null;
-		this.status=null;
-		this.price=null;
+
+		this.addonsPriceDatas = addonsPriceDatas;
+		this.contractPeriods = contractPeriods;
+
 	}
 
-	public OrderAddonsData(Long id, Long serviceId, String serviceCode,LocalDate startDate, LocalDate endDate, String status,
-			        BigDecimal price) {
-											
-		   this.id=id;
-		   this.serviceId=serviceId;
-		   this.serviceCode=serviceCode;
-		   this.startDate=startDate;
-		   this.endDate=endDate;
-		   this.status=status;
-		   this.price=price;
-		   this.addonsPriceDatas=null;
-		   this.contractPeriods=null;
-		   
-		   
-		   
-		   
+	public OrderAddonsData(Long id, Long serviceId, String serviceCode,LocalDate startDate,
+                   LocalDate endDate, String status,BigDecimal price,String addOnSerialNo) {
+
+		this.id = id;
+		this.serviceId = serviceId;
+		this.serviceCode = serviceCode;
+		this.startDate = startDate;
+		this.endDate = endDate;
+		this.status = status;
+		this.price = price;
+		this.addOnSerialNo = addOnSerialNo;
+
 	}
 
 	public Long getId() {
@@ -94,7 +85,10 @@ public class OrderAddonsData {
 	public void setDate(LocalDate date) {
 		this.date = date;
 	}
-	
+
+	public String getAddOnSerialNo() {
+		return addOnSerialNo;
+	}
 	
 
 }

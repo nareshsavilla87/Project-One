@@ -87,6 +87,7 @@ public class AssociationData {
 		this.allocationType = allocationType;
 		this.propertyCode = propertyCode;
 		this.orderId = orderId;
+		this.itemId = orderId;
 
 	}
 

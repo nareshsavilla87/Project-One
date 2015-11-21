@@ -23,7 +23,7 @@ public interface HardwareAssociationReadplatformService {
 
 	List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long clientId);
 	
-	List<AssociationData> retrieveCustomerHardwareAllocationData(Long clientId);
+	List<AssociationData> retrieveCustomerHardwareAllocationData(Long clientId,Long orderId,Long itemId);
 
 	List<AllocationDetailsData> retrieveClientAllocatedPlanByServiceMap(Long clientId, Long itemId);
 	

@@ -29,25 +29,32 @@ public OrderAddOnsReadPlaformServiceImpl(final PlatformSecurityContext context,f
 	this.context=context;
 }
 
-	
+	@Override
+	public List<OrderAddonsData> retrieveAllOrderAddons(Long orderId) {
 
-@Override
-public List<OrderAddonsData> retrieveAllOrderAddons(Long orderId) {
+		try {
+			this.context.authenticatedUser();
+			final OrderAddonMapper mapper = new OrderAddonMapper(this, orderId);
+			final String sql = "select " + mapper.schema();
 
-	try{
-		this.context.authenticatedUser();
-		final OrderAddonMapper mapper =new OrderAddonMapper(); 
-		final String sql="select "+mapper.schema();
-		
-		return this.jdbcTemplate.query(sql, mapper,new Object[]{orderId});
-		
-	}catch(EmptyResultDataAccessException dve){
-		return null;
-	}
-		
+			return this.jdbcTemplate.query(sql, mapper,new Object[] { orderId });
+
+		} catch (EmptyResultDataAccessException dve) {
+			return null;
+		}
+
 	}
 
-private class OrderAddonMapper implements RowMapper<OrderAddonsData>{
+	private class OrderAddonMapper implements RowMapper<OrderAddonsData> {
+
+		private final OrderAddOnsReadPlaformServiceImpl orderAddOnsReadPlaformServiceImpl;
+		private final Long orderId;
+
+		public OrderAddonMapper(OrderAddOnsReadPlaformServiceImpl orderAddOnsReadPlaformServiceImpl,Long orderId) {
+
+			this.orderAddOnsReadPlaformServiceImpl = orderAddOnsReadPlaformServiceImpl;
+			this.orderId = orderId;
+		}
 
 	public String schema() {
 	
@@ -66,11 +73,24 @@ private class OrderAddonMapper implements RowMapper<OrderAddonsData>{
 		final LocalDate endDate=JdbcSupport.getLocalDate(rs,"endDate");
 		final String statu=rs.getString("status");
 		final BigDecimal price=rs.getBigDecimal("price");
-		return new OrderAddonsData(id,serviceId,serviceCode,startDate,endDate,statu,price);
-	}
+		final String addOnSerialNo = this.orderAddOnsReadPlaformServiceImpl.retriveAddOnPairedSerialNumberData(orderId,serviceId);
 
-	
+		return new OrderAddonsData(id,serviceId,serviceCode,startDate,endDate,statu,price,addOnSerialNo);
+	}
 }
+
+	public String retriveAddOnPairedSerialNumberData(final Long orderId,final Long serviceId) {
+
+		try {
+			final String sql = "select hw_serial_no as serialNo from b_association where order_id= ? and service_id = ? and is_deleted='N'";
+
+			return this.jdbcTemplate.queryForObject(sql, String.class,new Object[] { orderId, serviceId });
+		} catch (EmptyResultDataAccessException dve) {
+			final String sql = "select hw_serial_no as serialNo from b_association where order_id= ? and is_deleted='N' limit 1";
+
+			return this.jdbcTemplate.queryForObject(sql, String.class,new Object[] { orderId });
+		}
+	}
 
 }
 
