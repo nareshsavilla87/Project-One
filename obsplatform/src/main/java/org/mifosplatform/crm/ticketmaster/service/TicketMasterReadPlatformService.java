@@ -6,6 +6,7 @@ import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.crm.ticketmaster.data.ClientTicketData;
 import org.mifosplatform.crm.ticketmaster.data.TicketMasterData;
 import org.mifosplatform.crm.ticketmaster.data.UsersData;
+import org.mifosplatform.crm.ticketmaster.domain.TicketDetail;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.service.Page;
 
@@ -19,10 +20,12 @@ public interface TicketMasterReadPlatformService {
 
 	List<EnumOptionData> retrievePriorityData();
 
-	List<TicketMasterData> retrieveClientTicketHistory(Long ticketId);
+	List<TicketMasterData> retrieveClientTicketHistory(Long ticketId, String historyParam);
 
 	TicketMasterData retrieveTicket(Long clientId, Long ticketId);
 	
 	Page<ClientTicketData> retrieveAssignedTicketsForNewClient(SearchSqlQuery searchTicketMaster, String statusType);
+
+	TicketDetail retrieveTicketDetail(Long ticketId);
 	
 }

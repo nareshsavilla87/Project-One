@@ -70,7 +70,7 @@ public class TicketDetail {
     
 		this.ticketId = ticketId;
         if(comments==""||comments=="undefined"||comments==null){
-        	   this.comments = null;
+        	   this.comments = "undefined";
         }else{        
         	this.comments = comments;
         	}
@@ -79,6 +79,13 @@ public class TicketDetail {
         this.createdDate = DateUtils.getLocalDateOfTenant().toDate();
         this.createdbyId = createdbyId;	
         this.assignFrom = assignFrom;
+	}
+
+	public TicketDetail(Long id, Long assignedTo, String assignFrom) {
+		
+		this.id=id;
+		this.assignedTo = assignedTo;
+		this.assignFrom = assignFrom;
 	}
 
 	public Long getId() {
@@ -126,10 +133,5 @@ public class TicketDetail {
 		this.assignFrom = assignFrom;
 	}
 
-	public TicketDetail() {
-		
-	}
-	
-	
 	
 }

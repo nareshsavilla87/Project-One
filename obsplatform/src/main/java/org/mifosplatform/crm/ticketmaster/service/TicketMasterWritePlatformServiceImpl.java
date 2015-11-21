@@ -44,13 +44,15 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 	private TicketDetailsRepository detailsRepository;
 	private final OrderWritePlatformService orderWritePlatformService;
 	private final AppUserRepository appUserRepository;
+	private final TicketMasterReadPlatformService ticketMasterReadPlatformService ;
 
 	
 	@Autowired
 	public TicketMasterWritePlatformServiceImpl(final PlatformSecurityContext context,
 			final TicketMasterRepository repository,final TicketDetailsRepository ticketDetailsRepository, 
 			final TicketMasterFromApiJsonDeserializer fromApiJsonDeserializer,final TicketMasterRepository ticketMasterRepository,
-			TicketDetailsRepository detailsRepository,final OrderWritePlatformService orderWritePlatformService	,AppUserRepository appUserRepository) {
+			TicketDetailsRepository detailsRepository,final OrderWritePlatformService orderWritePlatformService	,AppUserRepository appUserRepository,
+			TicketMasterReadPlatformService ticketMasterReadPlatformService) {
 		
 		this.context = context;
 		this.repository = repository;
@@ -60,6 +62,7 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 		this.detailsRepository = detailsRepository;
 		this.orderWritePlatformService = orderWritePlatformService;
 		this. appUserRepository = appUserRepository;
+		this.ticketMasterReadPlatformService=ticketMasterReadPlatformService;
 		
 	}
 
@@ -85,11 +88,11 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
           fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, documentCommand.getFileName());
          }
          Long createdbyId = context.authenticatedUser().getId();
-         TicketDetail ticket = this.ticketDetailsRepository.findOne(ticketId);
+         TicketDetail ticket = this.ticketMasterReadPlatformService.retrieveTicketDetail(ticketId);
          String assignFrom=null;
         AppUser user =this.appUserRepository.findOne(ticket.getAssignedTo());
         if(user.getUsername().equalsIgnoreCase(ticket.getAssignFrom())) {
-        	assignFrom = ticket.getAssignFrom();
+        	assignFrom =ticket.getAssignFrom();
         }else{
         	assignFrom = user.getUsername();
         }
