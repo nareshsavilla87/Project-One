@@ -327,11 +327,11 @@ public class TicketMasterApiResource {
 	    @Path("{ticketId}/history")
 	    @Consumes({MediaType.APPLICATION_JSON})
 	    @Produces({MediaType.APPLICATION_JSON})
-	    public String ticketHistory(@PathParam("ticketId") final Long ticketId, @Context final UriInfo uriInfo) {
+	    public String ticketHistory(@PathParam("ticketId") final Long ticketId, @QueryParam("historyParam") String historyParam,@Context final UriInfo uriInfo) {
 			
 			context.authenticatedUser().validateHasReadPermission(resourceNameForPermission);
 			final String description = this.ticketMasterWritePlatformService.retrieveTicketProblems(ticketId);
-	        final List<TicketMasterData> data = this.ticketMasterReadPlatformService.retrieveClientTicketHistory(ticketId);
+	        final List<TicketMasterData> data = this.ticketMasterReadPlatformService.retrieveClientTicketHistory(ticketId, historyParam);
 	        
 	        final TicketMasterData masterData = new TicketMasterData(description,data);
              

@@ -14,6 +14,7 @@ import org.mifosplatform.crm.ticketmaster.data.TicketMasterData;
 import org.mifosplatform.crm.ticketmaster.data.UsersData;
 import org.mifosplatform.crm.ticketmaster.domain.PriorityType;
 import org.mifosplatform.crm.ticketmaster.domain.PriorityTypeEnum;
+import org.mifosplatform.crm.ticketmaster.domain.TicketDetail;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.domain.JdbcSupport;
 import org.mifosplatform.infrastructure.core.service.Page;
@@ -198,12 +199,19 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 	}
 
 	@Override
-	public List<TicketMasterData> retrieveClientTicketHistory(final Long ticketId) {
-		
+	public List<TicketMasterData> retrieveClientTicketHistory(final Long ticketId, final String historyParam) {
 		context.authenticatedUser();
+		if("comment".equalsIgnoreCase(historyParam)){
 		final TicketDataMapper mapper = new TicketDataMapper();
-		String sql = "select " + mapper.schema() + " where t.ticket_id=tm.id and t.ticket_id=? and t.comments is not null order by t.id DESC";
+		String undefined ="undefined";
+		String sql = "select " + mapper.schema() + " where t.ticket_id=tm.id and t.ticket_id=? and t.comments is not null " +
+				"and t.comments Not like '"+undefined+"' order by t.id DESC";
 		return this.jdbcTemplate.query(sql, mapper, new Object[] { ticketId});
+		}else{
+			final TicketDataMapper mapper = new TicketDataMapper();
+			String sql = "select " + mapper.schema() + " where t.ticket_id=tm.id and t.ticket_id=?   order by t.id DESC";
+			return this.jdbcTemplate.query(sql, mapper, new Object[] { ticketId});
+		}
 	}
 	
 	private static final class TicketDataMapper implements
@@ -291,6 +299,38 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 			} catch (EmptyResultDataAccessException e) {
 					return null;
 			}
+	}
+	
+	@Override
+	public TicketDetail retrieveTicketDetail(final Long ticketId){
+		
+
+		try {
+				final TicketDetailMapper mapper = new TicketDetailMapper();
+				final String sql = "select " + mapper.ticketdetailSchema() + " where td.id=(select max(t.id) as id from b_ticket_details t where t.ticket_id=?)";
+				return jdbcTemplate.queryForObject(sql, mapper, new Object[] {ticketId});
+			} catch (EmptyResultDataAccessException e) {
+					return null;
+			}
+
+	}
+	
+	private static final class TicketDetailMapper implements RowMapper<TicketDetail> {
+
+		public String ticketdetailSchema() {
+				
+		return "max(td.id) as id, td.Assign_from as assignFrom, td.assigned_to as assignedTo from b_ticket_details td"; 
+		}
+
+		@Override
+		public TicketDetail mapRow(final ResultSet resultSet, final int rowNum) throws SQLException {
+
+			final Long id = resultSet.getLong("id");
+			final String assignfrom = resultSet.getString("assignFrom");
+			final Long assignedTo = resultSet.getLong("assignedTo");
+			
+			return new TicketDetail(id,  assignedTo,assignfrom);
+		}
 	}
 	
 }
