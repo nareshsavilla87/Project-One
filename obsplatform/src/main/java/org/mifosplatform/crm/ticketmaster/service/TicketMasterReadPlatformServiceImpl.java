@@ -204,7 +204,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 		if("comment".equalsIgnoreCase(historyParam)){
 		final TicketDataMapper mapper = new TicketDataMapper();
 		String undefined ="undefined";
-		String sql = "select " + mapper.schema() + " where t.ticket_id=tm.id and t.ticket_id=? and t.comments is not null and t.comments " +
+		String sql = "select " + mapper.schema() + " where t.ticket_id=tm.id and t.ticket_id=? and t.comments is not null " +
 				"and t.comments Not like '"+undefined+"' order by t.id DESC";
 		return this.jdbcTemplate.query(sql, mapper, new Object[] { ticketId});
 		}else{
