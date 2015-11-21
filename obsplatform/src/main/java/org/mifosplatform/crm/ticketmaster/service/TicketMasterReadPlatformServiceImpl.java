@@ -104,6 +104,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 	    	extraCriteria =" and tckt.status='"+statusType+"'";
 	    }
 	    sqlBuilder.append(extraCriteria);
+	    sqlBuilder.append(" order by tckt.id desc ");
 	    
         if (searchTicketMaster.isLimited()) {
             sqlBuilder.append(" limit ").append(searchTicketMaster.getLimit());
@@ -139,7 +140,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 		return "tckt.id as id, tckt.priority as priority, tckt.ticket_date as ticketDate, tckt.assigned_to as userId,tckt.source_of_ticket as sourceOfTicket, "
 					+" tckt.problem_code as problemCode, tckt.status_code as statusCode, tckt.due_date as dueDate," +
 					"(SELECT code_value FROM m_code_value mcv WHERE  tckt.status_code = mcv.id) AS ticketstatus," +
-					" tckt.description as description,tckt.resolution_description as resolutionDescription, "
+					" tckt.issue as issue,tckt.description as description, "
 			        + " (select code_value from m_code_value mcv where tckt.problem_code=mcv.id)as problemDescription," 
 					+ " tckt.status as status, "
 			        + " (select m_appuser.username from m_appuser "
@@ -164,14 +165,14 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 			final int userId = new Integer(usersId);
 			final String sourceOfTicket = resultSet.getString("sourceOfTicket");
 			final Date dueDate = resultSet.getTimestamp("dueDate");
+			final String issue = resultSet.getString("issue");
 			final String description = resultSet.getString("description");
-			final String resolutionDescription = resultSet.getString("resolutionDescription");
 			final String ticketstatus = resultSet.getString("ticketstatus");
 			final Integer problemCode = resultSet.getInt("problemCode");
 			final Integer statusCode = resultSet.getInt("statusCode");
 			
 			return new TicketMasterData(id, priority, status, userId, ticketDate, LastComment, problemDescription, assignedTo, sourceOfTicket,
-					dueDate, description, resolutionDescription, problemCode, statusCode,ticketstatus);
+					dueDate, description, issue, problemCode, statusCode,ticketstatus);
 		}
 	}
 
@@ -201,7 +202,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 		
 		context.authenticatedUser();
 		final TicketDataMapper mapper = new TicketDataMapper();
-		String sql = "select " + mapper.schema() + " where t.ticket_id=tm.id and t.ticket_id=? order by t.id DESC";
+		String sql = "select " + mapper.schema() + " where t.ticket_id=tm.id and t.ticket_id=? and t.comments is not null order by t.id DESC";
 		return this.jdbcTemplate.query(sql, mapper, new Object[] { ticketId});
 	}
 	
@@ -209,8 +210,8 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 					RowMapper<TicketMasterData> {
 
 		public String schema() {
-				return " t.id AS id,t.created_date AS createDate,user.username AS assignedTo,t.comments as description," +
-						" t.attachments AS attachments  FROM b_ticket_master tm , b_ticket_details t  "
+				return " t.id AS id,t.created_date AS createDate,user.username AS assignedTo,t.comments as description, t.assign_from as assignFrom, " +
+						" t.attachments AS attachments, tm.status as status  FROM b_ticket_master tm , b_ticket_details t  "
 						+" inner join m_appuser user on user.id = t.assigned_to ";
 
 		}
@@ -224,12 +225,14 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 			final String assignedTo = resultSet.getString("assignedTo");
 			final String description = resultSet.getString("description");
 			final String attachments = resultSet.getString("attachments");
+			final String assignFrom = resultSet.getString("assignFrom");
+			final String status =resultSet.getString("status");
 			String fileName=null;
 			if(attachments!=null){
 				File file=new File(attachments);
 				fileName=file.getName();
 			}
-			final TicketMasterData data = new TicketMasterData(id, createdDate, assignedTo, description, fileName);
+			final TicketMasterData data = new TicketMasterData(id, createdDate, assignedTo, description, fileName,assignFrom,status);
 
 			return data;
 		}
@@ -241,10 +244,9 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 		public String userTicketSchema() {
 					
 			return " SQL_CALC_FOUND_ROWS tckt.id AS id,tckt.client_id AS clientId,mct.display_name as clientName,tckt.priority AS priority,"+
-							"tckt.status AS status,tckt.ticket_date AS ticketDate,"+
+							"tckt.status AS status,tckt.ticket_date AS ticketDate,tckt.description as shortdescription,"+
 							"(SELECT user.username FROM m_appuser user WHERE tckt.createdby_id = user.id) AS created_user,"+
 							"tckt.assigned_to AS userId,"+
-							"(SELECT comments FROM b_ticket_details x WHERE tckt.id = x.ticket_id AND x.id = (SELECT max(id) FROM b_ticket_details y WHERE tckt.id = y.ticket_id)) AS LastComment,"+
 							"(SELECT mcv.code_value FROM m_code_value mcv WHERE mcv.id = tckt.problem_code) AS problemDescription,"+
 							"(SELECT user.username FROM m_appuser user WHERE tckt.assigned_to = user.id) AS assignedTo,"+
 							"CONCAT(TIMESTAMPDIFF(day, tckt.ticket_date, Now()), ' d ', MOD(TIMESTAMPDIFF(hour, tckt.ticket_date, Now()), 24), ' hr ',"+
@@ -263,7 +265,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 			final String status = resultSet.getString("status");
 			final Long userId = resultSet.getLong("userId");
 			final LocalDate ticketDate = JdbcSupport.getLocalDate(resultSet, "ticketDate");
-			final String lastComment = resultSet.getString("LastComment");
+			final String shortdescription = resultSet.getString("shortdescription");
 			final String problemDescription = resultSet.getString("problemDescription");
 			final String assignedTo = resultSet.getString("assignedTo");
 			final Long clientId = resultSet.getLong("clientId");
@@ -272,7 +274,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 			final String createUser = resultSet.getString("created_user");
 			final String closedByuser = resultSet.getString("closedby_user");
 					
-			return new ClientTicketData(id, priority, status, userId, ticketDate, lastComment, problemDescription,
+			return new ClientTicketData(id, priority, status, userId, ticketDate, shortdescription, problemDescription,
 					assignedTo, clientId, timeElapsed, clientName, createUser, closedByuser);
 		}
 				

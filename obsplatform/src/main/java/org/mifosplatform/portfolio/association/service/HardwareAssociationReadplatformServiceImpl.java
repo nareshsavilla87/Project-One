@@ -370,6 +370,7 @@ public List<HardwareAssociationData> retrieveClientAllocatedHardwareDetails(Long
 				}
 			}
 
+
 	@Override
 	public List<AssociationData> retrieveClientAssociationDetails(Long clientId, String serialNumber) {
 

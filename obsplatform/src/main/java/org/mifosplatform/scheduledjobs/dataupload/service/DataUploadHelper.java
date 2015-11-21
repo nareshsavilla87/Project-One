@@ -387,7 +387,7 @@ public class DataUploadHelper {
 					} 
 				}
 
-				final Collection<PropertyDefinationData> unitCodesList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_UNIT,currentLineData[2].trim());
+				final Collection<PropertyDefinationData> unitCodesList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_UNIT,currentLineData[2].trim(),null);
 				if (!unitCodesList.isEmpty()) {
 					for (PropertyDefinationData unitData : unitCodesList) {
 						if (unitData.getCode().equalsIgnoreCase(currentLineData[2].toString().trim())) {
@@ -396,7 +396,7 @@ public class DataUploadHelper {
 						}
 					}
 
-					final Collection<PropertyDefinationData> floorList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_FLOOR,currentLineData[3].trim());
+					final Collection<PropertyDefinationData> floorList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_FLOOR,currentLineData[3].trim(),null);
 					if (!floorList.isEmpty()) {
 						for (PropertyDefinationData floorData : floorList) {
 							if (floorData.getCode().equalsIgnoreCase(currentLineData[3].toString().trim())) {
@@ -405,7 +405,7 @@ public class DataUploadHelper {
 							}
 						}
 
-						final Collection<PropertyDefinationData> buildingCodeList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_BUILDING,currentLineData[4].trim());
+						final Collection<PropertyDefinationData> buildingCodeList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_BUILDING,currentLineData[4].trim(),null);
 						if (!buildingCodeList.isEmpty()) {
 							for (PropertyDefinationData buildingCode : buildingCodeList) {
 								if (buildingCode.getCode().equalsIgnoreCase(currentLineData[4].toString().trim())) {
@@ -414,7 +414,7 @@ public class DataUploadHelper {
 								}
 							}
 
-							final Collection<PropertyDefinationData> parcelList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_PARCEL,currentLineData[5].trim());
+							final Collection<PropertyDefinationData> parcelList = this.propertyReadPlatformService.retrievPropertyType(CodeNameConstants.CODE_PROPERTY_PARCEL,currentLineData[5].trim(),null);
 							if (!buildingCodeList.isEmpty()) {
 								for (PropertyDefinationData parcel : parcelList) {
 									if (parcel.getCode().equalsIgnoreCase(currentLineData[5].toString().trim())) {

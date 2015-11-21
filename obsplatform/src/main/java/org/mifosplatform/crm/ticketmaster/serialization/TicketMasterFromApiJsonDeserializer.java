@@ -24,7 +24,7 @@ import com.google.gson.reflect.TypeToken;
 public class TicketMasterFromApiJsonDeserializer {
 	
 	private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("priority", "problemCode", "description", "assignedTo", "ticketDate", "ticketTime", "locale", "dateFormat",
-														"sourceOfTicket", "dueTime", "ticketURL","status","resolutionDescription", "fileLocation"));
+														"sourceOfTicket", "dueTime", "ticketURL","status","resolutionDescription", "fileLocation","issue","assignFrom"));
 	private final FromJsonHelper fromApiJsonHelper;
 	
 	@Autowired
@@ -51,12 +51,14 @@ public class TicketMasterFromApiJsonDeserializer {
 	     final String problemCode = fromApiJsonHelper.extractStringNamed("problemCode", element);
 	     final String description = fromApiJsonHelper.extractStringNamed("description", element);
 	     final String assignedTo = fromApiJsonHelper.extractStringNamed("assignedTo", element);
+	     final String status = fromApiJsonHelper.extractStringNamed("status", element);
 	        
 	     baseDataValidator.reset().parameter("problemCode").value(problemCode).notBlank().notExceedingLengthOf(100);
 	     baseDataValidator.reset().parameter("priority").value(priority).notBlank().notExceedingLengthOf(100);
 	     baseDataValidator.reset().parameter("assignedTo").value(assignedTo).notBlank().notExceedingLengthOf(100);
 	     baseDataValidator.reset().parameter("description").value(description).notBlank();
-	        
+	     baseDataValidator.reset().parameter("issue").value(description).notBlank().notExceedingLengthOf(200);
+	     baseDataValidator.reset().parameter("status").value(status).notBlank().notExceedingLengthOf(100);
 	     throwExceptionIfValidationWarningsExist(dataValidationErrors);
 	     
 	 }

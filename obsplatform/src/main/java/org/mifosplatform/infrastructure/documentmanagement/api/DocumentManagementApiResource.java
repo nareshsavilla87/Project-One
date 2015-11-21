@@ -220,7 +220,7 @@ public class DocumentManagementApiResource {
 	public String addTicketDetails(@PathParam("ticketId") Long ticketId,@PathParam("entityType") String entityType, @PathParam("entityId") Long entityId,
             @HeaderParam("Content-Length") Long fileSize, @FormDataParam("file") InputStream inputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetails, @FormDataParam("file") FormDataBodyPart bodyPart,
-            @FormDataParam("comments") String comments, @FormDataParam("status") String status, @FormDataParam("assignedTo") Integer assignedTo,
+            @FormDataParam("comments") String comments, @FormDataParam("status") String status, @FormDataParam("assignedTo") Long assignedTo,
             @FormDataParam("ticketURL") String ticketURL, @FormDataParam("problemCode") Integer problemCode, @FormDataParam("priority") String priority) {
 	   
 

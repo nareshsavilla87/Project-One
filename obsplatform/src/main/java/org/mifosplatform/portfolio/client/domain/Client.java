@@ -184,14 +184,13 @@ public final class Client extends AbstractPersistable<Long> {
 	    ClientStatus status =  ClientStatus.NEW;
 	    final boolean active = true;
        
-
-        
+       
         if (active) {
             status = ClientStatus.NEW;
-            if(activationDate == null){
-         	   activationDate = DateUtils.getLocalDateOfTenant();
-            }
-           
+           if(activationDate == null){
+        	   activationDate = DateUtils.getLocalDateOfTenant();
+           }
+          
         }
 
         return new Client(status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,

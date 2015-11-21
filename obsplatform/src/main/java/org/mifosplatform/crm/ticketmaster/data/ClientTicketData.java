@@ -9,7 +9,7 @@ public class ClientTicketData {
     private final String status;
     private final Long userId;
     private final LocalDate ticketDate;
-    private final String lastComment;
+    private final String shortdescription;
     private final String problemDescription;
     private final String userName;
     private final Long clientId;
@@ -26,7 +26,7 @@ public class ClientTicketData {
 		this.status = status;
 		this.userId = assignedTo;
 		this.ticketDate = ticketDate;
-		this.lastComment = lastComment;
+		this.shortdescription = lastComment;
 		this.problemDescription = problemDescription;
 		this.userName = userName;
 		this.clientId = clientId;
@@ -35,7 +35,7 @@ public class ClientTicketData {
 	
 	}
 	public ClientTicketData(final Long id, final String priority, final String status, final Long assignedTo, final LocalDate ticketDate,
-			final String lastComment, final String problemDescription, final String userName, final Long clientId,
+			final String shortdescription, final String problemDescription, final String userName, final Long clientId,
 			final String timeElapsed, final String clientName, final String createUser, final String closedByuser) {
 	
 		this.id = id;
@@ -43,7 +43,7 @@ public class ClientTicketData {
 		this.status = status;
 		this.userId = assignedTo;
 		this.ticketDate = ticketDate;
-		this.lastComment = lastComment;
+		this.shortdescription = shortdescription;
 		this.problemDescription = problemDescription;
 		this.userName = userName;
 		this.clientId = clientId;
@@ -91,13 +91,7 @@ public class ClientTicketData {
 	/**
 	 * @return the lastComment
 	 */
-	public String getLastComment() {
-		return lastComment;
-	}
-
-	/**
-	 * @return the problemDescription
-	 */
+	
 	public String getProblemDescription() {
 		return problemDescription;
 	}
@@ -138,6 +132,12 @@ public class ClientTicketData {
 	
 	public String getClosedByuser() {
 		return closedByuser;
+	}
+	/**
+	 * @return the shortdescription
+	 */
+	public String getShortdescription() {
+		return shortdescription;
 	}
 
 }

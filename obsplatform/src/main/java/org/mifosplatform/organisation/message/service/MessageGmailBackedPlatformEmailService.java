@@ -135,7 +135,9 @@ public class MessageGmailBackedPlatformEmailService implements MessagePlatformEm
 				message.setFrom(new InternetAddress(authuser));
 				message.addRecipient(Message.RecipientType.TO,new InternetAddress(emailDetail.getMessageTo()));
 				message.setSubject(emailDetail.getSubject());
-
+				if(emailDetail.getSubject().equalsIgnoreCase("Ticket")){
+						message.addRecipient(Message.RecipientType.CC,new InternetAddress(emailDetail.getMessageFrom()));
+				}
 				StringBuilder messageBuilder = new StringBuilder()
 						.append(emailDetail.getHeader())
 						.append(emailDetail.getBody())
