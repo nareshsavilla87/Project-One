@@ -171,7 +171,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 					PlanMapping planMapping = this.planMappingRepository.findOneByPlanId(order.getPlanId());
 					List<OrderLine> orderLineData=order.getServices();
 
-					if ((requestData.getIshardwareReq().equalsIgnoreCase("Y") && detailsData == null) || planMapping == null) {
+					if ((requestData.getIshardwareReq().equalsIgnoreCase("Y") && detailsData.isEmpty()) || planMapping == null) {
 						String status = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
 						if (prepareRequest != null) {
 							prepareRequest.setStatus(status);
@@ -281,7 +281,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 
 								if (detailsData.size() != orderLineData.size() && this.checkServicesProvisionRequired(detailsData,orderLineData) 
 									 && !(UserActionStatusTypeEnum.ADDON_ACTIVATION.toString().equalsIgnoreCase(requestData.getRequestType())
-											|| UserActionStatusTypeEnum.ADDON_DISCONNECTION.toString().equalsIgnoreCase(requestType))) {
+											|| UserActionStatusTypeEnum.ADDON_DISCONNECTION.toString().equalsIgnoreCase(requestType)) || detailsData.isEmpty()) {
 								
 										String status = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
 										if (prepareRequest != null) {

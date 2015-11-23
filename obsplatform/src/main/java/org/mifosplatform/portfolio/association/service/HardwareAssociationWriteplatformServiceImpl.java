@@ -7,6 +7,7 @@ import net.sf.json.JSONObject;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResultBuilder;
+import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.itemdetails.domain.ItemDetails;
@@ -19,6 +20,8 @@ import org.mifosplatform.portfolio.order.domain.Order;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
 import org.mifosplatform.useradministration.domain.AppUser;
 import org.mifosplatform.workflow.eventvalidation.service.EventValidationReadPlatformService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.context.SecurityContext;
@@ -30,7 +33,8 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class HardwareAssociationWriteplatformServiceImpl implements HardwareAssociationWriteplatformService
 {
-
+	private final static Logger LOGGER = LoggerFactory.getLogger(HardwareAssociationWriteplatformServiceImpl.class);
+	
 	private final PlatformSecurityContext context;
 	private final OrderRepository orderRepository;
 	private final HardwareAssociationRepository associationRepository;
@@ -63,6 +67,7 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 
 	        }catch(DataIntegrityViolationException exception){
 	        	exception.printStackTrace();
+	        	
 	        }
 		
 	}
@@ -92,10 +97,6 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
 	}
-
-	private void handleCodeDataIntegrityIssues(JsonCommand command,DataIntegrityViolationException dve) {
-		
-	}
 	
    private Long getUserId() {
 		Long userId=null;
@@ -113,7 +114,6 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 	@Override
 	public CommandProcessingResult updateAssociation(JsonCommand command) {
 		
-		// TODO Auto-generated method stub
 		try {
 			context.authenticatedUser();
 			this.fromApiJsonDeserializer.validateForCreate(command.json());
@@ -135,10 +135,7 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 		
 		try {
 			
-//			AssociationData associationData=this.associationReadplatformService.retrieveSingleDetails(orderId);
-			
 		      HardwareAssociation association=this.associationRepository.findOne(associationId);
-		    
 		      if(association == null){
 					throw new HardwareDetailsNotFoundException(associationId);
 				}
@@ -172,6 +169,14 @@ public class HardwareAssociationWriteplatformServiceImpl implements HardwareAsso
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}
 	
+	}
+	
+	private void handleCodeDataIntegrityIssues(JsonCommand command,DataIntegrityViolationException dve) {
+
+		LOGGER.error(dve.getMessage(), dve);
+		throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue",
+				"Unknown data integrity issue with resource: "+ dve.getCause().getMessage());
+
 	}
 
 }

@@ -18,6 +18,7 @@ import org.mifosplatform.infrastructure.core.api.JsonCommand;
 import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.infrastructure.core.exception.PlatformDataIntegrityException;
 import org.mifosplatform.infrastructure.core.serialization.FromJsonHelper;
+import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.portfolio.allocation.domain.HardwareAssociationRepository;
 import org.mifosplatform.portfolio.association.data.AssociationData;
@@ -296,6 +297,7 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
 							}
 						}
 					}
+					orderAddonPrice.setBillEndDate(DateUtils.getLocalDateOfTenant());
 					orderAddonPrice.delete();
 					this.orderPriceRepository.saveAndFlush(orderAddonPrice);
 					orderAddons.setStatus(StatusTypeEnum.PENDING.toString());

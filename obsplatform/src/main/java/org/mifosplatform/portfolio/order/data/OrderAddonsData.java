@@ -19,6 +19,7 @@ public class OrderAddonsData {
 	private List<AddonsPriceData> addonsPriceDatas;
 	private List<SubscriptionData> contractPeriods;
 	private LocalDate date;
+	private Long associateId;
 	private String addOnSerialNo;
 
 	public OrderAddonsData(List<AddonsPriceData> addonsPriceDatas,List<SubscriptionData> contractPeriods) {
@@ -28,8 +29,8 @@ public class OrderAddonsData {
 
 	}
 
-	public OrderAddonsData(Long id, Long serviceId, String serviceCode,LocalDate startDate,
-                   LocalDate endDate, String status,BigDecimal price,String addOnSerialNo) {
+	public OrderAddonsData(Long id, Long serviceId, String serviceCode,LocalDate startDate,LocalDate endDate, 
+			String status,BigDecimal price,Long associateId,String addOnSerialNo) {
 
 		this.id = id;
 		this.serviceId = serviceId;
@@ -38,6 +39,7 @@ public class OrderAddonsData {
 		this.endDate = endDate;
 		this.status = status;
 		this.price = price;
+		this.associateId = associateId;
 		this.addOnSerialNo = addOnSerialNo;
 
 	}
@@ -84,6 +86,10 @@ public class OrderAddonsData {
 
 	public void setDate(LocalDate date) {
 		this.date = date;
+	}
+	
+	public Long getAssociateId() {
+		return associateId;
 	}
 
 	public String getAddOnSerialNo() {
