@@ -204,7 +204,7 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 			String sql = "";
 			if (itemId != null && orderId != null) {
 				sql = "select " + mapper.orderSchema() + "AND b.item_master_id="+itemId+" AND oa.order_id="+orderId ;
-			}else if(itemId != null) {
+			}else if(itemId != null && orderId == null) {
 				sql = "select " + mapper.schema() + "AND b.item_master_id="+itemId;
 			}else {
 				sql = "select " + mapper.allocationSchema();
