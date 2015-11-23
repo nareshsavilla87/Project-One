@@ -162,7 +162,7 @@ UPDATE c_configuration SET name='align-billing-cycle',value='{\"fixed\":false,\"
 module='Billing', description='If this flag is enable we will perform prorata charges separately to order'
 WHERE name='align-biiling-cycle';
 
-SET @id=(SELECT * FROM m_code WHERE code_name='Transaction Type');
+SET @ID=(SELECT id FROM m_code WHERE code_name='Transaction Type');
 INSERT IGNORE INTO m_code_value VALUES(null, @id,'Registration Fee','4');
 
 
