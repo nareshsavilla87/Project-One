@@ -38,7 +38,7 @@ public class ConfigurationConstants {
 
 	public static final String CONFIG_PROPERTY_SMTP= "smtp";
 	public static final String CONFIG_IS_PROPERTY_MASTER = "is-propertycode-enabled";
-	public static final String CONFIG_ALIGN_BIILING_CYCLE = "align-biiling-cycle";
+	public static final String CONFIG_ALIGN_BILLING_CYCLE = "align-billing-cycle";
 	public static final String CONFIG_PRORATA_WITH_NEXT_BILLING_CYCLE = "prorata-with-next-billing-cycle";
 	public static final String CONFIG_SINGLE_INVOICE_FOR_MULTI_ORDERS = "single-invoice-for-multi-orders";
 

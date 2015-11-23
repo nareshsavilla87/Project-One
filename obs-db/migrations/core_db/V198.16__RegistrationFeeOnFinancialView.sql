@@ -6,7 +6,7 @@ VIEW `fin_trans_vw` AS
         `b_invoice`.`id` AS `transId`,
         `m_appuser`.`username` AS `username`,
         `b_invoice`.`client_id` AS `client_id`,
-        if((`b_charge`.`charge_type` = 'NRC'),
+        if(((`b_charge`.`charge_type` = 'NRC') and (`b_charge`.`priceline_id` = 0)),
             'Once',
             'Periodic') AS `tran_type`,
         cast(`b_invoice`.`invoice_date` as date) AS `transDate`,
@@ -158,6 +158,8 @@ VIEW `fin_trans_vw` AS
             and (`bdr`.`transaction_date` <= now()))
     order by 1 , 2;
 
-
+UPDATE c_configuration SET name='align-billing-cycle',value='{\"fixed\":false,\"perpetual\":true}',
+module='Billing', description='If this flag is enable we will perform prorata charges separately to order'
+WHERE name='align-biiling-cycle';
 
 

@@ -29,31 +29,32 @@ public OrderAddOnsReadPlaformServiceImpl(final PlatformSecurityContext context,f
 	this.context=context;
 }
 
-	
+	@Override
+	public List<OrderAddonsData> retrieveAllOrderAddons(Long orderId) {
 
-@Override
-public List<OrderAddonsData> retrieveAllOrderAddons(Long orderId) {
+		try {
+			this.context.authenticatedUser();
+			final OrderAddonMapper mapper = new OrderAddonMapper();
+			final String sql = "select " + mapper.schema();
 
-	try{
-		this.context.authenticatedUser();
-		final OrderAddonMapper mapper =new OrderAddonMapper(); 
-		final String sql="select "+mapper.schema();
-		
-		return this.jdbcTemplate.query(sql, mapper,new Object[]{orderId});
-		
-	}catch(EmptyResultDataAccessException dve){
-		return null;
-	}
-		
+			return this.jdbcTemplate.query(sql, mapper,new Object[] { orderId });
+
+		} catch (EmptyResultDataAccessException dve) {
+			return null;
+		}
+
 	}
 
-private class OrderAddonMapper implements RowMapper<OrderAddonsData>{
+	private class OrderAddonMapper implements RowMapper<OrderAddonsData> {
 
 	public String schema() {
 	
 		return " ad.id as id,ad.service_id as serviceId,s.service_code as serviceCode,ad.start_date as startDate, ad.end_date as endDate," +
-				" ad.status as status,op.price as price FROM b_orders_addons ad, b_service s, b_order_price op " +
-				" WHERE ad.service_id =s.id and op.service_id = s.id and ad.order_id=op.order_id and ad.order_id =? and ad.is_deleted = 'N' group by ad.id;";
+				" ad.status as status,op.price as price,ba.id as associateId,ba.hw_serial_no as serialNo " +
+				" FROM b_orders_addons ad INNER JOIN b_service s ON ad.service_id =s.id" +
+				" INNER JOIN b_order_price op ON op.service_id = s.id and ad.order_id=op.order_id " +
+				" LEFT JOIN b_association ba ON ad.order_id = ba.order_id AND ad.service_id = ba.service_id AND ba.is_deleted='N'" +
+				" WHERE ad.order_id =? and ad.is_deleted = 'N' group by ad.id;";
 	}
 	
 	@Override
@@ -66,11 +67,14 @@ private class OrderAddonMapper implements RowMapper<OrderAddonsData>{
 		final LocalDate endDate=JdbcSupport.getLocalDate(rs,"endDate");
 		final String statu=rs.getString("status");
 		final BigDecimal price=rs.getBigDecimal("price");
-		return new OrderAddonsData(id,serviceId,serviceCode,startDate,endDate,statu,price);
+		final Long associateId = rs.getLong("associateId") ;
+		final String addOnSerialNo = rs.getString("serialNo") ;
+
+		return new OrderAddonsData(id,serviceId,serviceCode,startDate,endDate,statu,price,associateId,addOnSerialNo);
 	}
+}
 
 	
-}
 
 }
 

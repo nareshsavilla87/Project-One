@@ -15,7 +15,12 @@ public class AddonEndDateValidationException extends AbstractPlatformDomainRuleE
 	}
 	
 	public AddonEndDateValidationException(final String serviceId) {
-		super("error.msg.addon.provide.service.mapping.details","Provide service mapping details",serviceId);
+		super("error.msg.addon.provide.service.mapping.details","Provide service mapping details for add-on",serviceId);
+		
+	}
+	
+	public AddonEndDateValidationException() {
+		super("error.msg.purchase.req.device.for.activate.add-on.service","Purchase required device for activate add-on service");
 		
 	}
 

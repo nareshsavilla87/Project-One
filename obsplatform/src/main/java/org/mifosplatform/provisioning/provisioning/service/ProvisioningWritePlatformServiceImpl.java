@@ -362,7 +362,8 @@ public class ProvisioningWritePlatformServiceImpl implements ProvisioningWritePl
 			serialNumber = hardwareAssociation.get(0).getSerialNo();
 		} 
 		else {
-			if (hardwareAssociation.size() != order.getServices().size()){
+			if (hardwareAssociation.size() != order.getServices().size() && !(UserActionStatusTypeEnum.ADDON_ACTIVATION.toString().equalsIgnoreCase(requestType)
+					|| UserActionStatusTypeEnum.ADDON_DISCONNECTION.toString().equalsIgnoreCase(requestType))){
 				this.checkServiceProvisionRequired(hardwareAssociation,order,plan);// service level map
 			}
 		}

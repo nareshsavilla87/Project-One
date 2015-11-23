@@ -11,6 +11,7 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONException;
 import org.json.JSONObject;
+
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.payterms.data.PaytermData;
@@ -284,7 +285,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			// For Plan And HardWare Association
 			Configuration configurationProperty = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_PROPERTY_IMPLICIT_ASSOCIATION);
 
-			if(configurationProperty.isEnabled() && serialnum == null ){
+			if(configurationProperty.isEnabled() && StringUtils.isEmpty(serialnum) ){
 				
 				if(plan.isHardwareReq() == 'Y'){
 					
@@ -328,12 +329,10 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			/*processNotifyMessages(EventActionConstants.EVENT_ACTIVE_ORDER, clientId, order.getId().toString());*/
 			this.orderRepository.save(order);
 			return new CommandProcessingResult(order.getId(),order.getClientId());	
-			}catch (DataIntegrityViolationException dve) {
-				handleCodeDataIntegrityIssues(command, dve);
-				return new CommandProcessingResult(Long.valueOf(-1));
-				
-				}
-
+		} catch (JSONException | DataIntegrityViolationException dve) {
+			handleCodeDataIntegrityIssues(command, dve);
+			return new CommandProcessingResult(Long.valueOf(-1));
+		}
 	}
 	
 
@@ -347,7 +346,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 		}
 	}
 
-	private void handleCodeDataIntegrityIssues(JsonCommand command, DataIntegrityViolationException dve) {
+	private void handleCodeDataIntegrityIssues(JsonCommand command, Exception dve) {
 		throw new PlatformDataIntegrityException("error.msg.office.unknown.data.integrity.issue", "Unknown data integrity issue with resource.");
 	}
 
@@ -557,14 +556,18 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 			}
 			LocalDate renewalEndDate = this.orderAssembler.calculateEndDate(newStartdate, contractDetails.getSubscriptionType(), contractDetails.getUnits());
 
-			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BIILING_CYCLE);
+			Configuration configuration = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_ALIGN_BILLING_CYCLE);
 
-			if (configuration != null && plan.isPrepaid() == 'N') {
-
-				orderDetails.setBillingAlign(configuration.isEnabled() ? 'Y': 'N');
-				if (configuration.isEnabled() && renewalEndDate != null) {
+			if (configuration != null && configuration.isEnabled() && plan.isPrepaid() == 'N') {
+				
+				JSONObject configValue = new JSONObject(configuration.getValue());
+				if (renewalEndDate != null && configValue.getBoolean("fixed")) {
+					orderDetails.setBillingAlign('Y');
 					orderDetails.setEndDate(renewalEndDate.dayOfMonth().withMaximumValue());
-				} else {
+				} else if(renewalEndDate == null && configValue.getBoolean("perpetual")){
+					orderDetails.setBillingAlign('Y');
+					orderDetails.setEndDate(renewalEndDate);
+				}else{
 					orderDetails.setEndDate(renewalEndDate);
 				}
 			} else {
@@ -580,7 +583,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 					Price price1 = this.priceRepository.findOne(priceId);
 					Price price = this.priceRepository.findOneByPlanAndService(plan.getId(), service.getServiceCode(), contractDetails.getSubscriptionPeriod(),
 							price1.getChargeCode(), price1.getPriceRegion());
-					if (price != null) {
+					if (price != null ) {
 						ChargeCodeMaster chargeCode = this.chargeCodeRepository.findOneByChargeCode(price.getChargeCode());
 						orderprice.setChargeCode(chargeCode.getChargeCode());
 						orderprice.setChargeDuration(chargeCode.getChargeDuration().toString());
@@ -592,7 +595,8 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 						throw new PriceNotFoundException(priceId);
 					}
 				}
-				orderprice.setDatesOnOrderStatus(newStartdate, new LocalDate(orderDetails.getEndDate()), orderDetails.getUserAction());
+				 orderprice.setDatesOnOrderStatus(newStartdate, new LocalDate(orderDetails.getEndDate()), orderDetails.getUserAction());
+				
 				// setBillEndDate(renewalEndDate);
 				// this.OrderPriceRepository.save(orderprice);
 				orderDetails.setNextBillableDay(null);
@@ -646,7 +650,7 @@ public class OrderWritePlatformServiceImpl implements OrderWritePlatformService 
 
 			return new CommandProcessingResult(Long.valueOf(orderDetails.getClientId()), orderDetails.getClientId());
 
-		} catch (DataIntegrityViolationException dve) {
+		} catch (JSONException | DataIntegrityViolationException dve) {
 			handleCodeDataIntegrityIssues(null, dve);
 			return new CommandProcessingResult(Long.valueOf(-1));
 		}

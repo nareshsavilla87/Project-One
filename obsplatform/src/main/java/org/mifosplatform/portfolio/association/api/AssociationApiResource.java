@@ -116,7 +116,7 @@ public class AssociationApiResource {
 	public String retrieveAssociationTemplate(@QueryParam("clientId") final Long clientId,@Context final UriInfo uriInfo) {
  		 
 		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-		List<AssociationData> HardwareDatas = this.associationReadplatformService.retrieveCustomerHardwareAllocationData(clientId);
+		List<AssociationData> HardwareDatas = this.associationReadplatformService.retrieveCustomerHardwareAllocationData(clientId,null,null);
 		List<AssociationData> planDatas= this.associationReadplatformService.retrieveplanData(clientId);
 		AssociationData data=new AssociationData(HardwareDatas,planDatas);
 		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());

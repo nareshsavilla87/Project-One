@@ -171,7 +171,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 					PlanMapping planMapping = this.planMappingRepository.findOneByPlanId(order.getPlanId());
 					List<OrderLine> orderLineData=order.getServices();
 
-					if ((requestData.getIshardwareReq().equalsIgnoreCase("Y") && detailsData == null) || planMapping == null) {
+					if ((requestData.getIshardwareReq().equalsIgnoreCase("Y") && detailsData.isEmpty()) || planMapping == null) {
 						String status = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
 						if (prepareRequest != null) {
 							prepareRequest.setStatus(status);
@@ -228,15 +228,10 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 						 }
 						 jsonObject.put("oldServices", new Gson().toJson(serviceArray));
 					 }
-
 					 JSONArray newServiceArray = new JSONArray();
-					/* if(requestData.getRequestType().equalsIgnoreCase(UserActionStatusTypeEnum.DEVICE_SWAP.toString())){
-						 AllocationDetailsData allocationDetailsData=this.allocationReadPlatformService.getDisconnectedHardwareItemDetails(requestData.getOrderId(),requestData.getClientId());
-						 jsonObject.put("clientId", order.getClientId());
-						 jsonObject.put("OldHWId", allocationDetailsData.getSerialNo());
-						 jsonObject.put("NewHWId", HardWareId);
-					 }*/
-					 if(requestType.equalsIgnoreCase(UserActionStatusTypeEnum.ADDON_ACTIVATION.toString())){
+				
+					 if(requestType.equalsIgnoreCase(UserActionStatusTypeEnum.ADDON_ACTIVATION.toString())
+							 || UserActionStatusTypeEnum.ADDON_DISCONNECTION.toString().equalsIgnoreCase(requestType)){
 						 
 						 List<OrderAddons> orderAddons=this.orderAddonsRepository.findAddonsByOrderId(requestData.getOrderId());
 						 for(OrderAddons orderAddon:orderAddons){
@@ -278,13 +273,15 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 						 prepareRequest.setStatus(status);
 						 this.prepareRequsetRepository.save(prepareRequest);
 					 }
-						} else {// Service Level HardWare Map if Enabled
+			     }    else {// Service Level HardWare Map if Enabled
 
 							Configuration configProperty = this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_SERVICE_DEVICE_MAPPING);
 
 							if ("Y".equalsIgnoreCase(requestData.getIshardwareReq()) && (configProperty != null && configProperty.isEnabled())) {
 
-								if (detailsData.size() != orderLineData.size() && this.checkServicesProvisionRequired(detailsData,orderLineData) ) {
+								if (detailsData.size() != orderLineData.size() && this.checkServicesProvisionRequired(detailsData,orderLineData) 
+									 && !(UserActionStatusTypeEnum.ADDON_ACTIVATION.toString().equalsIgnoreCase(requestData.getRequestType())
+											|| UserActionStatusTypeEnum.ADDON_DISCONNECTION.toString().equalsIgnoreCase(requestType)) || detailsData.isEmpty()) {
 								
 										String status = OrderStatusEnumaration.OrderStatusType(StatusTypeEnum.PENDING).getValue().toString();
 										if (prepareRequest != null) {
@@ -335,7 +332,8 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 										jsonObject.put("oldServices",new Gson().toJson(serviceArray));
 									}
 
-									if (UserActionStatusTypeEnum.ADDON_ACTIVATION.toString().equalsIgnoreCase(requestData.getRequestType())) {
+									if (UserActionStatusTypeEnum.ADDON_ACTIVATION.toString().equalsIgnoreCase(requestData.getRequestType())
+											|| UserActionStatusTypeEnum.ADDON_DISCONNECTION.toString().equalsIgnoreCase(requestData.getRequestType())) {
 										List<OrderAddons> orderAddons = this.orderAddonsRepository.findAddonsByOrderId(requestData.getOrderId());
 										for (OrderAddons orderAddon : orderAddons) {
 											List<ServiceMapping> provisionServiceDetails = this.provisionServiceDetailsRepository.findOneByServiceId(orderAddon.getServiceId());
@@ -349,7 +347,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 											}
 											if (!detailsData.isEmpty()) {
 												for (AllocationDetailsData detail : detailsData) {
-													if (detail.getServiceId().equals(orderAddon.getServiceId())) {
+													if (detail.getServiceId() != null && orderAddon.getServiceId().equals(detail.getServiceId())) {
 														subjson.put("serialNo",detail.getSerialNo());
 														break;}
 												}
@@ -368,7 +366,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 											}
 											if (!detailsData.isEmpty()) {
 												for (AllocationDetailsData detail : detailsData) {
-													if (detail.getServiceId().equals(orderLine.getServiceId())) {
+													if (detail.getServiceId() != null && orderLine.getServiceId().equals(detail.getServiceId())) {
 														subjson.put("serialNo",detail.getSerialNo());
 														break;
 													}

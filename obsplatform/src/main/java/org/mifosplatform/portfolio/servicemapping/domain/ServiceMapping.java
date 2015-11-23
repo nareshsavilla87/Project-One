@@ -17,7 +17,7 @@ import org.springframework.data.jpa.domain.AbstractPersistable;
 		@UniqueConstraint(name = "service_identification_uq", columnNames = { "service_id", "service_identification"})})
 public class ServiceMapping extends AbstractPersistable<Long> {
 	
-	private static final long serialVersionUID = 3356227259773271027L;
+	private static final long serialVersionUID = 1L;
 
 	@Column(name = "service_id")
 	private Long serviceId;
@@ -137,6 +137,10 @@ public class ServiceMapping extends AbstractPersistable<Long> {
 	
 	public char getIsHwReq() {
 		return isHwReq;
+	}
+	
+	public Long getItemId() {
+		return itemId;
 	}
 
 	public Map<String, Object> update(JsonCommand command, boolean isServiceLevelMap) {

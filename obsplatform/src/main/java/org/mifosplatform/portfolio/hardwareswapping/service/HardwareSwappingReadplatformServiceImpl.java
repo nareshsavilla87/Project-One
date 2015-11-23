@@ -78,9 +78,6 @@ public class HardwareSwappingReadplatformServiceImpl implements HardwareSwapping
 			final String allocationType = rs.getString("allocationType");
 			final Long serviceId = rs.getLong("serviceId");
 
-
-
-
 			return new AssociationData(id,clientId,orderId,planId,serialNo,allocationType,serviceId);
 		}
 

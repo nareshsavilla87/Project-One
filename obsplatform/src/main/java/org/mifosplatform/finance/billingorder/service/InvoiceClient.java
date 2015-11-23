@@ -101,17 +101,22 @@ public class InvoiceClient {
 						invoiceAmount = invoiceAmount.add(invoiceData.getInvoiceAmount());
 						nextBillableDate = invoiceData.getNextBillableDay();
 						invoice=invoiceData.getInvoice();
+					}else{
+						nextBillableDate = processDate.plusDays(2).toDate();
 					}
 				}
 			}
 			if (singleInvoiceFlag) {
-
 				this.invoiceRepository.save(invoiceData.getInvoice());
 
 				// Update Client Balance
 				this.billingOrderWritePlatformService.updateClientBalance(invoiceData.getInvoice().getInvoiceAmount(), clientId,false);
 			}
-			return invoiceData.getInvoice();
+			if (invoiceData != null) {
+				return invoiceData.getInvoice();
+			} else {
+				throw new BillingOrderNoRecordsFoundException();
+			}
 			
 		} else {
 			throw new BillingOrderNoRecordsFoundException();
@@ -125,45 +130,47 @@ public class InvoiceClient {
 
 		List<BillingOrderCommand> billingOrderCommands = this.generateBillingOrderService.generatebillingOrder(products);
 
-		if(singleInvoiceFlag){
+		if (billingOrderCommands.size() != 0 && singleInvoiceFlag) {
 
-			invoice = this.generateBillingOrderService.generateMultiOrderInvoice(billingOrderCommands,invoice);
+				invoice = this.generateBillingOrderService.generateMultiOrderInvoice(billingOrderCommands,invoice);
 
-			// Update order-price
-			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
-			 Date nextBillableDate = billingOrderCommands.get(0).getNextBillableDate();
-				
+				// Update order-price
+				this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
+				Date nextBillableDate = billingOrderCommands.get(0).getNextBillableDate();
+
 				if ("UC".equalsIgnoreCase(billingOrderCommands.get(0).getChargeType())) {
 					nextBillableDate = processDate.plusDays(3).toDate();
 				}
-			 System.out.println("---------------------"+ nextBillableDate);
-			
-			return new GenerateInvoiceData(clientId,  nextBillableDate, invoice.getInvoiceAmount(),invoice);
+				System.out.println("---------------------" + nextBillableDate);
 
-		}else{
+				return new GenerateInvoiceData(clientId, nextBillableDate,invoice.getInvoiceAmount(), invoice);
 
-			// Invoice
-			Invoice singleInvoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
+		} else if(billingOrderCommands.size() != 0){
 
-			// Update order-price
-			this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
-			System.out.println("---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
-			
-			//Update usage charge's with chargeId
-			this.usageChargesWritePlatformService.updateUsageCharges(billingOrderCommands, singleInvoice);
-			
-			// Update Client Balance
-			this.billingOrderWritePlatformService.updateClientBalance(singleInvoice.getInvoiceAmount(), clientId, false);
-			
-			Date nextBillableDate = billingOrderCommands.get(0).getNextBillableDate();
-				
+				// Invoice
+				Invoice singleInvoice = this.generateBillingOrderService.generateInvoice(billingOrderCommands);
+
+				// Update order-price
+				this.billingOrderWritePlatformService.updateBillingOrder(billingOrderCommands);
+				System.out.println("---------------------"+ billingOrderCommands.get(0).getNextBillableDate());
+
+				// Update usage charge's with chargeId
+				this.usageChargesWritePlatformService.updateUsageCharges(billingOrderCommands, singleInvoice);
+
+				// Update Client Balance
+				this.billingOrderWritePlatformService.updateClientBalance(singleInvoice.getInvoiceAmount(), clientId, false);
+
+				Date nextBillableDate = billingOrderCommands.get(0).getNextBillableDate();
+
 				if ("UC".equalsIgnoreCase(billingOrderCommands.get(0).getChargeType())) {
 					nextBillableDate = processDate.plusDays(3).toDate();
 				}
-		    
-		    System.out.println("---------------------"+ nextBillableDate);	
+				System.out.println("---------------------" + nextBillableDate);
 
-			return new GenerateInvoiceData(clientId, nextBillableDate,singleInvoice.getInvoiceAmount(), singleInvoice);
+				return new GenerateInvoiceData(clientId, nextBillableDate,singleInvoice.getInvoiceAmount(), singleInvoice);
+				
+		} else {
+			return null;
 		}
 	}
 

@@ -11,7 +11,6 @@ import org.mifosplatform.infrastructure.core.data.CommandProcessingResult;
 import org.mifosplatform.portfolio.order.service.OrderAddOnsWritePlatformService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CreateOrderAddonsCommandHandler implements NewCommandSourceHandler {
@@ -23,7 +22,7 @@ public class CreateOrderAddonsCommandHandler implements NewCommandSourceHandler 
         this.writePlatformService = writePlatformService;
     }
 
-    @Transactional
+    
     @Override
     public CommandProcessingResult processCommand(final JsonCommand command) {
 

@@ -40,6 +40,7 @@ import org.mifosplatform.portfolio.order.domain.OrderHistory;
 import org.mifosplatform.portfolio.order.domain.OrderHistoryRepository;
 import org.mifosplatform.portfolio.order.domain.OrderLine;
 import org.mifosplatform.portfolio.order.domain.OrderRepository;
+import org.mifosplatform.portfolio.order.domain.UserActionStatusTypeEnum;
 import org.mifosplatform.portfolio.plan.domain.Plan;
 import org.mifosplatform.portfolio.plan.domain.PlanRepository;
 import org.mifosplatform.portfolio.planmapping.domain.PlanMapping;
@@ -167,6 +168,22 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 					"Please wait until pending state orders to be active", "Provisioning Request was sent to activation ", serialNo);
 		}
 		
+		//getting new serial number item details data 
+		ItemDetails newSerailNoItemData = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(provisionNum);
+		
+		if(newSerailNoItemData == null){
+			throw new SerialNumberNotFoundException(provisionNum);
+		}
+		
+		//getting old serial number item details data 
+		ItemDetails oldSerailNoItemData = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(serialNo);
+		
+
+		if(!newSerailNoItemData.getItemMasterId().equals(oldSerailNoItemData.getItemMasterId())){
+			throw new PlatformDataIntegrityException("error.msg.device.types.are.not.same", 
+					"Please choose same category devices", "Device swap not possiable-Please choose same category devices", "serialNumber");
+		}
+		
 		List<AssociationData> associationData = this.hardwareSwappingReadplatformService.retrievingAllAssociations(entityId,serialNo,Long.valueOf(0));
 		LinkedHashSet<Long> associationOrderList = new  LinkedHashSet<Long>();
 		
@@ -177,11 +194,6 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 			associationOrderList.add(association.getOrderId());
 		}
 	    
-	    //getting new serial number item details data 
-	    ItemDetails newSerailNoItemData = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(provisionNum);
-	    if(newSerailNoItemData == null){
-	    	throw new SerialNumberNotFoundException(provisionNum);
-	    }
 	    LocalDate newWarrantyDate = new LocalDate(newSerailNoItemData.getWarrantyDate());
 		
 		if(deviceAgrementType.equalsIgnoreCase(ConfigurationConstants.CONFIR_PROPERTY_OWN)){
@@ -270,8 +282,8 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 							 List<ServiceMapping> serviceMappingDetails=this.serviceMappingRepository.findOneByServiceId(orderLine.getServiceId());
 						 		ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId());
 						 		JSONObject subjson = new JSONObject();
+						 		subjson.put("serviceName", service !=null ?service.getServiceCode():" ");
 							 if(!serviceMappingDetails.isEmpty()){
-								 subjson.put("serviceName", service.getServiceCode());
 								 subjson.put("serviceIdentification", serviceMappingDetails.get(0).getServiceIdentification());
 							 }
 							 innerJsonArray.put(subjson);
@@ -285,8 +297,8 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 									List<ServiceMapping> serviceMappingDetails=this.serviceMappingRepository.findOneByServiceId(orderLine.getServiceId());
 									ServiceMaster service=this.serviceMasterRepository.findOne(orderLine.getServiceId());
 									JSONObject subjson = new JSONObject();
+									subjson.put("serviceName", service !=null ?service.getServiceCode():" ");
 									if(!serviceMappingDetails.isEmpty()){
-										subjson.put("serviceName", service.getServiceCode());
 										subjson.put("serviceIdentification", serviceMappingDetails.get(0).getServiceIdentification());
 									}
 									innerJsonArray.put(subjson);
@@ -301,9 +313,7 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 				}
 			}
 		
-			//getting old serial number item details data 
-			ItemDetails oldSerailNoItemData = this.itemDetailsRepository.getInventoryItemDetailBySerialNum(serialNo);
-			 LocalDate oldWarrantyDate = new LocalDate(oldSerailNoItemData.getWarrantyDate());
+			   LocalDate oldWarrantyDate = new LocalDate(oldSerailNoItemData.getWarrantyDate());
 				oldSerailNoItemData.setWarrantyDate(newWarrantyDate);
 				newSerailNoItemData.setWarrantyDate(oldWarrantyDate);
 				
@@ -330,9 +340,9 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 			 jsonObj.put("NewHWId", newSerailNoItemData.getProvisioningSerialNumber());
 			 jsonObj.put("plans", jsonArray);
 			 
-			 ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0),entityId,Long.valueOf(0), provisionSystem, "DEVICE SWAP",'N','N');
+			 ProcessRequest processRequest=new ProcessRequest(Long.valueOf(0),entityId,Long.valueOf(0), provisionSystem,UserActionStatusTypeEnum.DEVICE_SWAP.toString(),'N','N');
 			   ProcessRequestDetails processRequestDetails=new ProcessRequestDetails(Long.valueOf(0),Long.valueOf(0),jsonObj.toString(),"Recieved",
-			     provisionNum,DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),null,null,'N',"DEVICE SWAP",null);
+			     provisionNum,DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),null,null,'N',UserActionStatusTypeEnum.DEVICE_SWAP.toString(),null);
 			   processRequest.add(processRequestDetails);
 			   this.processRequestRepository.save(processRequest);
  			
@@ -355,12 +365,12 @@ public CommandProcessingResult doHardWareSwapping(final Long entityId,final Json
 	
 	}
 
-  private void handleDataIntegrityIssues(final JsonCommand command,final DataIntegrityViolationException dve) {
-	  
-	  LOGGER.error(dve.getMessage(), dve);
-		final Throwable realCause=dve.getCause();
+	private void handleDataIntegrityIssues(final JsonCommand command,final DataIntegrityViolationException dve) {
+
+		LOGGER.error(dve.getMessage(), dve);
+		final Throwable realCause = dve.getCause();
 		throw new PlatformDataIntegrityException("error.msg.could.unknown.data.integrity.issue",
 				"Unknown data integrity issue with resource: "+ realCause.getMessage());
-     }
+	}
 
 }

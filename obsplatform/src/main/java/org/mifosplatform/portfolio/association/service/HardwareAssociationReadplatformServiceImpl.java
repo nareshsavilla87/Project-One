@@ -197,11 +197,18 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 	}
 		
 	@Override
-	public List<AssociationData> retrieveCustomerHardwareAllocationData(final Long clientId) {
+	public List<AssociationData> retrieveCustomerHardwareAllocationData(final Long clientId,final Long orderId,final Long itemId) {
 
 		try {
 			AllocationMapper mapper = new AllocationMapper();
-			final String sql = "select " + mapper.allocationSchema();
+			String sql = "";
+			if (itemId != null && orderId != null) {
+				sql = "select " + mapper.orderSchema() + "AND b.item_master_id="+itemId+" AND oa.order_id="+orderId ;
+			}else if(itemId != null && orderId == null) {
+				sql = "select " + mapper.schema() + "AND b.item_master_id="+itemId;
+			}else {
+				sql = "select " + mapper.allocationSchema();
+			}
 			return this.jdbcTemplate.query(sql, mapper, new Object[] {clientId, clientId });
 
 		} catch (EmptyResultDataAccessException accessException) {
@@ -212,13 +219,28 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 	private static final class AllocationMapper implements RowMapper<AssociationData> {
 		
 		public String allocationSchema() {
-			return " 'ALLOT' as allocationType,b.serial_no AS serialNum,b.provisioning_serialno as provisionNum FROM  b_item_detail b" +
+			return " 'ALLOT' as allocationType,b.serial_no AS serialNum,b.provisioning_serialno as provisionNum,b.item_master_id as itemId FROM  b_item_detail b" +
 					" where  b.client_id=?  AND b.is_deleted ='N'" +
 					" union" +
-					" select  'OWNED' as allocationType,o.serial_number  AS serialNum, o.provisioning_serial_number  AS provisionNum FROM b_owned_hardware o" +
+					" select  'OWNED' as allocationType,o.serial_number  AS serialNum, o.provisioning_serial_number  AS provisionNum, 0 as itemId FROM b_owned_hardware o" +
 					" WHERE o.client_id = ? AND o.is_deleted = 'N'";
 
 		}	
+		
+		public String schema() {
+			return " 'ALLOT' as allocationType,b.serial_no AS serialNum,b.provisioning_serialno as provisionNum,b.item_master_id as itemId FROM  b_item_detail b,b_allocation a"
+					+ " where b.serial_no = a.serial_no AND b.client_id= ?  AND a.client_id = ? AND b.is_deleted ='N' AND a.is_deleted ='N'";
+
+		}	
+		
+		public String orderSchema() {
+			return " 'ALLOT' as allocationType,b.serial_no AS serialNum,b.provisioning_serialno as provisionNum,b.item_master_id as itemId"+
+					"  FROM  b_item_detail b INNER JOIN b_allocation a ON b.serial_no = a.serial_no "+
+					"  INNER JOIN b_association oa ON oa.client_id = b.client_id  AND a.serial_no = oa.hw_serial_no "+
+					"  AND b.client_id= ?  AND a.client_id = ? AND b.is_deleted ='N' AND a.is_deleted ='N' AND oa.is_deleted='N' ";
+
+		}
+		
 		
 	@Override
 	public AssociationData mapRow(final ResultSet rs, final int rowNum)throws SQLException {
@@ -226,7 +248,8 @@ public class HardwareAssociationReadplatformServiceImpl implements HardwareAssoc
 		final String serialNum = rs.getString("serialNum");
 		final String provisionNumber = rs.getString("provisionNum");
 		final String allocationType = rs.getString("allocationType");
-		return new AssociationData(serialNum, provisionNumber,allocationType, null, null);
+		final Long itemId = rs.getLong("itemId");
+		return new AssociationData(serialNum, provisionNumber,allocationType, null, itemId);
 	}
 }
 
