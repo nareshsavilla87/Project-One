@@ -11,7 +11,8 @@ select distinct
             'Periodic') AS `tran_type`,
         cast(`b_invoice`.`invoice_date` as date) AS `transDate`,
 	(CASE WHEN (`b_charge`.`priceline_id`= -1 && `b_charge`.`charge_type` = 'NRC') THEN 'SERVICE TRANSFER'
-             WHEN (`b_charge`.`priceline_id`= -2 && `b_charge`.`charge_type` = 'NRC' ) THEN 'REGISTRATION FEE'      
+             WHEN (`b_charge`.`priceline_id`= -2 && `b_charge`.`charge_type` = 'NRC' ) THEN 'REGISTRATION FEE'  
+             WHEN (`b_charge`.`priceline_id` > 0 && `b_charge`.`charge_type` = 'NRC' ) THEN 'RECONNECTION FEE'    
             ELSE 'INVOICE' END ) AS `transType`,
         if((`b_invoice`.`invoice_amount` > 0),
             `b_invoice`.`invoice_amount`,
