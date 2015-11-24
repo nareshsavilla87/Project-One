@@ -38,9 +38,10 @@ public class ConfigurationConstants {
 
 	public static final String CONFIG_PROPERTY_SMTP= "smtp";
 	public static final String CONFIG_IS_PROPERTY_MASTER = "is-propertycode-enabled";
-	public static final String CONFIG_ALIGN_BIILING_CYCLE = "align-biiling-cycle";
+	public static final String CONFIG_ALIGN_BILLING_CYCLE = "align-billing-cycle";
 	public static final String CONFIG_PRORATA_WITH_NEXT_BILLING_CYCLE = "prorata-with-next-billing-cycle";
 	public static final String CONFIG_SINGLE_INVOICE_FOR_MULTI_ORDERS = "single-invoice-for-multi-orders";
+	public static final String CONFIG_IS_REGISTRATION_FEE = "is-registration-fee";
 
 	public static final String CONFIG_PROPERTY_SMS= "sms-configuration";
 	public static final String CONFIG_IS_REDEMPTION = "is-redemption";
@@ -125,6 +126,7 @@ public class ConfigurationConstants {
 	public static final String CUBIWARE_AUTHORIZATION = "Authorization";
 	public static final String CUBIWARE_BASIC_NAME = "Basic ";
 	public static final String CUBIWARE_XML_DEVICE_DATA = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + "<device>" + "<customer-id></customer-id>" + "</device>";
+	
 	
 	
 }

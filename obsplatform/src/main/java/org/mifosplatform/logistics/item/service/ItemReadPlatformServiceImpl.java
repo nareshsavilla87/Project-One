@@ -8,7 +8,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.mifosplatform.billing.chargecode.data.ChargesData;
-import org.mifosplatform.cms.mediadetails.data.MediaLocationData;
 import org.mifosplatform.crm.clientprospect.service.SearchSqlQuery;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.service.Page;

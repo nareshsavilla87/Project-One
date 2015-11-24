@@ -215,6 +215,7 @@ public class PrepareRequestReadplatformServiceImpl  implements PrepareRequestRea
 								if (!provisionServiceDetails.isEmpty()) {
 									oldsubjson.put("oldServiceIdentification", provisionServiceDetails.get(0).getServiceIdentification());
 								}
+								oldsubjson.put("oldServiceName", service.getServiceCode());
 								oldsubjson.put("oldServiceType", service.getServiceType());
 								serviceArray.add(oldsubjson);
 							}

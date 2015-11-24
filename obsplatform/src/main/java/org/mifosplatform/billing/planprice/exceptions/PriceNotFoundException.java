@@ -5,14 +5,16 @@
  */
 package org.mifosplatform.billing.planprice.exceptions;
 
-import org.mifosplatform.infrastructure.core.exception.AbstractPlatformResourceNotFoundException;
+import org.mifosplatform.infrastructure.core.exception.AbstractPlatformDomainRuleException;
 
 /**
  * A {@link RuntimeException} thrown when a code is not found.
  */
-public class PriceNotFoundException extends AbstractPlatformResourceNotFoundException {
+public class PriceNotFoundException extends AbstractPlatformDomainRuleException {
 
-    public PriceNotFoundException(final String name) {
+	private static final long serialVersionUID = 1L;
+
+	public PriceNotFoundException(final String name) {
         super("error.msg.price.not.found", "price with id`" + name + "` does not exist", name);
     }
 

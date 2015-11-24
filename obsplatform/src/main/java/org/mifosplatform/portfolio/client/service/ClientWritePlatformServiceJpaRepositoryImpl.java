@@ -8,7 +8,6 @@ package org.mifosplatform.portfolio.client.service;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
@@ -28,6 +27,7 @@ import org.mifosplatform.cms.eventorder.service.PrepareRequestWriteplatformServi
 import org.mifosplatform.commands.domain.CommandWrapper;
 import org.mifosplatform.commands.service.CommandWrapperBuilder;
 import org.mifosplatform.commands.service.PortfolioCommandSourceWritePlatformService;
+import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.infrastructure.codes.domain.CodeValue;
 import org.mifosplatform.infrastructure.codes.domain.CodeValueRepository;
 import org.mifosplatform.infrastructure.configuration.domain.Configuration;
@@ -45,8 +45,11 @@ import org.mifosplatform.infrastructure.documentmanagement.exception.DocumentMan
 import org.mifosplatform.infrastructure.security.service.PlatformSecurityContext;
 import org.mifosplatform.logistics.item.domain.StatusTypeEnum;
 import org.mifosplatform.logistics.itemdetails.exception.ActivePlansFoundException;
+import org.mifosplatform.logistics.onetimesale.service.InvoiceOneTimeSale;
 import org.mifosplatform.organisation.address.domain.Address;
 import org.mifosplatform.organisation.address.domain.AddressRepository;
+import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
+import org.mifosplatform.organisation.feemaster.service.FeeMasterReadplatformService;
 import org.mifosplatform.organisation.groupsdetails.domain.GroupsDetails;
 import org.mifosplatform.organisation.groupsdetails.domain.GroupsDetailsRepository;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
@@ -131,6 +134,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
     private final PropertyMasterRepository propertyMasterRepository;
     private final PropertyHistoryRepository propertyHistoryRepository;
     private final SelfCareTemporaryRepository selfCareTemporaryRepository;
+    private final FeeMasterReadplatformService feeMasterReadplatformService;
+    private final InvoiceOneTimeSale invoiceOneTimeSale;
     
    
 
@@ -147,7 +152,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
             final ProvisioningActionsRepository provisioningActionsRepository,final PrepareRequestReadplatformService prepareRequestReadplatformService,
             final ProcessRequestRepository processRequestRepository,final ClientAdditionalFieldsRepository clientAdditionalFieldsRepository,
             final PropertyMasterRepository propertyMasterRepository, final PropertyHistoryRepository propertyHistoryRepository,
-            final SelfCareTemporaryRepository selfCareTemporaryRepository) {
+            final SelfCareTemporaryRepository selfCareTemporaryRepository,final FeeMasterReadplatformService feeMasterReadplatformService,
+            final InvoiceOneTimeSale invoiceOneTimeSale) {
     	
         this.context = context;
         this.ProvisioningWritePlatformService=ProvisioningWritePlatformService;
@@ -175,6 +181,8 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
         this.processRequestRepository = processRequestRepository;
         this.propertyMasterRepository = propertyMasterRepository;
         this.propertyHistoryRepository = propertyHistoryRepository;
+        this.feeMasterReadplatformService = feeMasterReadplatformService;
+        this.invoiceOneTimeSale = invoiceOneTimeSale;
        
     }
 
@@ -353,7 +361,6 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 			}
 			
 			 //for property code updation with client details
-				//configuration=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_PROPERTY_MASTER);
 				if(propertyConfiguration != null && propertyConfiguration.isEnabled()) {		
 				//	PropertyMaster propertyMaster=this.propertyMasterRepository.findoneByPropertyCode(address.getAddressNo());
 					if(propertyMaster !=null){
@@ -366,6 +373,7 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 					}
 					
 				}
+				
             
             final List<ActionDetaislData> actionDetailsDatas=this.actionDetailsReadPlatformService.retrieveActionDetails(EventActionConstants.EVENT_CREATE_CLIENT);
             if(!actionDetailsDatas.isEmpty()){
@@ -380,8 +388,21 @@ public class ClientWritePlatformServiceJpaRepositoryImpl implements ClientWriteP
 				this.ProvisioningWritePlatformService.postDetailsForProvisioning(newClient.getId(),Long.valueOf(0),ProvisioningApiConstants.REQUEST_CLIENT_ACTIVATION,
 						               provisionActions.getProvisioningSystem(),null);
 			}
-
             
+            Configuration registratFeeConfig=this.configurationRepository.findOneByName(ConfigurationConstants.CONFIG_IS_REGISTRATION_FEE);	
+			if (registratFeeConfig != null&& registratFeeConfig.isEnabled()
+					&& command.booleanPrimitiveValueOfParameterNamed(ClientApiConstants.registrationFlagParamName)) {
+
+				FeeMasterData registrationFeeData = this.feeMasterReadplatformService.retrieveCustomerRegionWiseFeeDetails(newClient.getId(),CodeNameConstants.CODE_REGISTRATION_FEE);
+				if (registrationFeeData != null) {
+					Invoice invoice = this.invoiceOneTimeSale.calculateAdditionalFeeCharges(registrationFeeData.getChargeCode(),registrationFeeData.getId(),Long.valueOf(-2), 
+							         newClient.getId(),registrationFeeData.getDefaultFeeAmount());
+
+					newClient.setRegistrationFee(invoice.getId());
+				} 
+			}
+			
+            this.clientRepository.saveAndFlush(newClient);
             
             return new CommandProcessingResultBuilder() 
                     .withCommandId(command.commandId()) 

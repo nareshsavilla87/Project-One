@@ -13,4 +13,6 @@ public interface FeeMasterReadplatformService {
 	
 	Collection<FeeMasterData> retrieveAllData(String transType);
 
+	FeeMasterData retrieveCustomerRegionWiseFeeDetails(Long clientId, String codeRegistrationFee);
+
 }

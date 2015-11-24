@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.Param;
 public interface OrderAddonsRepository  extends JpaRepository<OrderAddons, Long>,
    JpaSpecificationExecutor<OrderAddons>{
 
-    @Query("from OrderAddons order where order.orderId =:orderId and order.status='ACTIVE'")
+    @Query("from OrderAddons order where order.orderId =:orderId and order.isDelete='N'")
     List<OrderAddons> findAddonsByOrderId(@Param("orderId") final Long orderId);
 
     

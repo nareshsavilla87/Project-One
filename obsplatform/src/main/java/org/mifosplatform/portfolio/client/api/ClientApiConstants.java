@@ -46,6 +46,7 @@ public class ClientApiConstants {
     public static final String entryTypeParamName = "entryType";
     public static final String deviceParamName = "device";
     public static final String userNameParamName = "userName";
+    public static final String registrationFlagParamName = "registrationFee";
    
     // response parameters
     public static final String statusParamName = "status";
@@ -91,7 +92,7 @@ public class ClientApiConstants {
             addressNoParamName,cityParamName,countryParamName,emailParamName,phoneParamName,homePhoneNumberParamName,stateParamName,streetParamName,
             zipCodeParamName,loginParamName,passwordParamName,flagParamName,groupParamName,entryTypeParamName,deviceParamName,
             jobTitleParamName,fiananceIdParamName,utsCustomerIdParamName,genderParamName,dateOfBirthParamName,nationalityParamName,idTypeParamName,
-            idNumberParamName,remarksParamName,preferredLangParamName,ageGroupParamName,preferredCommunicationParamName));
+            idNumberParamName,remarksParamName,preferredLangParamName,ageGroupParamName,preferredCommunicationParamName,registrationFlagParamName));
 
 
     public static final Set<String> CLIENT_UPDATE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,titleParamName,
@@ -99,7 +100,7 @@ public class ClientApiConstants {
             lastnameParamName, fullnameParamName, activeParamName, activationDateParamName,clientCategoryParamName,phoneParamName,homePhoneNumberParamName,
             emailParamName,officeIdParamName,groupParamName,entryTypeParamName,userNameParamName,passwordParamName,
             jobTitleParamName,fiananceIdParamName,utsCustomerIdParamName,genderParamName,dateOfBirthParamName,nationalityParamName,idTypeParamName,
-            idNumberParamName,remarksParamName,preferredLangParamName,ageGroupParamName,preferredCommunicationParamName));
+            idNumberParamName,remarksParamName,preferredLangParamName,ageGroupParamName,preferredCommunicationParamName,registrationFlagParamName));
     
     public static final Set<String> CLIENT_CLOSE_REQUEST_DATA_PARAMETERS = new HashSet<String>(Arrays.asList(localeParamName,
             dateFormatParamName, closureDateParamName, closureReasonIdParamName));
