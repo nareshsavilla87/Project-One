@@ -34,4 +34,5 @@ public interface PropertyReadPlatformService {
 
 	List<String> retrieveclientProperties(Long clientId);
 
+	
 }

@@ -77,6 +77,7 @@ public static final String CODE_PROPERTY_PARCEL = "Parcel";
 public static final String CODE_PROPERTY_FLOOR = "Level/Floor";
 public static final String CODE_PROPERTY_UNIT = "Unit Codes";
 public static final String CODE_PROPERTY_BUILDING = "Building Codes";
+public static final String CODE_REGISTRATION_FEE = "Registration Fee";
 
 
 

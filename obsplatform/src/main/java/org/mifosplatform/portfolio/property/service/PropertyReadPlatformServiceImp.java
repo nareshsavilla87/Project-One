@@ -494,6 +494,5 @@ public class PropertyReadPlatformServiceImp implements PropertyReadPlatformServi
 		}
      }
 	
-	
 }
 

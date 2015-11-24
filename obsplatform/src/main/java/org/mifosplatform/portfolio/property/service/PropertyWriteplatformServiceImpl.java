@@ -6,8 +6,6 @@ import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.exception.ConstraintViolationException;
-import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
-import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.chargecode.exception.ChargeCodeNotFoundException;
 import org.mifosplatform.finance.billingorder.domain.Invoice;
 import org.mifosplatform.infrastructure.core.api.JsonCommand;
@@ -21,7 +19,6 @@ import org.mifosplatform.organisation.address.domain.Address;
 import org.mifosplatform.organisation.address.domain.AddressRepository;
 import org.mifosplatform.organisation.mcodevalues.api.CodeNameConstants;
 import org.mifosplatform.portfolio.association.data.AssociationData;
-import org.mifosplatform.portfolio.association.data.HardwareAssociationData;
 import org.mifosplatform.portfolio.association.service.HardwareAssociationReadplatformService;
 import org.mifosplatform.portfolio.property.domain.PropertyCodesMaster;
 import org.mifosplatform.portfolio.property.domain.PropertyCodesMasterRepository;
@@ -38,10 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.mifosplatform.portfolio.property.domain.PropertyDeviceMappingRepository;
 @Service
 public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformService {
 
@@ -52,7 +47,6 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	private final PropertyHistoryRepository propertyHistoryRepository;
 	private final PropertyCodesMasterRepository propertyCodesMasterRepository;
 	private final AddressRepository addressRepository;
-	private final ChargeCodeRepository chargeCodeRepository;
 	private final InvoiceOneTimeSale invoiceOneTimeSale;
 	private final PropertyReadPlatformService propertyReadPlatformService;
 	private final PropertyDeviceMappingRepository propertyDeviceMappingRepository;
@@ -62,8 +56,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 	public PropertyWriteplatformServiceImpl(final PlatformSecurityContext context,final PropertyCommandFromApiJsonDeserializer apiJsonDeserializer,
 			final PropertyMasterRepository propertyMasterRepository,final PropertyHistoryRepository propertyHistoryRepository,
 			final PropertyCodesMasterRepository propertyCodesMasterRepository,final AddressRepository addressRepository,
-		    final ChargeCodeRepository chargeCodeRepository,final InvoiceOneTimeSale invoiceOneTimeSale,
-		    final PropertyReadPlatformService propertyReadPlatformService,
+		    final InvoiceOneTimeSale invoiceOneTimeSale,final PropertyReadPlatformService propertyReadPlatformService,
             final PropertyDeviceMappingRepository propertyDeviceMappingRepository,
             final HardwareAssociationReadplatformService associationReadplatformService) {
 
@@ -74,7 +67,6 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 		this.propertyCodesMasterRepository = propertyCodesMasterRepository;
 		this.addressRepository = addressRepository;
 		this.propertyDeviceMappingRepository = propertyDeviceMappingRepository;
-		this.chargeCodeRepository = chargeCodeRepository;
 		this.invoiceOneTimeSale = invoiceOneTimeSale;
 		this.propertyReadPlatformService = propertyReadPlatformService;
 		 this.associationReadplatformService=associationReadplatformService;
@@ -297,8 +289,7 @@ public class PropertyWriteplatformServiceImpl implements PropertyWriteplatformSe
 			/* call one time invoice for service transfer */
 			if (!StringUtils.isEmpty(chargeCode)) {
 
-				ChargeCodeMaster chargeMaster = this.chargeCodeRepository.findOneByChargeCode(chargeCode);
-				Invoice invoice = this.invoiceOneTimeSale.calculateAdditionalFeeCharges(chargeMaster,transactionHistory.getId(), Long.valueOf(-1L),clientId, shiftChargeAmount);
+				Invoice invoice = this.invoiceOneTimeSale.calculateAdditionalFeeCharges(chargeCode,transactionHistory.getId(), Long.valueOf(-1L),clientId, shiftChargeAmount);
 				return new CommandProcessingResult(invoice.getId(), clientId);
 
 			} else {

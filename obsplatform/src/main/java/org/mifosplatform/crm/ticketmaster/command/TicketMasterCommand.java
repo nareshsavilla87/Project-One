@@ -12,7 +12,7 @@ public class TicketMasterCommand {
 	private final String description;
 	private final String status;
 	private final String resolutionDescription;
-	private final Integer assignedTo;
+	private final Long assignedTo;
 	private final String comments;
 	private final Long ticketId;
 	private final Long createdbyId;
@@ -22,7 +22,7 @@ public class TicketMasterCommand {
 	
 	public TicketMasterCommand(final Long clientId, final String priority,
 								final String description, final String problemCode, final String status,
-								final String resolutionDescription, final Integer assignedTo, final LocalDate ticketDate,
+								final String resolutionDescription, final Long assignedTo, final LocalDate ticketDate,
 								final Long createdbyId, final Integer statusCode){		
 		
 		this.id = null;
@@ -40,7 +40,7 @@ public class TicketMasterCommand {
 		this.statusCode = null;
 	}
 	public TicketMasterCommand(final Long ticketId, final String comments, final String status,
-			final Integer assignedTo, final Long createdbyId, final Integer statusCode,
+			final Long assignedTo, final Long createdbyId, final Integer statusCode,
 			final Integer problemCode, final String priority) {
 		
 		this.id = null;
@@ -100,7 +100,7 @@ public class TicketMasterCommand {
 	public String getResolutionDescription() {
 		return resolutionDescription;
 	}
-	public Integer getAssignedTo() {
+	public Long getAssignedTo() {
 		return assignedTo;
 	}
 	public String getComments() {

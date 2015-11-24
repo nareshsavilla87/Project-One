@@ -175,7 +175,6 @@ public class ClientsApiResource {
 	/**
      * this method is using for getting template data in editing a client
      */
-    @SuppressWarnings("unused")
 	@GET
     @Path("{clientId}")
     @Consumes({ MediaType.APPLICATION_JSON })
@@ -293,13 +292,8 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String update(@PathParam("clientId") final Long clientId, final String apiRequestBodyAsJson) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() 
-                .updateClient(clientId) 
-                .withJson(apiRequestBodyAsJson) 
-                .build(); 
-
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().updateClient(clientId).withJson(apiRequestBodyAsJson).build(); 
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -309,12 +303,8 @@ public class ClientsApiResource {
     @Produces({ MediaType.APPLICATION_JSON })
     public String delete(@PathParam("clientId") final Long clientId) {
 
-        final CommandWrapper commandRequest = new CommandWrapperBuilder() //
-                .deleteClient(clientId) //
-                .build(); //
-
+        final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteClient(clientId).build(); //
         final CommandProcessingResult result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
-
         return this.toApiJsonSerializer.serialize(result);
     }
 
@@ -337,13 +327,8 @@ public class ClientsApiResource {
         
         }else  if (is(commandParam, "close")) {
 
-        	 final CommandWrapper commandRequest = new CommandWrapperBuilder() 
-             .deleteClient(clientId) 
-             .withJson(apiRequestBodyAsJson) 
-             .build(); 
-
-
-           result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
+        	 final CommandWrapper commandRequest = new CommandWrapperBuilder().deleteClient(clientId).withJson(apiRequestBodyAsJson).build();
+             result = this.commandsSourceWritePlatformService.logCommandSource(commandRequest);
         }
         if (result == null) {
             throw new UnrecognizedQueryParamException("command", commandParam, new Object[] { "activate" });

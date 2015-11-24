@@ -50,7 +50,7 @@ public class TicketMaster {
 	private String resolutionDescription;
 	
 	@Column(name = "assigned_to")
-	private Integer assignedTo;
+	private Long assignedTo;
 
 	@Column(name = "source")
 	private String source;
@@ -75,6 +75,10 @@ public class TicketMaster {
 	
 	@Column(name = "lastmodified_date")
 	private Date lastModifydate;
+	
+	@Column(name="issue")
+	private String issue;
+	
 
 	public TicketMaster() {
 		
@@ -85,8 +89,8 @@ public class TicketMaster {
 		final String priority = command.stringValueOfParameterNamed("priority");
 		final Integer problemCode = command.integerValueOfParameterNamed("problemCode");
 		final String description = command.stringValueOfParameterNamed("description");
-		final Integer assignedTo = command.integerValueOfParameterNamed("assignedTo");
-		
+		final Long assignedTo = command.longValueOfParameterNamed("assignedTo");
+		final String issue = command.stringValueOfParameterNamed("issue");
 		final LocalDate startDate = command.localDateValueOfParameterNamed("ticketDate");
 		final String startDateString = startDate.toString() + command.stringValueOfParameterNamed("ticketTime");
 		final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -103,12 +107,12 @@ public class TicketMaster {
 		}else{
 			dueTime = dateFormat.parse(dueDate);
 		}
-	
-		return new TicketMaster(clientId, priority,ticketDate, problemCode,description,statusCode, null, 
-					assignedTo, null, null, null, sourceOfTicket, dueTime);
+		final String status = command.stringValueOfParameterNamed("status");
+		return new TicketMaster(clientId, priority,ticketDate, problemCode,description,statusCode, 
+					assignedTo, null, null, null, sourceOfTicket, dueTime,issue,status );
 	}
 
-	public TicketMaster(final Integer statusCode, final Integer assignedTo) {
+	public TicketMaster(final Integer statusCode, final Long assignedTo) {
 		
 		this.clientId = null;
 		this.priority = null;
@@ -125,16 +129,16 @@ public class TicketMaster {
 	}
 
 	public TicketMaster(final Long clientId, final String priority, final Date ticketDate, final Integer problemCode,
-			final String description, final String status, final String resolutionDescription, 
-			final Integer assignedTo, final Integer statusCode, final Date createdDate, final Integer createdbyId,
-			final String sourceOfTicket, final Date dueTime) {
+			final String description, final String resolutionDescription, 
+			final Long assignedTo, final Integer statusCode, final Date createdDate, final Integer createdbyId,
+			final String sourceOfTicket, final Date dueTime, final String issue, final String status) {
 		
 		this.clientId = clientId;
 		this.priority = priority;
 		this.ticketDate = ticketDate;
 		this.problemCode = problemCode;
 		this.description = description;
-		this.status = "OPEN";
+		this.status = status;
 		this.statusCode = statusCode;
 		this.source = "Manual";
 		this.resolutionDescription = resolutionDescription;
@@ -143,6 +147,7 @@ public class TicketMaster {
 		this.createdbyId = null;
 		this.sourceOfTicket = sourceOfTicket;
 		this.dueDate = dueTime;
+		this.issue =issue;
 		
 	}
 
@@ -186,7 +191,7 @@ public class TicketMaster {
 		return resolutionDescription;
 	}
 
-	public Integer getAssignedTo() {
+	public Long getAssignedTo() {
 		return assignedTo;
 	}
 	
@@ -228,6 +233,13 @@ public class TicketMaster {
 	 */
 	public void setCreatedbyId(final Long createdbyId) {
 		this.createdbyId = createdbyId;
+	}
+	public String getIssue() {
+		return issue;
+	}
+
+	public void setIssue(String issue) {
+		this.issue = issue;
 	}
 	
 }

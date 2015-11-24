@@ -8,6 +8,7 @@ import org.joda.time.LocalDate;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.infrastructure.core.service.DateUtils;
 import org.mifosplatform.organisation.mcodevalues.data.MCodeData;
+import org.mifosplatform.portfolio.client.data.ClientData;
 
 public class TicketMasterData {
 	
@@ -34,7 +35,10 @@ public class TicketMasterData {
 	private String sourceOfTicket;
 	private Date dueDate;
 	private String resolutionDescription;
+	private String issue;
 	private String ticketstatus;
+	private ClientData clientData;
+	private String assignFrom;
 	
   	public TicketMasterData(final List<EnumOptionData> statusType,
 			final List<EnumOptionData> priorityType) {
@@ -54,7 +58,7 @@ public class TicketMasterData {
 
 	public TicketMasterData(final Long id, final String priority, final String status, final Integer assignedTo, 
 			final LocalDate ticketDate, final String lastComment, final String problemDescription, final String userName, 
-			final String sourceOfTicket, final Date dueDate, final String description, final String resolutionDescription,
+			final String sourceOfTicket, final Date dueDate, final String description, final String issue,
 			final Integer problemCode, final Integer statusCode, String ticketstatus) {
 		
 		this.id = id;
@@ -68,7 +72,7 @@ public class TicketMasterData {
 		this.sourceOfTicket = sourceOfTicket;
 		this.dueDate = dueDate;
 		this.statusDescription = description;
-		this.resolutionDescription = resolutionDescription;
+		this.setIssue(issue);
 		this.problemCode = problemCode;
 		this.statusCode = statusCode;
 		this.ticketstatus = ticketstatus;
@@ -82,12 +86,14 @@ public class TicketMasterData {
 	}
 
 	public TicketMasterData(final Long id, final LocalDate createdDate,
-			final String assignedTo, final String description, final String fileName) {
+			final String assignedTo, final String description, final String fileName, final String assignFrom,final String status) {
 		 this.id = id;
 		 this.createdDate = createdDate;
 		 this.assignedTo = assignedTo;
 	     this.attachedFile = fileName;
 	     this.statusDescription = description;
+	     this.setAssignFrom(assignFrom);
+	     this.status= status;
 	}
 
 	public TicketMasterData(final String description, final List<TicketMasterData> data) {
@@ -179,6 +185,53 @@ public class TicketMasterData {
 
 	public void setProblemsDatas(Collection<MCodeData> problemsDatas) {
 		this.problemsDatas = problemsDatas;
+	}
+
+	public void clientData(ClientData clientData) {
+		
+		this.setClientData(clientData);
+	}
+
+	/**
+	 * @return the clientData
+	 */
+	public ClientData getClientData() {
+		return clientData;
+	}
+
+	/**
+	 * @param clientData the clientData to set
+	 */
+	public void setClientData(ClientData clientData) {
+		this.clientData = clientData;
+	}
+
+	/**
+	 * @return the assignFrom
+	 */
+	public String getAssignFrom() {
+		return assignFrom;
+	}
+
+	/**
+	 * @param assignFrom the assignFrom to set
+	 */
+	public void setAssignFrom(String assignFrom) {
+		this.assignFrom = assignFrom;
+	}
+
+	/**
+	 * @return the issue
+	 */
+	public String getIssue() {
+		return issue;
+	}
+
+	/**
+	 * @param issue the issue to set
+	 */
+	public void setIssue(String issue) {
+		this.issue = issue;
 	}
 	
 	

@@ -123,7 +123,6 @@ public final class Client extends AbstractPersistable<Long> {
     @JoinColumn(name = "closedon_userid", nullable = true)
     private AppUser closeddBy;
     
-
     @ManyToMany
     @JoinTable(name = "m_group_client", joinColumns = @JoinColumn(name = "client_id"), inverseJoinColumns = @JoinColumn(name = "group_id"))
     private Set<Group> groups;
@@ -135,21 +134,20 @@ public final class Client extends AbstractPersistable<Long> {
     @Temporal(TemporalType.DATE)
     private Date closureDate;
     
-    
-    @Column(name = "exempt_tax",nullable = false)
-	private char taxExemption='N';
-    
+	@Column(name = "exempt_tax", nullable = false)
+	private char taxExemption = 'N';
 
-    @Column(name = "bill_mode",nullable = true)
-   	private String billMode;
+	@Column(name = "bill_mode", nullable = true)
+	private String billMode;
 
-    @Column(name = "is_indororp",nullable = false)
- 	private String entryType;
-    
-    @Column(name = "parent_id",nullable = true)
- 	 private Long parentId;
+	@Column(name = "is_indororp", nullable = false)
+	private String entryType;
 
+	@Column(name = "parent_id", nullable = true)
+	private Long parentId;
 
+	@Column(name = "registration_fee", nullable = true)
+	private Long registrationFee;
 
     public static Client createNew(final Office clientOffice, final Group clientParentGroup, final JsonCommand command) {
 
@@ -184,14 +182,13 @@ public final class Client extends AbstractPersistable<Long> {
 	    ClientStatus status =  ClientStatus.NEW;
 	    final boolean active = true;
        
-
-        
+       
         if (active) {
             status = ClientStatus.NEW;
-            if(activationDate == null){
-         	   activationDate = DateUtils.getLocalDateOfTenant();
-            }
-           
+           if(activationDate == null){
+        	   activationDate = DateUtils.getLocalDateOfTenant();
+           }
+          
         }
 
         return new Client(status, clientOffice, clientParentGroup, accountNo, firstname, middlename, lastname, fullname, activationDate,
@@ -662,8 +659,6 @@ public final class Client extends AbstractPersistable<Long> {
 	public String getBillMode() {
 		return billMode;
 	}
-	
-	
 
 	public void setBillMode(final String billMode) {
 		this.billMode = billMode;
@@ -682,6 +677,14 @@ public final class Client extends AbstractPersistable<Long> {
 
 	public void setParentId(final Long parentId) {
 		this.parentId = parentId;
+	}
+
+	public Long getRegistrationFee() {
+		return registrationFee;
+	}
+
+	public void setRegistrationFee(Long registrationFee) {
+		this.registrationFee = registrationFee;
 	}
    
 }

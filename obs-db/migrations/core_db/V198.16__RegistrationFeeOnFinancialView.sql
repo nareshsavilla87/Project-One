@@ -2,18 +2,17 @@ SET SQL_SAFE_UPDATES=0;
 CREATE 
      OR REPLACE 
 VIEW `fin_trans_vw` AS
-    select distinct
+select distinct
         `b_invoice`.`id` AS `transId`,
         `m_appuser`.`username` AS `username`,
         `b_invoice`.`client_id` AS `client_id`,
-        if(((`b_charge`.`charge_type` = 'NRC') and (`b_charge`.`priceline_id` = 0)),
+        if((`b_charge`.`charge_type` = 'NRC'),
             'Once',
             'Periodic') AS `tran_type`,
         cast(`b_invoice`.`invoice_date` as date) AS `transDate`,
-		if(((`b_charge`.`charge_type` = 'NRC')
-                and (`b_charge`.`priceline_id` < 0)),
-            'SERVICE TRANSFER',
-            'INVOICE') AS `transType`,
+	(CASE WHEN (`b_charge`.`priceline_id`= -1 && `b_charge`.`charge_type` = 'NRC') THEN 'SERVICE TRANSFER'
+             WHEN (`b_charge`.`priceline_id`= -2 && `b_charge`.`charge_type` = 'NRC' ) THEN 'REGISTRATION FEE'      
+            ELSE 'INVOICE' END ) AS `transType`,
         if((`b_invoice`.`invoice_amount` > 0),
             `b_invoice`.`invoice_amount`,
             0) AS `dr_amt`,
@@ -28,7 +27,7 @@ VIEW `fin_trans_vw` AS
     where
         ((`b_invoice`.`createdby_id` = `m_appuser`.`id`)
             and (`b_invoice`.`id` = `b_charge`.`invoice_id`)
-            and (`b_invoice`.`invoice_date` <= now())) group by `b_invoice`.`id`
+            and (`b_invoice`.`invoice_date` <= now())) group by `b_invoice`.`id` 
     union all select distinct
         `b_adjustments`.`id` AS `transId`,
         `m_appuser`.`username` AS `username`,
@@ -164,5 +163,26 @@ WHERE name='align-biiling-cycle';
 
 SET @ID=(SELECT id FROM m_code WHERE code_name='Transaction Type');
 INSERT IGNORE INTO m_code_value VALUES(null, @id,'Registration Fee','4');
+
+INSERT IGNORE INTO c_configuration VALUES(NULL,'is-registration-fee',0,NULL,'Client','if this flag enabled registration fee charges taking option appeared while creating a customer');
+INSERT IGNORE INTO c_configuration VALUES(NULL,'is-cancel-registration-fee',0,NULL,'Client','if this flag enabled,If we taken Registration fee charges from customer that charges return to him while closing customer');
+
+
+DROP PROCEDURE  IF EXISTS registrationFee;
+DELIMITER //
+CREATE PROCEDURE registrationFee() 
+BEGIN
+  IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME ='m_client'
+      AND COLUMN_NAME ='registration_fee') THEN
+ALTER TABLE m_client ADD COLUMN registration_fee bigint(20) DEFAULT NULL AFTER parent_id;
+END IF;
+END //
+DELIMITER ;
+call registrationFee();
+DROP PROCEDURE  IF EXISTS registrationFee;
+
+
 
 

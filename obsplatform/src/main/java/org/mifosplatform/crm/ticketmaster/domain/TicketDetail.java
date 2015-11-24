@@ -34,47 +34,58 @@ public class TicketDetail {
 	private String attachments;
 	
 	@Column(name = "assigned_to")
-	private Integer assignedTo;
+	private Long assignedTo;
 	
 	@Column(name = "created_date")
 	private Date createdDate;
 	
 	@Column(name = "createdby_id")
 	private Long createdbyId;
-
 	
-	public TicketDetail() {
-		
-	}
+	@Column(name="Assign_from")
+	private String assignFrom;
+
 	
 	public static TicketDetail fromJson(final JsonCommand command) throws ParseException {
 	
-		final Integer assignedTo = command.integerValueOfParameterNamed("assignedTo");
+		final Long assignedTo = command.longValueOfParameterNamed("assignedTo");
 		final String description  = command.stringValueOfParameterNamed("description");
-	
 		final LocalDate startDate = command.localDateValueOfParameterNamed("ticketDate");
 		final String startDateString = startDate.toString() + command.stringValueOfParameterNamed("ticketTime");
 		final DateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		final Date ticketDate = df.parse(startDateString);
-	
-		return new TicketDetail(assignedTo, description, ticketDate);
+		final String assignFrom = command.stringValueOfParameterNamed("assignFrom");
+		return new TicketDetail(assignedTo, description, ticketDate, assignFrom);
 	}
 
-	public TicketDetail(final Integer assignedTo, final String description, final Date ticketDate) {
+	public TicketDetail(final Long assignedTo, final String description, final Date ticketDate, final String assignFrom ) {
 		this.assignedTo = assignedTo;
-		this.comments = description;
+		this.comments = null;
 		this.createdDate = ticketDate;
+		this.assignFrom = assignFrom;
 	}
 
 	public TicketDetail(final Long ticketId, final String comments, final String fileLocation,
-			final Integer assignedTo, final Long createdbyId) {
+			final Long assignedTo, final Long createdbyId, final String assignFrom) {
     
 		this.ticketId = ticketId;
-        this.comments = comments;
+        if(comments==""||comments=="undefined"||comments==null){
+        	   this.comments = "undefined";
+        }else{        
+        	this.comments = comments;
+        	}
         this.attachments = fileLocation;
         this.assignedTo = assignedTo;
         this.createdDate = DateUtils.getLocalDateOfTenant().toDate();
         this.createdbyId = createdbyId;	
+        this.assignFrom = assignFrom;
+	}
+
+	public TicketDetail(Long id, Long assignedTo, String assignFrom) {
+		
+		this.id=id;
+		this.assignedTo = assignedTo;
+		this.assignFrom = assignFrom;
 	}
 
 	public Long getId() {
@@ -97,7 +108,7 @@ public class TicketDetail {
 		return attachments;
 	}
 
-	public Integer getAssignedTo() {
+	public Long getAssignedTo() {
 		return assignedTo;
 	}
 
@@ -113,6 +124,14 @@ public class TicketDetail {
 		this.attachments = attachments;
 	}
 	
-	
+
+	public String getAssignFrom() {
+		return assignFrom;
+	}
+
+	public void setAssignFrom(String assignFrom) {
+		this.assignFrom = assignFrom;
+	}
+
 	
 }
