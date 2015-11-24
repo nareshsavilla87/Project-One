@@ -204,6 +204,7 @@ public class TicketMaster {
 		this.assignedTo = command.getAssignedTo();
 		this.priority = command.getPriority();
 		this.problemCode = command.getProblemCodeId();
+		this.resolutionDescription = command.getResolutionDescription();
 	}
 
 	public void closeTicket(final JsonCommand command, final Long userId) {

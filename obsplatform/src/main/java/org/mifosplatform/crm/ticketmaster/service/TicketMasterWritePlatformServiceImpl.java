@@ -96,15 +96,21 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
         }else{
         	assignFrom = user.getUsername();
         }
-		TicketDetail detail = new TicketDetail(ticketId,ticketMasterCommand.getComments(),fileLocation,ticketMasterCommand.getAssignedTo(),createdbyId,assignFrom);
+		TicketDetail detail = new TicketDetail(ticketId,ticketMasterCommand.getComments(),fileLocation,ticketMasterCommand.getAssignedTo(),createdbyId,assignFrom,ticketMasterCommand.getStatus());
          /*TicketMaster master = new TicketMaster(ticketMasterCommand.getStatusCode(), ticketMasterCommand.getAssignedTo());*/
          TicketMaster ticketMaster = this.ticketMasterRepository.findOne(ticketId);
          ticketMaster.updateTicket(ticketMasterCommand);
          this.ticketMasterRepository.save(ticketMaster);
         	 this.ticketDetailsRepository.save(detail);
-  		this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_EDIT_TICKET, ticketMaster.getClientId(), ticketMaster.getId().toString(), ticketURL);
-  		this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, ticketMaster.getClientId(), ticketMaster.getId().toString(), "UPDATE TICKET");
-		
+        	 if("Closed".equalsIgnoreCase(ticketMasterCommand.getStatus()))
+        	 {
+        		 this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_CLOSE_TICKET, ticketMaster.getClientId(), ticketMaster.getId().toString(), ticketURL);
+ 		  		 this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, ticketMaster.getClientId(), ticketMaster.getId().toString(), "CLOSE TICKET");
+ 				
+        	 }else{
+        		 this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_EDIT_TICKET, ticketMaster.getClientId(), ticketMaster.getId().toString(), ticketURL);
+        	  	this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, ticketMaster.getClientId(), ticketMaster.getId().toString(), "UPDATE TICKET");
+        	 }
          return detail.getId();
 
 	 	}

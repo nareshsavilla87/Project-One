@@ -23,7 +23,6 @@ import org.mifosplatform.crm.ticketmaster.domain.TicketMasterRepository;
 import org.mifosplatform.crm.ticketmaster.service.TicketMasterReadPlatformService;
 import org.mifosplatform.crm.userchat.domain.UserChat;
 import org.mifosplatform.crm.userchat.domain.UserChatRepository;
-import org.mifosplatform.crm.userchat.service.UserChatWriteplatformService;
 import org.mifosplatform.finance.billingorder.api.BillingOrderApiResourse;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBilling;
 import org.mifosplatform.finance.paymentsgateway.domain.PaypalRecurringBillingRepository;
@@ -54,8 +53,6 @@ import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestDetail
 import org.mifosplatform.provisioning.processrequest.domain.ProcessRequestRepository;
 import org.mifosplatform.provisioning.provisioning.api.ProvisioningApiConstants;
 import org.mifosplatform.useradministration.data.AppUserData;
-import org.mifosplatform.useradministration.domain.AppUser;
-import org.mifosplatform.useradministration.domain.AppUserRepository;
 import org.mifosplatform.useradministration.service.AppUserReadPlatformService;
 import org.mifosplatform.workflow.eventaction.data.ActionDetaislData;
 import org.mifosplatform.workflow.eventaction.data.EventActionProcedureData;
@@ -179,18 +176,21 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				          AppUserData user = this.readPlatformService.retrieveUser(new Long(data.getUserId()));
 				          BillingMessageTemplate billingMessageTemplate = this.messageTemplateRepository.findByTemplateDescription(BillingMessageTemplateConstants.MESSAGE_TEMPLATE_TICKET_TEMPLATE);
 				          if(billingMessageTemplate !=null){
-				          String value=ticketURL+""+resourceId;
-				          String removeUrl="<br/><b>URL : </b>"+"<a href="+value+">View Ticket</a>";
+				          @SuppressWarnings("unused")
+						String value=ticketURL+""+resourceId;
+				         /* String removeUrl="<br/><b>URL : </b>"+"<a href="+value+">View Ticket</a>";*/
 				          Client client =this.clientRepository.findOne(clientId);
 				         // removeUrl.replaceAll("(PARAMURL)", ticketURL+""+resourceId); 	
 				        	if(detailsData.getEventName().equalsIgnoreCase(EventActionConstants.EVENT_CREATE_TICKET)){
 				        	  	if(!user.getEmail().isEmpty()){
 				        	  		billingMessage = new BillingMessage(
-				        	  				"Hi Sir,<br/><br/> Issue has been created by"+client.getDisplayName()+"in OBS. Following are the Issue details <br/>",
-				        	  				"IssueId:"+ticketMaster.getId()+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date:"+ticketMaster.getCreatedDate()+"<br/>"
-				        	  				+"Status:"+ticketMaster.getStatus()+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assigned To:"+user.username()+"<br/>"
-				        	  				+"Description :"+ticketMaster.getDescription(), "", user.getEmail(), client.getEmail(),
-									 "Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
+				        	  				"Hi Sir,<br/><br/> Issue has been created by &nbsp;<b>"+client.getDisplayName()+"</b> &nbsp; in OBS. Following are the Issue details <br/>",
+				        	  				"<b>IssueId:</b>"+ticketMaster.getId()+
+				        	  				" <br/><b>Date:</b>"+ticketMaster.getCreatedDate()+
+				        	  				"<br/><b>Status:</b>"+ticketMaster.getStatus()+
+				        	  				"<br/><b>Assigned To:</b>"+user.username()+
+				        	  				"<br/><b>Description:</b>"+ticketMaster.getDescription(),"<br/><br/> <b>Thank You </b>", user.getEmail(), client.getEmail(),
+				        	  				"Ticket", BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
 									 BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 				        	  		this.messageDataRepository.save(billingMessage);
 				        	  	}else{
@@ -200,11 +200,13 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	  		}else{
 				        	  			
 				        	  			billingMessage = new BillingMessage(
-				        	  					"Hi Sir,<br/><br/> Ticket has been created by"+client.getDisplayName()+"in OBS. Following are the Ticket details <br/>",
-					        	  				"IssueId:"+ticketMaster.getId()+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Date:"+ticketMaster.getCreatedDate()+"<br/>"
-					        	  				+"Status:"+ticketMaster.getStatus()+"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Assigned To:"+user.username()+"<br/>"
-					        	  				+"Description :"+ticketMaster.getDescription(),"", actionProcedureData.getEmailId(), actionProcedureData.getEmailId(),
-					        	  				"Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
+				        	  					"Hi Sir,<br/><br/> Ticket has been created by &nbsp;<b>"+client.getDisplayName()+"</b> &nbsp; in OBS. Following are the Ticket details <br/>",
+				        	  					"<b>IssueId:</b>"+ticketMaster.getId()+
+					        	  				" <br/><b>Date:</b>"+ticketMaster.getCreatedDate()+
+					        	  				"<br/><b>Status:</b>"+ticketMaster.getStatus()+
+					        	  				"<br/><b>AssignedTo:</b>"+user.username()+
+					        	  				"<br/><b>Description:</b>"+ticketMaster.getDescription(),"<br/><br/><b>Thank You</b>", actionProcedureData.getEmailId(), actionProcedureData.getEmailId(),
+					        	  				"Ticket", BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
 					        	  				BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 				        	  					this.messageDataRepository.save(billingMessage);
 				        	  		}
@@ -213,24 +215,42 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	}else if(detailsData.getEventName().equalsIgnoreCase(EventActionConstants.EVENT_EDIT_TICKET)){
 				        	  		
 				        	    if(!user.getEmail().isEmpty()){
-				        	    	
-				        	  		billingMessage = new BillingMessage(
-				        	  				"Dear"+client.getDisplayName()+",<br/>","Your IssueId &nbsp;<b>"+ticketMaster.getId()+ "</b> hasbeen Assigned To: <b>"+user.username()+"</b>"+
-				        	  				"<br/>Status is:  <b>"+ticketMaster.getStatus()+"</b>  and COMMENT: "+data.getLastComment()+"<br/>", "<b>Thank You</b>", client.getEmail(), user.getEmail(),
-									"Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
-									BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
-				        	  		this.messageDataRepository.save(billingMessage);
-				        	  	
+				        	    	if("undefined".equalsIgnoreCase("data.getLastComment()")){
+				        	    		billingMessage = new BillingMessage(
+					        	  				"Dear &nbsp; <b>"+client.getDisplayName()+"</b>,<br/><br/>","Your IssueId &nbsp;<b>"+ticketMaster.getId()+"</b>"+
+					        	  				"<br/> hasbeen<b> Assigned To: </b>"+user.username()+
+					        	  				"<br/> <b>Status is:  </b>"+ticketMaster.getStatus()+
+					        	  				"<br/><br/>", "<b>Thank You</b>", 
+					        	  				client.getEmail(), user.getEmail(),	"Ticket", BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
+					        	  				BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
+					        	  		this.messageDataRepository.save(billingMessage);
+					        	  	
+				        	    		
+				        	    	}else{
+				        	    		billingMessage = new BillingMessage(
+					        	  				"Dear &nbsp; <b>"+client.getDisplayName()+"</b>,<br/><br/>","Your IssueId &nbsp;<b>"+ticketMaster.getId()+"</b>"+
+					        	  				"<br/> hasbeen<b> Assigned To: </b>"+user.username()+
+					        	  				"<br/> <b>Status is:  </b>"+ticketMaster.getStatus()+
+					        	  				"<br/> <b>COMMENT: </b> "+data.getLastComment()+
+					        	  				"<br/><br/>", "<b>Thank You</b>", 
+					        	  				client.getEmail(), user.getEmail(),	"Ticket", BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
+					        	  				BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
+					        	  		this.messageDataRepository.save(billingMessage);
+				        	    	}
+				        	  		
 				        	    }else{
 				        	  		
 				        	  		if(actionProcedureData.getEmailId().isEmpty()){
 					        	  			throw new EmailNotFoundException(new Long(data.getUserId()));	
 					        	  	}else{
 					        	  		billingMessage = new BillingMessage(
-					        	  				"Dear"+client.getDisplayName()+",<br/>","Your IssueId &nbsp;<b>"+ticketMaster.getId()+ "</b> hasbeen Assigned To: <b>"+user.username()+"</b>"+
-							        	  				"<br/>Status is:  <b>"+ticketMaster.getStatus()+"</b>  and COMMENT: "+data.getLastComment()+"<br/>", "<b>Thank You</b>", actionProcedureData.getEmailId(),
-					        	  	     actionProcedureData.getEmailId(),"Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
-					        	  	     BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
+					        	  				"Dear &nbsp;<b>"+client.getDisplayName()+"</b>,<br/><br/>","Your IssueId &nbsp;<b>"+ticketMaster.getId()+
+					        	  				"<br/> <b> hasbeen Assigned To: </b>"+user.username()+
+							        	  		"<br/><b> Status is: </b> "+ticketMaster.getStatus()+
+							        	  		"<br/> <b>  COMMENT: </b>"+data.getLastComment()+
+							        	  		"<br/><br/>", "<b>Thank You</b>", actionProcedureData.getEmailId(),
+							        	  		actionProcedureData.getEmailId(),"Ticket", BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
+							        	  		BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 						        	  		this.messageDataRepository.save(billingMessage);
 					        	  	}
 				        	  	}
@@ -238,19 +258,25 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 				        	}else if(detailsData.getEventName().equalsIgnoreCase(EventActionConstants.EVENT_CLOSE_TICKET)){
 				        		
 				        	  	if(!user.getEmail().isEmpty()){
-				        	  			billingMessage = new BillingMessage("CLOSED TICKET", data.getProblemDescription()+"<br/>"
-				        	  			+ticketMaster.getDescription()+"<br/>"+"RESOLUTION: \t"+ticketMaster.getResolutionDescription()+"<br/>"+removeUrl, "", user.getEmail(), user.getEmail(),
-										"Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
-										BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
+				        	  			billingMessage = new BillingMessage(
+				        	  					"Dear &nbsp;<b>"+client.getDisplayName()+"</b>,<br/><br/>","Your IssueId &nbsp;<b>"+ticketMaster.getId()+ "</b> &nbsp; was closed  Following are the Ticket details <br/>"+
+				        	  					"<br/><b>Description:</b>"+ticketMaster.getDescription()+
+				        	  					"<br/> <b>RESOLUTION:</b>"+ticketMaster.getResolutionDescription()+
+				        	  					"<br/><br/>", "<b>Thank You</b>", user.getEmail(), user.getEmail(),
+				        	  					"Ticket", BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
+				        	  					BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 				        	  			this.messageDataRepository.save(billingMessage);
 				        	  	}else{
 				        	  		if(actionProcedureData.getEmailId().isEmpty()){
 					        	  		throw new EmailNotFoundException(new Long(data.getUserId()));	
 					        	  	}else{
-					        	  		     billingMessage = new BillingMessage("CLOSED TICKET", data.getProblemDescription()+"<br/>"
-					        	  		    +ticketMaster.getDescription()+"<br/>"+"RESOLUTION: \t"+ticketMaster.getResolutionDescription()+"<br/>"+removeUrl, "", actionProcedureData.getEmailId(),
-					        	  	         actionProcedureData.getEmailId(),"Ticket:"+resourceId, BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
-					        	  	       BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
+					        	  		     billingMessage = new BillingMessage(
+					        	  		    		"Dear &nbsp;<b>"+client.getDisplayName()+"</b>,<br/><br/>","Your IssueId &nbsp;<b>"+ticketMaster.getId()+ "was closed  Following are the Ticket details <br/>"+
+							        	  			"<br/><b>Description:</b>"+ticketMaster.getDescription()+
+							        	  			"<br/> <b>RESOLUTION:</b>"+ticketMaster.getResolutionDescription()+
+							        	  			"<br/><br/>", "<b>Thank You</b>", user.getEmail(), user.getEmail(),
+							        	  			"Ticket", BillingMessageTemplateConstants.MESSAGE_TEMPLATE_STATUS, billingMessageTemplate,
+							        	  			BillingMessageTemplateConstants.MESSAGE_TEMPLATE_MESSAGE_TYPE, null);
 						        	        this.messageDataRepository.save(billingMessage);
 					        	  }
 				        	  	}

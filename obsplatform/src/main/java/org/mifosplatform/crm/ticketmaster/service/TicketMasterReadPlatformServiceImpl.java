@@ -139,7 +139,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 		public String clientOrderLookupSchema() {
 				
 		return "tckt.id as id, tckt.priority as priority, tckt.ticket_date as ticketDate, tckt.assigned_to as userId,tckt.source_of_ticket as sourceOfTicket, "
-					+" tckt.problem_code as problemCode, tckt.status_code as statusCode, tckt.due_date as dueDate," +
+					+" tckt.problem_code as problemCode, tckt.status_code as statusCode, tckt.due_date as dueDate, tckt.resolution_description as resolutionDescription," +
 					"(SELECT code_value FROM m_code_value mcv WHERE  tckt.status_code = mcv.id) AS ticketstatus," +
 					" tckt.issue as issue,tckt.description as description, "
 			        + " (select code_value from m_code_value mcv where tckt.problem_code=mcv.id)as problemDescription," 
@@ -168,12 +168,12 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 			final Date dueDate = resultSet.getTimestamp("dueDate");
 			final String issue = resultSet.getString("issue");
 			final String description = resultSet.getString("description");
-			final String ticketstatus = resultSet.getString("ticketstatus");
 			final Integer problemCode = resultSet.getInt("problemCode");
 			final Integer statusCode = resultSet.getInt("statusCode");
+			final String resolutionDescription = resultSet.getString("resolutionDescription");
 			
 			return new TicketMasterData(id, priority, status, userId, ticketDate, LastComment, problemDescription, assignedTo, sourceOfTicket,
-					dueDate, description, issue, problemCode, statusCode,ticketstatus);
+					dueDate, description, issue, problemCode, statusCode,resolutionDescription);
 		}
 	}
 
@@ -219,7 +219,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 
 		public String schema() {
 				return " t.id AS id,t.created_date AS createDate,user.username AS assignedTo,t.comments as description, t.assign_from as assignFrom, " +
-						" t.attachments AS attachments, tm.status as status  FROM b_ticket_master tm , b_ticket_details t  "
+						" t.attachments AS attachments, t.status as status  FROM b_ticket_master tm , b_ticket_details t  "
 						+" inner join m_appuser user on user.id = t.assigned_to ";
 
 		}
