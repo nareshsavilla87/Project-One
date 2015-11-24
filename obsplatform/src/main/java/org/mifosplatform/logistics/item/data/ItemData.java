@@ -11,9 +11,7 @@ import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.infrastructure.core.data.EnumOptionData;
 import org.mifosplatform.logistics.itemdetails.data.InventoryGrnData;
 import org.mifosplatform.organisation.feemaster.data.FeeMasterData;
-import org.mifosplatform.organisation.office.data.OfficeData;
 import org.mifosplatform.organisation.region.data.RegionData;
-import org.mifosplatform.organisation.staff.data.StaffData;
 
 public class ItemData {
 	

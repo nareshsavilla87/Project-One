@@ -163,7 +163,8 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 					payment.updateBillId(billId);
 					this.paymentRepository.save(payment);
 				}
-				else if ("SERVICE_CHARGES".equalsIgnoreCase(transIds.getTransactionType())) {
+				else if ("SERVICE_CHARGES".equalsIgnoreCase(transIds.getTransactionType())
+						|| "REGISTRATION_FEE".equalsIgnoreCase(transIds.getTransactionType())) {
 					BillingOrder billingOrder = this.billingOrderRepository.findOne(transIds.getTransactionId());
 					billingOrder.updateBillId(billId);
 					this.billingOrderRepository.save(billingOrder);
@@ -221,7 +222,8 @@ public class BillMasterWritePlatformServiceImplementation implements BillMasterW
 			billingDetails = billMaster.getBillDetails();
 			for(final BillDetail billDetail:billingDetails){  
 				
-				if ("SERVICE_CHARGES".equalsIgnoreCase(billDetail.getTransactionType())) {
+				if ("SERVICE_CHARGES".equalsIgnoreCase(billDetail.getTransactionType())
+						 || "REGISTRATION_FEE".equalsIgnoreCase(billDetail.getTransactionType())) {
 					BillingOrder billingOrder = this.billingOrderRepository.findOne(billDetail.getTransactionId());
 					billingOrder.updateBillId(null);
 					this.billingOrderRepository.save(billingOrder);

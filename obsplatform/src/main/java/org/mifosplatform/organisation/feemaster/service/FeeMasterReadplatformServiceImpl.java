@@ -50,8 +50,7 @@ public class FeeMasterReadplatformServiceImpl implements FeeMasterReadplatformSe
 				
 			}
 			@Override
-			public FeeMasterData mapRow(ResultSet rs, int rowNum)
-					throws SQLException {
+			public FeeMasterData mapRow(ResultSet rs, int rowNum) throws SQLException {
 			
 				final Long id = rs.getLong("id");
 				final String feeCode = rs.getString("feeCode");
@@ -63,6 +62,24 @@ public class FeeMasterReadplatformServiceImpl implements FeeMasterReadplatformSe
 				return new FeeMasterData(id,feeCode,feeDescription,transactionType,chargeCode,defaultFeeAmount,isRefundable);
 			
 			
+			}
+		
+			public String RegionWiseFeeDetailsSchema() {
+		
+				
+				return " fm.id AS id,fm.fee_code AS feeCode,fm.fee_description as feeDescription,fm.is_refundable as isRefundable,fm.transaction_type as transactionType," +
+						" fm.charge_code AS chargeCode,ifnull(truncate(fd.amount, 2),fm.default_fee_amount) AS defaultFeeAmount " +
+						" FROM b_fee_master fm  LEFT JOIN  b_client_address ca ON ca.client_id = ?  LEFT JOIN b_state s ON s.state_name = ca.state "+
+					    " LEFT JOIN b_priceregion_detail pd ON (pd.state_id = ifnull((SELECT DISTINCT c.id FROM b_fee_detail a, b_priceregion_detail b," +
+					    " b_state c,b_client_address d,b_fee_master m WHERE b.priceregion_id = a.region_id AND b.state_id = c.id" +
+					    " AND a.region_id = b.priceregion_id AND d.state = c.state_name AND d.address_key = 'PRIMARY'  AND d.client_id = ? " +
+					    " AND m.transaction_type = ? AND m.id = a.fee_id  AND a.is_deleted = 'N' AND m.is_deleted = 'N'), 0)  " +
+					    " AND pd.country_id = ifnull((SELECT DISTINCT  c.id FROM b_fee_detail a,b_priceregion_detail b, b_country c," +
+					    " b_state s, b_client_address d, b_fee_master m WHERE b.priceregion_id = a.region_id AND b.country_id = c.id" +
+					    " AND c.country_name = d.country  AND d.address_key = 'PRIMARY' AND d.client_id = ? AND m.transaction_type = ?" +
+					    " AND m.id = a.fee_id AND a.is_deleted = 'N' AND m.is_deleted = 'N'),0)) LEFT JOIN b_priceregion_master prm " +
+					    " ON prm.id = pd.priceregion_id LEFT JOIN b_fee_detail fd ON (fd.fee_id = fm.id AND fd.region_id = prm.id AND fd.is_deleted = 'N') "+
+					    " WHERE fm.transaction_type = ? AND fm.is_deleted = 'N' GROUP BY fm.id ";
 			}
 }
 
@@ -113,6 +130,24 @@ public class FeeMasterReadplatformServiceImpl implements FeeMasterReadplatformSe
 		
 		}catch (final EmptyResultDataAccessException e) {
 		    return null;
+		}
+	}
+
+
+	/* (non-Javadoc)
+	 * #retrieveCustomerRegionWiseFeeDetails(java.lang.Long, java.lang.String)
+	 */
+	@Override
+	public FeeMasterData retrieveCustomerRegionWiseFeeDetails(final Long clientId,final String RegistrationFee) {
+
+		try {
+			final FeeMasterDataMapper mapper = new FeeMasterDataMapper();
+			String sql = "select " + mapper.RegionWiseFeeDetailsSchema();
+			return this.jdbcTemplate.queryForObject(sql, mapper,new Object[] {clientId,clientId,RegistrationFee,
+					clientId,RegistrationFee,RegistrationFee});
+
+		} catch (final EmptyResultDataAccessException e) {
+			return null;
 		}
 	}
 

@@ -83,7 +83,8 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		BigDecimal depositRefundAmount =BigDecimal.ZERO;
 		
 		for (final BillDetail billDetail : billDetails) {
-			if ("SERVICE_CHARGES".equalsIgnoreCase(billDetail.getTransactionType())) {
+			if ("SERVICE_CHARGES".equalsIgnoreCase(billDetail.getTransactionType()) 
+					|| "REGISTRATION_FEE".equalsIgnoreCase(billDetail.getTransactionType())) {
 				if (billDetail.getAmount() != null)
 					chargeAmount = chargeAmount.add(billDetail.getAmount());
 				

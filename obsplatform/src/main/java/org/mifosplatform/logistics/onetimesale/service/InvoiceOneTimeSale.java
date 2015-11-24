@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.joda.time.LocalDate;
 import org.mifosplatform.billing.chargecode.domain.ChargeCodeMaster;
+import org.mifosplatform.billing.chargecode.domain.ChargeCodeRepository;
 import org.mifosplatform.billing.discountmaster.data.DiscountMasterData;
 import org.mifosplatform.billing.discountmaster.domain.DiscountDetails;
 import org.mifosplatform.billing.discountmaster.domain.DiscountMaster;
@@ -46,12 +47,14 @@ public class InvoiceOneTimeSale {
 	private final DiscountMasterRepository discountMasterRepository;
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final ClientRepositoryWrapper clientRepository;
+	private final ChargeCodeRepository chargeCodeRepository;
 	
 	@Autowired
 	public InvoiceOneTimeSale(final GenerateBill generateBill,final BillingOrderWritePlatformService billingOrderWritePlatformService,
 			final GenerateBillingOrderService generateBillingOrderService,final GenerateDisconnectionBill generateDisconnectionBill,
 			final GenerateReverseBillingOrderService generateReverseBillingOrderService,final DiscountMasterRepository discountMasterRepository,
-			final ClientRepositoryWrapper clientRepository,final BillingOrderReadPlatformService billingOrderReadPlatformService) {
+			final ClientRepositoryWrapper clientRepository,final BillingOrderReadPlatformService billingOrderReadPlatformService,
+		    final ChargeCodeRepository chargeCodeRepository) {
 		
 		this.generateBill = generateBill;
 		this.billingOrderWritePlatformService = billingOrderWritePlatformService;
@@ -61,6 +64,7 @@ public class InvoiceOneTimeSale {
 		this.discountMasterRepository = discountMasterRepository;
 		this.billingOrderReadPlatformService = billingOrderReadPlatformService;
 		this.clientRepository = clientRepository;
+		this.chargeCodeRepository = chargeCodeRepository;
 
 
 	}
@@ -157,10 +161,11 @@ public class InvoiceOneTimeSale {
 	 * @param feeChargeAmount
 	 * @return invoice
 	 */
-	public Invoice calculateAdditionalFeeCharges(final ChargeCodeMaster chargeMaster,final Long orderId, final Long priceId, 
+	public Invoice calculateAdditionalFeeCharges(final String chargeCode,final Long orderId, final Long priceId, 
 			                      final Long clientId, final BigDecimal ChargeAmount) {
 		
 		List<BillingOrderCommand> billingOrderCommands = new ArrayList<BillingOrderCommand>();
+		ChargeCodeMaster chargeMaster = this.chargeCodeRepository.findOneByChargeCode(chargeCode);
 		List<InvoiceTaxCommand>  listOfTaxes = this.calculateTax(clientId, ChargeAmount,chargeMaster);
 		BillingOrderCommand billingOrderCommand = new BillingOrderCommand(orderId,priceId,clientId, DateUtils.getDateOfTenant(),
 				DateUtils.getDateOfTenant(),DateUtils.getDateOfTenant(),chargeMaster.getBillFrequencyCode(), chargeMaster.getChargeCode(),

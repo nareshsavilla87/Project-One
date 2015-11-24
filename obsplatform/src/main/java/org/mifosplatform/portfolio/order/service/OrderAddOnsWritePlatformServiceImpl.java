@@ -120,8 +120,6 @@ public CommandProcessingResult createOrderAddons(JsonCommand command,Long orderI
            throw new AddonEndDateValidationException(orderId);
 	    //	endDate = new LocalDate(order.getEndDate());
 	      }
-	    
-	    
 	   
 	    Client client=this.clientRepository.findOneWithNotFoundDetection(order.getClientId());
 	    HardwareAssociation association=this.hardwareAssociationRepository.findOneByOrderId(orderId);

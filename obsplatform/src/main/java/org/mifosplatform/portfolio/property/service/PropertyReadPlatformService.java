@@ -24,7 +24,7 @@ public interface PropertyReadPlatformService {
 
 	Page<PropertyDefinationData> retrieveAllPropertyMasterData(SearchSqlQuery searchPropertyDetails);
 
-	List<PropertyDefinationData> retrievPropertyType(String propertyType,String code, String paramLength);
+	List<PropertyDefinationData> retrievPropertyType(String propertyType,String code,String paramLength);
 
 	PropertyDefinationData retrieveSinglePropertyMaster(Long codeId);
 
