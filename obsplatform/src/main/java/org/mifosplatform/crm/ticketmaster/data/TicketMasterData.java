@@ -59,7 +59,7 @@ public class TicketMasterData {
 	public TicketMasterData(final Long id, final String priority, final String status, final Integer assignedTo, 
 			final LocalDate ticketDate, final String lastComment, final String problemDescription, final String userName, 
 			final String sourceOfTicket, final Date dueDate, final String description, final String issue,
-			final Integer problemCode, final Integer statusCode, String ticketstatus) {
+			final Integer problemCode, final Integer statusCode, final String resolutionDescription) {
 		
 		this.id = id;
 		this.priority = priority;
@@ -75,7 +75,7 @@ public class TicketMasterData {
 		this.setIssue(issue);
 		this.problemCode = problemCode;
 		this.statusCode = statusCode;
-		this.ticketstatus = ticketstatus;
+		this.resolutionDescription = resolutionDescription;
 		
 	}
 

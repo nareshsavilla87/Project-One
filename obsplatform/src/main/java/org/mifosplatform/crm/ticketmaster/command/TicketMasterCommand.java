@@ -40,8 +40,8 @@ public class TicketMasterCommand {
 		this.statusCode = null;
 	}
 	public TicketMasterCommand(final Long ticketId, final String comments, final String status,
-			final Long assignedTo, final Long createdbyId, final Integer statusCode,
-			final Integer problemCode, final String priority) {
+			final Long assignedTo, final Long createdbyId, final Integer statusCode, 
+			final Integer problemCode, final String priority,final String resolutionDescription) {
 		
 		this.id = null;
 		this.clientId = null;
@@ -50,7 +50,7 @@ public class TicketMasterCommand {
 		this.problemCode = null;
 		this.description = null;
 		this.status = status;
-		this.resolutionDescription = null;
+		this.resolutionDescription = resolutionDescription;
 		this.assignedTo = assignedTo;
 		this.comments = comments;
 		this.ticketId = ticketId;

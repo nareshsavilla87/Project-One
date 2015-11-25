@@ -221,7 +221,8 @@ public class DocumentManagementApiResource {
             @HeaderParam("Content-Length") Long fileSize, @FormDataParam("file") InputStream inputStream,
             @FormDataParam("file") FormDataContentDisposition fileDetails, @FormDataParam("file") FormDataBodyPart bodyPart,
             @FormDataParam("comments") String comments, @FormDataParam("status") String status, @FormDataParam("assignedTo") Long assignedTo,
-            @FormDataParam("ticketURL") String ticketURL, @FormDataParam("problemCode") Integer problemCode, @FormDataParam("priority") String priority) {
+            @FormDataParam("ticketURL") String ticketURL, @FormDataParam("problemCode") Integer problemCode, @FormDataParam("priority") String priority,
+            @FormDataParam("resolutionDescription") String resolutionDescription) {
 	   
 
         FileUtils.validateFileSizeWithinPermissibleRange(fileSize, null, ApiConstants.MAX_FILE_UPLOAD_SIZE_IN_MB);
@@ -236,7 +237,7 @@ public class DocumentManagementApiResource {
          * permissable
          **/
         Long createdbyId = context.authenticatedUser().getId();
-        TicketMasterCommand ticketMasterCommand=new TicketMasterCommand(ticketId,comments,status,assignedTo,createdbyId,null,problemCode,priority);
+        TicketMasterCommand ticketMasterCommand=new TicketMasterCommand(ticketId,comments,status,assignedTo,createdbyId,null,problemCode,priority, resolutionDescription);
         DocumentCommand documentCommand=null;
         if(fileDetails!=null&&bodyPart!=null){
          documentCommand = new DocumentCommand(null, null, entityType, entityId, null, fileDetails.getFileName(), fileSize,
