@@ -219,7 +219,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 
 		public String schema() {
 				return " t.id AS id,t.created_date AS createDate,user.username AS assignedTo,t.comments as description, t.assign_from as assignFrom, " +
-						" t.attachments AS attachments, t.status as status  FROM b_ticket_master tm , b_ticket_details t  "
+						" t.attachments AS attachments, t.status as status, t.username as username  FROM b_ticket_master tm , b_ticket_details t  "
 						+" inner join m_appuser user on user.id = t.assigned_to ";
 
 		}
@@ -235,12 +235,13 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 			final String attachments = resultSet.getString("attachments");
 			final String assignFrom = resultSet.getString("assignFrom");
 			final String status =resultSet.getString("status");
+			final String username = resultSet.getString("username");
 			String fileName=null;
 			if(attachments!=null){
 				File file=new File(attachments);
 				fileName=file.getName();
 			}
-			final TicketMasterData data = new TicketMasterData(id, createdDate, assignedTo, description, fileName,assignFrom,status);
+			final TicketMasterData data = new TicketMasterData(id, createdDate, assignedTo, description, fileName,assignFrom,status, username);
 
 			return data;
 		}
