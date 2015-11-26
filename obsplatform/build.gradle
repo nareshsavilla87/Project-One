@@ -194,8 +194,13 @@ dependencies {
                 [group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.8.12'],
                 [group: 'com.paypal.sdk',name: 'merchantsdk', version: '2.5.106'],
                 [group: 'net.sf.jasperreports',name: 'jasperreports-fonts', version:'5.6.1'],
+<<<<<<< HEAD
                 [group: 'com.itextpdf', name: 'itextpdf', version: '5.5.4'],
                 [group: 'net.authorize', name: 'anet-java-sdk', version: '1.8.5']
+=======
+                [group: 'net.authorize', name: 'anet-java-sdk', version: '1.8.5'],
+                [group: 'com.itextpdf', name: 'itextpdf', version: '5.5.4']
+>>>>>>> 2c5968f485d49a9adfe8440d93c2ba42cfa28240
                        
  	        )
 
