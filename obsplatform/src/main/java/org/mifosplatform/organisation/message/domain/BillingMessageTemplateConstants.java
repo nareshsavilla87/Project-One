@@ -15,6 +15,8 @@ public class BillingMessageTemplateConstants {
 	public static final String MESSAGE_TEMPLATE_INVOICE = "INVOICE_EMAIL";
 	public static final String MESSAGE_TEMPLATE_PAYMENT = "PAYMENT_EMAIL";
 	public static final String MESSAGE_TEMPLATE_NOTIFY_TECHNICAL_TEAM = "NOTIFY_TECHNICAL_TEAM";
+	public static final String MESSAGE_TEMPLATE_EDIT_TICKET = "EDIT TICKET";
+	public static final String MESSAGE_TEMPLATE_ClOSE_TICKET = "ClOSE TICKET";
 	
 	//SMS Configuration constants
 	public static final String MESSAGE_TEMPLATE_SMS_CREATE_SELFCARE = "SMS_CREATE_SELFCARE";
