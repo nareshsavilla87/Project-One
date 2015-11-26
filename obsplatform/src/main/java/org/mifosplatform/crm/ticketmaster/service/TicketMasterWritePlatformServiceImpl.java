@@ -96,7 +96,7 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
         }else{
         	assignFrom = user.getUsername();
         }
-		TicketDetail detail = new TicketDetail(ticketId,ticketMasterCommand.getComments(),fileLocation,ticketMasterCommand.getAssignedTo(),createdbyId,assignFrom,ticketMasterCommand.getStatus());
+		TicketDetail detail = new TicketDetail(ticketId,ticketMasterCommand.getComments(),fileLocation,ticketMasterCommand.getAssignedTo(),createdbyId,assignFrom,ticketMasterCommand.getStatus(),ticketMasterCommand.getUsername());
          /*TicketMaster master = new TicketMaster(ticketMasterCommand.getStatusCode(), ticketMasterCommand.getAssignedTo());*/
          TicketMaster ticketMaster = this.ticketMasterRepository.findOne(ticketId);
          ticketMaster.updateTicket(ticketMasterCommand);

@@ -329,8 +329,6 @@ public class EventActionWritePlatformServiceImpl implements ActiondetailsWritePl
 			        	   this.eventActionRepository.save(eventAction);
 
 			        	   break; 
-			        	   
-			        	  
 					default:
 						break;
 				    }

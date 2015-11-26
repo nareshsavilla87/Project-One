@@ -44,8 +44,12 @@ public class TicketDetail {
 	
 	@Column(name="Assign_from")
 	private String assignFrom;
-
+	
+	@Column(name="status")
 	private String status;
+	
+	@Column(name="username")
+	private String username;
 
 	
 	public static TicketDetail fromJson(final JsonCommand command) throws ParseException {
@@ -68,7 +72,7 @@ public class TicketDetail {
 	}
 
 	public TicketDetail(final Long ticketId, final String comments, final String fileLocation,
-			final Long assignedTo, final Long createdbyId, final String assignFrom, final String status) {
+			final Long assignedTo, final Long createdbyId, final String assignFrom, final String status, final String username) {
     
 		this.ticketId = ticketId;
         if(comments==""||comments=="undefined"||comments==null){
@@ -81,7 +85,8 @@ public class TicketDetail {
         this.createdDate = DateUtils.getLocalDateOfTenant().toDate();
         this.createdbyId = createdbyId;	
         this.assignFrom = assignFrom;
-        this.setStatus(status);
+        this.username = username;
+        this.status=status;
 	}
 
 	public TicketDetail(Long id, Long assignedTo, String assignFrom) {
@@ -143,6 +148,14 @@ public class TicketDetail {
 	public void setStatus(String status) {
 		this.status = status;
 	}
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
 
 	
 }

@@ -86,7 +86,7 @@ public class TicketMasterData {
 	}
 
 	public TicketMasterData(final Long id, final LocalDate createdDate,
-			final String assignedTo, final String description, final String fileName, final String assignFrom,final String status) {
+			final String assignedTo, final String description, final String fileName, final String assignFrom,final String status, final String username) {
 		 this.id = id;
 		 this.createdDate = createdDate;
 		 this.assignedTo = assignedTo;
@@ -94,6 +94,7 @@ public class TicketMasterData {
 	     this.statusDescription = description;
 	     this.setAssignFrom(assignFrom);
 	     this.status= status;
+	     this.userName=username;
 	}
 
 	public TicketMasterData(final String description, final List<TicketMasterData> data) {
