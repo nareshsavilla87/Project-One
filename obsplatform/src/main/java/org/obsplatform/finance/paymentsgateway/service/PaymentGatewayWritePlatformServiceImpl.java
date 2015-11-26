@@ -20,7 +20,10 @@ import java.util.Map;
 import javax.net.ssl.HttpsURLConnection;
 import javax.servlet.http.HttpServletRequest;
 
+import net.authorize.sim.Fingerprint;
+
 import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.lang.RandomStringUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -961,5 +964,35 @@ public class PaymentGatewayWritePlatformServiceImpl implements PaymentGatewayWri
 			return ConfigurationConstants.PAYMENTGATEWAY_SUCCESS;
 		}
 		
+	}
+
+	@Override
+	public String createFingerPrint(Long amount) {
+
+		PaymentGatewayConfiguration pgConfig = this.paymentGatewayConfigurationRepository.findOneByName(ConfigurationConstants.AUTHORIZENET_PAYMENTGATEWAY);
+
+		if (null == pgConfig || null == pgConfig.getValue() || !pgConfig.isEnabled()) {
+			throw new PaymentGatewayConfigurationException(ConfigurationConstants.AUTHORIZENET_PAYMENTGATEWAY);
+		}
+
+		JsonElement parsedJson = this.fromApiJsonHelper.parse(pgConfig.getValue());
+		String apiLoginID = this.fromApiJsonHelper.extractStringNamed("merchantId", parsedJson);
+		String transactionKey = this.fromApiJsonHelper.extractStringNamed("transactionKey", parsedJson);
+		String length = this.fromApiJsonHelper.extractStringNamed("serialNoLength", parsedJson);
+		String generatedKey = RandomStringUtils.randomNumeric(Integer.valueOf(length));
+		String amount1 = String.valueOf(amount);
+		Fingerprint fingerprint = Fingerprint.createFingerprint(apiLoginID,transactionKey, Long.valueOf(generatedKey), amount1);
+		long x_fp_sequence = fingerprint.getSequence();
+		long x_fp_timestamp = fingerprint.getTimeStamp();
+		String x_fp_hash = fingerprint.getFingerprintHash();
+
+		JsonObject jsonobject = new JsonObject();
+		jsonobject.addProperty("x_merchantId", apiLoginID);
+		jsonobject.addProperty("x_fp_sequence", x_fp_sequence);
+		jsonobject.addProperty("x_fp_timestamp", x_fp_timestamp);
+		jsonobject.addProperty("x_fp_hash", x_fp_hash);
+		jsonobject.addProperty("x_amount", amount1);
+
+		return jsonobject.toString();
 	}
 }
