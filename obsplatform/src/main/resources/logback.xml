@@ -23,9 +23,9 @@
     </encoder>
   </appender>
   
-  <logger name="org.mifosng.platform" level="debug" />
-  <logger name="org.mifosplatform.infrastructure.security.filter" level="info" />
-  <logger name="org.mifosplatform" level="debug" />
+  <logger name="org.obs.platform" level="debug" />
+  <logger name="org.obsplatform.infrastructure.security.filter" level="info" />
+  <logger name="org.obsplatform" level="debug" />
   <logger name="org.springframework.web" level="info" />
   <logger name="org.springframework.beans" level="info" />
   <logger name="net.sf.ehcache" level="error" />

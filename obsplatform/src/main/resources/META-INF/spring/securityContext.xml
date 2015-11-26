@@ -29,7 +29,7 @@
 		<beans:property name="realmName" value="Billing Platform API" />
 	</beans:bean>
 
-	<beans:bean id="basicAuthenticationProcessingFilter" class="org.mifosplatform.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter">
+	<beans:bean id="basicAuthenticationProcessingFilter" class="org.obsplatform.infrastructure.security.filter.TenantAwareBasicAuthenticationFilter">
 		<beans:constructor-arg ref="authenticationManager" />
 		<beans:constructor-arg ref="basicAuthenticationEntryPoint" />
 	</beans:bean>

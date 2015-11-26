@@ -39,3 +39,4 @@ INSERT Ignore INTO `b_message_template` VALUES (null,'ClOSE TICKET','TICKET','De
 
 SET @ID=(SELECT id FROM b_message_template WHERE template_description='ClOSE TICKET');
 INSERT Ignore INTO `b_message_params` VALUES(null,@ID,'<customer>',1),(null,@ID,'<ticketId>',2),(null,@ID,'<ticketdesc>',3),(null,@ID,'<resolution>',4),(null,@ID,'<date>',5);
+
