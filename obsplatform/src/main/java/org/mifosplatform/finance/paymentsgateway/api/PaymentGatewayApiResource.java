@@ -32,6 +32,8 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.UriInfo;
 
+import net.authorize.sim.Fingerprint;
+
 import org.apache.commons.io.FileUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.json.JSONArray;
@@ -932,6 +934,71 @@ public class PaymentGatewayApiResource {
 		}
 		return sb.toString();
 	}
+	
+	@GET
+	@Path("authorize/{amount}")
+	@Consumes({MediaType.APPLICATION_JSON})
+	@Produces({MediaType.APPLICATION_JSON})
+	public String authTest(@PathParam("amount") Long amount) throws JSONException {
+        return this.paymentGatewayWritePlatformService.createFingerPrint(amount);
+	}
+	
+/*	@POST
+	@Path("authorize")
+	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
+	@Produces({ MediaType.TEXT_HTML })
+	public void authorize(final @Context HttpServletRequest request) {
+
+		
+			//String verifiyMessage = this.paymentGatewayRecurringWritePlatformService.paypalRecurringVerification(request);
+			//String txnType = request.getParameter(RecurringPaymentTransactionTypeConstants.RECURRING_TXNTYPE);
+			
+			//System.out.println("Transaction Type :" +txnType+ " , Result:" + verifiyMessage);
+			
+			String requestParameters = this.paymentGatewayRecurringWritePlatformService.getRequestParameters(request);
+			
+			System.out.println("requestParameters="+ requestParameters);
+			
+		
+			
+			if(request.getParameterMap().containsKey("x_response_code")){
+				String val = request.getParameter("x_response_code");
+				System.out.println("x_response_code="+ val);
+			}
+			
+			
+
+		
+	}
+	
+	@GET
+	@Path("authorize")
+	@Consumes({ MediaType.APPLICATION_FORM_URLENCODED })
+	@Produces({ MediaType.TEXT_HTML })
+	public void authorizeGet(final @Context HttpServletRequest request) {
+
+		
+			//String verifiyMessage = this.paymentGatewayRecurringWritePlatformService.paypalRecurringVerification(request);
+			//String txnType = request.getParameter(RecurringPaymentTransactionTypeConstants.RECURRING_TXNTYPE);
+			
+			//System.out.println("Transaction Type :" +txnType+ " , Result:" + verifiyMessage);
+			
+			String requestParameters = this.paymentGatewayRecurringWritePlatformService.getRequestParameters(request);
+			
+			System.out.println("requestParameters="+ requestParameters);
+			
+			System.out.println("x_trans_id="+request.getParameter("x_trans_id"));
+		
+			
+			if(request.getParameterMap().containsKey("x_response_code")){
+				String val = request.getParameter("x_response_code");
+				System.out.println("x_response_code="+ val);
+			}
+			
+			
+
+		
+	}*/
 	 
 }
 
