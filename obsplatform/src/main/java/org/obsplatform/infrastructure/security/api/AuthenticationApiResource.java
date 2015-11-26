@@ -24,7 +24,7 @@ import org.obsplatform.billing.loginhistory.domain.LoginHistoryRepository;
 import org.obsplatform.crm.userchat.service.UserChatReadplatformReadService;
 import org.obsplatform.infrastructure.configuration.data.LicenseData;
 import org.obsplatform.infrastructure.configuration.service.LicenseUpdateService;
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.obsplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.obsplatform.infrastructure.core.service.DateUtils;
 import org.obsplatform.infrastructure.core.service.ThreadLocalContextUtil;
@@ -77,7 +77,7 @@ public class AuthenticationApiResource {
     	
         Authentication authentication = new UsernamePasswordAuthenticationToken(username, password);
         Authentication authenticationCheck = customAuthenticationProvider.authenticate(authentication);
-        MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         System.out.println(tenant.getLicensekey());
         String notificationMessage=null;
         LicenseData licenseData= this.licenseUpdateService.getLicenseDetails(tenant.getLicensekey());

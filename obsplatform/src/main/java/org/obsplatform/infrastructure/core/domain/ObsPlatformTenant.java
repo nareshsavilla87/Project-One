@@ -5,7 +5,7 @@
  */
 package org.obsplatform.infrastructure.core.domain;
 
-public class MifosPlatformTenant {
+public class ObsPlatformTenant {
 
     private final Long id;
     private final String name;
@@ -20,7 +20,7 @@ public class MifosPlatformTenant {
 	private final String licensekey;
 	private final String localeName;
 
-    public MifosPlatformTenant(final Long id, final String name, final String schemaName, final String schemaServer,
+    public ObsPlatformTenant(final Long id, final String name, final String schemaName, final String schemaServer,
             final String schemaServerPort, final String schemaUsername, final String schemaPassword, String timezoneId,
             final boolean autoUpdateEnabled, String identifier, String licensekey,final String localeName) {
         this.id = id;

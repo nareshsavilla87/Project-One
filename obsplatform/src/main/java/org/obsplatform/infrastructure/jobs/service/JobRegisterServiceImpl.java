@@ -9,7 +9,7 @@ import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
 
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.obsplatform.infrastructure.core.exception.PlatformInternalServerException;
 import org.obsplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.obsplatform.infrastructure.jobs.annotation.CronMethodParser;
@@ -64,8 +64,8 @@ public class JobRegisterServiceImpl implements JobRegisterService {
 
     @PostConstruct
     public void loadAllJobs() {
-        List<MifosPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
-        for (MifosPlatformTenant tenant : allTenants) {
+        List<ObsPlatformTenant> allTenants = this.tenantDetailsService.findAllTenants();
+        for (ObsPlatformTenant tenant : allTenants) {
             ThreadLocalContextUtil.setTenant(tenant);
             List<ScheduledJobDetail> scheduledJobDetails = this.schedularWritePlatformService.retrieveAllJobs();
             for (ScheduledJobDetail jobDetails : scheduledJobDetails) {
@@ -246,7 +246,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
 
     private String getSchedulerName(final ScheduledJobDetail scheduledJobDetail) {
         StringBuilder sb = new StringBuilder(20);
-        MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         sb.append(SchedulerServiceConstants.SCHEDULER).append(tenant.getTenantIdentifier());
         if (scheduledJobDetail.getSchedulerGroup() > 0) {
             sb.append(SchedulerServiceConstants.SCHEDULER_GROUP).append(scheduledJobDetail.getSchedulerGroup());
@@ -286,7 +286,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
 
     private JobDetail createJobDetail(final ScheduledJobDetail scheduledJobDetail) throws Exception {
     	
-        MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         String[] jobDetails = CronMethodParser.findTargetMethodDetails(scheduledJobDetail.getJobName());
         Object targetObject = getBeanObject(Class.forName(jobDetails[CronMethodParser.CLASS_INDEX]));
         MethodInvokingJobDetailFactoryBean jobDetailFactoryBean = new MethodInvokingJobDetailFactoryBean();
@@ -339,7 +339,7 @@ public class JobRegisterServiceImpl implements JobRegisterService {
      */
     private Trigger createTrigger(final ScheduledJobDetail scheduledJobDetails, final JobDetail jobDetail) {
     	
-        MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         CronTriggerFactoryBean cronTriggerFactoryBean = new CronTriggerFactoryBean();
         cronTriggerFactoryBean.setName(scheduledJobDetails.getJobName() + "Trigger" + tenant.getTenantIdentifier());
         cronTriggerFactoryBean.setJobDetail(jobDetail);

@@ -12,7 +12,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.obsplatform.infrastructure.configuration.data.LicenseData;
 import org.obsplatform.infrastructure.configuration.exception.InvalidLicenseKeyException;
 import org.obsplatform.infrastructure.configuration.exception.LicenseKeyNotFoundException;
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.obsplatform.infrastructure.security.service.TenantDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,7 +33,7 @@ public LicenseUpdateServiceImpl(final TenantDetailsService tenantDetailsService)
 	
 @Transactional
 @Override
-public void updateLicenseKey(ServletRequest request,MifosPlatformTenant tenant) {
+public void updateLicenseKey(ServletRequest request,ObsPlatformTenant tenant) {
 
 	  String licenseKey= request.getParameter("key");
 	  if(licenseKey == null){
@@ -51,7 +51,7 @@ public void updateLicenseKey(ServletRequest request,MifosPlatformTenant tenant) 
 }
 
 @Override
-public boolean checkIfKeyIsValid(String licenseKey, MifosPlatformTenant tenant) {
+public boolean checkIfKeyIsValid(String licenseKey, ObsPlatformTenant tenant) {
 	
 	 boolean isValid=false;
 	try {

@@ -21,7 +21,7 @@ import org.obsplatform.finance.billingmaster.domain.BillMaster;
 import org.obsplatform.finance.billingmaster.domain.BillMasterRepository;
 import org.obsplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.obsplatform.infrastructure.core.data.CommandProcessingResult;
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.obsplatform.infrastructure.core.service.DateUtils;
 import org.obsplatform.infrastructure.core.service.FileUtils;
 import org.obsplatform.infrastructure.core.service.TenantAwareRoutingDataSource;
@@ -138,7 +138,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 			BillMaster billMaster = this.billMasterRepository.findOne(billId);
 
 			if ("invoice".equalsIgnoreCase(billMaster.getFileName())) {
-				final String fileLocation = FileUtils.MIFOSX_BASE_DIR;
+				final String fileLocation = FileUtils.OBS_BASE_DIR;
 				/** Recursively create the directory if it does not exist **/
 				if (!new File(fileLocation).isDirectory()) {
 					new File(fileLocation).mkdirs();
@@ -149,7 +149,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 				}
 				final String printStatementLocation = statementDetailsLocation+ File.separator +billMaster.getClientId()+"_"+DateUtils.getLocalDateOfTenant()+".pdf";
 				final String jpath = fileLocation + File.separator + "jasper";
-				final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+				final ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 				final String jfilepath = jpath + File.separator + "Statement_"+ tenant.getTenantIdentifier() + ".jasper";
 				File destinationFile = new File(jfilepath);
 				if (!destinationFile.exists()) {
@@ -197,7 +197,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	@Override
 	public String generateInovicePdf(final Long invoiceId) {
 		
-		final String fileLocation = FileUtils.MIFOSX_BASE_DIR ;
+		final String fileLocation = FileUtils.OBS_BASE_DIR ;
 		/** Recursively create the directory if it does not exist **/
 		if (!new File(fileLocation).isDirectory()) {
 			new File(fileLocation).mkdirs();
@@ -211,7 +211,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
-			final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+			final ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 			final String jasperfilepath =jpath+File.separator+"Invoicereport_"+tenant.getTenantIdentifier()+".jasper";
 			File destinationFile=new File(jasperfilepath);
 		      if(!destinationFile.exists()){
@@ -247,7 +247,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	@Override
 	public String generatePaymentPdf(final Long paymentId)  {
 		
-		final String fileLocation = FileUtils.MIFOSX_BASE_DIR ;
+		final String fileLocation = FileUtils.OBS_BASE_DIR ;
 		/** Recursively create the directory if it does not exist **/
 		if (!new File(fileLocation).isDirectory()) {
 			new File(fileLocation).mkdirs();
@@ -261,7 +261,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 		try {
 			
 			final String jpath = fileLocation+File.separator+"jasper"; 
-			final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+			final ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 			final String jasperfilepath =jpath+File.separator+"Paymentreport_"+tenant.getTenantIdentifier()+".jasper";
 			File destinationFile=new File(jasperfilepath);
 		      if(!destinationFile.exists()){
@@ -320,7 +320,7 @@ public class BillWritePlatformServiceImpl implements BillWritePlatformService {
 	 * @param tenant
 	 * @return Locale 
 	 */
-	 public Locale getLocale(MifosPlatformTenant tenant) {
+	 public Locale getLocale(ObsPlatformTenant tenant) {
 
 		Locale locale = LocaleUtils.toLocale(tenant.getLocaleName());
 		if (locale == null) {

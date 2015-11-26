@@ -177,7 +177,7 @@ public class FinancialTransactionApiResource {
 				
 		}else if(downloadType.equalsIgnoreCase("pdf")){
 			
-			fileLocation = org.obsplatform.infrastructure.core.service.FileUtils.MIFOSX_BASE_DIR + File.separator + "";
+			fileLocation = org.obsplatform.infrastructure.core.service.FileUtils.OBS_BASE_DIR + File.separator + "";
 		        if (!new File(fileLocation).isDirectory()) {
 		            new File(fileLocation).mkdirs();
 		        }

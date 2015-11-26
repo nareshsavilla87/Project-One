@@ -263,7 +263,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
         if (noPentaho) { throw new PlatformDataIntegrityException("error.msg.no.pentaho", "Pentaho is not enabled",
                 "Pentaho is not enabled"); }
 
-        final String reportPath = FileUtils.MIFOSX_BASE_DIR + File.separator + "pentahoReports" + File.separator + reportName + ".prpt";
+        final String reportPath = FileUtils.OBS_BASE_DIR + File.separator + "pentahoReports" + File.separator + reportName + ".prpt";
         logger.info("Report path: " + reportPath);
 
         // load report definition
@@ -368,7 +368,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
     @Override
     public String retrieveReportPDF(final String reportName, final String type, final Map<String, String> queryParams) {
 
-        String fileLocation = FileUtils.MIFOSX_BASE_DIR + File.separator + "";
+        String fileLocation = FileUtils.OBS_BASE_DIR + File.separator + "";
         if (!new File(fileLocation).isDirectory()) {
             new File(fileLocation).mkdirs();
         }
@@ -609,7 +609,7 @@ public class ReadReportingServiceImpl implements ReadReportingService {
 	@Override
 	public String generateEmailReport(String name, String type,Map<String, String> reportParams,String fileLocation) {
 		
-		String location = FileUtils.MIFOSX_BASE_DIR+ File.separator + JobName.REPORT_EMAIL.toString();
+		String location = FileUtils.OBS_BASE_DIR+ File.separator + JobName.REPORT_EMAIL.toString();
         if (!new File(location).isDirectory()) {
             new File(location).mkdirs();
         }

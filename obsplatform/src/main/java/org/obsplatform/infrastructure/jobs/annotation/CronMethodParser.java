@@ -23,7 +23,7 @@ import org.springframework.util.ClassUtils;
  */
 public class CronMethodParser {
 
-    private static final String SEARCH_PACKAGE = "org.mifosplatform.";
+    private static final String SEARCH_PACKAGE = "org.obsplatform.";
 
     private static final String CRON_ANNOTATION_ATTRIBUTE_NAME = "jobName";
 

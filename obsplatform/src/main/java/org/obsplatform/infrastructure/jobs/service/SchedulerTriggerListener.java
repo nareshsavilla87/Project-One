@@ -1,6 +1,6 @@
 package org.obsplatform.infrastructure.jobs.service;
 
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.obsplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.obsplatform.infrastructure.security.service.TenantDetailsService;
 import org.quartz.JobExecutionContext;
@@ -42,7 +42,7 @@ public class SchedulerTriggerListener implements TriggerListener {
     public boolean vetoJobExecution(final Trigger trigger, final JobExecutionContext context) {
 
         final String tenantIdentifier = trigger.getJobDataMap().getString(SchedulerServiceConstants.TENANT_IDENTIFIER);
-        final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
+        final ObsPlatformTenant tenant = this.tenantDetailsService.loadTenantById(tenantIdentifier);
         ThreadLocalContextUtil.setTenant(tenant);
         final JobKey key = trigger.getJobKey();
         final String jobKey = key.getName() + SchedulerServiceConstants.JOB_KEY_SEPERATOR + key.getGroup();

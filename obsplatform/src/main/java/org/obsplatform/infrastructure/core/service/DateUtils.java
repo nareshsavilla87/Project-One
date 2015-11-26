@@ -17,7 +17,7 @@ import org.joda.time.LocalDate;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.obsplatform.infrastructure.core.data.ApiParameterError;
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.obsplatform.infrastructure.core.exception.PlatformApiDataValidationException;
 
 public class DateUtils {
@@ -30,7 +30,7 @@ public class DateUtils {
 
         LocalDate today = new LocalDate();
 
-        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        final ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 
         if (tenant != null) {
             final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
@@ -72,7 +72,7 @@ public class DateUtils {
 
     	DateTime today = new DateTime();
 
-        final MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        final ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 
         if (tenant != null) {
             final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());

@@ -23,7 +23,7 @@ import org.obsplatform.infrastructure.configuration.data.LicenseData;
 import org.obsplatform.infrastructure.configuration.domain.ConfigurationDomainService;
 import org.obsplatform.infrastructure.configuration.exception.InvalidLicenseKeyException;
 import org.obsplatform.infrastructure.configuration.service.LicenseUpdateService;
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.obsplatform.infrastructure.core.serialization.ToApiJsonSerializer;
 import org.obsplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.obsplatform.infrastructure.security.data.PlatformRequestLog;
@@ -54,7 +54,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
  * valid.
  * 
  * If multi-tenant and basic auth credentials are valid, the details of the
- * tenant are stored in {@link MifosPlatformTenant} and stored in a
+ * tenant are stored in {@link ObsPlatformTenant} and stored in a
  * {@link ThreadLocal} variable for this request using
  * {@link ThreadLocalContextUtil}.
  * 
@@ -109,7 +109,7 @@ public class TenantAwareBasicAuthenticationFilter extends
 		this.licenseUpdateService = licenseUpdateService;
 	}
 
-	private final MifosPlatformTenant getTenantIdentifier(HttpServletRequest request) {
+	private final ObsPlatformTenant getTenantIdentifier(HttpServletRequest request) {
 
 		if (request.getParameterMap().containsKey(tenantIdentifier)) {
 			return this.tenantDetailsService.loadTenantById(request.getParameter(tenantIdentifier));
@@ -145,7 +145,7 @@ public class TenantAwareBasicAuthenticationFilter extends
 	@Override
 	public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain) throws IOException, ServletException {
 
-		MifosPlatformTenant tenant;
+		ObsPlatformTenant tenant;
 		HttpServletRequest request = (HttpServletRequest) req;
 		HttpServletResponse response = (HttpServletResponse) res;
 
