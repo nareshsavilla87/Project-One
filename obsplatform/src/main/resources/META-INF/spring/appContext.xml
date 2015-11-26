@@ -24,39 +24,34 @@
 	
 	<tx:annotation-driven />
 	
-	<context:component-scan base-package="org.mifosplatform.accounting.*,
-									      org.mifosplatform.commands.handler.*,
-										  org.mifosplatform.commands.service.*,
-										  org.mifosplatform.commands.*,
-										  org.mifosplatform.audit.*,
-										  org.mifosplatform.infrastructure.*,
-										  org.mifosplatform.organisation.*, 
-										  org.mifosplatform.cms.*,
-										  org.mifosplatform.crm.*,
-										  org.mifosplatform.finance.*,
-										  org.mifosplatform.portfolio.*,
-										  org.mifosplatform.billing.*,
-										  org.mifosplatform.logistics.*,
-										  org.mifosplatform.useradministration.*,
-										  org.mifosplatform.*">
+	<context:component-scan base-package="org.obsplatform.accounting.*,
+									      org.obsplatform.commands.handler.*,
+										  org.obsplatform.commands.service.*,
+										  org.obsplatform.commands.*,
+										  org.obsplatform.audit.*,
+										  org.obsplatform.infrastructure.*,
+										  org.obsplatform.organisation.*, 
+										  org.obsplatform.cms.*,
+										  org.obsplatform.crm.*,
+										  org.obsplatform.finance.*,
+										  org.obsplatform.portfolio.*,
+										  org.obsplatform.billing.*,
+										  org.obsplatform.logistics.*,
+										  org.obsplatform.useradministration.*,
+										  org.obsplatform.*">
 		<context:exclude-filter expression="org.springframework.stereotype.Controller" type="annotation" />
 	</context:component-scan>
 	
-	<bean id="auditorAware" class="org.mifosplatform.infrastructure.core.domain.AuditorAwareImpl" />
+	<bean id="auditorAware" class="org.obsplatform.infrastructure.core.domain.AuditorAwareImpl" />
 	<jpa:auditing auditor-aware-ref="auditorAware" />
 	
-    <!-- <jpa:repositories base-package="org.mifosplatform.commands.domain" />
-    <jpa:repositories base-package="org.mifosplatform.infrastructure.*.domain" />
-    <jpa:repositories base-package="org.mifosplatform.accounting.*.domain" />
-    <jpa:repositories base-package="org.mifosplatform.useradministration.domain" />
-    <jpa:repositories base-package="org.mifosplatform.organisation.*.domain" />
-    <jpa:repositories base-package="org.mifosplatform.portfolio.*" />
-    <jpa:repositories base-package="org.mifosplatform.billing.*" />
-    <jpa:repositories base-package="org.mifosplatform.cms.*" />
-    <jpa:repositories base-package="org.mifosplatform.crm.*" />
-    <jpa:repositories base-package="org.mifosplatform.finance.*" />
-    <jpa:repositories base-package="org.mifosplatform.logistics.*" /> -->
-    <jpa:repositories base-package="org.mifosplatform.*" />
+    <!-- <jpa:repositories base-package="org.obsplatform.commands.domain" />
+    <jpa:repositories base-package="org.obsplatform.infrastructure.*.domain" />
+    <jpa:repositories base-package="org.obsplatform.accounting.*.domain" />
+    <jpa:repositories base-package="org.obsplatform.useradministration.domain" />
+    <jpa:repositories base-package="org.obsplatform.organisation.*.domain" />
+    <jpa:repositories base-package="org.obsplatform.logistics.*" /> -->
+    <jpa:repositories base-package="org.obsplatform.*" />
     
 
     <import resource="infrastructure.xml" />
