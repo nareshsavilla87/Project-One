@@ -30,7 +30,7 @@ public class FileUtils {
 
     private final static Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
-    public static final String MIFOSX_BASE_DIR = System.getProperty("user.home") + File.separator + ".obs";
+    public static final String OBS_BASE_DIR = System.getProperty("user.home") + File.separator + ".obs";
     public static final String BILLING_BASE_DIR = System.getProperty("user.home") + File.separator + "billing";
     
     
@@ -122,7 +122,7 @@ public class FileUtils {
      * @return
      */
     public static String generateFileParentDirectory(String entityType, Long entityId) {
-        return FileUtils.MIFOSX_BASE_DIR + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim()
+        return FileUtils.OBS_BASE_DIR + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim()
                 + File.separator + "documents" + File.separator + entityType + File.separator + entityId + File.separator
                 + FileUtils.generateRandomString();
     }
@@ -131,7 +131,7 @@ public class FileUtils {
      * Generate directory path for storing new Image
      */
     public static String generateClientImageParentDirectory(final Long resourceId) {
-        return FileUtils.MIFOSX_BASE_DIR + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim()
+        return FileUtils.OBS_BASE_DIR + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim()
                 + File.separator + "images" + File.separator + "clients" + File.separator + resourceId;
     }
 
@@ -245,12 +245,12 @@ public class FileUtils {
     }
 
 	 public static String generateXlsFileDirectory() {
-        return FileUtils.MIFOSX_BASE_DIR + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim()
+        return FileUtils.OBS_BASE_DIR + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim()
                 + File.separator + "XlsFile"+ File.separator
                 + FileUtils.generateRandomString();
     }
 	 public static String generateLogFileDirectory() {
-	        return FileUtils.MIFOSX_BASE_DIR + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim()
+	        return FileUtils.OBS_BASE_DIR + File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim()
 	                + File.separator + "SheduleLogFile"+ File.separator;
 	 }
 	 
@@ -258,7 +258,7 @@ public class FileUtils {
 	 * Generate directory path for storing new logos of partners
 	 */
 	public static String generatePartnersImageDirectory(final Long resourceId) {
-		return FileUtils.MIFOSX_BASE_DIR+ File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "images"
+		return FileUtils.OBS_BASE_DIR+ File.separator + ThreadLocalContextUtil.getTenant().getName().replaceAll(" ", "").trim() + File.separator + "images"
 				+ File.separator + "partnerLogo" + File.separator + resourceId;
 	}
 

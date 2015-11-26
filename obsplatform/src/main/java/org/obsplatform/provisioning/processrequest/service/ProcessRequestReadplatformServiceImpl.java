@@ -4,7 +4,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.obsplatform.infrastructure.core.service.DataSourcePerTenantService;
 import org.obsplatform.infrastructure.core.service.ThreadLocalContextUtil;
 import org.obsplatform.infrastructure.security.service.TenantDetailsService;
@@ -35,7 +35,7 @@ public class ProcessRequestReadplatformServiceImpl implements ProcessRequestRead
 	public List<ProcessingDetailsData> retrieveProcessingDetails() {
 		try {
 
-			final MifosPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");
+			final ObsPlatformTenant tenant = this.tenantDetailsService.loadTenantById("default");
 			ThreadLocalContextUtil.setTenant(tenant);
 			JdbcTemplate jdbcTemplate = new JdbcTemplate(dataSourcePerTenantService.retrieveDataSource());
 			final ClientOrderMapper mapper = new ClientOrderMapper();

@@ -9,7 +9,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.obsplatform.infrastructure.security.service.TenantDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,8 +34,8 @@ public class TenantDatabaseUpgradeService {
 
     @PostConstruct
     public void upgradeAllTenants() {
-        List<MifosPlatformTenant> tenants = tenantDetailsService.findAllTenants();
-        for (MifosPlatformTenant tenant : tenants) {
+        List<ObsPlatformTenant> tenants = tenantDetailsService.findAllTenants();
+        for (ObsPlatformTenant tenant : tenants) {
             if (tenant.isAutoUpdateEnabled()) {
                 Flyway flyway = new Flyway();
                 flyway.setDataSource(tenant.databaseURL(), tenant.getSchemaUsername(), tenant.getSchemaPassword());

@@ -11,7 +11,7 @@ import java.util.List;
 
 import javax.sql.DataSource;
 
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.obsplatform.infrastructure.security.exception.InvalidTenantIdentiferException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -35,7 +35,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
         this.jdbcTemplate = new JdbcTemplate(dataSource);
     }
 
-    private static final class TenantMapper implements RowMapper<MifosPlatformTenant> {
+    private static final class TenantMapper implements RowMapper<ObsPlatformTenant> {
 
         private StringBuilder sqlBuilder = new StringBuilder(
                 "id, name, schema_name as schemaName,identifier as identifier, schema_server as schemaServer, schema_server_port as schemaServerPort, auto_update as autoUpdate, ")//
@@ -47,7 +47,7 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
         }
 
         @Override
-        public MifosPlatformTenant mapRow(final ResultSet rs,final int rowNum) throws SQLException {
+        public ObsPlatformTenant mapRow(final ResultSet rs,final int rowNum) throws SQLException {
 
             Long id = rs.getLong("id");
             String name = rs.getString("name");
@@ -62,13 +62,13 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
             String licensekey = rs.getString("licensekey");
             String localeName = rs.getString("localeName");
 
-            return new MifosPlatformTenant(id, name, schemaName, schemaServer, schemaServerPort, schemaUsername, schemaPassword,
+            return new ObsPlatformTenant(id, name, schemaName, schemaServer, schemaServerPort, schemaUsername, schemaPassword,
                     timezoneId, autoUpdateEnabled,identifier,licensekey,localeName);
         }
     }
 
     @Override
-    public MifosPlatformTenant loadTenantById(final String tenantIdentifier) {
+    public ObsPlatformTenant loadTenantById(final String tenantIdentifier) {
 
         try {
             TenantMapper rm = new TenantMapper();
@@ -81,12 +81,12 @@ public class JdbcTenantDetailsService implements TenantDetailsService {
     }
 
     @Override
-    public List<MifosPlatformTenant> findAllTenants() {
+    public List<ObsPlatformTenant> findAllTenants() {
         TenantMapper rm = new TenantMapper();
         String sql = "select  " + rm.schema();
 
-        List<MifosPlatformTenant> mifosPlatformTenants = jdbcTemplate.query(sql, rm, new Object[] {});
-        return mifosPlatformTenants;
+        List<ObsPlatformTenant> ObsPlatformTenants = jdbcTemplate.query(sql, rm, new Object[] {});
+        return ObsPlatformTenants;
     }
 
 	@Override

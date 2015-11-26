@@ -1,3 +1,3 @@
 #!/bin/bash
-cd mifosng-provider
+cd obsplatform
 gradle clean test

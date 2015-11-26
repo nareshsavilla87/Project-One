@@ -14,8 +14,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.ws.rs.core.UriInfo;
-
 import me.legrange.mikrotik.ApiConnection;
 import me.legrange.mikrotik.MikrotikApiException;
 
@@ -52,7 +50,7 @@ import org.obsplatform.infrastructure.configuration.domain.ConfigurationReposito
 import org.obsplatform.infrastructure.core.api.JsonCommand;
 import org.obsplatform.infrastructure.core.data.CommandProcessingResult;
 import org.obsplatform.infrastructure.core.data.EnumOptionData;
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.obsplatform.infrastructure.core.serialization.FromJsonHelper;
 import org.obsplatform.infrastructure.core.service.DateUtils;
 import org.obsplatform.infrastructure.core.service.FileUtils;
@@ -203,7 +201,7 @@ try
 	{
 	JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.INVOICE.toString());
 		if(data!=null){
-			MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+			ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
 			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 			LocalTime date=new LocalTime(zone);
 			String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
@@ -267,7 +265,7 @@ public void processRequest() {
 		List<PrepareRequestData> data = this.prepareRequestReadplatformService.retrieveDataForProcessing();
 
 			if(!data.isEmpty()){
-			   MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+			   ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
 			   final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 			   LocalTime date=new LocalTime(zone);
 	           String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
@@ -310,7 +308,7 @@ public void processSimulator() {
 		List<ProcessingDetailsData> processingDetails = this.processRequestReadplatformService.retrieveUnProcessingDetails();
 		if(data.getUpdateStatus().equalsIgnoreCase("Y")){ 
 			if(!processingDetails.isEmpty()){
-				MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+				ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
 				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 				LocalTime date=new LocalTime(zone);
 				String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
@@ -380,7 +378,7 @@ try {
 	JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.GENERATE_STATEMENT.toString());
 		
 		if(data!=null){
-			MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+			ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
 			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 			LocalTime date=new LocalTime(zone);
 			String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
@@ -444,7 +442,7 @@ try{
 JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.MESSAGE_MERGE.toString());
     
  if(data!=null){
-         MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+         ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
          final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
          LocalTime date=new LocalTime(zone);
          String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
@@ -499,7 +497,7 @@ try {
        System.out.println("Processing Auto Exipiry Details.......");
        JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.AUTO_EXIPIRY.toString());
         if(data!=null){
-            MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+            ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
             final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
             LocalTime date=new LocalTime(zone);
             String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
@@ -576,7 +574,7 @@ public void processNotify() {
 	  List<BillingMessageDataForProcessing> billingMessageDataForProcessings=this.billingMesssageReadPlatformService.retrieveMessageDataForProcessing(null);
 	  
 	  	if(!billingMessageDataForProcessings.isEmpty()){
-	  		MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+	  		ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
 	  		final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 	  		LocalTime date=new LocalTime(zone);
 	  		String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
@@ -877,7 +875,7 @@ public void processNotify() {
 			System.out.println("Processing Radius Details.......");
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RADIUS.toString());
 			if (data != null) {
-				MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+				ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 				LocalTime date = new LocalTime(zone);
 				String dateTime = date.getHourOfDay() + "_" + date.getMinuteOfHour() + "_" + date.getSecondOfMinute();
@@ -1174,7 +1172,7 @@ public void processNotify() {
 public void eventActionProcessor() {
 	try {
 		System.out.println("Processing Event Actions.....");
-		MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+		ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
 		final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 		LocalTime date=new LocalTime(zone);
 		String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
@@ -1214,11 +1212,11 @@ public void reportEmail() {
 	try {
 		JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.REPORT_EMAIL.toString());
           	if(data!=null){	
-          		MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+          		ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
           		final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
           		LocalTime date=new LocalTime(zone);
           		String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
-          		String fileLocation=FileUtils.MIFOSX_BASE_DIR+ File.separator + JobName.REPORT_EMAIL.toString() + File.separator +"ReportEmail_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+dateTime;
+          		String fileLocation=FileUtils.OBS_BASE_DIR+ File.separator + JobName.REPORT_EMAIL.toString() + File.separator +"ReportEmail_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+dateTime;
 				
 				String path=FileUtils.generateLogFileDirectory()+ JobName.REPORT_EMAIL.toString() + File.separator +"ReportEmail_"+DateUtils.getLocalDateOfTenant().toString().replace("-","")+"_"+dateTime+".log";
 				File fileHandler = new File(path.trim());
@@ -1283,7 +1281,7 @@ public void reportStatmentPdf() {
 		JobParameterData data=this.sheduleJobReadPlatformService.getJobParameters(JobName.REPORT_STATMENT.toString());
 		
 		if(data!=null){
-			MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+			ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
 			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 			LocalTime date=new LocalTime(zone);
 			String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
@@ -1332,7 +1330,7 @@ public void reportStatmentPdf() {
 			System.out.println("Processing export data....");
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.EXPORT_DATA.toString());
 			if (data != null) {
-				MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+				ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 				LocalTime date = new LocalTime(zone);
 				String dateTime = date.getHourOfDay() + "_"+ date.getMinuteOfHour() + "_"+ date.getSecondOfMinute();
@@ -1384,7 +1382,7 @@ public void reportStatmentPdf() {
 			System.out.println("Processing reseller commission data....");
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.RESELLER_COMMISSION.toString());
 			if (data != null) {
-				MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+				ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 				LocalTime date = new LocalTime(zone);
 				String dateTime = date.getHourOfDay() + "_"+ date.getMinuteOfHour() + "_"+ date.getSecondOfMinute();
@@ -1435,7 +1433,7 @@ public void reportStatmentPdf() {
 			System.out.println("Processing aging distribution data....");
 			//JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.EXPORT_DATA.toString());
 			///if (data != null) {
-			MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+			ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 			LocalTime date = new LocalTime(zone);
 			String dateTime = date.getHourOfDay() + "_"+ date.getMinuteOfHour() + "_"+ date.getSecondOfMinute();
@@ -1483,7 +1481,7 @@ public void reportStatmentPdf() {
 		try {
 			
 			System.out.println("Processing ReProcess Request Job .....");
-			MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
+			ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();	
 			final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 			LocalTime date=new LocalTime(zone);
 			String dateTime=date.getHourOfDay()+"_"+date.getMinuteOfHour()+"_"+date.getSecondOfMinute();
@@ -1651,7 +1649,7 @@ public void reportStatmentPdf() {
 			System.out.println("Processing Unpaid Customers Details.......");
 			JobParameterData data = this.sheduleJobReadPlatformService.getJobParameters(JobName.DISCONNECT_UNPAID_CUSTOMERS.toString());
 			if (data != null) {
-				MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+				ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
 				final DateTimeZone zone = DateTimeZone.forID(tenant.getTimezoneId());
 				LocalTime date = new LocalTime(zone);
 				String dateTime = date.getHourOfDay()+"_"+date.getMinuteOfHour() +"_"+ date.getSecondOfMinute();

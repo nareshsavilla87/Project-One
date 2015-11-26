@@ -17,7 +17,7 @@ import javax.sql.DataSource;
 
 import org.apache.tomcat.jdbc.pool.PoolConfiguration;
 import org.apache.tomcat.jdbc.pool.PoolProperties;
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
  * variable for this request.
  * 
  * {@link ThreadLocalContextUtil} is used to retrieve the
- * {@link MifosPlatformTenant} for the request.
+ * {@link ObsPlatformTenant} for the request.
  */
 @Service(value = "tomcatJdbcDataSourcePerTenantService")
 public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenantService, DataSource {
@@ -47,7 +47,7 @@ public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenant
         // default to tenant database datasource
         DataSource tenantDataSource = this.tenantDataSource;
 
-        MifosPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
+        ObsPlatformTenant tenant = ThreadLocalContextUtil.getTenant();
         if (tenant != null) {
             synchronized (this.tenantToDataSourceMap) {
                 // if tenant information available switch to appropriate
@@ -65,7 +65,7 @@ public class TomcatJdbcDataSourcePerTenantService implements DataSourcePerTenant
         return tenantDataSource;
     }
 
-    private DataSource createNewDataSourceFor(final MifosPlatformTenant tenant) {
+    private DataSource createNewDataSourceFor(final ObsPlatformTenant tenant) {
         // see
         // http://www.tomcatexpert.com/blog/2010/04/01/configuring-jdbc-pool-high-concurrency
 

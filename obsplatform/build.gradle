@@ -70,7 +70,7 @@ project.ext.mysqlUser='root'
 project.ext.mysqlPassword='mysql'
 
 
-group = 'org.mifosplatform'
+group = 'org.obsplatform'
 
 repositories {
     mavenCentral()
@@ -207,7 +207,7 @@ dependencies {
 }
 
 task dist(type:Zip){
-	baseName= 'mifosplatform'
+	baseName= 'obsplatform'
 	version = qualifyVersionIfNecessary(releaseVersion)
 	from('src/main/pentahoReports/') {
         fileMode = 0755
@@ -326,7 +326,7 @@ task dropDB<<{
 task setBlankPassword<<{
     sql = Sql.newInstance( 'jdbc:mysql://localhost:3306/', mysqlUser, mysqlPassword, 'com.mysql.jdbc.Driver' )
     sql.execute('USE `obsplatform-tenants`')
-    sql.execute('UPDATE obsplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'mifos\', schema_password = \'mysql\' WHERE id=1;')
+    sql.execute('UPDATE obsplatform-tenants.tenants SET schema_server = \'localhost\', schema_server_port = \'3306\', schema_username = \'root\', schema_password = \'mysql\' WHERE id=1;')
 }
 
 
@@ -420,15 +420,15 @@ task showTenantListDBInfo<<{
 /*
 * Support publication of artifacts versioned by topic branch.
 * CI builds supply `-P BRANCH_NAME=<TOPIC>` to gradle at build time.
-* If <TOPIC> starts with 'MIFOSX-', change version
+* If <TOPIC> starts with 'OBS-', change version
 * from BUILD-SNAPSHOT => <TOPIC>-SNAPSHOT
-* e.g. 1.1.0.BUILD-SNAPSHOT => 1.0.0.MIFOSX-1234-SNAPSHOT
+* e.g. 1.1.0.BUILD-SNAPSHOT => 1.0.0.OBS-1234-SNAPSHOT
 */
 def qualifyVersionIfNecessary(version) {
 
 	if (rootProject.hasProperty("BRANCH_NAME")) {
 		def qualifier = rootProject.getProperty("BRANCH_NAME")
-		if (qualifier.startsWith("MIFOSX-")) {
+		if (qualifier.startsWith("OBS-")) {
 			return version.replace('BUILD', qualifier)
 		}
 	}

@@ -5,7 +5,7 @@
  */
 package org.obsplatform.infrastructure.core.service;
 
-import org.obsplatform.infrastructure.core.domain.MifosPlatformTenant;
+import org.obsplatform.infrastructure.core.domain.ObsPlatformTenant;
 import org.springframework.util.Assert;
 
 /**
@@ -17,14 +17,14 @@ public class ThreadLocalContextUtil {
 
     private static final ThreadLocal<String> contextHolder = new ThreadLocal<String>();
 
-    private static final ThreadLocal<MifosPlatformTenant> tenantcontext = new ThreadLocal<MifosPlatformTenant>();
+    private static final ThreadLocal<ObsPlatformTenant> tenantcontext = new ThreadLocal<ObsPlatformTenant>();
 
-    public static void setTenant(final MifosPlatformTenant tenant) {
+    public static void setTenant(final ObsPlatformTenant tenant) {
         Assert.notNull(tenant, "tenant cannot be null");
         tenantcontext.set(tenant);
     }
 
-    public static MifosPlatformTenant getTenant() {
+    public static ObsPlatformTenant getTenant() {
         return tenantcontext.get();
     }
 
