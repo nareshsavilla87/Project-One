@@ -20,6 +20,12 @@ IF NOT EXISTS (
       AND COLUMN_NAME ='issue') THEN
 ALTER TABLE b_ticket_master ADD COLUMN issue VARCHAR(250) DEFAULT NULL AFTER  `assigned_to`;
 END IF;
+IF NOT EXISTS (
+     SELECT * FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME ='b_ticket_details'
+      AND COLUMN_NAME ='username') THEN
+ALTER TABLE b_ticket_details ADD COLUMN username VARCHAR(100) DEFAULT NULL AFTER  `status`;
+END IF;
 END //
 DELIMITER ;
 call ticket_detail_assign();
