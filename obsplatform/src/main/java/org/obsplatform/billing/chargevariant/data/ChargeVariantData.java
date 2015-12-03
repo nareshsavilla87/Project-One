@@ -17,6 +17,7 @@ public class ChargeVariantData {
 	private LocalDate endDate;
 	private List<ChargeVariantDetailsData> chargeVariantDetailsDatas;
 	private Collection<MCodeData> amountTypeData;
+	private Long id;
 
 	public ChargeVariantData(List<EnumOptionData> statusData,Collection<MCodeData> amountTypeData, Collection<MCodeData> chargeVariantTypeData) {
 
@@ -27,7 +28,8 @@ public class ChargeVariantData {
 	}
 
 	public ChargeVariantData(Long id, String chargeVariantCode,LocalDate startDate, LocalDate endDate, String status) {
-		
+			
+		   this.id = id;
 		   this.chargeVariantCode = chargeVariantCode;
 		   this.startDate = startDate;
 		   this.endDate = endDate;

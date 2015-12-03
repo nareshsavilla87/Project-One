@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS `b_chargevariant`;
 CREATE TABLE `b_chargevariant` (
   `id` int(20) NOT NULL AUTO_INCREMENT,
   `chargevariant_code` varchar(20) NOT NULL,
@@ -10,6 +11,7 @@ CREATE TABLE `b_chargevariant` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 
+DROP TABLE IF EXISTS `b_chargevariant_detail`;
 CREATE TABLE `b_chargevariant_detail` (
   `id` int(20) NOT NULL AUTO_INCREMENT,
   `chargevariant_id` int(10) NOT NULL,
