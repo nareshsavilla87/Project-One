@@ -6,15 +6,8 @@ import java.io.InputStream;
 import java.text.ParseException;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.obsplatform.crm.ticketmaster.command.TicketMasterCommand;
 import org.obsplatform.crm.ticketmaster.data.TicketMasterData;
-import org.obsplatform.crm.ticketmaster.data.UsersData;
 import org.obsplatform.crm.ticketmaster.domain.TicketDetail;
 import org.obsplatform.crm.ticketmaster.domain.TicketDetailsRepository;
 import org.obsplatform.crm.ticketmaster.domain.TicketMaster;
@@ -32,6 +25,13 @@ import org.obsplatform.portfolio.order.service.OrderWritePlatformService;
 import org.obsplatform.useradministration.domain.AppUser;
 import org.obsplatform.useradministration.domain.AppUserRepository;
 import org.obsplatform.workflow.eventaction.service.EventActionConstants;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.obsplatform.crm.ticketmaster.data.UsersData;
 
 @Service
 public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePlatformService{
@@ -96,7 +96,7 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
         }else{
         	assignFrom = user.getUsername();
         }
-		TicketDetail detail = new TicketDetail(ticketId,ticketMasterCommand.getComments(),fileLocation,ticketMasterCommand.getAssignedTo(),createdbyId,assignFrom,ticketMasterCommand.getStatus());
+		TicketDetail detail = new TicketDetail(ticketId,ticketMasterCommand.getComments(),fileLocation,ticketMasterCommand.getAssignedTo(),createdbyId,assignFrom,ticketMasterCommand.getStatus(),ticketMasterCommand.getUsername());
          /*TicketMaster master = new TicketMaster(ticketMasterCommand.getStatusCode(), ticketMasterCommand.getAssignedTo());*/
          TicketMaster ticketMaster = this.ticketMasterRepository.findOne(ticketId);
          ticketMaster.updateTicket(ticketMasterCommand);
