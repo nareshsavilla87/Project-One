@@ -7,6 +7,7 @@ import org.obsplatform.crm.ticketmaster.data.ClientTicketData;
 import org.obsplatform.crm.ticketmaster.data.TicketMasterData;
 import org.obsplatform.crm.ticketmaster.data.UsersData;
 import org.obsplatform.crm.ticketmaster.domain.TicketDetail;
+import org.obsplatform.crm.ticketmaster.domain.TicketHistory;
 import org.obsplatform.infrastructure.core.data.EnumOptionData;
 import org.obsplatform.infrastructure.core.service.Page;
 
@@ -27,5 +28,7 @@ public interface TicketMasterReadPlatformService {
 	Page<ClientTicketData> retrieveAssignedTicketsForNewClient(SearchSqlQuery searchTicketMaster, String statusType);
 
 	TicketDetail retrieveTicketDetail(Long ticketId);
+	
+	TicketHistory retrieveTickethistory(Long ticketId);
 	
 }
