@@ -5,6 +5,7 @@ import java.util.List;
 
 
 import org.obsplatform.billing.chargecode.data.ChargeCodeData;
+import org.obsplatform.billing.chargevariant.data.ChargeVariantData;
 import org.obsplatform.billing.discountmaster.data.DiscountMasterData;
 import org.obsplatform.infrastructure.core.data.EnumOptionData;
 import org.obsplatform.organisation.priceregion.data.PriceRegionData;
@@ -16,7 +17,7 @@ public class PricingData {
 
 	private List<ServiceData> serviceData,pricingData;
 	private List<ChargeCodeData> chargeData;
-	private List<EnumOptionData> chargevariant;
+	private List<ChargeVariantData> chargevariant;
 	private List<DiscountMasterData> discountdata;
 	private String planCode;
 	private Long planId;
@@ -37,7 +38,7 @@ public class PricingData {
 	private String isPrepaid;
 
 	public PricingData(final List<ServiceData> serviceData,	final List<ChargeCodeData> chargeData,
-	final List<EnumOptionData> chargevariant,final List<DiscountMasterData> data,final String planCode,final Long planId,final PricingData pricingData, 
+	final List<ChargeVariantData> chargevariant,final List<DiscountMasterData> data,final String planCode,final Long planId,final PricingData pricingData, 
 	final List<PriceRegionData> priceRegionData,final List<SubscriptionData> contractPeriods,final String isPrepaid)
 	{
 
@@ -141,7 +142,7 @@ public class PricingData {
 		return chargeData;
 	}
 
-	public List<EnumOptionData> getChargevariant() {
+	public List<ChargeVariantData> getChargevariant() {
 		return chargevariant;
 	}
 

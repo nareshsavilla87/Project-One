@@ -13,4 +13,5 @@ public interface OrderDetailsReadPlatformServices {
 
 	List<PriceData> retrieveDefaultPrices(Long planId, String billingFrequency,Long clientId);
 
+	Long retrieveClientActivePlanOrderDetails(Long clientId, Long planId);
 }
