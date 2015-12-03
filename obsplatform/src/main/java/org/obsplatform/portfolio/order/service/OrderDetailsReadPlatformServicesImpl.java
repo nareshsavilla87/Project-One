@@ -139,6 +139,14 @@ public class OrderDetailsReadPlatformServicesImpl implements OrderDetailsReadPla
 			return this.jdbcTemplate.query(sql, mapper1, new Object[] { clientId });
 		}
 
+		@Override
+		public Long retrieveClientActivePlanOrderDetails(Long clientId,
+				Long planId) {
+			
+			String sql = "select count(*) from b_orders bo where bo.client_id = ? and bo.plan_id = ? and order_status = '1'";
+			return this.jdbcTemplate.queryForLong(sql);
+		}
+
 	}
 
 
