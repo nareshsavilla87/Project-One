@@ -100,7 +100,7 @@ public class InvoiceClient {
 					}
 				}
 			}
-			if (singleInvoiceFlag) {
+			if (singleInvoiceFlag && invoiceData != null) {
 
 				this.invoiceRepository.save(invoiceData.getInvoice());
 

@@ -14,6 +14,8 @@ import org.obsplatform.finance.billingorder.domain.Invoice;
 import org.obsplatform.finance.billingorder.domain.InvoiceRepository;
 import org.obsplatform.finance.billingorder.domain.InvoiceTax;
 import org.obsplatform.infrastructure.core.service.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -23,7 +25,9 @@ import org.springframework.stereotype.Service;
  */
 @Service
 public class GenerateReverseBillingOrderServiceImp implements GenerateReverseBillingOrderService {
-
+	
+	private final static Logger LOGGER = LoggerFactory.getLogger(GenerateReverseBillingOrderServiceImp.class);
+	
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final GenerateDisconnectionBill generateDisconnectionBill;
 	private final InvoiceRepository invoiceRepository;

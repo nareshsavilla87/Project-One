@@ -22,12 +22,15 @@ import org.obsplatform.portfolio.client.domain.ClientRepository;
 import org.obsplatform.portfolio.order.domain.Order;
 import org.obsplatform.portfolio.order.domain.OrderPrice;
 import org.obsplatform.portfolio.order.domain.OrderRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class BillingOrderWritePlatformServiceImplementation implements BillingOrderWritePlatformService {
-
+	
+	private final static Logger LOGGER = LoggerFactory.getLogger(BillingOrderWritePlatformServiceImplementation.class);
 
 	private final OrderRepository orderRepository;
 	private final ClientBalanceRepository clientBalanceRepository;
