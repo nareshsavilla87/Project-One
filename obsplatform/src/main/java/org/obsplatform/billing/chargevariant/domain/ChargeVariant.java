@@ -57,9 +57,9 @@ public class ChargeVariant extends AbstractPersistable<Long> {
 
 	
 
-	public ChargeVariant(String chrgeVariantCode, String status,LocalDate startDate,LocalDate endDate) {
+	public ChargeVariant(String chargeVariantCode, String status,LocalDate startDate,LocalDate endDate) {
 	        
-		this.chargevariantCode = chrgeVariantCode;
+		this.chargevariantCode = chargeVariantCode;
 		this.status = status;
 		this.startDate = startDate.toDate();
 		this.endDate = endDate.toDate();
@@ -75,12 +75,12 @@ public class ChargeVariant extends AbstractPersistable<Long> {
 
 	public static ChargeVariant fromJson(final JsonCommand command) {
 		
-		final String chrgeVariantCode = command.stringValueOfParameterNamed("chrgeVariantCode");
+		final String chargeVariantCode = command.stringValueOfParameterNamed("chargeVariantCode");
 		final String status = command.stringValueOfParameterNamed("status");
 		final LocalDate startDate = command.localDateValueOfParameterNamed("startDate");
 		final LocalDate endDate = command.localDateValueOfParameterNamed("endDate");
 
-		return new ChargeVariant(chrgeVariantCode, status,startDate,endDate);
+		return new ChargeVariant(chargeVariantCode, status,startDate,endDate);
 	}
 
 	/**

@@ -34,7 +34,7 @@ public final class ChargeVariantCommandFromApiJsonDeserializer {
      */
 	
 	
-    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "chrgeVariantCode","dateFormat","locale",
+    private final Set<String> supportedParameters = new HashSet<String>(Arrays.asList("id", "chargeVariantCode","dateFormat","locale",
 			"status","startDate","endDate","variantType","from","range","amountType","amount","chargeVariantDetails"));
     
     private final FromJsonHelper fromApiJsonHelper;
@@ -55,8 +55,8 @@ public final class ChargeVariantCommandFromApiJsonDeserializer {
 
         final JsonElement element = fromApiJsonHelper.parse(json);
 
-        final String chrgeVariantCode = fromApiJsonHelper.extractStringNamed("chrgeVariantCode", element);
-        baseDataValidator.reset().parameter("chrgeVariantCode").value(chrgeVariantCode).notBlank().notExceedingLengthOf(10);
+        final String chargeVariantCode = fromApiJsonHelper.extractStringNamed("chargeVariantCode", element);
+        baseDataValidator.reset().parameter("chargeVariantCode").value(chargeVariantCode).notBlank().notExceedingLengthOf(10);
         final String status = fromApiJsonHelper.extractStringNamed("status", element);
         baseDataValidator.reset().parameter("status").value(status).notBlank();
         final LocalDate startDate = fromApiJsonHelper.extractLocalDateNamed("startDate", element);

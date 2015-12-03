@@ -47,7 +47,7 @@ import org.springframework.stereotype.Component;
 @Scope("singleton")
 public class ChargeVariantApiResource {
 
-	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "chrgeVariantCode",
+	private final Set<String> RESPONSE_DATA_PARAMETERS = new HashSet<String>(Arrays.asList("id", "chargeVariantCode",
 			"status","startDate","endDate","variantType","from","range","amountType","amount"));
 	
 	private final String resourceNameForPermissions = "CHARGEVARIANT";
