@@ -10,6 +10,8 @@ import org.obsplatform.crm.ticketmaster.command.TicketMasterCommand;
 import org.obsplatform.crm.ticketmaster.data.TicketMasterData;
 import org.obsplatform.crm.ticketmaster.domain.TicketDetail;
 import org.obsplatform.crm.ticketmaster.domain.TicketDetailsRepository;
+import org.obsplatform.crm.ticketmaster.domain.TicketHistory;
+import org.obsplatform.crm.ticketmaster.domain.TicketHistoryRepository;
 import org.obsplatform.crm.ticketmaster.domain.TicketMaster;
 import org.obsplatform.crm.ticketmaster.domain.TicketMasterRepository;
 import org.obsplatform.crm.ticketmaster.serialization.TicketMasterFromApiJsonDeserializer;
@@ -42,6 +44,7 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 	private TicketMasterFromApiJsonDeserializer fromApiJsonDeserializer;
 	private TicketMasterRepository ticketMasterRepository;
 	private TicketDetailsRepository detailsRepository;
+	private final TicketHistoryRepository historyRepository;
 	private final OrderWritePlatformService orderWritePlatformService;
 	private final AppUserRepository appUserRepository;
 	private final TicketMasterReadPlatformService ticketMasterReadPlatformService ;
@@ -52,7 +55,7 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 			final TicketMasterRepository repository,final TicketDetailsRepository ticketDetailsRepository, 
 			final TicketMasterFromApiJsonDeserializer fromApiJsonDeserializer,final TicketMasterRepository ticketMasterRepository,
 			TicketDetailsRepository detailsRepository,final OrderWritePlatformService orderWritePlatformService	,AppUserRepository appUserRepository,
-			TicketMasterReadPlatformService ticketMasterReadPlatformService) {
+			TicketMasterReadPlatformService ticketMasterReadPlatformService, final TicketHistoryRepository historyRepository) {
 		
 		this.context = context;
 		this.repository = repository;
@@ -63,6 +66,7 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 		this.orderWritePlatformService = orderWritePlatformService;
 		this. appUserRepository = appUserRepository;
 		this.ticketMasterReadPlatformService=ticketMasterReadPlatformService;
+		this.historyRepository = historyRepository;
 		
 	}
 
@@ -87,9 +91,10 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
          if(documentCommand.getFileName() != null){
           fileLocation = FileUtils.saveToFileSystem(inputStream, fileUploadLocation, documentCommand.getFileName());
          }
-         Long createdbyId = context.authenticatedUser().getId();
-         TicketDetail ticket = this.ticketMasterReadPlatformService.retrieveTicketDetail(ticketId);
-         String assignFrom=null;
+        Long createdbyId = context.authenticatedUser().getId();
+        TicketDetail ticket = this.ticketMasterReadPlatformService.retrieveTicketDetail(ticketId);
+        TicketHistory history = this.ticketMasterReadPlatformService.retrieveTickethistory(ticketId);
+        String assignFrom=null;
         AppUser user =this.appUserRepository.findOne(ticket.getAssignedTo());
         if(user.getUsername().equalsIgnoreCase(ticket.getAssignFrom())) {
         	assignFrom =ticket.getAssignFrom();
@@ -97,32 +102,33 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
         	assignFrom = user.getUsername();
         }
 		TicketDetail detail = new TicketDetail(ticketId,ticketMasterCommand.getComments(),fileLocation,ticketMasterCommand.getAssignedTo(),createdbyId,assignFrom,ticketMasterCommand.getStatus(),ticketMasterCommand.getUsername());
-         /*TicketMaster master = new TicketMaster(ticketMasterCommand.getStatusCode(), ticketMasterCommand.getAssignedTo());*/
-         TicketMaster ticketMaster = this.ticketMasterRepository.findOne(ticketId);
-         ticketMaster.updateTicket(ticketMasterCommand);
-         this.ticketMasterRepository.save(ticketMaster);
-        	 this.ticketDetailsRepository.save(detail);
-        	 if("Closed".equalsIgnoreCase(ticketMasterCommand.getStatus()))
-        	 {
+        TicketMaster ticketMaster = this.ticketMasterRepository.findOne(ticketId);
+        ticketMaster.updateTicket(ticketMasterCommand);
+        this.ticketMasterRepository.save(ticketMaster);
+        this.ticketDetailsRepository.save(detail);
+        if(!history.getStatus().equalsIgnoreCase(ticketMasterCommand.getStatus()) || !history.getAssignedTo().equals(ticketMasterCommand.getAssignedTo())){
+        	TicketHistory thistory = new TicketHistory(ticketId,ticketMasterCommand.getAssignedTo(),ticketMasterCommand.getStatus(),assignFrom);
+        	this.historyRepository.saveAndFlush(thistory);
+        }
+     	if("Closed".equalsIgnoreCase(ticketMasterCommand.getStatus()))
+        {
         		 this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_CLOSE_TICKET, ticketMaster.getClientId(), ticketMaster.getId().toString(), ticketURL);
  		  		 this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, ticketMaster.getClientId(), ticketMaster.getId().toString(), "CLOSE TICKET");
  				
-        	 }else{
-        		 this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_EDIT_TICKET, ticketMaster.getClientId(), ticketMaster.getId().toString(), ticketURL);
-        	  	this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, ticketMaster.getClientId(), ticketMaster.getId().toString(), "UPDATE TICKET");
+        }else{
+        		this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_EDIT_TICKET, ticketMaster.getClientId(), ticketMaster.getId().toString(), ticketURL);
+        		this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_NOTIFY_TECHNICALTEAM, ticketMaster.getClientId(), ticketMaster.getId().toString(), "UPDATE TICKET");
         	 }
-         return detail.getId();
-
-	 	}
-	 	catch (DataIntegrityViolationException dve) {
-		handleDataIntegrityIssues(ticketMasterCommand, dve);
-		return Long.valueOf(-1);
-		
-	 	} catch (IOException e) {
+        return detail.getId();
+	 }
+	 catch (DataIntegrityViolationException dve) {
+	handleDataIntegrityIssues(ticketMasterCommand, dve);
+	return Long.valueOf(-1);
+	 } catch (IOException e) {
          throw new DocumentManagementException(documentCommand.getName());
-	 	}
+	 }
 		
-	}
+}
 
 	@Override
 	public CommandProcessingResult closeTicket( final JsonCommand command) {
@@ -190,6 +196,10 @@ public class TicketMasterWritePlatformServiceImpl implements TicketMasterWritePl
 			details.setTicketId(ticketMaster.getId());
 			details.setCreatedbyId(created);
 			this.detailsRepository.saveAndFlush(details);
+			final TicketHistory history = TicketHistory.fromJson(command);
+			history.setTicketId(ticketMaster.getId());
+			history.setCreatedbyId(created);
+			this.historyRepository.saveAndFlush(history);
 			
 			this.orderWritePlatformService.processNotifyMessages(EventActionConstants.EVENT_CREATE_TICKET, command.getClientId(), ticketMaster.getId().toString(), ticketURL);
 			

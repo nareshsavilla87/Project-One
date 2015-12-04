@@ -15,6 +15,7 @@ import org.obsplatform.crm.ticketmaster.data.UsersData;
 import org.obsplatform.crm.ticketmaster.domain.PriorityType;
 import org.obsplatform.crm.ticketmaster.domain.PriorityTypeEnum;
 import org.obsplatform.crm.ticketmaster.domain.TicketDetail;
+import org.obsplatform.crm.ticketmaster.domain.TicketHistory;
 import org.obsplatform.infrastructure.core.data.EnumOptionData;
 import org.obsplatform.infrastructure.core.domain.JdbcSupport;
 import org.obsplatform.infrastructure.core.service.Page;
@@ -201,19 +202,42 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 	@Override
 	public List<TicketMasterData> retrieveClientTicketHistory(final Long ticketId, final String historyParam) {
 		context.authenticatedUser();
+		
 		if("comment".equalsIgnoreCase(historyParam)){
-		final TicketDataMapper mapper = new TicketDataMapper();
-		String undefined ="undefined";
-		String sql = "select " + mapper.schema() + " where t.ticket_id=tm.id and t.ticket_id=? and t.comments is not null " +
-				"and t.comments Not like '"+undefined+"' order by t.id DESC";
-		return this.jdbcTemplate.query(sql, mapper, new Object[] { ticketId});
-		}else{
+		
 			final TicketDataMapper mapper = new TicketDataMapper();
-			String sql = "select " + mapper.schema() + " where t.ticket_id=tm.id and t.ticket_id=?   order by t.id DESC";
+			String sql = "select " + mapper.schema() + " where t.ticket_id=tm.id and t.ticket_id=? and t.comments is not null order by t.id DESC";
 			return this.jdbcTemplate.query(sql, mapper, new Object[] { ticketId});
+		}else{
+			final TickethistoryMapper mapper = new TickethistoryMapper();
+			String sql = "select " + mapper.historyschema() + " where th.ticket_id = tm.id and th.ticket_id=?  and td.ticket_id = ? group by th.id order by th.id DESC";
+			return this.jdbcTemplate.query(sql, mapper, new Object[] { ticketId,ticketId});
 		}
 	}
-	
+	private static final class TickethistoryMapper implements
+			RowMapper<TicketMasterData> {
+
+		public String historyschema() {
+			return " th.id AS id, th.created_date AS createDate, user.username AS assignedTo, th.assign_from as assignFrom, th.status as status,"
+					+ " td.attachments as attachements from ( b_ticket_master tm, b_ticket_history th, b_ticket_details td) inner join m_appuser user ON " +
+					"user.id = th.assigned_to";
+
+		}
+
+		@Override
+		public TicketMasterData mapRow(ResultSet resultSet, int rowNum)throws SQLException {
+
+			final Long id = resultSet.getLong("id");
+			final LocalDate createdDate = JdbcSupport.getLocalDate(resultSet,"createDate");
+			final String assignedTo = resultSet.getString("assignedTo");
+			final String assignFrom = resultSet.getString("assignFrom");
+			final String status = resultSet.getString("status");
+			String fileName = null;
+			final TicketMasterData data = new TicketMasterData(id, createdDate,assignedTo, null, fileName, assignFrom, status, null);
+			return data;
+		}
+	}
+
 	private static final class TicketDataMapper implements
 					RowMapper<TicketMasterData> {
 
@@ -223,7 +247,6 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 						+" inner join m_appuser user on user.id = t.assigned_to ";
 
 		}
-
 		@Override
 		public TicketMasterData mapRow(ResultSet resultSet, int rowNum)
 						throws SQLException {
@@ -245,6 +268,7 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 
 			return data;
 		}
+		
 
 	}
 				
@@ -331,6 +355,37 @@ public class TicketMasterReadPlatformServiceImpl  implements TicketMasterReadPla
 			final Long assignedTo = resultSet.getLong("assignedTo");
 			
 			return new TicketDetail(id,  assignedTo,assignfrom);
+		}
+	}
+	@Override
+	public TicketHistory retrieveTickethistory(final Long ticketId){
+		
+
+		try {
+				final TicketHistoryMapper mapper = new TicketHistoryMapper();
+				final String sql = "select " + mapper.tickethistorySchema() + " where th.id=(select max(t.id) as id from b_ticket_history t where t.ticket_id=?)";
+				return jdbcTemplate.queryForObject(sql, mapper, new Object[] {ticketId});
+			} catch (EmptyResultDataAccessException e) {
+					return null;
+			}
+
+	}
+	
+	private static final class TicketHistoryMapper implements RowMapper<TicketHistory> {
+
+		public String tickethistorySchema() {
+				
+		return "max(th.id) as id, th.status as status, th.assigned_to as assignedTo from b_ticket_history th"; 
+		}
+
+		@Override
+		public TicketHistory mapRow(final ResultSet resultSet, final int rowNum) throws SQLException {
+
+			final Long id = resultSet.getLong("id");
+			final String status = resultSet.getString("status");
+			final Long assignedTo = resultSet.getLong("assignedTo");
+			
+			return new TicketHistory(id,assignedTo,status);
 		}
 	}
 	
