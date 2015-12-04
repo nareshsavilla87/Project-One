@@ -14,13 +14,17 @@ import org.obsplatform.finance.billingorder.domain.InvoiceRepository;
 import org.obsplatform.finance.billingorder.domain.InvoiceTax;
 import org.obsplatform.finance.billingorder.exceptions.BillingOrderNoRecordsFoundException;
 import org.obsplatform.infrastructure.core.service.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class GenerateBillingOrderServiceImplementation implements GenerateBillingOrderService {
-
+	
+	private final static Logger LOGGER = LoggerFactory.getLogger(GenerateBillingOrderServiceImplementation.class);
+	
 	private final GenerateBill generateBill;
 	private final BillingOrderReadPlatformService billingOrderReadPlatformService;
 	private final InvoiceRepository invoiceRepository;

@@ -7,11 +7,16 @@ import java.util.List;
 import org.joda.time.LocalDate;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.obsplatform.billing.chargevariant.domain.ChargeVariant;
+import org.obsplatform.billing.chargevariant.domain.ChargeVariantDetails;
+import org.obsplatform.billing.chargevariant.domain.ChargeVariantRepository;
+import org.obsplatform.billing.discountmaster.data.DiscountMasterData;
 import org.obsplatform.billing.discountmaster.domain.DiscountDetails;
 import org.obsplatform.billing.discountmaster.domain.DiscountMaster;
 import org.obsplatform.billing.discountmaster.domain.DiscountMasterRepository;
 import org.obsplatform.billing.discountmaster.exception.DiscountMasterNotFoundException;
 import org.obsplatform.billing.planprice.data.PriceData;
+import org.obsplatform.finance.billingorder.service.GenerateBill;
 import org.obsplatform.infrastructure.configuration.domain.Configuration;
 import org.obsplatform.infrastructure.configuration.domain.ConfigurationConstants;
 import org.obsplatform.infrastructure.configuration.domain.ConfigurationRepository;
@@ -41,19 +46,21 @@ private final ContractRepository contractRepository;
 private final ConfigurationRepository configurationRepository;
 private final DiscountMasterRepository discountMasterRepository;
 private final ClientRepository clientRepository;
-
+private final GenerateBill generateBill;
+private final ChargeVariantRepository chargeVariantRepository;
 
 @Autowired
 public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPlatformServices,final ContractRepository contractRepository,
 		   final DiscountMasterRepository discountMasterRepository,final ConfigurationRepository configurationRepository,
-		   final ClientRepository clientRepository){
+		   final ClientRepository clientRepository, final GenerateBill generateBill, final ChargeVariantRepository chargeVariantRepository){
 	
 	this.orderDetailsReadPlatformServices=orderDetailsReadPlatformServices;
 	this.contractRepository=contractRepository;
 	this.discountMasterRepository=discountMasterRepository;
 	this.configurationRepository = configurationRepository;
 	this.clientRepository = clientRepository;
-	
+	this.generateBill = generateBill;
+	this.chargeVariantRepository = chargeVariantRepository;
 }
 
 	public Order assembleOrderDetails(JsonCommand command, Long clientId, Plan plan) throws JSONException {
@@ -211,4 +218,33 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 		}
 		return order;
 	}
+	
+	/*private BigDecimal calculateChargeVariantPrice(String chargingVariant,BigDecimal orderPrice, Long clientId, Long planId) {
+		
+   	 ChargeVariant chargeVariant = this.chargeVariantRepository.findOne(Long.valueOf(chargingVariant));
+   	 Long orderActivationCount=this.orderDetailsReadPlatformServices.retrieveClientActivePlanOrderDetails(clientId,planId);
+   	 if(chargeVariant != null){
+   		   for(ChargeVariantDetails chargeVariantDetails:chargeVariant.getChargeVariantDetails()){
+   			 
+   			   DiscountMasterData discountMasterData = new DiscountMasterData(chargeVariant.getId(),null,null,chargeVariantDetails.getAmountType(),
+		    				chargeVariantDetails.getAmount(), null,null);
+   			     if(orderActivationCount > 1){
+   			      if("ANY".equalsIgnoreCase(chargeVariantDetails.getVariantType())){
+   			    	  orderPrice =  this.generateBill.calculateDiscount(discountMasterData,orderPrice).getDiscountedChargeAmount();  
+   			    	   return orderPrice;
+   			      }else if("Range".equalsIgnoreCase(chargeVariantDetails.getVariantType())){
+
+   			    	  if (orderActivationCount >= chargeVariantDetails.getFrom() && orderActivationCount <= chargeVariantDetails.getTo()) {
+   			    		  orderPrice =  this.generateBill.calculateDiscount(discountMasterData, orderPrice).getDiscountedChargeAmount();  
+      			    	       return orderPrice;
+   			    		}
+   			    	     
+   			      }
+   			   
+   		         }
+   		   }
+   	 }
+   	 return orderPrice;
+   	
+	}*/
 }

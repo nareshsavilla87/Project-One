@@ -1,10 +1,12 @@
 package org.obsplatform.billing.planprice.data;
-import java.math.BigDecimal;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 
 
 import org.obsplatform.billing.chargecode.data.ChargeCodeData;
+import org.obsplatform.billing.chargevariant.data.ChargeVariantData;
 import org.obsplatform.billing.discountmaster.data.DiscountMasterData;
 import org.obsplatform.infrastructure.core.data.EnumOptionData;
 import org.obsplatform.organisation.priceregion.data.PriceRegionData;

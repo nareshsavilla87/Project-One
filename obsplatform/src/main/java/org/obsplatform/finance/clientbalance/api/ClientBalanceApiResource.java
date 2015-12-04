@@ -28,54 +28,56 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
+/**
+ * @author hugo
+ *
+ */
 @Path("/clientBalance")
 @Component
 @Scope("singleton")
 public class ClientBalanceApiResource {
 	
-	private  final Set<String> RESPONSE_DATA_PARAMETERS=new HashSet<String>(Arrays.asList("balanceAmount"));
+	private final Set<String> RESPONSE_DATA_PARAMETERS=new HashSet<String>(Arrays.asList("balanceAmount"));
     private final String resourceNameForPermissions = "CLIENTBALANCE";
 	private final PlatformSecurityContext context;
 	private final DefaultToApiJsonSerializer<ClientBalanceData> toApiJsonSerializer;
-   private final ApiRequestParameterHelper apiRequestParameterHelper;
-	private final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService;
-	private ClientBalanceReadPlatformService clientBalanceReadPlatformService;
-	final private PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService;
+    private final ApiRequestParameterHelper apiRequestParameterHelper;
+	private final ClientBalanceReadPlatformService clientBalanceReadPlatformService;
+    private final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService;
 	
 	@Autowired
-	 public ClientBalanceApiResource(final PlatformSecurityContext context,  final DefaultToApiJsonSerializer<ClientBalanceData> toApiJsonSerializer,
-	 final ApiRequestParameterHelper apiRequestParameterHelper, final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,
-	 final ClientBalanceReadPlatformService balanceReadPlatformService,final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService)
-	{
-				        this.context = context;
-				        this.toApiJsonSerializer = toApiJsonSerializer;
-				        this.apiRequestParameterHelper = apiRequestParameterHelper;
-				        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
-				        this.clientBalanceReadPlatformService=balanceReadPlatformService;
-				        this.portfolioCommandSourceWritePlatformService=portfolioCommandSourceWritePlatformService;
-	}	
-	
+	public ClientBalanceApiResource(final PlatformSecurityContext context,
+			final DefaultToApiJsonSerializer<ClientBalanceData> toApiJsonSerializer,
+			final ApiRequestParameterHelper apiRequestParameterHelper,
+			final ClientBalanceReadPlatformService balanceReadPlatformService,
+			final PortfolioCommandSourceWritePlatformService portfolioCommandSourceWritePlatformService) {
+		this.context = context;
+		this.toApiJsonSerializer = toApiJsonSerializer;
+		this.apiRequestParameterHelper = apiRequestParameterHelper;
+		this.clientBalanceReadPlatformService = balanceReadPlatformService;
+		this.portfolioCommandSourceWritePlatformService = portfolioCommandSourceWritePlatformService;
+	}
+
 	@GET
-    @Path("template/{clientid}")
-    @Consumes({ MediaType.APPLICATION_JSON })
-    @Produces({ MediaType.APPLICATION_JSON })
-   public String retrieveCharge(@PathParam("clientid") final Long clientid, @Context final UriInfo uriInfo)
-	{
-	       context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
-	        ClientBalanceData balanceDatas = this.clientBalanceReadPlatformService.retrieveBalance(clientid);
-	      //  ClientBalanceData balance=balanceDatas.get(0);
-	        final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
-	        return this.toApiJsonSerializer.serialize(settings, balanceDatas, RESPONSE_DATA_PARAMETERS);
+	@Path("template/{clientid}")
+	@Consumes({ MediaType.APPLICATION_JSON })
+	@Produces({ MediaType.APPLICATION_JSON })
+	public String retrieveCharge(@PathParam("clientid") final Long clientid,@Context final UriInfo uriInfo) {
+		
+		context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
+		ClientBalanceData balanceDatas = this.clientBalanceReadPlatformService.retrieveBalance(clientid);
+		final ApiRequestJsonSerializationSettings settings = apiRequestParameterHelper.process(uriInfo.getQueryParameters());
+		return this.toApiJsonSerializer.serialize(settings, balanceDatas,RESPONSE_DATA_PARAMETERS);
 	}
 
 	@POST
-	@Produces({MediaType.APPLICATION_JSON})
-	@Consumes({MediaType.APPLICATION_JSON})
-	public String addNewClientBalanec(final String jsonRequestBody){
+	@Produces({ MediaType.APPLICATION_JSON })
+	@Consumes({ MediaType.APPLICATION_JSON })
+	public String addNewClientBalanec(final String jsonRequestBody) {
+		
 		final CommandWrapper command = new CommandWrapperBuilder().createBalance().withJson(jsonRequestBody).build();
 		final CommandProcessingResult result = portfolioCommandSourceWritePlatformService.logCommandSource(command);
-		 return this.toApiJsonSerializer.serialize(result);
+		return this.toApiJsonSerializer.serialize(result);
 	}
-
 
 }

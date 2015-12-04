@@ -1345,4 +1345,8 @@ public class CommandWrapper {
 		
 		return this.actionName.equalsIgnoreCase("DELETE") && this.entityName.equalsIgnoreCase("BEESMARTCLIENT");
 	}
+	
+	public boolean isChargeVariant() {
+		return this.entityName.equalsIgnoreCase("CHARGEVARIANT");
+	}
 }

@@ -2996,6 +2996,30 @@ public class CommandWrapperBuilder {
 		this.href = "/beesmart";
 		return this;
 	}
+	
+	public CommandWrapperBuilder createchargeVariant() {
+		this.actionName = "CREATE";
+		this.entityName = "CHARGEVARIANT";
+		this.entityId = null;
+		this.href = "/chargevariant";
+		return this;
+	}
+
+	public CommandWrapperBuilder updateChargeVariant(Long id) {
+		this.actionName = "UPDATE";
+		this.entityName = "CHARGEVARIANT";
+		this.entityId = id;
+		this.href = "/chargevariant";
+		return this;
+	}
+
+	public CommandWrapperBuilder deleteChargeVariant(Long id) {
+		this.actionName = "DELETE";
+		this.entityName = "CHARGEVARIANT";
+		this.entityId = id;
+		this.href = "/chargevariant";
+		return this;
+	}
 }
 
 

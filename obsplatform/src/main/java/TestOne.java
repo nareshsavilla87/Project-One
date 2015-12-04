@@ -131,6 +131,14 @@ public class TestOne {
 
 	               System.out.println();
 	           }
+	           Long s= 1L;
+	           Long s1 =1L;
+	         if(!s.equals(s1))
+	         {
+	        	 System.out.println("true");
+	         }else{
+	        	 System.out.println("false");
+	         }
 	       }
 	   }
 	
