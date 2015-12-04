@@ -86,7 +86,7 @@ private class AddonPriceMapper implements RowMapper<AddonsPriceData>{
 		 final Long serviceId=rs.getLong("serviceId");
 		 final String serviceCode=rs.getString("serviceCode");
 		 final BigDecimal price =rs.getBigDecimal("price");
-		 return new AddonsPriceData(id,serviceId,serviceCode,price,null,null);
+		 return new AddonsPriceData(id,serviceId,serviceCode,price,null,null,null);
 	}
 	
 }
@@ -151,7 +151,7 @@ private class PlanAddonsMapper implements RowMapper<AddonsPriceData>{
 	
 	public String schema(){
 		return "  ads.id AS id,adp.service_id AS serviceId,c.id as chargeCodeId,s.service_code AS serviceCode,adp.price AS price, " +
-			   " c.charge_description as chargecodeDescription FROM b_addons_service ads,b_addons_service_price adp,b_service s,b_charge_codes c " +
+			   " c.charge_description as chargecodeDescription,c.charge_code as chargecode FROM b_addons_service ads,b_addons_service_price adp,b_service s,b_charge_codes c " +
 			   "  WHERE ads.id = adp.adservice_id AND ads.is_deleted = 'N' AND ads.charge_code = c.charge_code AND s.id = adp.service_id ";
 	}
 
@@ -163,7 +163,8 @@ private class PlanAddonsMapper implements RowMapper<AddonsPriceData>{
 		 final String serviceCode=rs.getString("serviceCode");
 		 final String chargecodeDescription=rs.getString("chargecodeDescription");
 		 final BigDecimal price =rs.getBigDecimal("price");
-		 return new AddonsPriceData(id,serviceId,serviceCode,price,chargeCodeId,chargecodeDescription);
+		 final String chargeCode = rs.getString("chargecode");
+		 return new AddonsPriceData(id,serviceId,serviceCode,price,chargeCodeId,chargecodeDescription,chargeCode);
 	}
 	
 }
