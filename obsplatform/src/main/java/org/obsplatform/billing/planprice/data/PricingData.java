@@ -1,5 +1,6 @@
 package org.obsplatform.billing.planprice.data;
-import java.math.BigDecimal;
+
+import java.math.BigDecimal;
 import java.util.List;
 
 
@@ -17,7 +18,7 @@ public class PricingData {
 
 	private List<ServiceData> serviceData,pricingData;
 	private List<ChargeCodeData> chargeData;
-	private List<ChargeVariantData> chargevariant;
+	private List<EnumOptionData> chargevariant;
 	private List<DiscountMasterData> discountdata;
 	private String planCode;
 	private Long planId;
@@ -38,7 +39,7 @@ public class PricingData {
 	private String isPrepaid;
 
 	public PricingData(final List<ServiceData> serviceData,	final List<ChargeCodeData> chargeData,
-	final List<ChargeVariantData> chargevariant,final List<DiscountMasterData> data,final String planCode,final Long planId,final PricingData pricingData, 
+	final List<EnumOptionData> chargevariant,final List<DiscountMasterData> data,final String planCode,final Long planId,final PricingData pricingData, 
 	final List<PriceRegionData> priceRegionData,final List<SubscriptionData> contractPeriods,final String isPrepaid)
 	{
 
@@ -142,7 +143,7 @@ public class PricingData {
 		return chargeData;
 	}
 
-	public List<ChargeVariantData> getChargevariant() {
+	public List<EnumOptionData> getChargevariant() {
 		return chargevariant;
 	}
 
