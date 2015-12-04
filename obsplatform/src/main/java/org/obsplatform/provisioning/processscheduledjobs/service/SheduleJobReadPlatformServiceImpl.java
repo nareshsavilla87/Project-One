@@ -254,8 +254,8 @@ public SheduleJobReadPlatformServiceImpl(final DataSourcePerTenantService dataSo
 			if("Y".equalsIgnoreCase(data.isDynamic())){
 			        return jdbcTemplate.query(query, mapper, new Object[] { });
 			  }else{
-				    query=query.toLowerCase().replace("now()","?");
-					return jdbcTemplate.query(query, mapper, new Object[] { data.getProcessDate() });
+				    query=query.replace("NOW() + INTERVAL 7 DAY","'"+data.getProcessDate()+"'");
+					return jdbcTemplate.query(query, mapper, new Object[] {});
 			     }
 		       } catch (EmptyResultDataAccessException e) {
 				return null;

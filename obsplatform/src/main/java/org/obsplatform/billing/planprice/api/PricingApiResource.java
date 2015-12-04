@@ -20,6 +20,8 @@ import javax.ws.rs.core.UriInfo;
 
 import org.obsplatform.billing.chargecode.data.ChargeCodeData;
 import org.obsplatform.billing.chargecode.service.ChargeCodeReadPlatformService;
+import org.obsplatform.billing.chargevariant.data.ChargeVariantData;
+import org.obsplatform.billing.chargevariant.service.ChargeVariantReadPlatformService;
 import org.obsplatform.billing.discountmaster.data.DiscountMasterData;
 import org.obsplatform.billing.discountmaster.service.DiscountReadPlatformService;
 import org.obsplatform.billing.planprice.data.PricingData;
@@ -65,13 +67,14 @@ public class PricingApiResource {
 	    private final PlanReadPlatformService planReadPlatformService;
 	    private final ChargeCodeReadPlatformService chargeCodeReadPlatformService;
 	    private final DiscountReadPlatformService discountReadPlatformService;
+	    private final ChargeVariantReadPlatformService chargeVariantReadPlatformService;
 	    
 	    @Autowired
 	    public PricingApiResource(final PlatformSecurityContext context,final RegionalPriceReadplatformService regionalPriceReadplatformService, 
 	    		final DefaultToApiJsonSerializer<PricingData> toApiJsonSerializer, final ApiRequestParameterHelper apiRequestParameterHelper,
 	    		final PortfolioCommandSourceWritePlatformService commandsSourceWritePlatformService,final PriceReadPlatformService priceReadPlatformService,
 	    		final PlanReadPlatformService planReadPlatformService,final ChargeCodeReadPlatformService chargeCodeReadPlatformService,
-	    		final  DiscountReadPlatformService discountReadPlatformService) {
+	    		final  DiscountReadPlatformService discountReadPlatformService, final ChargeVariantReadPlatformService chargeVariantReadPlatformService) {
 		        
 	    		this.context = context;
 		        this.toApiJsonSerializer = toApiJsonSerializer;
@@ -82,6 +85,7 @@ public class PricingApiResource {
 		        this.regionalPriceReadplatformService=regionalPriceReadplatformService;
 		        this.discountReadPlatformService=discountReadPlatformService;
 		        this.commandsSourceWritePlatformService = commandsSourceWritePlatformService;
+		        this.chargeVariantReadPlatformService = chargeVariantReadPlatformService;
 		    }	
 	    
 	  
@@ -111,7 +115,8 @@ public class PricingApiResource {
 	    	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 	    	List<ServiceData> serviceData = this.priceReadPlatformService.retrieveServiceDetails(planId);
 	    	List<ChargeCodeData> chargeCode = this.chargeCodeReadPlatformService.retrieveAllChargeCodes();
-	    	List<EnumOptionData> datas = this.priceReadPlatformService.retrieveChargeVariantData();
+	    	//List<EnumOptionData> datas = this.priceReadPlatformService.retrieveChargeVariantData();
+	    	List<ChargeVariantData> datas = this.chargeVariantReadPlatformService.retrieveAllChargeVariantData();
 	    	List<DiscountMasterData> discountMasterDatas= this.discountReadPlatformService.retrieveAllDiscounts();
 	    	List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
 	    	List<SubscriptionData> contractPeriods = this.planReadPlatformService.retrieveSubscriptionData(null,null);
