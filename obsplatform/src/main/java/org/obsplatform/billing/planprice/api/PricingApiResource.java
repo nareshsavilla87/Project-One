@@ -115,8 +115,8 @@ public class PricingApiResource {
 	    	context.authenticatedUser().validateHasReadPermission(resourceNameForPermissions);
 	    	List<ServiceData> serviceData = this.priceReadPlatformService.retrieveServiceDetails(planId);
 	    	List<ChargeCodeData> chargeCode = this.chargeCodeReadPlatformService.retrieveAllChargeCodes();
-	    	//List<EnumOptionData> datas = this.priceReadPlatformService.retrieveChargeVariantData();
-	    	List<ChargeVariantData> datas = this.chargeVariantReadPlatformService.retrieveAllChargeVariantData();
+	    	List<EnumOptionData> datas = this.priceReadPlatformService.retrieveChargeVariantData();
+	    	/*List<ChargeVariantData> datas = this.chargeVariantReadPlatformService.retrieveAllChargeVariantData();*/
 	    	List<DiscountMasterData> discountMasterDatas= this.discountReadPlatformService.retrieveAllDiscounts();
 	    	List<PriceRegionData> priceRegionData = this.regionalPriceReadplatformService.getPriceRegionsDetails();
 	    	List<SubscriptionData> contractPeriods = this.planReadPlatformService.retrieveSubscriptionData(null,null);

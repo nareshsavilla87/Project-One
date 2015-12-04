@@ -141,7 +141,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 				if(discountMaster == null){
 					throw new DiscountMasterNotFoundException();
 				}
-				BigDecimal servicePrice=calculateChargeVariantPrice(data.getChargingVariant(),data.getPrice(),clientId,plan.getId());
+				
 				//	If serviceId Not Exist
 				OrderPrice price = new OrderPrice(data.getServiceId(),data.getChargeCode(), data.getChargingVariant(),data.getPrice(), 
 						null, data.getChagreType(),
@@ -219,7 +219,7 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
 		return order;
 	}
 	
-	private BigDecimal calculateChargeVariantPrice(String chargingVariant,BigDecimal orderPrice, Long clientId, Long planId) {
+	/*private BigDecimal calculateChargeVariantPrice(String chargingVariant,BigDecimal orderPrice, Long clientId, Long planId) {
 		
    	 ChargeVariant chargeVariant = this.chargeVariantRepository.findOne(Long.valueOf(chargingVariant));
    	 Long orderActivationCount=this.orderDetailsReadPlatformServices.retrieveClientActivePlanOrderDetails(clientId,planId);
@@ -246,5 +246,5 @@ public OrderAssembler(final OrderDetailsReadPlatformServices orderDetailsReadPla
    	 }
    	 return orderPrice;
    	
-	}
+	}*/
 }
