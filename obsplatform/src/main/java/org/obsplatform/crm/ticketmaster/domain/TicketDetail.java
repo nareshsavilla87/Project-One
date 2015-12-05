@@ -95,6 +95,7 @@ public class TicketDetail {
 		this.assignedTo = assignedTo;
 		this.assignFrom = assignFrom;
 	}
+	public TicketDetail(){}
 
 	public Long getId() {
 		return id;
