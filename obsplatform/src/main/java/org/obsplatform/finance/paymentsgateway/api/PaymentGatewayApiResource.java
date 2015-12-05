@@ -936,10 +936,10 @@ public class PaymentGatewayApiResource {
 	}
 	
 	@GET
-	@Path("authorize/{amount}")
+	@Path("authorize")
 	@Consumes({MediaType.APPLICATION_JSON})
 	@Produces({MediaType.APPLICATION_JSON})
-	public String authTest(@PathParam("amount") Long amount) throws JSONException {
+	public String authTest(@QueryParam("amount") BigDecimal amount) throws JSONException {
         return this.paymentGatewayWritePlatformService.createFingerPrint(amount);
 	}
 	

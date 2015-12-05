@@ -1,6 +1,7 @@
 package org.obsplatform.finance.paymentsgateway.service;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
 import org.json.JSONException;
 import org.obsplatform.infrastructure.core.api.JsonCommand;
@@ -19,7 +20,7 @@ public interface PaymentGatewayWritePlatformService {
 
 	String globalPayProcessing(String transactionId, String remarks) throws JSONException, IOException;
 
-	String createFingerPrint(Long amount);
+	String createFingerPrint(BigDecimal amount);
 	
 	
 }
